@@ -29,7 +29,7 @@ export default function Layout({
             )}.png?theme=light&md=0&fontSize=75px&images=https%3A%2F%2Fassets.zeit.co%2Fimage%2Fupload%2Ffront%2Fassets%2Fdesign%2Fnextjs-black-logo.svg`}
         />
         </Head>
-            <nav className="border-pink-500 px-4 sm:px-4 py-2.5">
+            <nav className="border-pink-500 px-4 sm:px-4 py-2.5 border-b-2">
                 <div className="container flex flex-wrap justify-between items-center mx-auto">
                     <a href="/" className="flex items-center">
                         <img src="/favicon.ico" className="mr-3 h-6 sm:h-9" alt="Flowbite Logo" />
