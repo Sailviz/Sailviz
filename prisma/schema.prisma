@@ -2,14 +2,44 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-    provider = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 datasource db {
-    provider = "sqlite"
-    url      = env("DATABASE_URL")
+  provider = "mysql"
+  url      = env("DATABASE_URL")
 }
 
-model Example {
-    id String @id @default(cuid())
+model Boats {
+  id   String @id @unique @default(uuid())
+  Name String @unique
+  Crew Int
+  PY   Int
+}
+
+model Clubs {
+  id     String   @id @unique @default(uuid())
+  Name   String   @unique
+  Series Series[]
+}
+
+model Series {
+  id      String  @id @unique @default(uuid())
+  Name    String  @unique
+  Race    Race[]
+  Clubs   Clubs?  @relation(fields: [clubsId], references: [id])
+  clubsId String?
+}
+
+model Race {
+  id       String   @id @unique @default(uuid())
+  Number   Int
+  DateTime DateTime
+  OOD      String
+  AOD      String
+  SO       String
+  ASO      String
+  Results  Json?
+  Series   Series?  @relation(fields: [seriesId], references: [id])
+  seriesId String?
 }
