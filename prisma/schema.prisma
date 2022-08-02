@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -18,16 +15,13 @@ model Boats {
 }
 
 model Clubs {
-  id     String   @id @unique @default(uuid())
-  Name   String   @unique
-  Series Series[]
+  id     String @id @unique @default(uuid())
+  Name   String @unique
 }
 
 model Series {
   id      String  @id @unique @default(uuid())
   Name    String  @unique
-  Race    Race[]
-  Clubs   Clubs?  @relation(fields: [clubsId], references: [id])
   clubsId String?
 }
 
@@ -40,6 +34,5 @@ model Race {
   SO       String
   ASO      String
   Results  Json?
-  Series   Series?  @relation(fields: [seriesId], references: [id])
   seriesId String?
 }
