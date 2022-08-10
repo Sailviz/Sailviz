@@ -7,6 +7,16 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Users {
+  name     String
+  id       String    @id @unique @default(uuid())
+  email    String @unique
+  password String
+  settings Json
+  club     String
+  permLvl  Int
+}
+
 model Boats {
   id   String @id @unique @default(uuid())
   Name String @unique
@@ -14,15 +24,18 @@ model Boats {
   PY   Int
 }
 
-model Clubs {
-  id     String @id @unique @default(uuid())
-  Name   String @unique
+model Club {
+  id   String @id @unique @default(uuid())
+  Name String @unique
+  Series Series[]
 }
 
 model Series {
   id      String  @id @unique @default(uuid())
   Name    String  @unique
-  clubsId String?
+  Club     Club  @relation(fields: [clubId], references: [id])
+  clubId   String
+  Races Race[]
 }
 
 model Race {
@@ -34,5 +47,6 @@ model Race {
   SO       String
   ASO      String
   Results  Json?
-  seriesId String?
+  Series     Series  @relation(fields: [seriesId], references: [id])
+  seriesId   String
 }
