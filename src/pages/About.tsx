@@ -8,6 +8,7 @@ const About = () => {
                 <h1 className="text-5xl md:text-[5rem] leading-normal font-extrabold text-gray-700">
                     About
                 </h1>
+                <p>this is a long page about the project, should also include roadmap</p>
             </div>
     </Layout>
   );

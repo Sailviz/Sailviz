@@ -1,6 +1,5 @@
 import Head from 'next/head'
-import Image from 'next/image'
-import Link from 'next/link'
+import { ToastContainer, toast } from 'react-toastify';
 
 export const siteTitle = 'SRM'
 
@@ -13,7 +12,7 @@ export default function Layout({
     home?: boolean
   }) {
     return (
-    <div>
+    <div className="h-screen">
         <Head>
         <link rel="shortcut icon" href="/favicon.ico"/>
         <title>{siteTitle}</title>
@@ -29,7 +28,9 @@ export default function Layout({
             )}.png?theme=light&md=0&fontSize=75px&images=https%3A%2F%2Fassets.zeit.co%2Fimage%2Fupload%2Ffront%2Fassets%2Fdesign%2Fnextjs-black-logo.svg`}
         />
         </Head>
-            <nav className="border-pink-500 px-4 sm:px-4 py-2.5 border-b-2">
+        <ToastContainer />
+        <div className="flex flex-col h-full">
+            <nav className="border-pink-500 px-4 sm:px-4 py-2.5 border-b-2 flex">
                 <div className="container flex flex-wrap justify-between items-center mx-auto">
                     <a href="/" className="flex items-center">
                         <img src="/favicon.ico" className="mr-3 h-6 sm:h-9" alt="Flowbite Logo" />
@@ -53,7 +54,8 @@ export default function Layout({
                     </div>
                 </div>
             </nav>
-        <main>{children}</main>
+            <main className="flex items-stretch h-full">{children}</main>
+        </div>
     </div>
     )
 }

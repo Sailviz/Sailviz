@@ -4,7 +4,7 @@ import Card from '../components/Card'
 const Home = () => {
     return (
         <Layout home>
-            <main className="container mx-auto flex flex-col items-center justify-center h-screen p-4">
+            <main className="container mx-auto flex flex-col items-center justify-center h-full p-4">
                 <h1 className="text-5xl md:text-[5rem] leading-normal font-extrabold text-gray-700">
                     SRM
                 </h1>
@@ -12,19 +12,22 @@ const Home = () => {
                     <Card
                         name="Start a Race"
                         description="5, 4, 1, GO!"
-                        link="/Start"
+                        link="/About#Start"
                     />
                     <Card
-                        name="Join the Platform"
-                        description="Sign your club up"
-                        link="/Join"
+                        name="Record Results"
+                        description="Instant calculation"
+                        link="/About#Results"
                     />
                     <Card
-                        name="How it works"
+                        name="Calculate Series"
                         description="How to run races"
-                        link="/About"
+                        link="/About#Series"
                     />
                 </div>
+                <p>
+                    Flashy pictures with boats and results
+                </p>
             </main>
     </Layout>
   );

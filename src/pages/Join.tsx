@@ -8,6 +8,7 @@ const Join = () => {
                 <h1 className="text-5xl md:text-[5rem] leading-normal font-extrabold text-gray-700">
                     Join
                 </h1>
+                <p>Please Email SRM@alexpegg.uk to enquire about joining</p>
             </div>
     </Layout>
   );
