@@ -21,34 +21,34 @@ model Users {
 
 model Boats {
   id   String @id @unique @default(uuid())
-  Name String @unique
-  Crew Int
-  PY   Int
+  name String @unique
+  crew Int
+  py   Int
 }
 
-model Club {
+model Clubs {
   id   String @id @unique @default(uuid())
-  Name String @unique
-  Series Series[]
+  name String @unique
+  series Series[]
 }
 
 model Series {
   id      String  @id @unique @default(uuid())
-  Name    String  @unique
-  Club     Club  @relation(fields: [clubId], references: [id])
+  name    String  @unique
+  club     Clubs  @relation(fields: [clubId], references: [id])
   clubId   String
-  Races Race[]
+  races Race[]
 }
 
 model Race {
   id       String   @id @unique @default(uuid())
-  Number   Int
-  DateTime DateTime
+  number   Int
+  dateTime DateTime
   OOD      String
   AOD      String
   SO       String
   ASO      String
-  Results  Json?
-  Series     Series  @relation(fields: [seriesId], references: [id])
+  results  Json?
+  series     Series  @relation(fields: [seriesId], references: [id])
   seriesId   String
 }
