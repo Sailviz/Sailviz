@@ -10,8 +10,8 @@ const About = () => {
                 </h1>
                 <p>this is a long page about the project, should also include roadmap</p>
             </div>
-    </Layout>
-  );
+        </Layout>
+    );
 };
 
 
