@@ -36,11 +36,11 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
         // check if we have all data.
         // The website stops this, but just in case
         try {
-            assert.notStrictEqual(null, req.body.email, 'Email required');
-            assert.notStrictEqual(null, req.body.password, 'Password required');
-            assert.notStrictEqual(null, req.body.name, 'Name required');
-            assert.notStrictEqual(null, req.body.club, 'club required');
-            assert.notStrictEqual(null, req.body.permLvl, 'permLvl required');
+            assert.notStrictEqual(undefined, req.body.email, 'Email required');
+            assert.notStrictEqual(undefined, req.body.password, 'Password required');
+            assert.notStrictEqual(undefined, req.body.name, 'Name required');
+            assert.notStrictEqual(undefined, req.body.club, 'club required');
+            assert.notStrictEqual(undefined, req.body.permLvl, 'permLvl required');
 
         } catch (bodyError) {
             res.status(403).json({error: true, message: "information missing"});
@@ -55,10 +55,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 
         var Existinguser = await findUser(email)
         if (!Existinguser) {
-            console.log("creating new user")
-            // proceed to Create
             var creationResult = await createUser(name, email, password, club, permLvl)
-            console.log(creationResult)
             if (creationResult) {
                 var user = creationResult;
                 var token = jwt.sign(
@@ -68,11 +65,10 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
                         expiresIn: 3000, //50 minutes
                     },
                 );
-                res.status(200).json({token});
+                res.status(200).json({error: false, token: token});
                 return;
             }
             else{
-                console.log("failed to create user")
                 res.status(500).json({error: true, message: 'Something went wrong crating user account'});
             }
         } else {
