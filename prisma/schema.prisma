@@ -29,6 +29,7 @@ model Boats {
 model Clubs {
   id   String @id @unique @default(uuid())
   name String @unique
+  settings Json
   series Series[]
 }
 
@@ -37,6 +38,7 @@ model Series {
   name    String  @unique
   club     Clubs  @relation(fields: [clubId], references: [id])
   clubId   String
+  settings Json
   races Race[]
 }
 
