@@ -49,14 +49,14 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
         if (!ExistingBoat) {
             var creationResult = await createBoat(name, crew, py)
             if (creationResult) {
-                res.status(200).json({error: false});
+                res.status(201).json({error: false});
                 return;
             }
             else{
                 res.status(500).json({error: true, message: 'Something went wrong crating boat'});
             }
         } else {
-            res.status(403).json({error: true, message: 'Email already exists'});
+            res.status(409).json({error: true, message: 'Boat already exists'});
             return;
         }
     }

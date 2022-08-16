@@ -15,7 +15,8 @@ async function findClub(name: string){
 async function createClub(name: string){
     var club = await prisma.clubs.create({
         data: {
-            name: name
+            name: name,
+            settings: {}
         },
     })
     return club;
@@ -38,7 +39,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
         if (!Existinguser) {
             var Club = await createClub(name)
             if (Club) {
-                res.status(200).json({error: false, Club: Club});
+                res.status(201).json({error: false, Club: Club});
                 return;
             }
             else{
@@ -46,7 +47,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
             }
         } else {
             // User exists
-            res.status(403).json({error: true, message: 'club already exists'});
+            res.status(409).json({error: true, message: 'club already exists'});
             return;
         }
     }

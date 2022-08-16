@@ -65,7 +65,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
                         expiresIn: 3000, //50 minutes
                     },
                 );
-                res.status(200).json({error: false, token: token});
+                res.status(201).json({error: false, token: token});
                 return;
             }
             else{
@@ -73,7 +73,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
             }
         } else {
             // User exists
-            res.status(403).json({error: true, message: 'Email already exists'});
+            res.status(409).json({error: true, message: 'Email already exists'});
             return;
         }
     }
