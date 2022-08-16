@@ -16,13 +16,13 @@ async function getClub(name: string){
 export default  async(req: NextApiRequest, res: NextApiResponse) => {
     var name: string = req.body.name
     console.log(name)
-    if (req.method === 'GET') {
+    if (req.method === 'POST') {
         var Club = await getClub(name)
         if(Club){
             res.status(200).json({error: false, Club: Club});
         }
         else{
-            res.status(500).json({error: true, message: 'Could not find club'});
+            res.status(204).json({error: true, message: 'Could not find club'});
         }
     }
 };
