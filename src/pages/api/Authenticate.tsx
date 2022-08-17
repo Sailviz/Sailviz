@@ -52,12 +52,12 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
                 res.status(200).json({error: false, token: token});
                 return;
             } else {
-            res.status(401).json({error: true, message: 'Wrong email or password'});
+            res.status(400).json({error: true, message: 'Wrong email or password'});
             return;
             }
         }
         else {
-            res.status(403).json({error: true, message: 'Wrong email or password'});
+            res.status(400).json({error: true, message: 'Wrong email or password'});
             return;
         }
     }

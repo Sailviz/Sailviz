@@ -22,7 +22,7 @@ export default  async(req: NextApiRequest, res: NextApiResponse) => {
             res.status(200).json({error: false, Club: Club});
         }
         else{
-            res.status(204).json({error: true, message: 'Could not find club'});
+            res.status(200).json({error: true, message: 'Could not find club'});
         }
     }
 };

@@ -43,7 +43,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
             assert.notStrictEqual(undefined, req.body.permLvl, 'permLvl required');
 
         } catch (bodyError) {
-            res.status(403).json({error: true, message: "information missing"});
+            res.status(400).json({error: true, message: "information missing"});
             return;
         }
         
@@ -65,7 +65,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
                         expiresIn: 3000, //50 minutes
                     },
                 );
-                res.status(201).json({error: false, token: token});
+                res.status(200).json({error: false, token: token});
                 return;
             }
             else{
@@ -73,7 +73,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
             }
         } else {
             // User exists
-            res.status(409).json({error: true, message: 'Email already exists'});
+            res.status(400).json({error: true, message: 'Email already exists'});
             return;
         }
     }
