@@ -1,3 +1,3 @@
-# Create T3 App
+# SRM
 
-This is an app bootstrapped according to the [init.tips](https://init.tips) stack, also known as the T3-Stack.
+This will be an app where you can easily manage sailing races.
