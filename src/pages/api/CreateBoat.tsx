@@ -37,7 +37,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
             assert.notStrictEqual(undefined, req.body.py);
 
         } catch (bodyError) {
-            res.status(400).json({error: true, message: "information missing"});
+            res.json({error: true, message: "information missing"});
             return;
         }
         
@@ -49,14 +49,14 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
         if (!ExistingBoat) {
             var creationResult = await createBoat(name, crew, py)
             if (creationResult) {
-                res.status(200).json({error: false});
+                res.json({error: false});
                 return;
             }
             else{
-                res.status(500).json({error: true, message: 'Something went wrong crating boat'});
+                res.json({error: true, message: 'Something went wrong crating boat'});
             }
         } else {
-            res.status(400).json({error: true, message: 'Boat already exists'});
+            res.json({error: true, message: 'Boat already exists'});
             return;
         }
     }

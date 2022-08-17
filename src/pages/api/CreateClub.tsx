@@ -29,7 +29,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
         try {
             assert.notStrictEqual(undefined, req.body.name, 'Name required');
         } catch (bodyError) {
-            res.status(403).json({error: true, message: "information missing"});
+            res.json({error: true, message: "information missing"});
             return;
         }
         
@@ -39,15 +39,15 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
         if (!Existinguser) {
             var Club = await createClub(name)
             if (Club) {
-                res.status(200).json({error: false, Club: Club});
+                res.json({error: false, Club: Club});
                 return;
             }
             else{
-                res.status(500).json({error: true, message: 'Something went wrong crating club'});
+                res.json({error: true, message: 'Something went wrong crating club'});
             }
         } else {
             // User exists
-            res.status(400).json({error: true, message: 'club already exists'});
+            res.json({error: true, message: 'club already exists'});
             return;
         }
     }

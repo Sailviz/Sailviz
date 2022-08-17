@@ -32,7 +32,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
             assert.notStrictEqual(null, req.body.email, 'Email required');
             assert.notStrictEqual(null, req.body.password, 'Password required');
         } catch (bodyError) {
-            res.status(403).json({error: true, message: "email or password missing"});
+            res.json({error: true, message: "email or password missing"});
         }
 
         const email = req.body.email;
@@ -49,15 +49,15 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
                         expiresIn: 3000, //50 minutes
                     },
                 );
-                res.status(200).json({error: false, token: token});
+                res.json({error: false, token: token});
                 return;
             } else {
-            res.status(400).json({error: true, message: 'Wrong email or password'});
+            res.json({error: true, message: 'Wrong email or password'});
             return;
             }
         }
         else {
-            res.status(400).json({error: true, message: 'Wrong email or password'});
+            res.json({error: true, message: 'Wrong email or password'});
             return;
         }
     }

@@ -65,15 +65,15 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
                         expiresIn: 3000, //50 minutes
                     },
                 );
-                res.status(200).json({error: false, token: token});
+                res.json({error: false, token: token});
                 return;
             }
             else{
-                res.status(500).json({error: true, message: 'Something went wrong crating user account'});
+                res.json({error: true, message: 'Something went wrong crating user account'});
             }
         } else {
             // User exists
-            res.status(400).json({error: true, message: 'Email already exists'});
+            res.json({error: true, message: 'Email already exists'});
             return;
         }
     }
