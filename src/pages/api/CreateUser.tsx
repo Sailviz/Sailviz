@@ -16,6 +16,15 @@ async function findUser(email: string){
     return result;
 }
 
+async function findClub(name: string){
+    var result = await prisma.clubs.findUnique({
+        where: {
+            name: name,
+        },
+    })
+    return result;
+}
+
 async function createUser(name: string, email: string, password: string, club: string, permLvl: number){
     var hash = await bcrypt.hash(password, saltRounds)
     var user = await prisma.users.create({
@@ -52,6 +61,14 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
         var password = req.body.password
         var club = req.body.club
         var permLvl = req.body.permLvl
+
+        //check club exists
+
+        var Existingclub = await findClub(name)
+        if (!Existingclub) {
+            res.json({error: true, message: 'Club does not exist'});
+            return;
+        }
 
         var Existinguser = await findUser(email)
         if (!Existinguser) {
