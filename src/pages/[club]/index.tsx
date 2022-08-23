@@ -12,8 +12,16 @@ async function checkClubExist (club: string) {
     return res
 }
 
-const Clubindex = () => {
+async function CheckAuthentication () {   
+    const res = await fetch(`/api/CheckAuthentication`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+    })
+    .then((r) => r.json())
+    return res
+}
 
+const Clubindex = () => {
 
     const router = useRouter()
     var [message, setMessage] = useState('Loading')
@@ -21,22 +29,29 @@ const Clubindex = () => {
     //check that club exists
     useEffect(()=>{
         async function run(){
-            var res = await checkClubExist(club! as string)
+            //check that club exists
+            if(club == undefined) return
+            var res = await checkClubExist(club as string)
             if (res.error == false){
                 setMessage("Club " + club + " found")
             } else {
                 setMessage("Club " + club + " not found")
+                return
             }
+            //check if auth cookie is valid
+            res = await CheckAuthentication()
+            if(res.error == true){
+                setMessage("Logon not found")
+                router.push('/Login')
+            } else {
+                setMessage("Logon found")
+                router.push(club + "/Dashboard")
+            }
+
         }
         run()
     }, [club])
-    //use cookie to log in
-    //otherwise show log in page
-    /*
-    useEffect(() => {
-        //router.push('/' + club + '/Dashboard')
-    })
-    */
+    
     return (
         <>
             <div className="container mx-auto flex flex-col items-center justify-center h-screen p-4">

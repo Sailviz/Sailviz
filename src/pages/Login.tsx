@@ -28,13 +28,14 @@ const Login = () => {
     const submitData = async (e: React.SyntheticEvent) => {
         e.preventDefault()
         const body = { email, password }
-        const res = await fetch(`/api/authenticate`, {
+        const res = await fetch(`/api/Authenticate`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(body),
         })
         .then((r) => r.json())
         .then((data) => {
+            console.log(data)
             if (data && data.error) {
                 setError(data.message);
                 //alert(data.message)
@@ -42,7 +43,7 @@ const Login = () => {
             if (data && data.token) {
                 //set cookie
                 cookie.set('token', data.token, {expires: 2});
-                Router.push("/Dashboard");
+                Router.push("/" + data.club);
             }
             else{
                 console.error("no token with login request")
@@ -77,7 +78,7 @@ const Login = () => {
                         disabled={!email || !password}
                         type="submit"
                         value="Login"
-                        className="m-2 bg-slate-300 border-0 py-4 px-6 text-lg font-medium enabled:bg-pink-500"
+                        className="m-2 bg-slate-300 border-0 py-4 px-6 text-lg font-medium enabled:bg-pink-500 enabled:hover:bg-pink-400"
                     />
                     <a className="ml-4" href="#" onClick={() => Router.push('/')}>
                         or Cancel

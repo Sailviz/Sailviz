@@ -3,7 +3,6 @@ import { useRouter } from 'next/router'
 const Club = () => {
     const router = useRouter()
     var club  = router.query.club
-    console.log(club)
     return (
         <>
             <div className="container mx-auto flex flex-col items-center justify-center h-screen p-4">

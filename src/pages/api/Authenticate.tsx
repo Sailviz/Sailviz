@@ -49,7 +49,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
                         expiresIn: 3000, //50 minutes
                     },
                 );
-                res.json({error: false, token: token});
+                res.json({error: false, token: token, club: user.club});
                 return;
             } else {
             res.json({error: true, message: 'Wrong email or password'});
