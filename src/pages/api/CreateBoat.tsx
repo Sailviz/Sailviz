@@ -49,7 +49,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
         if (!ExistingBoat) {
             var creationResult = await createBoat(name, crew, py)
             if (creationResult) {
-                res.json({error: false});
+                res.json({error: false, id: creationResult.id});
                 return;
             }
             else{
