@@ -35,8 +35,8 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
         
         var name = req.body.name
 
-        var Existinguser = await findClub(name)
-        if (!Existinguser) {
+        var Existingclub = await findClub(name)
+        if (!Existingclub) {
             var Club = await createClub(name)
             if (Club) {
                 res.json({error: false, Club: Club});
