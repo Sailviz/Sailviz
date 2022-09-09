@@ -22,40 +22,28 @@ async function findSeries(name: string, club: any){
     return result;
 }
 
-async function findRace(number: Number, series: any){
-    var result = await prisma.race.findFirst({
-        where: {
-            number: number,
-            seriesId: series.id
-        },
-    })
-    return result;
-}
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
     if (req.method === 'POST') {
         // check if we have all data.
         // The website stops this, but just in case
         try {
-            assert.notStrictEqual(undefined, req.body.series, 'Name required');
-            assert.notStrictEqual(undefined, req.body.number, 'Name required');
+            assert.notStrictEqual(undefined, req.body.name, 'Name required');
             assert.notStrictEqual(undefined, req.body.club, 'Club required');
-
         } catch (bodyError) {
             res.json({error: true, message: "information missing"});
             return;
         }
         
-        var number = req.body.number
-        var seriesName = req.body.series
+        var name = req.body.name
         var club = req.body.club
 
         club = await findClub(club)
         if (club) {
-            var series = await findSeries(seriesName, club)
-            if (series) {
-                var race = await findRace(number, series)
-                res.json({error: false, race: race});
+            var Series = await findSeries(name, club)
+            if (Series) {
+                res.json({error: false, series: Series});
+                return;
             }
             else{
                 res.json({error: true, message: 'Could not find series'});
