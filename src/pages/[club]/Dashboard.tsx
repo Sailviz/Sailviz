@@ -7,7 +7,7 @@ import { server } from '../../components/URL';
 const Club = () => {
     const router = useRouter()
     var club  = router.query.club
-    var series = {}
+    var series: any = {}
 
     const getRaces = async () => {
         const body = {
@@ -30,38 +30,45 @@ const Club = () => {
         });
     };
 
-    const createHeader = (series) => {
-        var div = document.createElement('div');
-        div.innerHTML = '<h3>' + series.name + '</h3>';
+    const createHeader = (series: any) => {
+        var li = document.createElement('li');
+
+        var div = document.createElement('div')
+        div.className = 'py-4 before:inline-block before:content-["\\25B6"] select-none'
+        div.innerHTML = series.name
+        li.appendChild(div)
+
+        li.id = series.id
         
-        div.className = 'w-full p-4 bg-pink-400 text-lg font-extrabold text-gray-700'
-        
+        li.className = 'list-none w-full bg-pink-400 text-lg font-extrabold text-gray-700 cursor-pointer select-none'
+        li.onclick = function (){
+            expandSeries(this)
+        }
+
         var Bar = document.getElementById("leftBar")
         if(Bar == null) {
             return
         }
-        Bar.appendChild(div);
+        Bar.appendChild(li);
     }
-    const createChild = (race) => {
-        var div = document.createElement('div');
-        div.innerHTML = '<h3>' + race.number + " (" + race.dateTime + ")" + '</h3>';
+    const createChild = (race: any) => {
+        var ul = document.createElement('ul');
+        ul.innerHTML = '<li>' + race.number + " (" + race.dateTime + ")" + '</li>';
         
-        div.className = 'w-full p-4 bg-pink-300 text-lg font-extrabold text-gray-700'
+        ul.className = 'list-none select-none w-full p-4 bg-pink-300 text-lg font-extrabold text-gray-700 ' + race.seriesId
         
-        var Bar = document.getElementById("leftBar")
-        if(Bar == null) {
+        var Parent = document.getElementById(race.seriesId)
+        if(Parent == null) {
             return
         }
-        Bar.appendChild(div);
+        Parent.appendChild(ul);
     }
 
     const generateBar = () => {
         removeChildren(document.getElementById("leftBar"))
         for(const element in series){
-            console.log(series[element])
-            createHeader(series[element])
+            createHeader(series[element ])
             for(const race in series[element].races){
-                console.log(series[element].races[race])
                 createChild(series[element].races[race])
             }
         }
@@ -73,8 +80,20 @@ const Club = () => {
         }
     };
 
-    const expandSeries = () => {
-        console.log("expand")
+    const expandSeries = (element: any) => {
+        console.log(element.id)
+        var children = document.getElementsByClassName(element.id) as unknown as HTMLElement[] 
+        for(var i = 0; i < children.length; i++){
+            var child = children[i]
+            if(!child){return}
+
+            if(child.style.display == 'none'){
+                child.style.display = 'block'
+            } else{
+                child.style.display = 'none'
+            }
+         }
+
     }
 
     const showSettings = () => {
@@ -106,7 +125,7 @@ const Club = () => {
                 </div>
                 <div id="page" className='flex basis-9/12'>
                     <p className="text-6xl font-extrabold text-gray-700 p-6">
-                        Open a page to view settings.
+                        Text
                     </p>
                 </div>
             </div>
