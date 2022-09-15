@@ -36,14 +36,15 @@ const Club = () => {
         var div = document.createElement('div')
         div.className = 'py-4 before:inline-block before:content-["\\25B6"] select-none'
         div.innerHTML = series.name
+        div.onclick = function (){
+            expandSeries(li)
+        }
         li.appendChild(div)
 
         li.id = series.id
         
         li.className = 'list-none w-full bg-pink-400 text-lg font-extrabold text-gray-700 cursor-pointer select-none'
-        li.onclick = function (){
-            expandSeries(this)
-        }
+        
 
         var Bar = document.getElementById("leftBar")
         if(Bar == null) {
