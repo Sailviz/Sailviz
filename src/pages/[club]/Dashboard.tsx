@@ -34,7 +34,7 @@ const Club = () => {
         var li = document.createElement('li');
 
         var div = document.createElement('div')
-        div.className = 'py-4 before:inline-block before:content-["\\25B6"] select-none'
+        div.className = 'py-4 before:inline-block before:content-["\\25B6"] select-none before:rotate-90 '
         div.innerHTML = series.name
         div.onclick = function (){
             expandSeries(li)
@@ -82,7 +82,9 @@ const Club = () => {
     };
 
     const expandSeries = (element: any) => {
-        console.log(element.id)
+        var title = document.getElementById(element.id)
+        var titleText = title?.firstElementChild
+        if(titleText == null){return}
         var children = document.getElementsByClassName(element.id) as unknown as HTMLElement[] 
         for(var i = 0; i < children.length; i++){
             var child = children[i]
@@ -90,8 +92,12 @@ const Club = () => {
 
             if(child.style.display == 'none'){
                 child.style.display = 'block'
+                titleText.classList.add('before:rotate-90')
+                titleText.classList.remove('before:rotate-0')
             } else{
                 child.style.display = 'none'
+                titleText.classList.add('before:rotate-0')
+                titleText.classList.remove('before:rotate-90')
             }
          }
 
