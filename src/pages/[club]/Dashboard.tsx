@@ -13,7 +13,25 @@ const Club = () => {
     var [activeSeries, setActiveSeries] = useState('')
     var [activeRace, setActiveRace] = useState('')
 
-    var [raceData, setRaceData] = useState({})
+    var [raceData, setRaceData] = useState({
+        "id": "",
+        "number": 0,
+        "dateTime": "",
+        "OOD": "",
+        "AOD": "",
+        "SO": "",
+        "ASO": "",
+        "results": null,
+        "settings": {},
+        "seriesId": ""
+    })
+    var [seriesData, setSeriesData] = useState({
+        "id": "",
+        "name": "",
+        "clubId": "",
+        "settings": {}
+    })
+
 
     const getRaces = async () => {
         const body = {
@@ -52,6 +70,27 @@ const Club = () => {
             } else {
                 console.log(data.race)
                 setRaceData(data.race)
+                getSeriesInfo(data.race.seriesId)
+            }
+        });
+    };
+
+    const getSeriesInfo = async (id: any) => {
+        const body = {
+            "id": id
+        }
+        const res = await fetch(`${server}/api/GetSeriesById`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body),
+        })
+        .then((res) => res.json())
+        .then((data) => {
+            if (data && data.error) {
+                console.log(data.error)
+            } else {
+                console.log(data.series)
+                setSeriesData(data.series)
             }
         });
     };
@@ -114,10 +153,11 @@ const Club = () => {
         }
     };
 
-    const selectSeries = (element: any) => {
+    const selectSeries = async (element: any) => {
         hidePages()
         var series = document.getElementById('series')
         if(series == null){return}
+        await getSeriesInfo(element.id)
         series.classList.remove('hidden')
         setActiveSeries(element.id)
     }
@@ -126,9 +166,9 @@ const Club = () => {
         hidePages()
         var race = document.getElementById('race')
         if(race == null){return}
+        await getRaceInfo(raceId)
         race.classList.remove('hidden')
         setActiveRace(raceId)
-        await getRaceInfo(raceId)
     }
 
     const expandSeries = (element: any) => {
@@ -202,15 +242,12 @@ const Club = () => {
                     </div>
                     <div id="series" className="hidden">
                         <p className="text-6xl font-extrabold text-gray-700 p-6">
-                            Series {activeSeries}
+                            {seriesData.name}
                         </p>
                     </div>
                     <div id="race" className="hidden">
                         <p className="text-6xl font-extrabold text-gray-700 p-6">
-                            Race {activeRace}
-                        </p>
-                        <p className="text-6xl font-extrabold text-gray-700 p-6">
-                            Number: {raceData.number}
+                            {seriesData.name}: {raceData.number}
                         </p>
                     </div>
                 </div>
