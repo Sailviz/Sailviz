@@ -51,7 +51,7 @@ const Club = () => {
                 console.log(data.error)
             } else {
                 console.log(data.race)
-                return data.race
+                setRaceData(data.race)
             }
         });
     };
@@ -122,13 +122,13 @@ const Club = () => {
         setActiveSeries(element.id)
     }
 
-    const selectRace = (raceId: string) => {
+    const selectRace = async (raceId: string) => {
         hidePages()
         var race = document.getElementById('race')
         if(race == null){return}
         race.classList.remove('hidden')
         setActiveRace(raceId)
-        setRaceData(getRaceInfo(raceId))
+        await getRaceInfo(raceId)
     }
 
     const expandSeries = (element: any) => {
