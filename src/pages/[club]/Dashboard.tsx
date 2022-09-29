@@ -13,6 +13,8 @@ const Club = () => {
     var [activeSeries, setActiveSeries] = useState('')
     var [activeRace, setActiveRace] = useState('')
 
+    var [raceData, setRaceData] = useState({})
+
     const getRaces = async () => {
         const body = {
             "club": club
@@ -30,6 +32,26 @@ const Club = () => {
                 console.log(data.series)
                 series = data.series
                 generateBar()
+            }
+        });
+    };
+
+    const getRaceInfo = async (id: any) => {
+        const body = {
+            "id": id
+        }
+        const res = await fetch(`${server}/api/GetRaceById`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body),
+        })
+        .then((res) => res.json())
+        .then((data) => {
+            if (data && data.error) {
+                console.log(data.error)
+            } else {
+                console.log(data.race)
+                return data.race
             }
         });
     };
@@ -106,6 +128,7 @@ const Club = () => {
         if(race == null){return}
         race.classList.remove('hidden')
         setActiveRace(raceId)
+        setRaceData(getRaceInfo(raceId))
     }
 
     const expandSeries = (element: any) => {
@@ -185,6 +208,9 @@ const Club = () => {
                     <div id="race" className="hidden">
                         <p className="text-6xl font-extrabold text-gray-700 p-6">
                             Race {activeRace}
+                        </p>
+                        <p className="text-6xl font-extrabold text-gray-700 p-6">
+                            Number: {raceData.number}
                         </p>
                     </div>
                 </div>
