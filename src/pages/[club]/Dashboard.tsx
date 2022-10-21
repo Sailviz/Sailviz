@@ -140,7 +140,10 @@ const Club = () => {
     const generateBar = () => {
         removeChildren(document.getElementById("leftBar"))
         for(const element in series){
-            createHeader(series[element ])
+            createHeader(series[element])
+            series[element].races.sort((a : any,b : any) => {
+                return a.number - b.number;
+            })
             for(const race in series[element].races){
                 createChild(series[element].races[race])
             }
