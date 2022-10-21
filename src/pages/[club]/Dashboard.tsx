@@ -7,7 +7,7 @@ import { server } from '../../components/URL';
 
 const Club = () => {
     const router = useRouter()
-    var club  = router.query.club
+    var club = router.query.club
     var series: any = {}
 
     var [activeSeries, setActiveSeries] = useState('')
@@ -42,16 +42,16 @@ const Club = () => {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(body),
         })
-        .then((res) => res.json())
-        .then((data) => {
-            if (data && data.error) {
-                console.log(data.error)
-            } else {
-                console.log(data.series)
-                series = data.series
-                generateBar()
-            }
-        });
+            .then((res) => res.json())
+            .then((data) => {
+                if (data && data.error) {
+                    console.log(data.error)
+                } else {
+                    console.log(data.series)
+                    series = data.series
+                    generateBar()
+                }
+            });
     };
 
     const getRaceInfo = async (id: any) => {
@@ -63,16 +63,16 @@ const Club = () => {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(body),
         })
-        .then((res) => res.json())
-        .then((data) => {
-            if (data && data.error) {
-                console.log(data.error)
-            } else {
-                console.log(data.race)
-                setRaceData(data.race)
-                getSeriesInfo(data.race.seriesId)
-            }
-        });
+            .then((res) => res.json())
+            .then((data) => {
+                if (data && data.error) {
+                    console.log(data.error)
+                } else {
+                    console.log(data.race)
+                    setRaceData(data.race)
+                    getSeriesInfo(data.race.seriesId)
+                }
+            });
     };
 
     const getSeriesInfo = async (id: any) => {
@@ -84,15 +84,15 @@ const Club = () => {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(body),
         })
-        .then((res) => res.json())
-        .then((data) => {
-            if (data && data.error) {
-                console.log(data.error)
-            } else {
-                console.log(data.series)
-                setSeriesData(data.series)
-            }
-        });
+            .then((res) => res.json())
+            .then((data) => {
+                if (data && data.error) {
+                    console.log(data.error)
+                } else {
+                    console.log(data.series)
+                    setSeriesData(data.series)
+                }
+            });
     };
 
     const createHeader = (series: any) => {
@@ -101,21 +101,21 @@ const Club = () => {
         var div = document.createElement('div')
         div.className = 'py-4 before:inline-block before:content-["\\25B6"] select-none before:rotate-90 '
         div.innerHTML = series.name
-        div.ondblclick = function (){
+        div.ondblclick = function () {
             expandSeries(li)
         }
-        div.onclick = function (){
+        div.onclick = function () {
             selectSeries(li)
         }
         li.appendChild(div)
 
         li.id = series.id
-        
+
         li.className = 'list-none w-full bg-pink-400 text-lg font-extrabold text-gray-700 cursor-pointer select-none'
-        
+
 
         var Bar = document.getElementById("leftBar")
-        if(Bar == null) {
+        if (Bar == null) {
             return
         }
         Bar.appendChild(li);
@@ -123,15 +123,15 @@ const Club = () => {
     const createChild = (race: any) => {
         var ul = document.createElement('ul');
         ul.innerHTML = '<li>' + race.number + " (" + race.dateTime + ")" + '</li>';
-        
+
         ul.className = 'list-none select-none w-full p-4 bg-pink-300 text-lg font-extrabold text-gray-700 ' + race.seriesId
-        
-        ul.onclick = function (){
+
+        ul.onclick = function () {
             selectRace(race.id)
         }
 
         var Parent = document.getElementById(race.seriesId)
-        if(Parent == null) {
+        if (Parent == null) {
             return
         }
         Parent.appendChild(ul);
@@ -139,12 +139,12 @@ const Club = () => {
 
     const generateBar = () => {
         removeChildren(document.getElementById("leftBar"))
-        for(const element in series){
+        for (const element in series) {
             createHeader(series[element])
-            series[element].races.sort((a : any,b : any) => {
+            series[element].races.sort((a: any, b: any) => {
                 return a.number - b.number;
             })
-            for(const race in series[element].races){
+            for (const race in series[element].races) {
                 createChild(series[element].races[race])
             }
         }
@@ -159,7 +159,7 @@ const Club = () => {
     const selectSeries = async (element: any) => {
         hidePages()
         var series = document.getElementById('series')
-        if(series == null){return}
+        if (series == null) { return }
         await getSeriesInfo(element.id)
         series.classList.remove('hidden')
         setActiveSeries(element.id)
@@ -168,7 +168,7 @@ const Club = () => {
     const selectRace = async (raceId: string) => {
         hidePages()
         var race = document.getElementById('race')
-        if(race == null){return}
+        if (race == null) { return }
         await getRaceInfo(raceId)
         race.classList.remove('hidden')
         setActiveRace(raceId)
@@ -177,25 +177,25 @@ const Club = () => {
     const expandSeries = (element: any) => {
         var title = document.getElementById(element.id)
         var titleText = title?.firstElementChild
-        if(titleText == null){return}
-        var children = document.getElementsByClassName(element.id) as unknown as HTMLElement[] 
-        for(var i = 0; i < children.length; i++){
+        if (titleText == null) { return }
+        var children = document.getElementsByClassName(element.id) as unknown as HTMLElement[]
+        for (var i = 0; i < children.length; i++) {
             var child = children[i]
-            if(!child){return}
+            if (!child) { return }
 
-            if(child.style.display == 'none'){
+            if (child.style.display == 'none') {
                 //show
                 child.style.display = 'block'
                 titleText.classList.add('before:rotate-90')
                 titleText.classList.remove('before:rotate-0')
-                
-            } else{
+
+            } else {
                 //hide
                 child.style.display = 'none'
                 titleText.classList.add('before:rotate-0')
                 titleText.classList.remove('before:rotate-90')
             }
-         }
+        }
 
     }
     const hidePages = () => {
@@ -215,7 +215,7 @@ const Club = () => {
     }
 
     useEffect(() => {
-        if(club !== undefined){
+        if (club !== undefined) {
             const fetchRaces = async () => {
                 await getRaces()
             }
@@ -225,7 +225,7 @@ const Club = () => {
 
 
         }
-    },[club])
+    }, [club])
 
     return (
         <Dashboard>
@@ -237,7 +237,7 @@ const Club = () => {
                         </div>
                     </div>
                 </div>
-                <div id="page" className='flex basis-9/12'>
+                <div id="page" className='flex basis-9/12 h-full w-full'>
                     <div id="settings" className="">
                         <p className="text-6xl font-extrabold text-gray-700 p-6">
                             Settings
@@ -252,11 +252,57 @@ const Club = () => {
                         <p className="text-6xl font-extrabold text-gray-700 p-6">
                             {seriesData.name}: {raceData.number}
                         </p>
+                        <div className="flex px-6">
+                            <div className='flex flex-col px-6 w-full '>
+                                <p className='text-2xl font-bold text-gray-700'>
+                                    OOD
+                                </p>
+                                <input type="text"
+                                    className="w-full p-2 mx-0 my-2 border-4 rounded focus:border-pink-500 focus:outline-none"
+                                    value={raceData.OOD}
+                                />
+                            </div>
+
+                            <div className='flex flex-col px-6 w-full'>
+                                <p className='text-2xl font-bold text-gray-700'>
+                                    AOD
+                                </p>
+                                <input type="text"
+                                    className="w-full p-2 mx-0 my-2 border-4 rounded focus:border-pink-500 focus:outline-none"
+                                    value={raceData.AOD}
+                                />
+                                
+                            </div>
+
+                        </div>
+                        <div className="flex px-6">
+                            <div className='flex flex-col px-6 w-full'>
+                                <p className='text-2xl font-bold text-gray-700'>
+                                    SO
+                                </p>
+                                <input type="text"
+                                    className="w-full p-2 mx-0 my-2 border-4 rounded focus:border-pink-500 focus:outline-none"
+                                    value={raceData.SO}
+                                />
+                            </div>
+
+                            <div className='flex flex-col px-6 w-full'>
+                                <p className='text-2xl font-bold text-gray-700'>
+                                    ASO
+                                </p>
+                                <input type="text"
+                                    className="w-full p-2 mx-0 my-2 border-4 rounded focus:border-pink-500 focus:outline-none"
+                                    value={raceData.ASO}
+                                />
+                                
+                            </div>
+
+                        </div>
                     </div>
                 </div>
             </div>
         </Dashboard>
-  )
+    )
 }
 
 export default Club
