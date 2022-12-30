@@ -250,10 +250,11 @@ const Club = () => {
 
     const saveRaceSettings = (e: ChangeEvent<HTMLInputElement>) => {
         let newRaceData: RaceDataType = raceData
+        console.log(e.target.value)
         newRaceData[e.target.id] = e.target.value
         setRaceData(newRaceData)
+        console.log(raceData)
     }
-
     const saveRaceType = (newValue: any) => {
         let newRaceData: RaceDataType = raceData
         newRaceData["Type"] = newValue.value
@@ -382,11 +383,11 @@ const Club = () => {
                                     Type
                                 </p>
                                 <div className="w-full p-2 mx-0 my-2 border-4 rounded focus:border-pink-500 focus:outline-none">
-                                    <Select defaultValue={raceData.Type} onChange={saveRaceType} id='Type' className='w-full'
+                                    <Select defaultValue={{ value: raceData.Type, label: raceData.Type }} key={raceData.Type} onChange={saveRaceType} id='Type' className='w-full'
                                         options={raceOptions} />
                                 </div>
-
                             </div>
+
 
                         </div>
                         <div className="p-6">

@@ -51,7 +51,7 @@ model Race {
   SO       String
   ASO      String
   results  Json?
-  Type     String
+  Format     String
   series     Series  @relation(fields: [seriesId], references: [id])
   seriesId   String
 }
