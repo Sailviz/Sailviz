@@ -7,7 +7,7 @@ import assert from 'assert';
 const saltRounds = 10;
 const jwtSecret = process.env.jwtSecret;
 
-async function findUser(email: string){
+async function findUser(email: string) {
     var result = await prisma.users.findUnique({
         where: {
             email: email,
@@ -16,7 +16,7 @@ async function findUser(email: string){
     return result;
 }
 
-async function findClub(name: string){
+async function findClub(name: string) {
     var result = await prisma.clubs.findUnique({
         where: {
             name: name,
@@ -25,7 +25,7 @@ async function findClub(name: string){
     return result;
 }
 
-async function createUser(name: string, email: string, password: string, club: string, permLvl: number){
+async function createUser(name: string, email: string, password: string, club: string, permLvl: number) {
     var hash = await bcrypt.hash(password, saltRounds)
     var user = await prisma.users.create({
         data: {
@@ -52,10 +52,10 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
             assert.notStrictEqual(undefined, req.body.permLvl, 'permLvl required');
 
         } catch (bodyError) {
-            res.status(400).json({error: true, message: "information missing"});
+            res.status(400).json({ error: true, message: "information missing" });
             return;
         }
-        
+
         var name = req.body.name
         var email = req.body.email
         var password = req.body.password
@@ -64,9 +64,10 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 
         //check club exists
 
-        var Existingclub = await findClub(name)
-        if (!Existingclub) {
-            res.json({error: true, message: 'Club does not exist'});
+        var Existingclub = await findClub(club)
+        console.log(Existingclub)
+        if (Existingclub == null) {
+            res.json({ error: true, message: 'Club does not exist' });
             return;
         }
 
@@ -76,21 +77,21 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
             if (creationResult) {
                 var user = creationResult;
                 var token = jwt.sign(
-                    {userId: user.name, email: user.email, id: user.id},
+                    { userId: user.name, email: user.email, id: user.id },
                     jwtSecret,
                     {
                         expiresIn: 3000, //50 minutes
                     },
                 );
-                res.json({error: false, token: token});
+                res.json({ error: false, token: token });
                 return;
             }
-            else{
-                res.json({error: true, message: 'Something went wrong crating user account'});
+            else {
+                res.json({ error: true, message: 'Something went wrong crating user account' });
             }
         } else {
             // User exists
-            res.json({error: true, message: 'Email already exists'});
+            res.json({ error: true, message: 'Email already exists' });
             return;
         }
     }

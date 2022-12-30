@@ -1,26 +1,20 @@
 import Layout from '../components/Layout'
 import useSWR from 'swr';
-import { toast } from 'react-toastify';
 import cookie from 'js-cookie'
 import React, { useState } from 'react'
 import Router from 'next/router'
 
 const Login = () => {
-    const {data} = useSWR('/api/CheckAuthentication', async function(args) {
+    const { data } = useSWR('/api/CheckAuthentication', async function (args) {
         const res = await fetch(args);
         return res.json();
     });
     if (data) {
-        if (data.email) {
+        if (!data.error && data.email) {
             Router.push("/Dashboard");
         }
-        if (data.error){
-            toast(data.message, {
-                position: toast.POSITION.BOTTOM_RIGHT
-            });
-        }
     }
-    
+
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [error, setError] = useState('')
@@ -29,27 +23,27 @@ const Login = () => {
         e.preventDefault()
         const body = { email, password }
         const res = await fetch(`/api/Authenticate`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(body),
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body),
         })
-        .then((r) => r.json())
-        .then((data) => {
-            console.log(data)
-            if (data && data.error) {
-                setError(data.message);
-                //alert(data.message)
-            }
-            if (data && data.token) {
-                //set cookie
-                cookie.set('token', data.token, {expires: 2});
-                Router.push("/" + data.club);
-            }
-            else{
-                console.error("no token with login request")
+            .then((r) => r.json())
+            .then((data) => {
                 console.log(data)
-            }
-        });
+                if (data && data.error) {
+                    setError(data.message);
+                    //alert(data.message)
+                }
+                if (data && data.token) {
+                    //set cookie
+                    cookie.set('token', data.token, { expires: 2 });
+                    Router.push("/" + data.club);
+                }
+                else {
+                    console.error("no token with login request")
+                    console.log(data)
+                }
+            });
     };
 
     return (
@@ -84,9 +78,9 @@ const Login = () => {
                         or Cancel
                     </a>
                 </form>
-          </div>
-    </>
-  );
+            </div>
+        </>
+    );
 };
 
 

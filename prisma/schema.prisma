@@ -45,13 +45,13 @@ model Series {
 model Race {
   id       String   @id @unique @default(uuid())
   number   Int
-  dateTime DateTime
+  Time     String
   OOD      String
   AOD      String
   SO       String
   ASO      String
   results  Json?
-  settings Json
+  Type     String
   series     Series  @relation(fields: [seriesId], references: [id])
   seriesId   String
 }

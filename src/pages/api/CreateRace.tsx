@@ -5,7 +5,7 @@ import assert from 'assert';
 import { create } from 'domain';
 import { createInterface } from 'readline';
 
-async function findClub(name: string){
+async function findClub(name: string) {
     var result = await prisma.clubs.findUnique({
         where: {
             name: name,
@@ -14,7 +14,7 @@ async function findClub(name: string){
     return result;
 }
 
-async function findSeries(name: string, club: any){
+async function findSeries(name: string, club: any) {
     var result = await prisma.series.findFirst({
         where: {
             name: name,
@@ -24,7 +24,7 @@ async function findSeries(name: string, club: any){
     return result;
 }
 
-async function findRace(number: Number, series: any){
+async function findRace(number: number, series: any) {
     var result = await prisma.race.findFirst({
         where: {
             number: number,
@@ -34,13 +34,13 @@ async function findRace(number: Number, series: any){
     return result;
 }
 
-async function createRace(number: Number, series: any, time: Date){
+async function createRace(number: number, series: any, time: any) {
     var res = await prisma.race.create({
         data: {
             number: number,
             seriesId: series.id,
-            dateTime: time,
-            settings: {},
+            Time: time,
+            Type: "Handicap",
             OOD: "Unknown",
             AOD: "Unknown",
             SO: "Unknown",
@@ -61,35 +61,35 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
             assert.notStrictEqual(undefined, req.body.time, 'time required');
 
         } catch (bodyError) {
-            res.json({error: true, message: "information missing"});
+            res.json({ error: true, message: "information missing" });
             return;
         }
-        
+
         var number = req.body.number
         var seriesName = req.body.seriesName
         var club = req.body.club
-        var time: Date = req.body.time
+        var time = req.body.time
 
         club = await findClub(club)
         if (club) {
             var series = await findSeries(seriesName, club)
             if (series) {
                 var ExistingRace = await findRace(number, series)
-                if(!ExistingRace){
+                if (!ExistingRace) {
                     var race = await createRace(number, series, time)
-                    res.json({error: false, race: race});
+                    res.json({ error: false, race: race });
                 } else {
-                    res.json({error: true, message: "Race with that number already exists in series"});
+                    res.json({ error: true, message: "Race with that number already exists in series" });
 
                 }
-                
+
             }
-            else{
-                res.json({error: true, message: 'Could not find series'});
+            else {
+                res.json({ error: true, message: 'Could not find series' });
             }
         } else {
             // User exists
-            res.json({error: true, message: 'club not found'});
+            res.json({ error: true, message: 'club not found' });
             return;
         }
     }

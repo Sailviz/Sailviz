@@ -1,9 +1,25 @@
 import { useRouter } from 'next/router'
-import { useEffect, useState } from 'react';
+import { ChangeEvent, useEffect, useState } from 'react';
 import Dashboard from '../../components/Dashboard'
-
-
+import Select from 'react-select';
 import { server } from '../../components/URL';
+import dayjs from 'dayjs';
+type RaceDataType = {
+    [key: string]: any,
+    id: string,
+    number: number,
+    dateTime: string,
+    OOD: string,
+    AOD: string,
+    SO: string,
+    ASO: string,
+    results: any,
+    Time: string,
+    Type: string,
+    seriesId: string
+};
+
+const raceOptions = [{ value: "Pursuit", label: "Pursuit" }, { value: "Handicap", label: "Handicap" }]
 
 const Club = () => {
     const router = useRouter()
@@ -13,7 +29,7 @@ const Club = () => {
     var [activeSeries, setActiveSeries] = useState('')
     var [activeRace, setActiveRace] = useState('')
 
-    var [raceData, setRaceData] = useState({
+    var [raceData, setRaceData] = useState<RaceDataType>({
         "id": "",
         "number": 0,
         "dateTime": "",
@@ -22,7 +38,8 @@ const Club = () => {
         "SO": "",
         "ASO": "",
         "results": null,
-        "settings": {},
+        "Time": "",
+        "Type": "",
         "seriesId": ""
     })
     var [seriesData, setSeriesData] = useState({
@@ -95,6 +112,23 @@ const Club = () => {
             });
     };
 
+    const updateRaceSettings = async () => {
+        const body = raceData
+        const res = await fetch(`${server}/api/UpdateRaceById`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body),
+        })
+            .then((res) => res.json())
+            .then((data) => {
+                if (data && data.error) {
+                    console.log(data.error)
+                } else {
+                    console.log(data)
+                }
+            });
+    };
+
     const createHeader = (series: any) => {
         var li = document.createElement('li');
 
@@ -122,7 +156,7 @@ const Club = () => {
     }
     const createChild = (race: any) => {
         var ul = document.createElement('ul');
-        ul.innerHTML = '<li>' + race.number + " (" + race.dateTime + ")" + '</li>';
+        ul.innerHTML = '<li>' + race.number + " (" + dayjs(race.Time, "YYYY-MM-DD HH:mm").format('ddd D MMM YY [at] HH:mm') + ")" + '</li>';
 
         ul.className = 'list-none select-none w-full p-4 bg-pink-300 text-lg font-extrabold text-gray-700 ' + race.seriesId
 
@@ -214,6 +248,32 @@ const Club = () => {
         settings?.classList.remove('hidden')
     }
 
+    const saveRaceSettings = (e: ChangeEvent<HTMLInputElement>) => {
+        let newRaceData: RaceDataType = raceData
+        newRaceData[e.target.id] = e.target.value
+        setRaceData(newRaceData)
+    }
+
+    const saveRaceType = (newValue: any) => {
+        let newRaceData: RaceDataType = raceData
+        newRaceData["Type"] = newValue.value
+        setRaceData(newRaceData)
+        console.log(raceData)
+    }
+
+    const saveRaceDate = (e: ChangeEvent<HTMLInputElement>) => {
+        let newRaceData: RaceDataType = raceData
+        var time = e.target.value
+        time = time.replace('T', ' ')
+        var day = dayjs(time)
+        if (day.isValid()) {
+            newRaceData[e.target.id] = time
+            setRaceData(newRaceData)
+        } else {
+            console.log("date is not valid input")
+        }
+    }
+
     useEffect(() => {
         if (club !== undefined) {
             const fetchRaces = async () => {
@@ -258,8 +318,10 @@ const Club = () => {
                                     OOD
                                 </p>
                                 <input type="text"
+                                    id='OOD'
                                     className="w-full p-2 mx-0 my-2 border-4 rounded focus:border-pink-500 focus:outline-none"
-                                    value={raceData.OOD}
+                                    defaultValue={raceData.OOD}
+                                    onChange={saveRaceSettings}
                                 />
                             </div>
 
@@ -268,10 +330,24 @@ const Club = () => {
                                     AOD
                                 </p>
                                 <input type="text"
+                                    id='AOD'
                                     className="w-full p-2 mx-0 my-2 border-4 rounded focus:border-pink-500 focus:outline-none"
-                                    value={raceData.AOD}
+                                    defaultValue={raceData.AOD}
+                                    onChange={saveRaceSettings}
                                 />
-                                
+
+                            </div>
+
+                            <div className='flex flex-col px-6 w-full'>
+                                <p className='text-2xl font-bold text-gray-700'>
+                                    Time
+                                </p>
+                                <input type="datetime-local"
+                                    id='Time'
+                                    className="w-full p-2 mx-0 my-2 border-4 rounded focus:border-pink-500 focus:outline-none"
+                                    defaultValue={dayjs(raceData.Time).format('YYYY-MM-DDTHH:ss')}
+                                    onChange={saveRaceDate}
+                                />
                             </div>
 
                         </div>
@@ -281,8 +357,10 @@ const Club = () => {
                                     SO
                                 </p>
                                 <input type="text"
+                                    id='SO'
                                     className="w-full p-2 mx-0 my-2 border-4 rounded focus:border-pink-500 focus:outline-none"
-                                    value={raceData.SO}
+                                    defaultValue={raceData.SO}
+                                    onChange={saveRaceSettings}
                                 />
                             </div>
 
@@ -291,12 +369,30 @@ const Club = () => {
                                     ASO
                                 </p>
                                 <input type="text"
+                                    id='ASO'
                                     className="w-full p-2 mx-0 my-2 border-4 rounded focus:border-pink-500 focus:outline-none"
-                                    value={raceData.ASO}
+                                    defaultValue={raceData.ASO}
+                                    onChange={saveRaceSettings}
                                 />
-                                
+
                             </div>
 
+                            <div className='flex flex-col px-6 w-full'>
+                                <p className='text-2xl font-bold text-gray-700'>
+                                    Type
+                                </p>
+                                <div className="w-full p-2 mx-0 my-2 border-4 rounded focus:border-pink-500 focus:outline-none">
+                                    <Select defaultValue={raceData.Type} onChange={saveRaceType} id='Type' className='w-full'
+                                        options={raceOptions} />
+                                </div>
+
+                            </div>
+
+                        </div>
+                        <div className="p-6">
+                            <p onClick={updateRaceSettings} className="text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
+                                Save
+                            </p>
                         </div>
                     </div>
                 </div>
