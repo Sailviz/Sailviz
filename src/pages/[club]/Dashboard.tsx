@@ -140,6 +140,7 @@ const Club = () => {
         button.innerHTML = "▶"
         button.type = "button"
         button.onclick = function (event) {
+            event.stopPropagation()
             expandSeries(series.id)
 
         }
