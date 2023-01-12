@@ -1,7 +1,8 @@
 import Head from 'next/head'
 import Router from 'next/router'
 import cookie from 'js-cookie'
-
+import Link from 'next/link'
+import Image from 'next/image'
 
 export const siteTitle = 'SRM'
 
@@ -33,10 +34,14 @@ export default function Dashboard({
             <div className="flex flex-col h-full">
                 <nav className="border-pink-500 px-4 sm:px-4 py-2.5 border-b-2 flex">
                     <div className="container flex flex-wrap justify-between items-center mx-auto">
-                        <a href="/" className="flex items-center">
-                            <img src="/favicon.ico" className="mr-3 h-6 sm:h-9" />
-                            <span className="self-center text-xl font-semibold whitespace-nowrap text-gray-700">SRM</span>
-                        </a>
+                        <Link href="/" className="flex items-center">
+                            <a className='flex flex-row'>
+                                <Image src="/favicon.ico" className="mr-3 h-6 sm:h-9" width={40} height={40} />
+                                <div className=" text-xl font-semibold whitespace-nowrap text-gray-700 p-3">
+                                    SRM
+                                </div>
+                            </a>
+                        </Link>
                         <div className="hidden w-full md:block md:w-auto" id="navbar-default">
                             <ul className="flex flex-col mt-4 md:flex-row md:space-x-8 md:mt-0 md:text-sm md:font-medium">
                                 <li>
