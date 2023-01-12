@@ -133,11 +133,21 @@ const Club = () => {
         var li = document.createElement('li');
 
         var div = document.createElement('div')
-        div.className = 'py-4 before:inline-block before:content-["\\25B6"] select-none before:rotate-90 '
-        div.innerHTML = series.name
-        div.ondblclick = function () {
-            expandSeries(li)
+        div.className = 'py-4 flex'
+        var button = document.createElement('button')
+        var title = document.createElement('div')
+        button.className = 'px-4 z-10 relative rotate-90'
+        button.innerHTML = "▶"
+        button.type = "button"
+        button.onclick = function (event) {
+            expandSeries(series.id)
+
         }
+
+        div.appendChild(button)
+        div.appendChild(title)
+        title.innerHTML += series.name
+
         div.onclick = function () {
             selectSeries(li)
         }
@@ -208,11 +218,12 @@ const Club = () => {
         setActiveRace(raceId)
     }
 
-    const expandSeries = (element: any) => {
-        var title = document.getElementById(element.id)
-        var titleText = title?.firstElementChild
+    const expandSeries = (id: any) => {
+        var title = document.getElementById(id)
+        var titleText = title?.firstElementChild?.firstElementChild
+        console.log(titleText)
         if (titleText == null) { return }
-        var children = document.getElementsByClassName(element.id) as unknown as HTMLElement[]
+        var children = document.getElementsByClassName(id) as unknown as HTMLElement[]
         for (var i = 0; i < children.length; i++) {
             var child = children[i]
             if (!child) { return }
@@ -220,14 +231,14 @@ const Club = () => {
             if (child.style.display == 'none') {
                 //show
                 child.style.display = 'block'
-                titleText.classList.add('before:rotate-90')
-                titleText.classList.remove('before:rotate-0')
+                titleText.classList.add('rotate-90')
+                titleText.classList.remove('rotate-0')
 
             } else {
                 //hide
                 child.style.display = 'none'
-                titleText.classList.add('before:rotate-0')
-                titleText.classList.remove('before:rotate-90')
+                titleText.classList.add('rotate-0')
+                titleText.classList.remove('rotate-90')
             }
         }
 
