@@ -3,7 +3,7 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 
 import assert from 'assert';
 
-async function findClub(name: string){
+async function findClub(name: string) {
     var result = await prisma.clubs.findUnique({
         where: {
             name: name,
@@ -12,7 +12,7 @@ async function findClub(name: string){
     return result;
 }
 
-async function findSeries(club: any){
+async function findSeries(club: any) {
     var result = await prisma.series.findMany({
         where: {
             clubId: club.id
@@ -32,25 +32,24 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
         try {
             assert.notStrictEqual(undefined, req.body.club, 'Club required')
         } catch (bodyError) {
-            res.json({error: true, message: "information missing"});
+            res.json({ error: true, message: "information missing" });
             return;
         }
-        
+
         var club = req.body.club
 
         club = await findClub(club)
         if (club) {
             var Series = await findSeries(club)
             if (Series) {
-                res.json({error: false, series: Series});
+                res.json({ error: false, series: Series });
                 return;
             }
-            else{
-                res.json({error: true, message: 'Could not find series'});
+            else {
+                res.json({ error: true, message: 'Could not find series' });
             }
         } else {
-            // User exists
-            res.json({error: true, message: 'club not found'});
+            res.json({ error: true, message: 'club not found' });
             return;
         }
     }
