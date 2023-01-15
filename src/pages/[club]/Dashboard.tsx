@@ -57,7 +57,6 @@ const Club = () => {
     }))
 
     var [seriesData, setSeriesData] = useState<SeriesDataType[]>([])
-    var [gotSeries, setGotSeries] = useState(false)
 
     const getListOfSeries = async () => {
         const body = {
@@ -73,7 +72,6 @@ const Club = () => {
                 if (data && data.error) {
                     console.log(data.error)
                 } else {
-                    setGotSeries(true)
                     setSeriesData(data.series)
                 }
             });
@@ -316,7 +314,7 @@ const Club = () => {
                                     className="w-full p-2 mx-0 my-2 border-4 rounded focus:border-pink-500 focus:outline-none"
                                     defaultValue={activeSeriesData.name}
                                 />
-                                <SeriesTable data={seriesData} key={gotSeries} />
+                                <SeriesTable data={seriesData} key={seriesData.length} />
                             </div>
                         </div>
 
