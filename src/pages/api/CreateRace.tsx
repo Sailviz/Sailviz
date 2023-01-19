@@ -56,7 +56,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
         // The website stops this, but just in case
         try {
             assert.notStrictEqual(undefined, req.body.seriesName, 'Name required');
-            assert.notStrictEqual(undefined, req.body.number, 'Name required');
+            assert.notStrictEqual(undefined, req.body.number, 'Number required');
             assert.notStrictEqual(undefined, req.body.club, 'Club required');
             assert.notStrictEqual(undefined, req.body.time, 'time required');
 

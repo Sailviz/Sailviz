@@ -2,43 +2,37 @@ import React, { useState } from 'react';
 import dayjs from 'dayjs';
 import { createColumnHelper, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table'
 
-type RaceDataType = {
-    [key: string]: any,
-    id: string,
-    number: number,
-    OOD: string,
-    AOD: string,
-    SO: string,
-    ASO: string,
-    results: any,
-    Time: string,
-    Type: string,
-    seriesId: string
-};
+type SettingsType = {
+    numberToCount: number
+}
 
-const columnHelper = createColumnHelper<RaceDataType>()
+type SeriesDataType = {
+    id: string,
+    name: string,
+    clubId: string,
+    settings: SettingsType,
+    races: []
+}
+
+const columnHelper = createColumnHelper<SeriesDataType>()
 
 const columns = [
-    columnHelper.accessor('number', {
-        header: "number",
+    columnHelper.accessor('name', {
+        header: "name",
         cell: info => info.getValue(),
     }),
-    columnHelper.accessor('Type', {
-        header: "Type",
-        cell: info => info.getValue(),
-    }),
-    columnHelper.accessor('Time', {
+    columnHelper.accessor(row => row.races.length.toString(), {
         id: "Number of Races",
-        cell: info => dayjs(info.getValue(), "YYYY-MM-DD HH:mm").format('ddd D MMM YY [at] HH:mm'),
+        cell: info => info.getValue(),
     }),
-    columnHelper.accessor('OOD', {
+    columnHelper.accessor(row => row.settings['numberToCount'], {
         id: "Number to Count",
         cell: info => info.getValue(),
     }),
 ]
 
 
-const SeriesTable = (props: any) => {
+const ClubTable = (props: any) => {
     var [data, setData] = useState(props.data)
     console.log(data)
     var table = useReactTable({
@@ -81,4 +75,4 @@ const SeriesTable = (props: any) => {
     )
 }
 
-export default SeriesTable
+export default ClubTable

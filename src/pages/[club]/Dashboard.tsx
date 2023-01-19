@@ -5,12 +5,14 @@ import Select from 'react-select';
 import { server } from '../../components/URL';
 import dayjs from 'dayjs';
 import SeriesTable from '../../components/SeriesTable';
+import ClubTable from '../../components/ClubTable';
+import RaceResultsTable from '../../components/RaceResultsTable';
+
 
 type RaceDataType = {
     [key: string]: any,
     id: string,
     number: number,
-    dateTime: string,
     OOD: string,
     AOD: string,
     SO: string,
@@ -22,11 +24,17 @@ type RaceDataType = {
 };
 
 type SeriesDataType = {
+    [key: string]: any,
     id: string,
     name: string,
     clubId: string,
-    settings: object,
+    settings: SettingsType,
     races: RaceDataType[]
+}
+
+type SettingsType = {
+    [key: string]: any,
+    numberToCount: number
 }
 
 const raceOptions = [{ value: "Pursuit", label: "Pursuit" }, { value: "Handicap", label: "Handicap" }]
@@ -39,7 +47,9 @@ const Club = () => {
         "id": "",
         "name": "",
         "clubId": "",
-        "settings": {},
+        "settings": {
+            "numberToCount": 0
+        },
         "races": []
     })
     var [activeRaceData, setActiveRaceData] = useState<RaceDataType>(({
@@ -96,6 +106,48 @@ const Club = () => {
                     console.log(data.error)
                 } else {
                     console.log(data)
+                    getListOfSeries()
+                }
+            });
+    };
+
+    const updateSeriesSettings = async () => {
+        const body = activeSeriesData
+        const res = await fetch(`${server}/api/UpdateSeriesById`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body),
+        })
+            .then((res) => res.json())
+            .then((data) => {
+                if (data && data.error) {
+                    console.log(data.error)
+                } else {
+                    console.log(data)
+                }
+            });
+    };
+
+    const addRace = async () => {
+        var time = dayjs().format('YYYY-MM-DD HH:mm')
+        const body = {
+            "club": club,
+            "seriesName": activeSeriesData.name,
+            "number": activeSeriesData.races.length + 1,
+            "time": time
+        }
+        const res = await fetch(`${server}/api/CreateRace`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body),
+        })
+            .then((res) => res.json())
+            .then((data) => {
+                if (data && data.error) {
+                    console.log(data.error)
+                } else {
+                    console.log(data)
+                    getListOfSeries()
                 }
             });
     };
@@ -195,7 +247,6 @@ const Club = () => {
         //set active race
         console.log(seriesData)
         for (var s = 0; s < seriesData.length; s++) {
-            console.log("here")
             var races = seriesData[s]?.races
             if (!races) return
             for (var r = 0; r < races.length; r++) {
@@ -276,16 +327,19 @@ const Club = () => {
         }
     }
 
+    const saveSeriesSettings = (e: ChangeEvent<HTMLInputElement>) => {
+        let newSeriesData: SeriesDataType = activeSeriesData
+        console.log(newSeriesData)
+        newSeriesData.settings[e.target.id] = parseInt(e.target.value)
+        setActiveSeriesData(newSeriesData)
+    }
+
     useEffect(() => {
         if (club !== undefined) {
             const fetchRaces = async () => {
                 await getListOfSeries()
             }
             fetchRaces()
-
-            //now I need to transfer this data into the page
-
-
         }
     }, [club])
 
@@ -295,34 +349,46 @@ const Club = () => {
                 <div id="leftBar" className='flex basis-3/12 flex-col justify-start h-full border-pink-500 border-r-2'>
                     <div className='w-full flex cursor-pointer' onClick={showSettings}>
                         <div className='w-full p-4 bg-pink-500 text-lg font-extrabold text-gray-700'>
-                            <p>Club Settings</p>
+                            <p>Overview</p>
                         </div>
                     </div>
                 </div>
                 <div id="page" className='flex basis-9/12 h-full w-full'>
                     <div id="settings" className="">
                         <p className="text-6xl font-extrabold text-gray-700 p-6">
-                            Settings
+                            Overview
                         </p>
-                        <div className="flex px-6">
-                            <div className='flex flex-col px-6 w-full '>
-                                <p className='text-2xl font-bold text-gray-700'>
-                                    Series
-                                </p>
-                                <input type="text"
-                                    id=''
-                                    className="w-full p-2 mx-0 my-2 border-4 rounded focus:border-pink-500 focus:outline-none"
-                                    defaultValue={activeSeriesData.name}
-                                />
-                                <SeriesTable data={seriesData} key={seriesData.length} />
-                            </div>
-                        </div>
+                        <ClubTable data={seriesData} key={activeRaceData.id} />
+
 
                     </div>
                     <div id="series" className="hidden">
                         <p className="text-6xl font-extrabold text-gray-700 p-6">
                             {activeSeriesData.name}
                         </p>
+                        <SeriesTable data={activeSeriesData.races} key={activeSeriesData.id} />
+                        <div className="p-6">
+                            <p onClick={addRace} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
+                                Add Race
+                            </p>
+                        </div>
+                        <div className='flex flex-col px-6 w-full '>
+                            <p className='text-2xl font-bold text-gray-700'>
+                                Races To Count
+                            </p>
+                            <input type="text"
+                                id='numberToCount'
+                                className="w-full p-2 mx-0 my-2 border-4 rounded focus:border-pink-500 focus:outline-none"
+                                defaultValue={activeSeriesData.settings.numberToCount}
+                                key={activeSeriesData.id}
+                                onChange={saveSeriesSettings}
+                            />
+                            <div className="p-6">
+                                <p onClick={updateSeriesSettings} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
+                                    Save
+                                </p>
+                            </div>
+                        </div>
                     </div>
                     <div id="race" className="hidden">
                         <p className="text-6xl font-extrabold text-gray-700 p-6">
@@ -337,6 +403,7 @@ const Club = () => {
                                     id='OOD'
                                     className="w-full p-2 mx-0 my-2 border-4 rounded focus:border-pink-500 focus:outline-none"
                                     defaultValue={activeRaceData.OOD}
+                                    key={activeRaceData.id}
                                     onChange={saveRaceSettings}
                                 />
                             </div>
@@ -349,6 +416,7 @@ const Club = () => {
                                     id='AOD'
                                     className="w-full p-2 mx-0 my-2 border-4 rounded focus:border-pink-500 focus:outline-none"
                                     defaultValue={activeRaceData.AOD}
+                                    key={activeRaceData.id}
                                     onChange={saveRaceSettings}
                                 />
 
@@ -362,6 +430,7 @@ const Club = () => {
                                     id='Time'
                                     className="w-full p-2 mx-0 my-2 border-4 rounded focus:border-pink-500 focus:outline-none"
                                     defaultValue={dayjs(activeRaceData.Time).format('YYYY-MM-DDTHH:ss')}
+                                    key={activeRaceData.id}
                                     onChange={saveRaceDate}
                                 />
                             </div>
@@ -376,6 +445,7 @@ const Club = () => {
                                     id='SO'
                                     className="w-full p-2 mx-0 my-2 border-4 rounded focus:border-pink-500 focus:outline-none"
                                     defaultValue={activeRaceData.SO}
+                                    key={activeRaceData.id}
                                     onChange={saveRaceSettings}
                                 />
                             </div>
@@ -388,9 +458,9 @@ const Club = () => {
                                     id='ASO'
                                     className="w-full p-2 mx-0 my-2 border-4 rounded focus:border-pink-500 focus:outline-none"
                                     defaultValue={activeRaceData.ASO}
+                                    key={activeRaceData.id}
                                     onChange={saveRaceSettings}
                                 />
-
                             </div>
 
                             <div className='flex flex-col px-6 w-full'>
@@ -407,14 +477,13 @@ const Club = () => {
                                         options={raceOptions} />
                                 </div>
                             </div>
-
-
                         </div>
                         <div className="p-6">
-                            <p onClick={updateRaceSettings} className="text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
+                            <p onClick={updateRaceSettings} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
                                 Save
                             </p>
                         </div>
+                        <RaceResultsTable data={activeRaceData} key={activeRaceData.id} />
                     </div>
                 </div>
             </div>
