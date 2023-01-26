@@ -69,7 +69,6 @@ const columns = [
 
 const SeriesTable = (props: any) => {
     var [data, setData] = useState(props.data)
-    console.log(data)
     var table = useReactTable({
         data,
         columns,

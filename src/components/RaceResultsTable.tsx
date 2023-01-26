@@ -62,7 +62,6 @@ const columns = [
 
 const RaceResultsTable = (props: any) => {
     var [data, setData] = useState(props.data.results)
-    console.log(data)
     var table = useReactTable({
         data,
         columns,
