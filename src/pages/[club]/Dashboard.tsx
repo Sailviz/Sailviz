@@ -2,12 +2,11 @@ import { useRouter } from 'next/router'
 import { ChangeEvent, useEffect, useState, useId } from 'react';
 import Dashboard from '../../components/Dashboard'
 import Select from 'react-select';
-import { server } from '../../components/URL';
 import dayjs from 'dayjs';
 import SeriesTable from '../../components/SeriesTable';
 import ClubTable from '../../components/ClubTable';
 import RaceResultsTable from '../../components/RaceResultsTable';
-import * as API from '../../components/apiMethods';
+import * as DB from '../../components/apiMethods';
 import { promise } from 'zod';
 
 
@@ -19,7 +18,7 @@ type RaceDataType = {
     AOD: string,
     SO: string,
     ASO: string,
-    results: ResultsType[],
+    results: ResultsDataType[],
     Time: string,
     Type: string,
     seriesId: string
@@ -34,7 +33,7 @@ type SeriesDataType = {
     races: RaceDataType[]
 }
 
-type ResultsType = {
+type ResultsDataType = {
     [key: string]: any,
     Helm: string,
     Crew: string,
@@ -89,68 +88,10 @@ const Club = () => {
 
     var [seriesData, setSeriesData] = useState<SeriesDataType[]>([])
 
-
-    const updateRaceSettings = async () => {
-        const body = activeRaceData
-        const res = await fetch(`${server}/api/UpdateRaceById`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(body),
-        })
-            .then((res) => res.json())
-            .then(async (data) => {
-                if (data && data.error) {
-                    console.log(data.error)
-                } else {
-                    console.log(data)
-                    setSeriesData(await API.fetchSeries(club))
-                }
-            });
-    };
-
-    const updateSeriesSettings = async () => {
-        const body = activeSeriesData
-        const res = await fetch(`${server}/api/UpdateSeriesById`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(body),
-        })
-            .then((res) => res.json())
-            .then((data) => {
-                if (data && data.error) {
-                    console.log(data.error)
-                } else {
-                    console.log(data)
-                }
-            });
-    };
-
-    const addRace = async () => {
-        var time = dayjs().format('YYYY-MM-DD HH:mm')
-        const body = {
-            "club": club,
-            "seriesName": activeSeriesData.name,
-            "time": time
-        }
-        const res = await fetch(`${server}/api/CreateRace`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(body),
-        })
-            .then((res) => res.json())
-            .then(async (data) => {
-                if (data && data.error) {
-                    console.log(data.message)
-                } else {
-                    console.log(data)
-                    setSeriesData(await API.fetchSeries(club))
-                }
-            });
-    };
-
-
+    //adds an entry to a race and updates database
     const addRaceEntry = async (id: string) => {
-        const entry = {
+        let newRaceData: RaceDataType = activeRaceData
+        const entry: ResultsDataType = {
             Helm: "",
             Crew: "",
             BoatClass: "",
@@ -159,8 +100,9 @@ const Club = () => {
             Laps: 0,
             Position: 0
         }
-        activeRaceData.results.push(entry)
-        updateRaceSettings()
+        newRaceData.results.push(entry)
+        setActiveRaceData(newRaceData)
+        DB.updateRaceSettings(newRaceData)
     }
 
     const createHeader = (series: any) => {
@@ -216,7 +158,7 @@ const Club = () => {
         Parent.appendChild(ul);
     }
 
-    const generateBar = (seriesData: SeriesDataType[]) => {
+    const generateBar = () => {
         removeChildren(document.getElementById("leftBar"))
         for (const element in seriesData) {
             var data = seriesData[element]
@@ -347,15 +289,20 @@ const Club = () => {
 
     useEffect(() => {
         if (club !== undefined) {
+
             const fetchRaces = async () => {
-                var data = await API.fetchSeries(club)
-                console.log(data)
-                setSeriesData(data)
-                generateBar(data)
+                var data = await DB.fetchSeries(club)
+                var array = [...data]
+                console.log(array)
+                setSeriesData(array)
             }
             fetchRaces()
         }
     }, [club])
+
+    useEffect(() => {
+        generateBar()
+    }, [seriesData]);
 
     return (
         <Dashboard>
@@ -386,7 +333,7 @@ const Club = () => {
                             <SeriesTable data={activeSeriesData.races} key={activeSeriesData.id} />
                         </div>
                         <div className="p-6">
-                            <p onClick={addRace} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
+                            <p onClick={() => DB.createRace(club, activeSeriesData.name)} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
                                 Add Race
                             </p>
                         </div>
@@ -400,7 +347,7 @@ const Club = () => {
                                 defaultValue={activeSeriesData.settings.numberToCount}
                                 key={activeSeriesData.id}
                                 onChange={saveSeriesSettings}
-                                onBlur={updateSeriesSettings}
+                                onBlur={() => DB.updateSeriesSettings(activeSeriesData)}
                             />
                         </div>
                     </div>
@@ -419,7 +366,7 @@ const Club = () => {
                                     defaultValue={activeRaceData.OOD}
                                     key={activeRaceData.id}
                                     onChange={saveRaceSettings}
-                                    onBlur={updateRaceSettings}
+                                    onBlur={() => DB.updateRaceSettings(activeRaceData)}
                                 />
                             </div>
 
@@ -433,7 +380,7 @@ const Club = () => {
                                     defaultValue={activeRaceData.AOD}
                                     key={activeRaceData.id}
                                     onChange={saveRaceSettings}
-                                    onBlur={updateRaceSettings}
+                                    onBlur={() => DB.updateRaceSettings(activeRaceData)}
                                 />
 
                             </div>
@@ -448,7 +395,7 @@ const Club = () => {
                                     defaultValue={dayjs(activeRaceData.Time).format('YYYY-MM-DDTHH:ss')}
                                     key={activeRaceData.id}
                                     onChange={saveRaceDate}
-                                    onBlur={updateRaceSettings}
+                                    onBlur={() => DB.updateRaceSettings(activeRaceData)}
                                 />
                             </div>
 
@@ -464,7 +411,7 @@ const Club = () => {
                                     defaultValue={activeRaceData.SO}
                                     key={activeRaceData.id}
                                     onChange={saveRaceSettings}
-                                    onBlur={updateRaceSettings}
+                                    onBlur={() => DB.updateRaceSettings(activeRaceData)}
                                 />
                             </div>
 
@@ -478,7 +425,7 @@ const Club = () => {
                                     defaultValue={activeRaceData.ASO}
                                     key={activeRaceData.id}
                                     onChange={saveRaceSettings}
-                                    onBlur={updateRaceSettings}
+                                    onBlur={() => DB.updateRaceSettings(activeRaceData)}
                                 />
                             </div>
 
@@ -490,7 +437,7 @@ const Club = () => {
                                     <Select
                                         defaultValue={{ value: activeRaceData.Type, label: activeRaceData.Type }}
                                         key={activeRaceData.Type}
-                                        onBlur={updateRaceSettings}
+                                        onBlur={() => DB.updateRaceSettings(activeRaceData)}
                                         onChange={saveRaceType}
                                         instanceId={useId()}
                                         className='w-full'
