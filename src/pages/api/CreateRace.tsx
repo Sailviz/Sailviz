@@ -24,17 +24,16 @@ async function findSeries(name: string, club: any) {
     return result;
 }
 
-async function findRace(number: number, series: any) {
-    var result = await prisma.race.findFirst({
+async function findRace(series: any) {
+    var result = await prisma.race.findMany({
         where: {
-            number: number,
             seriesId: series.id
         },
     })
     return result;
 }
 
-async function createRace(number: number, series: any, time: any) {
+async function createRace(number: number, series: any, time: any, results: any) {
     var res = await prisma.race.create({
         data: {
             number: number,
@@ -45,6 +44,7 @@ async function createRace(number: number, series: any, time: any) {
             AOD: "Unknown",
             SO: "Unknown",
             ASO: "Unknown",
+            results: results
         },
     })
     return res;
@@ -56,7 +56,6 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
         // The website stops this, but just in case
         try {
             assert.notStrictEqual(undefined, req.body.seriesName, 'Name required');
-            assert.notStrictEqual(undefined, req.body.number, 'Number required');
             assert.notStrictEqual(undefined, req.body.club, 'Club required');
             assert.notStrictEqual(undefined, req.body.time, 'time required');
 
@@ -65,23 +64,26 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
             return;
         }
 
-        var number = req.body.number
         var seriesName = req.body.seriesName
         var club = req.body.club
         var time = req.body.time
+        var results = [{
+            "Helm": "",
+            "Crew": "",
+            "BoatClass": "",
+            "BoatNumber": "",
+            "Time": 0,
+            "Laps": 0,
+            "Position": 0
+        }]
 
         club = await findClub(club)
         if (club) {
             var series = await findSeries(seriesName, club)
+            var number = (await findRace(series)).length + 1
             if (series) {
-                var ExistingRace = await findRace(number, series)
-                if (!ExistingRace) {
-                    var race = await createRace(number, series, time)
-                    res.json({ error: false, race: race });
-                } else {
-                    res.json({ error: true, message: "Race with that number already exists in series" });
-
-                }
+                var race = await createRace(number, series, time, results)
+                res.json({ error: false, race: race });
 
             }
             else {

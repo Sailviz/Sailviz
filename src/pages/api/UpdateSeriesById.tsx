@@ -33,9 +33,9 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
         var id = req.body.id
         var settings = req.body.settings
 
-        var race = await updateSeries(id, settings)
-        if (race) {
-            res.json({ error: false, race: race });
+        var series = await updateSeries(id, settings)
+        if (series) {
+            res.json({ error: false, series: series });
         } else {
             // User exists
             res.json({ error: true, message: 'race not found' });

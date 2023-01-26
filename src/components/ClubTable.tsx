@@ -41,7 +41,7 @@ const ClubTable = (props: any) => {
         getCoreRowModel: getCoreRowModel(),
     })
     return (
-        <div className="px-8" key={props.data}>
+        <div key={props.data}>
             <table>
                 <thead>
                     {table.getHeaderGroups().map(headerGroup => (

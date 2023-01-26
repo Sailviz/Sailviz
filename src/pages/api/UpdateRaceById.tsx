@@ -3,18 +3,19 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 
 import assert from 'assert';
 
-async function updateRace(id: any, OOD: string, AOD: string, SO: string, ASO: string, Time: string, Type: string) {
+async function updateRace(id: any, OOD: string, AOD: string, SO: string, ASO: string, Time: string, Type: string, results: any) {
     var result = await prisma.race.update({
         where: {
             id: id
         },
         data: {
-            OOD: OOD,
-            AOD: AOD,
-            SO: SO,
-            ASO: ASO,
-            Time: Time,
-            Type: Type
+            OOD: OOD || undefined,
+            AOD: AOD || undefined,
+            SO: SO || undefined,
+            ASO: ASO || undefined,
+            Time: Time || undefined,
+            Type: Type || undefined,
+            results: results || undefined
         }
     })
     return result;
@@ -40,8 +41,9 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
         var ASO = req.body.ASO
         var Time = req.body.Time
         var Type = req.body.Type
+        var results = req.body.results
 
-        var race = await updateRace(id, OOD, AOD, SO, ASO, Time, Type)
+        var race = await updateRace(id, OOD, AOD, SO, ASO, Time, Type, results)
         if (race) {
             res.json({ error: false, race: race });
         } else {

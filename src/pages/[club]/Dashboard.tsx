@@ -17,7 +17,7 @@ type RaceDataType = {
     AOD: string,
     SO: string,
     ASO: string,
-    results: any,
+    results: ResultsType[],
     Time: string,
     Type: string,
     seriesId: string
@@ -30,6 +30,17 @@ type SeriesDataType = {
     clubId: string,
     settings: SettingsType,
     races: RaceDataType[]
+}
+
+type ResultsType = {
+    [key: string]: any,
+    Helm: string,
+    Crew: string,
+    BoatClass: string,
+    BoatNumber: string,
+    Time: number,
+    Laps: number,
+    Position: number
 }
 
 type SettingsType = {
@@ -60,7 +71,15 @@ const Club = () => {
         "AOD": "",
         "SO": "",
         "ASO": "",
-        "results": null,
+        "results": [{
+            "Helm": "",
+            "Crew": "",
+            "BoatClass": "",
+            "BoatNumber": "",
+            "Time": 0,
+            "Laps": 0,
+            "Position": 0
+        }],
         "Time": "",
         "Type": "",
         "seriesId": ""
@@ -133,7 +152,6 @@ const Club = () => {
         const body = {
             "club": club,
             "seriesName": activeSeriesData.name,
-            "number": activeSeriesData.races.length + 1,
             "time": time
         }
         const res = await fetch(`${server}/api/CreateRace`, {
@@ -144,13 +162,28 @@ const Club = () => {
             .then((res) => res.json())
             .then((data) => {
                 if (data && data.error) {
-                    console.log(data.error)
+                    console.log(data.message)
                 } else {
                     console.log(data)
                     getListOfSeries()
                 }
             });
     };
+
+
+    const addRaceEntry = async (id: string) => {
+        const entry = {
+            Helm: "",
+            Crew: "",
+            BoatClass: "",
+            BoatNumber: "",
+            Time: 0,
+            Laps: 0,
+            Position: 0
+        }
+        activeRaceData.results.push(entry)
+        updateRaceSettings()
+    }
 
     const createHeader = (series: any) => {
         var li = document.createElement('li');
@@ -358,15 +391,19 @@ const Club = () => {
                         <p className="text-6xl font-extrabold text-gray-700 p-6">
                             Overview
                         </p>
-                        <ClubTable data={seriesData} key={activeRaceData.id} />
+                        <div className='p-6'>
+                            <ClubTable data={seriesData} key={activeRaceData.id} />
+                        </div>
 
 
                     </div>
-                    <div id="series" className="hidden">
+                    <div id="series" className="hidden w-3/4">
                         <p className="text-6xl font-extrabold text-gray-700 p-6">
                             {activeSeriesData.name}
                         </p>
-                        <SeriesTable data={activeSeriesData.races} key={activeSeriesData.id} />
+                        <div className='p-6'>
+                            <SeriesTable data={activeSeriesData.races} key={activeSeriesData.id} />
+                        </div>
                         <div className="p-6">
                             <p onClick={addRace} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
                                 Add Race
@@ -382,19 +419,15 @@ const Club = () => {
                                 defaultValue={activeSeriesData.settings.numberToCount}
                                 key={activeSeriesData.id}
                                 onChange={saveSeriesSettings}
+                                onBlur={updateSeriesSettings}
                             />
-                            <div className="p-6">
-                                <p onClick={updateSeriesSettings} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
-                                    Save
-                                </p>
-                            </div>
                         </div>
                     </div>
                     <div id="race" className="hidden">
                         <p className="text-6xl font-extrabold text-gray-700 p-6">
                             {activeSeriesData.name}: {activeRaceData.number}
                         </p>
-                        <div className="flex px-6">
+                        <div className="flex w-3/4">
                             <div className='flex flex-col px-6 w-full '>
                                 <p className='text-2xl font-bold text-gray-700'>
                                     OOD
@@ -405,6 +438,7 @@ const Club = () => {
                                     defaultValue={activeRaceData.OOD}
                                     key={activeRaceData.id}
                                     onChange={saveRaceSettings}
+                                    onBlur={updateRaceSettings}
                                 />
                             </div>
 
@@ -418,6 +452,7 @@ const Club = () => {
                                     defaultValue={activeRaceData.AOD}
                                     key={activeRaceData.id}
                                     onChange={saveRaceSettings}
+                                    onBlur={updateRaceSettings}
                                 />
 
                             </div>
@@ -432,11 +467,12 @@ const Club = () => {
                                     defaultValue={dayjs(activeRaceData.Time).format('YYYY-MM-DDTHH:ss')}
                                     key={activeRaceData.id}
                                     onChange={saveRaceDate}
+                                    onBlur={updateRaceSettings}
                                 />
                             </div>
 
                         </div>
-                        <div className="flex px-6">
+                        <div className="flex w-3/4">
                             <div className='flex flex-col px-6 w-full'>
                                 <p className='text-2xl font-bold text-gray-700'>
                                     SO
@@ -447,6 +483,7 @@ const Club = () => {
                                     defaultValue={activeRaceData.SO}
                                     key={activeRaceData.id}
                                     onChange={saveRaceSettings}
+                                    onBlur={updateRaceSettings}
                                 />
                             </div>
 
@@ -460,6 +497,7 @@ const Club = () => {
                                     defaultValue={activeRaceData.ASO}
                                     key={activeRaceData.id}
                                     onChange={saveRaceSettings}
+                                    onBlur={updateRaceSettings}
                                 />
                             </div>
 
@@ -471,6 +509,7 @@ const Club = () => {
                                     <Select
                                         defaultValue={{ value: activeRaceData.Type, label: activeRaceData.Type }}
                                         key={activeRaceData.Type}
+                                        onBlur={updateRaceSettings}
                                         onChange={saveRaceType}
                                         instanceId={useId()}
                                         className='w-full'
@@ -478,12 +517,14 @@ const Club = () => {
                                 </div>
                             </div>
                         </div>
-                        <div className="p-6">
-                            <p onClick={updateRaceSettings} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
-                                Save
+                        <div className='p-6 w-3/4'>
+                            <RaceResultsTable data={activeRaceData} key={activeRaceData.id} />
+                        </div>
+                        <div className="p-6 w-3/4">
+                            <p onClick={(e) => addRaceEntry(activeRaceData.id)} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
+                                Add Entry
                             </p>
                         </div>
-                        <RaceResultsTable data={activeRaceData} key={activeRaceData.id} />
                     </div>
                 </div>
             </div>

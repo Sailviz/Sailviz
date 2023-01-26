@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import dayjs from 'dayjs';
-import { createColumnHelper, flexRender, getCoreRowModel, useReactTable, ColumnDef } from '@tanstack/react-table'
+import { createColumnHelper, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table'
 
 type RaceDataType = {
     [key: string]: any,
@@ -10,7 +9,7 @@ type RaceDataType = {
     AOD: string,
     SO: string,
     ASO: string,
-    results: ResultsType,
+    results: ResultsType[],
     Time: string,
     Type: string,
     seriesId: string
@@ -27,49 +26,42 @@ type ResultsType = {
     Position: number
 }
 
-const columnHelper = createColumnHelper<RaceDataType>()
+const columnHelper = createColumnHelper<ResultsType>()
 
 const columns = [
-    columnHelper.accessor(row => row.results.Helm, {
+    columnHelper.accessor('Helm', {
         header: "Helm",
         cell: info => info.getValue(),
-        footer: info => info.column.id,
     }),
-    columnHelper.accessor(row => row.results.Crew, {
+    columnHelper.accessor('Crew', {
         id: "Crew",
         cell: info => info.getValue(),
-        footer: info => info.column.id,
     }),
-    columnHelper.accessor(row => row.results.BoatClass, {
+    columnHelper.accessor('BoatClass', {
         id: "Boat Class",
         cell: info => info.getValue(),
-        footer: info => info.column.id,
     }),
-    columnHelper.accessor(row => row.results.BoatNumber, {
+    columnHelper.accessor('BoatNumber', {
         id: "Sail Number",
         cell: info => info.getValue(),
-        footer: info => info.column.id,
     }),
-    columnHelper.accessor(row => row.results.Time, {
+    columnHelper.accessor('Time', {
         header: "Time",
         cell: info => info.getValue(),
-        footer: info => info.column.id,
     }),
-    columnHelper.accessor(row => row.results.Laps, {
+    columnHelper.accessor('Laps', {
         header: "Laps",
         cell: info => info.getValue(),
-        footer: info => info.column.id,
     }),
-    columnHelper.accessor(row => row.results.Position, {
+    columnHelper.accessor('Position', {
         header: "Position",
         cell: info => info.getValue(),
-        footer: info => info.column.id,
     }),
 ]
 
 
-const SeriesTable = (props: any) => {
-    var [data, setData] = useState(props.data)
+const RaceResultsTable = (props: any) => {
+    var [data, setData] = useState(props.data.results)
     console.log(data)
     var table = useReactTable({
         data,
@@ -77,7 +69,7 @@ const SeriesTable = (props: any) => {
         getCoreRowModel: getCoreRowModel(),
     })
     return (
-        <div className="px-8" key={props.data}>
+        <div key={props.data}>
             <table>
                 <thead>
                     {table.getHeaderGroups().map(headerGroup => (
@@ -100,31 +92,15 @@ const SeriesTable = (props: any) => {
                         <tr key={row.id}>
                             {row.getVisibleCells().map(cell => (
                                 <td key={cell.id} className='border-4 p-2'>
-                                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                    <input defaultValue={cell.getValue() as string} id={cell.id} className={'w-full'} />
                                 </td>
                             ))}
                         </tr>
                     ))}
                 </tbody>
-                <tfoot>
-                    {table.getFooterGroups().map(footerGroup => (
-                        <tr key={footerGroup.id}>
-                            {footerGroup.headers.map(header => (
-                                <th key={header.id} className='border-4 p-2 text-gray-400'>
-                                    {header.isPlaceholder
-                                        ? null
-                                        : flexRender(
-                                            header.column.columnDef.footer,
-                                            header.getContext()
-                                        )}
-                                </th>
-                            ))}
-                        </tr>
-                    ))}
-                </tfoot>
             </table>
         </div>
     )
 }
 
-export default SeriesTable
+export default RaceResultsTable
