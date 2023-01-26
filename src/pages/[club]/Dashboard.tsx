@@ -7,6 +7,8 @@ import dayjs from 'dayjs';
 import SeriesTable from '../../components/SeriesTable';
 import ClubTable from '../../components/ClubTable';
 import RaceResultsTable from '../../components/RaceResultsTable';
+import * as API from '../../components/apiMethods';
+import { promise } from 'zod';
 
 
 type RaceDataType = {
@@ -52,7 +54,7 @@ const raceOptions = [{ value: "Pursuit", label: "Pursuit" }, { value: "Handicap"
 
 const Club = () => {
     const router = useRouter()
-    var club = router.query.club
+    var club: string = router.query.club as string
 
     var [activeSeriesData, setActiveSeriesData] = useState<SeriesDataType>({
         "id": "",
@@ -87,30 +89,6 @@ const Club = () => {
 
     var [seriesData, setSeriesData] = useState<SeriesDataType[]>([])
 
-    const getListOfSeries = async () => {
-        const body = {
-            "club": club
-        }
-        const res = await fetch(`${server}/api/GetSeriesByClub`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(body),
-        })
-            .then((res) => res.json())
-            .then((data) => {
-                if (data && data.error) {
-                    console.log(data.error)
-                } else {
-                    setSeriesData(data.series)
-                }
-            });
-    };
-
-    useEffect(() => {
-        console.log('state changed', seriesData)
-        generateBar()
-    }, [seriesData]);
-
 
     const updateRaceSettings = async () => {
         const body = activeRaceData
@@ -120,12 +98,12 @@ const Club = () => {
             body: JSON.stringify(body),
         })
             .then((res) => res.json())
-            .then((data) => {
+            .then(async (data) => {
                 if (data && data.error) {
                     console.log(data.error)
                 } else {
                     console.log(data)
-                    getListOfSeries()
+                    setSeriesData(await API.fetchSeries(club))
                 }
             });
     };
@@ -160,12 +138,12 @@ const Club = () => {
             body: JSON.stringify(body),
         })
             .then((res) => res.json())
-            .then((data) => {
+            .then(async (data) => {
                 if (data && data.error) {
                     console.log(data.message)
                 } else {
                     console.log(data)
-                    getListOfSeries()
+                    setSeriesData(await API.fetchSeries(club))
                 }
             });
     };
@@ -238,7 +216,7 @@ const Club = () => {
         Parent.appendChild(ul);
     }
 
-    const generateBar = () => {
+    const generateBar = (seriesData: SeriesDataType[]) => {
         removeChildren(document.getElementById("leftBar"))
         for (const element in seriesData) {
             var data = seriesData[element]
@@ -370,7 +348,10 @@ const Club = () => {
     useEffect(() => {
         if (club !== undefined) {
             const fetchRaces = async () => {
-                await getListOfSeries()
+                var data = await API.fetchSeries(club)
+                console.log(data)
+                setSeriesData(data)
+                generateBar(data)
             }
             fetchRaces()
         }
