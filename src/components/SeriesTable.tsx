@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 import dayjs from 'dayjs';
 import { createColumnHelper, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table'
-import { info } from 'console';
-import { clearLine } from 'readline';
-import { defaultProps } from 'react-select/dist/declarations/src/Select';
+import * as DB from './apiMethods';
+
 
 type RaceDataType = {
     [key: string]: any,
@@ -19,14 +18,38 @@ type RaceDataType = {
     seriesId: string
 };
 
-const Time = ({ time }: any) => {
-    // Loop through the array and create a badge-like component instead of a comma-separated string
+const Time = ({ ...props }: any) => {
+    const initialValue = props.getValue()
+    // We need to keep and update the state of the cell normally
+    const [value, setValue] = React.useState(initialValue)
+
+    // When the input is blurred, we'll call our table meta's updateData function
+    const onBlur = () => {
+        //table.options.meta?.updateData(props.index, props.id, value)
+        //DB.updateRaceSettings(props.time)
+        console.log(value)
+        var raceData: RaceDataType = props.row.original
+        console.log(raceData.id)
+        var time = value.replace('T', ' ')
+        var day = dayjs(time)
+        if (day.isValid()) {
+            raceData.Time = time
+            DB.updateRaceSettings(raceData)
+        }
+    }
+
+    // If the initialValue is changed external, sync it up with our state
+    React.useEffect(() => {
+        setValue(initialValue)
+    }, [initialValue])
     return (
         <>
             <input type="datetime-local"
                 id='Time'
                 className="w-full"
-                defaultValue={dayjs(time).format('YYYY-MM-DDTHH:ss')}
+                value={dayjs(props.time).format('YYYY-MM-DDTHH:ss')}
+                onChange={e => setValue(e.target.value)}
+                onBlur={onBlur}
             />
         </>
     );
@@ -42,7 +65,7 @@ const columns = [
     }),
     columnHelper.accessor('Time', {
         id: "Number of Races",
-        cell: info => <Time values={info.getValue()} />
+        cell: props => <Time {...props} />
     }),
     columnHelper.accessor('Type', {
         id: "Type",

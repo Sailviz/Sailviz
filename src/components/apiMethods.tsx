@@ -54,7 +54,7 @@ export async function fetchSeries(club: string): Promise<SeriesDataType[]> {
         .then((res) => res.json())
         .then((data) => {
             if (data && data.error) {
-                console.log(data.error)
+                console.log(data.message)
             } else {
                 console.log(data.series)
                 return (data.series)
@@ -72,7 +72,7 @@ export async function updateRaceSettings(raceData: RaceDataType) {
         .then((res) => res.json())
         .then(async (data) => {
             if (data && data.error) {
-                console.log(data.error)
+                console.log(data.message)
             } else {
                 console.log(data)
                 //TODO reload series data.
@@ -90,7 +90,7 @@ export async function updateSeriesSettings(seriesData: SeriesDataType) {
         .then((res) => res.json())
         .then((data) => {
             if (data && data.error) {
-                console.log(data.error)
+                console.log(data.message)
             } else {
                 console.log(data)
             }
