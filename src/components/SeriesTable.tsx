@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { ChangeEvent, useState } from 'react';
 import dayjs from 'dayjs';
 import { createColumnHelper, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table'
 import * as DB from './apiMethods';
+import Select from 'react-select';
 
 
 type RaceDataType = {
@@ -18,15 +19,14 @@ type RaceDataType = {
     seriesId: string
 };
 
+const raceOptions = [{ value: "Pursuit", label: "Pursuit" }, { value: "Handicap", label: "Handicap" }]
+
+
 const Time = ({ ...props }: any) => {
     const initialValue = props.getValue()
-    // We need to keep and update the state of the cell normally
     const [value, setValue] = React.useState(initialValue)
 
-    // When the input is blurred, we'll call our table meta's updateData function
     const onBlur = () => {
-        //table.options.meta?.updateData(props.index, props.id, value)
-        //DB.updateRaceSettings(props.time)
         console.log(value)
         var raceData: RaceDataType = props.row.original
         console.log(raceData.id)
@@ -38,7 +38,6 @@ const Time = ({ ...props }: any) => {
         }
     }
 
-    // If the initialValue is changed external, sync it up with our state
     React.useEffect(() => {
         setValue(initialValue)
     }, [initialValue])
@@ -47,7 +46,7 @@ const Time = ({ ...props }: any) => {
             <input type="datetime-local"
                 id='Time'
                 className="w-full"
-                value={dayjs(props.time).format('YYYY-MM-DDTHH:ss')}
+                value={dayjs(value).format('YYYY-MM-DDTHH:ss')}
                 onChange={e => setValue(e.target.value)}
                 onBlur={onBlur}
             />
@@ -55,6 +54,58 @@ const Time = ({ ...props }: any) => {
     );
 };
 
+const Type = ({ ...props }: any) => {
+    const initialValue = props.getValue()
+    const [value, setValue] = React.useState(initialValue)
+
+    const onBlur = (type: string) => {
+        var raceData: RaceDataType = props.row.original
+        console.log(raceData.id)
+
+        raceData.Type = type
+        DB.updateRaceSettings(raceData)
+    }
+
+    React.useEffect(() => {
+        setValue(initialValue)
+    }, [initialValue])
+    return (
+        <>
+            <Select
+                defaultValue={{ value: value, label: value }}
+                key={value}
+                onChange={(e) => { setValue(e?.value); onBlur(e?.value) }}
+                className='w-full'
+                options={raceOptions} />
+        </>
+    );
+};
+
+const Text = ({ ...props }: any) => {
+    const initialValue = props.getValue()
+    const [value, setValue] = React.useState(initialValue)
+
+    const onBlur = (e: ChangeEvent<HTMLInputElement>) => {
+        var raceData: RaceDataType = props.row.original
+        raceData[props.column.id] = e.target.value
+        DB.updateRaceSettings(raceData)
+    }
+
+    React.useEffect(() => {
+        setValue(initialValue)
+    }, [initialValue])
+    return (
+        <>
+            <input type="text"
+                id='AOD'
+                className="w-full p-2 "
+                defaultValue={value}
+                key={value}
+                onBlur={(e) => onBlur(e)}
+            />
+        </>
+    );
+};
 
 const columnHelper = createColumnHelper<RaceDataType>()
 
@@ -69,23 +120,23 @@ const columns = [
     }),
     columnHelper.accessor('Type', {
         id: "Type",
-        cell: info => info.getValue(),
+        cell: props => <Type {...props} />
     }),
     columnHelper.accessor('OOD', {
         id: "OOD",
-        cell: info => info.getValue(),
+        cell: props => <Text {...props} />
     }),
     columnHelper.accessor('AOD', {
         id: "AOD",
-        cell: info => info.getValue(),
+        cell: props => <Text {...props} />
     }),
     columnHelper.accessor('SO', {
         id: "SO",
-        cell: info => info.getValue(),
+        cell: props => <Text {...props} />
     }),
     columnHelper.accessor('ASO', {
         id: "ASO",
-        cell: info => info.getValue(),
+        cell: props => <Text {...props} />
     }),
 ]
 

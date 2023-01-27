@@ -7,7 +7,6 @@ import SeriesTable from '../../components/SeriesTable';
 import ClubTable from '../../components/ClubTable';
 import RaceResultsTable from '../../components/RaceResultsTable';
 import * as DB from '../../components/apiMethods';
-import { promise } from 'zod';
 
 
 type RaceDataType = {
