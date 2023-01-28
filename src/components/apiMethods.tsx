@@ -97,7 +97,7 @@ export async function updateSeriesSettings(seriesData: SeriesDataType) {
         });
 };
 
-export async function createRace(club: string, seriesName: string) {
+export async function createRace(club: string, seriesName: string): Promise<RaceDataType> {
     var time = dayjs().format('YYYY-MM-DD HH:mm')
     const body = {
         "club": club,
@@ -114,8 +114,8 @@ export async function createRace(club: string, seriesName: string) {
             if (data && data.error) {
                 console.log(data.message)
             } else {
-                console.log(data)
-                //TODO refresh series data.
+                console.log(data.race)
+                return data.race
             }
         });
 };

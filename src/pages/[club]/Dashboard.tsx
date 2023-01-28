@@ -87,6 +87,9 @@ const Club = () => {
 
     var [seriesData, setSeriesData] = useState<SeriesDataType[]>([])
 
+    var [updateState, setUpdateState] = useState(0)
+
+
     //adds an entry to a race and updates database
     const addRaceEntry = async (id: string) => {
         let newRaceData: RaceDataType = activeRaceData
@@ -161,7 +164,7 @@ const Club = () => {
         removeChildren(document.getElementById("leftBar"))
         for (const element in seriesData) {
             var data = seriesData[element]
-            if (data == undefined) { return }
+            if (data == undefined || data.races == undefined) { return }
             createHeader(data)
             data.races.sort((a: any, b: any) => {
                 return a.number - b.number;
@@ -286,6 +289,14 @@ const Club = () => {
         setActiveSeriesData(newSeriesData)
     }
 
+    const addRaceToSeries = async () => {
+        //This doesn't seem to work for some reason, state updates before the confusing line, but doesn't change if that line is commented out.
+        var race: RaceDataType = await DB.createRace(club, activeSeriesData.name)
+        var newSeriesData: SeriesDataType[] = seriesData.map(obj => ({ ...obj }))
+        newSeriesData[newSeriesData.findIndex(x => x.id === race.seriesId)]?.races.push(race)
+        setSeriesData(newSeriesData)
+    }
+
     useEffect(() => {
         if (club !== undefined) {
 
@@ -303,6 +314,10 @@ const Club = () => {
         generateBar()
     }, [seriesData]);
 
+    useEffect(() => {
+        setUpdateState(updateState + 1)
+    }, [seriesData, activeRaceData.id, activeSeriesData]);
+
     return (
         <Dashboard>
             <div className="w-full flex flex-row items-center justify-start h-full">
@@ -319,7 +334,7 @@ const Club = () => {
                             Overview
                         </p>
                         <div className='p-6'>
-                            <ClubTable data={seriesData} key={activeRaceData.id} />
+                            <ClubTable data={seriesData} key={updateState} />
                         </div>
 
 
@@ -329,10 +344,10 @@ const Club = () => {
                             {activeSeriesData.name}
                         </p>
                         <div className='p-6'>
-                            <SeriesTable data={activeSeriesData.races} key={activeSeriesData.id} />
+                            <SeriesTable data={activeSeriesData.races} key={updateState} />
                         </div>
                         <div className="p-6">
-                            <p onClick={() => DB.createRace(club, activeSeriesData.name)} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
+                            <p onClick={addRaceToSeries} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
                                 Add Race
                             </p>
                         </div>
@@ -445,7 +460,7 @@ const Club = () => {
                             </div>
                         </div>
                         <div className='p-6 w-3/4'>
-                            <RaceResultsTable data={activeRaceData} key={activeRaceData.id} />
+                            <RaceResultsTable data={activeRaceData} key={seriesData} />
                         </div>
                         <div className="p-6 w-3/4">
                             <p onClick={(e) => addRaceEntry(activeRaceData.id)} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
