@@ -107,14 +107,14 @@ const Text = ({ ...props }: any) => {
     );
 };
 
-const Remove = ({ ...props }: any, updateData: any) => {
+const Remove = ({ ...props }: any) => {
     const onClick = () => {
         var raceData: RaceDataType = props.row.original
         console.log(props)
         console.log(raceData)
         DB.deleteRace(raceData.id)
         props.table.options.data = props.table.options.data.filter(function (item: any) {
-            return item.id !== raceData.id
+            return item.number !== raceData.number
         })
         console.log(props.table.options.data)
         props.updateData(props.table.options.data)

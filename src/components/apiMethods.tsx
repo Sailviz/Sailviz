@@ -56,7 +56,6 @@ export async function fetchSeries(club: string): Promise<SeriesDataType[]> {
             if (data && data.error) {
                 console.log(data.message)
             } else {
-                console.log(data.series)
                 return (data.series)
             }
         });

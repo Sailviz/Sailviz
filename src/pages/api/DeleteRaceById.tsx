@@ -3,6 +3,15 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 
 import assert from 'assert';
 
+async function findRace(id: any) {
+    var result = await prisma.race.findFirst({
+        where: {
+            id: id
+        },
+    })
+    return result;
+}
+
 async function deleteRace(id: any) {
     var result = await prisma.race.delete({
         where: {
@@ -27,8 +36,9 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 
         var id = req.body.id
 
-        var race = await deleteRace(id)
+        var race = await findRace(id)
         if (race) {
+            await deleteRace(id)
             res.json({ error: false, race: race });
         } else {
             // User exists

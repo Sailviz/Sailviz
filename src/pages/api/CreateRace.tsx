@@ -5,6 +5,20 @@ import assert from 'assert';
 import { create } from 'domain';
 import { createInterface } from 'readline';
 
+type RaceDataType = {
+    [key: number]: any,
+    id: string,
+    number: number,
+    OOD: string,
+    AOD: string,
+    SO: string,
+    ASO: string,
+    results: [],
+    Time: string,
+    Type: string,
+    seriesId: string
+};
+
 async function findClub(name: string) {
     var result = await prisma.clubs.findUnique({
         where: {
@@ -80,7 +94,12 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
         club = await findClub(club)
         if (club) {
             var series = await findSeries(seriesName, club)
-            var number = (await findRace(series)).length + 1
+            var races: RaceDataType[] = (await findRace(series)) as RaceDataType[]
+            var number = 1
+            while (races.some(object => object.number === number)) {
+                number++;
+            }
+            console.log(number)
             if (series) {
                 var race = await createRace(number, series, time, results)
                 res.json({ error: false, race: race });
