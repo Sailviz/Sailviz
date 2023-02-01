@@ -119,3 +119,23 @@ export async function createRace(club: string, seriesName: string): Promise<Race
             }
         });
 };
+
+export async function deleteRace(id: string): Promise<RaceDataType> {
+    const body = {
+        "id": id,
+    }
+    return await fetch(`${server}/api/DeleteRaceById`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+    })
+        .then((res) => res.json())
+        .then(async (data) => {
+            if (data && data.error) {
+                console.log(data.message)
+            } else {
+                console.log(data.race)
+                return data.race
+            }
+        });
+};

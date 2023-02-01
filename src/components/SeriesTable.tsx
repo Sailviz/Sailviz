@@ -1,8 +1,9 @@
-import React, { ChangeEvent, useState } from 'react';
+import React, { ChangeEvent, MouseEventHandler, useState } from 'react';
 import dayjs from 'dayjs';
-import { createColumnHelper, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table'
+import { createColumnHelper, flexRender, getCoreRowModel, RowSelection, useReactTable } from '@tanstack/react-table'
 import * as DB from './apiMethods';
 import Select from 'react-select';
+import { setEnvironmentData } from 'worker_threads';
 
 
 type RaceDataType = {
@@ -20,7 +21,6 @@ type RaceDataType = {
 };
 
 const raceOptions = [{ value: "Pursuit", label: "Pursuit" }, { value: "Handicap", label: "Handicap" }]
-
 
 const Time = ({ ...props }: any) => {
     const initialValue = props.getValue()
@@ -107,45 +107,70 @@ const Text = ({ ...props }: any) => {
     );
 };
 
-const columnHelper = createColumnHelper<RaceDataType>()
+const Remove = ({ ...props }: any, updateData: any) => {
+    const onClick = () => {
+        var raceData: RaceDataType = props.row.original
+        console.log(props)
+        console.log(raceData)
+        DB.deleteRace(raceData.id)
+        props.table.options.data = props.table.options.data.filter(function (item: any) {
+            return item.id !== raceData.id
+        })
+        console.log(props.table.options.data)
+        props.updateData(props.table.options.data)
+    }
+    return (
+        <>
+            <p className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0"
+                onClick={onClick} >
+                Remove
+            </p>
+        </>
+    );
+};
 
-const columns = [
-    columnHelper.accessor('number', {
-        id: "number",
-        cell: info => info.getValue(),
-    }),
-    columnHelper.accessor('Time', {
-        id: "Number of Races",
-        cell: props => <Time {...props} />
-    }),
-    columnHelper.accessor('Type', {
-        id: "Type",
-        cell: props => <Type {...props} />
-    }),
-    columnHelper.accessor('OOD', {
-        id: "OOD",
-        cell: props => <Text {...props} />
-    }),
-    columnHelper.accessor('AOD', {
-        id: "AOD",
-        cell: props => <Text {...props} />
-    }),
-    columnHelper.accessor('SO', {
-        id: "SO",
-        cell: props => <Text {...props} />
-    }),
-    columnHelper.accessor('ASO', {
-        id: "ASO",
-        cell: props => <Text {...props} />
-    }),
-]
+const columnHelper = createColumnHelper<RaceDataType>()
 
 
 const SeriesTable = (props: any) => {
     var [data, setData] = useState(props.data)
+
     var table = useReactTable({
         data,
-        columns,
+        columns: [
+            columnHelper.accessor('number', {
+                id: "number",
+                cell: info => info.getValue(),
+            }),
+            columnHelper.accessor('Time', {
+                id: "Number of Races",
+                cell: props => <Time {...props} />
+            }),
+            columnHelper.accessor('Type', {
+                id: "Type",
+                cell: props => <Type {...props} />
+            }),
+            columnHelper.accessor('OOD', {
+                id: "OOD",
+                cell: props => <Text {...props} />
+            }),
+            columnHelper.accessor('AOD', {
+                id: "AOD",
+                cell: props => <Text {...props} />
+            }),
+            columnHelper.accessor('SO', {
+                id: "SO",
+                cell: props => <Text {...props} />
+            }),
+            columnHelper.accessor('ASO', {
+                id: "ASO",
+                cell: props => <Text {...props} />
+            }),
+            columnHelper.accessor('', {
+                id: "Remove",
+                cell: props => <Remove {...props} updateData={setData} />
+            }),
+        ],
         getCoreRowModel: getCoreRowModel(),
     })
     return (
