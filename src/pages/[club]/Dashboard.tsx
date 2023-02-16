@@ -296,7 +296,18 @@ const Club = () => {
         newSeriesData[newSeriesData.findIndex(x => x.id === race.seriesId)]?.races.push(race)
         setSeriesData(newSeriesData)
     }
-
+    const removeRace = async (raceId: string) => {
+        console.log("updating main copy of series")
+        let newSeriesData: SeriesDataType[] = seriesData
+        var seriesIndex = newSeriesData.findIndex(y => y.id == activeSeriesData.id)
+        if (newSeriesData[seriesIndex] == undefined) return
+        let raceIndex = newSeriesData[seriesIndex].races.findIndex(x => x.id === raceId)
+        console.log(raceIndex)
+        newSeriesData[seriesIndex].races.splice(raceIndex, 1)
+        console.log(newSeriesData)
+        setSeriesData(newSeriesData)
+        setUpdateState(updateState + 1) //this forces the component to update
+    }
     useEffect(() => {
         if (club !== undefined) {
 
@@ -312,7 +323,7 @@ const Club = () => {
 
     useEffect(() => {
         generateBar()
-    }, [seriesData]);
+    }, [seriesData, updateState]);
 
     useEffect(() => {
         setUpdateState(updateState + 1)
@@ -344,7 +355,7 @@ const Club = () => {
                             {activeSeriesData.name}
                         </p>
                         <div className='p-6'>
-                            <SeriesTable data={activeSeriesData.races} key={updateState} />
+                            <SeriesTable data={activeSeriesData.races} key={updateState} removeRace={removeRace} />
                         </div>
                         <div className="p-6">
                             <p onClick={addRaceToSeries} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">

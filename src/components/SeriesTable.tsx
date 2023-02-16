@@ -97,7 +97,7 @@ const Text = ({ ...props }: any) => {
     return (
         <>
             <input type="text"
-                id='AOD'
+                id=''
                 className="w-full p-2 "
                 defaultValue={value}
                 key={value}
@@ -109,15 +109,10 @@ const Text = ({ ...props }: any) => {
 
 const Remove = ({ ...props }: any) => {
     const onClick = () => {
-        var raceData: RaceDataType = props.row.original
-        console.log(props)
-        console.log(raceData)
-        DB.deleteRace(raceData.id)
-        props.table.options.data = props.table.options.data.filter(function (item: any) {
-            return item.number !== raceData.number
-        })
+        console.log(props.id)
+        DB.deleteRace(props.id)
         console.log(props.table.options.data)
-        props.updateData(props.table.options.data)
+        props.removeRace(props.id)
     }
     return (
         <>
@@ -134,6 +129,12 @@ const columnHelper = createColumnHelper<RaceDataType>()
 
 const SeriesTable = (props: any) => {
     var [data, setData] = useState(props.data)
+
+    const updateData = (data: any) => {
+        console.log(data)
+        setData(data)
+        props.removeRace(data)
+    }
 
     var table = useReactTable({
         data,
@@ -168,7 +169,7 @@ const SeriesTable = (props: any) => {
             }),
             columnHelper.accessor('', {
                 id: "Remove",
-                cell: props => <Remove {...props} updateData={setData} />
+                cell: props => <Remove {...props} id={props.row.original.id} removeRace={updateData} />
             }),
         ],
         getCoreRowModel: getCoreRowModel(),

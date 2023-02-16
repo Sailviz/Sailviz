@@ -133,7 +133,6 @@ export async function deleteRace(id: string): Promise<RaceDataType> {
             if (data && data.error) {
                 console.log(data.message)
             } else {
-                console.log(data.race)
                 return data.race
             }
         });
