@@ -350,7 +350,7 @@ const Club = () => {
 
 
                     </div>
-                    <div id="series" className="hidden w-3/4">
+                    <div id="series" className="hidden w-full">
                         <p className="text-6xl font-extrabold text-gray-700 p-6">
                             {activeSeriesData.name}
                         </p>

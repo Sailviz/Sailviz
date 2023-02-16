@@ -98,7 +98,7 @@ const Text = ({ ...props }: any) => {
         <>
             <input type="text"
                 id=''
-                className="w-full p-2 "
+                className="w-32 p-2 "
                 defaultValue={value}
                 key={value}
                 onBlur={(e) => onBlur(e)}
@@ -181,7 +181,7 @@ const SeriesTable = (props: any) => {
                     {table.getHeaderGroups().map(headerGroup => (
                         <tr key={headerGroup.id}>
                             {headerGroup.headers.map(header => (
-                                <th key={header.id} className='border-4 p-2'>
+                                <th key={header.id} className='border-4 p-1'>
                                     {header.isPlaceholder
                                         ? null
                                         : flexRender(
