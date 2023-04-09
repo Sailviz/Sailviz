@@ -41,6 +41,12 @@ type SettingsType = {
     [key: string]: any,
     numberToCount: number
 }
+type BoatDataType = {
+    id: string,
+    name: string,
+    crew: number,
+    py: number
+}
 
 export async function fetchSeries(club: string): Promise<SeriesDataType[]> {
     const body = {
@@ -57,6 +63,24 @@ export async function fetchSeries(club: string): Promise<SeriesDataType[]> {
                 console.log(data.message)
             } else {
                 return (data.series)
+            }
+        });
+};
+
+export async function fetchBoats(): Promise<BoatDataType[]> {
+    const body = {
+    }
+    return await fetch(`${server}/api/GetBoats`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+    })
+        .then((res) => res.json())
+        .then((data) => {
+            if (data && data.error) {
+                console.log(data.message)
+            } else {
+                return (data.boats)
             }
         });
 };

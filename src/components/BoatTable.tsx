@@ -1,67 +1,33 @@
 import React, { useState } from 'react';
 import { createColumnHelper, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table'
 
-type RaceDataType = {
-    [key: string]: any,
+type BoatDataType = {
     id: string,
-    number: number,
-    OOD: string,
-    AOD: string,
-    SO: string,
-    ASO: string,
-    results: ResultsType[],
-    Time: string,
-    Type: string,
-    seriesId: string
-};
-
-type ResultsType = {
-    [key: string]: any,
-    Helm: string,
-    Crew: string,
-    BoatClass: string,
-    BoatNumber: string,
-    Time: number,
-    Laps: number,
-    Position: number
+    name: string,
+    crew: number,
+    py: number
 }
 
-const columnHelper = createColumnHelper<ResultsType>()
+const columnHelper = createColumnHelper<BoatDataType>()
 
 const columns = [
-    columnHelper.accessor('Helm', {
-        header: "Helm",
+    columnHelper.accessor('name', {
+        header: "name",
         cell: info => info.getValue(),
     }),
-    columnHelper.accessor('Crew', {
-        id: "Crew",
+    columnHelper.accessor('crew', {
+        header: "crew",
         cell: info => info.getValue(),
     }),
-    columnHelper.accessor('Class', {
-        id: "Boat Class",
-        cell: info => info.getValue(),
-    }),
-    columnHelper.accessor('Sail Number', {
-        id: "Sail Number",
-        cell: info => info.getValue(),
-    }),
-    columnHelper.accessor('Time', {
-        header: "Time",
-        cell: info => info.getValue(),
-    }),
-    columnHelper.accessor('Laps', {
-        header: "Laps",
-        cell: info => info.getValue(),
-    }),
-    columnHelper.accessor('Position', {
-        header: "Position",
+    columnHelper.accessor('py', {
+        id: "py",
         cell: info => info.getValue(),
     }),
 ]
 
 
-const RaceResultsTable = (props: any) => {
-    var [data, setData] = useState(props.data.results)
+const BoatTable = (props: any) => {
+    var [data, setData] = useState(props.data)
     var table = useReactTable({
         data,
         columns,
@@ -91,7 +57,7 @@ const RaceResultsTable = (props: any) => {
                         <tr key={row.id}>
                             {row.getVisibleCells().map(cell => (
                                 <td key={cell.id} className='border-4 p-2'>
-                                    <input defaultValue={cell.getValue() as string} id={cell.id} className={'w-full'} />
+                                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                 </td>
                             ))}
                         </tr>
@@ -102,4 +68,4 @@ const RaceResultsTable = (props: any) => {
     )
 }
 
-export default RaceResultsTable
+export default BoatTable

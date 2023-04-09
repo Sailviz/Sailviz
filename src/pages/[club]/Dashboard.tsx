@@ -5,6 +5,7 @@ import Select from 'react-select';
 import dayjs from 'dayjs';
 import SeriesTable from '../../components/SeriesTable';
 import ClubTable from '../../components/ClubTable';
+import BoatTable from '../../components/BoatTable';
 import RaceResultsTable from '../../components/RaceResultsTable';
 import * as DB from '../../components/apiMethods';
 
@@ -48,6 +49,13 @@ type SettingsType = {
     numberToCount: number
 }
 
+type BoatDataType = {
+    id: string,
+    name: string,
+    crew: number,
+    py: number
+}
+
 const raceOptions = [{ value: "Pursuit", label: "Pursuit" }, { value: "Handicap", label: "Handicap" }]
 
 const Club = () => {
@@ -86,6 +94,8 @@ const Club = () => {
     }))
 
     var [seriesData, setSeriesData] = useState<SeriesDataType[]>([])
+
+    var [boatData, setBoatData] = useState<BoatDataType[]>([])
 
     var [updateState, setUpdateState] = useState(0)
 
@@ -300,10 +310,11 @@ const Club = () => {
         console.log("updating main copy of series")
         let newSeriesData: SeriesDataType[] = seriesData
         var seriesIndex = newSeriesData.findIndex(y => y.id == activeSeriesData.id)
-        if (newSeriesData[seriesIndex] == undefined) return
-        let raceIndex = newSeriesData[seriesIndex].races.findIndex(x => x.id === raceId)
+        var thisSeries = newSeriesData[seriesIndex]
+        if (thisSeries == undefined) return
+        let raceIndex = thisSeries.races.findIndex(x => x.id === raceId)
         console.log(raceIndex)
-        newSeriesData[seriesIndex].races.splice(raceIndex, 1)
+        newSeriesData[seriesIndex]?.races.splice(raceIndex, 1)
         console.log(newSeriesData)
         setSeriesData(newSeriesData)
         setUpdateState(updateState + 1) //this forces the component to update
@@ -314,10 +325,22 @@ const Club = () => {
             const fetchRaces = async () => {
                 var data = await DB.fetchSeries(club)
                 var array = [...data]
-                console.log(array)
                 setSeriesData(array)
             }
             fetchRaces()
+
+            const fetchBoats = async () => {
+                var data = await DB.fetchBoats()
+                if (data) {
+                    var array = [...data]
+                    console.log(array)
+                    setBoatData(array)
+                } else {
+                    console.log("could not find boats")
+                }
+                
+            }
+            fetchBoats()
         }
     }, [club])
 
@@ -344,8 +367,17 @@ const Club = () => {
                         <p className="text-6xl font-extrabold text-gray-700 p-6">
                             Overview
                         </p>
+                        <p className='text-2xl font-bold text-gray-700 p-6'>
+                                Series
+                        </p>
                         <div className='p-6'>
                             <ClubTable data={seriesData} key={updateState} />
+                        </div>
+                        <p className='text-2xl font-bold text-gray-700 p-6'>
+                                Boats
+                        </p>
+                        <div className='p-6'>
+                            <BoatTable data={boatData} key={updateState} />
                         </div>
 
 
