@@ -1,17 +1,6 @@
 import React, { useState } from 'react';
 import { createColumnHelper, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table'
 
-type SettingsType = {
-    numberToCount: number
-}
-
-type SeriesDataType = {
-    id: string,
-    name: string,
-    clubId: string,
-    settings: SettingsType,
-    races: []
-}
 
 const columnHelper = createColumnHelper<SeriesDataType>()
 

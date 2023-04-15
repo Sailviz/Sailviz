@@ -1,13 +1,6 @@
 import React, { useState } from 'react';
 import { createColumnHelper, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table'
 
-type BoatDataType = {
-    id: string,
-    name: string,
-    crew: number,
-    py: number
-}
-
 const columnHelper = createColumnHelper<BoatDataType>()
 
 const columns = [

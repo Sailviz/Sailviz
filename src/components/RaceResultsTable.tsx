@@ -1,32 +1,8 @@
 import React, { useState } from 'react';
 import { createColumnHelper, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table'
 
-type RaceDataType = {
-    [key: string]: any,
-    id: string,
-    number: number,
-    OOD: string,
-    AOD: string,
-    SO: string,
-    ASO: string,
-    results: ResultsType[],
-    Time: string,
-    Type: string,
-    seriesId: string
-};
 
-type ResultsType = {
-    [key: string]: any,
-    Helm: string,
-    Crew: string,
-    BoatClass: string,
-    BoatNumber: string,
-    Time: number,
-    Laps: number,
-    Position: number
-}
-
-const columnHelper = createColumnHelper<ResultsType>()
+const columnHelper = createColumnHelper<ResultsDataType>()
 
 const columns = [
     columnHelper.accessor('Helm', {
