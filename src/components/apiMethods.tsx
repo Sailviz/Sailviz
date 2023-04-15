@@ -102,7 +102,7 @@ export async function createRace(clubId: string, seriesId: string): Promise<Race
 
 export async function deleteRace(id: string): Promise<RaceDataType> {
     const body = {
-        "id": id,
+        "raceId": id,
     }
     return await fetch(`${server}/api/DeleteRaceById`, {
         method: 'POST',
