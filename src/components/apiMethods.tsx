@@ -2,52 +2,6 @@ import React from 'react';
 import { server } from './URL';
 import dayjs from 'dayjs';
 
-
-type RaceDataType = {
-    [key: string]: any,
-    id: string,
-    number: number,
-    OOD: string,
-    AOD: string,
-    SO: string,
-    ASO: string,
-    results: ResultsType[],
-    Time: string,
-    Type: string,
-    seriesId: string
-};
-
-type SeriesDataType = {
-    [key: string]: any,
-    id: string,
-    name: string,
-    clubId: string,
-    settings: SettingsType,
-    races: RaceDataType[]
-}
-
-type ResultsType = {
-    [key: string]: any,
-    Helm: string,
-    Crew: string,
-    BoatClass: string,
-    BoatNumber: string,
-    Time: number,
-    Laps: number,
-    Position: number
-}
-
-type SettingsType = {
-    [key: string]: any,
-    numberToCount: number
-}
-type BoatDataType = {
-    id: string,
-    name: string,
-    crew: number,
-    py: number
-}
-
 export async function fetchSeries(club: string): Promise<SeriesDataType[]> {
     const body = {
         "club": club
@@ -158,6 +112,62 @@ export async function deleteRace(id: string): Promise<RaceDataType> {
                 console.log(data.message)
             } else {
                 return data.race
+            }
+        });
+};
+
+export async function getRYAPY(): Promise<BoatDataType[]> {
+
+    return await fetch(`${server}/api/GetRYAPY`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+    })
+        .then((res) => res.json())
+        .then(async (data) => {
+            if (data && data.error) {
+                console.log(data.message)
+            } else {
+                return data.boats
+            }
+        });
+};
+
+export async function getClub(club: string): Promise<ClubDataType> {
+    const body = {
+        "name": club,
+    }
+    return await fetch(`${server}/api/GetClub`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+    })
+        .then((res) => res.json())
+        .then(async (data) => {
+            if (data && data.error) {
+                console.log(data.message)
+            } else {
+                return data.club
+            }
+        });
+};
+
+export async function setBoats(clubId: string, data: BoatDataType[]): Promise<ClubDataType> {
+    const body = {
+        "clubId": clubId,
+        "data": data
+    }
+    console.log(body)
+    return await fetch(`${server}/api/SetBoats`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+    })
+        .then((res) => res.json())
+        .then(async (data) => {
+            if (data && data.error) {
+                console.log(data.message)
+            } else {
+                return data.club
             }
         });
 };

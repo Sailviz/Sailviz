@@ -20,10 +20,11 @@ model Users {
 }
 
 model Boats {
-  id   String @id @unique @default(uuid())
-  name String @unique
+  name String @id @unique
   crew Int
   py   Int
+  club     Clubs  @relation(fields: [clubId], references: [id])
+  clubId   String
 }
 
 model Clubs {
@@ -31,6 +32,7 @@ model Clubs {
   name String @unique
   settings Json
   series Series[]
+  boats Boats[]
 }
 
 model Series {

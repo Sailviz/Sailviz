@@ -24,9 +24,9 @@ export default  async(req: NextApiRequest, res: NextApiResponse) => {
     var name: string = req.body.name
     console.log(name)
     if (req.method === 'POST') {
-        var Club = await getClub(name)
-        if(Club){
-            res.json({error: false, Club: Club});
+        var club = await getClub(name)
+        if(club){
+            res.json({error: false, club: club});
         }
         else{
             res.json({error: true, message: 'Could not find club'});
