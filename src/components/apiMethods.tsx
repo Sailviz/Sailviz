@@ -61,7 +61,9 @@ export async function updateRaceSettings(raceData: RaceDataType) {
 };
 
 export async function updateSeriesSettings(seriesData: SeriesDataType) {
-    const body = seriesData
+    const body = {
+        "series": seriesData
+    }
     return await fetch(`${server}/api/UpdateSeriesById`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

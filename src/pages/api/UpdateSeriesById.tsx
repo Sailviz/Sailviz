@@ -7,13 +7,14 @@ type SettingsType = {
     numberToCount: number
 }
 
-async function updateSeries(seriesId: any, settings: SettingsType) {
+async function updateSeries(series: SeriesDataType) {
     var result = await prisma.series.update({
         where: {
-            id: seriesId
+            id: series.id
         },
         data: {
-            settings: settings
+            settings: series.settings,
+            name: series.name
         }
     })
     return result;
@@ -24,21 +25,20 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
         // check if we have all data.
         // The website stops this, but just in case
         try {
-            assert.notStrictEqual(undefined, req.body.seriesId, 'seriesId required');
+            assert.notStrictEqual(undefined, req.body.series);
 
         } catch (bodyError) {
             res.json({ error: true, message: "information missing" });
             return;
         }
-        var seriesId = req.body.seriesId
-        var settings = req.body.settings
+        var series = req.body.series
 
-        var series = await updateSeries(seriesId, settings)
-        if (series) {
-            res.json({ error: false, series: series });
+        var updatedSeries = await updateSeries(series)
+        if (updatedSeries) {
+            res.json({ error: false, series: updatedSeries });
         } else {
             // User exists
-            res.json({ error: true, message: 'race not found' });
+            res.json({ error: true, message: 'series not found' });
         }
     }
 };
