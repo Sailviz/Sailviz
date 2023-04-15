@@ -354,7 +354,7 @@ const Club = () => {
                                 Boats
                         </p>
                         <div className="px-5 w-3/4">
-                            <p onClick={updateBoatsToLatest} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
+                            <p onClick={(e) => {confirm("are you sure you want to do this?")?updateBoatsToLatest(): null;}} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
                                 Update list to match latest RYA values
                             </p>
                         </div>
