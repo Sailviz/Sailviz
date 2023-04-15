@@ -270,8 +270,15 @@ const Club = () => {
         DB.setBoats(clubId, await DB.getRYAPY())
     }
 
+    const addSeries = async () => {
+        var series: SeriesDataType = await DB.createSeries(clubId, "new series")
+        console.log(series)
+        series.races = []
+        console.log(seriesData)
+        setSeriesData(seriesData.concat(series))
+    }
+
     const addRaceToSeries = async () => {
-        //This doesn't seem to work for some reason, state updates before the confusing line, but doesn't change if that line is commented out.
         var race: RaceDataType = await DB.createRace(clubId, activeSeriesData.id)
         var newSeriesData: SeriesDataType[] = seriesData.map(obj => ({ ...obj }))
         newSeriesData[newSeriesData.findIndex(x => x.id === race.seriesId)]?.races.push(race)
@@ -286,6 +293,17 @@ const Club = () => {
         let raceIndex = thisSeries.races.findIndex(x => x.id === raceId)
         console.log(raceIndex)
         newSeriesData[seriesIndex]?.races.splice(raceIndex, 1)
+        console.log(newSeriesData)
+        setSeriesData(newSeriesData)
+        setUpdateState(updateState + 1) //this forces the component to update
+    }
+
+    const removeSeries = async (raceId: string) => {
+        console.log("updating main copy of series")
+        let newSeriesData: SeriesDataType[] = seriesData
+        var seriesIndex = newSeriesData.findIndex(y => y.id == activeSeriesData.id)
+        console.log(newSeriesData)
+        newSeriesData.splice(seriesIndex, 1)
         console.log(newSeriesData)
         setSeriesData(newSeriesData)
         setUpdateState(updateState + 1) //this forces the component to update
@@ -348,7 +366,12 @@ const Club = () => {
                                 Series
                         </p>
                         <div className='p-6'>
-                            <ClubTable data={seriesData} key={updateState} />
+                            <ClubTable data={seriesData} key={updateState} removeSeries={removeSeries}/>
+                        </div>
+                        <div className="p-6">
+                            <p onClick={addSeries} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
+                                Add Series
+                            </p>
                         </div>
                         <p className='text-2xl font-bold text-gray-700 p-6'>
                                 Boats

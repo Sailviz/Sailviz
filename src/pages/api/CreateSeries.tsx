@@ -3,20 +3,20 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 import assert from 'assert';
 
 
-async function findSeries(name: string, clubId: any){
+async function findSeries(seriesName: string, clubId: any){
     var result = await prisma.series.findFirst({
         where: {
-            name: name,
+            name: seriesName,
             clubId: clubId
         },
     })
     return result;
 }
 
-async function createSeries(name: string, clubId: string){
+async function createSeries(seriesName: string, clubId: string){
     var res = await prisma.series.create({
         data: {
-            name: name,
+            name: seriesName,
             clubId: clubId,
             settings: {}
         },
@@ -29,18 +29,18 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
         // check if we have all data.
         // The website stops this, but just in case
         try {
-            assert.notStrictEqual(undefined, req.body.name, 'Name required');
+            assert.notStrictEqual(undefined, req.body.seriesName, 'Name required');
             assert.notStrictEqual(undefined, req.body.clubId, 'Club required');
         } catch (bodyError) {
             res.json({error: true, message: "information missing"});
             return;
         }
         
-        var name = req.body.name
+        var seriesName = req.body.seriesName
         var clubId = req.body.clubId
-        var ExistingSeries = await findSeries(name, clubId)
+        var ExistingSeries = await findSeries(seriesName, clubId)
         if (!ExistingSeries) {
-            var Series = await createSeries(name, clubId)
+            var Series = await createSeries(seriesName, clubId)
             res.json({error: false, series: Series})
             return
         }
