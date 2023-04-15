@@ -1,19 +1,19 @@
 import { useRouter } from 'next/router'
 import { ChangeEvent, useEffect, useState, useId } from 'react';
-import Dashboard from '../../components/Dashboard'
+import Dashboard from '../components/Dashboard'
 import Select from 'react-select';
 import dayjs from 'dayjs';
-import SeriesTable from '../../components/SeriesTable';
-import ClubTable from '../../components/ClubTable';
-import BoatTable from '../../components/BoatTable';
-import RaceResultsTable from '../../components/RaceResultsTable';
-import * as DB from '../../components/apiMethods';
+import SeriesTable from '../components/SeriesTable';
+import ClubTable from '../components/ClubTable';
+import BoatTable from '../components/BoatTable';
+import RaceResultsTable from '../components/RaceResultsTable';
+import * as DB from '../components/apiMethods';
+import Cookies from 'js-cookie';
 
 const raceOptions = [{ value: "Pursuit", label: "Pursuit" }, { value: "Handicap", label: "Handicap" }]
 
 const Club = () => {
     const router = useRouter()
-    var club: string = router.query.club as string
     var [clubId, setClubId] = useState<string>("")
 
     var [activeSeriesData, setActiveSeriesData] = useState<SeriesDataType>({
@@ -261,7 +261,7 @@ const Club = () => {
 
     const addRaceToSeries = async () => {
         //This doesn't seem to work for some reason, state updates before the confusing line, but doesn't change if that line is commented out.
-        var race: RaceDataType = await DB.createRace(club, activeSeriesData.id)
+        var race: RaceDataType = await DB.createRace(clubId, activeSeriesData.id)
         var newSeriesData: SeriesDataType[] = seriesData.map(obj => ({ ...obj }))
         newSeriesData[newSeriesData.findIndex(x => x.id === race.seriesId)]?.races.push(race)
         setSeriesData(newSeriesData)
@@ -280,16 +280,8 @@ const Club = () => {
         setUpdateState(updateState + 1) //this forces the component to update
     }
     useEffect(() => {
-        if (club !== undefined) {
-            const fetchClubId = async () => {
-                var data = await DB.getClub(club)
-                if (data) {
-                    setClubId(data.id)
-                }
-            }
-            fetchClubId()
-        }
-    }, [club])
+        setClubId(Cookies.get('clubId') || "")
+    }, [])
 
     useEffect(() => {
         if (clubId != "") {

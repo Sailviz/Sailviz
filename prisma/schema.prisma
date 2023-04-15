@@ -15,12 +15,14 @@ model Users {
   email    String @unique
   password String
   settings Json
-  club     String
+  club     Clubs  @relation(fields: [clubId], references: [id])
+  clubId   String
   permLvl  Int
 }
 
 model Boats {
-  name String @id @unique
+  id   String @id @unique @default(uuid())
+  name String
   crew Int
   py   Int
   club     Clubs  @relation(fields: [clubId], references: [id])
@@ -33,6 +35,7 @@ model Clubs {
   settings Json
   series Series[]
   boats Boats[]
+  users Users[]
 }
 
 model Series {
