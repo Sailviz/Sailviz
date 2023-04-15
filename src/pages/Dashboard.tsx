@@ -251,6 +251,17 @@ const Club = () => {
         console.log(newSeriesData)
         newSeriesData.settings[e.target.id] = parseInt(e.target.value)
         setActiveSeriesData(newSeriesData)
+
+        updateRanges()
+    }
+
+    const updateRanges = () => {
+        const range = document.getElementById('numberToCount') as HTMLInputElement
+        const rangeV = document.getElementById('rangeV') as HTMLInputElement
+        const newValue = Number( (parseInt(range.value) - parseInt(range.min)) * 100 / (parseInt(range.max) - parseInt(range.min)))
+        const newPosition = 10 - (newValue * 0.2);
+        rangeV.innerHTML = `<span>${range.value}</span>`;
+        rangeV.style.left = `calc(${newValue}% + (${newPosition}px))`;
     }
 
     const updateBoatsToLatest = async() => {
@@ -279,6 +290,7 @@ const Club = () => {
         setSeriesData(newSeriesData)
         setUpdateState(updateState + 1) //this forces the component to update
     }
+
     useEffect(() => {
         setClubId(Cookies.get('clubId') || "")
     }, [])
@@ -314,6 +326,7 @@ const Club = () => {
 
     useEffect(() => {
         setUpdateState(updateState + 1)
+        updateRanges()
     }, [seriesData, activeRaceData.id, activeSeriesData]);
 
     return (
@@ -367,14 +380,20 @@ const Club = () => {
                             <p className='text-2xl font-bold text-gray-700'>
                                 Races To Count
                             </p>
-                            <input type="text"
-                                id='numberToCount'
-                                className="w-full p-2 mx-0 my-2 border-4 rounded focus:border-pink-500 focus:outline-none"
-                                defaultValue={activeSeriesData.settings.numberToCount}
-                                key={activeSeriesData.id}
-                                onChange={saveSeriesSettings}
-                                onBlur={() => DB.updateSeriesSettings(activeSeriesData)}
-                            />
+                            {/* padding for range bubble */}
+                            <div className='h-6'></div> 
+                            <div className='range-wrap'>
+                                <div className='range-value' id='rangeV'></div>
+                                <input type="range"
+                                    id='numberToCount'
+                                    min="1"
+                                    max={activeSeriesData.races.length}
+                                    defaultValue={activeSeriesData.settings.numberToCount}
+                                    key={activeSeriesData.id}
+                                    onChange={saveSeriesSettings}
+                                    onBlur={() => DB.updateSeriesSettings(activeSeriesData)}
+                                />
+                            </div>
                         </div>
                     </div>
                     <div id="race" className="hidden">
