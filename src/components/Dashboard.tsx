@@ -45,7 +45,7 @@ export default function Dashboard({
                         <div className="hidden w-full md:block md:w-auto" id="navbar-default">
                             <ul className="flex flex-col mt-4 md:flex-row md:space-x-8 md:mt-0 md:text-sm md:font-medium">
                                 <li>
-                                    <a onClick={(e) => { cookie.remove('token'); Router.push('/') }} className="text-white bg-pink-500 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">Log Out</a>
+                                    <a onClick={(e) => { cookie.remove('token'); cookie.remove('clubId'); Router.push('/') }} className="text-white bg-pink-500 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">Log Out</a>
                                 </li>
                             </ul>
                         </div>
