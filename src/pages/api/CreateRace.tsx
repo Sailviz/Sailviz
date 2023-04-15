@@ -1,57 +1,22 @@
 import prisma from '../../components/prisma'
 import type { NextApiRequest, NextApiResponse } from 'next'
-
 import assert from 'assert';
-import { create } from 'domain';
-import { createInterface } from 'readline';
 
-type RaceDataType = {
-    [key: number]: any,
-    id: string,
-    number: number,
-    OOD: string,
-    AOD: string,
-    SO: string,
-    ASO: string,
-    results: [],
-    Time: string,
-    Type: string,
-    seriesId: string
-};
 
-async function findClub(name: string) {
-    var result = await prisma.clubs.findUnique({
-        where: {
-            name: name,
-        },
-    })
-    return result;
-}
-
-async function findSeries(name: string, club: any) {
-    var result = await prisma.series.findFirst({
-        where: {
-            name: name,
-            clubId: club.id
-        },
-    })
-    return result;
-}
-
-async function findRace(series: any) {
+async function findRace(seriesId: any) {
     var result = await prisma.race.findMany({
         where: {
-            seriesId: series.id
+            seriesId: seriesId
         },
     })
     return result;
 }
 
-async function createRace(number: number, series: any, time: any, results: any) {
+async function createRace(number: number, seriesId: any, time: any, results: any) {
     var res = await prisma.race.create({
         data: {
             number: number,
-            seriesId: series.id,
+            seriesId: seriesId,
             Time: time,
             Type: "Handicap",
             OOD: "Unknown",
@@ -69,8 +34,8 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
         // check if we have all data.
         // The website stops this, but just in case
         try {
-            assert.notStrictEqual(undefined, req.body.seriesName, 'Name required');
-            assert.notStrictEqual(undefined, req.body.club, 'Club required');
+            assert.notStrictEqual(undefined, req.body.seriesId, 'Id required');
+            assert.notStrictEqual(undefined, req.body.clubId, 'Club required');
             assert.notStrictEqual(undefined, req.body.time, 'time required');
 
         } catch (bodyError) {
@@ -78,8 +43,8 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
             return;
         }
 
-        var seriesName = req.body.seriesName
-        var club = req.body.club
+        var seriesId = req.body.seriesId
+        var clubId = req.body.clubId
         var time = req.body.time
         var results = [{
             "Helm": "",
@@ -90,28 +55,18 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
             "Laps": 0,
             "Position": 0
         }]
-
-        club = await findClub(club)
-        if (club) {
-            var series = await findSeries(seriesName, club)
-            var races: RaceDataType[] = (await findRace(series)) as RaceDataType[]
-            var number = 1
-            while (races.some(object => object.number === number)) {
-                number++;
-            }
-            console.log(number)
-            if (series) {
-                var race = await createRace(number, series, time, results)
-                res.json({ error: false, race: race });
-
-            }
-            else {
-                res.json({ error: true, message: 'Could not find series' });
-            }
-        } else {
-            // User exists
-            res.json({ error: true, message: 'club not found' });
-            return;
+        var races: RaceDataType[] = (await findRace(seriesId)) as RaceDataType[]
+        var number = 1
+        //this numbers the race with the lowest number that is not being used.
+        while (races.some(object => object.number === number)) {
+            number++;
+        }
+        if (races) {
+            var race = await createRace(number, seriesId, time, results)
+            res.json({ error: false, race: race });
+        }
+        else {
+            res.json({ error: true, message: 'Could not find series' });
         }
     }
 };

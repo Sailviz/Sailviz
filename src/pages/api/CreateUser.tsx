@@ -16,10 +16,10 @@ async function findUser(email: string) {
     return result;
 }
 
-async function findClub(name: string) {
+async function findClub(clubId: string) {
     var result = await prisma.clubs.findUnique({
         where: {
-            name: name,
+            id: clubId,
         },
     })
     return result;
@@ -48,7 +48,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
             assert.notStrictEqual(undefined, req.body.email, 'Email required');
             assert.notStrictEqual(undefined, req.body.password, 'Password required');
             assert.notStrictEqual(undefined, req.body.name, 'Name required');
-            assert.notStrictEqual(undefined, req.body.club, 'club required');
+            assert.notStrictEqual(undefined, req.body.clubId, 'club required');
             assert.notStrictEqual(undefined, req.body.permLvl, 'permLvl required');
 
         } catch (bodyError) {
@@ -59,21 +59,19 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
         var name = req.body.name
         var email = req.body.email
         var password = req.body.password
-        var club = req.body.club
+        var clubId = req.body.clubId
         var permLvl = req.body.permLvl
 
         //check club exists
-
-        var Existingclub = await findClub(club)
-        console.log(Existingclub)
-        if (Existingclub == null) {
+        var club = await findClub(clubId)
+        if (club == null) {
             res.json({ error: true, message: 'Club does not exist' });
             return;
         }
 
         var Existinguser = await findUser(email)
         if (!Existinguser) {
-            var creationResult = await createUser(name, email, password, club, permLvl)
+            var creationResult = await createUser(name, email, password, club.name, permLvl)
             if (creationResult) {
                 var user = creationResult;
                 var token = jwt.sign(

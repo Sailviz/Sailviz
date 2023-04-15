@@ -8,12 +8,12 @@ const saltRounds = 10;
 const jwtSecret = process.env.jwtSecret;
 
 async function deleteAll(clubId: string){
-    var result = await prisma.boats.deleteMany({
+    await prisma.boats.deleteMany({
         where: {
             clubId: clubId,
         },
     })
-    return result;
+    return
 }
 
 async function createAll(clubId: string, data: BoatDataType[]){

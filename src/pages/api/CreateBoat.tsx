@@ -16,12 +16,13 @@ async function findBoat(name: string){
     return result;
 }
 
-async function createBoat(name: string, crew: number, py: number){
+async function createBoat(name: string, crew: number, py: number, clubId: string){
     var boat = await prisma.boats.create({
         data: {
             name: name,
             crew: crew,
-            py: py
+            py: py,
+            clubId: clubId
         },
     })
     return boat;
@@ -35,6 +36,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
             assert.notStrictEqual(undefined, req.body.name);
             assert.notStrictEqual(undefined, req.body.crew);
             assert.notStrictEqual(undefined, req.body.py);
+            assert.notStrictEqual(undefined, req.body.clubId);
 
         } catch (bodyError) {
             res.json({error: true, message: "information missing"});
@@ -44,12 +46,13 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
         var name = req.body.name
         var crew = req.body.crew
         var py = req.body.py
+        var clubId = req.body.clubId
 
         var ExistingBoat = await findBoat(name)
         if (!ExistingBoat) {
-            var creationResult = await createBoat(name, crew, py)
+            var creationResult = await createBoat(name, crew, py, clubId)
             if (creationResult) {
-                res.json({error: false, id: creationResult.id});
+                res.json({error: false, id: creationResult});
                 return;
             }
             else{

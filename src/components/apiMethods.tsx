@@ -2,11 +2,11 @@ import React from 'react';
 import { server } from './URL';
 import dayjs from 'dayjs';
 
-export async function fetchSeries(club: string): Promise<SeriesDataType[]> {
+export async function getSeries(clubId: string): Promise<SeriesDataType[]> {
     const body = {
-        "club": club
+        "clubId": clubId
     }
-    return await fetch(`${server}/api/GetSeriesByClub`, {
+    return await fetch(`${server}/api/GetSeriesByClubId`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
@@ -21,8 +21,9 @@ export async function fetchSeries(club: string): Promise<SeriesDataType[]> {
         });
 };
 
-export async function fetchBoats(): Promise<BoatDataType[]> {
+export async function getBoats(clubId: string): Promise<BoatDataType[]> {
     const body = {
+        "clubId": clubId
     }
     return await fetch(`${server}/api/GetBoats`, {
         method: 'POST',
@@ -40,7 +41,9 @@ export async function fetchBoats(): Promise<BoatDataType[]> {
 };
 
 export async function updateRaceSettings(raceData: RaceDataType) {
-    const body = raceData
+    const body = {
+        "race": raceData
+    }
     return await fetch(`${server}/api/UpdateRaceById`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -74,11 +77,11 @@ export async function updateSeriesSettings(seriesData: SeriesDataType) {
         });
 };
 
-export async function createRace(club: string, seriesName: string): Promise<RaceDataType> {
+export async function createRace(clubId: string, seriesId: string): Promise<RaceDataType> {
     var time = dayjs().format('YYYY-MM-DD HH:mm')
     const body = {
-        "club": club,
-        "seriesName": seriesName,
+        "clubId": clubId,
+        "seriesId": seriesId,
         "time": time
     }
     return await fetch(`${server}/api/CreateRace`, {
@@ -136,7 +139,7 @@ export async function getClub(club: string): Promise<ClubDataType> {
     const body = {
         "name": club,
     }
-    return await fetch(`${server}/api/GetClub`, {
+    return await fetch(`${server}/api/GetClubByName`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),

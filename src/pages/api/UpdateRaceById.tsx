@@ -3,19 +3,19 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 
 import assert from 'assert';
 
-async function updateRace(id: any, OOD: string, AOD: string, SO: string, ASO: string, Time: string, Type: string, results: any) {
+async function updateRace(race: RaceDataType) {
     var result = await prisma.race.update({
         where: {
-            id: id
+            id: race.id
         },
         data: {
-            OOD: OOD || undefined,
-            AOD: AOD || undefined,
-            SO: SO || undefined,
-            ASO: ASO || undefined,
-            Time: Time || undefined,
-            Type: Type || undefined,
-            results: results || undefined
+            OOD: race.OOD || undefined,
+            AOD: race.AOD || undefined,
+            SO: race.SO || undefined,
+            ASO: race.ASO || undefined,
+            Time: race.Time || undefined,
+            Type: race.Type || undefined,
+            results: race.results || undefined
         }
     })
     return result;
@@ -26,26 +26,18 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
         // check if we have all data.
         // The website stops this, but just in case
         try {
-            assert.notStrictEqual(undefined, req.body.id, 'id required');
+            assert.notStrictEqual(undefined, req.body.race);
 
         } catch (bodyError) {
             res.json({ error: true, message: "information missing" });
             return;
         }
-        console.log(req.body)
 
-        var id = req.body.id
-        var OOD = req.body.OOD
-        var AOD = req.body.AOD
-        var SO = req.body.SO
-        var ASO = req.body.ASO
-        var Time = req.body.Time
-        var Type = req.body.Type
-        var results = req.body.results
+        var race: RaceDataType = req.body.race
 
-        var race = await updateRace(id, OOD, AOD, SO, ASO, Time, Type, results)
-        if (race) {
-            res.json({ error: false, race: race });
+        var updatedRace = await updateRace(race)
+        if (updatedRace) {
+            res.json({ error: false, race: updatedRace });
         } else {
             // User exists
             res.json({ error: true, message: 'race not found' });

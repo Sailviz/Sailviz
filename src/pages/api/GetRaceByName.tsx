@@ -3,10 +3,10 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 
 import assert from 'assert';
 
-async function findClub(name: string){
+async function findClub(clubId: string){
     var result = await prisma.clubs.findUnique({
         where: {
-            name: name,
+            id: clubId,
         },
     })
     return result;
@@ -22,10 +22,10 @@ async function findSeries(name: string, club: any){
     return result;
 }
 
-async function findRace(number: number, series: any){
+async function findRace(raceNumber: number, series: any){
     var result = await prisma.race.findFirst({
         where: {
-            number: number,
+            number: raceNumber,
             seriesId: series.id
         },
     })
@@ -37,24 +37,24 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
         // check if we have all data.
         // The website stops this, but just in case
         try {
-            assert.notStrictEqual(undefined, req.body.series, 'Name required');
-            assert.notStrictEqual(undefined, req.body.number, 'Name required');
-            assert.notStrictEqual(undefined, req.body.club, 'Club required');
+            assert.notStrictEqual(undefined, req.body.seriesName);
+            assert.notStrictEqual(undefined, req.body.raceNumber);
+            assert.notStrictEqual(undefined, req.body.clubId);
 
         } catch (bodyError) {
             res.json({error: true, message: "information missing"});
             return;
         }
         
-        var number = req.body.number
-        var seriesName = req.body.series
-        var club = req.body.club
+        var raceNumber = req.body.raceNumber
+        var seriesName = req.body.seriesName
+        var clubId = req.body.clubId
 
-        club = await findClub(club)
+        var club = await findClub(clubId)
         if (club) {
             var series = await findSeries(seriesName, club)
             if (series) {
-                var race = await findRace(number, series)
+                var race = await findRace(raceNumber, series)
                 res.json({error: false, race: race});
             }
             else{

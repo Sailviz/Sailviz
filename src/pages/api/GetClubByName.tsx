@@ -16,7 +16,7 @@ async function getClub(name: string){
 
 export default  async(req: NextApiRequest, res: NextApiResponse) => {
     try {
-        assert.notStrictEqual(undefined, req.body.name, 'Name required');
+        assert.notStrictEqual(undefined, req.body.name);
     } catch (bodyError) {
         res.json({error: true, message: "information missing"});
         return;

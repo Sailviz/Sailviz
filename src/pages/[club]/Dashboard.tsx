@@ -261,7 +261,7 @@ const Club = () => {
 
     const addRaceToSeries = async () => {
         //This doesn't seem to work for some reason, state updates before the confusing line, but doesn't change if that line is commented out.
-        var race: RaceDataType = await DB.createRace(club, activeSeriesData.name)
+        var race: RaceDataType = await DB.createRace(club, activeSeriesData.id)
         var newSeriesData: SeriesDataType[] = seriesData.map(obj => ({ ...obj }))
         newSeriesData[newSeriesData.findIndex(x => x.id === race.seriesId)]?.races.push(race)
         setSeriesData(newSeriesData)
@@ -281,19 +281,30 @@ const Club = () => {
     }
     useEffect(() => {
         if (club !== undefined) {
+            const fetchClubId = async () => {
+                var data = await DB.getClub(club)
+                if (data) {
+                    setClubId(data.id)
+                }
+            }
+            fetchClubId()
+        }
+    }, [club])
+
+    useEffect(() => {
+        if (clubId != "") {
 
             const fetchRaces = async () => {
-                var data = await DB.fetchSeries(club)
+                var data = await DB.getSeries(clubId)
                 var array = [...data]
                 setSeriesData(array)
             }
             fetchRaces()
 
             const fetchBoats = async () => {
-                var data = await DB.fetchBoats()
+                var data = await DB.getBoats(clubId)
                 if (data) {
                     var array = [...data]
-                    console.log(array)
                     setBoatData(array)
                 } else {
                     console.log("could not find boats")
@@ -302,16 +313,8 @@ const Club = () => {
             }
             fetchBoats()
 
-            const fetchClubId = async () => {
-                var data = await DB.getClub(club)
-                if (data) {
-                    setClubId(data.id)
-                    console.log(data.id)
-                }
-            }
-            fetchClubId()
         }
-    }, [club])
+    }, [clubId])
 
     useEffect(() => {
         generateBar()

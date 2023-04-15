@@ -3,20 +3,11 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 
 import assert from 'assert';
 
-async function findClub(name: string){
-    var result = await prisma.clubs.findUnique({
-        where: {
-            name: name,
-        },
-    })
-    return result;
-}
-
-async function findSeries(name: string, club: any){
+async function findSeries(seriesName: string, clubId: string){
     var result = await prisma.series.findFirst({
         where: {
-            name: name,
-            clubId: club.id
+            name: seriesName,
+            clubId: clubId
         },
     })
     return result;
@@ -28,19 +19,18 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
         // check if we have all data.
         // The website stops this, but just in case
         try {
-            assert.notStrictEqual(undefined, req.body.name, 'Name required');
-            assert.notStrictEqual(undefined, req.body.club, 'Club required');
+            assert.notStrictEqual(undefined, req.body.seriesName, 'Name required');
+            assert.notStrictEqual(undefined, req.body.clubId, 'Club required');
         } catch (bodyError) {
             res.json({error: true, message: "information missing"});
             return;
         }
         
-        var name = req.body.name
-        var club = req.body.club
+        var seriesName = req.body.seriesName
+        var clubId = req.body.clubId
 
-        club = await findClub(club)
-        if (club) {
-            var Series = await findSeries(name, club)
+        var Series = await findSeries(seriesName, clubId)
+        if (Series) {
             if (Series) {
                 res.json({error: false, series: Series});
                 return;
