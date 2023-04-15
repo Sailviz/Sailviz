@@ -318,15 +318,15 @@ const Club = () => {
 
     return (
         <Dashboard>
-            <div className="w-full flex flex-row items-center justify-start h-full">
-                <div id="leftBar" className='flex basis-3/12 flex-col justify-start h-full border-pink-500 border-r-2'>
+            <div className="w-full flex flex-row items-center justify-start panel-height">
+                <div id="leftBar" className='flex basis-3/12 flex-col justify-start h-full border-pink-500 border-r-2 overflow-y-auto'>
                     <div className='w-full flex cursor-pointer' onClick={showSettings}>
-                        <div className='w-full p-4 bg-pink-500 text-lg font-extrabold text-gray-700'>
+                        <div className='w-full p-4 bg-pink-500 text-lg font-extrabold text-gray-700 over'>
                             <p>Overview</p>
                         </div>
                     </div>
                 </div>
-                <div id="page" className='flex basis-9/12 h-full w-full'>
+                <div id="page" className='flex basis-9/12 h-full w-full overflow-y-auto'>
                     <div id="settings" className="">
                         <p className="text-6xl font-extrabold text-gray-700 p-6">
                             Overview

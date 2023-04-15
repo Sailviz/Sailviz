@@ -1,3 +1,9 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+
+.panel-height {
+    /* this should be -80px but 75 fits nicely */
+    height: calc(100vh - 75px); 
+}
