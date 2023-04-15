@@ -3,22 +3,7 @@ import dayjs from 'dayjs';
 import { createColumnHelper, flexRender, getCoreRowModel, RowSelection, useReactTable } from '@tanstack/react-table'
 import * as DB from './apiMethods';
 import Select from 'react-select';
-import { setEnvironmentData } from 'worker_threads';
 
-
-type RaceDataType = {
-    [key: string]: any,
-    id: string,
-    number: number,
-    OOD: string,
-    AOD: string,
-    SO: string,
-    ASO: string,
-    results: any,
-    Time: string,
-    Type: string,
-    seriesId: string
-};
 
 const raceOptions = [{ value: "Pursuit", label: "Pursuit" }, { value: "Handicap", label: "Handicap" }]
 
