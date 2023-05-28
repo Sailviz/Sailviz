@@ -214,3 +214,41 @@ export async function setBoats(clubId: string, data: BoatDataType[]): Promise<Cl
             }
         });
 };
+
+export async function createRaceEntry(raceId: string): Promise<ResultsDataType> {
+    const body = {
+        "raceId": raceId,
+    }
+    return await fetch(`${server}/api/CreateRaceEntry`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+    })
+        .then((res) => res.json())
+        .then(async (data) => {
+            if (data && data.error) {
+                console.log(data.message)
+            } else {
+                return data.result
+            }
+        });
+};
+
+export async function updateResultById(result: ResultsDataType): Promise<RaceDataType> {
+    const body = {
+        result: result,
+    }
+    return await fetch(`${server}/api/UpdateResultById`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+    })
+        .then((res) => res.json())
+        .then(async (data) => {
+            if (data && data.error) {
+                console.log(data.message)
+            } else {
+                return data.race
+            }
+        });
+};

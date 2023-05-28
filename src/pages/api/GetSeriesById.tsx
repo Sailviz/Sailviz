@@ -3,8 +3,8 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 
 import assert from 'assert';
 
-async function findSeries(seriesId: any){
-    var result = await prisma.series.findFirst({
+async function findSeries(seriesId: any) {
+    var result = await prisma.series.findUnique({
         where: {
             id: seriesId
         },
@@ -20,18 +20,18 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
             assert.notStrictEqual(undefined, req.body.seriesId);
 
         } catch (bodyError) {
-            res.json({error: true, message: "information missing"});
+            res.json({ error: true, message: "information missing" });
             return;
         }
-        
+
         var seriesId = req.body.seriesId
 
         var series = await findSeries(seriesId)
         if (series) {
-            res.json({error: false, series: series});
+            res.json({ error: false, series: series });
         } else {
             // User exists
-            res.json({error: true, message: 'series not found'});
+            res.json({ error: true, message: 'series not found' });
         }
     }
 };

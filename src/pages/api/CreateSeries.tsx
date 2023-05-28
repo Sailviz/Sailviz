@@ -3,7 +3,7 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 import assert from 'assert';
 
 
-async function findSeries(seriesName: string, clubId: any){
+async function findSeries(seriesName: string, clubId: any) {
     var result = await prisma.series.findFirst({
         where: {
             name: seriesName,
@@ -13,12 +13,16 @@ async function findSeries(seriesName: string, clubId: any){
     return result;
 }
 
-async function createSeries(seriesName: string, clubId: string){
+async function createSeries(seriesName: string, clubId: string) {
     var res = await prisma.series.create({
         data: {
             name: seriesName,
-            clubId: clubId,
-            settings: {}
+            settings: {},
+            club: {
+                connect: {
+                    id: clubId
+                }
+            }
         },
     })
     return res;
@@ -32,20 +36,20 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
             assert.notStrictEqual(undefined, req.body.seriesName, 'Name required');
             assert.notStrictEqual(undefined, req.body.clubId, 'Club required');
         } catch (bodyError) {
-            res.json({error: true, message: "information missing"});
+            res.json({ error: true, message: "information missing" });
             return;
         }
-        
+
         var seriesName = req.body.seriesName
         var clubId = req.body.clubId
         var ExistingSeries = await findSeries(seriesName, clubId)
         if (!ExistingSeries) {
             var Series = await createSeries(seriesName, clubId)
-            res.json({error: false, series: Series})
+            res.json({ error: false, series: Series })
             return
         }
         else {
-            res.json({error: true, message: 'Something went wrong creating Series'});
+            res.json({ error: true, message: 'Something went wrong creating Series' });
         }
     }
 };

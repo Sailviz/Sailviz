@@ -9,7 +9,11 @@ async function findSeries(clubId: any) {
             clubId: clubId
         },
         include: {
-            races: true,
+            races: {
+                include: {
+                    results: true
+                }
+            }
         }
     })
     return result;

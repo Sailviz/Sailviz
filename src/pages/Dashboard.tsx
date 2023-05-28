@@ -17,58 +17,48 @@ const Club = () => {
     var [clubId, setClubId] = useState<string>("")
 
     var [activeSeriesData, setActiveSeriesData] = useState<SeriesDataType>({
-        "id": "",
-        "name": "",
-        "clubId": "",
-        "settings": {
-            "numberToCount": 0
+        id: "",
+        name: "",
+        clubId: "",
+        settings: {
+            numberToCount: 0
         },
-        "races": []
+        races: []
     })
     var [activeRaceData, setActiveRaceData] = useState<RaceDataType>(({
-        "id": "",
-        "number": 0,
-        "dateTime": "",
-        "OOD": "",
-        "AOD": "",
-        "SO": "",
-        "ASO": "",
-        "results": [{
-            "Helm": "",
-            "Crew": "",
-            "BoatClass": "",
-            "BoatNumber": "",
-            "Time": 0,
-            "Laps": 0,
-            "Position": 0
-        }],
-        "Time": "",
-        "Type": "",
-        "seriesId": ""
+        id: "",
+        number: 0,
+        Time: "",
+        OOD: "",
+        AOD: "",
+        SO: "",
+        ASO: "",
+        results: [],
+        Type: "",
+        seriesId: ""
     }))
 
-    var [seriesData, setSeriesData] = useState<SeriesDataType[]>([])
+    const [seriesData, setSeriesData] = useState<SeriesDataType[]>([])
 
-    var [boatData, setBoatData] = useState<BoatDataType[]>([])
-
-    var [updateState, setUpdateState] = useState(0)
+    const [boatData, setBoatData] = useState<BoatDataType[]>([])
 
 
     //adds an entry to a race and updates database
     const addRaceEntry = async (id: string) => {
-        let newRaceData: RaceDataType = activeRaceData
-        const entry: ResultsDataType = {
-            Helm: "",
-            Crew: "",
-            BoatClass: "",
-            BoatNumber: "",
-            Time: 0,
-            Laps: 0,
-            Position: 0
-        }
-        newRaceData.results.push(entry)
-        setActiveRaceData(newRaceData)
-        DB.updateRaceSettings(newRaceData)
+        console.log(activeRaceData)
+        const entry = await DB.createRaceEntry(id)
+        setActiveRaceData({ ...activeRaceData, results: activeRaceData.results.concat(entry) })
+    }
+
+    const updateRaceEntry = async (result: ResultsDataType) => {
+        console.log(result)
+
+        setActiveRaceData(await DB.updateResultById(result))
+        //calculateResults()
+    }
+
+    const removeRaceEntry = () => {
+
     }
 
     const createHeader = (series: any) => {
@@ -126,9 +116,7 @@ const Club = () => {
 
     const generateBar = () => {
         removeChildren(document.getElementById("leftBar"))
-        for (const element in seriesData) {
-            var data = seriesData[element]
-            if (data == undefined || data.races == undefined) { return }
+        seriesData.forEach(data => {
             createHeader(data)
             data.races.sort((a: any, b: any) => {
                 return a.number - b.number;
@@ -136,7 +124,7 @@ const Club = () => {
             for (const race in data.races) {
                 createChild(data.races[race])
             }
-        }
+        })
     }
 
     const removeChildren = (parent: any) => {
@@ -150,13 +138,11 @@ const Club = () => {
         var series = document.getElementById('series')
         if (series == null) { return }
         //set active series
-        for (var s = 0; s < seriesData.length; s++) {
-            if (seriesData[s]?.id == element.id) {
-                if (seriesData[s] != undefined) {
-                    setActiveSeriesData(seriesData[s] as SeriesDataType)
-                }
+        seriesData.forEach(data => {
+            if (data.id == element.id) {
+                setActiveSeriesData(data)
             }
-        }
+        })
         series.classList.remove('hidden')
     }
 
@@ -165,19 +151,16 @@ const Club = () => {
         hidePages()
         //set active race
         console.log(seriesData)
-        for (var s = 0; s < seriesData.length; s++) {
-            var races = seriesData[s]?.races
+        seriesData.forEach(series => {
+            var races = series.races
             if (!races) return
-            for (var r = 0; r < races.length; r++) {
-                if (races[r]?.id == raceId) {
-                    if (races[r] != undefined) {
-                        setActiveRaceData(races[r] as RaceDataType)
-                        setActiveSeriesData(seriesData[s] as SeriesDataType)
-                        console.log(activeRaceData)
-                    }
+            races.forEach(race => {
+                if (race.id == raceId) {
+                    setActiveRaceData(race)
+                    setActiveSeriesData(series)
                 }
-            }
-        }
+            })
+        })
         var race = document.getElementById('race')
         if (race == null) { return }
         race.classList.remove('hidden')
@@ -186,25 +169,25 @@ const Club = () => {
     const expandSeries = (id: any) => {
         var title = document.getElementById(id)
         var titleText = title?.firstElementChild?.firstElementChild
-        if (titleText == null) { return }
         var children = document.getElementsByClassName(id) as unknown as HTMLElement[]
-        for (var i = 0; i < children.length; i++) {
-            var child = children[i]
-            if (!child) { return }
-
+        children.forEach(child => {
             if (child.style.display == 'none') {
                 //show
                 child.style.display = 'block'
-                titleText.classList.add('rotate-90')
-                titleText.classList.remove('rotate-0')
+                if (titleText) {
+                    titleText.classList.add('rotate-90')
+                    titleText.classList.remove('rotate-0')
+                }
 
             } else {
                 //hide
                 child.style.display = 'none'
-                titleText.classList.add('rotate-0')
-                titleText.classList.remove('rotate-90')
+                if (titleText) {
+                    titleText.classList.add('rotate-0')
+                    titleText.classList.remove('rotate-90')
+                }
             }
-        }
+        })
 
     }
     const hidePages = () => {
@@ -228,19 +211,15 @@ const Club = () => {
         setActiveRaceData(newRaceData)
     }
     const saveRaceType = (newValue: any) => {
-        let newRaceData: RaceDataType = activeRaceData
-        newRaceData["Type"] = newValue.value
-        setActiveRaceData(newRaceData)
+        setActiveRaceData({ ...activeRaceData, Type: newValue.value })
     }
 
     const saveRaceDate = (e: ChangeEvent<HTMLInputElement>) => {
-        let newRaceData: RaceDataType = activeRaceData
         var time = e.target.value
         time = time.replace('T', ' ')
         var day = dayjs(time)
         if (day.isValid()) {
-            newRaceData[e.target.id] = time
-            setActiveRaceData(newRaceData)
+            setActiveRaceData({ ...activeRaceData, Time: time })
         } else {
             console.log("date is not valid input")
         }
@@ -258,32 +237,30 @@ const Club = () => {
     const updateRanges = () => {
         const range = document.getElementById('numberToCount') as HTMLInputElement
         const rangeV = document.getElementById('rangeV') as HTMLInputElement
-        const newValue = Number( (parseInt(range.value) - parseInt(range.min)) * 100 / (parseInt(range.max) - parseInt(range.min)))
+        const newValue = Number((parseInt(range.value) - parseInt(range.min)) * 100 / (parseInt(range.max) - parseInt(range.min)))
         const newPosition = 10 - (newValue * 0.2);
         rangeV.innerHTML = `<span>${range.value}</span>`;
         rangeV.style.left = `calc(${newValue}% + (${newPosition}px))`;
     }
 
-    const updateBoatsToLatest = async() => {
+    const updateBoatsToLatest = async () => {
         setBoatData(await DB.getRYAPY())
-        setUpdateState(updateState + 1)
         DB.setBoats(clubId, await DB.getRYAPY())
     }
 
     const addSeries = async () => {
-        var series: SeriesDataType = await DB.createSeries(clubId, "new series")
-        console.log(series)
-        series.races = []
-        console.log(seriesData)
-        setSeriesData(seriesData.concat(series))
+        var newSeries = await DB.createSeries(clubId, "new newSeries")
+        newSeries.races = []
+        setSeriesData(seriesData.concat(newSeries))
     }
 
     const addRaceToSeries = async () => {
-        var race: RaceDataType = await DB.createRace(clubId, activeSeriesData.id)
+        var race = await DB.createRace(clubId, activeSeriesData.id)
         var newSeriesData: SeriesDataType[] = seriesData.map(obj => ({ ...obj }))
         newSeriesData[newSeriesData.findIndex(x => x.id === race.seriesId)]?.races.push(race)
         setSeriesData(newSeriesData)
     }
+
     const removeRace = async (raceId: string) => {
         console.log("updating main copy of series")
         let newSeriesData: SeriesDataType[] = seriesData
@@ -295,7 +272,6 @@ const Club = () => {
         newSeriesData[seriesIndex]?.races.splice(raceIndex, 1)
         console.log(newSeriesData)
         setSeriesData(newSeriesData)
-        setUpdateState(updateState + 1) //this forces the component to update
     }
 
     const removeSeries = async (raceId: string) => {
@@ -306,7 +282,6 @@ const Club = () => {
         newSeriesData.splice(seriesIndex, 1)
         console.log(newSeriesData)
         setSeriesData(newSeriesData)
-        setUpdateState(updateState + 1) //this forces the component to update
     }
 
     useEffect(() => {
@@ -331,7 +306,7 @@ const Club = () => {
                 } else {
                     console.log("could not find boats")
                 }
-                
+
             }
             fetchBoats()
 
@@ -340,12 +315,7 @@ const Club = () => {
 
     useEffect(() => {
         generateBar()
-    }, [seriesData, updateState]);
-
-    useEffect(() => {
-        setUpdateState(updateState + 1)
-        updateRanges()
-    }, [seriesData, activeRaceData.id, activeSeriesData]);
+    }, [seriesData]);
 
     return (
         <Dashboard>
@@ -363,10 +333,10 @@ const Club = () => {
                             Overview
                         </p>
                         <p className='text-2xl font-bold text-gray-700 p-6'>
-                                Series
+                            Series
                         </p>
                         <div className='p-6'>
-                            <ClubTable data={seriesData} key={updateState} removeSeries={removeSeries}/>
+                            <ClubTable data={seriesData} key={seriesData} removeSeries={removeSeries} />
                         </div>
                         <div className="p-6">
                             <p onClick={addSeries} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
@@ -374,15 +344,15 @@ const Club = () => {
                             </p>
                         </div>
                         <p className='text-2xl font-bold text-gray-700 p-6'>
-                                Boats
+                            Boats
                         </p>
                         <div className="px-5 w-3/4">
-                            <p onClick={(e) => {confirm("are you sure you want to do this?")?updateBoatsToLatest(): null;}} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
+                            <p onClick={(e) => { confirm("are you sure you want to do this?") ? updateBoatsToLatest() : null; }} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
                                 Update list to match latest RYA values
                             </p>
                         </div>
                         <div className='p-6'>
-                            <BoatTable data={boatData} key={updateState} />
+                            <BoatTable data={boatData} key={boatData} />
                         </div>
 
 
@@ -392,7 +362,7 @@ const Club = () => {
                             {activeSeriesData.name}
                         </p>
                         <div className='p-6'>
-                            <SeriesTable data={activeSeriesData.races} key={updateState} removeRace={removeRace} />
+                            <SeriesTable data={activeSeriesData.races} key={activeSeriesData.races} removeRace={removeRace} />
                         </div>
                         <div className="p-6">
                             <p onClick={addRaceToSeries} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
@@ -404,7 +374,7 @@ const Club = () => {
                                 Races To Count
                             </p>
                             {/* padding for range bubble */}
-                            <div className='h-6'></div> 
+                            <div className='h-6'></div>
                             <div className='range-wrap'>
                                 <div className='range-value' id='rangeV'></div>
                                 <input type="range"
@@ -514,7 +484,7 @@ const Club = () => {
                             </div>
                         </div>
                         <div className='p-6 w-3/4'>
-                            <RaceResultsTable data={activeRaceData} key={seriesData} />
+                            <RaceResultsTable data={activeRaceData.results} key={activeRaceData.id} removeEntrant={removeRaceEntry} updateEntrant={updateRaceEntry} />
                         </div>
                         <div className="p-6 w-3/4">
                             <p onClick={(e) => addRaceEntry(activeRaceData.id)} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">

@@ -12,18 +12,21 @@ async function findRace(seriesId: any) {
     return result;
 }
 
-async function createRace(number: number, seriesId: any, time: any, results: any) {
+async function createRace(number: number, seriesId: any, time: any) {
     var res = await prisma.race.create({
         data: {
             number: number,
-            seriesId: seriesId,
             Time: time,
             Type: "Handicap",
             OOD: "Unknown",
             AOD: "Unknown",
             SO: "Unknown",
             ASO: "Unknown",
-            results: results
+            series: {
+                connect: {
+                    id: seriesId
+                }
+            }
         },
     })
     return res;
@@ -46,15 +49,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
         var seriesId = req.body.seriesId
         var clubId = req.body.clubId
         var time = req.body.time
-        var results = [{
-            "Helm": "",
-            "Crew": "",
-            "BoatClass": "",
-            "BoatNumber": "",
-            "Time": 0,
-            "Laps": 0,
-            "Position": 0
-        }]
+
         var races: RaceDataType[] = (await findRace(seriesId)) as RaceDataType[]
         var number = 1
         //this numbers the race with the lowest number that is not being used.
@@ -62,7 +57,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
             number++;
         }
         if (races) {
-            var race = await createRace(number, seriesId, time, results)
+            var race = await createRace(number, seriesId, time)
             res.json({ error: false, race: race });
         }
         else {

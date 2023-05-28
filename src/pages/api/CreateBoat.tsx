@@ -1,28 +1,34 @@
 import prisma from '../../components/prisma'
 import type { NextApiRequest, NextApiResponse } from 'next'
-
-const jwt = require('jsonwebtoken');
-const bcrypt = require('bcrypt');
 import assert from 'assert';
-const saltRounds = 10;
-const jwtSecret = process.env.jwtSecret;
 
-async function findBoat(name: string){
-    var result = await prisma.boats.findUnique({
+async function findBoat(name: string, clubId: string) {
+    var result = await prisma.boats.findMany({
         where: {
-            name: name,
+            AND: [
+                {
+                    name: name
+                },
+                {
+                    clubId: clubId
+                }
+            ]
         },
     })
     return result;
 }
 
-async function createBoat(name: string, crew: number, py: number, clubId: string){
+async function createBoat(name: string, crew: number, py: number, clubId: string) {
     var boat = await prisma.boats.create({
         data: {
             name: name,
             crew: crew,
             py: py,
-            clubId: clubId
+            club: {
+                connect: {
+                    id: clubId
+                }
+            }
         },
     })
     return boat;
@@ -39,27 +45,27 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
             assert.notStrictEqual(undefined, req.body.clubId);
 
         } catch (bodyError) {
-            res.json({error: true, message: "information missing"});
+            res.json({ error: true, message: "information missing" });
             return;
         }
-        
+
         var name = req.body.name
         var crew = req.body.crew
         var py = req.body.py
         var clubId = req.body.clubId
 
-        var ExistingBoat = await findBoat(name)
+        var ExistingBoat = await findBoat(name, clubId)
         if (!ExistingBoat) {
             var creationResult = await createBoat(name, crew, py, clubId)
             if (creationResult) {
-                res.json({error: false, id: creationResult});
+                res.json({ error: false, id: creationResult });
                 return;
             }
-            else{
-                res.json({error: true, message: 'Something went wrong crating boat'});
+            else {
+                res.json({ error: true, message: 'Something went wrong crating boat' });
             }
         } else {
-            res.json({error: true, message: 'Boat already exists'});
+            res.json({ error: true, message: 'Boat already exists' });
             return;
         }
     }
