@@ -12,12 +12,11 @@ async function findRace(raceId: any) {
     return result;
 }
 
-async function createEntry(raceId: string) {
+async function createEntry(raceId: string,) {
     var res = await prisma.result.create({
         data: {
             Helm: "",
             Crew: "",
-            BoatId: "",
             SailNumber: 0,
             Time: "",
             CorrectedTime: 0,
@@ -27,8 +26,8 @@ async function createEntry(raceId: string) {
                 connect: {
                     id: raceId
                 }
-            }
-
+            },
+            boat: {}
         }
     })
     return res;

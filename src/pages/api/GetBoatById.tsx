@@ -3,17 +3,10 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 
 import assert from 'assert';
 
-async function findRace(raceId: any) {
-    var result = await prisma.race.findFirst({
+async function findRace(boatId: any) {
+    var result = await prisma.boats.findFirst({
         where: {
-            id: raceId
-        },
-        include: {
-            results: {
-                include: {
-                    boat: true
-                }
-            }
+            id: boatId
         }
     })
     return result;
@@ -24,21 +17,21 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
         // check if we have all data.
         // The website stops this, but just in case
         try {
-            assert.notStrictEqual(undefined, req.body.raceId);
+            assert.notStrictEqual(undefined, req.body.boatId);
 
         } catch (bodyError) {
             res.json({ error: true, message: "information missing" });
             return;
         }
 
-        var raceId = req.body.raceId
+        var boatId = req.body.boatId
 
-        var race = await findRace(raceId)
-        if (race) {
-            res.json({ error: false, race: race });
+        var boat = await findRace(boatId)
+        if (boat) {
+            res.json({ error: false, boat: boat });
         } else {
             // User exists
-            res.json({ error: true, message: 'race not found' });
+            res.json({ error: true, message: 'boat not found' });
         }
     }
 };

@@ -1,7 +1,7 @@
-import React, { ChangeEvent, useState } from 'react';
+import React, { ChangeEvent, useState, useEffect } from 'react';
 import { createColumnHelper, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table'
 import Select from 'react-select';
-
+import * as DB from '../components/apiMethods';
 
 const Text = ({ ...props }) => {
     const initialValue = props.getValue()
@@ -10,12 +10,9 @@ const Text = ({ ...props }) => {
     const onBlur = (e: ChangeEvent<HTMLInputElement>) => {
         const original = props.row.original
         original[props.column.id] = e.target.value
-        props.updateEntrant(original)
+        props.updateResult(original)
     }
 
-    React.useEffect(() => {
-        setValue(initialValue)
-    }, [initialValue])
     return (
         <>
             <input type="text"
@@ -36,7 +33,7 @@ const Number = ({ ...props }: any) => {
     const onBlur = (e: ChangeEvent<HTMLInputElement>) => {
         let original = props.row.original
         original[props.column.id] = parseInt(e.target.value)
-        props.updateEntrant(original)
+        props.updateResult(original)
     }
 
     React.useEffect(() => {
@@ -61,8 +58,9 @@ const Time = ({ ...props }: any) => {
 
     const onBlur = (e: ChangeEvent<HTMLInputElement>) => {
         let original = props.row.original
+        console.log(e.target.value)
         original[props.column.id] = e.target.value
-        props.updateEntrant(original)
+        props.updateResult(original)
     }
 
     React.useEffect(() => {
@@ -83,31 +81,40 @@ const Time = ({ ...props }: any) => {
 };
 
 const Class = ({ ...props }: any) => {
-    const initialValue = props.getValue()
+    var initialValue = props.getValue()
+    if (initialValue == null) {
+        initialValue = { value: "", label: "" }
+    }
     const [value, setValue] = React.useState(initialValue)
 
+    let boats: BoatDataType[] = []
     let options: any = []
+    useEffect(() => {
+        const fetchBoats = async () => {
+            boats = await DB.getBoats(props.clubId)
+            boats.forEach(boat => {
+                options.push({ value: boat, label: boat.name })
+            })
+        }
+        if (props.clubId) {
+            fetchBoats()
+        }
+    }, [value]);
 
-    //need to generate list of options
 
     const onBlur = (newValue: any) => {
         let original = props.row.original
-        original[props.column.id] = newValue
-        if (props.column.id == "Class") {
-            //Need to get PY of boat.
-            original.PY = 23
-        }
-        props.updateEntrant(original)
+        console.log(newValue)
+        original.boat = newValue
+        props.updateResult(original)
     }
 
-    React.useEffect(() => {
-        setValue(initialValue)
-    }, [initialValue])
+
     return (
         <>
             <Select
                 className='w-max min-w-full'
-                defaultValue={{ value: value, label: value }}
+                defaultValue={{ value: value.id, label: value.name }}
                 key={value}
                 onChange={(e) => { setValue(e?.value); onBlur(e?.value) }}
                 options={options}
@@ -119,8 +126,8 @@ const Class = ({ ...props }: any) => {
 
 const Remove = ({ ...props }: any) => {
     const onClick = () => {
-        console.log(props.id)
-        props.removeEntrant(props.id)
+        console.log(props.row.original.id)
+        props.deleteResult(props.row.original.id)
     }
     return (
         <>
@@ -136,20 +143,67 @@ const Remove = ({ ...props }: any) => {
 const columnHelper = createColumnHelper<ResultsDataType>()
 
 const RaceResultsTable = (props: any) => {
-    let [data, setData] = useState(props.data)
-    console.log(data)
-    const removeEntrant = (id: any) => {
-        props.removeEntrant(id)
+    let [data, setData] = useState<ResultsDataType[]>(props.data)
+    let clubId = props.clubId
+    let raceId = props.raceId
+
+    const deleteResult = (id: any) => {
+        props.deleteResult(id)
+        const tempdata: ResultsDataType[] = [...data]
+        tempdata.splice(tempdata.findIndex((x: ResultsDataType) => x.id === id), 1)
+        setData(tempdata)
     }
 
-    const updateEntrant = (Entrant: ResultsDataType) => {
-        props.updateEntrant(Entrant)
-        console.log(Entrant)
+    const createResult = async (id: any) => {
+        var result = (await props.createResult(id))
+        setData([...data, result])
+    }
+
+
+    const updateResult = (Result: ResultsDataType) => {
+        props.updateResult(Result)
+        console.log(Result)
         const tempdata = data
-        tempdata[tempdata.findIndex((x: ResultsDataType) => x.id === Entrant.id)] = Entrant
+        tempdata[tempdata.findIndex((x: ResultsDataType) => x.id === Result.id)] = Result
         console.log(tempdata)
-        //setData(tempdata)
-        setData([...data, data.splice(data.findIndex((x: ResultsDataType) => x.id === Entrant.id), 1, Entrant)])
+        setData(tempdata)
+        calculateResults()
+    }
+
+    const calculateResults = () => {
+        //most nuber of laps.
+        const maxLaps = Math.max.apply(null, data.map(function (o: ResultsDataType) { return o.Laps }))
+        if (!(maxLaps > 0)) {
+            console.log("max laps not more than one")
+            return
+        }
+        const resultsData = [...data]
+
+        //calculate corrected time
+        resultsData.forEach(result => {
+            if (result.Time == "" || result.boat == null || result.Laps == 0)
+                return
+            const timeParts: string[] = result.Time.split(':');
+            let seconds = 1
+            if (timeParts[0] != undefined && timeParts[1] != undefined && timeParts[2] != undefined) {
+                seconds = (+timeParts[0]) * 60 * 60 + (+timeParts[1]) * 60 + (+timeParts[2]);
+            }
+            result.CorrectedTime = (seconds * 1000 * (maxLaps / result.Laps)) / result.boat.py
+        });
+
+        //calculate finish position
+
+        const sortedResults = resultsData.sort((a, b) => a.CorrectedTime - b.CorrectedTime);
+        sortedResults.forEach((result, index) => {
+            result.Position = index + 1;
+        });
+
+        sortedResults.forEach(result => {
+            DB.updateResultById(result)
+        })
+
+        setData(sortedResults)
+        console.log(sortedResults)
     }
 
 
@@ -158,41 +212,41 @@ const RaceResultsTable = (props: any) => {
         columns: [
             columnHelper.accessor('Helm', {
                 header: "Helm",
-                cell: props => <Text {...props} updateEntrant={updateEntrant} />
+                cell: props => <Text {...props} updateResult={updateResult} />
             }),
             columnHelper.accessor('Crew', {
                 header: "Crew",
-                cell: props => <Text {...props} updateEntrant={updateEntrant} />
+                cell: props => <Text {...props} updateResult={updateResult} />
             }),
-            columnHelper.accessor('BoatId', {
+            columnHelper.accessor('boat', {
                 header: "Class",
                 id: "Class",
                 size: 300,
-                cell: props => <Class {...props} updateEntrant={updateEntrant} />
+                cell: props => <Class {...props} updateResult={updateResult} clubId={clubId} />
             }),
             columnHelper.accessor('SailNumber', {
                 header: "Sail Number",
-                cell: props => <Number {...props} updateEntrant={updateEntrant} />
+                cell: props => <Number {...props} updateResult={updateResult} />
             }),
             columnHelper.accessor('Time', {
                 header: "Time",
-                cell: props => <Time {...props} updateEntrant={updateEntrant} />
+                cell: props => <Time {...props} updateResult={updateResult} />
             }),
             columnHelper.accessor('Laps', {
                 header: "Laps",
-                cell: props => <Number {...props} updateEntrant={updateEntrant} />
+                cell: props => <Number {...props} updateResult={updateResult} />
             }),
             columnHelper.accessor('CorrectedTime', {
                 header: "Corrected Time",
-                cell: props => <Number {...props} updateEntrant={updateEntrant} />
+                cell: props => <Number {...props} updateResult={updateResult} />
             }),
             columnHelper.accessor('Position', {
                 header: "Position",
-                cell: props => <Number {...props} updateEntrant={updateEntrant} />
+                cell: props => <Number {...props} updateResult={updateResult} />
             }),
             columnHelper.display({
                 id: "Remove",
-                cell: props => <Remove {...props} removeEntrant={removeEntrant} />
+                cell: props => <Remove {...props} deleteResult={deleteResult} />
             }),
         ],
         getCoreRowModel: getCoreRowModel()
@@ -228,6 +282,11 @@ const RaceResultsTable = (props: any) => {
                     ))}
                 </tbody>
             </table>
+            <div className="p-6 w-3/4">
+                <p onClick={() => createResult(raceId)} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
+                    Add Entry
+                </p>
+            </div>
         </div>
     )
 }

@@ -11,7 +11,11 @@ async function findSeries(clubId: any) {
         include: {
             races: {
                 include: {
-                    results: true
+                    results: {
+                        include: {
+                            boat: true
+                        }
+                    }
                 }
             }
         }

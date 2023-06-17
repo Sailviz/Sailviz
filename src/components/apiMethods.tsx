@@ -40,7 +40,26 @@ export async function getBoats(clubId: string): Promise<BoatDataType[]> {
         });
 };
 
-export async function updateRaceSettings(raceData: RaceDataType) {
+export async function getBoatById(boatId: string): Promise<BoatDataType> {
+    const body = {
+        "boatId": boatId
+    }
+    return await fetch(`${server}/api/GetBoatById`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+    })
+        .then((res) => res.json())
+        .then((data) => {
+            if (data && data.error) {
+                console.log(data.message)
+            } else {
+                return (data.boat)
+            }
+        });
+};
+
+export async function updateRaceById(raceData: RaceDataType) {
     const body = {
         "race": raceData
     }
@@ -220,6 +239,25 @@ export async function createRaceEntry(raceId: string): Promise<ResultsDataType> 
         "raceId": raceId,
     }
     return await fetch(`${server}/api/CreateRaceEntry`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+    })
+        .then((res) => res.json())
+        .then(async (data) => {
+            if (data && data.error) {
+                console.log(data.message)
+            } else {
+                return data.result
+            }
+        });
+};
+
+export async function DeleteResultById(resultId: string): Promise<ResultsDataType> {
+    const body = {
+        "resultId": resultId,
+    }
+    return await fetch(`${server}/api/DeleteResultById`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),

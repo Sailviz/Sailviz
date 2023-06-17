@@ -22,11 +22,12 @@ type SeriesDataType = {
 };
 
 type ResultsDataType = {
+  [key: string]: any;
   id: string;
   raceId: string;
   Helm: string;
   Crew: string;
-  BoatId: string;
+  boat: BoatDataType;
   SailNumber: number;
   Time: string;
   CorrectedTime: number;

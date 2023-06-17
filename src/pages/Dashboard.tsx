@@ -44,22 +44,23 @@ const Club = () => {
 
 
     //adds an entry to a race and updates database
-    const addRaceEntry = async (id: string) => {
+    const createResult = async (id: string) => {
         console.log(activeRaceData)
         const entry = await DB.createRaceEntry(id)
         setActiveRaceData({ ...activeRaceData, results: activeRaceData.results.concat(entry) })
+        return entry
     }
 
-    const updateRaceEntry = async (result: ResultsDataType) => {
+    const updateResult = async (result: ResultsDataType) => {
         console.log(result)
 
-        setActiveRaceData(await DB.updateResultById(result))
-        //calculateResults()
+        await DB.updateResultById(result)
     }
 
-    const removeRaceEntry = () => {
-
+    const deleteResult = async (resultId: string) => {
+        await DB.DeleteResultById(resultId)
     }
+
 
     const createHeader = (series: any) => {
         var li = document.createElement('li');
@@ -274,7 +275,7 @@ const Club = () => {
         setSeriesData(newSeriesData)
     }
 
-    const removeSeries = async (raceId: string) => {
+    const removeSeries = async () => {
         console.log("updating main copy of series")
         let newSeriesData: SeriesDataType[] = seriesData
         var seriesIndex = newSeriesData.findIndex(y => y.id == activeSeriesData.id)
@@ -404,7 +405,7 @@ const Club = () => {
                                     defaultValue={activeRaceData.OOD}
                                     key={activeRaceData.id}
                                     onChange={saveRaceSettings}
-                                    onBlur={() => DB.updateRaceSettings(activeRaceData)}
+                                    onBlur={() => DB.updateRaceById(activeRaceData)}
                                 />
                             </div>
 
@@ -418,7 +419,7 @@ const Club = () => {
                                     defaultValue={activeRaceData.AOD}
                                     key={activeRaceData.id}
                                     onChange={saveRaceSettings}
-                                    onBlur={() => DB.updateRaceSettings(activeRaceData)}
+                                    onBlur={() => DB.updateRaceById(activeRaceData)}
                                 />
 
                             </div>
@@ -433,7 +434,7 @@ const Club = () => {
                                     defaultValue={dayjs(activeRaceData.Time).format('YYYY-MM-DDTHH:ss')}
                                     key={activeRaceData.id}
                                     onChange={saveRaceDate}
-                                    onBlur={() => DB.updateRaceSettings(activeRaceData)}
+                                    onBlur={() => DB.updateRaceById(activeRaceData)}
                                 />
                             </div>
 
@@ -449,7 +450,7 @@ const Club = () => {
                                     defaultValue={activeRaceData.SO}
                                     key={activeRaceData.id}
                                     onChange={saveRaceSettings}
-                                    onBlur={() => DB.updateRaceSettings(activeRaceData)}
+                                    onBlur={() => DB.updateRaceById(activeRaceData)}
                                 />
                             </div>
 
@@ -463,7 +464,7 @@ const Club = () => {
                                     defaultValue={activeRaceData.ASO}
                                     key={activeRaceData.id}
                                     onChange={saveRaceSettings}
-                                    onBlur={() => DB.updateRaceSettings(activeRaceData)}
+                                    onBlur={() => DB.updateRaceById(activeRaceData)}
                                 />
                             </div>
 
@@ -475,7 +476,7 @@ const Club = () => {
                                     <Select
                                         defaultValue={{ value: activeRaceData.Type, label: activeRaceData.Type }}
                                         key={activeRaceData.Type}
-                                        onBlur={() => DB.updateRaceSettings(activeRaceData)}
+                                        onBlur={() => DB.updateRaceById(activeRaceData)}
                                         onChange={saveRaceType}
                                         instanceId={useId()}
                                         className='w-full'
@@ -483,13 +484,8 @@ const Club = () => {
                                 </div>
                             </div>
                         </div>
-                        <div className='p-6 w-3/4'>
-                            <RaceResultsTable data={activeRaceData.results} key={activeRaceData.id} removeEntrant={removeRaceEntry} updateEntrant={updateRaceEntry} />
-                        </div>
-                        <div className="p-6 w-3/4">
-                            <p onClick={(e) => addRaceEntry(activeRaceData.id)} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
-                                Add Entry
-                            </p>
+                        <div className='p-6 w-full'>
+                            <RaceResultsTable data={activeRaceData.results} key={activeRaceData.id} deleteResult={deleteResult} updateResult={updateResult} createResult={createResult} clubId={clubId} raceId={activeRaceData.id} />
                         </div>
                     </div>
                 </div>

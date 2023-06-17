@@ -22,12 +22,13 @@ model Users {
 }
 
 model Boats {
-  id     String @id @unique @default(uuid())
-  name   String
-  crew   Int
-  py     Int
-  club   Clubs  @relation(fields: [clubId], references: [id])
-  clubId String
+  id      String   @id @unique @default(uuid())
+  name    String
+  crew    Int
+  py      Int
+  club    Clubs    @relation(fields: [clubId], references: [id])
+  clubId  String
+  results Result[]
 
   @@index([clubId])
 }
@@ -69,12 +70,13 @@ model Race {
 }
 
 model Result {
-  id            String @id @unique @default(uuid())
-  race          Race   @relation(fields: [raceId], references: [id])
+  id            String  @id @unique @default(uuid())
+  race          Race    @relation(fields: [raceId], references: [id])
   raceId        String
   Helm          String
   Crew          String
-  BoatId        String
+  boat          Boats?  @relation(fields: [boatId], references: [id])
+  boatId        String?
   SailNumber    Int
   Time          String
   CorrectedTime Float
@@ -82,4 +84,5 @@ model Result {
   Position      Int
 
   @@index([raceId])
+  @@index([boatId])
 }

@@ -3,9 +3,6 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 
 import assert from 'assert';
 
-type SettingsType = {
-    numberToCount: number
-}
 
 async function updateResult(result: ResultsDataType) {
     var res = await prisma.race.update({
@@ -20,13 +17,12 @@ async function updateResult(result: ResultsDataType) {
                     },
                     data: {
                         SailNumber: result.SailNumber,
-                        BoatId: result.BoatId,
                         CorrectedTime: result.CorrectedTime,
                         Crew: result.Crew,
                         Helm: result.Helm,
                         Laps: result.Laps,
                         Position: result.Position,
-                        Time: result.Time
+                        Time: result.Time,
                     }
                 }
             }
@@ -38,6 +34,36 @@ async function updateResult(result: ResultsDataType) {
     })
     return res;
 }
+
+async function updateBoat(result: ResultsDataType) {
+    var res = await prisma.race.update({
+        where: {
+            id: result.raceId
+        },
+        data: {
+            results: {
+                update: {
+                    where: {
+                        id: result.id
+                    },
+                    data: {
+                        boat: {
+                            connect: {
+                                id: result.boat.id
+                            }
+                        }
+                    }
+                }
+            }
+
+        },
+        include: {
+            results: true
+        }
+    })
+    return res;
+}
+
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
     if (req.method === 'POST') {
@@ -51,7 +77,9 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
             return;
         }
         var result = req.body.result
-
+        if (result.boat != null) {
+            await updateBoat(result)
+        }
         var race = await updateResult(result)
         if (race) {
             res.json({ error: false, race: race });
