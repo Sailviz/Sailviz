@@ -48,6 +48,9 @@ const Club = () => {
         console.log(activeRaceData)
         const entry = await DB.createRaceEntry(id)
         setActiveRaceData({ ...activeRaceData, results: activeRaceData.results.concat(entry) })
+        var data = await DB.getSeries(clubId)
+        var array = [...data]
+        setSeriesData(array)
         return entry
     }
 
@@ -55,10 +58,16 @@ const Club = () => {
         console.log(result)
 
         await DB.updateResultById(result)
+        var data = await DB.getSeries(clubId)
+        var array = [...data]
+        setSeriesData(array)
     }
 
     const deleteResult = async (resultId: string) => {
         await DB.DeleteResultById(resultId)
+        var data = await DB.getSeries(clubId)
+        var array = [...data]
+        setSeriesData(array)
     }
 
 
