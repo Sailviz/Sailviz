@@ -206,7 +206,6 @@ const RaceResultsTable = (props: any) => {
         console.log(sortedResults)
     }
 
-
     let table = useReactTable({
         data,
         columns: [
