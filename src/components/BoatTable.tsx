@@ -27,8 +27,8 @@ const BoatTable = (props: any) => {
         getCoreRowModel: getCoreRowModel(),
     })
     return (
-        <div key={props.data}>
-            <table>
+        <div key={props.data} className='overflow-scroll h-64 overflow-x-hidden'>
+            <table className='w-full'>
                 <thead>
                     {table.getHeaderGroups().map(headerGroup => (
                         <tr key={headerGroup.id}>
