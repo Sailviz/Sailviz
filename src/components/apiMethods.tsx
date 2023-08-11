@@ -98,6 +98,25 @@ export async function updateBoatById(boatData: BoatDataType) {
         });
 };
 
+export async function deleteBoatById(id: string): Promise<BoatDataType> {
+    const body = {
+        "id": id,
+    }
+    return await fetch(`${server}/api/DeleteBoatById`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+    })
+        .then((res) => res.json())
+        .then(async (data) => {
+            if (data && data.error) {
+                console.log(data.message)
+            } else {
+                return data.boat
+            }
+        });
+};
+
 export async function updateSeriesSettings(seriesData: SeriesDataType) {
     const body = {
         "series": seriesData
@@ -196,6 +215,8 @@ export async function deleteRace(id: string): Promise<RaceDataType> {
             }
         });
 };
+
+
 
 export async function getRYAPY(): Promise<BoatDataType[]> {
 

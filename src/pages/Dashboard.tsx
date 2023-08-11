@@ -265,6 +265,13 @@ const Club = () => {
         await DB.updateBoatById(boat)
     }
 
+    const deleteBoat = async (boat: BoatDataType) => {
+        const tempdata = boatData
+        tempdata.splice(tempdata.findIndex((x: BoatDataType) => x.id === boat.id), 1)
+        setBoatData([...tempdata])
+        await DB.deleteBoatById(boat.id)
+    }
+
     const addSeries = async () => {
         var newSeries = await DB.createSeries(clubId, "new newSeries")
         newSeries.races = []
@@ -369,7 +376,7 @@ const Club = () => {
                             </p>
                         </div>
                         <div className='p-6'>
-                            <BoatTable data={boatData} key={boatData} updateBoat={updateBoat} />
+                            <BoatTable data={boatData} key={boatData} updateBoat={updateBoat} deleteBoat={deleteBoat} />
                         </div>
 
 
