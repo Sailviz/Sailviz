@@ -173,7 +173,7 @@ const RaceResultsTable = (props: any) => {
     const calculateResults = () => {
         //most nuber of laps.
         const maxLaps = Math.max.apply(null, data.map(function (o: ResultsDataType) { return o.Laps }))
-        if (!(maxLaps > 0)) {
+        if (!(maxLaps >= 0)) {
             console.log("max laps not more than one")
             return
         }
