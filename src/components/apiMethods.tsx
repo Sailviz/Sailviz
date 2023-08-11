@@ -79,6 +79,25 @@ export async function updateRaceById(raceData: RaceDataType) {
         });
 };
 
+export async function updateBoatById(boatData: BoatDataType) {
+    const body = {
+        "boat": boatData
+    }
+    return await fetch(`${server}/api/UpdateBoatById`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+    })
+        .then((res) => res.json())
+        .then(async (data) => {
+            if (data && data.error) {
+                console.log(data.message)
+            } else {
+                console.log(data)
+            }
+        });
+};
+
 export async function updateSeriesSettings(seriesData: SeriesDataType) {
     const body = {
         "series": seriesData
