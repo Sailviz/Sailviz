@@ -105,6 +105,7 @@ const BoatTable = (props: any) => {
             }),
         ],
         getCoreRowModel: getCoreRowModel(),
+        getFilteredRowModel: getFilteredRowModel()
     })
 
     return (
