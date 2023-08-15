@@ -29,6 +29,29 @@ const Number = ({ ...props }: any) => {
     );
 };
 
+const Text = ({ ...props }) => {
+    const initialValue = props.getValue()
+    const [value, setValue] = React.useState(initialValue)
+
+    const onBlur = (e: ChangeEvent<HTMLInputElement>) => {
+        const original = props.row.original
+        original[props.column.id] = e.target.value
+        props.updateBoat(original)
+    }
+
+    return (
+        <>
+            <input type="text"
+                id=''
+                className=" text-center"
+                defaultValue={value}
+                key={value}
+                onBlur={(e) => onBlur(e)}
+            />
+        </>
+    );
+};
+
 const Remove = ({ ...props }: any) => {
     const onClick = () => {
         console.log(props.row.original)
@@ -112,7 +135,7 @@ const BoatTable = (props: any) => {
         columns: [
             columnHelper.accessor('name', {
                 header: "name",
-                cell: info => info.getValue()
+                cell: props => <Text {...props} updateBoat={updateBoat} />,
             }),
             columnHelper.accessor('crew', {
                 header: "crew",

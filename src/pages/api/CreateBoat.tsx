@@ -3,7 +3,7 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 import assert from 'assert';
 
 async function findBoat(name: string, clubId: string) {
-    var result = await prisma.boats.findMany({
+    var result = await prisma.boats.findFirst({
         where: {
             AND: [
                 {
@@ -55,10 +55,11 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
         var clubId = req.body.clubId
 
         var ExistingBoat = await findBoat(name, clubId)
+        console.log(ExistingBoat)
         if (!ExistingBoat) {
             var creationResult = await createBoat(name, crew, py, clubId)
             if (creationResult) {
-                res.json({ error: false, id: creationResult });
+                res.json({ error: false, boat: creationResult });
                 return;
             }
             else {

@@ -98,6 +98,29 @@ export async function updateBoatById(boatData: BoatDataType) {
         });
 };
 
+export async function createBoat(boatName: string, crew: number, py: number, clubId: string): Promise<BoatDataType> {
+    const body = {
+        "name": boatName,
+        "crew": crew,
+        "py": py,
+        "clubId": clubId
+    }
+    return await fetch(`${server}/api/CreateBoat`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+    })
+        .then((res) => res.json())
+        .then(async (data) => {
+            if (data && data.error) {
+                console.log(data.message)
+            } else {
+                console.log(data)
+                return data.boat
+            }
+        });
+};
+
 export async function deleteBoatById(id: string): Promise<BoatDataType> {
     const body = {
         "id": id,
