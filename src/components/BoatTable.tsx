@@ -52,6 +52,19 @@ const Text = ({ ...props }) => {
     );
 };
 
+const Add = ({ ...props }) => {
+
+    return (
+        <>
+            <div className="px-3 py-1 w-full">
+                <p onClick={(e) => props.createBoat()} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
+                    Add
+                </p>
+            </div>
+        </>
+    );
+};
+
 const Remove = ({ ...props }: any) => {
     const onClick = () => {
         console.log(props.row.original)
@@ -67,7 +80,7 @@ const Remove = ({ ...props }: any) => {
     );
 };
 
-function Filter({ column, table }) {
+function Filter({ column, table }: { column: any, table: any }) {
     const firstValue = table
         .getPreFilteredRowModel()
         .flatRows[0]?.getValue(column.id);
@@ -80,7 +93,7 @@ function Filter({ column, table }) {
                 type="number"
                 value={columnFilterValue?.[0] ?? ""}
                 onChange={(e) =>
-                    column.setFilterValue((old) => [e.target.value, old?.[1]])
+                    column.setFilterValue((old: string) => [e.target.value, old?.[1]])
                 }
                 placeholder={`Min`}
                 className="table-min-max-filter-bar"
@@ -89,7 +102,7 @@ function Filter({ column, table }) {
                 type="number"
                 value={columnFilterValue?.[1] ?? ""}
                 onChange={(e) =>
-                    column.setFilterValue((old) => [old?.[0], e.target.value])
+                    column.setFilterValue((old: string) => [old?.[0], e.target.value])
                 }
                 placeholder={`Max`}
                 className="table-min-max-filter-bar"
@@ -129,6 +142,10 @@ const BoatTable = (props: any) => {
         setData(tempdata)
     }
 
+    const createBoat = () => {
+        props.createBoat()
+    }
+
 
     var table = useReactTable({
         data,
@@ -149,6 +166,7 @@ const BoatTable = (props: any) => {
             }),
             columnHelper.display({
                 id: "Remove",
+                header: _ => <Add {...props} createBoat={createBoat} />,
                 cell: props => <Remove {...props} deleteBoat={deleteBoat} />
             }),
         ],
