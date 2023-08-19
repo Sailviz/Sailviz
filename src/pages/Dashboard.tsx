@@ -14,7 +14,7 @@ const raceOptions = [{ value: "Pursuit", label: "Pursuit" }, { value: "Handicap"
 
 const Club = () => {
     const router = useRouter()
-    var [clubId, setClubId] = useState<string>("")
+    var [clubId, setClubId] = useState<string>("invalid")
 
     var [activeSeriesData, setActiveSeriesData] = useState<SeriesDataType>({
         id: "",
@@ -345,6 +345,9 @@ const Club = () => {
             }
             fetchBoats()
 
+        } else {
+            console.log("user not signed in")
+            router.push("/")
         }
     }, [clubId])
 
