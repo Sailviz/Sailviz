@@ -2,11 +2,31 @@ import React from 'react';
 import { server } from './URL';
 import dayjs from 'dayjs';
 
-export async function getSeries(clubId: string): Promise<SeriesDataType[]> {
+export async function GetSeriesByClubId(clubId: string): Promise<SeriesDataType[]> {
     const body = {
         "clubId": clubId
     }
     return await fetch(`${server}/api/GetSeriesByClubId`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+    })
+        .then((res) => res.json())
+        .then((data) => {
+            if (data && data.error) {
+                console.log(data.message)
+            } else {
+                return (data.series)
+            }
+        });
+};
+
+export async function GetSeriesById(id: string): Promise<SeriesDataType> {
+    const body = {
+        "id": id,
+    }
+    console.log(body)
+    return await fetch(`${server}/api/GetSeriesById`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
@@ -76,6 +96,21 @@ export async function updateRaceById(raceData: RaceDataType) {
                 console.log(data)
                 //TODO reload series data.
             }
+        });
+};
+
+export async function getRaceById(raceId: string) {
+    const body = {
+        "id": raceId
+    }
+    return await fetch(`${server}/api/GetRaceById`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+    })
+        .then((res) => res.json())
+        .then(async (data) => {
+            return data
         });
 };
 

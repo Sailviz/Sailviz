@@ -48,7 +48,7 @@ const Club = () => {
         console.log(activeRaceData)
         const entry = await DB.createRaceEntry(id)
         setActiveRaceData({ ...activeRaceData, results: activeRaceData.results.concat(entry) })
-        var data = await DB.getSeries(clubId)
+        var data = await DB.GetSeriesByClubId(clubId)
         var array = [...data]
         setSeriesData(array)
         return entry
@@ -58,14 +58,14 @@ const Club = () => {
         console.log(result)
 
         await DB.updateResultById(result)
-        var data = await DB.getSeries(clubId)
+        var data = await DB.GetSeriesByClubId(clubId)
         var array = [...data]
         setSeriesData(array)
     }
 
     const deleteResult = async (resultId: string) => {
         await DB.DeleteResultById(resultId)
-        var data = await DB.getSeries(clubId)
+        var data = await DB.GetSeriesByClubId(clubId)
         var array = [...data]
         setSeriesData(array)
     }
@@ -327,7 +327,7 @@ const Club = () => {
         if (clubId != "") {
 
             const fetchRaces = async () => {
-                var data = await DB.getSeries(clubId)
+                var data = await DB.GetSeriesByClubId(clubId)
                 var array = [...data]
                 setSeriesData(array)
             }
@@ -519,6 +519,11 @@ const Club = () => {
                                         options={raceOptions} />
                                 </div>
                             </div>
+                        </div>
+                        <div className="p-6 w-3/4">
+                            <p onClick={() => router.push({ pathname: '/Race', query: { race: activeRaceData.id } })} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
+                                Race Panel
+                            </p>
                         </div>
                         <div className='p-6 w-full'>
                             <RaceResultsTable data={activeRaceData.results} key={activeRaceData.id} deleteResult={deleteResult} updateResult={updateResult} createResult={createResult} clubId={clubId} raceId={activeRaceData.id} />
