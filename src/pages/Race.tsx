@@ -39,7 +39,17 @@ const RacePage = () => {
         //start time - UTC of start of 5 min count down.
     }))
 
+    const startRace = async () => {
+        fetch("http://192.168.1.223/start", { mode: 'no-cors' }).then((res) => {
+            if (res.status !== 200) {
+                console.log("clock start failed with " + res.status)
+            }
+        }
 
+        ).catch(function (err) {
+            console.log('Fetch Error :-S', err);
+        });
+    }
 
     useEffect(() => {
         let raceId = query.race as string
@@ -67,7 +77,7 @@ const RacePage = () => {
                         Race Time:
                     </div>
                     <div className="p-2 w-1/4">
-                        <p onClick={() => null} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-xl px-5 py-2.5 text-center">
+                        <p onClick={startRace} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-xl px-5 py-2.5 text-center">
                             Start
                         </p>
                     </div>

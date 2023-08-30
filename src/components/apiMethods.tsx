@@ -41,6 +41,46 @@ export async function GetSeriesById(id: string): Promise<SeriesDataType> {
         });
 };
 
+export async function GetClubById(id: string): Promise<SeriesDataType> {
+    const body = {
+        "id": id,
+    }
+    return await fetch(`${server}/api/GetClubById`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+    })
+        .then((res) => res.json())
+        .then((data) => {
+            if (data && data.error) {
+                console.log(data.message)
+            } else {
+                return (data.club)
+            }
+        });
+};
+
+export async function UpdateClubById(id: string, settings: SettingsType): Promise<SeriesDataType> {
+    const body = {
+        "id": id,
+        "settings": settings
+    }
+    console.log(body)
+    return await fetch(`${server}/api/UpdateClubById`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+    })
+        .then((res) => res.json())
+        .then((data) => {
+            if (data && data.error) {
+                console.log(data.message)
+            } else {
+                return (data.series)
+            }
+        });
+};
+
 export async function getBoats(clubId: string): Promise<BoatDataType[]> {
     const body = {
         "clubId": clubId

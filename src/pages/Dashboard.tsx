@@ -25,7 +25,7 @@ const Club = () => {
         },
         races: []
     })
-    var [activeRaceData, setActiveRaceData] = useState<RaceDataType>(({
+    var [activeRaceData, setActiveRaceData] = useState<RaceDataType>({
         id: "",
         number: 0,
         Time: "",
@@ -36,11 +36,13 @@ const Club = () => {
         results: [],
         Type: "",
         seriesId: ""
-    }))
+    })
 
     const [seriesData, setSeriesData] = useState<SeriesDataType[]>([])
 
     const [boatData, setBoatData] = useState<BoatDataType[]>([])
+
+    const [clubSettings, setClubSettings] = useState<SettingsType>({} as SettingsType)
 
 
     //adds an entry to a race and updates database
@@ -244,6 +246,12 @@ const Club = () => {
         updateRanges()
     }
 
+    const saveClubSettings = (e: ChangeEvent<HTMLInputElement>) => {
+        const tempdata = clubSettings
+        tempdata[e.target.id] = e.target.value
+        setClubSettings(tempdata)
+    }
+
     const updateRanges = () => {
         const range = document.getElementById('numberToCount') as HTMLInputElement
         const rangeV = document.getElementById('rangeV') as HTMLInputElement
@@ -325,6 +333,22 @@ const Club = () => {
 
     useEffect(() => {
         if (clubId != "") {
+            //catch if not fully updated
+            if (clubId == "invalid") {
+                return
+            }
+            console.log(clubId)
+            const fetchSettings = async () => {
+                var data = await DB.GetClubById(clubId)
+                console.log(data)
+                if (data) {
+                    setClubSettings(data.settings)
+                } else {
+                    console.log("could not fetch club settings")
+                }
+
+            }
+            fetchSettings()
 
             const fetchRaces = async () => {
                 var data = await DB.GetSeriesByClubId(clubId)
@@ -392,7 +416,21 @@ const Club = () => {
                                 Update list to match latest RYA values
                             </p>
                         </div>
-
+                        <p className='text-2xl font-bold text-gray-700 p-6'>
+                            Clock Config
+                        </p>
+                        <div className='flex flex-col px-6 w-full '>
+                            <p className='text-2xl font-bold text-gray-700'>
+                                IP Address
+                            </p>
+                            <input type="text"
+                                id='clockIP'
+                                className="w-full p-2 mx-0 my-2 border-4 rounded focus:border-pink-500 focus:outline-none"
+                                defaultValue={clubSettings.clockIP}
+                                onChange={saveClubSettings}
+                                onBlur={() => DB.UpdateClubById(clubId, clubSettings)}
+                            />
+                        </div>
                     </div>
                     <div id="series" className="hidden w-full">
                         <p className="text-6xl font-extrabold text-gray-700 p-6">
