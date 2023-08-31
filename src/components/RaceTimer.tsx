@@ -1,33 +1,45 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 
-
-const RaceTimer = ({ expiresIn }: { expiresIn: number }) => {
-    const [min, setMin] = useState(0);
-    const [sec, setSec] = useState(0);
+const CountdownTimer = ({ expiresIn, timerActive, onFourMinutes, onOneMinute, onGo }) => {
+    //these two states are completely wrong but the code works for some reason.
     const [timeLeft, setTimeLeft] = useState(expiresIn);
+    const [isCountingUp, setIsCountingUp] = useState(false);
+    const [timeoutId, setTimeoutId] = useState(null);
 
-    const formatTime = (t: number) => t < 10 ? '0' + t : t;
+    const tick = () => {
+        if (!timerActive) return;
+        if (timeLeft === 0 && !isCountingUp) {
+            setIsCountingUp(true);
+            if (onGo) onGo();
+        } else if (timeLeft === 60) {
+            if (onOneMinute) onOneMinute();
+        } else if (timeLeft === 240) {
+            if (onFourMinutes) onFourMinutes();
+        }
+        console.log(timeLeft) //nonsense
+        setTimeLeft((prevTimeLeft) => (isCountingUp ? prevTimeLeft + 1 : prevTimeLeft - 1));
+
+        setTimeoutId(setTimeout(tick, 1000));
+    };
 
     useEffect(() => {
-        const interval = setInterval(() => {
-            const m = Math.floor(timeLeft / 60);
-            const s = timeLeft - m * 60;
+        if (timerActive) {
+            tick();
+        } else {
+            clearTimeout(timeoutId);
+            setTimeLeft(expiresIn);
+            setIsCountingUp(false);
+        }
+    }, [timerActive]);
 
-            setMin(m);
-            setSec(s);
-            if (m <= 0 && s <= 0) return () => clearInterval(interval);
-
-            setTimeLeft((t) => t - 1);
-        }, 1000);
-
-        return () => clearInterval(interval);
-    }, [timeLeft]);
+    const minutes = Math.floor(Math.abs(timeLeft) / 60);
+    const seconds = Math.abs(timeLeft) % 60;
 
     return (
         <>
-            <span>{formatTime(min)}</span> : <span>{formatTime(sec)}</span>
+            {`${timeLeft < 0 ? '+' : '-'}${minutes}:${seconds.toString().padStart(2, '0')}`}
         </>
     );
-}
+};
 
-export default RaceTimer;
+export default CountdownTimer;

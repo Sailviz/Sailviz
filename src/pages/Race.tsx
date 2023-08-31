@@ -47,7 +47,7 @@ const RacePage = () => {
     }))
 
     var [raceState, setRaceActive] = useState<raceStateType>(raceStateType.reset)
-    var [raceTime, setRaceTime] = useState(0)
+    const [timerActive, setTimerActive] = useState(false);
 
     const startRace = async () => {
         fetch("http://192.168.1.223/start", { mode: 'no-cors' }).then((res) => {
@@ -57,9 +57,9 @@ const RacePage = () => {
             }
             //set official start time in DB
             setRaceActive(raceStateType.running)
-            setInstructions("do the flags and the horn!")
+            setInstructions("do the flags and the hooter!")
             //start countdown timer
-            setRaceTime(300)
+            setTimerActive(true)
 
         }
 
@@ -69,6 +69,18 @@ const RacePage = () => {
         });
     }
 
+    const handleFourMinutes = () => {
+        console.log('4 minutes left');
+    };
+
+    const handleOneMinute = () => {
+        console.log('1 minute left');
+    };
+
+    const handleGo = () => {
+        console.log('GO!');
+    };
+
     const stopRace = async () => {
         //add are you sure here
         fetch("http://192.168.1.223/stop", { mode: 'no-cors' }).then((res) => {
@@ -77,6 +89,7 @@ const RacePage = () => {
                 return
             }
             setRaceActive(raceStateType.stopped)
+            setTimerActive(false)
             setInstructions("Hit reset to start from the beginning")
         }
 
@@ -124,7 +137,7 @@ const RacePage = () => {
                         Event: {seriesName} - {race.number}
                     </div>
                     <div className="shrink w-1/4 p-2 m-2 border-4 rounded-lg bg-white text-lg font-medium">
-                        Race Time: {(raceState == raceStateType.running) && <RaceTimer expiresIn={raceTime} />}
+                        Race Time: <RaceTimer expiresIn={10} timerActive={timerActive} onFourMinutes={handleFourMinutes} onOneMinute={handleOneMinute} onGo={handleGo} />
                     </div>
                     <div className="p-2 w-1/4">
                         {(() => {
