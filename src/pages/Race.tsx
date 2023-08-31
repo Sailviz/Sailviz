@@ -2,6 +2,13 @@ import React, { useEffect, useState } from "react"
 import Router, { useRouter } from "next/router"
 import * as DB from '../components/apiMethods';
 import Dashboard from "../components/Dashboard";
+import RaceTimer from "../components/RaceTimer"
+
+enum raceStateType {
+    running,
+    stopped,
+    reset
+}
 
 const RacePage = () => {
 
@@ -11,7 +18,7 @@ const RacePage = () => {
 
     var [seriesName, setSeriesName] = useState("")
 
-    var [Instructions, setInstructions] = useState("Hit Start when ready to start the starting procedure")
+    var [Instructions, setInstructions] = useState("Hit Start to begin the starting procedure")
 
     var [race, setRace] = useState<RaceDataType>(({
         id: "",
@@ -39,24 +46,67 @@ const RacePage = () => {
         //start time - UTC of start of 5 min count down.
     }))
 
+    var [raceState, setRaceActive] = useState<raceStateType>(raceStateType.reset)
+    var [raceTime, setRaceTime] = useState(0)
+
     const startRace = async () => {
         fetch("http://192.168.1.223/start", { mode: 'no-cors' }).then((res) => {
-            if (res.status !== 200) {
+            if (res.status !== 0) {
                 console.log("clock start failed with " + res.status)
+                return
             }
+            //set official start time in DB
+            setRaceActive(raceStateType.running)
+            setInstructions("do the flags and the horn!")
+            //start countdown timer
+            setRaceTime(300)
+
         }
 
         ).catch(function (err) {
             console.log('Fetch Error :-S', err);
+            alert("race clock not connected.")
+        });
+    }
+
+    const stopRace = async () => {
+        //add are you sure here
+        fetch("http://192.168.1.223/stop", { mode: 'no-cors' }).then((res) => {
+            if (res.status !== 0) {
+                console.log("clock stop failed with " + res.status)
+                return
+            }
+            setRaceActive(raceStateType.stopped)
+            setInstructions("Hit reset to start from the beginning")
+        }
+
+        ).catch(function (err) {
+            console.log('Fetch Error :-S', err);
+            alert("race clock not connected.")
+        });
+    }
+
+    const resetRace = async () => {
+        //add are you sure here
+        fetch("http://192.168.1.223/reset", { mode: 'no-cors' }).then((res) => {
+            if (res.status !== 0) {
+                console.log("clock reset failed with " + res.status)
+                return
+            }
+            setRaceActive(raceStateType.reset)
+            setInstructions("Hit Start to begin the starting procedure")
+        }
+
+        ).catch(function (err) {
+            console.log('Fetch Error :-S', err);
+            alert("race clock not connected.")
         });
     }
 
     useEffect(() => {
         let raceId = query.race as string
-        console.log(raceId)
         const fetchRace = async () => {
             let data = await DB.getRaceById(raceId)
-            console.log(data.race)
             setRace(data.race)
 
             setSeriesName(await DB.GetSeriesById(data.race.seriesId).then((res) => { return (res.name) }))
@@ -74,12 +124,27 @@ const RacePage = () => {
                         Event: {seriesName} - {race.number}
                     </div>
                     <div className="shrink w-1/4 p-2 m-2 border-4 rounded-lg bg-white text-lg font-medium">
-                        Race Time:
+                        Race Time: {(raceState == raceStateType.running) && <RaceTimer expiresIn={raceTime} />}
                     </div>
                     <div className="p-2 w-1/4">
-                        <p onClick={startRace} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-xl px-5 py-2.5 text-center">
-                            Start
-                        </p>
+                        {(() => {
+                            switch (raceState) {
+                                case raceStateType.reset:
+                                    return (<p onClick={startRace} className="cursor-pointer text-white bg-green-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-xl px-5 py-2.5 text-center">
+                                        Start
+                                    </p>)
+                                case raceStateType.running:
+                                    return (<p onClick={stopRace} className="cursor-pointer text-white bg-red-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-xl px-5 py-2.5 text-center">
+                                        Stop
+                                    </p>)
+                                case raceStateType.stopped:
+                                    return (<p onClick={resetRace} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-xl px-5 py-2.5 text-center">
+                                        Reset
+                                    </p>)
+                                default:
+                                    return (<p></p>)
+                            }
+                        })()}
                     </div>
                 </div>
                 <div className="flex w-11/12 shrink flex-row justify-around">

@@ -25,7 +25,6 @@ export async function GetSeriesById(id: string): Promise<SeriesDataType> {
     const body = {
         "id": id,
     }
-    console.log(body)
     return await fetch(`${server}/api/GetSeriesById`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
