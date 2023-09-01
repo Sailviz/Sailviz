@@ -14,6 +14,8 @@ const RacePage = () => {
 
     const router = useRouter()
 
+    const raceLength = 300000
+
     const query = router.query
 
     var [seriesName, setSeriesName] = useState("")
@@ -48,6 +50,7 @@ const RacePage = () => {
 
     var [raceState, setRaceActive] = useState<raceStateType>(raceStateType.reset)
     const [timerActive, setTimerActive] = useState(false);
+    const [startTime, setStartTime] = useState(0);
 
     const startRace = async () => {
         fetch("http://192.168.1.223/start", { mode: 'no-cors' }).then((res) => {
@@ -56,6 +59,7 @@ const RacePage = () => {
                 return
             }
             //set official start time in DB
+            setStartTime(new Date().getTime() + raceLength)
             setRaceActive(raceStateType.running)
             setInstructions("do the flags and the hooter!")
             //start countdown timer
@@ -107,6 +111,7 @@ const RacePage = () => {
                 return
             }
             setRaceActive(raceStateType.reset)
+            setStartTime(new Date().getTime() + raceLength)
             setInstructions("Hit Start to begin the starting procedure")
         }
 
@@ -137,7 +142,7 @@ const RacePage = () => {
                         Event: {seriesName} - {race.number}
                     </div>
                     <div className="shrink w-1/4 p-2 m-2 border-4 rounded-lg bg-white text-lg font-medium">
-                        Race Time: <RaceTimer expiresIn={10} timerActive={timerActive} onFourMinutes={handleFourMinutes} onOneMinute={handleOneMinute} onGo={handleGo} />
+                        Race Time: <RaceTimer startTime={startTime} timerActive={timerActive} onFourMinutes={handleFourMinutes} onOneMinute={handleOneMinute} onGo={handleGo} />
                     </div>
                     <div className="p-2 w-1/4">
                         {(() => {
