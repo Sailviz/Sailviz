@@ -160,7 +160,13 @@ const RacePage = () => {
         modal.style.display = "block"
         //option to lap, option to finish
         if (!e.target.parentNode) return
-        setActiveResult(race.results[e.target.parentNode.id])
+        console.log(e.target.parentNode)
+        console.log(race.results[e.target.parentNode.id])
+        let index = race.results.findIndex((x: ResultsDataType) => x.id === e.target.parentNode.id)
+        console.log(index)
+        if (index >= 0) {
+            setActiveResult(race.results[index])
+        }
 
     }
 
@@ -193,6 +199,11 @@ const RacePage = () => {
         //send to DB
         await DB.updateResultById(tempdata.results[index])
         closeBoatMenu()
+
+        let card = document.getElementById(activeResult.id)
+        card?.classList.remove("bg-green-300")
+        card?.classList.add("bg-red-300")
+        card?.classList.add("active:pointer-events-none")
     }
 
     useEffect(() => {
@@ -269,12 +280,21 @@ const RacePage = () => {
                 <div className=" w-full h-full grow">
                     <div className="flex flex-row justify-around flex-wrap">
                         {race.results.map((element, index) => {
-                            return (
-                                <div key={index} id={index.toString()} onClick={openBoatMenu} className="duration-500 motion-safe:hover:scale-105 flex-col justify-center p-6 m-4 border-2 border-pink-500 rounded-lg shadow-xl cursor-pointer w-1/4 shrink-0">
-                                    <h2 className="text-2xl text-gray-700">{element.SailNumber} - {element.boat.name}</h2>
-                                    <p className="text-base text-gray-600">{element.Helm} - {element.Crew}</p>
-                                </div>
-                            )
+                            if (element.finishTime != 0) {
+                                return (
+                                    <div key={index} id={element.id} onClick={openBoatMenu} className=' active:pointer-events-none bg-red-300 duration-500 motion-safe:hover:scale-105 flex-col justify-center p-6 m-4 border-2 border-pink-500 rounded-lg shadow-xl cursor-pointer w-1/4 shrink-0'>
+                                        <h2 className="text-2xl text-gray-700">{element.SailNumber} - {element.boat.name}</h2>
+                                        <p className="text-base text-gray-600">{element.Helm} - {element.Crew}</p>
+                                    </div>
+                                )
+                            } else {
+                                return (
+                                    <div key={index} id={element.id} onClick={openBoatMenu} className='bg-green-300 duration-500 motion-safe:hover:scale-105 flex-col justify-center p-6 m-4 border-2 border-pink-500 rounded-lg shadow-xl cursor-pointer w-1/4 shrink-0'>
+                                        <h2 className="text-2xl text-gray-700">{element.SailNumber} - {element.boat.name}</h2>
+                                        <p className="text-base text-gray-600">{element.Helm} - {element.Crew}</p>
+                                    </div>
+                                )
+                            }
                         })}
                     </div>
                 </div>
