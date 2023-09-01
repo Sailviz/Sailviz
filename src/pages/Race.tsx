@@ -14,7 +14,7 @@ const RacePage = () => {
 
     const router = useRouter()
 
-    const raceLength = 300.5 //5 mins in seconds
+    const raceLength = 10.5 //5 mins in seconds
 
     const query = router.query
 
@@ -51,6 +51,7 @@ const RacePage = () => {
             Position: 0,
         }],
         Type: "",
+        startTime: 0,
         seriesId: ""
         //extra fields required for actually racing.
         //start time - UTC of start of 5 min count down.
@@ -89,13 +90,20 @@ const RacePage = () => {
                 return
             }
             //set official start time in DB
-            setStartTime((new Date().getTime() / 1000) + raceLength)
+            let localTime = Math.floor((new Date().getTime() / 1000) + raceLength)
+            setStartTime(localTime)
             setResetTimer(false)
             setRaceActive(raceStateType.running)
             setInstructions("do the flags and the hooter!")
             //start countdown timer
             setTimerActive(true)
 
+            //mutate local race copy.
+            let newRaceData: RaceDataType = race
+            newRaceData.startTime = localTime
+            setRace(newRaceData)
+            //send to DB
+            DB.updateRaceById(newRaceData)
         }
 
         ).catch(function (err) {
@@ -189,6 +197,39 @@ const RacePage = () => {
         closeBoatMenu()
     }
 
+    const calculateResults = () => {
+        //most nuber of laps.
+        console.log(race)
+        const maxLaps = Math.max.apply(null, race.results.map(function (o: ResultsDataType) { return Object.keys(o.lapTimes).length }))
+        console.log(maxLaps)
+        if (!(maxLaps >= 0)) {
+            console.log("max laps not more than one")
+            return
+        }
+        const resultsData = [...race.results]
+
+        //calculate corrected time
+        resultsData.forEach(result => {
+            let seconds = result.finishTime - race.startTime
+            console.log(seconds)
+            result.CorrectedTime = (seconds * 1000 * (maxLaps / Object.keys(result.lapTimes).length)) / result.boat.py
+            console.log(result.CorrectedTime)
+        });
+
+        //calculate finish position
+
+        const sortedResults = resultsData.sort((a, b) => a.CorrectedTime - b.CorrectedTime);
+        sortedResults.forEach((result, index) => {
+            result.Position = index + 1;
+        });
+
+        sortedResults.forEach(result => {
+            DB.updateResultById(result)
+        })
+
+        console.log(sortedResults)
+    }
+
     const finishBoat = async () => {
         //modify race data
         const tempdata = race
@@ -204,6 +245,23 @@ const RacePage = () => {
         card?.classList.remove("bg-green-300")
         card?.classList.add("bg-red-300")
         card?.classList.add("active:pointer-events-none")
+
+        if (checkAllFinished()) {
+            //show popup to say race is finished.
+            stopRace()
+            calculateResults()
+
+        }
+    }
+
+    const checkAllFinished = () => {
+        let allFinished = true
+        race.results.forEach(data => {
+            if (data.finishTime == 0) {
+                allFinished = false
+            }
+        })
+        return allFinished
     }
 
     useEffect(() => {

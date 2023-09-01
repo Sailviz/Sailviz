@@ -15,6 +15,7 @@ async function updateRace(race: RaceDataType) {
             ASO: race.ASO || undefined,
             Time: race.Time || undefined,
             Type: race.Type || undefined,
+            startTime: race.startTime || undefined,
         }
     })
     return result;

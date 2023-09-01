@@ -8,6 +8,7 @@ type RaceDataType = {
   ASO: string;
   results: ResultsType[];
   Time: string;
+  startTime: number;
   Type: string;
   seriesId: string;
 };

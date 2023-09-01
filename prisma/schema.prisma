@@ -54,17 +54,18 @@ model Series {
 }
 
 model Race {
-  id       String   @id @unique @default(uuid())
-  number   Int
-  Time     String
-  OOD      String
-  AOD      String
-  SO       String
-  ASO      String
-  results  Result[]
-  Type     String
-  series   Series   @relation(fields: [seriesId], references: [id])
-  seriesId String
+  id        String   @id @unique @default(uuid())
+  number    Int
+  Time      String
+  OOD       String
+  AOD       String
+  SO        String
+  ASO       String
+  results   Result[]
+  Type      String
+  series    Series   @relation(fields: [seriesId], references: [id])
+  seriesId  String
+  startTime Int
 
   @@index([seriesId])
 }
