@@ -166,13 +166,15 @@ const RaceResultsTable = (props: any) => {
         const tempdata = data
         tempdata[tempdata.findIndex((x: ResultsDataType) => x.id === Result.id)] = Result
         console.log(tempdata)
-        setData(tempdata)
-        calculateResults()
+        setData([...tempdata])
+        //don't calculate results in the table
+        //calculateResults()
     }
 
     const calculateResults = () => {
         //most nuber of laps.
-        const maxLaps = Math.max.apply(null, data.map(function (o: ResultsDataType) { return o.Laps }))
+        console.log(data)
+        const maxLaps = Math.max.apply(null, data.map(function (o: ResultsDataType) { return Object.keys(o.lapTimes).length }))
         if (!(maxLaps >= 0)) {
             console.log("max laps not more than one")
             return

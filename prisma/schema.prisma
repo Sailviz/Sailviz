@@ -78,9 +78,9 @@ model Result {
   boat          Boats?  @relation(fields: [boatId], references: [id])
   boatId        String?
   SailNumber    Int
-  Time          String
+  finishTime    String
+  lapTimes      Json
   CorrectedTime Float
-  Laps          Int
   Position      Int
 
   @@index([raceId])

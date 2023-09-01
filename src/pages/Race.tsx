@@ -35,7 +35,13 @@ const RacePage = () => {
             raceId: "",
             Helm: "",
             Crew: "",
-            boat: {},
+            boat: {
+                id: "",
+                name: "",
+                crew: 0,
+                py: 0,
+                clubId: "",
+            },
             SailNumber: 0,
             Time: "",
             CorrectedTime: 0,
@@ -53,7 +59,13 @@ const RacePage = () => {
         raceId: "",
         Helm: "",
         Crew: "",
-        boat: {},
+        boat: {
+            id: "",
+            name: "",
+            crew: 0,
+            py: 0,
+            clubId: "",
+        },
         SailNumber: 0,
         Time: "",
         CorrectedTime: 0,
@@ -137,7 +149,7 @@ const RacePage = () => {
         });
     }
 
-    const openBoatMenu = async (e: ChangeEvent<HTMLInputElement>) => {
+    const openBoatMenu = async (e: any) => {
         //show modal
         let modal = document.getElementById("modal")
         if (!modal) return
@@ -155,12 +167,28 @@ const RacePage = () => {
 
     }
 
+    const lapBoat = async () => {
+        //modify race data
+        const tempdata = race
+        tempdata.results[tempdata.findIndex((x: BoatDataType) => x.id === activeResult.id)].laps.push(new Date().getTime())
+        setRace({ ...tempdata })
+        //send to DB
+        await DB.updateRaceById(tempdata)
+        closeBoatMenu()
+    }
+
+    const finishBoat = async () => {
+        //modify race data
+        //send to DB
+        closeBoatMenu()
+    }
+
     useEffect(() => {
         let raceId = query.race as string
         const fetchRace = async () => {
             let data = await DB.getRaceById(raceId)
             setRace(data.race)
-
+            fetch("http://192.168.1.223/reset", { mode: 'no-cors' })
             setSeriesName(await DB.GetSeriesById(data.race.seriesId).then((res) => { return (res.name) }))
         }
         if (raceId != undefined) {
@@ -173,19 +201,21 @@ const RacePage = () => {
             <div className="w-full flex flex-col items-center justify-start panel-height">
                 <div id="modal" className="hidden fixed z-10 left-0 top-0 w-full h-full overflow-auto bg-black-400">
                     <div className="bg-white bg-opacity-20 backdrop-blur rounded drop-shadow-lg border-pink-500 my-52 mx-auto p-5 border-4 w-7/12 h-3/6">
-                        <p onClick={closeBoatMenu} className="bg-red-500 float-right font-bold text-lg">&times;</p>
+                        <p onClick={closeBoatMenu} className=" cursor-pointer bg-red-100 border-red-600 rounded-lg border-4 aspect-square float-right font-bold text-3xl w-12 text-center">&times;</p>
                         <h2 className="text-2xl text-gray-700">{activeResult.SailNumber} - {activeResult.boat.name}</h2>
                         <p className="text-base text-gray-600">{activeResult.Helm} - {activeResult.Crew}</p>
 
-                        <div className="px-5 py-1 w-3/4">
-                            <p onClick={() => null} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
-                                Lap
-                            </p>
-                        </div>
-                        <div className="px-5 py-1 w-3/4">
-                            <p onClick={() => null} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
-                                Finish
-                            </p>
+                        <div className="flex flex-row m-12 h-4/6">
+                            <div className="px-5 py-1 w-3/4">
+                                <p onClick={lapBoat} className="h-full cursor-pointer  text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-3xl px-5 py-2.5 text-center mr-3 md:mr-0">
+                                    Lap
+                                </p>
+                            </div>
+                            <div className="px-5 py-1 w-3/4">
+                                <p onClick={finishBoat} className="h-full cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-3xl px-5 py-2.5 text-center mr-3 md:mr-0">
+                                    Finish
+                                </p>
+                            </div>
                         </div>
                     </div>
 

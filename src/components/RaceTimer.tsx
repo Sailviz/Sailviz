@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-const CountdownTimer = ({ startTime, timerActive, onFourMinutes, onOneMinute, onGo, reset }) => {
+const CountdownTimer = ({ startTime, timerActive, onFourMinutes, onOneMinute, onGo, reset }: { startTime: number, timerActive: boolean, onFourMinutes: any, onOneMinute: any, onGo: any, reset: boolean }) => {
     //these two states are completely wrong but the code works for some reason.
     const [timeLeft, setTimeLeft] = useState({ minutes: 5, seconds: 0, countingUp: false });
 
