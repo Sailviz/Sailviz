@@ -14,7 +14,7 @@ const RacePage = () => {
 
     const router = useRouter()
 
-    const raceLength = 300500 //bit longer than 5 mins so that it shows as 5 mins and closer sync with clock
+    const raceLength = 300.5 //5 mins in seconds
 
     const query = router.query
 
@@ -89,7 +89,7 @@ const RacePage = () => {
                 return
             }
             //set official start time in DB
-            setStartTime(new Date().getTime() + raceLength)
+            setStartTime((new Date().getTime() / 1000) + raceLength)
             setResetTimer(false)
             setRaceActive(raceStateType.running)
             setInstructions("do the flags and the hooter!")
@@ -142,7 +142,7 @@ const RacePage = () => {
                 return
             }
             setRaceActive(raceStateType.reset)
-            setStartTime(new Date().getTime() + raceLength)
+            setStartTime((new Date().getTime() / 1000) + raceLength)
             setResetTimer(true)
             setInstructions("Hit Start to begin the starting procedure")
         }
@@ -175,7 +175,7 @@ const RacePage = () => {
         //modify race data
         const tempdata = race
         let index = tempdata.results.findIndex((x: ResultsDataType) => x.id === activeResult.id)
-        tempdata.results[index].lapTimes.times.push(new Date().getTime())
+        tempdata.results[index].lapTimes.times.push(Math.floor(new Date().getTime() / 1000))
         console.log(tempdata.results[index])
         setRace({ ...tempdata })
         //send to DB
@@ -185,7 +185,13 @@ const RacePage = () => {
 
     const finishBoat = async () => {
         //modify race data
+        const tempdata = race
+        let index = tempdata.results.findIndex((x: ResultsDataType) => x.id === activeResult.id)
+        tempdata.results[index].finishTime = Math.floor(new Date().getTime() / 1000)
+        console.log(tempdata.results[index])
+        setRace({ ...tempdata })
         //send to DB
+        await DB.updateResultById(tempdata.results[index])
         closeBoatMenu()
     }
 

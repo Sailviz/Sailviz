@@ -6,14 +6,14 @@ const CountdownTimer = ({ startTime, timerActive, onFourMinutes, onOneMinute, on
 
     const calculateTimeLeft = () => {
         let countingUp = false
-        let difference = startTime - new Date().getTime()
+        let difference = startTime - (new Date().getTime() / 1000)
         if (difference < 0) {
             difference = Math.abs(difference)
             countingUp = true
         }
         let time = {
-            minutes: Math.floor((difference / 1000 / 60) % 60),
-            seconds: Math.floor((difference / 1000) % 60),
+            minutes: Math.floor((difference / 60) % 60),
+            seconds: Math.floor((difference) % 60),
             countingUp: countingUp
         }
 

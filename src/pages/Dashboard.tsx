@@ -48,7 +48,7 @@ const Club = () => {
     //adds an entry to a race and updates database
     const createResult = async (id: string) => {
         console.log(activeRaceData)
-        const entry = await DB.createRaceEntry(id)
+        const entry = await DB.createResult(id)
         setActiveRaceData({ ...activeRaceData, results: activeRaceData.results.concat(entry) })
         var data = await DB.GetSeriesByClubId(clubId)
         var array = [...data]

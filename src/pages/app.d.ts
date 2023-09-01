@@ -29,7 +29,7 @@ type ResultsDataType = {
   Crew: string;
   boat: BoatDataType;
   SailNumber: number;
-  finishTime: string;
+  finishTime: number;
   lapTimes: object;
   CorrectedTime: number;
   Position: number;

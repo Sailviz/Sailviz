@@ -371,11 +371,11 @@ export async function setBoats(clubId: string, data: BoatDataType[]): Promise<Cl
         });
 };
 
-export async function createRaceEntry(raceId: string): Promise<ResultsDataType> {
+export async function createResult(raceId: string): Promise<ResultsDataType> {
     const body = {
         "raceId": raceId,
     }
-    return await fetch(`${server}/api/CreateRaceEntry`, {
+    return await fetch(`${server}/api/CreateResult`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
@@ -416,7 +416,9 @@ export async function updateResultById(result: ResultsDataType): Promise<RaceDat
     return await fetch(`${server}/api/UpdateResultById`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
+        body: JSON.stringify(body,
+            (key, value) => (typeof value === 'bigint' ? value.toString() : value) // return everything else unchanged
+        ),
     })
         .then((res) => res.json())
         .then(async (data) => {

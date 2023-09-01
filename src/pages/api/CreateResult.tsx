@@ -18,7 +18,7 @@ async function createEntry(raceId: string,) {
             Helm: "",
             Crew: "",
             SailNumber: 0,
-            finishTime: "",
+            finishTime: 0,
             CorrectedTime: 0,
             lapTimes: {
                 "times": []
@@ -34,6 +34,7 @@ async function createEntry(raceId: string,) {
     })
     return res;
 }
+
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
     if (req.method === 'POST') {
