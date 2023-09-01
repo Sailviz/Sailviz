@@ -20,9 +20,9 @@ async function updateResult(result: ResultsDataType) {
                         CorrectedTime: result.CorrectedTime,
                         Crew: result.Crew,
                         Helm: result.Helm,
-                        Laps: result.Laps,
+                        lapTimes: result.lapTimes,
                         Position: result.Position,
-                        Time: result.Time,
+                        finishTime: result.finishTime,
                     }
                 }
             }

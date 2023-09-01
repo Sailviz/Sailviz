@@ -20,7 +20,9 @@ async function createEntry(raceId: string,) {
             SailNumber: 0,
             finishTime: "",
             CorrectedTime: 0,
-            lapTimes: {},
+            lapTimes: {
+                "times": []
+            },
             Position: 0,
             race: {
                 connect: {

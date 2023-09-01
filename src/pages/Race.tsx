@@ -43,9 +43,11 @@ const RacePage = () => {
                 clubId: "",
             },
             SailNumber: 0,
-            Time: "",
+            finishTime: "",
             CorrectedTime: 0,
-            Laps: 0,
+            lapTimes: {
+                times: []
+            },
             Position: 0,
         }],
         Type: "",
@@ -67,9 +69,11 @@ const RacePage = () => {
             clubId: "",
         },
         SailNumber: 0,
-        Time: "",
+        finishTime: "",
         CorrectedTime: 0,
-        Laps: 0,
+        lapTimes: {
+            times: []
+        },
         Position: 0,
     });
 
@@ -170,10 +174,12 @@ const RacePage = () => {
     const lapBoat = async () => {
         //modify race data
         const tempdata = race
-        tempdata.results[tempdata.findIndex((x: BoatDataType) => x.id === activeResult.id)].laps.push(new Date().getTime())
+        let index = tempdata.results.findIndex((x: ResultsDataType) => x.id === activeResult.id)
+        tempdata.results[index].lapTimes.times.push(new Date().getTime())
+        console.log(tempdata.results[index])
         setRace({ ...tempdata })
         //send to DB
-        await DB.updateRaceById(tempdata)
+        await DB.updateResultById(tempdata.results[index])
         closeBoatMenu()
     }
 
@@ -188,6 +194,7 @@ const RacePage = () => {
         const fetchRace = async () => {
             let data = await DB.getRaceById(raceId)
             setRace(data.race)
+            fetch("http://192.168.1.223/stop", { mode: 'no-cors' })
             fetch("http://192.168.1.223/reset", { mode: 'no-cors' })
             setSeriesName(await DB.GetSeriesById(data.race.seriesId).then((res) => { return (res.name) }))
         }
