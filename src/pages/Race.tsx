@@ -14,7 +14,7 @@ const RacePage = () => {
 
     const router = useRouter()
 
-    const raceLength = 300000
+    const raceLength = 300500 //bit longer than 5 mins so that it shows as 5 mins and closer sync with clock
 
     const query = router.query
 
@@ -50,6 +50,7 @@ const RacePage = () => {
 
     var [raceState, setRaceActive] = useState<raceStateType>(raceStateType.reset)
     const [timerActive, setTimerActive] = useState(false);
+    const [resetTimer, setResetTimer] = useState(false);
     const [startTime, setStartTime] = useState(0);
 
     const startRace = async () => {
@@ -60,6 +61,7 @@ const RacePage = () => {
             }
             //set official start time in DB
             setStartTime(new Date().getTime() + raceLength)
+            setResetTimer(false)
             setRaceActive(raceStateType.running)
             setInstructions("do the flags and the hooter!")
             //start countdown timer
@@ -112,6 +114,7 @@ const RacePage = () => {
             }
             setRaceActive(raceStateType.reset)
             setStartTime(new Date().getTime() + raceLength)
+            setResetTimer(true)
             setInstructions("Hit Start to begin the starting procedure")
         }
 
@@ -142,7 +145,7 @@ const RacePage = () => {
                         Event: {seriesName} - {race.number}
                     </div>
                     <div className="shrink w-1/4 p-2 m-2 border-4 rounded-lg bg-white text-lg font-medium">
-                        Race Time: <RaceTimer startTime={startTime} timerActive={timerActive} onFourMinutes={handleFourMinutes} onOneMinute={handleOneMinute} onGo={handleGo} />
+                        Race Time: <RaceTimer startTime={startTime} timerActive={timerActive} onFourMinutes={handleFourMinutes} onOneMinute={handleOneMinute} onGo={handleGo} reset={resetTimer} />
                     </div>
                     <div className="p-2 w-1/4">
                         {(() => {

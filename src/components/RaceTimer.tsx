@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from 'react';
 
-const CountdownTimer = ({ startTime, timerActive, onFourMinutes, onOneMinute, onGo }) => {
+const CountdownTimer = ({ startTime, timerActive, onFourMinutes, onOneMinute, onGo, reset }) => {
     //these two states are completely wrong but the code works for some reason.
     const [timeLeft, setTimeLeft] = useState({ minutes: 5, seconds: 0, countingUp: false });
 
     const calculateTimeLeft = () => {
         let countingUp = false
         let difference = startTime - new Date().getTime()
-        console.log(difference)
         if (difference < 0) {
             difference = Math.abs(difference)
             countingUp = true
@@ -22,12 +21,7 @@ const CountdownTimer = ({ startTime, timerActive, onFourMinutes, onOneMinute, on
     }
 
     useEffect(() => {
-        if (!timerActive) {
-            //setTimeLeft({ minutes: 5, seconds: 0 })
-            console.log("probably hit reset")
-            console.log(timeLeft)
-            return
-        }
+        if (!timerActive) return
         const timer = setTimeout(() => {
             setTimeLeft(calculateTimeLeft());
         }, 1000);
@@ -35,8 +29,11 @@ const CountdownTimer = ({ startTime, timerActive, onFourMinutes, onOneMinute, on
         return () => clearTimeout(timer);
     }, [timerActive, timeLeft, startTime]);
 
-    console.log(timeLeft)
-    console.log(timeLeft.countingUp)
+    useEffect(() => {
+        if (reset) {
+            setTimeLeft(calculateTimeLeft());
+        }
+    }, [reset]);
 
     if (timeLeft.minutes == 0 && timeLeft.seconds == 0) {
         if (onGo) onGo();
