@@ -19,7 +19,7 @@ const Time = ({ ...props }: any) => {
         var day = dayjs(time)
         if (day.isValid()) {
             raceData.Time = time
-            DB.updateRaceSettings(raceData)
+            DB.updateRaceById(raceData)
         }
     }
 
@@ -48,7 +48,7 @@ const Type = ({ ...props }: any) => {
         console.log(raceData.id)
 
         raceData.Type = type
-        DB.updateRaceSettings(raceData)
+        DB.updateRaceById(raceData)
     }
 
     React.useEffect(() => {
@@ -73,7 +73,7 @@ const Text = ({ ...props }: any) => {
     const onBlur = (e: ChangeEvent<HTMLInputElement>) => {
         var raceData: RaceDataType = props.row.original
         raceData[props.column.id] = e.target.value
-        DB.updateRaceSettings(raceData)
+        DB.updateRaceById(raceData)
     }
 
     React.useEffect(() => {

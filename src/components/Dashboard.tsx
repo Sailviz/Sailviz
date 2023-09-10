@@ -9,10 +9,12 @@ export const siteTitle = 'SRM'
 
 export default function Dashboard({
     children,
-    home
+    club,
+    userName
 }: {
     children: React.ReactNode
-    home?: boolean
+    club?: string
+    userName?: string
 }) {
     return (
         <div className="h-screen">
@@ -40,6 +42,12 @@ export default function Dashboard({
                                 <div className=" text-xl font-semibold whitespace-nowrap text-gray-700 p-3">
                                     SRM
                                 </div>
+                                <p className=" text-xl font-semibold whitespace-nowrap text-gray-700 p-3">
+                                    {club}
+                                </p>
+                                <p className=" text-xl font-semibold whitespace-nowrap text-gray-700 p-3">
+                                    logged in as {userName}
+                                </p>
                             </a>
                         </Link>
                         <div className="hidden w-full md:block md:w-auto" id="navbar-default">

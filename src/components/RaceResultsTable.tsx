@@ -171,42 +171,6 @@ const RaceResultsTable = (props: any) => {
         //calculateResults()
     }
 
-    const calculateResults = () => {
-        //most nuber of laps.
-        console.log(data)
-        const maxLaps = Math.max.apply(null, data.map(function (o: ResultsDataType) { return Object.keys(o.lapTimes).length }))
-        if (!(maxLaps >= 0)) {
-            console.log("max laps not more than one")
-            return
-        }
-        const resultsData = [...data]
-
-        //calculate corrected time
-        resultsData.forEach(result => {
-            if (result.Time == "" || result.boat == null || result.Laps == 0)
-                return
-            const timeParts: string[] = result.Time.split(':');
-            let seconds = 1
-            if (timeParts[0] != undefined && timeParts[1] != undefined && timeParts[2] != undefined) {
-                seconds = (+timeParts[0]) * 60 * 60 + (+timeParts[1]) * 60 + (+timeParts[2]);
-            }
-            result.CorrectedTime = (seconds * 1000 * (maxLaps / result.Laps)) / result.boat.py
-        });
-
-        //calculate finish position
-
-        const sortedResults = resultsData.sort((a, b) => a.CorrectedTime - b.CorrectedTime);
-        sortedResults.forEach((result, index) => {
-            result.Position = index + 1;
-        });
-
-        sortedResults.forEach(result => {
-            DB.updateResultById(result)
-        })
-
-        setData(sortedResults)
-        console.log(sortedResults)
-    }
 
     let table = useReactTable({
         data,

@@ -7,7 +7,7 @@ import assert from 'assert';
 const saltRounds = 10;
 const jwtSecret = process.env.jwtSecret;
 
-async function findUser(email: string){
+async function findUser(email: string) {
     const result = await prisma.users.findUnique({
         where: {
             email: email,
@@ -18,7 +18,7 @@ async function findUser(email: string){
 
 async function authUser(email: string, password: string) {
     var user = await findUser(email);
-    if (user == null) {return false}
+    if (user == null) { return false }
     var result = bcrypt.compare(password, user.password);
     return result;
 }
@@ -32,32 +32,32 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
             assert.notStrictEqual(null, req.body.email, 'Email required');
             assert.notStrictEqual(null, req.body.password, 'Password required');
         } catch (bodyError) {
-            res.json({error: true, message: "email or password missing"});
+            res.json({ error: true, message: "email or password missing" });
         }
 
         const email = req.body.email;
         const password = req.body.password;
 
         var user = await findUser(email)
-        if(user){
+        if (user) {
             var result = await authUser(email, password)
             if (result) {
                 const token = jwt.sign(
-                    {name: user.name, email: user.email, id:user.id},
+                    { name: user.name, email: user.email, id: user.id },
                     jwtSecret,
                     {
                         expiresIn: 3000, //50 minutes
                     },
                 );
-                res.json({error: false, token: token, club: user.clubId});
+                res.json({ error: false, token: token, club: user.clubId, user: user.id });
                 return;
             } else {
-            res.json({error: true, message: 'Wrong email or password'});
-            return;
+                res.json({ error: true, message: 'Wrong email or password' });
+                return;
             }
         }
         else {
-            res.json({error: true, message: 'Wrong email or password'});
+            res.json({ error: true, message: 'Wrong email or password' });
             return;
         }
     }

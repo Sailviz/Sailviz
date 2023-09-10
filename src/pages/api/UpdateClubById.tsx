@@ -5,13 +5,13 @@ import assert from 'assert';
 
 //this only updates the settings part of the club record
 
-async function updateClub(id: string, settings: SettingsType) {
+async function updateClub(club: ClubDataType) {
     var result = await prisma.clubs.update({
         where: {
-            id: id
+            id: club.id
         },
         data: {
-            settings: settings
+            settings: club.settings
         }
     })
     return result;
@@ -29,11 +29,10 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
             return;
         }
 
-        var id: string = req.body.id
-        var settings: SettingsType = req.body.settings
+        var club: ClubDataType = req.body.club
 
 
-        var updatedBoat = await updateClub(id, settings)
+        var updatedBoat = await updateClub(club)
         if (updatedBoat) {
             res.json({ error: false, club: updatedBoat });
         } else {

@@ -11,26 +11,23 @@ const Home = () => {
                 <div className="grid gap-3 pt-3 mt-3 text-center md:grid-cols-3 lg:w-2/3">
                     <Card
                         name="Start a Race"
-                        description="5, 4, 1, GO!"
+                        description=""
                         link="/About#Start"
                     />
                     <Card
                         name="Record Results"
-                        description="Instant calculation"
+                        description=""
                         link="/About#Results"
                     />
                     <Card
                         name="Calculate Series"
-                        description="How to run races"
+                        description=""
                         link="/About#Series"
                     />
                 </div>
-                <p>
-                    Flashy pictures with boats and results
-                </p>
             </main>
-    </Layout>
-  );
+        </Layout>
+    );
 };
 
 

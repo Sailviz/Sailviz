@@ -36,9 +36,14 @@ type ResultsDataType = {
   Position: number;
 };
 
-type SettingsType = {
+type RaceSettingsType = {
   [key: string]: any;
   numberToCount: number;
+};
+
+type ClubSettingsType = {
+  [key: string]: any;
+  clockIP: string;
 };
 
 type BoatDataType = {
@@ -52,7 +57,15 @@ type BoatDataType = {
 type ClubDataType = {
   id: string;
   name: string;
-  settings: object;
+  settings: ClubSettingsType;
   series: SeriesDataType[];
   boats: BoatDataType[];
+};
+
+type UserDataType = {
+  id: string;
+  name: string;
+  settings: object;
+  permLvl: number;
+  clubId: string;
 };

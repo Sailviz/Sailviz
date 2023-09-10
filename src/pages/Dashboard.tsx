@@ -15,6 +15,24 @@ const raceOptions = [{ value: "Pursuit", label: "Pursuit" }, { value: "Handicap"
 const Club = () => {
     const router = useRouter()
     var [clubId, setClubId] = useState<string>("invalid")
+    var [club, setClub] = useState<ClubDataType>({
+        id: "",
+        name: "",
+        settings: {
+            clockIP: ""
+        },
+        series: [],
+        boats: [],
+    })
+
+    var [user, setUser] = useState<UserDataType>({
+        id: "",
+        name: "",
+        settings: {},
+        permLvl: 0,
+        clubId: ""
+
+    })
 
     var [activeSeriesData, setActiveSeriesData] = useState<SeriesDataType>({
         id: "",
@@ -35,14 +53,13 @@ const Club = () => {
         ASO: "",
         results: [],
         Type: "",
-        seriesId: ""
+        seriesId: "",
+        startTime: 0
     })
 
     const [seriesData, setSeriesData] = useState<SeriesDataType[]>([])
 
     const [boatData, setBoatData] = useState<BoatDataType[]>([])
-
-    const [clubSettings, setClubSettings] = useState<SettingsType>({} as SettingsType)
 
 
     //adds an entry to a race and updates database
@@ -247,9 +264,9 @@ const Club = () => {
     }
 
     const saveClubSettings = (e: ChangeEvent<HTMLInputElement>) => {
-        const tempdata = clubSettings
-        tempdata[e.target.id] = e.target.value
-        setClubSettings(tempdata)
+        const tempdata = club
+        tempdata.settings[e.target.id] = e.target.value
+        setClub(tempdata)
     }
 
     const updateRanges = () => {
@@ -337,18 +354,29 @@ const Club = () => {
             if (clubId == "invalid") {
                 return
             }
-            console.log(clubId)
-            const fetchSettings = async () => {
+            const fetchClub = async () => {
                 var data = await DB.GetClubById(clubId)
-                console.log(data)
                 if (data) {
-                    setClubSettings(data.settings)
+                    setClub(data)
                 } else {
                     console.log("could not fetch club settings")
                 }
 
             }
-            fetchSettings()
+            fetchClub()
+
+            const fetchUser = async () => {
+                var userid = Cookies.get('Id')
+                if (userid == undefined) return
+                var data = await DB.GetUserById(userid)
+                if (data) {
+                    setUser(data)
+                } else {
+                    console.log("could not fetch club settings")
+                }
+
+            }
+            fetchUser()
 
             const fetchRaces = async () => {
                 var data = await DB.GetSeriesByClubId(clubId)
@@ -380,7 +408,7 @@ const Club = () => {
     }, [seriesData]);
 
     return (
-        <Dashboard>
+        <Dashboard club={club.name} userName={user.name}>
             <div className="w-full flex flex-row items-center justify-start panel-height">
                 <div id="leftBar" className='flex basis-3/12 flex-col justify-start h-full border-pink-500 border-r-2 overflow-y-auto'>
                     <div className='w-full flex cursor-pointer' onClick={showSettings}>
@@ -426,9 +454,9 @@ const Club = () => {
                             <input type="text"
                                 id='clockIP'
                                 className="w-full p-2 mx-0 my-2 border-4 rounded focus:border-pink-500 focus:outline-none"
-                                defaultValue={clubSettings.clockIP}
+                                defaultValue={club.settings.clockIP}
                                 onChange={saveClubSettings}
-                                onBlur={() => DB.UpdateClubById(clubId, clubSettings)}
+                                onBlur={() => DB.UpdateClubById(club)}
                             />
                         </div>
                     </div>

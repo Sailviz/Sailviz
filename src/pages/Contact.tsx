@@ -8,10 +8,10 @@ const Contact = () => {
                 <h1 className="text-5xl md:text-[5rem] leading-normal font-extrabold text-gray-700">
                     Contact
                 </h1>
-                <p>Please Email SRM@alexpegg.uk for all enquiries</p>
+                <p>Please Contact Alex Pegg for assitance</p>
             </div>
-    </Layout>
-  );
+        </Layout>
+    );
 };
 
 

@@ -40,7 +40,7 @@ export async function GetSeriesById(id: string): Promise<SeriesDataType> {
         });
 };
 
-export async function GetClubById(id: string): Promise<SeriesDataType> {
+export async function GetClubById(id: string): Promise<ClubDataType> {
     const body = {
         "id": id,
     }
@@ -59,10 +59,28 @@ export async function GetClubById(id: string): Promise<SeriesDataType> {
         });
 };
 
-export async function UpdateClubById(id: string, settings: SettingsType): Promise<SeriesDataType> {
+export async function GetUserById(id: string): Promise<UserDataType> {
     const body = {
         "id": id,
-        "settings": settings
+    }
+    return await fetch(`${server}/api/GetUserById`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+    })
+        .then((res) => res.json())
+        .then((data) => {
+            if (data && data.error) {
+                console.log(data.message)
+            } else {
+                return (data.user)
+            }
+        });
+};
+
+export async function UpdateClubById(clubData: ClubDataType): Promise<ClubDataType> {
+    const body = {
+        "club": clubData
     }
     console.log(body)
     return await fetch(`${server}/api/UpdateClubById`, {
@@ -312,8 +330,6 @@ export async function deleteRace(id: string): Promise<RaceDataType> {
             }
         });
 };
-
-
 
 export async function getRYAPY(): Promise<BoatDataType[]> {
 
