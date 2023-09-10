@@ -25,7 +25,7 @@ async function findClub(clubId: string) {
     return result;
 }
 
-async function createUser(name: string, email: string, password: string, club: string, permLvl: number) {
+async function createUser(name: string, email: string, password: string, clubId: string, permLvl: number) {
     var hash = await bcrypt.hash(password, saltRounds)
     var user = await prisma.users.create({
         data: {
@@ -33,7 +33,7 @@ async function createUser(name: string, email: string, password: string, club: s
             name: name,
             password: hash,
             settings: {},
-            club: club,
+            clubId: clubId,
             permLvl: permLvl,
         },
     })
@@ -71,14 +71,14 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 
         var Existinguser = await findUser(email)
         if (!Existinguser) {
-            var creationResult = await createUser(name, email, password, club.name, permLvl)
+            var creationResult = await createUser(name, email, password, club.id, permLvl)
             if (creationResult) {
                 var user = creationResult;
                 var token = jwt.sign(
                     { userId: user.name, email: user.email, id: user.id },
                     jwtSecret,
                     {
-                        expiresIn: 3000, //50 minutes
+                        expiresIn: '1d', //1 day
                     },
                 );
                 res.json({ error: false, token: token });
