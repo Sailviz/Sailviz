@@ -1,5 +1,5 @@
 import React, { ChangeEvent, useState, useEffect } from 'react';
-import { createColumnHelper, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table'
+import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, useReactTable, SortingState } from '@tanstack/react-table'
 import Select from 'react-select';
 import * as DB from '../components/apiMethods';
 
@@ -139,8 +139,28 @@ const Remove = ({ ...props }: any) => {
     );
 };
 
+function Sort({ column, table }: { column: any, table: any }) {
+    const firstValue = table
+        .getPreFilteredRowModel()
+        .flatRows[0]?.getValue(column.id);
+
+    const columnFilterValue = column.getFilterValue();
+
+    return (
+        <div className='flex flex-row justify-center'>
+            <p onClick={(e) => column.toggleSorting(true)} className='cursor-pointer'>
+                ▲
+            </p>
+            <p onClick={(e) => column.toggleSorting(false)} className='cursor-pointer'>
+                ▼
+            </p>
+        </div>
+    )
+}
+
 
 const columnHelper = createColumnHelper<ResultsDataType>()
+
 
 const RaceResultsTable = (props: any) => {
     let [data, setData] = useState<ResultsDataType[]>(props.data)
@@ -171,50 +191,64 @@ const RaceResultsTable = (props: any) => {
         //calculateResults()
     }
 
+    const [sorting, setSorting] = useState<SortingState>([]);
 
     let table = useReactTable({
         data,
         columns: [
             columnHelper.accessor('Helm', {
                 header: "Helm",
-                cell: props => <Text {...props} updateResult={updateResult} />
+                cell: props => <Text {...props} updateResult={updateResult} />,
+                enableSorting: false
             }),
             columnHelper.accessor('Crew', {
                 header: "Crew",
-                cell: props => <Text {...props} updateResult={updateResult} />
+                cell: props => <Text {...props} updateResult={updateResult} />,
+                enableSorting: false
             }),
             columnHelper.accessor('boat', {
                 header: "Class",
                 id: "Class",
                 size: 300,
-                cell: props => <Class {...props} updateResult={updateResult} clubId={clubId} />
+                cell: props => <Class {...props} updateResult={updateResult} clubId={clubId} />,
+                enableSorting: false
             }),
             columnHelper.accessor('SailNumber', {
                 header: "Sail Number",
-                cell: props => <Number {...props} updateResult={updateResult} />
+                cell: props => <Number {...props} updateResult={updateResult} />,
+                enableSorting: false
             }),
             columnHelper.accessor('Time', {
                 header: "Time",
-                cell: props => <Time {...props} updateResult={updateResult} />
+                cell: props => <Time {...props} updateResult={updateResult} />,
+                enableSorting: false
             }),
             columnHelper.accessor('Laps', {
                 header: "Laps",
-                cell: props => <Number {...props} updateResult={updateResult} />
+                cell: props => <Number {...props} updateResult={updateResult} />,
+                enableSorting: false
             }),
             columnHelper.accessor('CorrectedTime', {
                 header: "Corrected Time",
-                cell: props => <Number {...props} updateResult={updateResult} />
+                cell: props => <Number {...props} updateResult={updateResult} />,
+                enableSorting: false
             }),
             columnHelper.accessor('Position', {
                 header: "Position",
-                cell: props => <Number {...props} updateResult={updateResult} />
+                cell: props => <Number {...props} updateResult={updateResult} />,
+                enableSorting: true
             }),
             columnHelper.display({
                 id: "Remove",
                 cell: props => <Remove {...props} deleteResult={deleteResult} />
             }),
         ],
-        getCoreRowModel: getCoreRowModel()
+        state: {
+            sorting,
+        },
+        onSortingChange: setSorting,
+        getCoreRowModel: getCoreRowModel(),
+        getSortedRowModel: getSortedRowModel(),
     })
     return (
         <div key={props.data} className='block max-w-full'>
@@ -230,6 +264,11 @@ const RaceResultsTable = (props: any) => {
                                             header.column.columnDef.header,
                                             header.getContext()
                                         )}
+                                    {header.column.getCanSort() ? (
+                                        <div>
+                                            <Sort column={header.column} table={table} />
+                                        </div>
+                                    ) : null}
                                 </th>
                             ))}
                         </tr>
