@@ -36,7 +36,7 @@ export default function Dashboard({
             <div className="flex flex-col h-full overflow-hidden">
                 <nav className="border-pink-500 px-4 sm:px-4 py-2.5 border-b-2 flex h-20">
                     <div className="container flex flex-wrap justify-between items-center mx-auto">
-                        <Link href="/" className="flex items-center">
+                        <div className="flex items-center">
                             <a className='flex flex-row'>
                                 <Image src="/favicon.ico" className="mr-3 h-6 sm:h-9" width={40} height={40} />
                                 <div className=" text-xl font-semibold whitespace-nowrap text-gray-700 p-3">
@@ -49,7 +49,7 @@ export default function Dashboard({
                                     logged in as {userName}
                                 </p>
                             </a>
-                        </Link>
+                        </div>
                         <div className="hidden w-full md:block md:w-auto" id="navbar-default">
                             <ul className="flex flex-col mt-4 md:flex-row md:space-x-8 md:mt-0 md:text-sm md:font-medium">
                                 <li>
