@@ -611,7 +611,7 @@ const Club = () => {
                             </p>
                         </div>
                         <div className='p-6 w-full'>
-                            <RaceResultsTable data={activeRaceData.results} key={activeRaceData.id} deleteResult={deleteResult} updateResult={updateResult} createResult={createResult} clubId={clubId} raceId={activeRaceData.id} />
+                            <RaceResultsTable data={activeRaceData.results} startTime={activeRaceData.startTime} key={activeRaceData.id} deleteResult={deleteResult} updateResult={updateResult} createResult={createResult} clubId={clubId} raceId={activeRaceData.id} />
                         </div>
                     </div>
                 </div>

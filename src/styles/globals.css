@@ -7,6 +7,10 @@
   height: calc(100vh - 75px);
 }
 
+input[disabled] {
+  background: white;
+}
+
 input[type="range"] {
   -webkit-appearance: none;
   margin: 20px 0;

@@ -2,6 +2,7 @@ import React, { ChangeEvent, useState, useEffect } from 'react';
 import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, useReactTable, SortingState } from '@tanstack/react-table'
 import Select from 'react-select';
 import * as DB from '../components/apiMethods';
+import { start } from 'repl';
 
 const Text = ({ ...props }) => {
     const initialValue = props.getValue()
@@ -36,9 +37,6 @@ const Number = ({ ...props }: any) => {
         props.updateResult(original)
     }
 
-    React.useEffect(() => {
-        setValue(initialValue)
-    }, [initialValue])
     return (
         <>
             <input type="number"
@@ -47,6 +45,7 @@ const Number = ({ ...props }: any) => {
                 defaultValue={Math.round(value)}
                 key={value}
                 onBlur={(e) => onBlur(e)}
+                disabled={props.disabled}
             />
         </>
     );
@@ -55,7 +54,6 @@ const Number = ({ ...props }: any) => {
 const Laps = ({ ...props }: any) => {
     const initialValue = props.getValue()
     const [value, setValue] = React.useState(initialValue)
-    console.log(initialValue.number)
 
     const onBlur = (e: ChangeEvent<HTMLInputElement>) => {
         let original = props.row.original
@@ -63,9 +61,6 @@ const Laps = ({ ...props }: any) => {
         props.updateResult(original)
     }
 
-    React.useEffect(() => {
-        setValue(initialValue)
-    }, [initialValue])
     return (
         <>
             <input type="number"
@@ -81,18 +76,18 @@ const Laps = ({ ...props }: any) => {
 
 const Time = ({ ...props }: any) => {
     const initialValue = props.getValue()
-    const [value, setValue] = React.useState(initialValue)
+    const [value, setValue] = React.useState(new Date((initialValue - props.startTime) * 1000).toISOString().substring(11, 19))
 
     const onBlur = (e: ChangeEvent<HTMLInputElement>) => {
         let original = props.row.original
-        console.log(e.target.value)
-        original[props.column.id] = e.target.value
+        var parts = e.target.value.split(':'); // split it at the colons
+        if (parts[0] == undefined || parts[1] == undefined || parts[2] == undefined) return
+        // minutes are 60 seconds. Hours are 60 minutes * 60 seconds.
+        var seconds = (+parts[0]) * 60 * 60 + (+parts[1]) * 60 + (+parts[2]);
+        original[props.column.id] = seconds + props.startTime
         props.updateResult(original)
     }
 
-    React.useEffect(() => {
-        setValue(initialValue)
-    }, [initialValue])
     return (
         <>
             <input type="time"
@@ -191,10 +186,9 @@ const columnHelper = createColumnHelper<ResultsDataType>()
 
 const RaceResultsTable = (props: any) => {
     let [data, setData] = useState<ResultsDataType[]>(props.data)
+    let [startTime, setStartTime] = useState(props.startTime)
     let clubId = props.clubId
     let raceId = props.raceId
-
-    console.log(props.data)
 
     const deleteResult = (id: any) => {
         props.deleteResult(id)
@@ -216,8 +210,6 @@ const RaceResultsTable = (props: any) => {
         tempdata[tempdata.findIndex((x: ResultsDataType) => x.id === Result.id)] = Result
         console.log(tempdata)
         setData([...tempdata])
-        //don't calculate results in the table
-        //calculateResults()
     }
 
     const [sorting, setSorting] = useState<SortingState>([]);
@@ -244,12 +236,12 @@ const RaceResultsTable = (props: any) => {
             }),
             columnHelper.accessor('SailNumber', {
                 header: "Sail Number",
-                cell: props => <Number {...props} updateResult={updateResult} />,
+                cell: props => <Number {...props} updateResult={updateResult} disabled={false} />,
                 enableSorting: false
             }),
-            columnHelper.accessor('Time', {
+            columnHelper.accessor('finishTime', {
                 header: "Time",
-                cell: props => <Time {...props} updateResult={updateResult} />,
+                cell: props => <Time {...props} startTime={startTime} updateResult={updateResult} />,
                 enableSorting: false
             }),
             columnHelper.accessor('lapTimes', {
@@ -259,12 +251,12 @@ const RaceResultsTable = (props: any) => {
             }),
             columnHelper.accessor('CorrectedTime', {
                 header: "Corrected Time",
-                cell: props => <Number {...props} updateResult={updateResult} />,
+                cell: props => <Number {...props} updateResult={updateResult} disabled={true} />,
                 enableSorting: false
             }),
             columnHelper.accessor('Position', {
                 header: "Position",
-                cell: props => <Number {...props} updateResult={updateResult} />,
+                cell: props => <Number {...props} updateResult={updateResult} disabled={true} />,
                 enableSorting: true
             }),
             columnHelper.display({
