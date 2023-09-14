@@ -9,6 +9,7 @@ import BoatTable from '../components/BoatTable';
 import RaceResultsTable from '../components/RaceResultsTable';
 import * as DB from '../components/apiMethods';
 import Cookies from 'js-cookie';
+import SeriesResultsTable from '../components/SeriesResultsTable';
 
 const raceOptions = [{ value: "Pursuit", label: "Pursuit" }, { value: "Handicap", label: "Handicap" }]
 
@@ -510,6 +511,7 @@ const Club = () => {
                             :
                             <div></div>
                         }
+                        <SeriesResultsTable data={activeSeriesData} clubId={clubId} />
                     </div>
                     <div id="race" className="hidden">
                         <p className="text-6xl font-extrabold text-gray-700 p-6">
