@@ -52,6 +52,33 @@ const Number = ({ ...props }: any) => {
     );
 };
 
+const Laps = ({ ...props }: any) => {
+    const initialValue = props.getValue()
+    const [value, setValue] = React.useState(initialValue)
+    console.log(initialValue.number)
+
+    const onBlur = (e: ChangeEvent<HTMLInputElement>) => {
+        let original = props.row.original
+        original[props.column.id].number = parseInt(e.target.value)
+        props.updateResult(original)
+    }
+
+    React.useEffect(() => {
+        setValue(initialValue)
+    }, [initialValue])
+    return (
+        <>
+            <input type="number"
+                id=''
+                className="p-2 m-2 text-center w-full"
+                defaultValue={Math.round(value.number)}
+                key={value.number}
+                onBlur={(e) => onBlur(e)}
+            />
+        </>
+    );
+};
+
 const Time = ({ ...props }: any) => {
     const initialValue = props.getValue()
     const [value, setValue] = React.useState(initialValue)
@@ -167,6 +194,8 @@ const RaceResultsTable = (props: any) => {
     let clubId = props.clubId
     let raceId = props.raceId
 
+    console.log(props.data)
+
     const deleteResult = (id: any) => {
         props.deleteResult(id)
         const tempdata: ResultsDataType[] = [...data]
@@ -223,9 +252,9 @@ const RaceResultsTable = (props: any) => {
                 cell: props => <Time {...props} updateResult={updateResult} />,
                 enableSorting: false
             }),
-            columnHelper.accessor('Laps', {
+            columnHelper.accessor('lapTimes', {
                 header: "Laps",
-                cell: props => <Number {...props} updateResult={updateResult} />,
+                cell: props => <Laps {...props} updateResult={updateResult} />,
                 enableSorting: false
             }),
             columnHelper.accessor('CorrectedTime', {

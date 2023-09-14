@@ -31,9 +31,14 @@ type ResultsDataType = {
   boat: BoatDataType;
   SailNumber: number;
   finishTime: number;
-  lapTimes: object;
+  lapTimes: lapTimesType;
   CorrectedTime: number;
   Position: number;
+};
+
+type lapTimesType = {
+  times: Array;
+  number: number;
 };
 
 type RaceSettingsType = {
