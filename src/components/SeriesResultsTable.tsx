@@ -150,21 +150,7 @@ const SeriesResultsTable = (props: any) => {
             cell: props => <Number {...props} disabled={false} />,
             enableSorting: false
         }),
-        columnHelper.accessor('R1', {
-            header: "R1",
-            cell: props => <Number {...props} disabled={true} />,
-            enableSorting: true
-        }),
-        columnHelper.accessor('Total', {
-            header: "Total",
-            cell: props => <Number {...props} disabled={true} />,
-            enableSorting: true
-        }),
-        columnHelper.accessor('Net', {
-            header: "Net",
-            cell: props => <Number {...props} disabled={true} />,
-            enableSorting: true
-        }),
+
     ];
 
     props.data.races.forEach((race: RaceDataType) => {
@@ -176,6 +162,21 @@ const SeriesResultsTable = (props: any) => {
         })
         columns.push(newColumn)
     })
+
+    const totalColumn = columnHelper.accessor('Total', {
+        header: "Total",
+        cell: props => <Number {...props} disabled={true} />,
+        enableSorting: true
+    })
+
+    const netColumn = columnHelper.accessor('Net', {
+        header: "Net",
+        cell: props => <Number {...props} disabled={true} />,
+        enableSorting: true
+    })
+
+    columns.push(totalColumn)
+    columns.push(netColumn)
 
     console.log(props.data)
     const [sorting, setSorting] = useState<SortingState>([]);

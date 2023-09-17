@@ -511,7 +511,7 @@ const Club = () => {
                             :
                             <div></div>
                         }
-                        <SeriesResultsTable data={activeSeriesData} clubId={clubId} />
+                        <SeriesResultsTable key={activeSeriesData.id} data={activeSeriesData} clubId={clubId} />
                     </div>
                     <div id="race" className="hidden">
                         <p className="text-6xl font-extrabold text-gray-700 p-6">
