@@ -3,15 +3,23 @@ import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, use
 import Select from 'react-select';
 import * as DB from '../components/apiMethods';
 
+//not a db type, only used here
+type SeriesResultsType = {
+    [key: string]: any;
+    Rank: number;
+    Helm: string;
+    Crew: string;
+    Boat: BoatDataType;
+    SailNumber: number;
+    Total: number;
+    Net: number;
+    racePositions: number[];
+}
+
+
 const Text = ({ ...props }) => {
     const initialValue = props.getValue()
     const [value, setValue] = React.useState(initialValue)
-
-    const onBlur = (e: ChangeEvent<HTMLInputElement>) => {
-        const original = props.row.original
-        original[props.column.id] = e.target.value
-        props.updateResult(original)
-    }
 
     return (
         <>
@@ -20,7 +28,7 @@ const Text = ({ ...props }) => {
                 className=" text-center"
                 defaultValue={value}
                 key={value}
-                onBlur={(e) => onBlur(e)}
+                disabled={true}
             />
         </>
     );
@@ -29,13 +37,6 @@ const Text = ({ ...props }) => {
 const Number = ({ ...props }: any) => {
     const initialValue = props.getValue()
     const [value, setValue] = React.useState(initialValue)
-
-    const onBlur = (e: ChangeEvent<HTMLInputElement>) => {
-        let original = props.row.original
-        original[props.column.id] = parseInt(e.target.value)
-        props.updateResult(original)
-    }
-
     return (
         <>
             <input type="number"
@@ -43,8 +44,7 @@ const Number = ({ ...props }: any) => {
                 className="p-2 m-2 text-center w-full"
                 defaultValue={Math.round(value)}
                 key={value}
-                onBlur={(e) => onBlur(e)}
-                disabled={props.disabled}
+                disabled={true}
             />
         </>
     );
@@ -73,21 +73,12 @@ const Class = ({ ...props }: any) => {
     }, [value]);
 
 
-    const onBlur = (newValue: any) => {
-        let original = props.row.original
-        console.log(newValue)
-        original.boat = newValue
-        props.updateResult(original)
-    }
-
-
     return (
         <>
             <Select
                 className='w-max min-w-full'
                 defaultValue={{ value: value.id, label: value.name }}
                 key={value}
-                onChange={(e) => { setValue(e?.value); onBlur(e?.value) }}
                 options={options}
             />
 
@@ -115,48 +106,92 @@ function Sort({ column, table }: { column: any, table: any }) {
 }
 
 
-const columnHelper = createColumnHelper<ResultsDataType>()
+const columnHelper = createColumnHelper<SeriesResultsType>()
 
 
 const SeriesResultsTable = (props: any) => {
-    let [data, setData] = useState<ResultsDataType[]>(props.data)
+    let [seriesData, setSeriesData] = useState<SeriesDataType>(props.data)
     let clubId = props.clubId
 
+    //calculate results table from data.
+    let [data, setData] = useState<SeriesResultsType[]>([])
+
+    const calcTable = () => {
+        let tempresults: SeriesResultsType[] = []
+        //collate results from same person.
+        seriesData.races.forEach(race => {
+            race.results.forEach(result => {
+                //if new racer, add to tempresults
+                if (tempresults.filter(function (t) {
+                    return t.Helm == result.helm && t.boat == result.boat
+                })) {
+                    tempresults.push({
+                        Rank: 0,
+                        Helm: result.Helm,
+                        Crew: result.Crew,
+                        Boat: result.boat,
+                        SailNumber: result.SailNumber,
+                        Total: 0,
+                        Net: 0,
+                        racePositions: [result.Position]
+                    })
+                }
+                //add result to tempresults
+            })
+        });
+        //fill dnc
+        //calculate discards
+        //calculate net
+
+        console.log(tempresults)
+        setData(tempresults)
+
+    }
+
+    React.useEffect(() => {
+        console.log(seriesData)
+        if (seriesData != undefined) {
+            calcTable()
+        }
+    }, [seriesData])
+
     let columns = [
-        columnHelper.accessor('Position', {
+        columnHelper.accessor('Rank', {
             header: "Rank",
-            cell: props => <Number {...props} disabled={true} />,
+            cell: props => <Number {...props} />,
             enableSorting: true
         }),
-        columnHelper.accessor('Helm', {
+        columnHelper.accessor("Helm", {
             header: "Helm",
             cell: props => <Text {...props} />,
             enableSorting: false
         }),
-        columnHelper.accessor('Crew', {
+        columnHelper.accessor("Crew", {
             header: "Crew",
             cell: props => <Text {...props} />,
             enableSorting: false
         }),
-        columnHelper.accessor('boat', {
+        columnHelper.accessor("boat", {
             header: "Class",
             id: "Class",
             size: 300,
             cell: props => <Class {...props} clubId={clubId} />,
             enableSorting: false
         }),
-        columnHelper.accessor('SailNumber', {
+        columnHelper.accessor((data) => data.SailNumber, {
             header: "Sail Number",
-            cell: props => <Number {...props} disabled={false} />,
+            cell: props => <Number {...props} />,
             enableSorting: false
         }),
 
     ];
 
-    props.data.races.forEach((race: RaceDataType) => {
+    //add column for each race in series
+    props.data.races.forEach((race: RaceDataType, index: number) => {
         console.log(race)
-        const newColumn = columnHelper.accessor('Net', {
-            header: race.number.toString(),
+        console.log(data, index)
+        const newColumn = columnHelper.accessor((data) => data.racePositions[index], {
+            header: "R" + race.number.toString(),
             cell: props => <Number {...props} disabled={true} />,
             enableSorting: true
         })
@@ -178,7 +213,6 @@ const SeriesResultsTable = (props: any) => {
     columns.push(totalColumn)
     columns.push(netColumn)
 
-    console.log(props.data)
     const [sorting, setSorting] = useState<SortingState>([]);
 
     let table = useReactTable({
