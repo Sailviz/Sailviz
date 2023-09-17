@@ -7,7 +7,8 @@ import RaceTimer from "../components/RaceTimer"
 enum raceStateType {
     running,
     stopped,
-    reset
+    reset,
+    calculate
 }
 
 const RacePage = () => {
@@ -78,7 +79,7 @@ const RacePage = () => {
         Position: 0,
     });
 
-    var [raceState, setRaceActive] = useState<raceStateType>(raceStateType.reset)
+    var [raceState, setRaceState] = useState<raceStateType>(raceStateType.reset)
     const [timerActive, setTimerActive] = useState(false);
     const [resetTimer, setResetTimer] = useState(false);
     const [startTime, setStartTime] = useState(0);
@@ -93,7 +94,7 @@ const RacePage = () => {
             let localTime = Math.floor((new Date().getTime() / 1000) + raceLength)
             setStartTime(localTime)
             setResetTimer(false)
-            setRaceActive(raceStateType.running)
+            setRaceState(raceStateType.running)
             setInstructions("do the flags and the hooter!")
             //start countdown timer
             setTimerActive(true)
@@ -131,7 +132,7 @@ const RacePage = () => {
                 console.log("clock stop failed with " + res.status)
                 return
             }
-            setRaceActive(raceStateType.stopped)
+            setRaceState(raceStateType.stopped)
             setTimerActive(false)
             setInstructions("Hit reset to start from the beginning")
         }
@@ -149,7 +150,7 @@ const RacePage = () => {
                 console.log("clock reset failed with " + res.status)
                 return
             }
-            setRaceActive(raceStateType.reset)
+            setRaceState(raceStateType.reset)
             setStartTime((new Date().getTime() / 1000) + raceLength)
             setResetTimer(true)
             setInstructions("Hit Start to begin the starting procedure")
@@ -250,7 +251,7 @@ const RacePage = () => {
         if (checkAllFinished()) {
             //show popup to say race is finished.
             stopRace()
-            calculateResults()
+            setRaceState(raceStateType.calculate)
 
         }
     }
@@ -276,6 +277,9 @@ const RacePage = () => {
         }
         if (raceId != undefined) {
             fetchRace()
+            if (checkAllFinished()) {
+                setRaceState(raceStateType.calculate)
+            }
         }
     }, [router])
 
@@ -324,6 +328,10 @@ const RacePage = () => {
                                 case raceStateType.stopped:
                                     return (<p onClick={resetRace} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-xl px-5 py-2.5 text-center">
                                         Reset
+                                    </p>)
+                                case raceStateType.calculate:
+                                    return (<p onClick={calculateResults} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-xl px-5 py-2.5 text-center">
+                                        Calculate Results
                                     </p>)
                                 default:
                                     return (<p></p>)

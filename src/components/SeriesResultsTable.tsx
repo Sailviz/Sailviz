@@ -57,6 +57,7 @@ const Class = ({ ...props }: any) => {
         initialValue = { value: "", label: "" }
     }
     const [value, setValue] = React.useState(initialValue)
+    console.log(initialValue)
 
     let boats: BoatDataType[] = []
     let options: any = []
