@@ -50,43 +50,6 @@ const Number = ({ ...props }: any) => {
     );
 };
 
-
-const Class = ({ ...props }: any) => {
-    var initialValue = props.getValue()
-    if (initialValue == null) {
-        initialValue = { value: "", label: "" }
-    }
-    const [value, setValue] = React.useState(initialValue)
-    console.log(initialValue)
-
-    let boats: BoatDataType[] = []
-    let options: any = []
-    useEffect(() => {
-        const fetchBoats = async () => {
-            boats = await DB.getBoats(props.clubId)
-            boats.forEach(boat => {
-                options.push({ value: boat, label: boat.name })
-            })
-        }
-        if (props.clubId) {
-            fetchBoats()
-        }
-    }, [value]);
-
-
-    return (
-        <>
-            <Select
-                className='w-max min-w-full'
-                defaultValue={{ value: value.id, label: value.name }}
-                key={value}
-                options={options}
-            />
-
-        </>
-    );
-};
-
 function Sort({ column, table }: { column: any, table: any }) {
     const firstValue = table
         .getPreFilteredRowModel()
@@ -126,6 +89,7 @@ const SeriesResultsTable = (props: any) => {
                 if (tempresults.filter(function (t) {
                     return t.Helm == result.helm && t.boat == result.boat
                 })) {
+                    console.log(result.boat)
                     tempresults.push({
                         Rank: 0,
                         Helm: result.Helm,
@@ -172,11 +136,10 @@ const SeriesResultsTable = (props: any) => {
             cell: props => <Text {...props} />,
             enableSorting: false
         }),
-        columnHelper.accessor("boat", {
+        columnHelper.accessor((data) => data.Boat.name, {
             header: "Class",
             id: "Class",
-            size: 300,
-            cell: props => <Class {...props} clubId={clubId} />,
+            cell: props => <Text {...props} clubId={clubId} />,
             enableSorting: false
         }),
         columnHelper.accessor((data) => data.SailNumber, {
