@@ -89,7 +89,6 @@ const SeriesResultsTable = (props: any) => {
                 if (tempresults.filter(function (t) {
                     return t.Helm == result.helm && t.boat == result.boat
                 })) {
-                    console.log(result.boat)
                     tempresults.push({
                         Rank: 0,
                         Helm: result.Helm,
@@ -98,10 +97,13 @@ const SeriesResultsTable = (props: any) => {
                         SailNumber: result.SailNumber,
                         Total: 0,
                         Net: 0,
-                        racePositions: [result.Position]
+                        racePositions: new Array<number>(seriesData.races.length)
                     })
                 }
                 //add result to tempresults
+                const index = tempresults.findIndex((t) => t.Helm == result.Helm && t.Boat == result.boat)
+                console.log(index, race.number)
+                tempresults[index]?.racePositions.splice(race.number - 1, 0, result.Position)
             })
         });
         //fill dnc
