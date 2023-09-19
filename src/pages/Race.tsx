@@ -85,7 +85,7 @@ const RacePage = () => {
     const [startTime, setStartTime] = useState(0);
 
     const startRace = async () => {
-        fetch("http://192.168.1.223/start", { mode: 'no-cors' }).then((res) => {
+        fetch("http://192.168.10.40/start", { mode: 'no-cors' }).then((res) => {
             if (res.status !== 0) {
                 console.log("clock start failed with " + res.status)
                 return
@@ -127,7 +127,7 @@ const RacePage = () => {
 
     const stopRace = async () => {
         //add are you sure here
-        fetch("http://192.168.1.223/stop", { mode: 'no-cors' }).then((res) => {
+        fetch("http://192.168.10.40/stop", { mode: 'no-cors' }).then((res) => {
             if (res.status !== 0) {
                 console.log("clock stop failed with " + res.status)
                 return
@@ -145,7 +145,7 @@ const RacePage = () => {
 
     const resetRace = async () => {
         //add are you sure here
-        fetch("http://192.168.1.223/reset", { mode: 'no-cors' }).then((res) => {
+        fetch("http://192.168.10.40/reset", { mode: 'no-cors' }).then((res) => {
             if (res.status !== 0) {
                 console.log("clock reset failed with " + res.status)
                 return
@@ -271,8 +271,8 @@ const RacePage = () => {
         const fetchRace = async () => {
             let data = await DB.getRaceById(raceId)
             setRace(data.race)
-            fetch("http://192.168.1.223/stop", { mode: 'no-cors' })
-            fetch("http://192.168.1.223/reset", { mode: 'no-cors' })
+            fetch("http://192.168.10.40/stop", { mode: 'no-cors' })
+            fetch("http://192.168.10.40/reset", { mode: 'no-cors' })
             setSeriesName(await DB.GetSeriesById(data.race.seriesId).then((res) => { return (res.name) }))
         }
         if (raceId != undefined) {

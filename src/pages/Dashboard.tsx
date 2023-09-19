@@ -520,7 +520,7 @@ const Club = () => {
                         <div className="flex w-3/4">
                             <div className='flex flex-col px-6 w-full '>
                                 <p className='text-2xl font-bold text-gray-700'>
-                                    OOD
+                                    RO
                                 </p>
                                 <input type="text"
                                     id='OOD'
@@ -534,7 +534,7 @@ const Club = () => {
 
                             <div className='flex flex-col px-6 w-full'>
                                 <p className='text-2xl font-bold text-gray-700'>
-                                    AOD
+                                    ARO
                                 </p>
                                 <input type="text"
                                     id='AOD'
