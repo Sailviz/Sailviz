@@ -35,11 +35,11 @@ const CountdownTimer = ({ startTime, timerActive, onFourMinutes, onOneMinute, on
         }
     }, [reset]);
 
-    if (timeLeft.minutes == 0 && timeLeft.seconds == 0) {
+    if (timeLeft.minutes == 0 && timeLeft.seconds == 0 && timeLeft.countingUp == false) {
         if (onGo) onGo();
-    } else if (timeLeft.minutes == 1 && timeLeft.seconds == 0) {
+    } else if (timeLeft.minutes == 1 && timeLeft.seconds == 0 && timeLeft.countingUp == false) {
         if (onOneMinute) onOneMinute();
-    } else if (timeLeft.minutes == 4 && timeLeft.seconds == 0) {
+    } else if (timeLeft.minutes == 4 && timeLeft.seconds == 0 && timeLeft.countingUp == false) {
         if (onFourMinutes) onFourMinutes();
     }
 
