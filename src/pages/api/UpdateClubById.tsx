@@ -22,8 +22,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
         // check if we have all data.
         // The website stops this, but just in case
         try {
-            assert.notStrictEqual(undefined, req.body.id);
-            assert.notStrictEqual(undefined, req.body.settings);
+            assert.notStrictEqual(undefined, req.body.club);
         } catch (bodyError) {
             res.json({ error: true, message: "information missing" });
             return;

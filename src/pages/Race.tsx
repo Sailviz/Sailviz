@@ -83,10 +83,11 @@ const RacePage = () => {
     const [timerActive, setTimerActive] = useState(false);
     const [resetTimer, setResetTimer] = useState(false);
     const [startTime, setStartTime] = useState(0);
+    const [clockIP, setClockIP] = useState("");
 
     const startRaceButton = async () => {
         const timeoutId = setTimeout(() => controller.abort(), 2000)
-        fetch("http://192.168.10.40/start", { signal: controller.signal }).then(response => {
+        fetch("http://" + clockIP + "/start", { signal: controller.signal }).then(response => {
             //set official start time in DB
             startRace()
 
@@ -132,7 +133,7 @@ const RacePage = () => {
         setTimerActive(false)
         setInstructions("Hit reset to start from the beginning")
         const timeoutId = setTimeout(() => controller.abort(), 2000)
-        fetch("http://192.168.10.40/stop", { signal: controller.signal }).then(response => {
+        fetch("http://" + clockIP + "/stop", { signal: controller.signal }).then(response => {
             clearTimeout(timeoutId)
         }).catch(function (err) {
             console.log('Clock not connected: ', err);
@@ -142,7 +143,7 @@ const RacePage = () => {
     const resetRace = async () => {
         //add are you sure here
         const timeoutId = setTimeout(() => controller.abort(), 2000)
-        fetch("http://192.168.10.40/reset", { signal: controller.signal }).then(response => {
+        fetch("http://" + clockIP + "/reset", { signal: controller.signal }).then(response => {
             clearTimeout(timeoutId)
         }).catch(function (err) {
             console.log('Clock not connected: ', err);
@@ -264,13 +265,33 @@ const RacePage = () => {
 
     useEffect(() => {
         let raceId = query.race as string
+        const getClockIP = async () => {
+            await DB.getRaceById(raceId).then((data: RaceDataType) => {
+                DB.GetSeriesById(data.race.seriesId).then((data: SeriesDataType) => {
+                    console.log(data)
+                    DB.GetClubById(data.clubId).then((data) => {
+                        setClockIP(data.settings['clockIP'])
+                    })
+                })
+
+            })
+        }
+
+        if (raceId != undefined) {
+            getClockIP()
+
+        }
+    }, [router])
+
+    useEffect(() => {
+        let raceId = query.race as string
         const fetchRace = async () => {
             let data = await DB.getRaceById(raceId)
             setRace(data.race)
 
             const timeoutId = setTimeout(() => controller.abort(), 2000)
-            fetch("http://192.168.10.40/stop", { signal: controller.signal }).then(response => {
-                fetch("http://192.168.10.40/reset", { mode: 'no-cors' })
+            fetch("http://" + clockIP + "/stop", { signal: controller.signal }).then(response => {
+                fetch("http://" + clockIP + "/reset", { mode: 'no-cors' })
 
                 clearTimeout(timeoutId)
             }).catch((err) => {
@@ -278,10 +299,12 @@ const RacePage = () => {
             })
             setSeriesName(await DB.GetSeriesById(data.race.seriesId).then((res) => { return (res.name) }))
         }
+
         if (raceId != undefined) {
             fetchRace()
         }
-    }, [router])
+
+    }, [clockIP])
 
     useEffect(() => {
         if (checkAllFinished()) {
