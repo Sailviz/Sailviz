@@ -103,7 +103,7 @@ const RacePage = () => {
         setStartTime(localTime)
         setResetTimer(false)
         setRaceState(raceStateType.running)
-        setInstructions("do the flags and the hooter!")
+        setInstructions("show class flag.")
         //start countdown timer
         setTimerActive(true)
 
@@ -116,15 +116,19 @@ const RacePage = () => {
     }
 
     const handleFourMinutes = () => {
-        console.log('4 minutes left');
+        console.log('4 minutes left')
+        setInstructions("show preparatory and class flag")
     };
 
     const handleOneMinute = () => {
-        console.log('1 minute left');
+        console.log('1 minute left')
+        setInstructions("show class flag")
     };
 
     const handleGo = () => {
-        console.log('GO!');
+        console.log('GO!')
+        setInstructions("show no flags")
+
     };
 
     const stopRace = async () => {
@@ -163,10 +167,7 @@ const RacePage = () => {
         modal.style.display = "block"
         //option to lap, option to finish
         if (!e.target.parentNode) return
-        console.log(e.target.parentNode)
-        console.log(race.results[e.target.parentNode.id])
         let index = race.results.findIndex((x: ResultsDataType) => x.id === e.target.parentNode.id)
-        console.log(index)
         if (index >= 0) {
             setActiveResult(race.results[index])
         }
@@ -289,14 +290,6 @@ const RacePage = () => {
             let data = await DB.getRaceById(raceId)
             setRace(data.race)
 
-            const timeoutId = setTimeout(() => controller.abort(), 2000)
-            fetch("http://" + clockIP + "/stop", { signal: controller.signal }).then(response => {
-                fetch("http://" + clockIP + "/reset", { mode: 'no-cors' })
-
-                clearTimeout(timeoutId)
-            }).catch((err) => {
-                console.log("clock not connected")
-            })
             setSeriesName(await DB.GetSeriesById(data.race.seriesId).then((res) => { return (res.name) }))
         }
 
@@ -309,6 +302,12 @@ const RacePage = () => {
     useEffect(() => {
         if (checkAllFinished()) {
             setRaceState(raceStateType.calculate)
+        }
+        else if (race.startTime != 0) {
+            setRaceState(raceStateType.running)
+            setStartTime(race.startTime)
+            setResetTimer(false)
+            setTimerActive(true)
         }
     }, [race])
 
