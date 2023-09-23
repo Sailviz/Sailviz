@@ -15,7 +15,7 @@ const RacePage = () => {
 
     const router = useRouter()
 
-    const raceLength = 10.5 //5 mins in seconds
+    const raceLength = 301 //5 mins in seconds plus a bit so that it shows 5:00
 
     const query = router.query
 
@@ -84,33 +84,34 @@ const RacePage = () => {
     const [resetTimer, setResetTimer] = useState(false);
     const [startTime, setStartTime] = useState(0);
 
-    const startRace = async () => {
-        fetch("http://192.168.10.40/start", { mode: 'no-cors' }).then((res) => {
-            if (res.status !== 0) {
-                console.log("clock start failed with " + res.status)
-                return
-            }
+    const startRaceButton = async () => {
+        const timeoutId = setTimeout(() => controller.abort(), 2000)
+        fetch("http://192.168.10.40/start", { signal: controller.signal }).then(response => {
             //set official start time in DB
-            let localTime = Math.floor((new Date().getTime() / 1000) + raceLength)
-            setStartTime(localTime)
-            setResetTimer(false)
-            setRaceState(raceStateType.running)
-            setInstructions("do the flags and the hooter!")
-            //start countdown timer
-            setTimerActive(true)
+            startRace()
 
-            //mutate local race copy.
-            let newRaceData: RaceDataType = race
-            newRaceData.startTime = localTime
-            setRace(newRaceData)
-            //send to DB
-            DB.updateRaceById(newRaceData)
-        }
+            clearTimeout(timeoutId)
+        }).catch((err) => {
+            console.log("clock not connected")
+            confirm("Clock not connected, do you want to start the race?") ? startRace() : null;
+        })
+    }
 
-        ).catch(function (err) {
-            console.log('Fetch Error :-S', err);
-            alert("race clock not connected.")
-        });
+    const startRace = async () => {
+        let localTime = Math.floor((new Date().getTime() / 1000) + raceLength)
+        setStartTime(localTime)
+        setResetTimer(false)
+        setRaceState(raceStateType.running)
+        setInstructions("do the flags and the hooter!")
+        //start countdown timer
+        setTimerActive(true)
+
+        //Update database
+        let newRaceData: RaceDataType = race
+        newRaceData.startTime = localTime
+        setRace(newRaceData)
+        //send to DB
+        DB.updateRaceById(newRaceData)
     }
 
     const handleFourMinutes = () => {
@@ -127,39 +128,31 @@ const RacePage = () => {
 
     const stopRace = async () => {
         //add are you sure here
-        fetch("http://192.168.10.40/stop", { mode: 'no-cors' }).then((res) => {
-            if (res.status !== 0) {
-                console.log("clock stop failed with " + res.status)
-                return
-            }
-            setRaceState(raceStateType.stopped)
-            setTimerActive(false)
-            setInstructions("Hit reset to start from the beginning")
-        }
-
-        ).catch(function (err) {
-            console.log('Fetch Error :-S', err);
-            alert("race clock not connected.")
+        setRaceState(raceStateType.stopped)
+        setTimerActive(false)
+        setInstructions("Hit reset to start from the beginning")
+        const timeoutId = setTimeout(() => controller.abort(), 2000)
+        fetch("http://192.168.10.40/stop", { signal: controller.signal }).then(response => {
+            clearTimeout(timeoutId)
+        }).catch(function (err) {
+            console.log('Clock not connected: ', err);
         });
     }
 
     const resetRace = async () => {
         //add are you sure here
-        fetch("http://192.168.10.40/reset", { mode: 'no-cors' }).then((res) => {
-            if (res.status !== 0) {
-                console.log("clock reset failed with " + res.status)
-                return
-            }
-            setRaceState(raceStateType.reset)
-            setStartTime((new Date().getTime() / 1000) + raceLength)
-            setResetTimer(true)
-            setInstructions("Hit Start to begin the starting procedure")
-        }
-
-        ).catch(function (err) {
-            console.log('Fetch Error :-S', err);
-            alert("race clock not connected.")
+        const timeoutId = setTimeout(() => controller.abort(), 2000)
+        fetch("http://192.168.10.40/reset", { signal: controller.signal }).then(response => {
+            clearTimeout(timeoutId)
+        }).catch(function (err) {
+            console.log('Clock not connected: ', err);
         });
+
+        setRaceState(raceStateType.reset)
+        setStartTime((new Date().getTime() / 1000) + raceLength)
+        setResetTimer(true)
+        setInstructions("Hit Start to begin the starting procedure")
+
     }
 
     const openBoatMenu = async (e: any) => {
@@ -331,11 +324,11 @@ const RacePage = () => {
                         {(() => {
                             switch (raceState) {
                                 case raceStateType.reset:
-                                    return (<p onClick={startRace} className="cursor-pointer text-white bg-green-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-xl px-5 py-2.5 text-center">
+                                    return (<p onClick={startRaceButton} className="cursor-pointer text-white bg-green-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-xl px-5 py-2.5 text-center">
                                         Start
                                     </p>)
                                 case raceStateType.running:
-                                    return (<p onClick={stopRace} className="cursor-pointer text-white bg-red-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-xl px-5 py-2.5 text-center">
+                                    return (<p onClick={(e) => { confirm("are you sure you want to stop the race?") ? stopRace() : null; }} className="cursor-pointer text-white bg-red-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-xl px-5 py-2.5 text-center">
                                         Stop
                                     </p>)
                                 case raceStateType.stopped:
