@@ -259,6 +259,7 @@ const RacePage = () => {
     const checkAllFinished = () => {
         let allFinished = true
         race.results.forEach(data => {
+            console.log(data)
             if (data.finishTime == 0) {
                 allFinished = false
             }
@@ -266,22 +267,34 @@ const RacePage = () => {
         return allFinished
     }
 
+    const controller = new AbortController()
+
     useEffect(() => {
         let raceId = query.race as string
         const fetchRace = async () => {
             let data = await DB.getRaceById(raceId)
             setRace(data.race)
-            fetch("http://192.168.10.40/stop", { mode: 'no-cors' })
-            fetch("http://192.168.10.40/reset", { mode: 'no-cors' })
+
+            const timeoutId = setTimeout(() => controller.abort(), 2000)
+            fetch("http://192.168.10.40/stop", { signal: controller.signal }).then(response => {
+                fetch("http://192.168.10.40/reset", { mode: 'no-cors' })
+
+                clearTimeout(timeoutId)
+            }).catch((err) => {
+                console.log("clock not connected")
+            })
             setSeriesName(await DB.GetSeriesById(data.race.seriesId).then((res) => { return (res.name) }))
         }
         if (raceId != undefined) {
             fetchRace()
-            if (checkAllFinished()) {
-                setRaceState(raceStateType.calculate)
-            }
         }
     }, [router])
+
+    useEffect(() => {
+        if (checkAllFinished()) {
+            setRaceState(raceStateType.calculate)
+        }
+    }, [race])
 
     return (
         <Dashboard>
