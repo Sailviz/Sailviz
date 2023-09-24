@@ -188,19 +188,16 @@ const RacePage = () => {
         console.log(sortedResults)
     }
 
-    const finishBoat = async (e: ChangeEvent<HTMLInputElement>) => {
+    const finishBoat = async (id: string) => {
         //modify race data
         const tempdata = race
-        let index = tempdata.results.findIndex((x: ResultsDataType) => x.id === e.target.id)
+        let index = tempdata.results.findIndex((x: ResultsDataType) => x.id === id)
         tempdata.results[index].finishTime = Math.floor(new Date().getTime() / 1000)
         console.log(tempdata.results[index])
         setRace({ ...tempdata })
         //send to DB
         await DB.updateResultById(tempdata.results[index])
-
-        let card = document.getElementById(e.target.id)
-        card?.classList.remove("bg-green-300")
-        card?.classList.add("bg-red-300")
+        setInstructions(tempdata.results[index].name + "finished")
 
         if (checkAllFinished()) {
             //show popup to say race is finished.
@@ -259,6 +256,7 @@ const RacePage = () => {
 
     useEffect(() => {
         if (checkAllFinished()) {
+            setInstructions("race is finished, calculate the results")
             setRaceState(raceStateType.calculate)
         }
         else if (race.startTime != 0) {
@@ -283,19 +281,19 @@ const RacePage = () => {
                         {(() => {
                             switch (raceState) {
                                 case raceStateType.reset:
-                                    return (<p onClick={startRaceButton} className="cursor-pointer text-white bg-green-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-xl px-5 py-2.5 text-center">
+                                    return (<p onClick={startRaceButton} className="cursor-pointer text-white bg-green-600 font-medium rounded-lg text-xl px-5 py-2.5 text-center">
                                         Start
                                     </p>)
                                 case raceStateType.running:
-                                    return (<p onClick={(e) => { confirm("are you sure you want to stop the race?") ? stopRace() : null; }} className="cursor-pointer text-white bg-red-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-xl px-5 py-2.5 text-center">
+                                    return (<p onClick={(e) => { confirm("are you sure you want to stop the race?") ? stopRace() : null; }} className="cursor-pointer text-white bg-red-600 font-medium rounded-lg text-xl px-5 py-2.5 text-center">
                                         Stop
                                     </p>)
                                 case raceStateType.stopped:
-                                    return (<p onClick={resetRace} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-xl px-5 py-2.5 text-center">
+                                    return (<p onClick={resetRace} className="cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-xl px-5 py-2.5 text-center">
                                         Reset
                                     </p>)
                                 case raceStateType.calculate:
-                                    return (<p onClick={calculateResults} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-xl px-5 py-2.5 text-center">
+                                    return (<p onClick={calculateResults} className="cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-xl px-5 py-2.5 text-center">
                                         Calculate Results
                                     </p>)
                                 default:
@@ -310,10 +308,10 @@ const RacePage = () => {
                     </div>
                     <div className="w-1/4 p-2">
                         {finishMode ?
-                            <p onClick={() => setFinishMode(false)} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-xl px-5 py-2.5 text-center">
+                            <p onClick={() => setFinishMode(false)} className="cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-xl px-5 py-2.5 text-center">
                                 Lap Mode
                             </p> :
-                            <p onClick={() => setFinishMode(true)} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-xl px-5 py-2.5 text-center">
+                            <p onClick={() => setFinishMode(true)} className="cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-xl px-5 py-2.5 text-center">
                                 Finish Mode
                             </p>
                         }
@@ -322,30 +320,49 @@ const RacePage = () => {
                 <div className=" w-full h-full grow">
                     <div className="flex flex-row justify-around flex-wrap">
                         {race.results.map((result, index) => {
-                            return (
-                                <div key={index} id={result.id} className='flex bg-green-300 flex-row justify-between p-6 m-4 border-2 border-pink-500 rounded-lg shadow-xl w-1/4 shrink-0'>
-                                    <div className="flex flex-col">
-                                        <h2 className="text-2xl text-gray-700">{result.SailNumber} - {result.boat.name}</h2>
-                                        <p className="text-base text-gray-600">{result.Helm} - {result.Crew}</p>
+                            console.log(result)
+                            if (result.finishTime == 0) {
+                                return (
+                                    <div key={index} id={result.id} className='flex bg-green-300 flex-row justify-between p-6 m-4 border-2 border-pink-500 rounded-lg shadow-xl w-1/4 shrink-0'>
+                                        <div className="flex flex-col">
+                                            <h2 className="text-2xl text-gray-700">{result.SailNumber} - {result.boat.name}</h2>
+                                            <p className="text-base text-gray-600">{result.Helm} - {result.Crew}</p>
+                                        </div>
+                                        <div className="px-5 py-1 w-2/4">
+                                            {finishMode ?
+                                                <p onClick={() => finishBoat(result.id)} className="cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
+                                                    Finish
+                                                </p>
+                                                :
+                                                <p onClick={() => lapBoat(result.id)} className="cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
+                                                    Lap
+                                                </p>
+                                            }
+
+                                        </div>
                                     </div>
-                                    <div className="px-5 py-1 w-2/4">
-                                        {!finishMode ?
-                                            <p onClick={() => lapBoat(result.id)} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
-                                                Lap
+                                )
+                            } else {
+                                return (
+                                    <div key={index} id={result.id} className='flex bg-red-300 flex-row justify-between p-6 m-4 border-2 border-pink-500 rounded-lg shadow-xl w-1/4 shrink-0'>
+                                        <div className="flex flex-col">
+                                            <h2 className="text-2xl text-gray-700">{result.SailNumber} - {result.boat.name}</h2>
+                                            <p className="text-base text-gray-600">{result.Helm} - {result.Crew}</p>
+                                        </div>
+                                        <div className="px-5 py-1 w-2/4">
+                                            <p className="text-white bg-blue-600 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
+                                                Finished
                                             </p>
-                                            :
-                                            <p onClick={() => finishBoat(result.id)} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
-                                                Finish
-                                            </p>
-                                        }
+
+                                        </div>
                                     </div>
-                                </div>
-                            )
-                        }, this)}
+                                )
+                            }
+                        })}
                     </div>
                 </div>
             </div>
-        </Dashboard>
+        </Dashboard >
     )
 }
 
