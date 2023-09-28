@@ -87,19 +87,26 @@ const Time = ({ ...props }: any) => {
         original[props.column.id] = seconds + props.startTime
         props.updateResult(original)
     }
-
-    return (
-        <>
-            <input type="time"
-                id=''
-                className="p-2 m-2 text-center w-full"
-                defaultValue={value}
-                key={value}
-                step={"1"}
-                onBlur={(e) => onBlur(e)}
-            />
-        </>
-    );
+    if (initialValue == -1) {
+        return (
+            <p className="p-2 m-2 text-center w-full">
+                Retired
+            </p>
+        )
+    } else {
+        return (
+            <>
+                <input type="time"
+                    id=''
+                    className="p-2 m-2 text-center w-full"
+                    defaultValue={value}
+                    key={value}
+                    step={"1"}
+                    onBlur={(e) => onBlur(e)}
+                />
+            </>
+        )
+    }
 };
 
 const Class = ({ ...props }: any) => {

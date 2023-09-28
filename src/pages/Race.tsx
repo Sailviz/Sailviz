@@ -44,7 +44,7 @@ const RacePage = () => {
                 clubId: "",
             },
             SailNumber: 0,
-            finishTime: "",
+            finishTime: 0,
             CorrectedTime: 0,
             lapTimes: {
                 times: []
@@ -57,6 +57,8 @@ const RacePage = () => {
         //extra fields required for actually racing.
         //start time - UTC of start of 5 min count down.
     }))
+
+    const [activeResultIndex, setActiveResultIndex] = useState(0);
 
     var [raceState, setRaceState] = useState<raceStateType>(raceStateType.reset)
     const [timerActive, setTimerActive] = useState(false);
@@ -140,7 +142,15 @@ const RacePage = () => {
 
     }
 
-
+    const retireBoat = async () => {
+        //modify race data
+        const tempdata = race
+        tempdata.results[activeResultIndex].finishTime = -1 //finish time is a string so we can put in status
+        setRace({ ...tempdata })
+        //send to DB
+        await DB.updateResultById(tempdata.results[activeResultIndex])
+        closeModal()
+    }
 
     const lapBoat = async (id: string) => {
         console.log(id)
@@ -217,6 +227,26 @@ const RacePage = () => {
         return allFinished
     }
 
+    const openModal = async (e: any) => {
+        //show modal
+        let modal = document.getElementById("modal")
+        if (!modal) return
+        modal.style.display = "block"
+        if (!e.target.parentNode) return
+        let index = race.results.findIndex((x: ResultsDataType) => x.id === e.target.parentNode.id)
+        if (index >= 0) {
+            setActiveResultIndex(index)
+        }
+
+    }
+
+    const closeModal = async () => {
+        let modal = document.getElementById("modal")
+        if (!modal) return
+        modal.style.display = "none"
+
+    }
+
     const controller = new AbortController()
 
     useEffect(() => {
@@ -270,6 +300,19 @@ const RacePage = () => {
     return (
         <Dashboard>
             <div className="w-full flex flex-col items-center justify-start panel-height">
+                <div id="modal" className="hidden fixed z-10 left-0 top-0 w-full h-full overflow-auto bg-black-400">
+                    <div className="bg-white bg-opacity-20 backdrop-blur rounded drop-shadow-lg border-pink-500 my-64 mx-auto p-5 border-4 w-7/12 h-3/6">
+                        <p onClick={closeModal} className=" cursor-pointer bg-red-100 border-red-600 rounded-lg border-4 aspect-square float-right font-bold text-3xl w-12 text-center">&times;</p>
+                        <h2 className="text-2xl text-gray-700">{race.results[activeResultIndex].SailNumber} - {race.results[activeResultIndex].boat.name}</h2>
+                        <p className="text-base text-gray-600">{race.results[activeResultIndex].Helm} - {race.results[activeResultIndex].Crew}</p>
+                        <div className="px-5 py-1 w-3/4 mx-auto my-10">
+                            <p onClick={() => retireBoat()} className="h-full cursor-pointer  text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-3xl px-5 py-2.5 text-center mr-3 md:mr-0">
+                                Retire From Race
+                            </p>
+                        </div>
+                    </div>
+
+                </div>
                 <div className="flex w-full flex-row justify-around">
                     <div className="w-1/4 p-2 m-2 border-4 rounded-lg bg-white text-lg font-medium">
                         Event: {seriesName} - {race.number}
@@ -322,19 +365,20 @@ const RacePage = () => {
                         {race.results.map((result, index) => {
                             console.log(result)
                             if (result.finishTime == 0) {
+                                //no defined finish time so we assume they have not finished
                                 return (
-                                    <div key={index} id={result.id} className='flex bg-green-300 flex-row justify-between p-6 m-4 border-2 border-pink-500 rounded-lg shadow-xl w-1/4 shrink-0'>
-                                        <div className="flex flex-col">
+                                    <div onClick={openModal} key={index} id={result.id} className='flex bg-green-300 flex-row justify-between m-4 border-2 border-pink-500 rounded-lg shadow-xl w-1/4 shrink-0'>
+                                        <div className="flex flex-col m-6">
                                             <h2 className="text-2xl text-gray-700">{result.SailNumber} - {result.boat.name}</h2>
                                             <p className="text-base text-gray-600">{result.Helm} - {result.Crew}</p>
                                         </div>
-                                        <div className="px-5 py-1 w-2/4">
+                                        <div className="p-5 w-2/4">
                                             {finishMode ?
-                                                <p onClick={() => finishBoat(result.id)} className="cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
+                                                <p onClick={() => finishBoat(result.id)} className="cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-sm p-5 text-center mr-3 md:mr-0">
                                                     Finish
                                                 </p>
                                                 :
-                                                <p onClick={() => lapBoat(result.id)} className="cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
+                                                <p onClick={() => lapBoat(result.id)} className="cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-sm p-5 text-center mr-3 md:mr-0">
                                                     Lap
                                                 </p>
                                             }
@@ -343,6 +387,10 @@ const RacePage = () => {
                                     </div>
                                 )
                             } else {
+                                let text = "Finished"
+                                if (result.finishTime == -1) {
+                                    text = "Retired"
+                                }
                                 return (
                                     <div key={index} id={result.id} className='flex bg-red-300 flex-row justify-between p-6 m-4 border-2 border-pink-500 rounded-lg shadow-xl w-1/4 shrink-0'>
                                         <div className="flex flex-col">
@@ -351,7 +399,7 @@ const RacePage = () => {
                                         </div>
                                         <div className="px-5 py-1 w-2/4">
                                             <p className="text-white bg-blue-600 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
-                                                Finished
+                                                {text}
                                             </p>
 
                                         </div>
