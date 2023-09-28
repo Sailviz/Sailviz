@@ -427,7 +427,10 @@ const Club = () => {
                 <div id="page" className='flex basis-9/12 h-full w-full overflow-y-auto'>
                     <div id="blank" className="">
                         <p className="text-6xl font-extrabold text-gray-700 p-6">
-                            select a page on the left &lt;---
+                            Welcome to Sailing Race Manager
+                        </p>
+                        <p className="text-6xl font-extrabold text-gray-700 p-6">
+                            Add a button here to go to the next race.
                         </p>
                     </div>
                     <div id="settings" className="hidden w-full">
