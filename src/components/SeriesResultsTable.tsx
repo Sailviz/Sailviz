@@ -115,7 +115,11 @@ const SeriesResultsTable = (props: any) => {
             })
         });
         //fill dnc
-
+        //calculate total
+        tempresults.forEach(result => {
+            result.Total = result.racePositions.reduce((partialSum, a) => partialSum + a, 0)
+        })
+        //calculate discards/net
 
         console.log(tempresults)
         setData(tempresults)
