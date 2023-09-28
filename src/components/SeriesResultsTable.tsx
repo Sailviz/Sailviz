@@ -82,14 +82,16 @@ const SeriesResultsTable = (props: any) => {
 
     const calcTable = () => {
         let tempresults: SeriesResultsType[] = []
+        console.log(tempresults)
         //collate results from same person.
         seriesData.races.forEach(race => {
             race.results.forEach(result => {
                 //if new racer, add to tempresults
-                if (tempresults.filter(function (t) {
-                    return t.Helm == result.helm && t.boat == result.boat
-                })) {
-                    tempresults.push({
+                let index = tempresults.findIndex(function (t) {
+                    return (t.Helm == result.Helm && t.Boat.id == result.boat.id)
+                })
+                if (index == -1) {
+                    index = tempresults.push({ //sets index to index of newly pushed element
                         Rank: 0,
                         Helm: result.Helm,
                         Crew: result.Crew,
@@ -97,18 +99,23 @@ const SeriesResultsTable = (props: any) => {
                         SailNumber: result.SailNumber,
                         Total: 0,
                         Net: 0,
-                        racePositions: new Array<number>(seriesData.races.length)
+                        racePositions: Array(seriesData.races.length).fill(0),
                     })
+                    index -= 1
+                    console.log("updated index: ", index)
                 }
                 //add result to tempresults
-                const index = tempresults.findIndex((t) => t.Helm == result.Helm && t.Boat == result.boat)
-                console.log(index, race.number)
-                tempresults[index]?.racePositions.splice(race.number - 1, 0, result.Position)
+                console.log("pushing ", result.Position, " to ", index, " ", tempresults[index])
+                if (tempresults[index] != undefined) {
+                    tempresults[index].racePositions[race.number - 1] = (result.Position)
+                } else {
+                    console.log("something went wrong")
+                }
+
             })
         });
         //fill dnc
-        //calculate discards
-        //calculate net
+
 
         console.log(tempresults)
         setData(tempresults)
