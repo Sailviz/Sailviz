@@ -17,7 +17,7 @@ async function createRace(number: number, seriesId: any, time: any) {
         data: {
             number: number,
             Time: time,
-            startTime: "0",
+            startTime: 0,
             Type: "Handicap",
             OOD: "Unknown",
             AOD: "Unknown",
