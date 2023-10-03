@@ -360,14 +360,13 @@ const RacePage = () => {
                         }
                     </div>
                 </div>
-                <div className=" w-full h-full grow overflow-auto">
+                <div className="overflow-auto">
                     <div className="flex flex-row justify-around flex-wrap">
                         {race.results.map((result, index) => {
-                            console.log(result)
                             if (result.finishTime == 0) {
                                 //no defined finish time so we assume they have not finished
                                 return (
-                                    <div onClick={openModal} key={index} id={result.id} className='flex bg-green-300 flex-row justify-between m-4 border-2 border-pink-500 rounded-lg shadow-xl w-1/4 shrink-0'>
+                                    <div onClick={openModal} key={index} id={result.id} className='flex bg-green-300 flex-row justify-between m-4 border-2 border-pink-500 rounded-lg shadow-xl w-96 shrink-0'>
                                         <div className="flex flex-col m-6">
                                             <h2 className="text-2xl text-gray-700">{result.SailNumber} - {result.boat.name}</h2>
                                             <p className="text-base text-gray-600">{result.Helm} - {result.Crew}</p>
@@ -392,12 +391,12 @@ const RacePage = () => {
                                     text = "Retired"
                                 }
                                 return (
-                                    <div key={index} id={result.id} className='flex bg-red-300 flex-row justify-between p-6 m-4 border-2 border-pink-500 rounded-lg shadow-xl w-1/4 shrink-0'>
+                                    <div key={index} id={result.id} className='flex bg-red-300 flex-row justify-between p-6 m-4 border-2 border-pink-500 rounded-lg shadow-xl w-96 shrink-0'>
                                         <div className="flex flex-col">
                                             <h2 className="text-2xl text-gray-700">{result.SailNumber} - {result.boat.name}</h2>
                                             <p className="text-base text-gray-600">{result.Helm} - {result.Crew}</p>
                                         </div>
-                                        <div className="px-5 py-1 w-2/4">
+                                        <div className="px-5 py-1">
                                             <p className="text-white bg-blue-600 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
                                                 {text}
                                             </p>
