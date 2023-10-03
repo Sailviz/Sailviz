@@ -182,6 +182,9 @@ const RacePage = () => {
             console.log(seconds)
             result.CorrectedTime = (seconds * 1000 * (maxLaps / Object.keys(result.lapTimes).length)) / result.boat.py
             console.log(result.CorrectedTime)
+            if (result.finishTime == -1) {
+                result.CorrectedTime = 99999
+            }
         });
 
         //calculate finish position
