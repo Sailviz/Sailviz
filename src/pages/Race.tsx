@@ -360,7 +360,7 @@ const RacePage = () => {
                         }
                     </div>
                 </div>
-                <div className=" w-full h-full grow">
+                <div className=" w-full h-full grow overflow-auto">
                     <div className="flex flex-row justify-around flex-wrap">
                         {race.results.map((result, index) => {
                             console.log(result)
