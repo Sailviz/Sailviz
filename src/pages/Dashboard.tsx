@@ -6,7 +6,7 @@ import dayjs from 'dayjs';
 import SeriesTable from '../components/SeriesTable';
 import ClubTable from '../components/ClubTable';
 import BoatTable from '../components/BoatTable';
-import RaceResultsTable from '../components/RaceResultsTable';
+import RaceResultsTable from '../components/SignOnTable';
 import * as DB from '../components/apiMethods';
 import Cookies from 'js-cookie';
 import SeriesResultsTable from '../components/SeriesResultsTable';
@@ -609,6 +609,11 @@ const Club = () => {
                                         options={raceOptions} />
                                 </div>
                             </div>
+                        </div>
+                        <div className="p-6 w-3/4">
+                            <p onClick={() => router.push({ pathname: '/SignOn', query: { race: activeRaceData.id } })} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
+                                Sign-On Sheet
+                            </p>
                         </div>
                         <div className="p-6 w-3/4">
                             <p onClick={() => router.push({ pathname: '/Race', query: { race: activeRaceData.id } })} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">

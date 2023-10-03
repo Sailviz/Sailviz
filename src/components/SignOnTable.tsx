@@ -2,7 +2,6 @@ import React, { ChangeEvent, useState, useEffect } from 'react';
 import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, useReactTable, SortingState } from '@tanstack/react-table'
 import Select from 'react-select';
 import * as DB from './apiMethods';
-import { start } from 'repl';
 
 const Text = ({ ...props }) => {
     const initialValue = props.getValue()
@@ -49,64 +48,6 @@ const Number = ({ ...props }: any) => {
             />
         </>
     );
-};
-
-const Laps = ({ ...props }: any) => {
-    const initialValue = props.getValue()
-    const [value, setValue] = React.useState(initialValue)
-
-    const onBlur = (e: ChangeEvent<HTMLInputElement>) => {
-        let original = props.row.original
-        original[props.column.id].number = parseInt(e.target.value)
-        props.updateResult(original)
-    }
-
-    return (
-        <>
-            <input type="number"
-                id=''
-                className="p-2 m-2 text-center w-full"
-                defaultValue={Math.round(value.number)}
-                key={value.number}
-                onBlur={(e) => onBlur(e)}
-            />
-        </>
-    );
-};
-
-const Time = ({ ...props }: any) => {
-    const initialValue = props.getValue()
-    const [value, setValue] = React.useState(new Date((initialValue - props.startTime) * 1000).toISOString().substring(11, 19))
-
-    const onBlur = (e: ChangeEvent<HTMLInputElement>) => {
-        let original = props.row.original
-        var parts = e.target.value.split(':'); // split it at the colons
-        if (parts[0] == undefined || parts[1] == undefined || parts[2] == undefined) return
-        // minutes are 60 seconds. Hours are 60 minutes * 60 seconds.
-        var seconds = (+parts[0]) * 60 * 60 + (+parts[1]) * 60 + (+parts[2]);
-        original[props.column.id] = seconds + props.startTime
-        props.updateResult(original)
-    }
-    if (initialValue == -1) {
-        return (
-            <p className="p-2 m-2 text-center w-full">
-                Retired
-            </p>
-        )
-    } else {
-        return (
-            <>
-                <input type="time"
-                    id=''
-                    className="p-2 m-2 text-center w-full"
-                    defaultValue={value}
-                    key={value}
-                    step={"1"}
-                    onBlur={(e) => onBlur(e)}
-                />
-            </>
-        )
-    }
 };
 
 const Class = ({ ...props }: any) => {
@@ -193,7 +134,7 @@ function Sort({ column, table }: { column: any, table: any }) {
 const columnHelper = createColumnHelper<ResultsDataType>()
 
 
-const RaceResultsTable = (props: any) => {
+const SignOnTable = (props: any) => {
     let [data, setData] = useState<ResultsDataType[]>(props.data)
     let [startTime, setStartTime] = useState(props.startTime)
     let clubId = props.clubId
@@ -247,26 +188,6 @@ const RaceResultsTable = (props: any) => {
                 header: "Sail Number",
                 cell: props => <Number {...props} updateResult={updateResult} disabled={false} />,
                 enableSorting: false
-            }),
-            columnHelper.accessor('finishTime', {
-                header: "Time",
-                cell: props => <Time {...props} startTime={startTime} updateResult={updateResult} />,
-                enableSorting: false
-            }),
-            columnHelper.accessor('lapTimes', {
-                header: "Laps",
-                cell: props => <Laps {...props} updateResult={updateResult} />,
-                enableSorting: false
-            }),
-            columnHelper.accessor('CorrectedTime', {
-                header: "Corrected Time",
-                cell: props => <Number {...props} updateResult={updateResult} disabled={true} />,
-                enableSorting: false
-            }),
-            columnHelper.accessor('Position', {
-                header: "Position",
-                cell: props => <Number {...props} updateResult={updateResult} disabled={true} />,
-                enableSorting: true
             }),
             columnHelper.display({
                 id: "Remove",
@@ -327,4 +248,4 @@ const RaceResultsTable = (props: any) => {
     )
 }
 
-export default RaceResultsTable
+export default SignOnTable
