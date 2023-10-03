@@ -374,11 +374,11 @@ const RacePage = () => {
                                         </div>
                                         <div className="p-5 w-2/4">
                                             {finishMode ?
-                                                <p onClick={() => finishBoat(result.id)} className="cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-sm p-5 text-center mr-3 md:mr-0">
+                                                <p onClick={(e) => { e.stopPropagation(); finishBoat(result.id) }} className="cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-sm p-5 text-center mr-3 md:mr-0">
                                                     Finish
                                                 </p>
                                                 :
-                                                <p onClick={() => lapBoat(result.id)} className="cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-sm p-5 text-center mr-3 md:mr-0">
+                                                <p onClick={(e) => { e.stopPropagation(); lapBoat(result.id) }} className="cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-sm p-5 text-center mr-3 md:mr-0">
                                                     Lap
                                                 </p>
                                             }
