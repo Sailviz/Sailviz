@@ -119,7 +119,15 @@ const RacePage = () => {
         tempResults.forEach((res) => {
             console.log(res.boat)
         })
-        tempResults.sort((a, b) => { return (a.boat?.py - b.boat?.py) })
+        tempResults.sort((a, b) => {
+            //compare laps
+            if (a.lapTimes.number != b.lapTimes.number) {
+                console.log(a.lapTimes.number, b.lapTimes.number)
+                return (a.lapTimes.number - b.lapTimes.number)
+            } else {
+                return (a.boat?.py - b.boat?.py)
+            }
+        })
         console.log("sorted")
 
         tempResults.forEach((res, index) => {
