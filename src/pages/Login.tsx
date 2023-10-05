@@ -38,7 +38,7 @@ const Login = () => {
                     //set cookie
                     cookie.set('token', data.token, { expires: 2 });
                     cookie.set('clubId', data.club, { expires: 2 });
-                    cookie.set('Id', data.user, { expires: 2 })
+                    cookie.set('userId', data.user, { expires: 2 })
                     Router.push("/Dashboard");
                 }
                 else {

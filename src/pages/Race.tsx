@@ -3,6 +3,7 @@ import Router, { useRouter } from "next/router"
 import * as DB from '../components/apiMethods';
 import Dashboard from "../components/Dashboard";
 import RaceTimer from "../components/RaceTimer"
+import Cookies from "js-cookie";
 
 enum raceStateType {
     running,
@@ -20,7 +21,7 @@ const RacePage = () => {
     const query = router.query
 
     var [seriesName, setSeriesName] = useState("")
-
+    var [clubId, setClubId] = useState<string>("invalid")
     var [Instructions, setInstructions] = useState("Hit Start to begin the starting procedure")
 
     var [race, setRace] = useState<RaceDataType>(({
@@ -57,6 +58,25 @@ const RacePage = () => {
         //extra fields required for actually racing.
         //start time - UTC of start of 5 min count down.
     }))
+
+    var [club, setClub] = useState<ClubDataType>({
+        id: "",
+        name: "",
+        settings: {
+            clockIP: ""
+        },
+        series: [],
+        boats: [],
+    })
+
+    var [user, setUser] = useState<UserDataType>({
+        id: "",
+        name: "",
+        settings: {},
+        permLvl: 0,
+        clubId: ""
+
+    })
 
     const [activeResultIndex, setActiveResultIndex] = useState(0);
 
@@ -330,8 +350,47 @@ const RacePage = () => {
         orderResults()
     }, [race])
 
+    useEffect(() => {
+        setClubId(Cookies.get('clubId') || "")
+    }, [])
+
+    useEffect(() => {
+        if (clubId != "") {
+            //catch if not fully updated
+            if (clubId == "invalid") {
+                return
+            }
+            const fetchClub = async () => {
+                var data = await DB.GetClubById(clubId)
+                if (data) {
+                    setClub(data)
+                } else {
+                    console.log("could not fetch club settings")
+                }
+
+            }
+            fetchClub()
+
+            const fetchUser = async () => {
+                var userid = Cookies.get('userId')
+                if (userid == undefined) return
+                var data = await DB.GetUserById(userid)
+                if (data) {
+                    setUser(data)
+                } else {
+                    console.log("could not fetch club settings")
+                }
+
+            }
+            fetchUser()
+        } else {
+            console.log("user not signed in")
+            router.push("/")
+        }
+    }, [clubId])
+
     return (
-        <Dashboard>
+        <Dashboard club={club.name} userName={user.name}>
             <div className="w-full flex flex-col items-center justify-start panel-height">
                 <div id="modal" className="hidden fixed z-10 left-0 top-0 w-full h-full overflow-auto bg-black-400">
                     <div className="bg-white bg-opacity-20 backdrop-blur rounded drop-shadow-lg border-pink-500 my-64 mx-auto p-5 border-4 w-7/12 h-3/6">

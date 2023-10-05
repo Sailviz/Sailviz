@@ -134,7 +134,7 @@ const SignOnPage = () => {
             fetchClub()
 
             const fetchUser = async () => {
-                var userid = Cookies.get('Id')
+                var userid = Cookies.get('userId')
                 if (userid == undefined) return
                 var data = await DB.GetUserById(userid)
                 if (data) {
