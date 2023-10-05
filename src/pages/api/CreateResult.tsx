@@ -21,7 +21,8 @@ async function createEntry(raceId: string,) {
             finishTime: 0,
             CorrectedTime: 0,
             lapTimes: {
-                "times": []
+                "times": [],
+                "number": 0,
             },
             Position: 0,
             race: {
