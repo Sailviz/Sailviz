@@ -113,6 +113,27 @@ const RacePage = () => {
 
     };
 
+    const orderResults = async () => {
+        console.log("new sort")
+        let tempResults = race.results
+        tempResults.forEach((res) => {
+            console.log(res.boat)
+        })
+        tempResults.sort((a, b) => { return (a.boat.py - b.boat.py) })
+        console.log("sorted")
+
+        tempResults.forEach((res, index) => {
+            const element = document.getElementById(res.id)
+            if (element) {
+                element.order = index
+            }
+        })
+
+        tempResults.forEach((res) => {
+            console.log(res.boat)
+        })
+    }
+
     const stopRace = async () => {
         //add are you sure here
         setRaceState(raceStateType.stopped)
@@ -298,6 +319,7 @@ const RacePage = () => {
             setResetTimer(false)
             setTimerActive(true)
         }
+        orderResults()
     }, [race])
 
     return (
