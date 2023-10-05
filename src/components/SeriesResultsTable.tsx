@@ -149,7 +149,7 @@ const SeriesResultsTable = (props: any) => {
             cell: props => <Text {...props} />,
             enableSorting: false
         }),
-        columnHelper.accessor((data) => data.Boat.name, {
+        columnHelper.accessor((data) => data.Boat?.name, {
             header: "Class",
             id: "Class",
             cell: props => <Text {...props} clubId={clubId} />,
