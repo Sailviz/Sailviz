@@ -88,7 +88,7 @@ const SeriesResultsTable = (props: any) => {
             race.results.forEach(result => {
                 //if new racer, add to tempresults
                 let index = tempresults.findIndex(function (t) {
-                    return (t.Helm == result.Helm && t.Boat.id == result.boat.id)
+                    return (t.Helm == result.Helm && t.Boat?.id == result.boat?.id)
                 })
                 if (index == -1) {
                     index = tempresults.push({ //sets index to index of newly pushed element
