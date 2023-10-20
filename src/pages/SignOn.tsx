@@ -37,7 +37,15 @@ const SignOnPage = () => {
 
     })
 
-    const [seriesData, setSeriesData] = useState<SeriesDataType>()
+    const [seriesData, setSeriesData] = useState<SeriesDataType>({
+        id: "",
+        name: "",
+        clubId: "",
+        settings: {
+            numberToCount: 0
+        },
+        races: []
+    })
 
     const [boatData, setBoatData] = useState<BoatDataType[]>([])
 
@@ -85,7 +93,7 @@ const SignOnPage = () => {
     const updateResult = async (result: ResultsDataType) => {
         console.log(result)
 
-        await DB.updateResultById(result)
+        await DB.updateResult(result)
         var data = await DB.getRaceById(race.id)
         setRace(data)
     }
@@ -104,7 +112,7 @@ const SignOnPage = () => {
                 setRace(data.race)
                 DB.GetSeriesById(data.race.seriesId).then((data: SeriesDataType) => {
                     console.log(data)
-                    setSeriesData(data.series)
+                    setSeriesData(data)
                 })
 
             })
@@ -165,8 +173,13 @@ const SignOnPage = () => {
     }, [clubId])
 
     return (
-        <div className="m-6">
-            <SignOnTable data={race.results} startTime={race.startTime} key={race.id} deleteResult={deleteResult} updateResult={updateResult} createResult={createResult} clubId={clubId} raceId={race.id} />
+        <div>
+            <div className="text-6xl font-extrabold text-gray-700 p-6">
+                {seriesData.name}: {race.number} at {race.Time}
+            </div>
+            <div className="m-6">
+                <SignOnTable data={race.results} startTime={race.startTime} key={race.id} deleteResult={deleteResult} updateResult={updateResult} createResult={createResult} clubId={clubId} raceId={race.id} />
+            </div>
         </div>
     )
 }
