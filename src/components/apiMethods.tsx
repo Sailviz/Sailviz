@@ -232,7 +232,7 @@ export async function deleteBoatById(id: string): Promise<BoatDataType> {
         });
 };
 
-export async function updateSeriesSettings(seriesData: SeriesDataType) {
+export async function updateSeries(seriesData: SeriesDataType) {
     const body = {
         "series": seriesData
     }
@@ -293,11 +293,11 @@ export async function createSeries(clubId: string, seriesName: string): Promise<
         });
 };
 
-export async function deleteSeries(seriesId: string): Promise<SeriesDataType> {
+export async function deleteSeries(series: SeriesDataType): Promise<SeriesDataType> {
     const body = {
-        "seriesId": seriesId
+        "series": series
     }
-    return await fetch(`${server}/api/DeleteSeriesById`, {
+    return await fetch(`${server}/api/DeleteSeries`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
@@ -307,7 +307,7 @@ export async function deleteSeries(seriesId: string): Promise<SeriesDataType> {
             if (data && data.error) {
                 console.log(data.message)
             } else {
-                return data.series
+                return data
             }
         });
 };
@@ -425,7 +425,7 @@ export async function DeleteResultById(resultId: string): Promise<ResultsDataTyp
         });
 };
 
-export async function updateResultById(result: ResultsDataType): Promise<RaceDataType> {
+export async function updateResult(result: ResultsDataType): Promise<RaceDataType> {
     const body = {
         result: result,
     }

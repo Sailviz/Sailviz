@@ -1,14 +1,48 @@
-import React, { useState } from 'react';
+import React, { ChangeEvent, useState } from 'react';
 import { createColumnHelper, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table'
 import * as DB from './apiMethods';
 
+const Text = ({ ...props }) => {
+    const initialValue = props.getValue()
+    const [value, setValue] = React.useState(initialValue)
+
+    const onBlur = (e: ChangeEvent<HTMLInputElement>) => {
+        const original = props.row.original
+        original[props.column.id] = e.target.value
+        props.updateSeries(original)
+    }
+
+    return (
+        <>
+            <input type="text"
+                id=''
+                className=" text-center"
+                defaultValue={value}
+                key={value}
+                onBlur={(e) => onBlur(e)}
+            />
+        </>
+    );
+};
+
+const Add = ({ ...props }) => {
+
+    return (
+        <>
+            <div className="px-3 py-1 w-full">
+                <p onClick={(e) => props.createSeries()} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
+                    Add
+                </p>
+            </div>
+        </>
+    );
+};
+
 const Remove = ({ ...props }: any) => {
     const onClick = () => {
-        if (!confirm("are you sure you want to do this?")) return
-        console.log(props.id)
-        DB.deleteSeries(props.id)
-        console.log(props.table.options.data)
-        props.removeSeries(props.id)
+        if (confirm("are you sure you want to do this?")) {
+            props.deleteSeries(props.row.original)
+        }
     }
     return (
         <>
@@ -25,10 +59,26 @@ const columnHelper = createColumnHelper<SeriesDataType>()
 const ClubTable = (props: any) => {
     var [data, setData] = useState(props.data)
 
-    const updateData = (data: any) => {
-        console.log(data)
-        setData(data)
-        props.removeSeries(data)
+    const updateSeries = (boat: SeriesDataType) => {
+        //update local copy
+        const tempdata = data
+        tempdata[tempdata.findIndex((x: SeriesDataType) => x.id === boat.id)] = boat
+        setData([...tempdata])
+
+        //update main record and database
+        props.updateSeries(boat)
+    }
+
+    const createSeries = () => {
+        props.createSeries()
+    }
+
+    const deleteSeries = (series: SeriesDataType) => {
+        console.log(series)
+        props.deleteSeries(series)
+        const tempdata: SeriesDataType[] = [...data]
+        tempdata.splice(tempdata.findIndex((x: SeriesDataType) => x.id === series.id), 1)
+        setData(tempdata)
     }
 
     var table = useReactTable({
@@ -36,7 +86,7 @@ const ClubTable = (props: any) => {
         columns: [
             columnHelper.accessor('name', {
                 header: "name",
-                cell: info => info.getValue(),
+                cell: props => <Text {...props} updateSeries={updateSeries} />,
             }),
             columnHelper.accessor(row => row.races.length.toString(), {
                 id: "Number of Races",
@@ -48,7 +98,8 @@ const ClubTable = (props: any) => {
             }),
             columnHelper.accessor('', {
                 id: "Remove",
-                cell: props => <Remove {...props} id={props.row.original.id} removeSeries={updateData} />
+                header: _ => <Add {...props} createSeries={createSeries} />,
+                cell: props => <Remove {...props} id={props.row.original.id} deleteSeries={deleteSeries} />
             }),
         ],
         getCoreRowModel: getCoreRowModel(),

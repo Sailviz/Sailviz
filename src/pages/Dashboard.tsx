@@ -77,7 +77,7 @@ const Club = () => {
     const updateResult = async (result: ResultsDataType) => {
         console.log(result)
 
-        await DB.updateResultById(result)
+        await DB.updateResult(result)
         var data = await DB.GetSeriesByClubId(clubId)
         var array = [...data]
         setSeriesData(array)
@@ -311,11 +311,12 @@ const Club = () => {
         }
     }
 
-    const addSeries = async () => {
+    const createSeries = async () => {
         var newSeries = await DB.createSeries(clubId, "new newSeries")
         newSeries.races = []
         setSeriesData(seriesData.concat(newSeries))
     }
+
 
     const addRaceToSeries = async () => {
         var race = await DB.createRace(clubId, activeSeriesData.id)
@@ -337,14 +338,20 @@ const Club = () => {
         setSeriesData(newSeriesData)
     }
 
-    const removeSeries = async () => {
+    const updateSeries = async (series: SeriesDataType) => {
+        const tempdata = seriesData
+        tempdata[tempdata.findIndex((x: SeriesDataType) => x.id === series.id)] = series
+        setSeriesData([...tempdata])
+        await DB.updateSeries(series)
+    }
+
+    const deleteSeries = async (series: SeriesDataType) => {
         console.log("updating main copy of series")
         let newSeriesData: SeriesDataType[] = seriesData
-        var seriesIndex = newSeriesData.findIndex(y => y.id == activeSeriesData.id)
+        newSeriesData.splice(newSeriesData.findIndex(y => y.id == series.id), 1)
         console.log(newSeriesData)
-        newSeriesData.splice(seriesIndex, 1)
-        console.log(newSeriesData)
-        setSeriesData(newSeriesData)
+        setSeriesData([...newSeriesData])
+        await DB.deleteSeries(series)
     }
 
     useEffect(() => {
@@ -441,12 +448,7 @@ const Club = () => {
                             Series
                         </p>
                         <div className='p-6'>
-                            <ClubTable data={seriesData} key={seriesData} removeSeries={removeSeries} />
-                        </div>
-                        <div className="p-6">
-                            <p onClick={addSeries} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
-                                Add Series
-                            </p>
+                            <ClubTable data={seriesData} key={seriesData} deleteSeries={deleteSeries} updateSeries={updateSeries} createSeries={createSeries} />
                         </div>
                         <p className='text-2xl font-bold text-gray-700 p-6'>
                             Boats
@@ -507,7 +509,7 @@ const Club = () => {
                                         defaultValue={activeSeriesData.settings.numberToCount}
                                         key={activeSeriesData.id}
                                         onChange={saveSeriesSettings}
-                                        onBlur={() => DB.updateSeriesSettings(activeSeriesData)}
+                                        onBlur={() => DB.updateSeries(activeSeriesData)}
                                     />
                                 </div>
                             </div>

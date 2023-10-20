@@ -48,7 +48,8 @@ const RacePage = () => {
             finishTime: 0,
             CorrectedTime: 0,
             lapTimes: {
-                times: []
+                times: [],
+                number: 0
             },
             Position: 0,
         }],
@@ -197,7 +198,7 @@ const RacePage = () => {
         tempdata.results[activeResultIndex].finishTime = -1 //finish time is a string so we can put in status
         setRace({ ...tempdata })
         //send to DB
-        await DB.updateResultById(tempdata.results[activeResultIndex])
+        await DB.updateResult(tempdata.results[activeResultIndex])
         closeModal()
     }
 
@@ -210,8 +211,9 @@ const RacePage = () => {
         tempdata.results[index].lapTimes.number += 1 //increment number of laps
         console.log(tempdata.results[index])
         setRace({ ...tempdata })
+        orderResults()
         //send to DB
-        await DB.updateResultById(tempdata.results[index])
+        await DB.updateResult(tempdata.results[index])
     }
 
     const calculateResults = () => {
@@ -244,7 +246,7 @@ const RacePage = () => {
         });
 
         sortedResults.forEach(result => {
-            DB.updateResultById(result)
+            DB.updateResult(result)
         })
 
         console.log(sortedResults)
@@ -258,7 +260,7 @@ const RacePage = () => {
         console.log(tempdata.results[index])
         setRace({ ...tempdata })
         //send to DB
-        await DB.updateResultById(tempdata.results[index])
+        await DB.updateResult(tempdata.results[index])
         setInstructions(tempdata.results[index].name + "finished")
 
         if (checkAllFinished()) {
@@ -462,6 +464,7 @@ const RacePage = () => {
                                         <div className="flex flex-col m-6">
                                             <h2 className="text-2xl text-gray-700">{result.SailNumber} - {result.boat?.name}</h2>
                                             <p className="text-base text-gray-600">{result.Helm} - {result.Crew}</p>
+                                            <p className="text-base text-gray-600">Laps: {result.lapTimes.number}</p>
                                         </div>
                                         <div className="p-5 w-2/4">
                                             {finishMode ?

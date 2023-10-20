@@ -44,7 +44,7 @@ model Clubs {
 
 model Series {
   id       String @id @unique @default(uuid())
-  name     String @unique
+  name     String
   club     Clubs  @relation(fields: [clubId], references: [id])
   clubId   String
   settings Json
