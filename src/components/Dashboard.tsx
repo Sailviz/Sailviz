@@ -38,10 +38,14 @@ export default function Dashboard({
                     <div className="container flex flex-wrap justify-between items-center mx-auto">
                         <div className="flex items-center">
                             <a className='flex flex-row'>
-                                <Image src="/favicon.ico" className="mr-3 h-6 sm:h-9" width={40} height={40} />
-                                <div className=" text-xl font-semibold whitespace-nowrap text-gray-700 p-3">
-                                    SRM
-                                </div>
+                                <Link href={"/Dashboard"}>
+                                    <a className='flex flex-row'>
+                                        <Image src="/favicon.ico" className="mr-3 h-6 sm:h-9" width={40} height={40} />
+                                        <div className=" text-xl font-semibold whitespace-nowrap text-gray-700 p-3">
+                                            SRM
+                                        </div>
+                                    </a>
+                                </Link>
                                 <p className=" text-xl font-semibold whitespace-nowrap text-gray-700 p-3">
                                     {club}
                                 </p>
