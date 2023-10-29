@@ -242,8 +242,13 @@ const Club = () => {
         newRaceData[e.target.id] = e.target.value
         setActiveRaceData(newRaceData)
     }
-    const saveRaceType = (newValue: any) => {
+    const saveRaceType = async (newValue: any) => {
+        console.log(newValue)
         setActiveRaceData({ ...activeRaceData, Type: newValue.value })
+        await DB.updateRaceById({ ...activeRaceData, Type: newValue.value })
+        var data = await DB.GetSeriesByClubId(clubId)
+        var array = [...data]
+        setSeriesData(array)
     }
 
     const saveRaceDate = (e: ChangeEvent<HTMLInputElement>) => {
@@ -352,6 +357,15 @@ const Club = () => {
         console.log(newSeriesData)
         setSeriesData([...newSeriesData])
         await DB.deleteSeries(series)
+    }
+
+    const openRacePanel = async () => {
+        if (activeRaceData.Type == "Handicap") {
+            router.push({ pathname: '/HRace', query: { race: activeRaceData.id } })
+
+        } else {
+            router.push({ pathname: '/PRace', query: { race: activeRaceData.id } })
+        }
     }
 
     useEffect(() => {
@@ -604,7 +618,6 @@ const Club = () => {
                                     <Select
                                         defaultValue={{ value: activeRaceData.Type, label: activeRaceData.Type }}
                                         key={activeRaceData.Type}
-                                        onBlur={() => DB.updateRaceById(activeRaceData)}
                                         onChange={saveRaceType}
                                         instanceId={useId()}
                                         className='w-full'
@@ -618,7 +631,7 @@ const Club = () => {
                             </p>
                         </div>
                         <div className="p-6 w-3/4">
-                            <p onClick={() => router.push({ pathname: '/Race', query: { race: activeRaceData.id } })} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
+                            <p onClick={openRacePanel} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
                                 Race Panel
                             </p>
                         </div>
