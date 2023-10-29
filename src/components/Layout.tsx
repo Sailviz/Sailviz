@@ -1,7 +1,6 @@
 import Head from 'next/head'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Router } from 'next/router'
 export const siteTitle = 'SRM'
 
 
@@ -26,18 +25,20 @@ export default function Layout({
                     property="og:image"
                     content={`https://og-image.vercel.app/${encodeURI(
                         siteTitle
-                    )}.png?theme=dark&md=0&fontSize=75px&images=https%3A%2F%2Fassets.zeit.co%2Fimage%2Fupload%2Ffront%2Fassets%2Fdesign%2Fnextjs-white-logo.svg`}
+                    )}.png?theme=light&md=0&fontSize=75px&images=https%3A%2F%2Fassets.zeit.co%2Fimage%2Fupload%2Ffront%2Fassets%2Fdesign%2Fnextjs-black-logo.svg`}
                 />
             </Head>
             <div className="flex flex-col h-full">
                 <nav className="border-pink-500 px-4 sm:px-4 py-2.5 border-b-2 flex">
                     <div className="container flex flex-wrap justify-between items-center mx-auto">
-                        <div className='flex flex-row' >
-                            <Image src="/favicon.ico" className="mr-3 h-6 sm:h-9" width={40} height={40} />
-                            <div className=" text-xl font-semibold whitespace-nowrap text-gray-700 p-3">
-                                SRM
+                        <Link href={"/Dashboard"}>
+                            <div className='flex flex-row'>
+                                <Image src="/favicon.ico" className="mr-3 h-6 sm:h-9" width={40} height={40} />
+                                <div className=" text-xl font-semibold whitespace-nowrap text-gray-700 p-3">
+                                    SRM
+                                </div>
                             </div>
-                        </div>
+                        </Link>
                         <div className="hidden w-full md:block md:w-auto" id="navbar-default">
                             <ul className="flex flex-col mt-4 md:flex-row md:space-x-8 md:mt-0 md:text-sm md:font-medium">
                                 <li>
