@@ -255,8 +255,12 @@ const RacePage = () => {
         //modify race data
         const tempdata = race
         let index = tempdata.results.findIndex((x: ResultsDataType) => x.id === id)
+        //set finish time
         tempdata.results[index].finishTime = Math.floor(new Date().getTime() / 1000)
-        console.log(tempdata.results[index])
+        //add final lap to lap info
+        tempdata.results[index].lapTimes.times.push(Math.floor(new Date().getTime() / 1000))
+        tempdata.results[index].lapTimes.number += 1 //increment number of laps
+        //update local race copy
         setRace({ ...tempdata })
         //send to DB
         await DB.updateResult(tempdata.results[index])
