@@ -113,6 +113,7 @@ const SignOnPage = () => {
                 DB.GetSeriesById(data.race.seriesId).then((data: SeriesDataType) => {
                     console.log(data)
                     setSeriesData(data)
+                    setClubId(data.clubId)
                 })
 
             })
@@ -157,7 +158,7 @@ const SignOnPage = () => {
             const fetchBoats = async () => {
                 var data = await DB.getBoats(clubId)
                 if (data) {
-                    var array = [...data]
+                    let array = [...data]
                     setBoatData(array)
                 } else {
                     console.log("could not find boats")
