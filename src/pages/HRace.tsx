@@ -64,7 +64,8 @@ const RacePage = () => {
         id: "",
         name: "",
         settings: {
-            clockIP: ""
+            clockIP: "",
+            pursuitLength: 0
         },
         series: [],
         boats: [],
@@ -134,32 +135,22 @@ const RacePage = () => {
 
     };
 
-    const orderResults = async () => {
-        console.log("new sort")
-        let tempResults = race.results
-        tempResults.forEach((res) => {
-            console.log(res.boat)
-        })
-        tempResults.sort((a, b) => {
+    const orderResults = async (results: ResultsDataType[]) => {
+        console.log(results)
+        results.sort((a, b) => {
             //compare laps
             if (a.lapTimes.number != b.lapTimes.number) {
-                console.log(a.lapTimes.number, b.lapTimes.number)
                 return (a.lapTimes.number - b.lapTimes.number)
             } else {
                 return (a.boat?.py - b.boat?.py)
             }
         })
-        console.log("sorted")
 
-        tempResults.forEach((res, index) => {
+        results.forEach((res, index) => {
             const element = document.getElementById(res.id)
             if (element) {
                 element.order = index
             }
-        })
-
-        tempResults.forEach((res) => {
-            console.log(res.boat)
         })
     }
 
@@ -210,10 +201,10 @@ const RacePage = () => {
         tempdata.results[index].lapTimes.times.push(Math.floor(new Date().getTime() / 1000))
         tempdata.results[index].lapTimes.number += 1 //increment number of laps
         console.log(tempdata.results[index])
+        DB.updateResult(tempdata.results[index])
         setRace({ ...tempdata })
-        orderResults()
+        orderResults(tempdata.results)
         //send to DB
-        await DB.updateResult(tempdata.results[index])
     }
 
     const calculateResults = () => {
@@ -263,6 +254,8 @@ const RacePage = () => {
         tempdata.results[index].lapTimes.number += 1 //increment number of laps
         //update local race copy
         setRace({ ...tempdata })
+        //moved finished to bottom of screen
+        orderResults(tempdata.results)
         //send to DB
         await DB.updateResult(tempdata.results[index])
         setInstructions(tempdata.results[index].name + "finished")
@@ -333,7 +326,7 @@ const RacePage = () => {
             setResetTimer(false)
             setTimerActive(true)
         }
-        orderResults()
+        orderResults(race.results)
     }, [race])
 
     useEffect(() => {
