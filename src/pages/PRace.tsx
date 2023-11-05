@@ -302,7 +302,7 @@ const RacePage = () => {
 
     return (
         <Dashboard club={club.name} userName={user.name}>
-            <div className="w-full flex flex-col items-center justify-start panel-height">
+            <div className="w-full flex flex-col items-center justify-start panel-height overflow-auto">
                 <div className="flex w-full flex-row justify-around">
                     <div className="w-1/4 p-2 m-2 border-4 rounded-lg bg-white text-lg font-medium">
                         Event: {seriesName} - {race.number}
@@ -342,13 +342,13 @@ const RacePage = () => {
 
                 </div>
 
-                <div className="overflow-auto">
+                <div className="">
                     <ReactSortable list={race.results} setList={(newState) => setOrder(newState)}>
                         {race.results.map((result, index) => {
                             return (
                                 <div key={index} id={result.id} className='bg-green-300 border-2 border-pink-500'>
                                     <div className="flex flex-row m-4 justify-between">
-                                        <h2 className="text-2xl text-gray-700 flex my-auto mr-5">{result.SailNumber} - {result.boat?.name} : {result.Helm} - {result.Crew} Laps: {result.lapTimes.number} Position: {result.Position}</h2>
+                                        <h2 className="text-2xl text-gray-700 flex my-auto mr-5">{result.SailNumber} - {result.boat?.name} : {result.Helm} - {result.Crew} - Laps: {result.lapTimes.number} Position: {result.Position}</h2>
                                         <p onClick={() => retireBoat(result.id)} className="cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-sm p-5 mx-2 ml-auto text-center flex">
                                             Retire
                                         </p>
