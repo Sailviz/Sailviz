@@ -86,13 +86,15 @@ const SignOnPage = () => {
 
         await DB.updateResult(result)
         var data = await DB.getRaceById(race.id)
-        setRace(data)
+        console.log(race)
+        console.log(data)
+        setRace(data.race)
     }
 
     const deleteResult = async (resultId: string) => {
         await DB.DeleteResultById(resultId)
         var data = await DB.getRaceById(race.id)
-        setSeriesData(data)
+        setSeriesData(data.race)
     }
 
 
@@ -154,6 +156,7 @@ const SignOnPage = () => {
             router.push("/")
         }
     }, [clubId])
+
 
     return (
         <div>
