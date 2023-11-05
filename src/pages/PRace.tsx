@@ -199,6 +199,7 @@ const RacePage = () => {
     }
 
     const setOrder = async (newState: ResultsDataType[]) => {
+        if (newState.length < 2) return
         console.log(newState)
         newState.forEach((_, index) => {
             newState[index].Position = index + 1
