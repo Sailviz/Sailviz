@@ -2,7 +2,7 @@ import React, { ChangeEvent, MouseEventHandler, useEffect, useState } from "reac
 import Router, { useRouter } from "next/router"
 import * as DB from '../components/apiMethods';
 import Dashboard from "../components/Dashboard";
-import RaceTimer from "../components/RaceTimer"
+import PursuitTimer from "../components/PursuitTimer"
 import Cookies from "js-cookie";
 import { ReactSortable } from "react-sortablejs";
 import { Result } from "postcss";
@@ -18,7 +18,7 @@ const RacePage = () => {
 
     const router = useRouter()
 
-    const raceLength = 301 //5 mins in seconds plus a bit so that it shows 5:00
+    const startLength = 301 //5 mins in seconds plus a bit so that it shows 5:00
 
     const query = router.query
 
@@ -66,7 +66,8 @@ const RacePage = () => {
         id: "",
         name: "",
         settings: {
-            clockIP: ""
+            clockIP: "",
+            pursuitLength: 0
         },
         series: [],
         boats: [],
@@ -103,7 +104,7 @@ const RacePage = () => {
     }
 
     const startRace = async () => {
-        let localTime = Math.floor((new Date().getTime() / 1000) + raceLength)
+        let localTime = Math.floor((new Date().getTime() / 1000) + startLength)
         setStartTime(localTime)
         setResetTimer(false)
         setRaceState(raceStateType.running)
@@ -158,7 +159,7 @@ const RacePage = () => {
         });
 
         setRaceState(raceStateType.reset)
-        setStartTime((new Date().getTime() / 1000) + raceLength)
+        setStartTime((new Date().getTime() / 1000) + startLength)
         setResetTimer(true)
         setInstructions("Hit Start to begin the starting procedure")
 
@@ -183,6 +184,18 @@ const RacePage = () => {
         setRace({ ...tempdata })
         //send to DB
         await DB.updateResult(tempdata.results[index])
+
+    }
+
+    const endRace = async () => {
+        setRaceState(raceStateType.calculate)
+        setTimerActive(false)
+    }
+
+    const submitResults = async () => {
+        race.results.forEach(result => {
+            DB.updateResult(result)
+        })
     }
 
     const setOrder = async (newState: ResultsDataType[]) => {
@@ -190,7 +203,11 @@ const RacePage = () => {
         newState.forEach((_, index) => {
             newState[index].Position = index + 1
         })
-        setRace({ ...race, results: newState })
+        let tempResults = { ...race, results: newState }
+        setRace(tempResults)
+        tempResults.results.forEach(result => {
+            DB.updateResult(result)
+        })
     }
 
     const controller = new AbortController()
@@ -219,7 +236,11 @@ const RacePage = () => {
         let raceId = query.race as string
         const fetchRace = async () => {
             let data = await DB.getRaceById(raceId)
-            setRace(data.race)
+            //sort race results
+            console.log(data.race.results)
+            const sortedResults = data.race.results.sort((a: ResultsDataType, b: ResultsDataType) => a.Position - b.Position);
+            console.log(sortedResults)
+            setRace({ ...data.race, results: sortedResults })
 
             setSeriesName(await DB.GetSeriesById(data.race.seriesId).then((res) => { return (res.name) }))
         }
@@ -286,7 +307,7 @@ const RacePage = () => {
                         Event: {seriesName} - {race.number}
                     </div>
                     <div className="w-1/4 p-2 m-2 border-4 rounded-lg bg-white text-lg font-medium">
-                        Race Time: <RaceTimer startTime={startTime} timerActive={timerActive} onFourMinutes={handleFourMinutes} onOneMinute={handleOneMinute} onGo={handleGo} reset={resetTimer} />
+                        Race Time: <PursuitTimer startTime={startTime} endTime={club.settings.pursuitLength} timerActive={timerActive} onFourMinutes={handleFourMinutes} onOneMinute={handleOneMinute} onGo={handleGo} onEnd={endRace} reset={resetTimer} />
                     </div>
                     <div className="p-2 w-1/4">
                         {(() => {
@@ -304,8 +325,8 @@ const RacePage = () => {
                                         Reset
                                     </p>)
                                 case raceStateType.calculate:
-                                    return (<p className="cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-xl px-5 py-2.5 text-center">
-                                        Calculate Results
+                                    return (<p onClick={submitResults} className="cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-xl px-5 py-2.5 text-center">
+                                        Submit Results
                                     </p>)
                                 default:
                                     return (<p></p>)

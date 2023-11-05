@@ -49,6 +49,7 @@ type RaceSettingsType = {
 type ClubSettingsType = {
   [key: string]: any;
   clockIP: string;
+  pursuitLength: number;
 };
 
 type BoatDataType = {

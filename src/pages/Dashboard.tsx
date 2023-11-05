@@ -476,6 +476,18 @@ const Club = () => {
                             </p>
                         </div>
                         <p className='text-2xl font-bold text-gray-700 p-6'>
+                            Pursuit Race Length
+                        </p>
+                        <div className='flex flex-col px-6 w-full '>
+                            <input type="number"
+                                id='pursuitLength'
+                                className="w-1/3 p-2 mx-0 my-2 border-4 rounded focus:border-pink-500 focus:outline-none"
+                                defaultValue={club.settings.pursuitLength}
+                                onChange={saveClubSettings}
+                                onBlur={() => DB.UpdateClubById(club)}
+                            />
+                        </div>
+                        <p className='text-2xl font-bold text-gray-700 p-6'>
                             Clock Config
                         </p>
                         <div className='flex flex-col px-6 w-full '>
@@ -484,7 +496,7 @@ const Club = () => {
                             </p>
                             <input type="text"
                                 id='clockIP'
-                                className="w-full p-2 mx-0 my-2 border-4 rounded focus:border-pink-500 focus:outline-none"
+                                className="w-1/3 p-2 mx-0 my-2 border-4 rounded focus:border-pink-500 focus:outline-none"
                                 defaultValue={club.settings.clockIP}
                                 onChange={saveClubSettings}
                                 onBlur={() => DB.UpdateClubById(club)}
