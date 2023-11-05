@@ -192,10 +192,11 @@ const RacePage = () => {
 
     }
 
-    const retireBoat = async () => {
+    const retireBoat = async (id: string) => {
         //modify race data
         const tempdata = race
-        tempdata.results[activeResultIndex].finishTime = -1 //finish time is a string so we can put in status
+        let index = tempdata.results.findIndex((x: ResultsDataType) => x.id === id)
+        tempdata.results[index].finishTime = -1 //finish time is a string so we can put in status
         setRace({ ...tempdata })
         //send to DB
         await DB.updateResult(tempdata.results[activeResultIndex])
@@ -439,15 +440,15 @@ const RacePage = () => {
                                         <div className="p-5 w-2/4">
                                             {finishMode ?
                                                 <div>
-                                                    <p onClick={(e) => { e.stopPropagation(); finishBoat(result.id) }} className="cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-sm p-5 text-center my-1">
+                                                    <p onClick={(e) => { finishBoat(result.id) }} className="cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-sm p-5 text-center my-1">
                                                         Finish
                                                     </p>
-                                                    <p onClick={() => retireBoat()} className="cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-sm p-5 text-center my-1">
+                                                    <p onClick={(e) => { confirm("are you sure you retire" + result.SailNumber) ? retireBoat(result.id) : null; }} className="cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-sm p-5 text-center my-1">
                                                         Retire
                                                     </p>
                                                 </div>
                                                 :
-                                                <p onClick={(e) => { e.stopPropagation(); lapBoat(result.id) }} className="cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-sm p-5 text-center">
+                                                <p onClick={(e) => { lapBoat(result.id) }} className="cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-sm p-5 text-center">
                                                     Lap
                                                 </p>
                                             }
