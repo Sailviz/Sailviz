@@ -6,6 +6,7 @@ import * as DB from './apiMethods';
 const Text = ({ ...props }) => {
     const initialValue = props.getValue()
     const [value, setValue] = React.useState(initialValue)
+    console.log(value)
 
     const onBlur = (e: ChangeEvent<HTMLInputElement>) => {
         const original = props.row.original
@@ -52,25 +53,11 @@ const Number = ({ ...props }: any) => {
 
 const Class = ({ ...props }: any) => {
     var initialValue = props.getValue()
+    let options = props.options
     if (initialValue == null) {
         initialValue = { value: "", label: "" }
     }
     const [value, setValue] = React.useState(initialValue)
-
-    let boats: BoatDataType[] = []
-    let options: any = []
-    useEffect(() => {
-        const fetchBoats = async () => {
-            boats = await DB.getBoats(props.clubId)
-            boats.forEach(boat => {
-                options.push({ value: boat, label: boat.name })
-            })
-        }
-        if (props.clubId) {
-            fetchBoats()
-        }
-    }, [value]);
-
 
     const onBlur = (newValue: any) => {
         let original = props.row.original
@@ -136,9 +123,21 @@ const columnHelper = createColumnHelper<ResultsDataType>()
 
 const SignOnTable = (props: any) => {
     let [data, setData] = useState<ResultsDataType[]>(props.data)
-    let [startTime, setStartTime] = useState(props.startTime)
     let clubId = props.clubId
     let raceId = props.raceId
+    let options: object[] = []
+    console.log(data)
+
+    const fetchBoats = async () => {
+        let boats = await DB.getBoats(clubId)
+        boats.forEach(boat => {
+            options.push({ value: boat, label: boat.name })
+        })
+    }
+    if (clubId) {
+        fetchBoats()
+    }
+
 
     const deleteResult = (id: any) => {
         props.deleteResult(id)
@@ -181,7 +180,7 @@ const SignOnTable = (props: any) => {
                 header: "Class",
                 id: "Class",
                 size: 300,
-                cell: props => <Class {...props} updateResult={updateResult} clubId={clubId} />,
+                cell: props => <Class {...props} updateResult={updateResult} clubId={clubId} options={options} />,
                 enableSorting: false
             }),
             columnHelper.accessor('SailNumber', {
@@ -202,7 +201,7 @@ const SignOnTable = (props: any) => {
         getSortedRowModel: getSortedRowModel(),
     })
     return (
-        <div key={props.data} className='block max-w-full'>
+        <div className='block max-w-full'>
             <table className='w-full border-spacing-0'>
                 <thead>
                     {table.getHeaderGroups().map(headerGroup => (
