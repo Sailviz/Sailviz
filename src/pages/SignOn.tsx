@@ -18,15 +18,6 @@ const SignOnPage = () => {
     const query = router.query
 
     var [clubId, setClubId] = useState<string>("invalid")
-    var [club, setClub] = useState<ClubDataType>({
-        id: "",
-        name: "",
-        settings: {
-            clockIP: ""
-        },
-        series: [],
-        boats: [],
-    })
 
     var [user, setUser] = useState<UserDataType>({
         id: "",
@@ -107,6 +98,7 @@ const SignOnPage = () => {
 
     useEffect(() => {
         let raceId = query.race as string
+        setClubId(Cookies.get('clubId') || "")
         const getRace = async () => {
             await DB.getRaceById(raceId).then((data: RaceDataType) => {
                 setRace(data.race)
@@ -131,16 +123,6 @@ const SignOnPage = () => {
             if (clubId == "invalid") {
                 return
             }
-            const fetchClub = async () => {
-                var data = await DB.GetClubById(clubId)
-                if (data) {
-                    setClub(data)
-                } else {
-                    console.log("could not fetch club settings")
-                }
-
-            }
-            fetchClub()
 
             const fetchUser = async () => {
                 var userid = Cookies.get('userId')
