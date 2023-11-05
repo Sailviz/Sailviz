@@ -24,7 +24,7 @@ const CountdownTimer = ({ startTime, timerActive, onFourMinutes, onOneMinute, on
         if (!timerActive) return
         const timer = setTimeout(() => {
             setTimeLeft(calculateTimeLeft());
-        }, 1000);
+        }, 100);
 
         return () => clearTimeout(timer);
     }, [timerActive, timeLeft, startTime]);
