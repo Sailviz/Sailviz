@@ -443,7 +443,7 @@ const RacePage = () => {
                                                     <p onClick={(e) => { finishBoat(result.id) }} className="cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-sm p-5 text-center my-1">
                                                         Finish
                                                     </p>
-                                                    <p onClick={(e) => { confirm("are you sure you retire" + result.SailNumber) ? retireBoat(result.id) : null; }} className="cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-sm p-5 text-center my-1">
+                                                    <p onClick={(e) => { confirm("are you sure you retire " + result.SailNumber) ? retireBoat(result.id) : null; }} className="cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-sm p-5 text-center my-1">
                                                         Retire
                                                     </p>
                                                 </div>
