@@ -266,7 +266,8 @@ const Club = () => {
         let newSeriesData: SeriesDataType = activeSeriesData
         console.log(newSeriesData)
         newSeriesData.settings[e.target.id] = parseInt(e.target.value)
-        setActiveSeriesData(newSeriesData)
+        // setActiveSeriesData({ ...activeSeriesData, settings: [...activeSeriesData.settings, [e.target.id]: e.target.value]  })
+        setActiveSeriesData({ ...newSeriesData })
 
         updateRanges()
     }
@@ -542,7 +543,7 @@ const Club = () => {
                             :
                             <div></div>
                         }
-                        <SeriesResultsTable key={activeSeriesData.id} data={activeSeriesData} clubId={clubId} />
+                        <SeriesResultsTable key={activeSeriesData.settings["numberToCount"] + activeSeriesData.id} data={activeSeriesData} clubId={clubId} />
                     </div>
                     <div id="race" className="hidden">
                         <p className="text-6xl font-extrabold text-gray-700 p-6">

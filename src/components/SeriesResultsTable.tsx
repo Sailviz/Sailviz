@@ -120,14 +120,23 @@ const SeriesResultsTable = (props: any) => {
             result.Total = result.racePositions.reduce((partialSum, a) => partialSum + a, 0)
         })
         //calculate discards/net
+        tempresults.forEach(result => {
+            result.racePositions.sort((a, b) => a - b)
+            let Net = 0
+            result.racePositions.forEach((position, index) => {
+                if (index < seriesData.settings.numberToCount) {
+                    Net += position
+                }
+            })
+            result.Net = Net
+        })
 
         console.log(tempresults)
         setData(tempresults)
 
     }
 
-    React.useEffect(() => {
-        console.log(seriesData)
+    useEffect(() => {
         if (seriesData != undefined) {
             calcTable()
         }
@@ -165,8 +174,6 @@ const SeriesResultsTable = (props: any) => {
 
     //add column for each race in series
     props.data.races.forEach((race: RaceDataType, index: number) => {
-        console.log(race)
-        console.log(data, index)
         const newColumn = columnHelper.accessor((data) => data.racePositions[index], {
             header: "R" + race.number.toString(),
             cell: props => <Number {...props} disabled={true} />,
