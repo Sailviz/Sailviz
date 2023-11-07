@@ -2,7 +2,7 @@ import React, { ChangeEvent, MouseEventHandler, useEffect, useState } from "reac
 import Router, { useRouter } from "next/router"
 import * as DB from '../components/apiMethods';
 import Dashboard from "../components/Dashboard";
-import PursuitTimer from "../components/PursuitTimer"
+import PursuitTimer from "../components/RaceTimer"
 import Cookies from "js-cookie";
 import { ReactSortable } from "react-sortablejs";
 import { Result } from "postcss";

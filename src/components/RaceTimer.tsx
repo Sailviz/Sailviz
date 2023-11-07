@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-const CountdownTimer = ({ startTime, timerActive, onFourMinutes, onOneMinute, onGo, reset }: { startTime: number, timerActive: boolean, onFourMinutes: any, onOneMinute: any, onGo: any, reset: boolean }) => {
+const CountdownTimer = ({ startTime, endTime, timerActive, onFourMinutes, onOneMinute, onGo, onEnd, reset }: { startTime: number, endTime: number | null, timerActive: boolean, onFourMinutes: any, onOneMinute: any, onGo: any, onEnd: any, reset: boolean }) => {
     //these two states are completely wrong but the code works for some reason.
     const [timeLeft, setTimeLeft] = useState({ minutes: 5, seconds: 0, countingUp: false });
 
@@ -41,6 +41,8 @@ const CountdownTimer = ({ startTime, timerActive, onFourMinutes, onOneMinute, on
         if (onOneMinute) onOneMinute();
     } else if (timeLeft.minutes == 4 && timeLeft.seconds == 0 && timeLeft.countingUp == false) {
         if (onFourMinutes) onFourMinutes();
+    } else if (endTime != null && timeLeft.minutes == endTime && timeLeft.seconds == 0 && timeLeft.countingUp == true) {
+        if (onEnd) onEnd();
     }
 
     return (
