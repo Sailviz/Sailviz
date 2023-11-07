@@ -139,7 +139,12 @@ const RacePage = () => {
         console.log(results)
         results.sort((a, b) => {
             //compare laps
-            if (a.lapTimes.number != b.lapTimes.number) {
+            console.log(a.finishTime)
+            if (a.finishTime == -1) { //retired boats to end of list
+                return 1
+            } else if (b.finishTime == -1) { //retired boats to end of list
+                return -1
+            } else if (a.lapTimes.number != b.lapTimes.number) {
                 return (a.lapTimes.number - b.lapTimes.number)
             } else {
                 return (a.boat?.py - b.boat?.py)
