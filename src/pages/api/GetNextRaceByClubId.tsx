@@ -5,7 +5,7 @@ import dayjs from 'dayjs';
 import assert from 'assert';
 
 async function findRace(clubId: string) {
-    var result = await prisma.race.findFirst({
+    var result = await prisma.race.findMany({
         where: {
             AND: [{
                 Time: {
@@ -19,6 +19,10 @@ async function findRace(clubId: string) {
 
 
         },
+        orderBy: {
+            Time: 'asc'
+        },
+        take: 1,
         select: {
             id: true
         }
@@ -41,8 +45,8 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
         var clubId = req.body.clubId
 
         var race = await findRace(clubId)
-        if (race) {
-            res.json({ error: false, id: race.id });
+        if (race[0]) {
+            res.json({ error: false, id: race[0].id });
         } else {
             // User exists
             res.json({ error: true, message: 'race not found' });
