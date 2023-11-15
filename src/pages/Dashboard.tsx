@@ -158,9 +158,14 @@ const Club = () => {
     }
 
     const removeChildren = (parent: any) => {
-        while (parent.childElementCount > 1) {
-            parent.removeChild(parent.lastChild);
-        }
+        var children = [].slice.call(parent.children);
+        console.log(children)
+        children.forEach((child: any) => {
+            console.log(child)
+            if (child.id != 'homebutton' && child.id != 'settingsbutton') {
+                parent.removeChild(child);
+            }
+        })
     };
 
     const selectSeries = async (element: any) => {
@@ -223,6 +228,8 @@ const Club = () => {
     const hidePages = () => {
         var settings = document.getElementById('settings')
         settings?.classList.add('hidden')
+        var home = document.getElementById('home')
+        home?.classList.add('hidden')
         var series = document.getElementById('series')
         series?.classList.add('hidden')
         var race = document.getElementById('race')
@@ -234,6 +241,12 @@ const Club = () => {
     const showSettings = () => {
         hidePages()
         var settings = document.getElementById('settings')
+        settings?.classList.remove('hidden')
+    }
+
+    const showHome = () => {
+        hidePages()
+        var settings = document.getElementById('home')
         settings?.classList.remove('hidden')
     }
 
@@ -437,17 +450,22 @@ const Club = () => {
             <div className="w-full flex flex-row items-center justify-start panel-height">
                 <div id="leftBar" className='flex basis-3/12 flex-col justify-start h-full border-pink-500 border-r-2 overflow-y-auto'>
                     {user.permLvl == 0 ?
-                        <div className='w-full flex cursor-pointer' onClick={showSettings}>
+                        <div id="settingsbutton" className='w-full flex cursor-pointer' onClick={showSettings}>
                             <div className='w-full p-4 bg-pink-500 text-lg font-extrabold text-gray-700 over'>
-                                <p>Overview</p>
+                                <p>Settings</p>
                             </div>
                         </div>
                         :
                         <div></div>
                     }
+                    <div id='homebutton' className='w-full flex cursor-pointer' onClick={showHome}>
+                        <div className='w-full p-4 bg-pink-500 text-lg font-extrabold text-gray-700 over'>
+                            <p>Home</p>
+                        </div>
+                    </div>
                 </div>
                 <div id="page" className='flex basis-9/12 h-full w-full overflow-y-auto'>
-                    <div id="blank" className="">
+                    <div id="home" className="">
                         <p className="text-6xl font-extrabold text-gray-700 p-6">
                             Welcome to Sailing Race Manager
                         </p>
@@ -457,7 +475,7 @@ const Club = () => {
                     </div>
                     <div id="settings" className="hidden w-full">
                         <p className="text-6xl font-extrabold text-gray-700 p-6">
-                            Overview
+                            Settings
                         </p>
                         <p className='text-2xl font-bold text-gray-700 p-6'>
                             Series
