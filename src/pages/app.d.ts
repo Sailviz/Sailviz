@@ -41,6 +41,14 @@ type lapTimesType = {
   number: number;
 };
 
+type NextRaceDataType = {
+  id: "";
+  number: 0;
+  series: {
+    name: "";
+  };
+};
+
 type RaceSettingsType = {
   [key: string]: any;
   numberToCount: number;

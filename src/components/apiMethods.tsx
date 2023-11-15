@@ -171,7 +171,7 @@ export async function getRaceById(raceId: string) {
         });
 };
 
-export async function getNextRaceByClubId(clubId: string): Promise<string> {
+export async function getNextRaceByClubId(clubId: string): Promise<NextRaceDataType> {
     const body = {
         "clubId": clubId
     }
@@ -182,7 +182,7 @@ export async function getNextRaceByClubId(clubId: string): Promise<string> {
     })
         .then((res) => res.json())
         .then(async (data) => {
-            return data.id
+            return data.race
         });
 };
 

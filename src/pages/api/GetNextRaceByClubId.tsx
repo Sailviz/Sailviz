@@ -24,7 +24,13 @@ async function findRace(clubId: string) {
         },
         take: 1,
         select: {
-            id: true
+            id: true,
+            number: true,
+            series: {
+                select: {
+                    name: true
+                }
+            }
         }
     })
     return result;
@@ -46,7 +52,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 
         var race = await findRace(clubId)
         if (race[0]) {
-            res.json({ error: false, id: race[0].id });
+            res.json({ error: false, race: race[0] });
         } else {
             // User exists
             res.json({ error: true, message: 'race not found' });
