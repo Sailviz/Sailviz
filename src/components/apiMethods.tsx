@@ -171,6 +171,21 @@ export async function getRaceById(raceId: string) {
         });
 };
 
+export async function getNextRaceByClubId(clubId: string): Promise<string> {
+    const body = {
+        "clubId": clubId
+    }
+    return await fetch(`${server}/api/GetNextRaceByClubId`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+    })
+        .then((res) => res.json())
+        .then(async (data) => {
+            return data.id
+        });
+};
+
 export async function updateBoatById(boatData: BoatDataType) {
     const body = {
         "boat": boatData

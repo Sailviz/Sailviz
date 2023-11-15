@@ -20,7 +20,8 @@ const Club = () => {
         id: "",
         name: "",
         settings: {
-            clockIP: ""
+            clockIP: "",
+            pursuitLength: 0
         },
         series: [],
         boats: [],
@@ -57,6 +58,8 @@ const Club = () => {
         seriesId: "",
         startTime: 0
     })
+
+    var [nextRaceId, setNextRaceId] = useState("")
 
     const [seriesData, setSeriesData] = useState<SeriesDataType[]>([])
 
@@ -179,6 +182,10 @@ const Club = () => {
             }
         })
         series.classList.remove('hidden')
+    }
+
+    const getNextRace = async () => {
+        setNextRaceId(await DB.getNextRaceByClubId(clubId))
     }
 
     const selectRace = async (raceId: string) => {
@@ -435,6 +442,8 @@ const Club = () => {
             }
             fetchBoats()
 
+            getNextRace()
+
         } else {
             console.log("user not signed in")
             router.push("/")
@@ -472,6 +481,7 @@ const Club = () => {
                         <p className="text-6xl font-extrabold text-gray-700 p-6">
                             Add a button here to go to the next race.
                         </p>
+                        <p> {nextRaceId} </p>
                     </div>
                     <div id="settings" className="hidden w-full">
                         <p className="text-6xl font-extrabold text-gray-700 p-6">
