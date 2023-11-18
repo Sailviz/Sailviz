@@ -6,7 +6,6 @@ import * as DB from './apiMethods';
 const Text = ({ ...props }) => {
     const initialValue = props.getValue()
     const [value, setValue] = React.useState(initialValue)
-    console.log(value)
 
     const onBlur = (e: ChangeEvent<HTMLInputElement>) => {
         const original = props.row.original

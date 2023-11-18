@@ -28,17 +28,11 @@ const SignOnPage = () => {
 
     })
 
-    const [seriesData, setSeriesData] = useState<SeriesDataType>({
-        id: "",
-        name: "",
-        clubId: "",
-        settings: {
-            numberToCount: 0
-        },
-        races: []
-    })
+    const [seriesName, setSeriesName] = useState("")
 
     const [boatData, setBoatData] = useState<BoatDataType[]>([])
+
+    var [todaysRaces, setTodaysRaces] = useState<NextRaceDataType[]>([])
 
     var [race, setRace] = useState<RaceDataType>(({
         id: "",
@@ -74,6 +68,50 @@ const SignOnPage = () => {
 
     }))
 
+    function toggleSidebar() {
+        let sidebar = document.getElementById("sidebar")
+        let main = document.getElementById("main")
+        console.log(sidebar, main)
+        if (main == undefined || sidebar == undefined) return
+        if (sidebar.style.width == "0px") {
+            sidebar.style.width = "350px";
+            main.style.marginLeft = "350px";
+        }
+        else {
+            sidebar.style.width = "0";
+            main.style.marginLeft = "0";
+        }
+    }
+
+    const createChild = (race: NextRaceDataType) => {
+        var ul = document.createElement('ul');
+
+        ul.className = 'list-none select-none w-full p-4 bg-pink-300 text-lg font-extrabold text-gray-700 '
+
+        ul.onclick = async function () {
+            await DB.getRaceById(race.id).then((data: RaceDataType) => {
+                setRace(data.race)
+            })
+            setSeriesName(race.series.name)
+        }
+
+        ul.innerHTML = race.series.name + ": " + race.number.toString()
+
+        return ul
+    }
+
+    const generateBar = () => {
+        let racelist = document.getElementById("racelist")
+        if (racelist == undefined) return
+        while (racelist.firstChild) {
+            racelist.removeChild(racelist.firstChild)
+        }
+        console.log(todaysRaces)
+        todaysRaces.forEach(data => {
+            racelist?.appendChild(createChild(data))
+        })
+    }
+
     const createResult = async (id: string) => {
         console.log(race)
         const entry = await DB.createResult(id)
@@ -93,8 +131,6 @@ const SignOnPage = () => {
 
     const deleteResult = async (resultId: string) => {
         await DB.DeleteResultById(resultId)
-        var data = await DB.getRaceById(race.id)
-        setSeriesData(data.race)
     }
 
 
@@ -105,9 +141,7 @@ const SignOnPage = () => {
             await DB.getRaceById(raceId).then((data: RaceDataType) => {
                 setRace(data.race)
                 DB.GetSeriesById(data.race.seriesId).then((data: SeriesDataType) => {
-                    console.log(data)
-                    setSeriesData(data)
-                    setClubId(data.clubId)
+                    setSeriesName(data.name)
                 })
 
             })
@@ -151,20 +185,60 @@ const SignOnPage = () => {
             }
             fetchBoats()
 
+            const fetchTodaysRaces = async () => {
+                var data = await DB.getTodaysRaceByClubId(clubId)
+                if (data) {
+                    setTodaysRaces(data)
+                } else {
+                    console.log("could not find todays race")
+                }
+                if (data[0]) {
+                    await DB.getRaceById(data[0].id).then((data: RaceDataType) => {
+                        setRace(data.race)
+                        DB.GetSeriesById(data.race.seriesId).then((data: SeriesDataType) => {
+                            setSeriesName(data.name)
+                        })
+                    })
+                }
+            }
+            fetchTodaysRaces()
+
         } else {
             console.log("user not signed in")
             router.push("/")
         }
     }, [clubId])
 
+    useEffect(() => {
+        generateBar()
+    }, [todaysRaces])
+
 
     return (
         <div>
-            <div className="text-6xl font-extrabold text-gray-700 p-6">
-                {seriesData.name}: {race.number} at {race.Time}
+            <div id="main" className="duration-300">
+                <button className="text-4xl text-black" onClick={toggleSidebar}>&#9776;</button>
+                {todaysRaces.length > 0 ?
+                    <div>
+                        <div className="text-6xl font-extrabold text-gray-700 p-6">
+                            {seriesName}: {race.number} at {race.Time}
+                        </div>
+                        <div className="m-6" key={todaysRaces.length}>
+
+                            <SignOnTable data={race.results} startTime={race.startTime} key={race.id} deleteResult={deleteResult} updateResult={updateResult} createResult={createResult} clubId={clubId} raceId={race.id} />
+                        </div>
+                    </div>
+                    :
+                    <div>
+                        <p className="text-6xl font-extrabold text-gray-700 p-6"> No Races Today</p>
+                    </div>
+                }
             </div>
-            <div className="m-6">
-                <SignOnTable data={race.results} startTime={race.startTime} key={race.id} deleteResult={deleteResult} updateResult={updateResult} createResult={createResult} clubId={clubId} raceId={race.id} />
+            <div id="sidebar" className="h-full w-0 fixed top-0 left-0 bg-gray-200 overflow-x-hidden pt-10 duration-500 z-10">
+                <p className="text-light p-8 block w-full duration-300 hover:text-blue text-3xl">Today's Races</p>
+                <div id="racelist">
+                    <p className="text-light p-8 block w-full duration-300 hover:text-blue text-3xl">test</p>
+                </div>
             </div>
         </div>
     )
