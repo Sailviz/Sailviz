@@ -235,7 +235,7 @@ const SignOnPage = () => {
                 }
             </div>
             <div id="sidebar" className="h-full w-0 fixed top-0 left-0 bg-gray-200 overflow-x-hidden pt-10 duration-500 z-10">
-                <p className="text-light p-8 block w-full duration-300 hover:text-blue text-3xl">Today's Races</p>
+                <p className="text-light p-8 block w-full duration-300 hover:text-blue text-3xl">Today&rsquo;s Races</p>
                 <div id="racelist">
                     <p className="text-light p-8 block w-full duration-300 hover:text-blue text-3xl">test</p>
                 </div>

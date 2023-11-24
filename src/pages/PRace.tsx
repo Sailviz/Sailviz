@@ -202,7 +202,7 @@ const RacePage = () => {
         if (newState.length < 2) return
         console.log(newState)
         newState.forEach((_, index) => {
-            newState[index].Position = index + 1
+            newState[index]!.Position = index + 1
         })
         let tempResults = { ...race, results: newState }
         setRace(tempResults)

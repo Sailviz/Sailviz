@@ -19,7 +19,7 @@ async function deleteAll(clubId: string) {
 async function createAll(clubId: string, data: BoatDataType[]) {
     for (var i = 0; i < data.length; i++) {
 
-        data[i].clubId = clubId
+        data[i]!.clubId = clubId
     }
     var boat = await prisma.boats.createMany({
         data: data

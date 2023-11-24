@@ -154,7 +154,7 @@ const RacePage = () => {
         results.forEach((res, index) => {
             const element = document.getElementById(res.id)
             if (element) {
-                element.order = index
+                element.style.order = index.toString()
             }
         })
     }
@@ -303,7 +303,7 @@ const RacePage = () => {
             getClockIP()
 
         }
-    }, [router])
+    }, [router, query.race])
 
     useEffect(() => {
         let raceId = query.race as string
@@ -318,7 +318,7 @@ const RacePage = () => {
             fetchRace()
         }
 
-    }, [clockIP])
+    }, [clockIP, query.race])
 
     useEffect(() => {
         if (checkAllFinished()) {

@@ -106,8 +106,8 @@ const SeriesResultsTable = (props: any) => {
                 }
                 //add result to tempresults
                 console.log("pushing ", result.Position, " to ", index, " ", tempresults[index])
-                if (index !== undefined) {
-                    tempresults[index].racePositions[race.number - 1] = (result.Position)
+                if (tempresults[index]) {
+                    tempresults[index]!.racePositions[race.number - 1] = (result.Position)
                 } else {
                     console.log("something went wrong")
                 }

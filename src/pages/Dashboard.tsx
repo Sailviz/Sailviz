@@ -190,10 +190,6 @@ const Club = () => {
         series.classList.remove('hidden')
     }
 
-    const getNextRace = async () => {
-        setNextRace(await DB.getNextRaceByClubId(clubId))
-    }
-
     const selectRace = async (raceId: string) => {
         console.log(raceId)
         hidePages()
@@ -448,13 +444,18 @@ const Club = () => {
             }
             fetchBoats()
 
+
+            const getNextRace = async () => {
+                setNextRace(await DB.getNextRaceByClubId(clubId))
+            }
+
             getNextRace()
 
         } else {
             console.log("user not signed in")
             router.push("/")
         }
-    }, [clubId])
+    }, [clubId, router])
 
     useEffect(() => {
         generateBar()
