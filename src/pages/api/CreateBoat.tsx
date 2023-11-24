@@ -34,7 +34,7 @@ async function createBoat(name: string, crew: number, py: number, clubId: string
     return boat;
 }
 
-export default async (req: NextApiRequest, res: NextApiResponse) => {
+const CreateBoat = async (req: NextApiRequest, res: NextApiResponse) => {
     if (req.method === 'POST') {
         // check if we have all data.
         // The website stops empty fields, this stops missing fields
@@ -71,3 +71,5 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
         }
     }
 };
+
+export default CreateBoat

@@ -14,7 +14,7 @@ async function getBoats(clubId: string) {
     return result;
 }
 
-export default async (req: NextApiRequest, res: NextApiResponse) => {
+const GetBoats = async (req: NextApiRequest, res: NextApiResponse) => {
     if (req.method === 'POST') {
         try {
             assert.notStrictEqual(undefined, req.body.clubId);
@@ -33,3 +33,5 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
         }
     }
 };
+
+export default GetBoats

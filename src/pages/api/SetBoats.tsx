@@ -7,7 +7,7 @@ import assert from 'assert';
 const saltRounds = 10;
 const jwtSecret = process.env.jwtSecret;
 
-async function deleteAll(clubId: string){
+async function deleteAll(clubId: string) {
     await prisma.boats.deleteMany({
         where: {
             clubId: clubId,
@@ -16,8 +16,9 @@ async function deleteAll(clubId: string){
     return
 }
 
-async function createAll(clubId: string, data: BoatDataType[]){
-    for(var i = 0; i < data.length; i++){
+async function createAll(clubId: string, data: BoatDataType[]) {
+    for (var i = 0; i < data.length; i++) {
+
         data[i].clubId = clubId
     }
     var boat = await prisma.boats.createMany({
@@ -26,7 +27,7 @@ async function createAll(clubId: string, data: BoatDataType[]){
     return boat;
 }
 
-export default async (req: NextApiRequest, res: NextApiResponse) => {
+const SetBoats = async (req: NextApiRequest, res: NextApiResponse) => {
     if (req.method === 'POST') {
         // check if we have all data.
         // The website stops empty fields, this stops missing fields
@@ -34,14 +35,16 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
             assert.notStrictEqual(undefined, req.body.clubId);
             assert.notStrictEqual(undefined, req.body.data);
         } catch (bodyError) {
-            res.json({error: true, message: "information missing"});
+            res.json({ error: true, message: "information missing" });
             return;
         }
-        
+
         var clubId = req.body.clubId
         var data = req.body.data
         deleteAll(clubId)
         createAll(clubId, data)
-        res.json({error: false});
+        res.json({ error: false });
     }
 };
+
+export default SetBoats

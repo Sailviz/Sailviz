@@ -28,7 +28,7 @@ async function createSeries(seriesName: string, clubId: string) {
     return res;
 }
 
-export default async (req: NextApiRequest, res: NextApiResponse) => {
+const CreateSeries = async (req: NextApiRequest, res: NextApiResponse) => {
     if (req.method === 'POST') {
         // check if we have all data.
         // The website stops this, but just in case
@@ -53,3 +53,5 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
         }
     }
 };
+
+export default CreateSeries

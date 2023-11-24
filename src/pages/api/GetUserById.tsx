@@ -23,7 +23,7 @@ async function getUser(id: string) {
     return result;
 }
 
-export default async (req: NextApiRequest, res: NextApiResponse) => {
+const GetUserById = async (req: NextApiRequest, res: NextApiResponse) => {
     try {
         assert.notStrictEqual(undefined, req.body.id);
     } catch (bodyError) {
@@ -41,3 +41,5 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
         }
     }
 };
+
+export default GetUserById

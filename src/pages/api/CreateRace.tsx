@@ -33,7 +33,7 @@ async function createRace(number: number, seriesId: any, time: any) {
     return res;
 }
 
-export default async (req: NextApiRequest, res: NextApiResponse) => {
+const CreateRace = async (req: NextApiRequest, res: NextApiResponse) => {
     if (req.method === 'POST') {
         // check if we have all data.
         // The website stops this, but just in case
@@ -66,3 +66,5 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
         }
     }
 };
+
+export default CreateRace

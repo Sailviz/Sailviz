@@ -17,7 +17,7 @@ async function updateClub(club: ClubDataType) {
     return result;
 }
 
-export default async (req: NextApiRequest, res: NextApiResponse) => {
+const UpdateClubById = async (req: NextApiRequest, res: NextApiResponse) => {
     if (req.method === 'POST') {
         // check if we have all data.
         // The website stops this, but just in case
@@ -40,3 +40,5 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
         }
     }
 };
+
+export default UpdateClubById

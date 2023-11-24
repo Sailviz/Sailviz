@@ -24,7 +24,7 @@ async function authUser(email: string, password: string) {
 }
 
 //synonymous with log in
-export default async (req: NextApiRequest, res: NextApiResponse) => {
+const Authenticate = async (req: NextApiRequest, res: NextApiResponse) => {
     if (req.method === 'POST') {
         // check if we have all data.
         // The website stops this, but just in case
@@ -62,3 +62,5 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
         }
     }
 };
+
+export default Authenticate

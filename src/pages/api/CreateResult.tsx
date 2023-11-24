@@ -1,6 +1,7 @@
 import prisma from '../../components/prisma'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import assert from 'assert';
+import { createRace } from '../../components/apiMethods';
 
 
 async function findRace(raceId: any) {
@@ -37,7 +38,7 @@ async function createEntry(raceId: string,) {
 }
 
 
-export default async (req: NextApiRequest, res: NextApiResponse) => {
+const CreateRace = async (req: NextApiRequest, res: NextApiResponse) => {
     if (req.method === 'POST') {
         // check if we have all data.
         // The website stops this, but just in case
@@ -61,3 +62,5 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
         }
     }
 };
+
+export default CreateRace
