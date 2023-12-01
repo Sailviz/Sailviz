@@ -71,7 +71,6 @@ const SignOnPage = () => {
     function toggleSidebar() {
         let sidebar = document.getElementById("sidebar")
         let main = document.getElementById("main")
-        console.log(sidebar, main)
         if (main == undefined || sidebar == undefined) return
         if (sidebar.style.width == "0px") {
             sidebar.style.width = "350px";
@@ -106,26 +105,20 @@ const SignOnPage = () => {
         while (racelist.firstChild) {
             racelist.removeChild(racelist.firstChild)
         }
-        console.log(todaysRaces)
         todaysRaces.forEach(data => {
             racelist?.appendChild(createChild(data))
         })
     }
 
     const createResult = async (id: string) => {
-        console.log(race)
         const entry = await DB.createResult(id)
         setRace({ ...race, results: race.results.concat(entry) })
         return entry
     }
 
     const updateResult = async (result: ResultsDataType) => {
-        console.log(result)
-
         await DB.updateResult(result)
         var data = await DB.getRaceById(race.id)
-        console.log(race)
-        console.log(data)
         setRace(data.race)
     }
 

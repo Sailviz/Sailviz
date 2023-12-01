@@ -1,101 +1,9 @@
-import React, { ChangeEvent, useState, useEffect } from 'react';
+import React, { ChangeEvent, useState, useRef } from 'react';
 import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, useReactTable, SortingState } from '@tanstack/react-table'
 import Select from 'react-select';
 import * as DB from './apiMethods';
 
-const Text = ({ ...props }) => {
-    const initialValue = props.getValue()
-    const [value, setValue] = React.useState(initialValue)
 
-    const onBlur = (e: ChangeEvent<HTMLInputElement>) => {
-        const original = props.row.original
-        original[props.column.id] = e.target.value
-        props.updateResult(original)
-    }
-
-    return (
-        <>
-            <input type="text"
-                id=''
-                className=" text-center"
-                defaultValue={value}
-                key={value}
-                onBlur={(e) => onBlur(e)}
-            />
-        </>
-    );
-};
-
-const Number = ({ ...props }: any) => {
-    const initialValue = props.getValue()
-    const [value, setValue] = React.useState(initialValue)
-
-    const onBlur = (e: ChangeEvent<HTMLInputElement>) => {
-        let original = props.row.original
-        original[props.column.id] = parseInt(e.target.value)
-        props.updateResult(original)
-    }
-
-    return (
-        <>
-            <input type="number"
-                id=''
-                className="p-2 m-2 text-center w-full"
-                defaultValue={Math.round(value)}
-                key={value}
-                onBlur={(e) => onBlur(e)}
-                disabled={props.disabled}
-            />
-        </>
-    );
-};
-
-const Class = ({ ...props }: any) => {
-    var initialValue = props.getValue()
-    let options = props.options
-    if (initialValue == null) {
-        initialValue = { value: "", label: "" }
-    }
-    const [value, setValue] = React.useState(initialValue)
-
-    const onBlur = (newValue: any) => {
-        let original = props.row.original
-        console.log(newValue)
-        original.boat = newValue
-        props.updateResult(original)
-    }
-
-
-    return (
-        <>
-            <Select
-                className='w-max min-w-full'
-                defaultValue={{ value: value.id, label: value.name }}
-                key={value}
-                onChange={(e) => { setValue(e?.value); onBlur(e?.value) }}
-                options={options}
-            />
-
-        </>
-    );
-};
-
-const Remove = ({ ...props }: any) => {
-    const onClick = () => {
-        if (confirm("Are you sure you want to remove") == true) {
-            console.log(props.row.original.id)
-            props.deleteResult(props.row.original.id)
-        }
-    }
-    return (
-        <>
-            <p className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0"
-                onClick={onClick} >
-                Remove
-            </p>
-        </>
-    );
-};
 
 function Sort({ column, table }: { column: any, table: any }) {
     const firstValue = table
@@ -125,7 +33,112 @@ const SignOnTable = (props: any) => {
     let clubId = props.clubId
     let raceId = props.raceId
     let options: object[] = []
-    console.log(data)
+
+    const Text = ({ ...props }) => {
+        const initialValue = props.getValue()
+        const [value, setValue] = React.useState(initialValue)
+
+        const onBlur = (e: ChangeEvent<HTMLInputElement>) => {
+            const original = props.row.original
+            original[props.column.id] = e.target.value
+            props.updateResult(original)
+        }
+
+        const key = props.column.id + '_' + props.row.id
+
+        return (
+            <>
+                <input type="text"
+                    id=''
+                    className="text-center h-full w-full text-2xl"
+                    defaultValue={value}
+                    onBlur={(e) => { onBlur(e); editableKeyToFocus.current = "" }}
+                    key={key}
+                    autoFocus={editableKeyToFocus.current == key}
+                    onFocus={() => editableKeyToFocus.current = key}
+                />
+            </>
+        );
+    };
+
+    const Number = ({ ...props }: any) => {
+        const initialValue = props.getValue()
+        const [value, setValue] = React.useState(initialValue)
+
+        const onBlur = (e: ChangeEvent<HTMLInputElement>) => {
+            let original = props.row.original
+            original[props.column.id] = parseInt(e.target.value)
+            props.updateResult(original)
+        }
+
+        const key = props.column.id + '_' + props.row.id
+
+        return (
+            <>
+                <input type="number"
+                    id=''
+                    className="p-2 m-2 text-center w-full text-2xl"
+                    defaultValue={Math.round(value)}
+                    onBlur={(e) => { onBlur(e); editableKeyToFocus.current = "" }}
+                    key={key}
+                    autoFocus={editableKeyToFocus.current == key}
+                    onFocus={() => editableKeyToFocus.current = key}
+                    disabled={props.disabled}
+                />
+            </>
+        );
+    };
+
+    const Class = ({ ...props }: any) => {
+        var initialValue = props.getValue()
+        let options = props.options
+        if (initialValue == null) {
+            initialValue = { value: "", label: "" }
+        }
+        const [value, setValue] = React.useState(initialValue)
+
+        const onBlur = (newValue: any) => {
+            let original = props.row.original
+            original.boat = newValue
+            props.updateResult(original)
+        }
+
+        const key = props.column.id + '_' + props.row.id
+
+        return (
+            <>
+                <Select
+                    className='w-max min-w-full text-2xl'
+                    defaultValue={{ value: value.id, label: value.name }}
+                    onChange={(e) => { setValue(e?.value); onBlur(e?.value) }}
+                    options={options}
+                    onBlur={() => editableKeyToFocus.current = ""}
+                    key={key}
+                    autoFocus={editableKeyToFocus.current == key}
+                    onFocus={() => editableKeyToFocus.current = key}
+                    openMenuOnFocus={true}
+
+                />
+
+            </>
+        );
+    };
+
+    const Remove = ({ ...props }: any) => {
+        const onClick = () => {
+            if (confirm("Are you sure you want to remove") == true) {
+                props.deleteResult(props.row.original.id)
+            }
+        }
+        return (
+            <>
+                <p className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0"
+                    onClick={onClick} >
+                    Remove
+                </p>
+            </>
+        );
+    };
 
     const fetchBoats = async () => {
         let boats = await DB.getBoats(clubId)
@@ -153,14 +166,14 @@ const SignOnTable = (props: any) => {
 
     const updateResult = (Result: ResultsDataType) => {
         props.updateResult(Result)
-        console.log(Result)
         const tempdata = data
         tempdata[tempdata.findIndex((x: ResultsDataType) => x.id === Result.id)] = Result
-        console.log(tempdata)
         setData([...tempdata])
     }
 
     const [sorting, setSorting] = useState<SortingState>([]);
+
+    let editableKeyToFocus = useRef("0")
 
     let table = useReactTable({
         data,
