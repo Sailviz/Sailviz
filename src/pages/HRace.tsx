@@ -436,7 +436,7 @@ const RacePage = () => {
                                             <p className="text-base text-gray-600">Laps: {result.lapTimes.number}</p>
                                         </div>
                                         <div className="p-5 w-2/4">
-                                            {finishMode ?
+                                            {finishMode && raceState == raceStateType.running ?
                                                 <div>
                                                     <p onClick={(e) => { finishBoat(result.id) }} className="cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-sm p-5 text-center my-1">
                                                         Finish
@@ -446,9 +446,13 @@ const RacePage = () => {
                                                     </p>
                                                 </div>
                                                 :
+                                                <></>
+                                            }
+                                            {!finishMode && raceState == raceStateType.running ?
                                                 <p onClick={(e) => { lapBoat(result.id) }} className="cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-sm p-5 text-center">
                                                     Lap
                                                 </p>
+                                                : <></>
                                             }
 
                                         </div>
