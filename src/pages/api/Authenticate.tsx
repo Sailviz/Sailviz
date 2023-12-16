@@ -45,9 +45,7 @@ const Authenticate = async (req: NextApiRequest, res: NextApiResponse) => {
                 const token = jwt.sign(
                     { name: user.name, email: user.email, id: user.id },
                     jwtSecret,
-                    {
-                        expiresIn: 3000, //50 minutes
-                    },
+                    { expiresIn: '364d' }
                 );
                 res.json({ error: false, token: token, club: user.clubId, user: user.id });
                 return;
