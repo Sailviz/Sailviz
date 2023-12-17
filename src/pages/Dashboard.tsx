@@ -168,9 +168,7 @@ const Club = () => {
 
     const removeChildren = (parent: any) => {
         var children = [].slice.call(parent.children);
-        console.log(children)
         children.forEach((child: any) => {
-            console.log(child)
             if (child.id != 'homebutton' && child.id != 'settingsbutton') {
                 parent.removeChild(child);
             }
@@ -462,7 +460,29 @@ const Club = () => {
 
     useEffect(() => {
         generateBar()
+        let timer1 = setTimeout(async () => {
+            var data = await DB.GetSeriesByClubId(clubId)
+            var array = [...data]
+            setSeriesData(array)
+        }, 5000);
+        return () => {
+            clearTimeout(timer1);
+        }
     }, [seriesData]);
+
+    useEffect(() => {
+        let timer1 = setTimeout(async () => {
+            console.log(activeRaceData)
+            if (activeRaceData.id == "") return
+            console.log(activeRaceData.id)
+            var data = await DB.getRaceById(activeRaceData.id)
+            console.log(data)
+            setActiveRaceData({ ...data })
+        }, 5000);
+        return () => {
+            clearTimeout(timer1);
+        }
+    }, [activeRaceData]);
 
     return (
         <Dashboard club={club.name} userName={user.name}>
@@ -685,7 +705,7 @@ const Club = () => {
                             </p>
                         </div>
                         <div className='p-6 w-full'>
-                            <RaceResultsTable data={activeRaceData.results} startTime={activeRaceData.startTime} key={activeRaceData.id} deleteResult={deleteResult} updateResult={updateResult} createResult={createResult} clubId={clubId} raceId={activeRaceData.id} />
+                            <RaceResultsTable data={activeRaceData.results} startTime={activeRaceData.startTime} key={JSON.stringify(activeRaceData.results)} deleteResult={deleteResult} updateResult={updateResult} createResult={createResult} clubId={clubId} raceId={activeRaceData.id} />
                         </div>
                     </div>
                 </div>

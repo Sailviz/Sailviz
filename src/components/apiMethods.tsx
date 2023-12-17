@@ -156,7 +156,7 @@ export async function updateRaceById(raceData: RaceDataType) {
         });
 };
 
-export async function getRaceById(raceId: string) {
+export async function getRaceById(raceId: string): Promise<RaceDataType> {
     const body = {
         "id": raceId
     }
@@ -167,7 +167,7 @@ export async function getRaceById(raceId: string) {
     })
         .then((res) => res.json())
         .then(async (data) => {
-            return data
+            return data.race
         });
 };
 

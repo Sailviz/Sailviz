@@ -119,7 +119,7 @@ const SignOnPage = () => {
     const updateResult = async (result: ResultsDataType) => {
         await DB.updateResult(result)
         var data = await DB.getRaceById(race.id)
-        setRace(data.race)
+        setRace(data)
     }
 
     const deleteResult = async (resultId: string) => {
@@ -131,10 +131,10 @@ const SignOnPage = () => {
         let raceId = query.race as string
         setClubId(Cookies.get('clubId') || "")
         const getRace = async () => {
-            await DB.getRaceById(raceId).then((data: RaceDataType) => {
-                setRace(data.race)
-                DB.GetSeriesById(data.race.seriesId).then((data: SeriesDataType) => {
-                    setSeriesName(data.name)
+            await DB.getRaceById(raceId).then((racedata: RaceDataType) => {
+                setRace(racedata)
+                DB.GetSeriesById(racedata.seriesId).then((series: SeriesDataType) => {
+                    setSeriesName(series.name)
                 })
 
             })
@@ -186,10 +186,10 @@ const SignOnPage = () => {
                     console.log("could not find todays race")
                 }
                 if (data[0]) {
-                    await DB.getRaceById(data[0].id).then((data: RaceDataType) => {
-                        setRace(data.race)
-                        DB.GetSeriesById(data.race.seriesId).then((data: SeriesDataType) => {
-                            setSeriesName(data.name)
+                    await DB.getRaceById(data[0].id).then((racedata: RaceDataType) => {
+                        setRace(racedata)
+                        DB.GetSeriesById(racedata.seriesId).then((series: SeriesDataType) => {
+                            setSeriesName(series.name)
                         })
                     })
                 }
