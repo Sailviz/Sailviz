@@ -31,7 +31,7 @@ export default function Layout({
             <div className="flex flex-col h-full">
                 <nav className="border-pink-500 px-4 sm:px-4 py-2.5 border-b-2 flex">
                     <div className="container flex flex-wrap justify-between items-center mx-auto">
-                        <Link href={"/Dashboard"}>
+                        <Link href={"/"}>
                             <div className='flex flex-row'>
                                 <Image src="/favicon.ico" className="mr-3 h-6 sm:h-9" width={40} height={40} />
                                 <div className=" text-xl font-semibold whitespace-nowrap text-gray-700 p-3">
