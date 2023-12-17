@@ -212,7 +212,8 @@ const Club = () => {
         var title = document.getElementById(id)
         var titleText = title?.firstElementChild?.firstElementChild
         var children = document.getElementsByClassName(id) as unknown as HTMLElement[]
-        children.forEach(child => {
+        console.log(children)
+        for (const child of children) {
             if (child.style.display == 'none') {
                 //show
                 child.style.display = 'block'
@@ -229,7 +230,7 @@ const Club = () => {
                     titleText.classList.remove('rotate-90')
                 }
             }
-        })
+        }
 
     }
     const hidePages = () => {
@@ -460,14 +461,15 @@ const Club = () => {
 
     useEffect(() => {
         generateBar()
-        let timer1 = setTimeout(async () => {
-            var data = await DB.GetSeriesByClubId(clubId)
-            var array = [...data]
-            setSeriesData(array)
-        }, 5000);
-        return () => {
-            clearTimeout(timer1);
-        }
+        //The below works, but it causes all the folders to open
+        // let timer1 = setTimeout(async () => {
+        //     var data = await DB.GetSeriesByClubId(clubId)
+        //     var array = [...data]
+        //     setSeriesData(array)
+        // }, 5000);
+        // return () => {
+        //     clearTimeout(timer1);
+        // }
     }, [seriesData]);
 
     useEffect(() => {
