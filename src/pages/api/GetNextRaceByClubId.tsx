@@ -9,7 +9,7 @@ async function findRace(clubId: string) {
         where: {
             AND: [{
                 Time: {
-                    gte: dayjs().toISOString()
+                    gte: dayjs().format('YYYY-MM-DD HH:mm').toString()
                 }
             }, {
                 series: {
