@@ -418,6 +418,9 @@ const Club = () => {
                 var data = await DB.GetUserById(userid)
                 if (data) {
                     setUser(data)
+                    if (data.permLvl == 2) {
+                        router.push('/SignOn')
+                    }
                 } else {
                     console.log("could not fetch club settings")
                 }

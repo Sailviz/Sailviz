@@ -10,7 +10,7 @@ const Login = () => {
         return res.json();
     });
     if (data) {
-        if (!data.error && data.email) {
+        if (!data.error) {
             Router.push("/Dashboard");
         }
     }
