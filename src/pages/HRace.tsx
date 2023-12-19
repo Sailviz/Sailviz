@@ -246,6 +246,7 @@ const RacePage = () => {
         })
 
         console.log(sortedResults)
+        router.push("/Dashboard")
     }
 
     const finishBoat = async (id: string) => {

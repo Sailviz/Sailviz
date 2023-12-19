@@ -196,6 +196,7 @@ const RacePage = () => {
         race.results.forEach(result => {
             DB.updateResult(result)
         })
+        router.push("/Dashboard")
     }
 
     const setOrder = async (newState: ResultsDataType[]) => {
