@@ -289,7 +289,7 @@ const RacePage = () => {
         let raceId = query.race as string
         const getClockIP = async () => {
             await DB.getRaceById(raceId).then((data: RaceDataType) => {
-                DB.GetSeriesById(data.race.seriesId).then((data: SeriesDataType) => {
+                DB.GetSeriesById(data.seriesId).then((data: SeriesDataType) => {
                     console.log(data)
                     DB.GetClubById(data.clubId).then((data) => {
                         setClockIP(data.settings['clockIP'])
@@ -309,9 +309,9 @@ const RacePage = () => {
         let raceId = query.race as string
         const fetchRace = async () => {
             let data = await DB.getRaceById(raceId)
-            setRace(data.race)
+            setRace(data)
 
-            setSeriesName(await DB.GetSeriesById(data.race.seriesId).then((res) => { return (res.name) }))
+            setSeriesName(await DB.GetSeriesById(data.seriesId).then((res) => { return (res.name) }))
         }
 
         if (raceId != undefined) {

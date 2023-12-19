@@ -89,7 +89,7 @@ const SignOnPage = () => {
 
         ul.onclick = async function () {
             await DB.getRaceById(race.id).then((data: RaceDataType) => {
-                setRace(data.race)
+                setRace(data)
             })
             setSeriesName(race.series.name)
         }
