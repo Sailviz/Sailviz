@@ -85,7 +85,7 @@ const SignOnPage = () => {
     const createChild = (race: NextRaceDataType) => {
         var ul = document.createElement('ul');
 
-        ul.className = 'list-none select-none w-full p-4 bg-pink-300 text-lg font-extrabold text-gray-700 '
+        ul.className = 'list-none select-none w-full p-4 bg-pink-300 text-lg font-extrabold text-gray-700 cursor-pointer my-2'
 
         ul.onclick = async function () {
             await DB.getRaceById(race.id).then((data: RaceDataType) => {
@@ -124,6 +124,14 @@ const SignOnPage = () => {
 
     const deleteResult = async (resultId: string) => {
         await DB.DeleteResultById(resultId)
+    }
+
+    const logout = async () => {
+        if (confirm("Are you sure you want to log out") == true) {
+            Cookies.remove('token')
+            Cookies.remove('clubId')
+            Router.push('/')
+        }
     }
 
 
@@ -232,6 +240,11 @@ const SignOnPage = () => {
                 <div id="racelist">
                     <p className="text-light p-8 block w-full duration-300 hover:text-blue text-3xl">test</p>
                 </div>
+                <p className="list-none select-none w-full p-4 text-lg font-extrabold text-gray-700"></p>
+                <p className="list-none select-none w-full p-4 text-lg font-extrabold text-gray-700"></p>
+                <p className="list-none select-none w-full p-4 text-lg font-extrabold text-gray-700"></p>
+                <p onClick={logout} className="list-none select-none w-full p-4 bg-blue-600 text-lg font-extrabold text-gray-700 cursor-pointer">Log Out</p>
+
             </div>
         </div>
     )
