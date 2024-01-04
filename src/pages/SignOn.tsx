@@ -218,7 +218,7 @@ const SignOnPage = () => {
     return (
         <div>
             <div id="main" className="duration-300">
-                <button className="text-4xl text-black" onClick={toggleSidebar}>&#9776;</button>
+                <button className="text-6xl text-black" onClick={toggleSidebar}>&#9776;</button>
                 {todaysRaces.length > 0 ?
                     <div>
                         <div className="text-6xl font-extrabold text-gray-700 p-6">
