@@ -700,6 +700,7 @@ const Club = () => {
                                         options={raceOptions} />
                                 </div>
                             </div>
+
                         </div>
                         <div className="p-6 w-3/4">
                             <p onClick={openRacePanel} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
@@ -708,6 +709,12 @@ const Club = () => {
                         </div>
                         <div className='p-6 w-full'>
                             <RaceResultsTable data={activeRaceData.results} startTime={activeRaceData.startTime} key={JSON.stringify(activeRaceData.results)} deleteResult={deleteResult} updateResult={updateResult} createResult={createResult} clubId={clubId} raceId={activeRaceData.id} />
+                        </div>
+                        <div>
+                            <p className="text-6xl font-extrabold text-gray-700 p-6">
+                                Dev info
+                            </p>
+                            <p> id: {activeRaceData.id}</p>
                         </div>
                     </div>
                 </div>
