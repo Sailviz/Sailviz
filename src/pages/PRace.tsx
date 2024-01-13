@@ -349,13 +349,23 @@ const RacePage = () => {
                             return (
                                 <div key={index} id={result.id} className={result.finishTime == -1 ? 'bg-red-300 border-2 border-pink-500' : 'bg-green-300 border-2 border-pink-500'}>
                                     <div className="flex flex-row m-4 justify-between">
-                                        <h2 className="text-2xl text-gray-700 flex my-auto mr-5">{result.SailNumber} - {result.boat?.name} : {result.Helm} - {result.Crew} - Laps: {result.lapTimes.number} Position: {result.Position}</h2>
-                                        <p onClick={(e) => { confirm("are you sure you retire " + result.SailNumber) ? retireBoat(result.id) : null; }} className="cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-sm p-5 mx-2 ml-auto text-center flex">
-                                            Retire
-                                        </p>
-                                        <p onClick={() => lapBoat(result.id)} className="cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-sm p-5 mx-2 text-center flex">
-                                            lap
-                                        </p>
+                                        <h2 className="text-2xl text-gray-700 flex my-auto mr-5">{result.SailNumber} - {result.boat?.name} : {result.Helm} - {result.Crew} -</h2>
+                                        {raceState == raceStateType.running ?
+                                            <div>
+                                                <h2 className="text-2xl text-gray-700 flex my-auto mr-5">Laps: {result.lapTimes.number} Position: {result.Position} </h2>
+                                                <p onClick={(e) => { confirm("are you sure you retire " + result.SailNumber) ? retireBoat(result.id) : null; }} className="cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-sm p-5 mx-2 ml-auto text-center flex">
+                                                    Retire
+                                                </p>
+                                                <p onClick={() => lapBoat(result.id)} className="cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-sm p-5 mx-2 text-center flex">
+                                                    lap
+                                                </p>
+                                            </div>
+                                            :
+                                            <div>
+                                                <h2 className="text-2xl text-gray-700 flex my-auto mr-5"> Start Time: {String(Math.floor(result.boat.pursuitStartTime / 60)).padStart(2, '0')}:{String(result.boat.pursuitStartTime % 60).padStart(2, '0')}</h2>
+                                            </div>
+                                        }
+
                                     </div>
                                 </div>
                             )

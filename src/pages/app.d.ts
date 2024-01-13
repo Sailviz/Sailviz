@@ -65,6 +65,7 @@ type BoatDataType = {
   name: string;
   crew: number;
   py: number;
+  pursuitStartTime: number;
   clubId: string;
 };
 

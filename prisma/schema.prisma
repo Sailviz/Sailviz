@@ -22,13 +22,14 @@ model Users {
 }
 
 model Boats {
-  id      String   @id @unique @default(uuid())
-  name    String
-  crew    Int
-  py      Int
-  club    Clubs    @relation(fields: [clubId], references: [id])
-  clubId  String
-  results Result[]
+  id               String   @id @unique @default(uuid())
+  name             String
+  crew             Int
+  py               Int
+  pursuitStartTime Int
+  club             Clubs    @relation(fields: [clubId], references: [id])
+  clubId           String
+  results          Result[]
 
   @@index([clubId])
 }

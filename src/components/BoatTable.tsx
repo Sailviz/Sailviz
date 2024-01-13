@@ -164,6 +164,12 @@ const BoatTable = (props: any) => {
                 cell: props => <Number {...props} updateBoat={updateBoat} />,
                 enableColumnFilter: false
             }),
+            columnHelper.accessor('pursuitStartTime', {
+                id: "pursuitStartTime",
+                header: () => <span>Pursuit Start Time</span>,
+                cell: props => <Number {...props} updateBoat={updateBoat} />,
+                enableColumnFilter: false
+            }),
             columnHelper.display({
                 id: "Remove",
                 header: _ => <Add {...props} createBoat={createBoat} />,
