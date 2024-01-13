@@ -24,6 +24,7 @@ async function createBoat(name: string, crew: number, py: number, clubId: string
             name: name,
             crew: crew,
             py: py,
+            pursuitStartTime: 0,
             club: {
                 connect: {
                     id: clubId
