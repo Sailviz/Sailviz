@@ -182,9 +182,25 @@ const RacePage = () => {
         let index = tempdata.results.findIndex((x: ResultsDataType) => x.id === id)
         tempdata.results[index].lapTimes.times.push(Math.floor(new Date().getTime() / 1000))
         tempdata.results[index].lapTimes.number += 1 //increment number of laps
-        setRace({ ...tempdata })
-        //send to DB
         await DB.updateResult(tempdata.results[index])
+
+        //recalculate position
+        tempdata.results.sort((a, b) => {
+            // get the number of laps for each car
+            let lapsA = a.lapTimes.number;
+            let lapsB = b.lapTimes.number;
+            // get the last lap time for each car
+            let lastA = a.lapTimes.times.slice(-1)[0];
+            let lastB = b.lapTimes.times.slice(-1)[0];
+            // compare the number of laps first, then the last lap time
+            return lapsB - lapsA || lastA - lastB;
+        });
+
+        tempdata.results.forEach((_, index) => {
+            tempdata.results[index]!.Position = index + 1
+        })
+
+        setRace({ ...tempdata })
 
     }
 
@@ -228,7 +244,7 @@ const RacePage = () => {
             }
 
         });
-        console.log(time)
+
         if (allStarted) {
             setRaceState(raceStateType.allStarted)
             setInstructions("All boats have started")
@@ -267,6 +283,7 @@ const RacePage = () => {
     useEffect(() => {
         let raceId = query.race as string
         const fetchRace = async () => {
+            setRaceState(raceStateType.reset)
             let data = await DB.getRaceById(raceId)
             //sort race results
             console.log(data.results)
