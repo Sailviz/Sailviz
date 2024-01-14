@@ -231,7 +231,13 @@ const RacePage = () => {
         console.log(time)
         if (allStarted) {
             setRaceState(raceStateType.allStarted)
-            setInstructions("All boats have stated")
+            setInstructions("All boats have started")
+        }
+
+        //to catch race being finished on page load
+        if (time.minutes > club.settings.pursuitLength) {
+            setRaceState(raceStateType.calculate)
+            setTimerActive(false)
         }
 
     }
@@ -268,6 +274,14 @@ const RacePage = () => {
             console.log(sortedResults)
             setRace({ ...data, results: sortedResults })
 
+            if (data.startTime != 0) {
+                //race has been started
+                setRaceState(raceStateType.starting)
+                setStartTime(race.startTime)
+                setResetTimer(false)
+                setTimerActive(true)
+            }
+
             setSeriesName(await DB.GetSeriesById(data.seriesId).then((res) => { return (res.name) }))
         }
 
@@ -276,15 +290,6 @@ const RacePage = () => {
         }
 
     }, [clockIP])
-
-    useEffect(() => {
-        if (race.startTime != 0) {
-            setRaceState(raceStateType.starting)
-            setStartTime(race.startTime)
-            setResetTimer(false)
-            setTimerActive(true)
-        }
-    }, [race])
 
     useEffect(() => {
         setClubId(Cookies.get('clubId') || "")
@@ -372,7 +377,7 @@ const RacePage = () => {
                                 <div key={index} id={result.id} className={result.finishTime == -1 ? 'bg-red-300 border-2 border-pink-500' : 'bg-green-300 border-2 border-pink-500'}>
                                     <div className="flex flex-row m-4 justify-between">
                                         <h2 className="text-2xl text-gray-700 flex my-auto mr-5"> <span className="handle cursor-row-resize px-3">☰</span>{result.SailNumber} - {result.boat?.name} : {result.Helm} - {result.Crew} -</h2>
-                                        {raceState == raceStateType.allStarted ?
+                                        {(raceState == raceStateType.allStarted || raceState == raceStateType.calculate) ?
                                             <div className="flex">
                                                 <h2 className="text-2xl text-gray-700 flex my-auto mr-5">Laps: {result.lapTimes.number} Position: {result.Position} </h2>
                                                 <p onClick={(e) => { confirm("are you sure you want to retire " + result.SailNumber) ? retireBoat(result.id) : null; }} className="cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-sm p-5 mx-2 ml-auto text-center flex">
