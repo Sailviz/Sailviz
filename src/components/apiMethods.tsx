@@ -298,6 +298,7 @@ export async function createRace(clubId: string, seriesId: string): Promise<Race
             if (data && data.error) {
                 console.log(data.message)
             } else {
+                data.race.results = [] //this adds a results list to the object
                 return data.race
             }
         });
@@ -355,6 +356,7 @@ export async function deleteRace(id: string): Promise<RaceDataType> {
         .then(async (data) => {
             if (data && data.error) {
                 console.log(data.message)
+                return false
             } else {
                 return data.race
             }

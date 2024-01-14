@@ -195,9 +195,12 @@ const Club = () => {
         console.log(seriesData)
         seriesData.forEach(series => {
             var races = series.races
+            console.log(races)
             if (!races) return
             races.forEach(race => {
                 if (race.id == raceId) {
+                    console.log(race)
+                    console.log(series)
                     setActiveRaceData(race)
                     setActiveSeriesData(series)
                 }
@@ -345,16 +348,22 @@ const Club = () => {
     }
 
 
-    const addRaceToSeries = async () => {
+    const createRace = async () => {
         var race = await DB.createRace(clubId, activeSeriesData.id)
-        var newSeriesData: SeriesDataType[] = seriesData.map(obj => ({ ...obj }))
+        console.log(race)
+
+        var newSeriesData: SeriesDataType[] = [...seriesData]
+        console.log(newSeriesData)
+        console.log(newSeriesData.findIndex(x => x.id === race.seriesId))
         newSeriesData[newSeriesData.findIndex(x => x.id === race.seriesId)]?.races.push(race)
+        console.log(newSeriesData)
         setSeriesData(newSeriesData)
     }
 
     const removeRace = async (raceId: string) => {
-        console.log("updating main copy of series")
-        let newSeriesData: SeriesDataType[] = seriesData
+        let result = await DB.deleteRace(raceId)
+        if (!result) { return } // failed to delete race
+        let newSeriesData: SeriesDataType[] = [...seriesData]
         var seriesIndex = newSeriesData.findIndex(y => y.id == activeSeriesData.id)
         var thisSeries = newSeriesData[seriesIndex]
         if (thisSeries == undefined) return
@@ -486,6 +495,7 @@ const Club = () => {
         }
     }, [activeRaceData]);
 
+    console.log(activeRaceData.results)
     return (
         <Dashboard club={club.name} userName={user.name}>
             <div className="w-full flex flex-row items-center justify-start panel-height">
@@ -568,10 +578,10 @@ const Club = () => {
                             {activeSeriesData.name}
                         </p>
                         <div className='p-6'>
-                            <SeriesTable data={activeSeriesData.races} key={activeSeriesData.races} removeRace={removeRace} permLvl={user.permLvl} />
+                            <SeriesTable data={activeSeriesData.races} key={JSON.stringify(seriesData)} removeRace={removeRace} />
                         </div>
                         <div className="p-6">
-                            <p onClick={addRaceToSeries} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
+                            <p onClick={createRace} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
                                 Add Race
                             </p>
                         </div>
