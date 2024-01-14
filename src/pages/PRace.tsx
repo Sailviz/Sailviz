@@ -2,13 +2,14 @@ import React, { ChangeEvent, MouseEventHandler, useEffect, useState } from "reac
 import Router, { useRouter } from "next/router"
 import * as DB from '../components/apiMethods';
 import Dashboard from "../components/Dashboard";
-import PursuitTimer from "../components/RaceTimer"
+import PursuitTimer from "../components/PRaceTimer"
 import Cookies from "js-cookie";
 import { ReactSortable } from "react-sortablejs";
-import { Result } from "postcss";
 
 enum raceStateType {
-    running,
+    countdown,
+    starting,
+    allStarted,
     stopped,
     reset,
     calculate
@@ -107,7 +108,7 @@ const RacePage = () => {
         let localTime = Math.floor((new Date().getTime() / 1000) + startLength)
         setStartTime(localTime)
         setResetTimer(false)
-        setRaceState(raceStateType.running)
+        setRaceState(raceStateType.countdown)
         setInstructions("show class flag.")
         //start countdown timer
         setTimerActive(true)
@@ -212,6 +213,29 @@ const RacePage = () => {
         })
     }
 
+    const ontimeupdate = async (time: { minutes: number, seconds: number, countingUp: boolean }) => {
+        let timeInSeconds = time.minutes * 60 + time.seconds
+
+        let allStarted = true
+
+        race.results.forEach(result => {
+            if (result.boat.pursuitStartTime < timeInSeconds) {
+                //boat has started
+
+            } else {
+                //boat has not stated
+                allStarted = false
+            }
+
+        });
+        console.log(time)
+        if (allStarted) {
+            setRaceState(raceStateType.allStarted)
+            setInstructions("All boats have stated")
+        }
+
+    }
+
     const controller = new AbortController()
 
     useEffect(() => {
@@ -255,7 +279,7 @@ const RacePage = () => {
 
     useEffect(() => {
         if (race.startTime != 0) {
-            setRaceState(raceStateType.running)
+            setRaceState(raceStateType.starting)
             setStartTime(race.startTime)
             setResetTimer(false)
             setTimerActive(true)
@@ -309,7 +333,7 @@ const RacePage = () => {
                         Event: {seriesName} - {race.number}
                     </div>
                     <div className="w-1/4 p-2 m-2 border-4 rounded-lg bg-white text-lg font-medium">
-                        Race Time: <PursuitTimer startTime={startTime} endTime={club.settings.pursuitLength} timerActive={timerActive} onFourMinutes={handleFourMinutes} onOneMinute={handleOneMinute} onGo={handleGo} onEnd={endRace} reset={resetTimer} />
+                        Race Time: <PursuitTimer startTime={startTime} endTime={club.settings.pursuitLength} timerActive={timerActive} onFourMinutes={handleFourMinutes} onOneMinute={handleOneMinute} onGo={handleGo} onEnd={endRace} onTimeUpdate={ontimeupdate} reset={resetTimer} />
                     </div>
                     <div className="p-2 w-1/4">
                         {(() => {
@@ -317,10 +341,6 @@ const RacePage = () => {
                                 case raceStateType.reset:
                                     return (<p onClick={startRaceButton} className="cursor-pointer text-white bg-green-600 font-medium rounded-lg text-xl px-5 py-2.5 text-center">
                                         Start
-                                    </p>)
-                                case raceStateType.running:
-                                    return (<p onClick={(e) => { confirm("are you sure you want to stop the race?") ? stopRace() : null; }} className="cursor-pointer text-white bg-red-600 font-medium rounded-lg text-xl px-5 py-2.5 text-center">
-                                        Stop
                                     </p>)
                                 case raceStateType.stopped:
                                     return (<p onClick={resetRace} className="cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-xl px-5 py-2.5 text-center">
@@ -330,8 +350,10 @@ const RacePage = () => {
                                     return (<p onClick={submitResults} className="cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-xl px-5 py-2.5 text-center">
                                         Submit Results
                                     </p>)
-                                default:
-                                    return (<p></p>)
+                                default: //countdown and starting and allStarted
+                                    return (<p onClick={(e) => { confirm("are you sure you want to stop the race?") ? stopRace() : null; }} className="cursor-pointer text-white bg-red-600 font-medium rounded-lg text-xl px-5 py-2.5 text-center">
+                                        Stop
+                                    </p>)
                             }
                         })()}
                     </div>
@@ -344,16 +366,16 @@ const RacePage = () => {
                 </div>
 
                 <div className="">
-                    <ReactSortable list={race.results} setList={(newState) => setOrder(newState)}>
+                    <ReactSortable handle=".handle" list={race.results} setList={(newState) => setOrder(newState)}>
                         {race.results.map((result, index) => {
                             return (
                                 <div key={index} id={result.id} className={result.finishTime == -1 ? 'bg-red-300 border-2 border-pink-500' : 'bg-green-300 border-2 border-pink-500'}>
                                     <div className="flex flex-row m-4 justify-between">
-                                        <h2 className="text-2xl text-gray-700 flex my-auto mr-5">{result.SailNumber} - {result.boat?.name} : {result.Helm} - {result.Crew} -</h2>
-                                        {raceState == raceStateType.running ?
-                                            <div>
+                                        <h2 className="text-2xl text-gray-700 flex my-auto mr-5"> <span className="handle cursor-row-resize px-3">☰</span>{result.SailNumber} - {result.boat?.name} : {result.Helm} - {result.Crew} -</h2>
+                                        {raceState == raceStateType.allStarted ?
+                                            <div className="flex">
                                                 <h2 className="text-2xl text-gray-700 flex my-auto mr-5">Laps: {result.lapTimes.number} Position: {result.Position} </h2>
-                                                <p onClick={(e) => { confirm("are you sure you retire " + result.SailNumber) ? retireBoat(result.id) : null; }} className="cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-sm p-5 mx-2 ml-auto text-center flex">
+                                                <p onClick={(e) => { confirm("are you sure you want to retire " + result.SailNumber) ? retireBoat(result.id) : null; }} className="cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-sm p-5 mx-2 ml-auto text-center flex">
                                                     Retire
                                                 </p>
                                                 <p onClick={() => lapBoat(result.id)} className="cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-sm p-5 mx-2 text-center flex">
@@ -361,8 +383,11 @@ const RacePage = () => {
                                                 </p>
                                             </div>
                                             :
-                                            <div>
+                                            <div className="flex">
                                                 <h2 className="text-2xl text-gray-700 flex my-auto mr-5"> Start Time: {String(Math.floor(result.boat.pursuitStartTime / 60)).padStart(2, '0')}:{String(result.boat.pursuitStartTime % 60).padStart(2, '0')}</h2>
+                                                <p onClick={() => lapBoat(result.id)} className="cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-sm p-5 mx-2 text-center flex">
+                                                    lap
+                                                </p>
                                             </div>
                                         }
 

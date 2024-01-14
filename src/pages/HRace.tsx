@@ -2,7 +2,7 @@ import React, { ChangeEvent, MouseEventHandler, useEffect, useState } from "reac
 import Router, { useRouter } from "next/router"
 import * as DB from '../components/apiMethods';
 import Dashboard from "../components/Dashboard";
-import RaceTimer from "../components/RaceTimer"
+import RaceTimer from "../components/HRaceTimer"
 import Cookies from "js-cookie";
 
 enum raceStateType {
@@ -382,7 +382,7 @@ const RacePage = () => {
                         Event: {seriesName} - {race.number}
                     </div>
                     <div className="w-1/4 p-2 m-2 border-4 rounded-lg bg-white text-lg font-medium">
-                        Race Time: <RaceTimer startTime={startTime} endTime={null} timerActive={timerActive} onFourMinutes={handleFourMinutes} onOneMinute={handleOneMinute} onGo={handleGo} onEnd={null} reset={resetTimer} />
+                        Race Time: <RaceTimer startTime={startTime} timerActive={timerActive} onFourMinutes={handleFourMinutes} onOneMinute={handleOneMinute} onGo={handleGo} onEnd={null} reset={resetTimer} />
                     </div>
                     <div className="p-2 w-1/4">
                         {(() => {
