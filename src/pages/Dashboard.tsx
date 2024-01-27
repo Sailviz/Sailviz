@@ -249,6 +249,24 @@ const SignOnPage = () => {
         generateBar()
     }, [todaysRaces])
 
+    useEffect(() => {
+        let timer1 = setTimeout(async () => {
+            console.log(race)
+            console.log(document.activeElement?.tagName)
+            if (document.activeElement?.tagName == "INPUT") {
+                return
+            }
+            if (race.id == "") return
+            console.log(race.id)
+            var data = await DB.getRaceById(race.id)
+            console.log(data)
+            setRace({ ...data })
+        }, 5000);
+        return () => {
+            clearTimeout(timer1);
+        }
+    }, [race]);
+
 
     return (
         <div>
