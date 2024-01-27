@@ -90,6 +90,9 @@ const Club = () => {
         var data = await DB.GetSeriesByClubId(clubId)
         var array = [...data]
         setSeriesData(array)
+
+        //force a race data update to restart data refresh
+        setActiveRaceData({ ...activeRaceData })
     }
 
     const deleteResult = async (resultId: string) => {
@@ -484,6 +487,10 @@ const Club = () => {
     useEffect(() => {
         let timer1 = setTimeout(async () => {
             console.log(activeRaceData)
+            console.log(document.activeElement?.tagName)
+            if (document.activeElement?.tagName == "INPUT") {
+                return
+            }
             if (activeRaceData.id == "") return
             console.log(activeRaceData.id)
             var data = await DB.getRaceById(activeRaceData.id)
