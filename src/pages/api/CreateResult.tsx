@@ -18,7 +18,7 @@ async function createEntry(raceId: string,) {
         data: {
             Helm: "",
             Crew: "",
-            SailNumber: 0,
+            SailNumber: "",
             finishTime: 0,
             CorrectedTime: 0,
             lapTimes: {

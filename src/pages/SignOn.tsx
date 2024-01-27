@@ -3,6 +3,9 @@ import Router, { useRouter } from "next/router"
 import * as DB from '../components/apiMethods';
 import Cookies from "js-cookie";
 import SignOnTable from "../components/SignOnTable";
+import Select from 'react-select';
+import { InputType } from "zlib";
+
 
 enum raceStateType {
     running,
@@ -68,6 +71,11 @@ const SignOnPage = () => {
 
     }))
 
+    const [options, setOptions] = useState([{ label: "", value: {} }])
+
+    const [selectedOption, setSelectedOption] = useState({ label: "", value: {} })
+
+
     function toggleSidebar() {
         let sidebar = document.getElementById("sidebar")
         let main = document.getElementById("main")
@@ -111,19 +119,42 @@ const SignOnPage = () => {
     }
 
     const createResult = async (id: string) => {
+        const HelmElement = document.getElementById("Helm") as HTMLInputElement
+        const CrewElement = document.getElementById("Crew") as HTMLInputElement
+        const SailNumberElement = document.getElementById("SailNum") as HTMLInputElement
+        const Boat = selectedOption.value as BoatDataType
+
+        if (HelmElement.value == "" || CrewElement.value == "" || SailNumberElement.value == "") {
+            return
+        }
+        if (Object.keys(Boat).length == 0) {
+            console.log("boat not selected")
+            return
+        }
+        //create a result record
         const entry = await DB.createResult(id)
+
+        entry.Helm = HelmElement.value
+        entry.Crew = CrewElement.value
+        entry.boat = Boat
+        entry.SailNumber = SailNumberElement.value
+
+        //then update it with the info
+        await DB.updateResult(entry)
+        //update local state
         setRace({ ...race, results: race.results.concat(entry) })
-        return entry
+
+        hideAddBoatModal()
     }
 
     const updateResult = async (result: ResultsDataType) => {
-        await DB.updateResult(result)
-        var data = await DB.getRaceById(race.id)
-        setRace(data)
     }
 
     const deleteResult = async (resultId: string) => {
+        console.log(resultId)
         await DB.DeleteResultById(resultId)
+
+        setRace({ ...race, results: race.results.filter((e) => { return (e.id != resultId) }) }) //remove result with matching id by way of filtering it out.
     }
 
     const logout = async () => {
@@ -132,6 +163,29 @@ const SignOnPage = () => {
             Cookies.remove('clubId')
             Router.push('/')
         }
+    }
+
+    const showAddBoatModal = async () => {
+        const Helm = document.getElementById('Helm') as HTMLInputElement;
+        Helm.value = ""
+
+        const Crew = document.getElementById("Crew") as HTMLInputElement
+        Crew.value = ""
+
+        const sailNum = document.getElementById("SailNum") as HTMLInputElement
+        sailNum.value = ""
+
+        setSelectedOption({ label: "", value: {} })
+
+
+        const modal = document.getElementById("modal")
+        modal?.classList.remove("hidden")
+
+    }
+
+    const hideAddBoatModal = async () => {
+        const modal = document.getElementById("modal")
+        modal?.classList.add("hidden")
     }
 
 
@@ -179,6 +233,11 @@ const SignOnPage = () => {
                 if (data) {
                     let array = [...data]
                     setBoatData(array)
+                    let tempoptions: { label: string; value: {} }[] = []
+                    array.forEach(boat => {
+                        tempoptions.push({ value: boat, label: boat.name })
+                    })
+                    setOptions(tempoptions)
                 } else {
                     console.log("could not find boats")
                 }
@@ -218,6 +277,56 @@ const SignOnPage = () => {
     return (
         <div>
             <div id="main" className="duration-300">
+                <div id="modal" className="hidden fixed z-10 left-0 top-0 w-full h-full overflow-auto bg-gray-400 backdrop-blur-sm bg-opacity-20">
+                    <div className="mx-40 my-20 px-10 py-5 border w-4/5 bg-gray-300 rounded-sm">
+                        <div className="text-6xl font-extrabold text-gray-700 p-6 float-right cursor-pointer" onClick={hideAddBoatModal}>&times;</div>
+                        <div className="text-6xl font-extrabold text-gray-700 p-6">Add Entry</div>
+                        <div className="flex w-3/4">
+                            <div className='flex flex-col px-6 w-full'>
+                                <p className='text-2xl font-bold text-gray-700'>
+                                    Helm
+                                </p>
+
+                                <input type="text" id="Helm" className="h-full text-2xl p-4" />
+                            </div>
+                            <div className='flex flex-col px-6 w-full'>
+                                <p className='text-2xl font-bold text-gray-700'>
+                                    Crew
+                                </p>
+
+                                <input type="text" id="Crew" className="h-full text-2xl p-4" />
+                            </div>
+                            <div className='flex flex-col px-6 w-full'>
+                                <p className='text-2xl font-bold text-gray-700'>
+                                    Class
+                                </p>
+                                <div className="w-full p-2 mx-0 my-2">
+                                    <Select
+                                        id="Class"
+                                        className=' w-56 h-full text-3xl'
+                                        options={options}
+                                        value={selectedOption}
+                                        onChange={(choice) => setSelectedOption(choice!)}
+                                    />
+                                </div>
+                            </div>
+                            <div className='flex flex-col px-6 w-full'>
+                                <p className='text-2xl font-bold text-gray-700'>
+                                    Sail Number
+                                </p>
+
+                                <input type="text" id="SailNum" className="h-full text-2xl p-4" />
+                            </div>
+                        </div>
+                        <div className=" flex justify-end mt-8">
+                            <div className="p-6 w-1/4 mr-2">
+                                <p onClick={() => createResult(race.id)} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
+                                    Add
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <button className="text-6xl text-black" onClick={toggleSidebar}>&#9776;</button>
                 {todaysRaces.length > 0 ?
                     <div>
@@ -226,7 +335,7 @@ const SignOnPage = () => {
                         </div>
                         <div className="m-6" key={todaysRaces.length}>
 
-                            <SignOnTable data={race.results} startTime={race.startTime} key={race.id} deleteResult={deleteResult} updateResult={updateResult} createResult={createResult} clubId={clubId} raceId={race.id} />
+                            <SignOnTable data={race.results} key={JSON.stringify(race)} startTime={race.startTime} deleteResult={deleteResult} updateResult={updateResult} createResult={createResult} clubId={clubId} raceId={race.id} />
                         </div>
                     </div>
                     :
@@ -234,6 +343,13 @@ const SignOnPage = () => {
                         <p className="text-6xl font-extrabold text-gray-700 p-6"> No Races Today</p>
                     </div>
                 }
+                <div className='w-full my-0 mx-auto'>
+                    <div className="p-6 w-3/4 m-auto">
+                        <p onClick={showAddBoatModal} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
+                            Add Entry
+                        </p>
+                    </div>
+                </div>
             </div>
             <div id="sidebar" className="h-full w-0 fixed top-0 left-0 bg-gray-200 overflow-x-hidden pt-10 duration-500 z-10">
                 <p className="text-light p-8 block w-full duration-300 hover:text-blue text-3xl">Today&rsquo;s Races</p>

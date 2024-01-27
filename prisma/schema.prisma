@@ -79,7 +79,7 @@ model Result {
   Crew          String
   boat          Boats?  @relation(fields: [boatId], references: [id])
   boatId        String?
-  SailNumber    Int
+  SailNumber    String
   finishTime    Int
   lapTimes      Json
   CorrectedTime Float

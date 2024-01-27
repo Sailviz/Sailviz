@@ -1,8 +1,5 @@
 import React, { ChangeEvent, useState, useRef } from 'react';
 import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, useReactTable, SortingState } from '@tanstack/react-table'
-import Select from 'react-select';
-import * as DB from './apiMethods';
-
 
 
 function Sort({ column, table }: { column: any, table: any }) {
@@ -38,25 +35,12 @@ const SignOnTable = (props: any) => {
         const initialValue = props.getValue()
         const [value, setValue] = React.useState(initialValue)
 
-        const onBlur = (e: ChangeEvent<HTMLInputElement>) => {
-            const original = props.row.original
-            original[props.column.id] = e.target.value
-            props.updateResult(original)
-        }
-
-        const key = props.column.id + '_' + props.row.id
-
         return (
             <>
-                <input type="text"
-                    id=''
-                    className="text-center h-full w-full text-2xl"
-                    defaultValue={value}
-                    onBlur={(e) => { onBlur(e); editableKeyToFocus.current = "" }}
-                    key={key}
-                    autoFocus={editableKeyToFocus.current == key}
-                    onFocus={() => editableKeyToFocus.current = key}
-                />
+                <div className='p-2 m-2 text-center w-full text-2xl'>
+                    {value}
+                </div>
+
             </>
         );
     };
@@ -65,61 +49,29 @@ const SignOnTable = (props: any) => {
         const initialValue = props.getValue()
         const [value, setValue] = React.useState(initialValue)
 
-        const onBlur = (e: ChangeEvent<HTMLInputElement>) => {
-            let original = props.row.original
-            original[props.column.id] = parseInt(e.target.value)
-            props.updateResult(original)
-        }
-
-        const key = props.column.id + '_' + props.row.id
-
         return (
             <>
-                <input type="number"
-                    id=''
-                    className="p-2 m-2 text-center w-full text-2xl"
-                    defaultValue={Math.round(value)}
-                    onBlur={(e) => { onBlur(e); editableKeyToFocus.current = "" }}
-                    key={key}
-                    autoFocus={editableKeyToFocus.current == key}
-                    onFocus={() => editableKeyToFocus.current = key}
-                    disabled={props.disabled}
-                />
+                <div className='p-2 m-2 text-center w-full text-2xl'>
+                    {value}
+                </div>
             </>
         );
     };
 
     const Class = ({ ...props }: any) => {
         var initialValue = props.getValue()
-        let options = props.options
         if (initialValue == null) {
             initialValue = { value: "", label: "" }
         }
         const [value, setValue] = React.useState(initialValue)
 
-        const onBlur = (newValue: any) => {
-            let original = props.row.original
-            original.boat = newValue
-            props.updateResult(original)
-        }
-
         const key = props.column.id + '_' + props.row.id
 
         return (
             <>
-                <Select
-                    className='w-max min-w-full text-2xl'
-                    defaultValue={{ value: value.id, label: value.name }}
-                    onChange={(e) => { setValue(e?.value); onBlur(e?.value) }}
-                    options={options}
-                    onBlur={() => editableKeyToFocus.current = ""}
-                    key={key}
-                    autoFocus={editableKeyToFocus.current == key}
-                    onFocus={() => editableKeyToFocus.current = key}
-                    openMenuOnFocus={true}
-
-                />
-
+                <div className='p-2 m-2 text-center w-full text-2xl'>
+                    {value.name}
+                </div>
             </>
         );
     };
@@ -140,36 +92,12 @@ const SignOnTable = (props: any) => {
         );
     };
 
-    const fetchBoats = async () => {
-        let boats = await DB.getBoats(clubId)
-        boats.forEach(boat => {
-            options.push({ value: boat, label: boat.name })
-        })
-    }
-    if (clubId) {
-        fetchBoats()
-    }
 
 
     const deleteResult = (id: any) => {
         props.deleteResult(id)
-        const tempdata: ResultsDataType[] = [...data]
-        tempdata.splice(tempdata.findIndex((x: ResultsDataType) => x.id === id), 1)
-        setData(tempdata)
     }
 
-    const createResult = async (id: any) => {
-        var result = (await props.createResult(id))
-        setData([...data, result])
-    }
-
-
-    const updateResult = (Result: ResultsDataType) => {
-        props.updateResult(Result)
-        const tempdata = data
-        tempdata[tempdata.findIndex((x: ResultsDataType) => x.id === Result.id)] = Result
-        setData([...tempdata])
-    }
 
     const [sorting, setSorting] = useState<SortingState>([]);
 
@@ -180,24 +108,24 @@ const SignOnTable = (props: any) => {
         columns: [
             columnHelper.accessor('Helm', {
                 header: "Helm",
-                cell: props => <Text {...props} updateResult={updateResult} />,
+                cell: props => <Text {...props} />,
                 enableSorting: false
             }),
             columnHelper.accessor('Crew', {
                 header: "Crew",
-                cell: props => <Text {...props} updateResult={updateResult} />,
+                cell: props => <Text {...props} />,
                 enableSorting: false
             }),
             columnHelper.accessor('boat', {
                 header: "Class",
                 id: "Class",
                 size: 300,
-                cell: props => <Class {...props} updateResult={updateResult} clubId={clubId} options={options} />,
+                cell: props => <Class {...props} clubId={clubId} options={options} />,
                 enableSorting: false
             }),
             columnHelper.accessor('SailNumber', {
                 header: "Sail Number",
-                cell: props => <Number {...props} updateResult={updateResult} disabled={false} />,
+                cell: props => <Number {...props} disabled={false} />,
                 enableSorting: false
             }),
             columnHelper.display({
@@ -248,13 +176,6 @@ const SignOnTable = (props: any) => {
                     ))}
                 </tbody>
             </table>
-            <div className='w-full my-0 mx-auto'>
-                <div className="p-6 w-3/4 m-auto">
-                    <p onClick={() => createResult(raceId)} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
-                        Add Entry
-                    </p>
-                </div>
-            </div>
         </div>
     )
 }
