@@ -256,10 +256,10 @@ const SignOnPage = () => {
                 <button className="text-6xl text-black" onClick={toggleSidebar}>&#9776;</button>
                 {todaysRaces.length > 0 ?
                     <div id="race">
-                        <p className="text-6xl font-extrabold text-gray-700 p-6">
+                        <p className="text-6xl font-extrabold text-gray-700 p-6 mx-36">
                             {seriesName}: {race.number} at {race.Time}
                         </p>
-                        <div className="flex w-3/4">
+                        <div className="flex w-3/4 mx-36">
                             <div className='flex flex-col px-6 w-full '>
                                 <p className='text-2xl font-bold text-gray-700'>
                                     RO
@@ -304,7 +304,7 @@ const SignOnPage = () => {
                             </div>
 
                         </div>
-                        <div className="flex w-3/4">
+                        <div className="flex w-3/4 mx-36">
                             <div className='flex flex-col px-6 w-full'>
                                 <p className='text-2xl font-bold text-gray-700'>
                                     SO
@@ -346,7 +346,7 @@ const SignOnPage = () => {
                             </div>
 
                         </div>
-                        <div className="p-6 w-3/4">
+                        <div className="p-6 w-3/4 mx-36">
                             <p onClick={openRacePanel} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
                                 Race Panel
                             </p>
