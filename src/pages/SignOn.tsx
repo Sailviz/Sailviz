@@ -124,7 +124,7 @@ const SignOnPage = () => {
         const SailNumberElement = document.getElementById("SailNum") as HTMLInputElement
         const Boat = selectedOption.value as BoatDataType
 
-        if (HelmElement.value == "" || CrewElement.value == "" || SailNumberElement.value == "") {
+        if (HelmElement.value == "" || SailNumberElement.value == "") {
             return
         }
         if (Object.keys(Boat).length == 0) {
