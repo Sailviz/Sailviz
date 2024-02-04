@@ -402,6 +402,42 @@ const Club = () => {
         }
     }
 
+    const generateResults = async () => {
+        var currentRace = activeRaceData
+        var csvRows = []
+        const headers = ['HelmName', 'CrewName', 'Class', 'SailNo', 'Laps', 'Elapsed', 'Code']
+
+        csvRows.push(headers.join(','));
+
+        currentRace.results.forEach(data => {
+            var values = [data.Helm, data.Crew, data.boat.name, data.SailNumber, data.lapTimes.number, (data.finishTime == -1 ? '' : data.finishTime - currentRace.startTime), (data.finishTime == -1 ? 'RET' : '')]
+            csvRows.push(values.join(','))
+        })
+        downloadResults(csvRows.join('\n'))
+    }
+
+    const downloadResults = async (data: any) => {
+        // Creating a Blob for having a csv file format  
+        // and passing the data with type 
+        const blob = new Blob([data], { type: 'text/csv' });
+
+        // Creating an object for downloading url 
+        const url = window.URL.createObjectURL(blob)
+
+        // Creating an anchor(a) tag of HTML 
+        const a = document.createElement('a')
+
+        // Passing the blob downloading url  
+        a.setAttribute('href', url)
+
+        // Setting the anchor tag attribute for downloading 
+        // and passing the download file name 
+        a.setAttribute('download', activeSeriesData.name + ' ' + activeRaceData.number + ' ' + 'results.csv');
+
+        // Performing a download with click 
+        a.click()
+    }
+
     useEffect(() => {
         setClubId(Cookies.get('clubId') || "")
     }, [])
@@ -714,6 +750,11 @@ const Club = () => {
                         </div>
                         <div className='p-6 w-full'>
                             <RaceResultsTable data={activeRaceData.results} startTime={activeRaceData.startTime} key={JSON.stringify(activeRaceData.results)} deleteResult={deleteResult} updateResult={updateResult} createResult={createResult} clubId={clubId} raceId={activeRaceData.id} />
+                        </div>
+                        <div className="p-6 w-3/4">
+                            <p onClick={generateResults} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
+                                Download Results
+                            </p>
                         </div>
                         <div>
                             <p className="text-6xl font-extrabold text-gray-700 p-6">
