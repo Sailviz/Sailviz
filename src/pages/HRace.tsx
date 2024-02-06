@@ -232,6 +232,9 @@ const RacePage = () => {
         setRace({ ...tempdata })
         orderResults(tempdata.results)
         //send to DB
+
+        let sound = document.getElementById("audio") as HTMLAudioElement
+        sound!.play();
     }
 
     const calculateResults = () => {
@@ -298,6 +301,8 @@ const RacePage = () => {
             setRaceState(raceStateType.calculate)
 
         }
+        let sound = document.getElementById("audio") as HTMLAudioElement
+        sound!.play();
     }
 
     const checkAllFinished = () => {
@@ -432,6 +437,7 @@ const RacePage = () => {
 
     return (
         <Dashboard club={club.name} userName={user.name}>
+            <audio id="audio" src=".\beep-6.mp3" ></audio>
             <div className="w-full flex flex-col items-center justify-start panel-height">
                 <div className="flex w-full flex-row justify-around">
                     <div className="w-1/4 p-2 m-2 border-4 rounded-lg bg-white text-lg font-medium">
