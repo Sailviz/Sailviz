@@ -9,13 +9,13 @@ async function updateRace(race: RaceDataType) {
             id: race.id
         },
         data: {
-            OOD: race.OOD || undefined,
-            AOD: race.AOD || undefined,
-            SO: race.SO || undefined,
-            ASO: race.ASO || undefined,
-            Time: race.Time || undefined,
-            Type: race.Type || undefined,
-            startTime: race.startTime || undefined,
+            OOD: race.OOD,
+            AOD: race.AOD,
+            SO: race.SO,
+            ASO: race.ASO,
+            Time: race.Time,
+            Type: race.Type,
+            startTime: race.startTime,
         }
     })
     return result;

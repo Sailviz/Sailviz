@@ -245,7 +245,7 @@ const RaceResultsTable = (props: any) => {
             }),
             columnHelper.accessor('SailNumber', {
                 header: "Sail Number",
-                cell: props => <Number {...props} updateResult={updateResult} disabled={false} />,
+                cell: props => <Text {...props} updateResult={updateResult} disabled={false} />,
                 enableSorting: false
             }),
             columnHelper.accessor('finishTime', {

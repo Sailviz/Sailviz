@@ -4,6 +4,7 @@ import * as DB from '../components/apiMethods';
 import Dashboard from "../components/Dashboard";
 import RaceTimer from "../components/HRaceTimer"
 import Cookies from "js-cookie";
+import { time } from "console";
 
 enum raceStateType {
     running,
@@ -16,7 +17,7 @@ const RacePage = () => {
 
     const router = useRouter()
 
-    const raceLength = 301 //5 mins in seconds plus a bit so that it shows 5:00
+    const startLength = 300 //5 mins in seconds
 
     const query = router.query
 
@@ -43,8 +44,9 @@ const RacePage = () => {
                 crew: 0,
                 py: 0,
                 clubId: "",
+                pursuitStartTime: 0
             },
-            SailNumber: 0,
+            SailNumber: "",
             finishTime: 0,
             CorrectedTime: 0,
             lapTimes: {
@@ -59,6 +61,8 @@ const RacePage = () => {
         //extra fields required for actually racing.
         //start time - UTC of start of 5 min count down.
     }))
+
+    var [lastResult, setLastResult] = useState<ResultsDataType | null>(null)
 
     var [club, setClub] = useState<ClubDataType>({
         id: "",
@@ -85,31 +89,28 @@ const RacePage = () => {
     var [raceState, setRaceState] = useState<raceStateType>(raceStateType.reset)
     const [timerActive, setTimerActive] = useState(false);
     const [resetTimer, setResetTimer] = useState(false);
-    const [startTime, setStartTime] = useState(0);
     const [clockIP, setClockIP] = useState("");
     const [finishMode, setFinishMode] = useState(false)
 
     const startRaceButton = async () => {
+        //use time for button
+        let localTime = Math.floor((new Date().getTime() / 1000) + startLength)
         const timeoutId = setTimeout(() => controller.abort(), 2000)
+        //reset everything
+        fetch("http://" + clockIP + "/reset", { signal: controller.signal }).then(response => {
+        }).catch((err) => {
+            console.log("clock not connected")
+            confirm("Clock not connected, do you want to start the race?") ? startRace() : null;
+        })
+        //start the timer
         fetch("http://" + clockIP + "/start", { signal: controller.signal }).then(response => {
-            //set official start time in DB
+            //configure race start
             startRace()
 
             clearTimeout(timeoutId)
         }).catch((err) => {
             console.log("clock not connected")
-            confirm("Clock not connected, do you want to start the race?") ? startRace() : null;
         })
-    }
-
-    const startRace = async () => {
-        let localTime = Math.floor((new Date().getTime() / 1000) + raceLength)
-        setStartTime(localTime)
-        setResetTimer(false)
-        setRaceState(raceStateType.running)
-        setInstructions("show class flag.")
-        //start countdown timer
-        setTimerActive(true)
 
         //Update database
         let newRaceData: RaceDataType = race
@@ -117,6 +118,14 @@ const RacePage = () => {
         setRace(newRaceData)
         //send to DB
         DB.updateRaceById(newRaceData)
+    }
+
+    const startRace = async () => {
+        setResetTimer(false)
+        setRaceState(raceStateType.running)
+        setInstructions("show class flag.")
+        //start countdown timer
+        setTimerActive(true)
     }
 
     const handleFourMinutes = () => {
@@ -136,10 +145,8 @@ const RacePage = () => {
     };
 
     const orderResults = async (results: ResultsDataType[]) => {
-        console.log(results)
         results.sort((a, b) => {
             //compare laps
-            console.log(a.finishTime)
             if (a.finishTime == -1) { //retired boats to end of list
                 return 1
             } else if (b.finishTime == -1) { //retired boats to end of list
@@ -182,16 +189,26 @@ const RacePage = () => {
         });
 
         setRaceState(raceStateType.reset)
-        setStartTime((new Date().getTime() / 1000) + raceLength)
         setResetTimer(true)
         setInstructions("Hit Start to begin the starting procedure")
 
+        //Update database
+        let newRaceData: RaceDataType = race
+        newRaceData.startTime = 0
+        setRace({ ...newRaceData })
+        //send to DB
+        console.log(newRaceData)
+        await DB.updateRaceById(newRaceData)
     }
 
     const retireBoat = async (id: string) => {
         //modify race data
-        const tempdata = race
-        let index = tempdata.results.findIndex((x: ResultsDataType) => x.id === id)
+        const data = window.structuredClone(race)
+        let index = data.results.findIndex((x: ResultsDataType) => x.id === id)
+        setLastResult({ ...data.results[index] })
+
+        //re copy to avoid problems
+        let tempdata = window.structuredClone(race)
         tempdata.results[index].finishTime = -1 //finish time is a string so we can put in status
         setRace({ ...tempdata })
         //send to DB
@@ -199,14 +216,19 @@ const RacePage = () => {
     }
 
     const lapBoat = async (id: string) => {
-        console.log(id)
+        let data = window.structuredClone(race)
         //modify race data
-        const tempdata = race
-        let index = tempdata.results.findIndex((x: ResultsDataType) => x.id === id)
+        let index = data.results.findIndex((x: ResultsDataType) => x.id === id)
+        //save state for undo
+        setLastResult({ ...data.results[index] })
+
+        //re copy to avoid problems
+        let tempdata = window.structuredClone(race)
+
         tempdata.results[index].lapTimes.times.push(Math.floor(new Date().getTime() / 1000))
         tempdata.results[index].lapTimes.number += 1 //increment number of laps
         console.log(tempdata.results[index])
-        DB.updateResult(tempdata.results[index])
+        await DB.updateResult(tempdata.results[index])
         setRace({ ...tempdata })
         orderResults(tempdata.results)
         //send to DB
@@ -251,8 +273,12 @@ const RacePage = () => {
 
     const finishBoat = async (id: string) => {
         //modify race data
-        const tempdata = race
-        let index = tempdata.results.findIndex((x: ResultsDataType) => x.id === id)
+        let data = window.structuredClone(race)
+        let index = data.results.findIndex((x: ResultsDataType) => x.id === id)
+        //save state for undo
+        setLastResult({ ...data.results[index] })
+
+        let tempdata = window.structuredClone(race)
         //set finish time
         tempdata.results[index].finishTime = Math.floor(new Date().getTime() / 1000)
         //add final lap to lap info
@@ -282,6 +308,28 @@ const RacePage = () => {
             }
         })
         return allFinished
+    }
+
+    const undo = async () => {
+        if (lastResult == null) {
+            return;
+        }
+        if (!confirm("are you sure you want to undo your last action?")) {
+            return
+        }
+        //revert to last result
+        const tempdata = race
+        let index = tempdata.results.findIndex((x: ResultsDataType) => x.id === lastResult!.id)
+        console.log(index)
+        console.log(lastResult)
+        tempdata.results[index] = lastResult
+        //update local race copy
+        setRace({ ...tempdata })
+        //send to DB
+        await DB.updateResult(lastResult)
+
+        setLastResult(null)
+
     }
 
     const controller = new AbortController()
@@ -328,7 +376,6 @@ const RacePage = () => {
         }
         else if (race.startTime != 0) {
             setRaceState(raceStateType.running)
-            setStartTime(race.startTime)
             setResetTimer(false)
             setTimerActive(true)
         }
@@ -374,6 +421,15 @@ const RacePage = () => {
         }
     }, [clubId])
 
+    const [time, setTime] = useState("");
+
+    useEffect(() => {
+        const interval = setInterval(() => setTime(new Date().toTimeString().split(' ')[0]!), 1000);
+        return () => {
+            clearInterval(interval);
+        };
+    }, []);
+
     return (
         <Dashboard club={club.name} userName={user.name}>
             <div className="w-full flex flex-col items-center justify-start panel-height">
@@ -382,7 +438,10 @@ const RacePage = () => {
                         Event: {seriesName} - {race.number}
                     </div>
                     <div className="w-1/4 p-2 m-2 border-4 rounded-lg bg-white text-lg font-medium">
-                        Race Time: <RaceTimer startTime={startTime} timerActive={timerActive} onFourMinutes={handleFourMinutes} onOneMinute={handleOneMinute} onGo={handleGo} onEnd={null} reset={resetTimer} />
+                        Race Time: <RaceTimer startTime={race.startTime} timerActive={timerActive} onFourMinutes={handleFourMinutes} onOneMinute={handleOneMinute} onGo={handleGo} onEnd={null} reset={resetTimer} />
+                    </div>
+                    <div className="w-1/4 p-2 m-2 border-4 rounded-lg bg-white text-lg font-medium">
+                        Actual Time:  {time}
                     </div>
                     <div className="p-2 w-1/4">
                         {(() => {
@@ -410,8 +469,13 @@ const RacePage = () => {
                     </div>
                 </div>
                 <div className="flex w-full shrink flex-row justify-around">
-                    <div className="w-7/12 p-2 my-2 mx-4 border-4 rounded-lg bg-white text-lg font-medium">
+                    <div className="w-6/12 p-2 my-2 mx-4 border-4 rounded-lg bg-white text-lg font-medium">
                         {Instructions}
+                    </div>
+                    <div className="w-1/4 p-2">
+                        <p onClick={() => undo()} className="cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-xl px-5 py-2.5 text-center">
+                            Undo
+                        </p>
                     </div>
                     <div className="w-1/4 p-2">
                         {finishMode ?
