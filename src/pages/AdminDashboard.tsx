@@ -410,7 +410,8 @@ const Club = () => {
         csvRows.push(headers.join(','));
 
         currentRace.results.forEach(data => {
-            var values = [data.Helm, data.Crew, data.boat.name, data.SailNumber, data.lapTimes.number, (data.finishTime == -1 ? '' : data.finishTime - currentRace.startTime), (data.finishTime == -1 ? 'RET' : '')]
+            var time = new Date((data.finishTime - currentRace.startTime) * 1000).toISOString().substring(11, 19)
+            var values = [data.Helm, data.Crew, data.boat.name, data.SailNumber, data.lapTimes.number, (data.finishTime == -1 ? '' : time), (data.finishTime == -1 ? 'RET' : '')]
             csvRows.push(values.join(','))
         })
         downloadResults(csvRows.join('\n'))
