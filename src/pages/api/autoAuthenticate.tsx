@@ -45,6 +45,9 @@ const Authenticate = async (req: NextApiRequest, res: NextApiResponse) => {
             );
             res.json({ error: false, token: token, club: user.clubId, user: user.id });
             return;
+        } else {
+            console.log('user not found')
+            return;
         }
     }
     else {
