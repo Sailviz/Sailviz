@@ -50,6 +50,9 @@ const AutoLogin = () => {
                 <h1 className="text-5xl md:text-[5rem] leading-normal font-extrabold text-gray-700">
                     Logging in
                 </h1>
+                <a className="ml-4" href="#" onClick={() => Router.push('/')}>
+                    or Cancel
+                </a>
             </div>
         </>
     );
