@@ -10,13 +10,14 @@ datasource db {
 
 model Users {
   name     String
-  id       String @id @unique @default(uuid())
-  email    String @unique
+  id       String  @id @unique @default(uuid())
+  email    String  @unique
   password String
   settings Json
-  club     Clubs  @relation(fields: [clubId], references: [id])
+  club     Clubs   @relation(fields: [clubId], references: [id])
   clubId   String
   permLvl  Int
+  uuid     String? @unique
 
   @@index([clubId])
 }
