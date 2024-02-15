@@ -2,14 +2,12 @@ import cookie from 'js-cookie'
 import React, { useState, useEffect } from 'react'
 import Router, { useRouter } from "next/router"
 
-const autoLogin = () => {
+const AutoLogin = () => {
 
     const router = useRouter()
 
     const query = router.query
 
-
-    const [uuid, setError] = useState('')
 
     const sendLoginRequest = async (uuid: string) => {
         const body = { uuid }
@@ -22,7 +20,6 @@ const autoLogin = () => {
             .then((data) => {
                 console.log(data)
                 if (data && data.error) {
-                    setError(data.message);
                     //alert(data.message)
                 }
                 if (data && data.token) {
@@ -59,4 +56,4 @@ const autoLogin = () => {
 };
 
 
-export default autoLogin;
+export default AutoLogin;
