@@ -100,6 +100,7 @@ const SignOnPage = () => {
                 setRace(data)
             })
             setSeriesName(race.series.name)
+            toggleSidebar()
         }
 
         ul.innerHTML = race.series.name + ": " + race.number.toString()
@@ -299,8 +300,7 @@ const SignOnPage = () => {
                                 <p className='text-2xl font-bold text-gray-700'>
                                     Helm
                                 </p>
-
-                                <input type="text" id="Helm" className="h-full text-2xl p-4" />
+                                <input type="text" id="Helm" name="Helm" className="h-full text-2xl p-4" autoCapitalize="characters" />
                             </div>
                             <div className='flex flex-col px-6 w-full'>
                                 <p className='text-2xl font-bold text-gray-700'>
