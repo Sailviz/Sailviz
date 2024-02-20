@@ -84,8 +84,6 @@ const RacePage = () => {
 
     })
 
-    const [activeResultIndex, setActiveResultIndex] = useState(0);
-
     var [raceState, setRaceState] = useState<raceStateType>(raceStateType.reset)
     const [timerActive, setTimerActive] = useState(false);
     const [resetTimer, setResetTimer] = useState(false);
@@ -224,10 +222,11 @@ const RacePage = () => {
 
         //re copy to avoid problems
         let tempdata = window.structuredClone(race)
-        tempdata.results[index].finishTime = -1 //finish time is a string so we can put in status
+        tempdata.results[index].finishTime = -1
         setRace({ ...tempdata })
+        console.log(tempdata.results[index])
         //send to DB
-        await DB.updateResult(tempdata.results[activeResultIndex])
+        await DB.updateResult(tempdata.results[index])
     }
 
     const lapBoat = async (id: string) => {
