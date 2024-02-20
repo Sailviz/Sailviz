@@ -666,6 +666,7 @@ const Club = () => {
                                     key={activeRaceData.id}
                                     onChange={saveRaceSettings}
                                     onBlur={() => DB.updateRaceById(activeRaceData)}
+                                    placeholder='Unknown'
                                 />
                             </div>
 
@@ -680,6 +681,7 @@ const Club = () => {
                                     key={activeRaceData.id}
                                     onChange={saveRaceSettings}
                                     onBlur={() => DB.updateRaceById(activeRaceData)}
+                                    placeholder='Unknown'
                                 />
 
                             </div>
@@ -711,6 +713,7 @@ const Club = () => {
                                     key={activeRaceData.id}
                                     onChange={saveRaceSettings}
                                     onBlur={() => DB.updateRaceById(activeRaceData)}
+                                    placeholder='Unknown'
                                 />
                             </div>
 
@@ -725,6 +728,7 @@ const Club = () => {
                                     key={activeRaceData.id}
                                     onChange={saveRaceSettings}
                                     onBlur={() => DB.updateRaceById(activeRaceData)}
+                                    placeholder='Unknown'
                                 />
                             </div>
 

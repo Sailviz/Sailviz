@@ -289,6 +289,8 @@ const SignOnPage = () => {
                                     key={race.id}
                                     onChange={saveRaceSettings}
                                     onBlur={() => DB.updateRaceById(race)}
+                                    value={""}
+                                    placeholder={"Unknown"}
                                 />
                             </div>
 
@@ -303,6 +305,7 @@ const SignOnPage = () => {
                                     key={race.id}
                                     onChange={saveRaceSettings}
                                     onBlur={() => DB.updateRaceById(race)}
+                                    placeholder='Unknown'
                                 />
 
                             </div>
@@ -334,6 +337,7 @@ const SignOnPage = () => {
                                     key={race.id}
                                     onChange={saveRaceSettings}
                                     onBlur={() => DB.updateRaceById(race)}
+                                    placeholder='Unknown'
                                 />
                             </div>
 
@@ -348,6 +352,7 @@ const SignOnPage = () => {
                                     key={race.id}
                                     onChange={saveRaceSettings}
                                     onBlur={() => DB.updateRaceById(race)}
+                                    placeholder='Unknown'
                                 />
                             </div>
 

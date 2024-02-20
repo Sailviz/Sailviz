@@ -19,10 +19,10 @@ async function createRace(number: number, seriesId: any, time: any) {
             Time: time,
             startTime: 0,
             Type: "Handicap",
-            OOD: "Unknown",
-            AOD: "Unknown",
-            SO: "Unknown",
-            ASO: "Unknown",
+            OOD: "",
+            AOD: "",
+            SO: "",
+            ASO: "",
             series: {
                 connect: {
                     id: seriesId
