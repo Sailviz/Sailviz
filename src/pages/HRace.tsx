@@ -126,22 +126,37 @@ const RacePage = () => {
         setInstructions("show class flag.")
         //start countdown timer
         setTimerActive(true)
+
+        let sound = document.getElementById("audio") as HTMLAudioElement
+        sound!.currentTime = 0
+        sound!.play();
     }
 
     const handleFourMinutes = () => {
         console.log('4 minutes left')
         setInstructions("show preparatory and class flag")
+
+        let sound = document.getElementById("audio") as HTMLAudioElement
+        sound!.currentTime = 0
+        sound!.play();
     };
 
     const handleOneMinute = () => {
         console.log('1 minute left')
         setInstructions("show class flag")
+
+        let sound = document.getElementById("audio") as HTMLAudioElement
+        sound!.currentTime = 0
+        sound!.play();
     };
 
     const handleGo = () => {
         console.log('GO!')
         setInstructions("show no flags")
 
+        let sound = document.getElementById("audio") as HTMLAudioElement
+        sound!.currentTime = 0
+        sound!.play();
     };
 
     const orderResults = async (results: ResultsDataType[]) => {
@@ -234,6 +249,7 @@ const RacePage = () => {
         //send to DB
 
         let sound = document.getElementById("audio") as HTMLAudioElement
+        sound!.currentTime = 0
         sound!.play();
     }
 
@@ -302,6 +318,7 @@ const RacePage = () => {
 
         }
         let sound = document.getElementById("audio") as HTMLAudioElement
+        sound!.currentTime = 0
         sound!.play();
     }
 
