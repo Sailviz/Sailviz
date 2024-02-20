@@ -622,7 +622,7 @@ const Club = () => {
                             {activeSeriesData.name}
                         </p>
                         <div className='p-6'>
-                            <SeriesTable data={activeSeriesData.races} key={JSON.stringify(seriesData)} removeRace={removeRace} />
+                            <SeriesTable data={activeSeriesData.races} key={activeSeriesData.id} removeRace={removeRace} />
                         </div>
                         <div className="p-6">
                             <p onClick={createRace} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
