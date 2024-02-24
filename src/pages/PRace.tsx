@@ -94,7 +94,7 @@ const RacePage = () => {
 
     const startRaceButton = async () => {
         const timeoutId = setTimeout(() => controller.abort(), 2000)
-        fetch("http://" + clockIP + "/start", { signal: controller.signal }).then(response => {
+        fetch("http://" + clockIP + "/start", { signal: controller.signal, mode: 'no-cors' }).then(response => {
             //set official start time in DB
             startRace()
 
@@ -144,7 +144,7 @@ const RacePage = () => {
         setTimerActive(false)
         setInstructions("Hit reset to start from the beginning")
         const timeoutId = setTimeout(() => controller.abort(), 2000)
-        fetch("http://" + clockIP + "/stop", { signal: controller.signal }).then(response => {
+        fetch("http://" + clockIP + "/stop", { signal: controller.signal, mode: 'no-cors' }).then(response => {
             clearTimeout(timeoutId)
         }).catch(function (err) {
             console.log('Clock not connected: ', err);
@@ -154,7 +154,7 @@ const RacePage = () => {
     const resetRace = async () => {
         //add are you sure here
         const timeoutId = setTimeout(() => controller.abort(), 2000)
-        fetch("http://" + clockIP + "/reset", { signal: controller.signal }).then(response => {
+        fetch("http://" + clockIP + "/reset", { signal: controller.signal, mode: 'no-cors' }).then(response => {
             clearTimeout(timeoutId)
         }).catch(function (err) {
             console.log('Clock not connected: ', err);

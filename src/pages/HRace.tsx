@@ -106,7 +106,7 @@ const RacePage = () => {
         }).catch((err) => {
             console.log("clock not connected")
             console.log(err)
-            confirm("Clock not connected, do you want to start the race?") ? startRace() : null;
+            confirm("Clock not connected, do you want to start the race?" + err) ? startRace() : null;
         })
         //start the timer
         fetch("http://" + clockIP + "/start", { signal: controller.signal, mode: 'no-cors' }).then(response => {
