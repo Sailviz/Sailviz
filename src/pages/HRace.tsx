@@ -4,8 +4,6 @@ import * as DB from '../components/apiMethods';
 import Dashboard from "../components/Dashboard";
 import RaceTimer from "../components/HRaceTimer"
 import Cookies from "js-cookie";
-import { time } from "console";
-import { Result } from "postcss";
 
 enum raceStateType {
     running,
@@ -98,20 +96,20 @@ const RacePage = () => {
         let localTime = Math.floor((new Date().getTime() / 1000) + startLength)
         const timeoutId = setTimeout(() => controller.abort(), 2000)
         //sound horn
-        fetch("http://" + hornIP + "/medium", { signal: controller.signal }).then(response => {
+        fetch("http://" + hornIP + "/medium", { signal: controller.signal, mode: 'no-cors' }).then(response => {
         }).catch((err) => {
             console.log("horn not connected")
             console.log(err)
         })
         //reset everything
-        fetch("http://" + clockIP + "/reset", { signal: controller.signal }).then(response => {
+        fetch("http://" + clockIP + "/reset", { signal: controller.signal, mode: 'no-cors' }).then(response => {
         }).catch((err) => {
             console.log("clock not connected")
             console.log(err)
             confirm("Clock not connected, do you want to start the race?") ? startRace() : null;
         })
         //start the timer
-        fetch("http://" + clockIP + "/start", { signal: controller.signal }).then(response => {
+        fetch("http://" + clockIP + "/start", { signal: controller.signal, mode: 'no-cors' }).then(response => {
             //configure race start
             startRace()
 
@@ -146,7 +144,7 @@ const RacePage = () => {
         setInstructions("show preparatory and class flag")
 
         //sound horn
-        fetch("http://" + hornIP + "/long", { signal: controller.signal }).then(response => {
+        fetch("http://" + hornIP + "/medium", { signal: controller.signal, mode: 'no-cors' }).then(response => {
         }).catch((err) => {
             console.log("horn not connected")
             console.log(err)
@@ -162,7 +160,7 @@ const RacePage = () => {
         setInstructions("show class flag")
 
         //sound horn
-        fetch("http://" + hornIP + "/medium", { signal: controller.signal }).then(response => {
+        fetch("http://" + hornIP + "/long", { signal: controller.signal, mode: 'no-cors' }).then(response => {
         }).catch((err) => {
             console.log("horn not connected")
             console.log(err)
@@ -178,7 +176,7 @@ const RacePage = () => {
         setInstructions("show no flags")
 
         //sound horn
-        fetch("http://" + hornIP + "/medium", { signal: controller.signal }).then(response => {
+        fetch("http://" + hornIP + "/medium", { signal: controller.signal, mode: 'no-cors' }).then(response => {
         }).catch((err) => {
             console.log("horn not connected")
             console.log(err)
@@ -214,7 +212,7 @@ const RacePage = () => {
         setTimerActive(false)
         setInstructions("Hit reset to start from the beginning")
         const timeoutId = setTimeout(() => controller.abort(), 2000)
-        fetch("http://" + clockIP + "/stop", { signal: controller.signal }).then(response => {
+        fetch("http://" + clockIP + "/stop", { signal: controller.signal, mode: 'no-cors' }).then(response => {
             clearTimeout(timeoutId)
         }).catch(function (err) {
             console.log('Clock not connected: ', err);
@@ -224,7 +222,7 @@ const RacePage = () => {
     const resetRace = async () => {
         //add are you sure here
         const timeoutId = setTimeout(() => controller.abort(), 2000)
-        fetch("http://" + clockIP + "/reset", { signal: controller.signal }).then(response => {
+        fetch("http://" + clockIP + "/reset", { signal: controller.signal, mode: 'no-cors' }).then(response => {
             clearTimeout(timeoutId)
         }).catch(function (err) {
             console.log('Clock not connected: ', err);
@@ -334,7 +332,7 @@ const RacePage = () => {
 
     const finishBoat = async (id: string) => {
         //sound horn
-        fetch("http://" + hornIP + "/short", { signal: controller.signal }).then(response => {
+        fetch("http://" + hornIP + "/short", { signal: controller.signal, mode: 'no-cors' }).then(response => {
         }).catch((err) => {
             console.log("horn not connected")
             console.log(err)
