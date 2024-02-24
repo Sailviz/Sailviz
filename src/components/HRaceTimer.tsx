@@ -1,9 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { runInThisContext } from 'vm';
 
+
+let fourminsDone = false
+let oneminsDone = false
+let zerominsDone = false
+
 const CountdownTimer = ({ startTime, timerActive, onFourMinutes, onOneMinute, onGo, onEnd, reset }: { startTime: number, timerActive: boolean, onFourMinutes: any, onOneMinute: any, onGo: any, onEnd: any, reset: boolean }) => {
     //these two states are completely wrong but the code works for some reason.
     const [timeLeft, setTimeLeft] = useState({ minutes: 5, seconds: 0, countingUp: false });
+
 
     const calculateTimeLeft = () => {
         let countingUp = false
@@ -37,11 +43,20 @@ const CountdownTimer = ({ startTime, timerActive, onFourMinutes, onOneMinute, on
     }, [reset]);
 
     if (timeLeft.minutes == 0 && timeLeft.seconds == 0 && timeLeft.countingUp == false) {
-        if (onGo) onGo();
+        if (!zerominsDone) {
+            if (onGo) onGo();
+            zerominsDone = true
+        }
     } else if (timeLeft.minutes == 1 && timeLeft.seconds == 0 && timeLeft.countingUp == false) {
-        if (onOneMinute) onOneMinute();
+        if (!oneminsDone) {
+            if (onOneMinute) onOneMinute();
+            oneminsDone = true
+        }
     } else if (timeLeft.minutes == 4 && timeLeft.seconds == 0 && timeLeft.countingUp == false) {
-        if (onFourMinutes) onFourMinutes();
+        if (!fourminsDone) {
+            if (onFourMinutes) onFourMinutes();
+            fourminsDone = true
+        }
     }
 
     return (
