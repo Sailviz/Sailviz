@@ -191,17 +191,14 @@ const RacePage = () => {
 
     const orderResults = async (results: ResultsDataType[]) => {
         results.sort((a, b) => {
-            //compare laps
-            if (a.finishTime == -1) { //retired boats to end of list
-                return 1
-            } else if (b.finishTime == -1) { //retired boats to end of list
-                return -1
-            } else if (a.lapTimes.number != b.lapTimes.number) {
-                return (a.lapTimes.number - b.lapTimes.number)
-            } else {
-                return (a.boat?.py - b.boat?.py)
-            }
-        })
+            //if done a lap, predicted is sum of lap times + last lap.
+            //if no lap done, predicted is py.
+            let aPredicted = a.lapTimes.times.length > 0 ? a.lapTimes.times.reduce((sum: number, time: number) => sum + time, a.lapTimes.times[a.lapTimes.times.length - 1]) : a.boat.py / 10
+            let bPredicted = b.lapTimes.times.length > 0 ? b.lapTimes.times.reduce((sum: number, time: number) => sum + time, b.lapTimes.times[b.lapTimes.times.length - 1]) : b.boat.py / 10
+
+            console.log(aPredicted, bPredicted)
+            return aPredicted - bPredicted;
+        });
 
         results.forEach((res, index) => {
             const element = document.getElementById(res.id)
@@ -382,16 +379,6 @@ const RacePage = () => {
             }
         })
         return allFinished
-    }
-
-    const getLastLapTime = (result: ResultsDataType) => {
-        let timeinSeconds = 0
-        if (result.lapTimes.times.length > 1) {
-            timeinSeconds = (result.lapTimes.times[result.lapTimes.times.length - 1] - result.lapTimes.times[result.lapTimes.times.length - 2]) * 1000
-        } else if (result.lapTimes.times.length == 1) {
-            timeinSeconds = (result.lapTimes.times[result.lapTimes.times.length - 1] - race.startTime) * 1000
-        }
-        return (new Date(timeinSeconds).toISOString().slice(14, 19))
     }
 
     const undo = async () => {
@@ -585,7 +572,7 @@ const RacePage = () => {
                                             <h2 className="text-2xl text-gray-700">{result.SailNumber} - {result.boat?.name}</h2>
                                             <p className="text-base text-gray-600">{result.Helm} - {result.Crew}</p>
                                             {result.lapTimes.times.length >= 1 ?
-                                                <p className="text-base text-gray-600">Laps: {result.lapTimes.number} Last: {getLastLapTime(result)}</p>
+                                                <p className="text-base text-gray-600">Laps: {result.lapTimes.number} Last: {new Date((result.lapTimes.times[result.lapTimes.times.length - 1] - race.startTime) * 1000).toISOString().slice(14, 19)}</p>
                                                 :
                                                 <p className="text-base text-gray-600">Laps: {result.lapTimes.number} </p>
                                             }
