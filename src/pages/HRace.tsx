@@ -100,14 +100,15 @@ const RacePage = () => {
         }).catch((err) => {
             console.log("horn not connected")
             console.log(err)
-            confirm(err.toString())
         })
         //reset everything
         fetch("http://" + clockIP + "/reset", { signal: controller.signal, mode: 'no-cors' }).then(response => {
         }).catch((err) => {
             console.log("clock not connected")
+            confirm(err.toString())
             console.log(err)
             confirm("Clock not connected, do you want to start the race?") ? startRace() : null;
+            confirm(err.toString())
         })
         //start the timer
         fetch("http://" + clockIP + "/start", { signal: controller.signal, mode: 'no-cors' }).then(response => {
