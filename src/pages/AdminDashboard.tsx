@@ -21,7 +21,8 @@ const Club = () => {
         name: "",
         settings: {
             clockIP: "",
-            pursuitLength: 0
+            pursuitLength: 0,
+            hornIP: ""
         },
         series: [],
         boats: [],
