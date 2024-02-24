@@ -5,6 +5,7 @@ import Dashboard from "../components/Dashboard";
 import RaceTimer from "../components/HRaceTimer"
 import Cookies from "js-cookie";
 import { time } from "console";
+import { Result } from "postcss";
 
 enum raceStateType {
     running,
@@ -243,6 +244,20 @@ const RacePage = () => {
         //send to DB
         console.log(newRaceData)
         await DB.updateRaceById(newRaceData)
+
+        //remove race laps/times for racers.
+        race.results.forEach(result => {
+            result.lapTimes = {
+                times: [],
+                number: 0
+            }
+            result.finishTime = 0
+            result.CorrectedTime = 0
+            result.Position = 0
+
+            DB.updateResult(result)
+        })
+
     }
 
     const retireBoat = async (id: string) => {
@@ -367,6 +382,16 @@ const RacePage = () => {
             }
         })
         return allFinished
+    }
+
+    const getLastLapTime = (result: ResultsDataType) => {
+        let timeinSeconds = 0
+        if (result.lapTimes.times.length > 1) {
+            timeinSeconds = (result.lapTimes.times[result.lapTimes.times.length - 1] - result.lapTimes.times[result.lapTimes.times.length - 2]) * 1000
+        } else if (result.lapTimes.times.length == 1) {
+            timeinSeconds = (result.lapTimes.times[result.lapTimes.times.length - 1] - race.startTime) * 1000
+        }
+        return (new Date(timeinSeconds).toISOString().slice(14, 19))
     }
 
     const undo = async () => {
@@ -556,18 +581,22 @@ const RacePage = () => {
                                 //no defined finish time so we assume they have not finished
                                 return (
                                     <div key={index} id={result.id} className='flex bg-green-300 flex-row justify-between m-4 border-2 border-pink-500 rounded-lg shadow-xl w-96 shrink-0'>
-                                        <div className="flex flex-col m-6">
+                                        <div className="flex flex-col ml-4 my-6">
                                             <h2 className="text-2xl text-gray-700">{result.SailNumber} - {result.boat?.name}</h2>
                                             <p className="text-base text-gray-600">{result.Helm} - {result.Crew}</p>
-                                            <p className="text-base text-gray-600">Laps: {result.lapTimes.number}</p>
+                                            {result.lapTimes.times.length >= 1 ?
+                                                <p className="text-base text-gray-600">Laps: {result.lapTimes.number} Last: {getLastLapTime(result)}</p>
+                                                :
+                                                <p className="text-base text-gray-600">Laps: {result.lapTimes.number} </p>
+                                            }
                                         </div>
-                                        <div className="p-5 w-2/4">
+                                        <div className="px-5 py-2 w-2/4">
                                             {finishMode && raceState == raceStateType.running ?
                                                 <div>
-                                                    <p onClick={(e) => { finishBoat(result.id) }} className="cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-sm p-5 text-center my-1">
+                                                    <p onClick={(e) => { finishBoat(result.id) }} className="cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-sm p-5 text-center mb-5">
                                                         Finish
                                                     </p>
-                                                    <p onClick={(e) => { confirm("are you sure you retire " + result.SailNumber) ? retireBoat(result.id) : null; }} className="cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-sm p-5 text-center my-1">
+                                                    <p onClick={(e) => { confirm("are you sure you retire " + result.SailNumber) ? retireBoat(result.id) : null; }} className="cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-sm p-5 text-center mt-5">
                                                         Retire
                                                     </p>
                                                 </div>
@@ -594,6 +623,7 @@ const RacePage = () => {
                                         <div className="flex flex-col">
                                             <h2 className="text-2xl text-gray-700">{result.SailNumber} - {result.boat.name}</h2>
                                             <p className="text-base text-gray-600">{result.Helm} - {result.Crew}</p>
+                                            <p className="text-base text-gray-600">Laps: {result.lapTimes.number} Finish: {new Date((result.lapTimes.times[result.lapTimes.times.length - 1] - race.startTime) * 1000).toISOString().slice(14, 19)}</p>
                                         </div>
                                         <div className="px-5 py-1">
                                             <p className="text-white bg-blue-600 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
