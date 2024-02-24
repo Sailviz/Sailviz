@@ -57,6 +57,7 @@ type RaceSettingsType = {
 type ClubSettingsType = {
   [key: string]: any;
   clockIP: string;
+  hornIP: string;
   pursuitLength: number;
 };
 

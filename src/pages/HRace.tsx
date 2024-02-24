@@ -69,6 +69,7 @@ const RacePage = () => {
         name: "",
         settings: {
             clockIP: "",
+            hornIP: "",
             pursuitLength: 0
         },
         series: [],
@@ -88,16 +89,24 @@ const RacePage = () => {
     const [timerActive, setTimerActive] = useState(false);
     const [resetTimer, setResetTimer] = useState(false);
     const [clockIP, setClockIP] = useState("");
+    const [hornIP, setHornIP] = useState("");
     const [finishMode, setFinishMode] = useState(false)
 
     const startRaceButton = async () => {
         //use time for button
         let localTime = Math.floor((new Date().getTime() / 1000) + startLength)
         const timeoutId = setTimeout(() => controller.abort(), 2000)
+        //sound horn
+        fetch("http://" + hornIP + "/medium", { signal: controller.signal }).then(response => {
+        }).catch((err) => {
+            console.log("horn not connected")
+            console.log(err)
+        })
         //reset everything
         fetch("http://" + clockIP + "/reset", { signal: controller.signal }).then(response => {
         }).catch((err) => {
             console.log("clock not connected")
+            console.log(err)
             confirm("Clock not connected, do you want to start the race?") ? startRace() : null;
         })
         //start the timer
@@ -108,6 +117,7 @@ const RacePage = () => {
             clearTimeout(timeoutId)
         }).catch((err) => {
             console.log("clock not connected")
+            console.log(err)
         })
 
         //Update database
@@ -134,6 +144,13 @@ const RacePage = () => {
         console.log('4 minutes left')
         setInstructions("show preparatory and class flag")
 
+        //sound horn
+        fetch("http://" + hornIP + "/long", { signal: controller.signal }).then(response => {
+        }).catch((err) => {
+            console.log("horn not connected")
+            console.log(err)
+        })
+
         let sound = document.getElementById("audio") as HTMLAudioElement
         sound!.currentTime = 0
         sound!.play();
@@ -143,6 +160,13 @@ const RacePage = () => {
         console.log('1 minute left')
         setInstructions("show class flag")
 
+        //sound horn
+        fetch("http://" + hornIP + "/medium", { signal: controller.signal }).then(response => {
+        }).catch((err) => {
+            console.log("horn not connected")
+            console.log(err)
+        })
+
         let sound = document.getElementById("audio") as HTMLAudioElement
         sound!.currentTime = 0
         sound!.play();
@@ -151,6 +175,13 @@ const RacePage = () => {
     const handleGo = () => {
         console.log('GO!')
         setInstructions("show no flags")
+
+        //sound horn
+        fetch("http://" + hornIP + "/medium", { signal: controller.signal }).then(response => {
+        }).catch((err) => {
+            console.log("horn not connected")
+            console.log(err)
+        })
 
         let sound = document.getElementById("audio") as HTMLAudioElement
         sound!.currentTime = 0
@@ -290,6 +321,13 @@ const RacePage = () => {
     }
 
     const finishBoat = async (id: string) => {
+        //sound horn
+        fetch("http://" + hornIP + "/short", { signal: controller.signal }).then(response => {
+        }).catch((err) => {
+            console.log("horn not connected")
+            console.log(err)
+        })
+
         //modify race data
         let data = window.structuredClone(race)
         let index = data.results.findIndex((x: ResultsDataType) => x.id === id)
@@ -357,12 +395,13 @@ const RacePage = () => {
 
     useEffect(() => {
         let raceId = query.race as string
-        const getClockIP = async () => {
+        const getLocalIP = async () => {
             await DB.getRaceById(raceId).then((data: RaceDataType) => {
                 DB.GetSeriesById(data.seriesId).then((data: SeriesDataType) => {
                     console.log(data)
                     DB.GetClubById(data.clubId).then((data) => {
                         setClockIP(data.settings['clockIP'])
+                        setHornIP(data.settings['hornIP'])
                     })
                 })
 
@@ -370,7 +409,7 @@ const RacePage = () => {
         }
 
         if (raceId != undefined) {
-            getClockIP()
+            getLocalIP()
 
         }
     }, [router, query.race])
