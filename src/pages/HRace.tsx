@@ -276,6 +276,7 @@ const RacePage = () => {
 
         //re copy to avoid problems
         let tempdata = window.structuredClone(race)
+        index = tempdata.results.findIndex((x: ResultsDataType) => x.id === id)
 
         tempdata.results[index].lapTimes.times.push(Math.floor(new Date().getTime() / 1000))
         tempdata.results[index].lapTimes.number += 1 //increment number of laps
@@ -342,6 +343,8 @@ const RacePage = () => {
         setLastResult({ ...data.results[index] })
 
         let tempdata = window.structuredClone(race)
+
+        index = tempdata.results.findIndex((x: ResultsDataType) => x.id === id)
         //set finish time
         tempdata.results[index].finishTime = Math.floor(new Date().getTime() / 1000)
         //add final lap to lap info
