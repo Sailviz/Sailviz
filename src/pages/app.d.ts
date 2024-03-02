@@ -11,6 +11,7 @@ type RaceDataType = {
   startTime: number;
   Type: string;
   seriesId: string;
+  series: SeriesDataType;
 };
 
 type SeriesDataType = {

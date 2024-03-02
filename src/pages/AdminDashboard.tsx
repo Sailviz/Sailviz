@@ -57,7 +57,8 @@ const Club = () => {
         results: [],
         Type: "",
         seriesId: "",
-        startTime: 0
+        startTime: 0,
+        series: {} as SeriesDataType
     })
 
     var [nextRace, setNextRace] = useState<NextRaceDataType>({

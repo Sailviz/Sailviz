@@ -5,6 +5,9 @@ import Cookies from "js-cookie";
 import SignOnTable from "../components/SignOnTable";
 import Select from 'react-select';
 import { InputType } from "zlib";
+import { json } from "stream/consumers";
+import RaceResultsTable from "../components/RaceResultsTable";
+import { active } from "sortablejs";
 
 
 enum raceStateType {
@@ -31,13 +34,11 @@ const SignOnPage = () => {
 
     })
 
-    const [seriesName, setSeriesName] = useState("")
-
     const [boatData, setBoatData] = useState<BoatDataType[]>([])
 
-    var [todaysRaces, setTodaysRaces] = useState<NextRaceDataType[]>([])
+    var [races, setRaces] = useState<RaceDataType[]>([])
 
-    var [race, setRace] = useState<RaceDataType>(({
+    var [activeRaceData, setActiveRaceData] = useState<RaceDataType>({
         id: "",
         number: 0,
         Time: "",
@@ -45,31 +46,13 @@ const SignOnPage = () => {
         AOD: "",
         SO: "",
         ASO: "",
-        results: [{
-            id: "",
-            raceId: "",
-            Helm: "",
-            Crew: "",
-            boat: {
-                id: "",
-                name: "",
-                crew: 0,
-                py: 0,
-                clubId: "",
-            },
-            SailNumber: 0,
-            finishTime: 0,
-            CorrectedTime: 0,
-            lapTimes: {
-                times: []
-            },
-            Position: 0,
-        }],
+        results: [],
         Type: "",
+        seriesId: "",
         startTime: 0,
-        seriesId: ""
+        series: {} as SeriesDataType
+    })
 
-    }))
 
     const [options, setOptions] = useState([{ label: "", value: {} }])
 
@@ -90,31 +73,46 @@ const SignOnPage = () => {
         }
     }
 
-    const createChild = (race: NextRaceDataType) => {
+    const createChild = (race: RaceDataType) => {
         var ul = document.createElement('ul');
 
         ul.className = 'list-none select-none w-full p-4 bg-pink-300 text-lg font-extrabold text-gray-700 cursor-pointer my-2'
 
         ul.onclick = async function () {
-            await DB.getRaceById(race.id).then((data: RaceDataType) => {
-                setRace(data)
-            })
-            setSeriesName(race.series.name)
+            console.log(race.id)
+            let index = races.findIndex((temp) => { return temp.id == race.id })
+            console.log(index)
+            if (index == -1) return
+            setActiveRaceData(races[index]!)
+            showPage("Results")
             toggleSidebar()
         }
 
-        ul.innerHTML = race.series.name + ": " + race.number.toString()
+        ul.innerHTML = race.series.name + ": " + race.number.toString() + " Results"
 
         return ul
+    }
+
+    const showPage = (id: string) => {
+        //hide all pages.
+        var Signon = document.getElementById('Signon')
+        Signon?.classList.add('hidden')
+        var results = document.getElementById('Results')
+        results?.classList.add('hidden')
+        var guide = document.getElementById('guide')
+        guide?.classList.add('hidden')
+
+        let selected = document.getElementById(id)
+        selected?.classList.remove('hidden')
     }
 
     const generateBar = () => {
         let racelist = document.getElementById("racelist")
         if (racelist == undefined) return
-        while (racelist.firstChild) {
-            racelist.removeChild(racelist.firstChild)
+        while (racelist.children.length > 2) {
+            racelist.removeChild(racelist.lastChild!)
         }
-        todaysRaces.forEach(data => {
+        races.forEach(data => {
             racelist?.appendChild(createChild(data))
         })
     }
@@ -143,19 +141,31 @@ const SignOnPage = () => {
         //then update it with the info
         await DB.updateResult(entry)
         //update local state
-        setRace({ ...race, results: race.results.concat(entry) })
+        // setRace({ ...race, results: race.results.concat(entry) })
 
         hideAddBoatModal()
     }
 
-    const updateResult = async (result: ResultsDataType) => {
+    const createResults = async () => {
+        races.forEach(race => {
+            let raceToggle = document.getElementById(race.id) as HTMLInputElement
+            if (raceToggle.value) {
+                createResult(race.id)
+            }
+        })
+
     }
+
+    const updateResult = async () => {
+
+    }
+
 
     const deleteResult = async (resultId: string) => {
         console.log(resultId)
         await DB.DeleteResultById(resultId)
 
-        setRace({ ...race, results: race.results.filter((e) => { return (e.id != resultId) }) }) //remove result with matching id by way of filtering it out.
+        // setRace({ ...race, results: race.results.filter((e) => { return (e.id != resultId) }) }) //remove result with matching id by way of filtering it out.
     }
 
     const logout = async () => {
@@ -191,22 +201,7 @@ const SignOnPage = () => {
 
 
     useEffect(() => {
-        let raceId = query.race as string
         setClubId(Cookies.get('clubId') || "")
-        const getRace = async () => {
-            await DB.getRaceById(raceId).then((racedata: RaceDataType) => {
-                setRace(racedata)
-                DB.GetSeriesById(racedata.seriesId).then((series: SeriesDataType) => {
-                    setSeriesName(series.name)
-                })
-
-            })
-        }
-
-        if (raceId != undefined) {
-            getRace()
-
-        }
     }, [router])
 
     useEffect(() => {
@@ -248,132 +243,161 @@ const SignOnPage = () => {
 
             const fetchTodaysRaces = async () => {
                 var data = await DB.getTodaysRaceByClubId(clubId)
+                console.log(data)
                 if (data) {
-                    setTodaysRaces(data)
+                    let racesCopy: RaceDataType[] = []
+                    for (let i = 0; i < data.length; i++) {
+                        console.log(data[i]!.number)
+                        const res = await DB.getRaceById(data[i]!.id)
+                        racesCopy[i] = res
+                    }
+                    console.log(racesCopy)
+                    setRaces(racesCopy)
                 } else {
                     console.log("could not find todays race")
                 }
-                if (data[0]) {
-                    await DB.getRaceById(data[0].id).then((racedata: RaceDataType) => {
-                        setRace(racedata)
-                        DB.GetSeriesById(racedata.seriesId).then((series: SeriesDataType) => {
-                            setSeriesName(series.name)
-                        })
-                    })
-                }
             }
             fetchTodaysRaces()
-
         } else {
             console.log("user not signed in")
             router.push("/")
         }
     }, [clubId])
 
-    useEffect(() => {
-        generateBar()
-    }, [todaysRaces])
 
     useEffect(() => {
         let timer1 = setTimeout(async () => {
-            if (race.id == "") return
-            console.log(race.id)
-            var data = await DB.getRaceById(race.id)
-            console.log(data)
-            setRace({ ...data })
+            console.log("updating local copy of results")
+            let racesCopy = window.structuredClone(races)
+            for (let i = 0; i < racesCopy.length; i++) {
+                var data = await DB.getRaceById(racesCopy[i]!.id)
+                racesCopy[i] = data
+            }
+            setRaces(racesCopy)
+            generateBar()
         }, 5000);
         return () => {
             clearTimeout(timer1);
         }
-    }, [race]);
-
+    }, [races]);
 
     return (
         <div>
             <div id="main" className="duration-300">
-                <div id="modal" className="hidden fixed z-10 left-0 top-0 w-full h-full overflow-auto bg-gray-400 backdrop-blur-sm bg-opacity-20">
-                    <div className="mx-40 my-20 px-10 py-5 border w-4/5 bg-gray-300 rounded-sm">
-                        <div className="text-6xl font-extrabold text-gray-700 p-6 float-right cursor-pointer" onClick={hideAddBoatModal}>&times;</div>
-                        <div className="text-6xl font-extrabold text-gray-700 p-6">Add Entry</div>
-                        <div className="flex w-3/4">
-                            <div className='flex flex-col px-6 w-full'>
-                                <p className='text-2xl font-bold text-gray-700'>
-                                    Helm
-                                </p>
-                                <input type="text" id="Helm" name="Helm" className="h-full text-2xl p-4" autoCapitalize="characters" />
-                            </div>
-                            <div className='flex flex-col px-6 w-full'>
-                                <p className='text-2xl font-bold text-gray-700'>
-                                    Crew
-                                </p>
+                <div id="Results" className="hidden" >
+                    <button className="text-6xl text-black" onClick={toggleSidebar}>&#9776;</button>
+                    <div className="p-4">
+                        <div className="text-6xl font-extrabold text-gray-700 p-6">
+                            {activeRaceData.series.name}: {activeRaceData.number}
+                        </div>
+                        <RaceResultsTable data={activeRaceData.results} startTime={activeRaceData.startTime} key={JSON.stringify(activeRaceData.results)} deleteResult={() => { }} updateResult={() => { }} createResult={() => { }} clubId={clubId} raceId={activeRaceData.id} />
+                    </div>
+                </div>
+                <div id="Signon" className="" >
+                    <div id="modal" className="hidden fixed z-10 left-0 top-0 w-full h-full overflow-auto bg-gray-400 backdrop-blur-sm bg-opacity-20">
+                        <div className="mx-40 my-20 px-10 py-5 border w-4/5 bg-gray-300 rounded-sm">
+                            <div className="text-6xl font-extrabold text-gray-700 p-6 float-right cursor-pointer" onClick={hideAddBoatModal}>&times;</div>
+                            <div className="text-6xl font-extrabold text-gray-700 p-6">Add Entry</div>
+                            <div className="flex w-3/4">
+                                <div className='flex flex-col px-6 w-full'>
+                                    <p className='text-2xl font-bold text-gray-700'>
+                                        Helm
+                                    </p>
+                                    <input type="text" id="Helm" name="Helm" className="h-full text-2xl p-4" autoCapitalize="characters" />
+                                </div>
+                                <div className='flex flex-col px-6 w-full'>
+                                    <p className='text-2xl font-bold text-gray-700'>
+                                        Crew
+                                    </p>
 
-                                <input type="text" id="Crew" className="h-full text-2xl p-4" />
-                            </div>
-                            <div className='flex flex-col px-6 w-full'>
-                                <p className='text-2xl font-bold text-gray-700'>
-                                    Class
-                                </p>
-                                <div className="w-full p-2 mx-0 my-2">
-                                    <Select
-                                        id="Class"
-                                        className=' w-56 h-full text-3xl'
-                                        options={options}
-                                        value={selectedOption}
-                                        onChange={(choice) => setSelectedOption(choice!)}
-                                    />
+                                    <input type="text" id="Crew" className="h-full text-2xl p-4" />
+                                </div>
+                                <div className='flex flex-col px-6 w-full'>
+                                    <p className='text-2xl font-bold text-gray-700'>
+                                        Class
+                                    </p>
+                                    <div className="w-full p-2 mx-0 my-2">
+                                        <Select
+                                            id="Class"
+                                            className=' w-56 h-full text-3xl'
+                                            options={options}
+                                            value={selectedOption}
+                                            onChange={(choice) => setSelectedOption(choice!)}
+                                        />
+                                    </div>
+                                </div>
+                                <div className='flex flex-col px-6 w-full'>
+                                    <p className='text-2xl font-bold text-gray-700'>
+                                        Sail Number
+                                    </p>
+
+                                    <input type="text" id="SailNum" className="h-full text-2xl p-4" />
                                 </div>
                             </div>
-                            <div className='flex flex-col px-6 w-full'>
-                                <p className='text-2xl font-bold text-gray-700'>
-                                    Sail Number
-                                </p>
-
-                                <input type="text" id="SailNum" className="h-full text-2xl p-4" />
+                            {races.map((race, index) => {
+                                return (
+                                    <div className="mx-6 my-10">
+                                        <div className="checkbox-wrapper-10 flex flex-row">
+                                            <input className="tgl tgl-flip" type="checkbox" id={race.id} />
+                                            <label className="tgl-btn" htmlFor={race.id} data-tg-off="Nope" data-tg-on="Yeah!"></label>
+                                            <label className=" pl-6 text-2xl font-bold text-gray-700" htmlFor={race.id}>{race.series.name} {race.number}</label>
+                                        </div>
+                                    </div>
+                                )
+                            })}
+                            <div className=" flex justify-end mt-8">
+                                <div className="p-6 w-1/4 mr-2">
+                                    <p onClick={() => createResults()} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
+                                        Add
+                                    </p>
+                                </div>
                             </div>
                         </div>
-                        <div className=" flex justify-end mt-8">
-                            <div className="p-6 w-1/4 mr-2">
-                                <p onClick={() => createResult(race.id)} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
-                                    Add
-                                </p>
+                    </div>
+                    <button className="text-6xl text-black" onClick={toggleSidebar}>&#9776;</button>
+                    {races.length > 0 ?
+                        <div key={JSON.stringify(races)}>
+                            <div className="text-6xl font-extrabold text-gray-700 p-6">
+                                Today's Races
                             </div>
-                        </div>
-                    </div>
-                </div>
-                <button className="text-6xl text-black" onClick={toggleSidebar}>&#9776;</button>
-                {todaysRaces.length > 0 ?
-                    <div>
-                        <div className="text-6xl font-extrabold text-gray-700 p-6">
-                            {seriesName}: {race.number} at {race.Time}
-                        </div>
-                        <div className="m-6" key={todaysRaces.length}>
+                            <div className='w-full my-0 mx-auto'>
+                                <div className="p-6 w-3/4 m-auto">
+                                    <p onClick={showAddBoatModal} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
+                                        Add Entry
+                                    </p>
+                                </div>
+                            </div>
+                            {races.map((race, index) => {
+                                return (
+                                    <div className="m-6">
+                                        <div className="text-4xl font-extrabold text-gray-700 p-6">
+                                            {race.series.name}: {race.number} at {race.Time.slice(10, 16)}
+                                        </div>
+                                        <SignOnTable data={race.results} deleteResult={deleteResult} updateResult={updateResult} createResult={createResult} clubId={clubId} />
+                                    </div>
+                                )
+                            })}
 
-                            <SignOnTable data={race.results} key={JSON.stringify(race)} startTime={race.startTime} deleteResult={deleteResult} updateResult={updateResult} createResult={createResult} clubId={clubId} raceId={race.id} />
                         </div>
-                    </div>
-                    :
-                    <div>
-                        <p className="text-6xl font-extrabold text-gray-700 p-6"> No Races Today</p>
-                    </div>
-                }
-                <div className='w-full my-0 mx-auto'>
-                    <div className="p-6 w-3/4 m-auto">
-                        <p onClick={showAddBoatModal} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
-                            Add Entry
-                        </p>
-                    </div>
+                        :
+                        <div>
+                            <p className="text-6xl font-extrabold text-gray-700 p-6"> No Races Today</p>
+                        </div>
+                    }
                 </div>
-            </div>
-            <div id="sidebar" className="h-full w-0 fixed top-0 left-0 bg-gray-200 overflow-x-hidden pt-10 duration-500 z-10">
-                <p className="text-light p-8 block w-full duration-300 hover:text-blue text-3xl">Today&rsquo;s Races</p>
-                <div id="racelist">
-                    <p className="text-light p-8 block w-full duration-300 hover:text-blue text-3xl">test</p>
-                </div>
-                <p className="list-none select-none w-full p-4 text-lg font-extrabold text-gray-700"></p>
-                <p className="list-none select-none w-full p-4 text-lg font-extrabold text-gray-700"></p>
-                <p className="list-none select-none w-full p-4 text-lg font-extrabold text-gray-700"></p>
-                <p onClick={logout} className="list-none select-none w-full p-4 bg-blue-600 text-lg font-extrabold text-gray-700 cursor-pointer">Log Out</p>
+                <div id="sidebar" className="h-full w-0 fixed top-0 left-0 bg-gray-200 overflow-x-hidden pt-10 duration-500 z-10">
+                    <p className="text-light p-8 block w-full duration-300 hover:text-blue text-3xl">Today&rsquo;s Races</p>
+                    <div id="racelist">
+                        <p className="list-none select-none w-full p-4 bg-pink-300 text-lg font-extrabold text-gray-700 cursor-pointer my-2" onClick={() => { toggleSidebar(); showPage("Signon") }}>SignOn Sheet</p>
+                        <p className="list-none select-none w-full p-4 bg-pink-300 text-lg font-extrabold text-gray-700 cursor-pointer my-2">User Guide</p>
+                        <p className="text-light p-8 block w-full duration-300 hover:text-blue text-3xl">test</p>
+                    </div>
+                    <p className="list-none select-none w-full p-4 text-lg font-extrabold text-gray-700"></p>
+                    <p className="list-none select-none w-full p-4 text-lg font-extrabold text-gray-700"></p>
+                    <p className="list-none select-none w-full p-4 text-lg font-extrabold text-gray-700"></p>
+                    <p onClick={logout} className="list-none select-none w-full p-4 bg-blue-600 text-lg font-extrabold text-gray-700 cursor-pointer">Log Out</p>
 
+                </div>
             </div>
         </div>
     )
