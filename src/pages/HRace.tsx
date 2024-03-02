@@ -56,9 +56,8 @@ const RacePage = () => {
         }],
         Type: "",
         startTime: 0,
-        seriesId: ""
-        //extra fields required for actually racing.
-        //start time - UTC of start of 5 min count down.
+        seriesId: "",
+        series: {} as SeriesDataType
     }))
 
     var [lastResult, setLastResult] = useState<ResultsDataType | null>(null)

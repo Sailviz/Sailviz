@@ -68,8 +68,8 @@ const SignOnPage = () => {
         }],
         Type: "",
         startTime: 0,
-        seriesId: ""
-
+        seriesId: "",
+        series: {} as SeriesDataType
     }))
 
     function toggleSidebar() {

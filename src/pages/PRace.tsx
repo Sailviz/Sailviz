@@ -5,6 +5,7 @@ import Dashboard from "../components/Dashboard";
 import PursuitTimer from "../components/PRaceTimer"
 import Cookies from "js-cookie";
 import { ReactSortable } from "react-sortablejs";
+import { Series } from "@prisma/client";
 
 enum raceStateType {
     countdown,
@@ -58,9 +59,8 @@ const RacePage = () => {
         }],
         Type: "",
         startTime: 0,
-        seriesId: ""
-        //extra fields required for actually racing.
-        //start time - UTC of start of 5 min count down.
+        seriesId: "",
+        series: {} as SeriesDataType
     }))
 
     var [club, setClub] = useState<ClubDataType>({
