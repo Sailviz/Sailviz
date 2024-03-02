@@ -336,7 +336,7 @@ const SignOnPage = () => {
                             </div>
                             {races.map((race, index) => {
                                 return (
-                                    <div className="mx-6 my-10">
+                                    <div className="mx-6 my-10" key={race.id + race.number}>
                                         <div className="checkbox-wrapper-10 flex flex-row">
                                             <input className="tgl tgl-flip" type="checkbox" id={race.id} />
                                             <label className="tgl-btn" htmlFor={race.id} data-tg-off="Nope" data-tg-on="Yeah!"></label>
@@ -358,7 +358,7 @@ const SignOnPage = () => {
                     {races.length > 0 ?
                         <div key={JSON.stringify(races)}>
                             <div className="text-6xl font-extrabold text-gray-700 p-6">
-                                Today's Races
+                                {"Today's Races"}
                             </div>
                             <div className='w-full my-0 mx-auto'>
                                 <div className="p-6 w-3/4 m-auto">
@@ -369,7 +369,7 @@ const SignOnPage = () => {
                             </div>
                             {races.map((race, index) => {
                                 return (
-                                    <div className="m-6">
+                                    <div className="m-6" key={race.id}>
                                         <div className="text-4xl font-extrabold text-gray-700 p-6">
                                             {race.series.name}: {race.number} at {race.Time.slice(10, 16)}
                                         </div>
