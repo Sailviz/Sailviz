@@ -259,6 +259,7 @@ const RacePage = () => {
 
         //re copy to avoid problems
         let tempdata = window.structuredClone(race)
+        index = tempdata.results.findIndex((x: ResultsDataType) => x.id === id)
         tempdata.results[index].finishTime = -1
         setRace({ ...tempdata })
         console.log(tempdata.results[index])
@@ -344,6 +345,7 @@ const RacePage = () => {
         let tempdata = window.structuredClone(race)
 
         index = tempdata.results.findIndex((x: ResultsDataType) => x.id === id)
+        console.log(tempdata.results[index])
         //set finish time
         tempdata.results[index].finishTime = Math.floor(new Date().getTime() / 1000)
         //add final lap to lap info
@@ -351,10 +353,10 @@ const RacePage = () => {
         tempdata.results[index].lapTimes.number += 1 //increment number of laps
         //update local race copy
         setRace({ ...tempdata })
-        //moved finished to bottom of screen
-        orderResults(tempdata.results)
         //send to DB
         await DB.updateResult(tempdata.results[index])
+        //moved finished to bottom of screen
+        orderResults(tempdata.results)
         setInstructions(tempdata.results[index].name + "finished")
 
         if (checkAllFinished()) {
@@ -607,7 +609,7 @@ const RacePage = () => {
                                         <div className="flex flex-col">
                                             <h2 className="text-2xl text-gray-700">{result.SailNumber} - {result.boat.name}</h2>
                                             <p className="text-base text-gray-600">{result.Helm} - {result.Crew}</p>
-                                            <p className="text-base text-gray-600">Laps: {result.lapTimes.number} Finish: {new Date((result.lapTimes.times[result.lapTimes.times.length - 1] - race.startTime) * 1000).toISOString().slice(14, 19)}</p>
+                                            <p className="text-base text-gray-600">Laps: {result.lapTimes.number} Finish: {new Date((result.finishTime - race.startTime) * 1000).toISOString().slice(14, 19)}</p>
                                         </div>
                                         <div className="px-5 py-1">
                                             <p className="text-white bg-blue-600 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
