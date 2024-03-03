@@ -94,14 +94,24 @@ const RacePage = () => {
 
     const startRaceButton = async () => {
         const timeoutId = setTimeout(() => controller.abort(), 2000)
+        fetch("http://" + club.settings.hornIP + "/medium", { signal: controller.signal, mode: 'no-cors' }).then(response => {
+        }).catch((err) => {
+            console.log("horn not connected")
+            console.log(err)
+        })
+        //reset everything
+        fetch("http://" + clockIP + "/reset", { signal: controller.signal, mode: 'no-cors' }).then(response => {
+        }).catch((err) => {
+        })
+        //start the timer
         fetch("http://" + clockIP + "/start", { signal: controller.signal, mode: 'no-cors' }).then(response => {
-            //set official start time in DB
+            //configure race start
             startRace()
 
             clearTimeout(timeoutId)
         }).catch((err) => {
             console.log("clock not connected")
-            confirm("Clock not connected, do you want to start the race?") ? startRace() : null;
+            console.log(err)
         })
     }
 
@@ -125,16 +135,51 @@ const RacePage = () => {
     const handleFourMinutes = () => {
         console.log('4 minutes left')
         setInstructions("show preparatory and class flag")
+
+        //sound horn
+        fetch("http://" + club.settings.hornIP + "/medium", { signal: controller.signal, mode: 'no-cors' }).then(response => {
+        }).catch((err) => {
+            console.log("horn not connected")
+            console.log(err)
+        })
+
+        let sound = document.getElementById("audio") as HTMLAudioElement
+        sound!.currentTime = 0
+        sound!.play();
     };
 
     const handleOneMinute = () => {
         console.log('1 minute left')
         setInstructions("show class flag")
+
+
+
+        //sound horn
+        fetch("http://" + club.settings.hornIP + "/long", { signal: controller.signal, mode: 'no-cors' }).then(response => {
+        }).catch((err) => {
+            console.log("horn not connected")
+            console.log(err)
+        })
+
+        let sound = document.getElementById("audio") as HTMLAudioElement
+        sound!.currentTime = 0
+        sound!.play();
     };
 
     const handleGo = () => {
         console.log('GO!')
         setInstructions("show no flags")
+
+        //sound horn
+        fetch("http://" + club.settings.hornIP + "/medium", { signal: controller.signal, mode: 'no-cors' }).then(response => {
+        }).catch((err) => {
+            console.log("horn not connected")
+            console.log(err)
+        })
+
+        let sound = document.getElementById("audio") as HTMLAudioElement
+        sound!.currentTime = 0
+        sound!.play();
 
     };
 
@@ -203,11 +248,25 @@ const RacePage = () => {
 
         setRace({ ...tempdata })
 
+        let sound = document.getElementById("audio") as HTMLAudioElement
+        sound!.currentTime = 0
+        sound!.play();
+
     }
 
     const endRace = async () => {
         setRaceState(raceStateType.calculate)
         setTimerActive(false)
+
+        //sound horn
+        fetch("http://" + club.settings.hornIP + "/medium", { signal: controller.signal, mode: 'no-cors' }).then(response => {
+        }).catch((err) => {
+            console.log("horn not connected")
+            console.log(err)
+        })
+        let sound = document.getElementById("audio") as HTMLAudioElement
+        sound!.currentTime = 0
+        sound!.play();
     }
 
     const submitResults = async () => {
@@ -350,6 +409,7 @@ const RacePage = () => {
 
     return (
         <Dashboard club={club.name} userName={user.name}>
+            <audio id="audio" src=".\beep-6.mp3" ></audio>
             <div className="w-full flex flex-col items-center justify-start panel-height overflow-auto">
                 <div className="flex w-full flex-row justify-around">
                     <div className="w-1/4 p-2 m-2 border-4 rounded-lg bg-white text-lg font-medium">
