@@ -289,7 +289,6 @@ const SignOnPage = () => {
                                     key={race.id}
                                     onChange={saveRaceSettings}
                                     onBlur={() => DB.updateRaceById(race)}
-                                    value={""}
                                     placeholder={"Unknown"}
                                 />
                             </div>
