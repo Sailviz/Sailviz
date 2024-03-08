@@ -347,7 +347,7 @@ const Club = () => {
     }
 
     const createSeries = async () => {
-        var newSeries = await DB.createSeries(clubId, "new newSeries")
+        var newSeries = await DB.createSeries(clubId, "NewSeries")
         newSeries.races = []
         setSeriesData(seriesData.concat(newSeries))
     }
@@ -578,7 +578,7 @@ const Club = () => {
                             Series
                         </p>
                         <div className='p-6'>
-                            <ClubTable data={seriesData} key={seriesData} deleteSeries={deleteSeries} updateSeries={updateSeries} createSeries={createSeries} />
+                            <ClubTable data={seriesData} key={JSON.stringify(seriesData)} deleteSeries={deleteSeries} updateSeries={updateSeries} createSeries={createSeries} />
                         </div>
                         <p className='text-2xl font-bold text-gray-700 p-6'>
                             Boats
@@ -639,10 +639,10 @@ const Club = () => {
                             {activeSeriesData.name}
                         </p>
                         <div className='p-6'>
-                            <SeriesTable data={activeSeriesData.races} key={activeSeriesData.id} removeRace={removeRace} />
+                            <SeriesTable data={activeSeriesData.races} key={JSON.stringify(seriesData)} removeRace={removeRace} />
                         </div>
                         <div className="p-6">
-                            <p onClick={createRace} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
+                            <p id='seriesAddRace' onClick={createRace} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
                                 Add Race
                             </p>
                         </div>
@@ -756,6 +756,7 @@ const Club = () => {
                                 <div className="w-full p-2 mx-0 my-2 border-4 rounded focus:border-pink-500 focus:outline-none">
                                     <Select
                                         defaultValue={{ value: activeRaceData.Type, label: activeRaceData.Type }}
+                                        id='raceType'
                                         key={activeRaceData.Type}
                                         onChange={saveRaceType}
                                         instanceId={useId()}

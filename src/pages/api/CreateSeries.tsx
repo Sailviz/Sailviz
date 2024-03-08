@@ -2,17 +2,6 @@ import prisma from '../../components/prisma'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import assert from 'assert';
 
-
-async function findSeries(seriesName: string, clubId: any) {
-    var result = await prisma.series.findFirst({
-        where: {
-            name: seriesName,
-            clubId: clubId
-        },
-    })
-    return result;
-}
-
 async function createSeries(seriesName: string, clubId: string) {
     var res = await prisma.series.create({
         data: {
@@ -42,11 +31,9 @@ const CreateSeries = async (req: NextApiRequest, res: NextApiResponse) => {
 
         var seriesName = req.body.seriesName
         var clubId = req.body.clubId
-        var ExistingSeries = await findSeries(seriesName, clubId)
-        if (!ExistingSeries) {
-            var Series = await createSeries(seriesName, clubId)
+        var Series = await createSeries(seriesName, clubId)
+        if (Series) {
             res.json({ error: false, series: Series })
-            return
         }
         else {
             res.json({ error: true, message: 'Something went wrong creating Series' });

@@ -29,7 +29,7 @@ const Add = ({ ...props }) => {
 
     return (
         <>
-            <div className="px-3 py-1 w-full">
+            <div className="px-3 py-1 w-full" id="createSeriesButton">
                 <p onClick={(e) => props.createSeries()} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
                     Add
                 </p>
@@ -106,7 +106,7 @@ const ClubTable = (props: any) => {
     })
     return (
         <div key={props.data}>
-            <table>
+            <table id={"clubTable"}>
                 <thead>
                     {table.getHeaderGroups().map(headerGroup => (
                         <tr key={headerGroup.id}>

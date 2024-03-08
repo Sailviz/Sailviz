@@ -141,19 +141,25 @@ const SignOnPage = () => {
         //then update it with the info
         await DB.updateResult(entry)
         //update local state
-        // setRace({ ...race, results: race.results.concat(entry) })
 
-        hideAddBoatModal()
     }
 
     const createResults = async () => {
         races.forEach(race => {
             let raceToggle = document.getElementById(race.id) as HTMLInputElement
-            if (raceToggle.value) {
+            if (raceToggle.checked) {
                 createResult(race.id)
             }
         })
 
+        let racesCopy = window.structuredClone(races)
+        console.log(racesCopy)
+        for (let i = 0; i < racesCopy.length; i++) {
+            console.log(racesCopy[i]!.id)
+            racesCopy[i] = await DB.getRaceById(racesCopy[i]!.id)
+        }
+        setRaces([...racesCopy])
+        hideAddBoatModal()
     }
 
     const updateResult = async () => {
@@ -165,7 +171,13 @@ const SignOnPage = () => {
         console.log(resultId)
         await DB.DeleteResultById(resultId)
 
-        // setRace({ ...race, results: race.results.filter((e) => { return (e.id != resultId) }) }) //remove result with matching id by way of filtering it out.
+        let racesCopy = window.structuredClone(races)
+        console.log(racesCopy)
+        for (let i = 0; i < racesCopy.length; i++) {
+            console.log(racesCopy[i]!.id)
+            racesCopy[i] = await DB.getRaceById(racesCopy[i]!.id)
+        }
+        setRaces([...racesCopy])
     }
 
     const logout = async () => {
@@ -185,6 +197,12 @@ const SignOnPage = () => {
 
         const sailNum = document.getElementById("SailNum") as HTMLInputElement
         sailNum.value = ""
+
+        const raceSelects = document.getElementsByName("raceSelect")
+        raceSelects.forEach((select) => {
+            const inputSelect = select as HTMLInputElement
+            inputSelect.checked = false
+        })
 
         setSelectedOption({ label: "", value: {} })
 
@@ -293,7 +311,7 @@ const SignOnPage = () => {
                         <RaceResultsTable data={activeRaceData.results} startTime={activeRaceData.startTime} key={JSON.stringify(activeRaceData.results)} deleteResult={() => { }} updateResult={() => { }} createResult={() => { }} clubId={clubId} raceId={activeRaceData.id} />
                     </div>
                 </div>
-                <div id="Signon" className="" >
+                <div id="Signon" className="">
                     <div id="modal" className="hidden fixed z-10 left-0 top-0 w-full h-full overflow-auto bg-gray-400 backdrop-blur-sm bg-opacity-20">
                         <div className="mx-40 my-20 px-10 py-5 border w-4/5 bg-gray-300 rounded-sm">
                             <div className="text-6xl font-extrabold text-gray-700 p-6 float-right cursor-pointer" onClick={hideAddBoatModal}>&times;</div>
@@ -336,9 +354,9 @@ const SignOnPage = () => {
                             </div>
                             {races.map((race, index) => {
                                 return (
-                                    <div className="mx-6 my-10" key={race.id + race.number}>
+                                    <div className="mx-6 my-10">
                                         <div className="checkbox-wrapper-10 flex flex-row">
-                                            <input className="tgl tgl-flip" type="checkbox" id={race.id} />
+                                            <input className="tgl tgl-flip" type="checkbox" id={race.id} name="raceSelect" />
                                             <label className="tgl-btn" htmlFor={race.id} data-tg-off="Nope" data-tg-on="Yeah!"></label>
                                             <label className=" pl-6 text-2xl font-bold text-gray-700" htmlFor={race.id}>{race.series.name} {race.number}</label>
                                         </div>
@@ -347,7 +365,7 @@ const SignOnPage = () => {
                             })}
                             <div className=" flex justify-end mt-8">
                                 <div className="p-6 w-1/4 mr-2">
-                                    <p onClick={() => createResults()} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
+                                    <p id="confirmEntry" onClick={createResults} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
                                         Add
                                     </p>
                                 </div>
@@ -362,7 +380,7 @@ const SignOnPage = () => {
                             </div>
                             <div className='w-full my-0 mx-auto'>
                                 <div className="p-6 w-3/4 m-auto">
-                                    <p onClick={showAddBoatModal} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
+                                    <p id="addEntry" onClick={showAddBoatModal} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
                                         Add Entry
                                     </p>
                                 </div>
