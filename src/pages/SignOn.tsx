@@ -354,7 +354,7 @@ const SignOnPage = () => {
                             </div>
                             {races.map((race, index) => {
                                 return (
-                                    <div className="mx-6 my-10">
+                                    <div className="mx-6 my-10" key={race.id}>
                                         <div className="checkbox-wrapper-10 flex flex-row">
                                             <input className="tgl tgl-flip" type="checkbox" id={race.id} name="raceSelect" />
                                             <label className="tgl-btn" htmlFor={race.id} data-tg-off="Nope" data-tg-on="Yeah!"></label>
