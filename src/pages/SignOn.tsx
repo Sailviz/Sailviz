@@ -303,7 +303,7 @@ const SignOnPage = () => {
         <div>
             <div id="main" className="duration-300">
                 <div id="Results" className="hidden" >
-                    <button className="text-6xl text-black" onClick={toggleSidebar}>&#9776;</button>
+                    <div id="ResultsMenuButton" className="text-6xl text-black w-min" onClick={toggleSidebar}>&#9776;</div>
                     <div className="p-4">
                         <div className="text-6xl font-extrabold text-gray-700 p-6">
                             {activeRaceData.series.name}: {activeRaceData.number}
@@ -372,7 +372,7 @@ const SignOnPage = () => {
                             </div>
                         </div>
                     </div>
-                    <button className="text-6xl text-black" onClick={toggleSidebar}>&#9776;</button>
+                    <div id="SideBarMenuButton" className="text-6xl text-black w-min" onClick={toggleSidebar}>&#9776;</div>
                     {races.length > 0 ?
                         <div key={JSON.stringify(races)}>
                             <div className="text-6xl font-extrabold text-gray-700 p-6">

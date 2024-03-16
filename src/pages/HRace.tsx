@@ -107,14 +107,12 @@ const RacePage = () => {
         //start the timer
         fetch("http://" + clockIP + "/start", { signal: controller.signal, mode: 'no-cors' }).then(response => {
             //configure race start
-            startRace()
-
-            clearTimeout(timeoutId)
         }).catch((err) => {
             console.log("clock not connected")
             console.log(err)
         })
 
+        startRace()
         //Update database
         let newRaceData: RaceDataType = race
         newRaceData.startTime = localTime
@@ -515,7 +513,7 @@ const RacePage = () => {
                     <div className="w-1/4 p-2 m-2 border-4 rounded-lg bg-white text-lg font-medium">
                         Actual Time:  {time}
                     </div>
-                    <div className="p-2 w-1/4">
+                    <div className="p-2 w-1/4" id="RaceStateButton">
                         {(() => {
                             switch (raceState) {
                                 case raceStateType.reset:
@@ -531,7 +529,7 @@ const RacePage = () => {
                                         Reset
                                     </p>)
                                 case raceStateType.calculate:
-                                    return (<p onClick={calculateResults} className="cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-xl px-5 py-2.5 text-center">
+                                    return (<p id="CalcResultsButton" onClick={calculateResults} className="cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-xl px-5 py-2.5 text-center">
                                         Calculate Results
                                     </p>)
                                 default:
@@ -549,7 +547,7 @@ const RacePage = () => {
                             Undo
                         </p>
                     </div>
-                    <div className="w-1/4 p-2">
+                    <div className="w-1/4 p-2" id="ModeButton">
                         {finishMode ?
                             <p onClick={() => setFinishMode(false)} className="cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-xl px-5 py-2.5 text-center">
                                 Lap Mode
@@ -561,7 +559,7 @@ const RacePage = () => {
                     </div>
                 </div>
                 <div className="overflow-auto">
-                    <div className="flex flex-row justify-around flex-wrap">
+                    <div className="flex flex-row justify-around flex-wrap" id="EntrantCards">
                         {race.results.map((result, index) => {
                             if (result.finishTime == 0) {
                                 //no defined finish time so we assume they have not finished
@@ -582,7 +580,7 @@ const RacePage = () => {
                                                     <p onClick={(e) => { finishBoat(result.id) }} className="cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-sm p-5 text-center mb-5">
                                                         Finish
                                                     </p>
-                                                    <p onClick={(e) => { confirm("are you sure you retire " + result.SailNumber) ? retireBoat(result.id) : null; }} className="cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-sm p-5 text-center mt-5">
+                                                    <p onClick={(e) => { confirm("are you sure you retire " + result.SailNumber) ? retireBoat(result.id) : null; }} className="text-white bg-blue-600 font-medium rounded-lg text-sm p-5 text-center mt-5">
                                                         Retire
                                                     </p>
                                                 </div>
