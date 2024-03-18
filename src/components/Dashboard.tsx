@@ -17,7 +17,7 @@ export default function Dashboard({
     userName?: string
 }) {
     return (
-        <div className="h-screen font-baylon">
+        <div className="h-screen">
             <Head>
                 <link rel="shortcut icon" href="/favicon.ico" />
                 <title>{siteTitle}</title>
@@ -39,7 +39,7 @@ export default function Dashboard({
                         <div className="flex items-center">
                             <Link href={"/Dashboard"}>
                                 <div className='flex flex-row'>
-                                    <Image src="/favicon.ico" className="mr-3 h-6 sm:h-9" width={40} height={40} />
+                                    <Image src="/favicon.ico" className="mr-3 h-6 sm:h-9" width={40} height={40} alt='SRM' />
                                     <p className='w-6'></p>
                                     <p className=" text-xl font-semibold whitespace-nowrap text-gray-700 p-3">
                                         {club}
