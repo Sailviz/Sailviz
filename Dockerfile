@@ -1,4 +1,4 @@
-FROM node:18-alpine
+FROM node:20-alpine
 
 ENV jwtSecret ${jwtSecret}
 
@@ -10,8 +10,7 @@ WORKDIR /usr/src/app
 
 # Installing dependencies
 COPY package*.json /usr/src/app/
-RUN apk update && apk upgrade openssl
-RUN apk add --update --no-cache openssl1.1-compat
+apk add openssl1.1-compat
 RUN npm install
 
 # Copying source files
