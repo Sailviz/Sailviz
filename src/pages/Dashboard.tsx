@@ -138,10 +138,20 @@ const SignOnPage = () => {
         }
     }
 
+    //Capitalise the first letter of each word, and maintain cursor pos.
     const saveRaceSettings = (e: ChangeEvent<HTMLInputElement>) => {
         let newRaceData: RaceDataType = race
-        newRaceData[e.target.id] = e.target.value
+        const sentence = e.target.value.split(' ');
+        const cursorPos = e.target.selectionStart
+        const capitalizedWords = sentence.map(word => word.charAt(0).toUpperCase() + word.slice(1));
+        const calitalisedSentence = capitalizedWords.join(' ')
+
+        newRaceData[e.target.id] = calitalisedSentence
         setRace(newRaceData)
+
+        let inputElement = document.getElementById(e.target.id) as HTMLInputElement
+        inputElement.value = calitalisedSentence
+        inputElement.selectionStart = cursorPos
     }
 
     const saveRaceDate = (e: ChangeEvent<HTMLInputElement>) => {
@@ -287,7 +297,7 @@ const SignOnPage = () => {
                                     className="w-full p-2 mx-0 my-2 border-4 rounded focus:border-pink-500 focus:outline-none"
                                     defaultValue={race.OOD}
                                     key={race.id}
-                                    onChange={saveRaceSettings}
+                                    onChange={(e) => saveRaceSettings(e)}
                                     onBlur={() => DB.updateRaceById(race)}
                                     placeholder={"Unknown"}
                                 />

@@ -166,6 +166,17 @@ const SignOnPage = () => {
 
     }
 
+    const CapitaliseInput = (e: ChangeEvent<HTMLInputElement>) => {
+        const sentence = e.target.value.split(' ');
+        const cursorPos = e.target.selectionStart
+        const capitalizedWords = sentence.map(word => word.charAt(0).toUpperCase() + word.slice(1));
+        const calitalisedSentence = capitalizedWords.join(' ')
+
+        let inputElement = document.getElementById(e.target.id) as HTMLInputElement
+        inputElement.value = calitalisedSentence
+        inputElement.selectionStart = cursorPos
+    }
+
 
     const deleteResult = async (resultId: string) => {
         console.log(resultId)
@@ -303,7 +314,7 @@ const SignOnPage = () => {
         <div>
             <div id="main" className="duration-300">
                 <div id="Results" className="hidden" >
-                    <div id="ResultsMenuButton" className="text-6xl text-black w-min" onClick={toggleSidebar}>&#9776;</div>
+                    <div id="ResultsMenuButton" className="text-6xl text-black w-min cursor-pointer" onClick={toggleSidebar}>&#9776;</div>
                     <div className="p-4">
                         <div className="text-6xl font-extrabold text-gray-700 p-6">
                             {activeRaceData.series.name}: {activeRaceData.number}
@@ -321,14 +332,14 @@ const SignOnPage = () => {
                                     <p className='text-2xl font-bold text-gray-700'>
                                         Helm
                                     </p>
-                                    <input type="text" id="Helm" name="Helm" className="h-full text-2xl p-4" autoCapitalize="characters" />
+                                    <input type="text" id="Helm" name="Helm" className="h-full text-2xl p-4" onChange={CapitaliseInput} />
                                 </div>
                                 <div className='flex flex-col px-6 w-full'>
                                     <p className='text-2xl font-bold text-gray-700'>
                                         Crew
                                     </p>
 
-                                    <input type="text" id="Crew" className="h-full text-2xl p-4" />
+                                    <input type="text" id="Crew" className="h-full text-2xl p-4" onChange={CapitaliseInput} />
                                 </div>
                                 <div className='flex flex-col px-6 w-full'>
                                     <p className='text-2xl font-bold text-gray-700'>
@@ -372,7 +383,7 @@ const SignOnPage = () => {
                             </div>
                         </div>
                     </div>
-                    <div id="SideBarMenuButton" className="text-6xl text-black w-min" onClick={toggleSidebar}>&#9776;</div>
+                    <div id="SideBarMenuButton" className="text-6xl text-black w-min cursor-pointer" onClick={toggleSidebar}>&#9776;</div>
                     {races.length > 0 ?
                         <div key={JSON.stringify(races)}>
                             <div className="text-6xl font-extrabold text-gray-700 p-6">

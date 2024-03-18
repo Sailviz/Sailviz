@@ -268,8 +268,18 @@ const Club = () => {
 
     const saveRaceSettings = (e: ChangeEvent<HTMLInputElement>) => {
         let newRaceData: RaceDataType = activeRaceData
-        newRaceData[e.target.id] = e.target.value
+
+        const sentence = e.target.value.split(' ');
+        const cursorPos = e.target.selectionStart
+        const capitalizedWords = sentence.map(word => word.charAt(0).toUpperCase() + word.slice(1));
+        const calitalisedSentence = capitalizedWords.join(' ')
+
+        newRaceData[e.target.id] = calitalisedSentence
         setActiveRaceData(newRaceData)
+
+        let inputElement = document.getElementById(e.target.id) as HTMLInputElement
+        inputElement.value = calitalisedSentence
+        inputElement.selectionStart = cursorPos
     }
     const saveRaceType = async (newValue: any) => {
         console.log(newValue)
