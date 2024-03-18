@@ -52,10 +52,10 @@ describe("full test", () => {
     cy.wait(2000);
     cy.get("ul").contains(": 1").click();
     cy.get("#OOD").should("be.visible");
-    cy.get("#OOD").clear().type("Race Officer").blur();
-    cy.get("#AOD").clear().type("Assistant Race Officer").blur();
-    cy.get("#SO").clear().type("Safety Officer").blur();
-    cy.get("#ASO").clear().type("Assistant Safety Officer").blur();
+    cy.get("#OOD").clear().type("race officer").blur();
+    cy.get("#AOD").clear().type("assistant Race officer").blur();
+    cy.get("#SO").clear().type("safety officer").blur();
+    cy.get("#ASO").clear().type("assistant Safety officer").blur();
     cy.get("#OOD").should("have.value", "Race Officer");
     cy.get("#AOD").should("have.value", "Assistant Race Officer");
     cy.get("#SO").should("have.value", "Safety Officer");
