@@ -10,8 +10,6 @@ WORKDIR /usr/src/app
 
 # Installing dependencies
 COPY package*.json /usr/src/app/
-RUN apk update \
-  && apk add openssl1.1-compat
 RUN npm install
 
 # Copying source files
