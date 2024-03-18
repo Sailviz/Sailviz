@@ -3,7 +3,11 @@
 module.exports = {
   content: ["./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
-    extend: {},
+    extend: {
+    },
+    fontFamily: {
+      baylon: ["baylon", "sans-serif"]
+    }
   },
   plugins: [],
   darkMode: 'class',

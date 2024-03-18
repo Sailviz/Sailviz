@@ -12,7 +12,7 @@ export default function Layout({
     home?: boolean,
 }) {
     return (
-        <div className="h-screen">
+        <div className="h-screen font-baylon">
             <Head>
                 <link rel="shortcut icon" href="/favicon.ico" />
                 <title>{siteTitle}</title>
@@ -34,9 +34,6 @@ export default function Layout({
                         <Link href={"/"}>
                             <div className='flex flex-row'>
                                 <Image src="/favicon.ico" className="mr-3 h-6 sm:h-9" width={40} height={40} />
-                                <div className=" text-xl font-semibold whitespace-nowrap text-gray-700 p-3">
-                                    SRM
-                                </div>
                             </div>
                         </Link>
                         <div className="hidden w-full md:block md:w-auto" id="navbar-default">
