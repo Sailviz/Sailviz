@@ -40,3 +40,5 @@ yarn-error.log*
 *.tsbuildinfo
 cypress/fixtures/data.json
 cypress/fixtures/data.json
+/cypress/screenshots
+cypress/fixtures/data.json

@@ -48,7 +48,7 @@ describe("full test", () => {
     cy.Login("OD@alexpegg.uk", "arst");
     cy.location("pathname").should("equal", "/Dashboard");
     cy.wait(2000);
-    cy.get("#SideBarMenuButton").click();
+    cy.get("#ToggleSidebar").click();
     cy.wait(2000);
     cy.get("ul").contains(": 1").click();
     cy.get("#OOD").should("be.visible");

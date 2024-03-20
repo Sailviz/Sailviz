@@ -163,7 +163,38 @@ const SignOnPage = () => {
     }
 
     const updateResult = async () => {
+        const resultid = document.getElementById("EditResultId") as HTMLInputElement
+        let id = resultid.innerHTML
 
+        let result = {} as ResultsDataType
+        for (let race of races) {
+            let index = race.results.findIndex((rac) => {
+                return rac.id == id
+            })
+            console.log(index, race)
+            if (index != -1) {
+                result = race.results[index]
+                console.log(result)
+                break
+            }
+        }
+        console.log(result)
+
+        const Helm = document.getElementById('editHelm') as HTMLInputElement;
+        result.Helm = Helm.value
+
+        const Crew = document.getElementById("editCrew") as HTMLInputElement
+        result.Crew = Crew.value
+
+        const Boat = document.getElementById("editClass") as HTMLSelectElement
+        setSelectedOption({ value: result.boat, label: result.boat.name })
+
+        const sailNum = document.getElementById("editSailNum") as HTMLInputElement
+        result.SailNumber = sailNum.value
+
+        await DB.updateResult(result)
+
+        hideEditBoatModal()
     }
 
     const CapitaliseInput = (e: ChangeEvent<HTMLInputElement>) => {
@@ -178,8 +209,12 @@ const SignOnPage = () => {
     }
 
 
-    const deleteResult = async (resultId: string) => {
+    const deleteResult = async (resultId?: string) => {
         console.log(resultId)
+        if (resultId == undefined) {
+            let temp = document.getElementById("EditResultId") as HTMLInputElement
+            resultId = temp.innerHTML
+        }
         await DB.DeleteResultById(resultId)
 
         let racesCopy = window.structuredClone(races)
@@ -189,6 +224,46 @@ const SignOnPage = () => {
             racesCopy[i] = await DB.getRaceById(racesCopy[i]!.id)
         }
         setRaces([...racesCopy])
+    }
+
+    const showEditModal = async (id: string) => {
+        console.log(id)
+        let result = {} as ResultsDataType
+        for (let race of races) {
+            let index = race.results.findIndex((rac) => {
+                return rac.id == id
+            })
+            console.log(index, race)
+            if (index != -1) {
+                result = race.results[index]
+                console.log(result)
+                break
+            }
+        }
+        console.log(result)
+        const Helm = document.getElementById('editHelm') as HTMLInputElement;
+        Helm.value = result.Helm
+
+        const Crew = document.getElementById("editCrew") as HTMLInputElement
+        Crew.value = result.Crew
+
+        const Boat = document.getElementById("editClass") as HTMLSelectElement
+        setSelectedOption({ value: result.boat, label: result.boat.name })
+
+        const sailNum = document.getElementById("editSailNum") as HTMLInputElement
+        sailNum.value = result.SailNumber
+
+        const resultid = document.getElementById("EditResultId") as HTMLInputElement
+        resultid.innerHTML = result.id
+
+
+        const modal = document.getElementById("editModal")
+        modal?.classList.remove("hidden")
+    }
+
+    const hideEditBoatModal = async () => {
+        const modal = document.getElementById("editModal")
+        modal?.classList.add("hidden")
     }
 
     const logout = async () => {
@@ -218,13 +293,13 @@ const SignOnPage = () => {
         setSelectedOption({ label: "", value: {} })
 
 
-        const modal = document.getElementById("modal")
+        const modal = document.getElementById("addModal")
         modal?.classList.remove("hidden")
 
     }
 
     const hideAddBoatModal = async () => {
-        const modal = document.getElementById("modal")
+        const modal = document.getElementById("addModal")
         modal?.classList.add("hidden")
     }
 
@@ -313,17 +388,8 @@ const SignOnPage = () => {
     return (
         <div>
             <div id="main" className="duration-300">
-                <div id="Results" className="hidden" >
-                    <div id="ResultsMenuButton" className="text-6xl text-black w-min cursor-pointer" onClick={toggleSidebar}>&#9776;</div>
-                    <div className="p-4">
-                        <div className="text-6xl font-extrabold text-gray-700 p-6">
-                            {activeRaceData.series.name}: {activeRaceData.number}
-                        </div>
-                        <RaceResultsTable data={activeRaceData.results} startTime={activeRaceData.startTime} key={JSON.stringify(activeRaceData.results)} deleteResult={() => { }} updateResult={() => { }} createResult={() => { }} clubId={clubId} raceId={activeRaceData.id} />
-                    </div>
-                </div>
                 <div id="Signon" className="">
-                    <div id="modal" className="hidden fixed z-10 left-0 top-0 w-full h-full overflow-auto bg-gray-400 backdrop-blur-sm bg-opacity-20">
+                    <div id="addModal" className="hidden fixed z-10 left-0 top-0 w-full h-full overflow-auto bg-gray-400 backdrop-blur-sm bg-opacity-20">
                         <div className="mx-40 my-20 px-10 py-5 border w-4/5 bg-gray-300 rounded-sm">
                             <div className="text-6xl font-extrabold text-gray-700 p-6 float-right cursor-pointer" onClick={hideAddBoatModal}>&times;</div>
                             <div className="text-6xl font-extrabold text-gray-700 p-6">Add Entry</div>
@@ -383,6 +449,67 @@ const SignOnPage = () => {
                             </div>
                         </div>
                     </div>
+                    <div id="editModal" className="hidden fixed z-10 left-0 top-0 w-full h-full overflow-auto bg-gray-400 backdrop-blur-sm bg-opacity-20">
+                        <div className="mx-40 my-20 px-10 py-5 border w-4/5 bg-gray-300 rounded-sm">
+                            <div className="text-6xl font-extrabold text-gray-700 p-6 float-right cursor-pointer" onClick={hideEditBoatModal}>&times;</div>
+                            <div className="text-6xl font-extrabold text-gray-700 p-6">Edit Entry</div>
+                            <div className="flex w-3/4">
+                                <div className='flex flex-col px-6 w-full'>
+                                    <p className='hidden' id="EditResultId">
+
+                                    </p>
+                                    <p className='text-2xl font-bold text-gray-700'>
+                                        Helm
+                                    </p>
+                                    <input type="text" id="editHelm" name="Helm" className="h-full text-2xl p-4" onChange={CapitaliseInput} />
+                                </div>
+                                <div className='flex flex-col px-6 w-full'>
+                                    <p className='text-2xl font-bold text-gray-700'>
+                                        Crew
+                                    </p>
+
+                                    <input type="text" id="editCrew" className="h-full text-2xl p-4" onChange={CapitaliseInput} />
+                                </div>
+                                <div className='flex flex-col px-6 w-full'>
+                                    <p className='text-2xl font-bold text-gray-700'>
+                                        Class
+                                    </p>
+                                    <div className="w-full p-2 mx-0 my-2">
+                                        <Select
+                                            id="editClass"
+                                            className=' w-56 h-full text-3xl'
+                                            options={options}
+                                            value={selectedOption}
+                                            onChange={(choice) => setSelectedOption(choice!)}
+                                        />
+                                    </div>
+                                </div>
+                                <div className='flex flex-col px-6 w-full'>
+                                    <p className='text-2xl font-bold text-gray-700'>
+                                        Sail Number
+                                    </p>
+
+                                    <input type="text" id="editSailNum" className="h-full text-2xl p-4" />
+                                </div>
+                            </div>
+                            <div className="flex flex-row justify-end">
+                                <div className=" flex justify-end mt-8">
+                                    <div className="p-4 mr-2">
+                                        <p id="confirmRemove" onClick={() => deleteResult(undefined)} className="cursor-pointer text-white bg-red-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-xl text-lg px-12 py-4 text-center mr-3 md:mr-0">
+                                            Remove
+                                        </p>
+                                    </div>
+                                </div>
+                                <div className=" flex justify-end mt-8">
+                                    <div className="p-4 mr-2">
+                                        <p id="confirmEdit" onClick={updateResult} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-xl px-12 py-4 text-center mr-3 md:mr-0">
+                                            update
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     <div id="SideBarMenuButton" className="text-6xl text-black w-min cursor-pointer" onClick={toggleSidebar}>&#9776;</div>
                     {races.length > 0 ?
                         <div key={JSON.stringify(races)}>
@@ -402,7 +529,7 @@ const SignOnPage = () => {
                                         <div className="text-4xl font-extrabold text-gray-700 p-6">
                                             {race.series.name}: {race.number} at {race.Time.slice(10, 16)}
                                         </div>
-                                        <SignOnTable data={race.results} deleteResult={deleteResult} updateResult={updateResult} createResult={createResult} clubId={clubId} />
+                                        <SignOnTable data={race.results} updateResult={updateResult} createResult={createResult} clubId={clubId} showEditModal={showEditModal} />
                                     </div>
                                 )
                             })}
@@ -413,6 +540,15 @@ const SignOnPage = () => {
                             <p className="text-6xl font-extrabold text-gray-700 p-6"> No Races Today</p>
                         </div>
                     }
+                </div>
+                <div id="Results" className="hidden" >
+                    <div id="ResultsMenuButton" className="text-6xl text-black w-min cursor-pointer" onClick={toggleSidebar}>&#9776;</div>
+                    <div className="p-4">
+                        <div className="text-6xl font-extrabold text-gray-700 p-6">
+                            {activeRaceData.series.name}: {activeRaceData.number}
+                        </div>
+                        <RaceResultsTable data={activeRaceData.results} startTime={activeRaceData.startTime} key={JSON.stringify(activeRaceData.results)} deleteResult={() => { }} updateResult={() => { }} createResult={() => { }} clubId={clubId} raceId={activeRaceData.id} />
+                    </div>
                 </div>
                 <div id="sidebar" className="h-full w-0 fixed top-0 left-0 bg-gray-200 overflow-x-hidden pt-10 duration-500 z-10">
                     <p className="text-light p-8 block w-full duration-300 hover:text-blue text-3xl">Today&rsquo;s Races</p>

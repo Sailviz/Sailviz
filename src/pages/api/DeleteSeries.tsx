@@ -22,7 +22,7 @@ async function deleteraces(seriesId: any) {
 }
 
 async function deleteSeries(seriesId: any) {
-    var result = await prisma.series.deleteMany({
+    var result = await prisma.series.delete({
         where: {
             id: seriesId
         }

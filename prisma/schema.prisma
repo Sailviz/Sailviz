@@ -47,7 +47,7 @@ model Clubs {
 model Series {
   id       String @id @unique @default(uuid())
   name     String
-  club     Clubs  @relation(fields: [clubId], references: [id])
+  club     Clubs  @relation(fields: [clubId], references: [id], onDelete: Cascade)
   clubId   String
   settings Json
   races    Race[]
@@ -65,7 +65,7 @@ model Race {
   ASO       String
   results   Result[]
   Type      String
-  series    Series   @relation(fields: [seriesId], references: [id])
+  series    Series   @relation(fields: [seriesId], references: [id], onDelete: Cascade)
   seriesId  String
   startTime Int
 
@@ -74,7 +74,7 @@ model Race {
 
 model Result {
   id            String  @id @unique @default(uuid())
-  race          Race    @relation(fields: [raceId], references: [id])
+  race          Race    @relation(fields: [raceId], references: [id], onDelete: Cascade)
   raceId        String
   Helm          String
   Crew          String
