@@ -51,11 +51,12 @@ describe("full test", () => {
     cy.get("#ToggleSidebar").click();
     cy.wait(2000);
     cy.get("ul").contains(": 1").click();
+    cy.get("#ToggleSidebar").click();
     cy.get("#OOD").should("be.visible");
-    cy.get("#OOD").clear().type("race officer").blur();
-    cy.get("#AOD").clear().type("assistant Race officer").blur();
-    cy.get("#SO").clear().type("safety officer").blur();
-    cy.get("#ASO").clear().type("assistant Safety officer").blur();
+    cy.CleverType("#OOD", "race officer").blur();
+    cy.CleverType("#AOD", "assistant Race officer").blur();
+    cy.CleverType("#SO", "safety officer").blur();
+    cy.CleverType("#ASO", "assistant Safety officer").blur();
     cy.get("#OOD").should("have.value", "Race Officer");
     cy.get("#AOD").should("have.value", "Assistant Race Officer");
     cy.get("#SO").should("have.value", "Safety Officer");

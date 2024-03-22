@@ -8,6 +8,7 @@ declare namespace Cypress {
       sailNum: string,
       races: Array<number>
     ): Chainable<JQuery<HTMLElement>>;
+    CleverType(id: string, text: string): Chainable<JQuery<HTMLElement>>;
   }
 }
 
@@ -58,5 +59,11 @@ Cypress.Commands.add("AddEntry", (helm, crew, boat, sailNum, races) => {
         .and("contain", sailNum);
     }
     i++;
+  });
+});
+
+Cypress.Commands.add("CleverType", (id, text) => {
+  Cypress._.times(text.length, (i) => {
+    cy.get(id).type(text[i] || "");
   });
 });

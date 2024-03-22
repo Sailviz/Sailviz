@@ -38,7 +38,5 @@ yarn-error.log*
 
 # typescript
 *.tsbuildinfo
-cypress/fixtures/data.json
-cypress/fixtures/data.json
+/cypress/fixtures/data.json
 /cypress/screenshots
-cypress/fixtures/data.json

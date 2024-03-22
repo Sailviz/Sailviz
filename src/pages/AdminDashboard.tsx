@@ -2,7 +2,7 @@ import { useRouter } from 'next/router'
 import { ChangeEvent, useEffect, useState, useId, useCallback } from 'react';
 import Dashboard from '../components/Dashboard'
 import Select from 'react-select';
-import dayjs from 'dayjs';
+import dayjs, { unix } from 'dayjs';
 import SeriesTable from '../components/SeriesTable';
 import ClubTable from '../components/ClubTable';
 import BoatTable from '../components/BoatTable';
@@ -10,6 +10,7 @@ import RaceResultsTable from '../components/RaceResultsTable';
 import * as DB from '../components/apiMethods';
 import Cookies from 'js-cookie';
 import SeriesResultsTable from '../components/SeriesResultsTable';
+import reactSelect from 'react-select';
 
 const raceOptions = [{ value: "Pursuit", label: "Pursuit" }, { value: "Handicap", label: "Handicap" }]
 
@@ -61,6 +62,8 @@ const Club = () => {
         series: {} as SeriesDataType
     })
 
+    var [activeResultId, setActiveResultId] = useState("")
+
     var [nextRace, setNextRace] = useState<NextRaceDataType>({
         id: "",
         number: 0,
@@ -72,6 +75,11 @@ const Club = () => {
     const [seriesData, setSeriesData] = useState<SeriesDataType[]>([])
 
     const [boatData, setBoatData] = useState<BoatDataType[]>([])
+
+    const [selectedOption, setSelectedOption] = useState({ label: "", value: {} as BoatDataType })
+
+    const [options, setOptions] = useState([{ label: "", value: {} as BoatDataType }])
+
 
 
     //adds an entry to a race and updates database
@@ -95,6 +103,44 @@ const Club = () => {
 
         //force a race data update to restart data refresh
         setActiveRaceData({ ...activeRaceData })
+    }
+
+    const editUpdateResult = async () => {
+        let result = activeRaceData.results.find((result) => result.id == activeResultId) as ResultsDataType
+        const Helm = document.getElementById('editHelm') as HTMLInputElement;
+        result.Helm = Helm.value
+
+        const Crew = document.getElementById("editCrew") as HTMLInputElement
+        result.Crew = Crew.value
+
+        result.boat = selectedOption.value
+
+        const sailNum = document.getElementById("editSailNum") as HTMLInputElement
+        sailNum.value = result.SailNumber
+
+        const LapData = document.getElementById("LapData") as HTMLElement
+        let laps = Array.from(LapData.childNodes)
+        laps.pop()
+        laps.forEach((element, index) => {
+            let inputElement = element.childNodes[1]?.childNodes[0] as HTMLInputElement
+
+            var parts = inputElement.value.split(':'); // split it at the colons
+            if (parts[0] == undefined || parts[1] == undefined || parts[2] == undefined) return
+            // minutes are 60 seconds. Hours are 60 minutes * 60 seconds.
+            var seconds = (+parts[0]) * 60 * 60 + (+parts[1]) * 60 + (+parts[2]);
+            var unixTime = seconds + activeRaceData.startTime
+            result.lapTimes.times[index] = unixTime
+
+            if (index == laps.length - 1) {
+                result.finishTime = unixTime
+            }
+        });
+
+        DB.updateResult(result)
+
+        setActiveRaceData({ ...activeRaceData }) //force update as content has changed
+
+        hideEditModal()
     }
 
     const deleteResult = async (resultId: string) => {
@@ -451,6 +497,69 @@ const Club = () => {
         a.click()
     }
 
+    const showEditModal = async (resultId: string) => {
+        console.log(resultId)
+        let result = activeRaceData.results.find((result) => result.id == resultId)
+
+        setActiveResultId(resultId)
+
+        console.log(result)
+        const Helm = document.getElementById('editHelm') as HTMLInputElement;
+        Helm.value = result.Helm
+
+        const Crew = document.getElementById("editCrew") as HTMLInputElement
+        Crew.value = result.Crew
+
+        try {
+            setSelectedOption({ value: result.boat, label: result.boat.name })
+        } catch (error) {
+            //result does not have boat assigned
+        }
+
+        const sailNum = document.getElementById("editSailNum") as HTMLInputElement
+        sailNum.value = result.SailNumber
+
+        const resultid = document.getElementById("EditResultId") as HTMLInputElement
+        resultid.innerHTML = result.id
+
+
+        const modal = document.getElementById("editModal")
+        modal!.classList.remove("hidden")
+        console.log(modal!.classList)
+        setActiveResultId(resultId.toString())
+
+    }
+
+    const hideEditModal = async () => {
+        const modal = document.getElementById("editModal")
+        modal?.classList.add("hidden")
+    }
+
+    const addLap = async () => {
+        let result = activeRaceData.results.find((result) => result.id == activeResultId)
+        result.lapTimes.times.push(0)
+        result.lapTimes.number = result.lapTimes.number + 1
+
+        DB.updateResult(result)
+
+        var data = await DB.GetSeriesByClubId(clubId)
+        var array = [...data]
+        setSeriesData(array)
+    }
+
+    const removeLap = async (index: number) => {
+        let result = activeRaceData.results.find((result) => result.id == activeResultId)
+        result.lapTimes.times.splice(index, 1)
+        result.lapTimes.number = result.lapTimes.number - 1
+
+        DB.updateResult(result)
+
+        var data = await DB.GetSeriesByClubId(clubId)
+        var array = [...data]
+        setSeriesData(array)
+    }
+
+
     useEffect(() => {
         setClubId(Cookies.get('clubId') || "")
     }, [])
@@ -498,8 +607,13 @@ const Club = () => {
             const fetchBoats = async () => {
                 var data = await DB.getBoats(clubId)
                 if (data) {
-                    var array = [...data]
+                    let array = [...data]
                     setBoatData(array)
+                    let tempoptions: { label: string; value: BoatDataType }[] = []
+                    array.forEach(boat => {
+                        tempoptions.push({ value: boat as BoatDataType, label: boat.name })
+                    })
+                    setOptions(tempoptions)
                 } else {
                     console.log("could not find boats")
                 }
@@ -551,7 +665,7 @@ const Club = () => {
         }
     }, [activeRaceData]);
 
-    console.log(activeRaceData.results)
+
     return (
         <Dashboard club={club.name} userName={user.name}>
             <div className="w-full flex flex-row items-center justify-start panel-height">
@@ -568,6 +682,94 @@ const Club = () => {
                     </div>
                 </div>
                 <div id="page" className='flex basis-9/12 h-full w-full overflow-y-auto'>
+                    <div id="editModal" className="hidden fixed z-10 left-0 top-0 w-full h-full overflow-auto bg-gray-400 backdrop-blur-sm bg-opacity-20" key={activeResultId}>
+                        <div className="mx-40 my-20 px-10 py-5 border w-4/5 bg-gray-300 rounded-sm">
+                            <div className="text-6xl font-extrabold text-gray-700 p-6 float-right cursor-pointer" onClick={hideEditModal}>&times;</div>
+                            <div className="text-6xl font-extrabold text-gray-700 p-6">Edit Entry</div>
+                            <div className="flex w-3/4">
+                                <div className='flex flex-col px-6 w-full'>
+                                    <p className='hidden' id="EditResultId">
+
+                                    </p>
+                                    <p className='text-2xl font-bold text-gray-700'>
+                                        Helm
+                                    </p>
+                                    <input type="text" id="editHelm" name="Helm" className="h-full text-2xl p-4" />
+                                </div>
+                                <div className='flex flex-col px-6 w-full'>
+                                    <p className='text-2xl font-bold text-gray-700'>
+                                        Crew
+                                    </p>
+
+                                    <input type="text" id="editCrew" className="h-full text-2xl p-4" />
+                                </div>
+                                <div className='flex flex-col px-6 w-full'>
+                                    <p className='text-2xl font-bold text-gray-700'>
+                                        Class
+                                    </p>
+                                    <div className="w-full p-2 mx-0 my-2">
+                                        <Select
+                                            id="editClass"
+                                            className=' w-56 h-full text-3xl'
+                                            options={options}
+                                            value={selectedOption}
+                                            onChange={(choice) => setSelectedOption(choice!)}
+                                        />
+                                    </div>
+                                </div>
+                                <div className='flex flex-col px-6 w-full'>
+                                    <p className='text-2xl font-bold text-gray-700'>
+                                        Sail Number
+                                    </p>
+
+                                    <input type="text" id="editSailNum" className="h-full text-2xl p-4" />
+                                </div>
+                            </div>
+                            <div>
+                                <p className="text-6xl font-extrabold text-gray-700 p-6">
+                                    Lap Info
+                                </p>
+                                <div className='flex flex-row w-full flex-wrap' id='LapData'>
+                                    {/* this map loops through laps in results, unless it can't find any. or second argument stops errors */}
+                                    {(activeRaceData.results.find((result) => result.id == activeResultId) || { lapTimes: { times: [] } }).lapTimes.times.map((time: number, index: number) => {
+                                        return (
+                                            <div className='flex flex-col px-6 w-min' key={time}>
+                                                <p className='text-2xl font-bold text-gray-700 p-2'>
+                                                    Lap {index + 1}
+                                                </p>
+                                                <div className='flex flex-row'>
+                                                    <input type="time" className="h-full text-xl p-4" step={"1"} defaultValue={new Date((time - activeRaceData.startTime) * 1000).toISOString().substring(11, 19)} />
+                                                    <div className="text-6xl font-extrabold text-red-600 p-6 float-right cursor-pointer" onClick={() => removeLap(index)}>&times;</div>
+                                                </div>
+
+                                            </div>
+                                        )
+                                    })}
+                                    <div className="p-4 mr-2 w-96 flex justify-end">
+                                        <p onClick={addLap} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-xl px-12 py-4 text-center mr-3 md:mr-0">
+                                            Add Lap
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="flex flex-row justify-end">
+                                <div className=" flex justify-end mt-8">
+                                    <div className="p-4 mr-2">
+                                        <p id="confirmRemove" onClick={() => { deleteResult(activeResultId); hideEditModal() }} className="cursor-pointer text-white bg-red-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-xl text-lg px-12 py-4 text-center mr-3 md:mr-0">
+                                            Remove
+                                        </p>
+                                    </div>
+                                </div>
+                                <div className=" flex justify-end mt-8">
+                                    <div className="p-4 mr-2">
+                                        <p id="confirmEdit" onClick={editUpdateResult} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-xl px-12 py-4 text-center mr-3 md:mr-0">
+                                            update
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     <div id="home" className="">
                         <p className="text-6xl font-extrabold text-gray-700 p-6">
                             Welcome to Sailing Race Manager
@@ -676,6 +878,12 @@ const Club = () => {
                             </div>
                         </div>
                         <SeriesResultsTable key={activeSeriesData.settings["numberToCount"] + activeSeriesData.id} data={activeSeriesData} clubId={clubId} />
+                        <div>
+                            <p className="text-6xl font-extrabold text-gray-700 p-6">
+                                Dev info
+                            </p>
+                            <p> id: {activeSeriesData.id}</p>
+                        </div>
                     </div>
                     <div id="race" className="hidden">
                         <p className="text-6xl font-extrabold text-gray-700 p-6">
@@ -726,7 +934,6 @@ const Club = () => {
                                     onBlur={() => DB.updateRaceById(activeRaceData)}
                                 />
                             </div>
-
                         </div>
                         <div className="flex w-3/4">
                             <div className='flex flex-col px-6 w-full'>
@@ -782,7 +989,7 @@ const Club = () => {
                             </p>
                         </div>
                         <div className='p-6 w-full'>
-                            <RaceResultsTable data={activeRaceData.results} startTime={activeRaceData.startTime} key={JSON.stringify(activeRaceData.results)} deleteResult={deleteResult} updateResult={updateResult} createResult={createResult} clubId={clubId} raceId={activeRaceData.id} />
+                            <RaceResultsTable data={activeRaceData.results} startTime={activeRaceData.startTime} key={JSON.stringify(activeRaceData.results)} deleteResult={deleteResult} updateResult={updateResult} createResult={createResult} clubId={clubId} raceId={activeRaceData.id} showEditModal={(id: string) => { showEditModal(id) }} />
                         </div>
                         <div className="p-6 w-3/4">
                             <p onClick={generateResults} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">

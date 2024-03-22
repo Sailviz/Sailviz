@@ -186,7 +186,6 @@ const SignOnPage = () => {
         const Crew = document.getElementById("editCrew") as HTMLInputElement
         result.Crew = Crew.value
 
-        const Boat = document.getElementById("editClass") as HTMLSelectElement
         setSelectedOption({ value: result.boat, label: result.boat.name })
 
         const sailNum = document.getElementById("editSailNum") as HTMLInputElement
