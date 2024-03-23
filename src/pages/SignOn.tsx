@@ -494,7 +494,7 @@ const SignOnPage = () => {
                             <div className="flex flex-row justify-end">
                                 <div className=" flex justify-end mt-8">
                                     <div className="p-4 mr-2">
-                                        <p id="confirmRemove" onClick={() => deleteResult(undefined)} className="cursor-pointer text-white bg-red-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-xl text-lg px-12 py-4 text-center mr-3 md:mr-0">
+                                        <p id="confirmRemove" onClick={() => { if (confirm("Are you sure you want to Delete?")) { deleteResult(undefined); hideEditBoatModal() } }} className="cursor-pointer text-white bg-red-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-xl text-lg px-12 py-4 text-center mr-3 md:mr-0">
                                             Remove
                                         </p>
                                     </div>
