@@ -145,7 +145,7 @@ const SignOnPage = () => {
         result.boat = selectedOption.value
 
         const sailNum = document.getElementById("editSailNum") as HTMLInputElement
-        sailNum.value = result.SailNumber
+        result.SailNumber = sailNum.value
 
         const LapData = document.getElementById("LapData") as HTMLElement
         let laps = Array.from(LapData.childNodes)
