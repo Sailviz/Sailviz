@@ -510,6 +510,9 @@ const SignOnPage = () => {
                         </div>
                     </div>
                     <div id="SideBarMenuButton" className="text-6xl text-black w-min cursor-pointer" onClick={toggleSidebar}>&#9776;</div>
+                    <p className="text-2xl font-extrabold text-gray-700 p-6">
+                        There is currently a delay between entry and showing in the tables below. Sorry! Will fix soon!
+                    </p>
                     {races.length > 0 ?
                         <div key={JSON.stringify(races)}>
                             <div className="text-6xl font-extrabold text-gray-700 p-6">
