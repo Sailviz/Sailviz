@@ -20,7 +20,7 @@ const RacePage = () => {
 
     const router = useRouter()
 
-    const startLength = 301 //5 mins in seconds plus a bit so that it shows 5:00
+    const startLength = 300 //5 mins in seconds plus a bit so that it shows 5:00
 
     const query = router.query
 
@@ -84,17 +84,17 @@ const RacePage = () => {
 
     })
 
-    const [activeResultIndex, setActiveResultIndex] = useState(0);
-
     var [raceState, setRaceState] = useState<raceStateType>(raceStateType.reset)
     const [timerActive, setTimerActive] = useState(false);
     const [resetTimer, setResetTimer] = useState(false);
     const [startTime, setStartTime] = useState(0);
     const [clockIP, setClockIP] = useState("");
+    const [hornIP, setHornIP] = useState("");
 
     const startRaceButton = async () => {
+        let localTime = Math.floor((new Date().getTime() / 1000) + startLength)
         const timeoutId = setTimeout(() => controller.abort(), 2000)
-        fetch("http://" + club.settings.hornIP + "/medium", { signal: controller.signal, mode: 'no-cors' }).then(response => {
+        fetch("http://" + hornIP + "/medium", { signal: controller.signal, mode: 'no-cors' }).then(response => {
         }).catch((err) => {
             console.log("horn not connected")
             console.log(err)
@@ -106,30 +106,30 @@ const RacePage = () => {
         //start the timer
         fetch("http://" + clockIP + "/start", { signal: controller.signal, mode: 'no-cors' }).then(response => {
             //configure race start
-            startRace()
 
             clearTimeout(timeoutId)
         }).catch((err) => {
             console.log("clock not connected")
             console.log(err)
         })
+
+        //Update database
+        let newRaceData: RaceDataType = race
+        newRaceData.startTime = localTime
+        setRace(newRaceData)
+        startRace()
     }
 
     const startRace = async () => {
-        let localTime = Math.floor((new Date().getTime() / 1000) + startLength)
-        setStartTime(localTime)
         setResetTimer(false)
         setRaceState(raceStateType.countdown)
         setInstructions("show class flag.")
         //start countdown timer
         setTimerActive(true)
 
-        //Update database
-        let newRaceData: RaceDataType = race
-        newRaceData.startTime = localTime
-        setRace(newRaceData)
-        //send to DB
-        DB.updateRaceById(newRaceData)
+        let sound = document.getElementById("audio") as HTMLAudioElement
+        sound!.currentTime = 0
+        sound!.play();
     }
 
     const handleFourMinutes = () => {
@@ -137,7 +137,7 @@ const RacePage = () => {
         setInstructions("show preparatory and class flag")
 
         //sound horn
-        fetch("http://" + club.settings.hornIP + "/medium", { signal: controller.signal, mode: 'no-cors' }).then(response => {
+        fetch("http://" + hornIP + "/medium", { signal: controller.signal, mode: 'no-cors' }).then(response => {
         }).catch((err) => {
             console.log("horn not connected")
             console.log(err)
@@ -155,7 +155,7 @@ const RacePage = () => {
 
 
         //sound horn
-        fetch("http://" + club.settings.hornIP + "/long", { signal: controller.signal, mode: 'no-cors' }).then(response => {
+        fetch("http://" + hornIP + "/long", { signal: controller.signal, mode: 'no-cors' }).then(response => {
         }).catch((err) => {
             console.log("horn not connected")
             console.log(err)
@@ -171,7 +171,7 @@ const RacePage = () => {
         setInstructions("show no flags")
 
         //sound horn
-        fetch("http://" + club.settings.hornIP + "/medium", { signal: controller.signal, mode: 'no-cors' }).then(response => {
+        fetch("http://" + hornIP + "/medium", { signal: controller.signal, mode: 'no-cors' }).then(response => {
         }).catch((err) => {
             console.log("horn not connected")
             console.log(err)
@@ -259,7 +259,7 @@ const RacePage = () => {
         setTimerActive(false)
 
         //sound horn
-        fetch("http://" + club.settings.hornIP + "/medium", { signal: controller.signal, mode: 'no-cors' }).then(response => {
+        fetch("http://" + hornIP + "/medium", { signal: controller.signal, mode: 'no-cors' }).then(response => {
         }).catch((err) => {
             console.log("horn not connected")
             console.log(err)
@@ -295,7 +295,7 @@ const RacePage = () => {
         let allStarted = true
 
         race.results.forEach(result => {
-            if (result.boat.pursuitStartTime < timeInSeconds) {
+            if (result.boat.pursuitStartTime < timeInSeconds && time.countingUp == true) {
                 //boat has started
 
             } else {
@@ -311,7 +311,7 @@ const RacePage = () => {
         }
 
         //to catch race being finished on page load
-        if (time.minutes > club.settings.pursuitLength) {
+        if (time.minutes > club.settings.pursuitLength && time.countingUp == true) {
             setRaceState(raceStateType.calculate)
             setTimerActive(false)
         }
@@ -328,6 +328,7 @@ const RacePage = () => {
                     console.log(data)
                     DB.GetClubById(data.clubId).then((data) => {
                         setClockIP(data.settings['clockIP'])
+                        setHornIP(data.settings['hornIP'])
                     })
                 })
 
@@ -382,6 +383,7 @@ const RacePage = () => {
                 var data = await DB.GetClubById(clubId)
                 if (data) {
                     setClub(data)
+                    console.log(data.settings.pursuitLength)
                 } else {
                     console.log("could not fetch club settings")
                 }
@@ -407,16 +409,33 @@ const RacePage = () => {
         }
     }, [clubId])
 
+    const [time, setTime] = useState("");
+
+    useEffect(() => {
+        const interval = setInterval(() => setTime(new Date().toTimeString().split(' ')[0]!), 1000);
+        return () => {
+            clearInterval(interval);
+        };
+    }, []);
+
     return (
         <Dashboard club={club.name} userName={user.name}>
             <audio id="audio" src=".\beep-6.mp3" ></audio>
             <div className="w-full flex flex-col items-center justify-start panel-height overflow-auto">
                 <div className="flex w-full flex-row justify-around">
+                    <div className="w-1/4 p-2">
+                        <p onClick={() => router.push({ pathname: '/Race', query: { race: race.id } })} className="cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-xl px-5 py-2.5 text-center">
+                            Back To Home
+                        </p>
+                    </div>
                     <div className="w-1/4 p-2 m-2 border-4 rounded-lg bg-white text-lg font-medium">
                         Event: {seriesName} - {race.number}
                     </div>
                     <div className="w-1/4 p-2 m-2 border-4 rounded-lg bg-white text-lg font-medium">
-                        Race Time: <PursuitTimer startTime={startTime} endTime={club.settings.pursuitLength} timerActive={timerActive} onFourMinutes={handleFourMinutes} onOneMinute={handleOneMinute} onGo={handleGo} onEnd={endRace} onTimeUpdate={ontimeupdate} reset={resetTimer} />
+                        Race Time: <PursuitTimer startTime={race.startTime} endTime={club.settings.pursuitLength} timerActive={timerActive} onFourMinutes={handleFourMinutes} onOneMinute={handleOneMinute} onGo={handleGo} onEnd={endRace} onTimeUpdate={ontimeupdate} reset={resetTimer} />
+                    </div>
+                    <div className="w-1/4 p-2 m-2 border-4 rounded-lg bg-white text-lg font-medium">
+                        Actual Time:  {time}
                     </div>
                     <div className="p-2 w-1/4">
                         {(() => {

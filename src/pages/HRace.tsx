@@ -112,13 +112,13 @@ const RacePage = () => {
             console.log(err)
         })
 
-        startRace()
         //Update database
         let newRaceData: RaceDataType = race
         newRaceData.startTime = localTime
         setRace(newRaceData)
         //send to DB
         DB.updateRaceById(newRaceData)
+        startRace()
     }
 
     const startRace = async () => {
