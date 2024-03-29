@@ -188,6 +188,9 @@ const SignOnPage = () => {
                 <p className="text-6xl font-extrabold text-gray-700 p-6 mx-36">
                     This is still new software! Please write down finish Times!
                 </p>
+                <div onClick={() => { router.push({ pathname: '/RaceOfficerGuide' }) }} className="cursor-pointer w-2/12 mx-36 text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-xl px-12 py-4 text-center mr-3 md:mr-0">
+                    Race Officer Guide
+                </div>
                 {/* show all races that are happening today */}
                 {todaysRaces.length > 0 ?
                     <div>
