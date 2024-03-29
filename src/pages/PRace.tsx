@@ -273,7 +273,7 @@ const RacePage = () => {
         race.results.forEach(result => {
             DB.updateResult(result)
         })
-        router.push("/Dashboard")
+        router.push({ pathname: '/Race', query: { race: race.id } })
     }
 
     const setOrder = async (newState: ResultsDataType[]) => {

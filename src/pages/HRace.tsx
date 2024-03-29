@@ -323,7 +323,7 @@ const RacePage = () => {
         })
 
         console.log(sortedResults)
-        router.push("/Dashboard")
+        router.push({ pathname: '/Race', query: { race: race.id } })
     }
 
     const finishBoat = async (id: string) => {
@@ -504,6 +504,11 @@ const RacePage = () => {
             <audio id="audio" src=".\beep-6.mp3" ></audio>
             <div className="w-full flex flex-col items-center justify-start panel-height">
                 <div className="flex w-full flex-row justify-around">
+                    <div className="w-1/4 p-2">
+                        <p onClick={() => router.push({ pathname: '/Race', query: { race: race.id } })} className="cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-xl px-5 py-2.5 text-center">
+                            Back To Home
+                        </p>
+                    </div>
                     <div className="w-1/4 p-2 m-2 border-4 rounded-lg bg-white text-lg font-medium">
                         Event: {seriesName} - {race.number}
                     </div>
@@ -539,6 +544,7 @@ const RacePage = () => {
                     </div>
                 </div>
                 <div className="flex w-full shrink flex-row justify-around">
+
                     <div className="w-6/12 p-2 my-2 mx-4 border-4 rounded-lg bg-white text-lg font-medium">
                         {Instructions}
                     </div>

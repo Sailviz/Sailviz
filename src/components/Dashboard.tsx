@@ -37,18 +37,15 @@ export default function Dashboard({
                 <nav className="border-pink-500 px-4 sm:px-4 py-2.5 border-b-2 flex h-20">
                     <div className="container flex flex-wrap justify-between items-center mx-auto">
                         <div className="flex items-center">
-                            <Link href={"/Dashboard"}>
-                                <div className='flex flex-row'>
-                                    <Image src="/favicon.ico" className="mr-3 h-6 sm:h-9" width={40} height={40} alt='SRM' />
-                                    <p className='w-6'></p>
-                                    <p className=" text-xl font-semibold whitespace-nowrap text-gray-700 p-3">
-                                        {club}
-                                    </p>
-                                    <p className=" text-xl font-semibold whitespace-nowrap text-gray-700 p-3">
-                                        logged in as {userName}
-                                    </p>
-                                </div>
-                            </Link>
+                            <div className='flex flex-row'>
+                                <div className=' text-4xl font-bold text-blue-600 p-1 cursor-pointer' onClick={() => Router.push("/Dashboard")}>SRM - </div>
+                                <p className="text-4xl font-bold text-blue-600 p-1 cursor-pointer">
+                                    {club}
+                                </p>
+                                <p className=" text-xl font-semibold whitespace-nowrap text-gray-700 p-3">
+                                    logged in as {userName}
+                                </p>
+                            </div>
                         </div>
                         <div className="hidden w-full md:block md:w-auto" id="navbar-default">
                             <ul className="flex flex-col mt-4 md:flex-row md:space-x-8 md:mt-0 md:text-sm md:font-medium">
@@ -59,7 +56,7 @@ export default function Dashboard({
                         </div>
                     </div>
                 </nav>
-                <main className="flex items-stretch h-full">{children}</main>
+                <main className="flex items-stretch w-full h-full">{children}</main>
             </div>
         </div>
     )

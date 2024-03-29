@@ -26,6 +26,7 @@ async function findRace(clubId: string) {
         select: {
             id: true,
             number: true,
+            Time: true,
             series: {
                 select: {
                     name: true

@@ -67,6 +67,7 @@ const Club = () => {
     var [nextRace, setNextRace] = useState<NextRaceDataType>({
         id: "",
         number: 0,
+        Time: "",
         series: {
             name: ""
         }

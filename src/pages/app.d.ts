@@ -43,10 +43,11 @@ type lapTimesType = {
 };
 
 type NextRaceDataType = {
-  id: "";
-  number: 0;
+  id: string;
+  number: number;
+  Time: string;
   series: {
-    name: "";
+    name: string;
   };
 };
 
