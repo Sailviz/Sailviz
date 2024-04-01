@@ -8,12 +8,7 @@ import Select from 'react-select';
 import RaceResultsTable from '../components/RaceResultsTable';
 import Dashboard from "../components/Dashboard";
 
-enum raceStateType {
-    running,
-    stopped,
-    reset,
-    calculate
-}
+const raceOptions = [{ value: "Pursuit", label: "Pursuit" }, { value: "Handicap", label: "Handicap" }]
 
 const SignOnPage = () => {
 
@@ -275,6 +270,12 @@ const SignOnPage = () => {
         setRace({ ...race })
     }
 
+    const saveRaceType = async (newValue: any) => {
+        console.log(newValue)
+        setRace({ ...race, Type: newValue.value })
+        await DB.updateRaceById({ ...race, Type: newValue.value })
+    }
+
     useEffect(() => {
         let raceId = query.race as string
         setClubId(Cookies.get('clubId') || "")
@@ -508,7 +509,6 @@ const SignOnPage = () => {
                             className="w-full p-2 mx-0 my-2 border-4 rounded focus:border-pink-500 focus:outline-none"
                             defaultValue={dayjs(race.Time).format('YYYY-MM-DDTHH:ss')}
                             key={race.id}
-                            disabled={true}
                         />
                     </div>
 
@@ -548,12 +548,13 @@ const SignOnPage = () => {
                         <p className='text-2xl font-bold text-gray-700'>
                             Type
                         </p>
-                        <input type="text"
-                            className="w-full p-2 mx-0 my-2 border-4 rounded focus:border-pink-500 focus:outline-none"
-                            defaultValue={race.Type}
-                            key={race.id}
-                            disabled={true}
-                        />
+                        <Select
+                            defaultValue={{ value: race.Type, label: race.Type }}
+                            id='raceType'
+                            key={race.Type}
+                            onChange={saveRaceType}
+                            className='w-full'
+                            options={raceOptions} />
                     </div>
 
                 </div>
