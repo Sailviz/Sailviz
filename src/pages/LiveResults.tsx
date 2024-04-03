@@ -34,7 +34,8 @@ const LiveResults = () => {
 
         //calculate corrected time
         resultsData.forEach(result => {
-            let seconds = result.finishTime - race.startTime
+            console.log(result.lapTimes.times[result.lapTimes.times.length - 1])
+            let seconds = result.lapTimes.times[result.lapTimes.times.length - 1] - race.startTime
             result.CorrectedTime = (seconds * 1000 * (maxLaps / result.lapTimes.times.length)) / result.boat.py
             if (result.finishTime == -1) {
                 result.CorrectedTime = 99999
