@@ -16,7 +16,7 @@ const RacePage = () => {
 
     const router = useRouter()
 
-    const startLength = 300 //5 mins in seconds
+    const startLength = 315 //5 15secs in seconds
 
     const query = router.query
 
@@ -68,7 +68,8 @@ const RacePage = () => {
         settings: {
             clockIP: "",
             hornIP: "",
-            pursuitLength: 0
+            pursuitLength: 0,
+            clockOffset: 0
         },
         series: [],
         boats: [],
@@ -86,26 +87,21 @@ const RacePage = () => {
     var [raceState, setRaceState] = useState<raceStateType>(raceStateType.reset)
     const [timerActive, setTimerActive] = useState(false);
     const [resetTimer, setResetTimer] = useState(false);
-    const [clockIP, setClockIP] = useState("");
-    const [hornIP, setHornIP] = useState("");
     const [finishMode, setFinishMode] = useState(false)
 
     const startRaceButton = async () => {
+        console.log(club.settings.ClockOffset)
         //use time for button
         let localTime = Math.floor((new Date().getTime() / 1000) + startLength)
         const timeoutId = setTimeout(() => controller.abort(), 2000)
         //sound horn
-        fetch("http://" + hornIP + "/medium", { signal: controller.signal, mode: 'no-cors' }).then(response => {
+        fetch("http://" + club.settings.hornIP + "/medium", { signal: controller.signal, mode: 'no-cors' }).then(response => {
         }).catch((err) => {
             console.log("horn not connected")
             console.log(err)
         })
-        //reset everything
-        fetch("http://" + clockIP + "/reset", { signal: controller.signal, mode: 'no-cors' }).then(response => {
-        }).catch((err) => {
-        })
         //start the timer
-        fetch("http://" + clockIP + "/start", { signal: controller.signal, mode: 'no-cors' }).then(response => {
+        fetch("http://" + club.settings.clockIP + "/set?startTime=" + (localTime - club.settings.clockOffset).toString(), { signal: controller.signal, mode: 'no-cors' }).then(response => {
             //configure race start
         }).catch((err) => {
             console.log("clock not connected")
@@ -138,7 +134,7 @@ const RacePage = () => {
         setInstructions("show preparatory and class flag")
 
         //sound horn
-        fetch("http://" + hornIP + "/medium", { signal: controller.signal, mode: 'no-cors' }).then(response => {
+        fetch("http://" + club.settings.hornIP + "/medium", { signal: controller.signal, mode: 'no-cors' }).then(response => {
         }).catch((err) => {
             console.log("horn not connected")
             console.log(err)
@@ -154,7 +150,7 @@ const RacePage = () => {
         setInstructions("show class flag")
 
         //sound horn
-        fetch("http://" + hornIP + "/long", { signal: controller.signal, mode: 'no-cors' }).then(response => {
+        fetch("http://" + club.settings.hornIP + "/long", { signal: controller.signal, mode: 'no-cors' }).then(response => {
         }).catch((err) => {
             console.log("horn not connected")
             console.log(err)
@@ -170,7 +166,7 @@ const RacePage = () => {
         setInstructions("show no flags")
 
         //sound horn
-        fetch("http://" + hornIP + "/medium", { signal: controller.signal, mode: 'no-cors' }).then(response => {
+        fetch("http://" + club.settings.hornIP + "/medium", { signal: controller.signal, mode: 'no-cors' }).then(response => {
         }).catch((err) => {
             console.log("horn not connected")
             console.log(err)
@@ -206,7 +202,7 @@ const RacePage = () => {
         setTimerActive(false)
         setInstructions("Hit reset to start from the beginning")
         const timeoutId = setTimeout(() => controller.abort(), 2000)
-        fetch("http://" + clockIP + "/stop", { signal: controller.signal, mode: 'no-cors' }).then(response => {
+        fetch("http://" + club.settings.clockIP + "/reset", { signal: controller.signal, mode: 'no-cors' }).then(response => {
             clearTimeout(timeoutId)
         }).catch(function (err) {
             console.log('Clock not connected: ', err);
@@ -216,7 +212,7 @@ const RacePage = () => {
     const resetRace = async () => {
         //add are you sure here
         const timeoutId = setTimeout(() => controller.abort(), 2000)
-        fetch("http://" + clockIP + "/reset", { signal: controller.signal, mode: 'no-cors' }).then(response => {
+        fetch("http://" + club.settings.clockIP + "/reset", { signal: controller.signal, mode: 'no-cors' }).then(response => {
             clearTimeout(timeoutId)
         }).catch(function (err) {
             console.log('Clock not connected: ', err);
@@ -328,7 +324,7 @@ const RacePage = () => {
 
     const finishBoat = async (id: string) => {
         //sound horn
-        fetch("http://" + hornIP + "/short", { signal: controller.signal, mode: 'no-cors' }).then(response => {
+        fetch("http://" + club.settings.hornIP + "/short", { signal: controller.signal, mode: 'no-cors' }).then(response => {
         }).catch((err) => {
             console.log("horn not connected")
             console.log(err)
@@ -402,26 +398,6 @@ const RacePage = () => {
 
     const controller = new AbortController()
 
-    useEffect(() => {
-        let raceId = query.race as string
-        const getLocalIP = async () => {
-            await DB.getRaceById(raceId).then((data: RaceDataType) => {
-                DB.GetSeriesById(data.seriesId).then((data: SeriesDataType) => {
-                    console.log(data)
-                    DB.GetClubById(data.clubId).then((data) => {
-                        setClockIP(data.settings['clockIP'])
-                        setHornIP(data.settings['hornIP'])
-                    })
-                })
-
-            })
-        }
-
-        if (raceId != undefined) {
-            getLocalIP()
-
-        }
-    }, [router, query.race])
 
     useEffect(() => {
         let raceId = query.race as string
@@ -436,7 +412,7 @@ const RacePage = () => {
             fetchRace()
         }
 
-    }, [clockIP, query.race])
+    }, [query.race])
 
     useEffect(() => {
         if (checkAllFinished()) {
@@ -464,6 +440,7 @@ const RacePage = () => {
             const fetchClub = async () => {
                 var data = await DB.GetClubById(clubId)
                 if (data) {
+                    console.log(data)
                     setClub(data)
                 } else {
                     console.log("could not fetch club settings")

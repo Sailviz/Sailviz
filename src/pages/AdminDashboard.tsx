@@ -23,7 +23,8 @@ const Club = () => {
         settings: {
             clockIP: "",
             pursuitLength: 0,
-            hornIP: ""
+            hornIP: "",
+            ClockOffset: 0
         },
         series: [],
         boats: [],
@@ -814,14 +815,24 @@ const Club = () => {
                         <p className='text-2xl font-bold text-gray-700 p-6'>
                             Clock Config
                         </p>
-                        <div className='flex flex-col px-6 w-full '>
-                            <p className='text-2xl font-bold text-gray-700'>
+                        <div className='flex flex-row px-6 w-full '>
+                            <p className='text-2xl font-bold text-gray-700 my-auto mx-4'>
                                 IP Address
                             </p>
                             <input type="text"
                                 id='clockIP'
                                 className="w-1/3 p-2 mx-0 my-2 border-4 rounded focus:border-pink-500 focus:outline-none"
                                 defaultValue={club.settings.clockIP}
+                                onChange={saveClubSettings}
+                                onBlur={() => DB.UpdateClubById(club)}
+                            />
+                            <p className='text-2xl font-bold text-gray-700 my-auto mx-4'>
+                                Offset
+                            </p>
+                            <input type="number"
+                                id='clockOffset'
+                                className="w-1/3 p-2 mx-0 my-2 border-4 rounded focus:border-pink-500 focus:outline-none"
+                                defaultValue={club.settings.ClockOffset}
                                 onChange={saveClubSettings}
                                 onBlur={() => DB.UpdateClubById(club)}
                             />
