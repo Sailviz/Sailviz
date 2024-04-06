@@ -10,7 +10,6 @@ import RaceResultsTable from '../components/RaceResultsTable';
 import * as DB from '../components/apiMethods';
 import Cookies from 'js-cookie';
 import SeriesResultsTable from '../components/SeriesResultsTable';
-import reactSelect from 'react-select';
 
 const raceOptions = [{ value: "Pursuit", label: "Pursuit" }, { value: "Handicap", label: "Handicap" }]
 
@@ -24,7 +23,7 @@ const Club = () => {
             clockIP: "",
             pursuitLength: 0,
             hornIP: "",
-            ClockOffset: 0
+            clockOffset: 0
         },
         series: [],
         boats: [],
@@ -804,7 +803,7 @@ const Club = () => {
                             Pursuit Race Length
                         </p>
                         <div className='flex flex-col px-6 w-full '>
-                            <input type="number"
+                            <input type="text"
                                 id='pursuitLength'
                                 className="w-1/3 p-2 mx-0 my-2 border-4 rounded focus:border-pink-500 focus:outline-none"
                                 defaultValue={club.settings.pursuitLength}
@@ -829,10 +828,10 @@ const Club = () => {
                             <p className='text-2xl font-bold text-gray-700 my-auto mx-4'>
                                 Offset
                             </p>
-                            <input type="number"
+                            <input type="text"
                                 id='clockOffset'
                                 className="w-1/3 p-2 mx-0 my-2 border-4 rounded focus:border-pink-500 focus:outline-none"
-                                defaultValue={club.settings.ClockOffset}
+                                defaultValue={club.settings.clockOffset}
                                 onChange={saveClubSettings}
                                 onBlur={() => DB.UpdateClubById(club)}
                             />

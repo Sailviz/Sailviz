@@ -122,11 +122,33 @@ const RacePage = () => {
         //start countdown timer
         setTimerActive(true)
 
-        let sound = document.getElementById("audio") as HTMLAudioElement
+        let sound = document.getElementById("Beep") as HTMLAudioElement
+        sound!.currentTime = 0
+        sound!.play();
+    }
+    const handleWarning = () => {
+        console.log('Warning')
+
+        let sound = document.getElementById("Countdown") as HTMLAudioElement
         sound!.currentTime = 0
         sound!.play();
     }
 
+    const handleFiveMinutes = () => {
+        console.log('5 minutes left')
+        setInstructions("show class flag")
+
+        //sound horn
+        fetch("http://" + club.settings.hornIP + "/medium", { signal: controller.signal, mode: 'no-cors' }).then(response => {
+        }).catch((err) => {
+            console.log("horn not connected")
+            console.log(err)
+        })
+
+        let sound = document.getElementById("Beep") as HTMLAudioElement
+        sound!.currentTime = 0
+        sound!.play();
+    };
     const handleFourMinutes = () => {
         console.log('4 minutes left')
         setInstructions("show preparatory and class flag")
@@ -138,7 +160,7 @@ const RacePage = () => {
             console.log(err)
         })
 
-        let sound = document.getElementById("audio") as HTMLAudioElement
+        let sound = document.getElementById("Beep") as HTMLAudioElement
         sound!.currentTime = 0
         sound!.play();
     };
@@ -156,7 +178,7 @@ const RacePage = () => {
             console.log(err)
         })
 
-        let sound = document.getElementById("audio") as HTMLAudioElement
+        let sound = document.getElementById("Beep") as HTMLAudioElement
         sound!.currentTime = 0
         sound!.play();
     };
@@ -172,7 +194,7 @@ const RacePage = () => {
             console.log(err)
         })
 
-        let sound = document.getElementById("audio") as HTMLAudioElement
+        let sound = document.getElementById("Beep") as HTMLAudioElement
         sound!.currentTime = 0
         sound!.play();
 
@@ -243,7 +265,7 @@ const RacePage = () => {
 
         setRace({ ...tempdata })
 
-        let sound = document.getElementById("audio") as HTMLAudioElement
+        let sound = document.getElementById("Beep") as HTMLAudioElement
         sound!.currentTime = 0
         sound!.play();
 
@@ -259,7 +281,7 @@ const RacePage = () => {
             console.log("horn not connected")
             console.log(err)
         })
-        let sound = document.getElementById("audio") as HTMLAudioElement
+        let sound = document.getElementById("Beep") as HTMLAudioElement
         sound!.currentTime = 0
         sound!.play();
     }
@@ -394,7 +416,9 @@ const RacePage = () => {
 
     return (
         <Dashboard club={club.name} userName={user.name}>
-            <audio id="audio" src=".\beep-6.mp3" ></audio>
+
+            <audio id="Beep" src=".\beep-6.mp3" ></audio>
+            <audio id="Countdown" src=".\Countdown.mp3" ></audio>
             <div className="w-full flex flex-col items-center justify-start panel-height overflow-auto">
                 <div className="flex w-full flex-row justify-around">
                     <div className="w-1/4 p-2">
@@ -406,7 +430,7 @@ const RacePage = () => {
                         Event: {seriesName} - {race.number}
                     </div>
                     <div className="w-1/4 p-2 m-2 border-4 rounded-lg bg-white text-lg font-medium">
-                        Race Time: <PursuitTimer startTime={race.startTime} endTime={club.settings.pursuitLength} timerActive={timerActive} onFourMinutes={handleFourMinutes} onOneMinute={handleOneMinute} onGo={handleGo} onEnd={endRace} onTimeUpdate={ontimeupdate} reset={resetTimer} />
+                        Race Time: <PursuitTimer startTime={race.startTime} endTime={club.settings.pursuitLength} timerActive={timerActive} onFiveMinutes={handleFiveMinutes} onFourMinutes={handleFourMinutes} onOneMinute={handleOneMinute} onGo={handleGo} onEnd={endRace} onTimeUpdate={ontimeupdate} onWarning={handleWarning} reset={resetTimer} />
                     </div>
                     <div className="w-1/4 p-2 m-2 border-4 rounded-lg bg-white text-lg font-medium">
                         Actual Time:  {time}

@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { runInThisContext } from 'vm';
 
-
+let fiveminsDone = false
 let fourminsDone = false
 let oneminsDone = false
 let zerominsDone = false
 
-const CountdownTimer = ({ startTime, timerActive, onFourMinutes, onOneMinute, onGo, onEnd, reset }: { startTime: number, timerActive: boolean, onFourMinutes: any, onOneMinute: any, onGo: any, onEnd: any, reset: boolean }) => {
-    //these two states are completely wrong but the code works for some reason.
-    const [timeLeft, setTimeLeft] = useState({ minutes: 5, seconds: 0, countingUp: false });
+let warningFlag = true
+
+const CountdownTimer = ({ startTime, timerActive, onFiveMinutes, onFourMinutes, onOneMinute, onGo, onWarning, reset }: { startTime: number, timerActive: boolean, onFiveMinutes: any, onFourMinutes: any, onOneMinute: any, onGo: any, onWarning: any, reset: boolean }) => {
+    const [timeLeft, setTimeLeft] = useState({ minutes: 6, seconds: 0, countingUp: false });
 
 
     const calculateTimeLeft = () => {
@@ -42,20 +42,54 @@ const CountdownTimer = ({ startTime, timerActive, onFourMinutes, onOneMinute, on
         }
     }, [reset]);
 
+    //full minute signals
     if (timeLeft.minutes == 0 && timeLeft.seconds == 0 && timeLeft.countingUp == false) {
         if (!zerominsDone) {
             if (onGo) onGo();
             zerominsDone = true
+            warningFlag = true
         }
     } else if (timeLeft.minutes == 1 && timeLeft.seconds == 0 && timeLeft.countingUp == false) {
         if (!oneminsDone) {
             if (onOneMinute) onOneMinute();
             oneminsDone = true
+            warningFlag = true
         }
     } else if (timeLeft.minutes == 4 && timeLeft.seconds == 0 && timeLeft.countingUp == false) {
         if (!fourminsDone) {
             if (onFourMinutes) onFourMinutes();
             fourminsDone = true
+            warningFlag = true
+        }
+    }
+    else if (timeLeft.minutes == 5 && timeLeft.seconds == 0 && timeLeft.countingUp == false) {
+        if (!fiveminsDone) {
+            if (onFiveMinutes) onFiveMinutes();
+            fiveminsDone = true
+            warningFlag = true
+        }
+    }
+
+    //5 second warnings
+    if (timeLeft.minutes == 0 && timeLeft.seconds == 5 && timeLeft.countingUp == false) {
+        if (onWarning && warningFlag) {
+            onWarning();
+            warningFlag = false
+        }
+    } else if (timeLeft.minutes == 1 && timeLeft.seconds == 5 && timeLeft.countingUp == false) {
+        if (onWarning && warningFlag) {
+            onWarning();
+            warningFlag = false
+        }
+    } else if (timeLeft.minutes == 4 && timeLeft.seconds == 5 && timeLeft.countingUp == false) {
+        if (onWarning && warningFlag) {
+            onWarning();
+            warningFlag = false
+        }
+    } else if (timeLeft.minutes == 5 && timeLeft.seconds == 5 && timeLeft.countingUp == false) {
+        if (onWarning && warningFlag) {
+            onWarning();
+            warningFlag = false
         }
     }
 
