@@ -29,7 +29,8 @@ const SignOnPage = () => {
         settings: {
             clockIP: "",
             pursuitLength: 0,
-            hornIP: ""
+            hornIP: "",
+            clockOffset: 0,
         },
         series: [],
         boats: [],
