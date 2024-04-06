@@ -24,7 +24,8 @@ const SignOnPage = () => {
         settings: {
             clockIP: "",
             pursuitLength: 0,
-            hornIP: ""
+            hornIP: "",
+            clockOffset: 0,
         },
         series: [],
         boats: [],
@@ -372,7 +373,7 @@ const SignOnPage = () => {
 
     return (
         <Dashboard club={club.name} userName={user.name}>
-            <div id="race">
+            <div id="race" className='h-full w-full overflow-y-auto'>
                 <div id="BackToHome" onClick={() => router.push("/Dashboard")} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center w-1/12 mt-4 mx-4">
                     Back To Home
                 </div>
@@ -464,107 +465,109 @@ const SignOnPage = () => {
                         </div>
                     </div>
                 </div>
-                <p className="text-6xl font-extrabold text-gray-700 p-6 mx-36">
-                    {seriesName}: {race.number}
-                </p>
-                <div className="flex w-full mx-36">
-
-                    <div className='flex flex-col px-6 w-full '>
-                        <p className='text-2xl font-bold text-gray-700'>
-                            Race Officer
-                        </p>
-                        <input type="text"
-                            id='OOD'
-                            className="w-full p-2 mx-0 my-2 border-4 rounded focus:border-pink-500 focus:outline-none"
-                            defaultValue={race.OOD}
-                            key={race.id}
-                            onChange={(e) => saveRaceSettings(e)}
-                            onBlur={() => DB.updateRaceById(race)}
-                            placeholder={"Unknown"}
-                        />
-                    </div>
-
-                    <div className='flex flex-col px-6 w-full'>
-                        <p className='text-2xl font-bold text-gray-700'>
-                            Assistant Race Officer
-                        </p>
-                        <input type="text"
-                            id='AOD'
-                            className="w-full p-2 mx-0 my-2 border-4 rounded focus:border-pink-500 focus:outline-none"
-                            defaultValue={race.AOD}
-                            key={race.id}
-                            onChange={saveRaceSettings}
-                            onBlur={() => DB.updateRaceById(race)}
-                            placeholder='Unknown'
-                        />
-
-                    </div>
-
-                    <div className='flex flex-col px-6 w-full'>
-                        <p className='text-2xl font-bold text-gray-700'>
-                            Time
-                        </p>
-                        <input type="datetime-local"
-                            id='Time'
-                            className="w-full p-2 mx-0 my-2 border-4 rounded focus:border-pink-500 focus:outline-none"
-                            defaultValue={dayjs(race.Time).format('YYYY-MM-DDTHH:ss')}
-                            key={race.id}
-                        />
-                    </div>
-
-                </div>
-                <div className="flex w-full mx-36">
-                    <div className='flex flex-col px-6 w-full'>
-                        <p className='text-2xl font-bold text-gray-700'>
-                            Safety Officer
-                        </p>
-                        <input type="text"
-                            id='SO'
-                            className="w-full p-2 mx-0 my-2 border-4 rounded focus:border-pink-500 focus:outline-none"
-                            defaultValue={race.SO}
-                            key={race.id}
-                            onChange={saveRaceSettings}
-                            onBlur={() => DB.updateRaceById(race)}
-                            placeholder='Unknown'
-                        />
-                    </div>
-
-                    <div className='flex flex-col px-6 w-full'>
-                        <p className='text-2xl font-bold text-gray-700'>
-                            Assistant Safety Officer
-                        </p>
-                        <input type="text"
-                            id='ASO'
-                            className="w-full p-2 mx-0 my-2 border-4 rounded focus:border-pink-500 focus:outline-none"
-                            defaultValue={race.ASO}
-                            key={race.id}
-                            onChange={saveRaceSettings}
-                            onBlur={() => DB.updateRaceById(race)}
-                            placeholder='Unknown'
-                        />
-                    </div>
-
-                    <div className='flex flex-col px-6 w-full'>
-                        <p className='text-2xl font-bold text-gray-700'>
-                            Type
-                        </p>
-                        <Select
-                            defaultValue={{ value: race.Type, label: race.Type }}
-                            id='raceType'
-                            key={race.Type}
-                            onChange={saveRaceType}
-                            className='w-full'
-                            options={raceOptions} />
-                    </div>
-
-                </div>
-                <div className="p-6 w-full mx-36">
-                    <p onClick={openRacePanel} id="RacePanelButton" className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
-                        Race Panel
+                <div className="px-36 pb-36">
+                    <p className="text-6xl font-extrabold text-gray-700 p-6">
+                        {seriesName}: {race.number}
                     </p>
-                </div>
-                <div className='p-6 w-full mx-36'>
-                    <RaceResultsTable data={race.results} startTime={race.startTime} key={JSON.stringify(race.results)} deleteResult={deleteResult} updateResult={updateResult} createResult={createResult} clubId={clubId} raceId={race.id} showEditModal={(id: string) => { showEditModal(id) }} />
+                    <div className="flex w-full">
+
+                        <div className='flex flex-col px-6 w-full '>
+                            <p className='text-2xl font-bold text-gray-700'>
+                                Race Officer
+                            </p>
+                            <input type="text"
+                                id='OOD'
+                                className="w-full p-2 mx-0 my-2 border-4 rounded focus:border-pink-500 focus:outline-none"
+                                defaultValue={race.OOD}
+                                key={race.id}
+                                onChange={(e) => saveRaceSettings(e)}
+                                onBlur={() => DB.updateRaceById(race)}
+                                placeholder={"Unknown"}
+                            />
+                        </div>
+
+                        <div className='flex flex-col px-6 w-full'>
+                            <p className='text-2xl font-bold text-gray-700'>
+                                Assistant Race Officer
+                            </p>
+                            <input type="text"
+                                id='AOD'
+                                className="w-full p-2 mx-0 my-2 border-4 rounded focus:border-pink-500 focus:outline-none"
+                                defaultValue={race.AOD}
+                                key={race.id}
+                                onChange={saveRaceSettings}
+                                onBlur={() => DB.updateRaceById(race)}
+                                placeholder='Unknown'
+                            />
+
+                        </div>
+
+                        <div className='flex flex-col px-6 w-full'>
+                            <p className='text-2xl font-bold text-gray-700'>
+                                Time
+                            </p>
+                            <input type="datetime-local"
+                                id='Time'
+                                className="w-full p-2 mx-0 my-2 border-4 rounded focus:border-pink-500 focus:outline-none"
+                                defaultValue={dayjs(race.Time).format('YYYY-MM-DDTHH:ss')}
+                                key={race.id}
+                            />
+                        </div>
+
+                    </div>
+                    <div className="flex w-full">
+                        <div className='flex flex-col px-6 w-full'>
+                            <p className='text-2xl font-bold text-gray-700'>
+                                Safety Officer
+                            </p>
+                            <input type="text"
+                                id='SO'
+                                className="w-full p-2 mx-0 my-2 border-4 rounded focus:border-pink-500 focus:outline-none"
+                                defaultValue={race.SO}
+                                key={race.id}
+                                onChange={saveRaceSettings}
+                                onBlur={() => DB.updateRaceById(race)}
+                                placeholder='Unknown'
+                            />
+                        </div>
+
+                        <div className='flex flex-col px-6 w-full'>
+                            <p className='text-2xl font-bold text-gray-700'>
+                                Assistant Safety Officer
+                            </p>
+                            <input type="text"
+                                id='ASO'
+                                className="w-full p-2 mx-0 my-2 border-4 rounded focus:border-pink-500 focus:outline-none"
+                                defaultValue={race.ASO}
+                                key={race.id}
+                                onChange={saveRaceSettings}
+                                onBlur={() => DB.updateRaceById(race)}
+                                placeholder='Unknown'
+                            />
+                        </div>
+
+                        <div className='flex flex-col px-6 w-full'>
+                            <p className='text-2xl font-bold text-gray-700'>
+                                Type
+                            </p>
+                            <Select
+                                defaultValue={{ value: race.Type, label: race.Type }}
+                                id='raceType'
+                                key={race.Type}
+                                onChange={saveRaceType}
+                                className='w-full'
+                                options={raceOptions} />
+                        </div>
+
+                    </div>
+                    <div className="p-6 w-full">
+                        <p onClick={openRacePanel} id="RacePanelButton" className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
+                            Race Panel
+                        </p>
+                    </div>
+                    <div className='p-6 w-full'>
+                        <RaceResultsTable data={race.results} startTime={race.startTime} key={JSON.stringify(race.results)} deleteResult={deleteResult} updateResult={updateResult} createResult={createResult} clubId={clubId} raceId={race.id} showEditModal={(id: string) => { showEditModal(id) }} />
+                    </div>
                 </div>
             </div>
         </Dashboard >
