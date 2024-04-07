@@ -8,7 +8,8 @@ import { InputType } from "zlib";
 import { json } from "stream/consumers";
 import RaceResultsTable from "../components/RaceResultsTable";
 import { active } from "sortablejs";
-
+import Switch from "../components/Switch";
+import { set } from "cypress/types/lodash";
 
 enum raceStateType {
     running,
@@ -57,6 +58,8 @@ const SignOnPage = () => {
     const [options, setOptions] = useState([{ label: "", value: {} }])
 
     const [selectedOption, setSelectedOption] = useState({ label: "", value: {} })
+
+    const [selectedRaces, setSelectedRaces] = useState<boolean[]>([]);
 
 
     function toggleSidebar() {
@@ -145,8 +148,13 @@ const SignOnPage = () => {
     }
 
     const createResults = async () => {
+        //check that at least one race is selected
+        if (selectedRaces.every((e) => { return !e })) {
+            console.log("no races selected")
+            return
+        }
         races.forEach(race => {
-            let raceToggle = document.getElementById(race.id) as HTMLInputElement
+            let raceToggle = document.getElementById(race.id + "Switch") as HTMLInputElement
             if (raceToggle.checked) {
                 createResult(race.id)
             }
@@ -356,6 +364,7 @@ const SignOnPage = () => {
                     }
                     console.log(racesCopy)
                     setRaces(racesCopy)
+                    setSelectedRaces(new Array(data.length).fill(false))
                 } else {
                     console.log("could not find todays race")
                 }
@@ -428,13 +437,18 @@ const SignOnPage = () => {
                                     <input type="text" id="SailNum" className="h-full text-2xl p-4" />
                                 </div>
                             </div>
+                            <div className="text-4xl font-extrabold text-gray-700 p-6">Select Race</div>
                             {races.map((race, index) => {
                                 return (
-                                    <div className="mx-6 my-10" key={race.id}>
-                                        <div className="checkbox-wrapper-10 flex flex-row">
-                                            <input className="tgl tgl-flip" type="checkbox" id={race.id} name="raceSelect" />
-                                            <label className="tgl-btn" htmlFor={race.id} data-tg-off="Nope" data-tg-on="Yeah!"></label>
-                                            <label className=" pl-6 text-2xl font-bold text-gray-700" htmlFor={race.id}>{race.series.name} {race.number}</label>
+                                    <div className="mx-6 mb-10" key={race.id}>
+                                        <div className="flex flex-row">
+                                            <Switch
+                                                id={race.id + "Switch"}
+                                                isOn={selectedRaces[index]!}
+                                                onColour="#02c66f"
+                                                handleToggle={() => { setSelectedRaces([...selectedRaces.slice(0, index), !selectedRaces[index], ...selectedRaces.slice(index + 1)]) }}
+                                            />
+                                            <label className=" pl-6 py-auto text-2xl font-bold text-gray-700" htmlFor={race.id}>{race.series.name} {race.number}</label>
                                         </div>
                                     </div>
                                 )
