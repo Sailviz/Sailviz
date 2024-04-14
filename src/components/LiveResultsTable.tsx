@@ -23,6 +23,24 @@ const Number = ({ ...props }) => {
     );
 };
 
+const CorrectedTime = ({ ...props }) => {
+    let value = Math.round(props.getValue())
+    let valueString = ""
+    if (value == 99999) {
+        valueString = "RTD"
+    } else {
+        valueString = value.toString()
+    }
+    //round value to nearest integer
+
+    return (
+        <div className=' text-center'>
+            {valueString}
+        </div>
+    );
+};
+
+
 
 const Time = ({ ...props }) => {
     const value = props.getValue()
@@ -122,9 +140,9 @@ const LiveResultsTable = (props: any) => {
         columns.push(newColumn)
     }
 
-    const CorrectedTime = columnHelper.accessor('CorrectedTime', {
+    const Correctedtime = columnHelper.accessor('CorrectedTime', {
         header: "Corrected Time",
-        cell: props => <Number {...props} />,
+        cell: props => <CorrectedTime {...props} />,
         enableSorting: false
     })
 
@@ -134,7 +152,7 @@ const LiveResultsTable = (props: any) => {
         enableSorting: true
     })
 
-    columns.push(CorrectedTime)
+    columns.push(Correctedtime)
     columns.push(Position)
 
     let table = useReactTable({

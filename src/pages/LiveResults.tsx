@@ -4,6 +4,13 @@ import Cookies from "js-cookie";
 import { useRouter } from "next/router";
 import * as DB from '../components/apiMethods';
 import LiveResultsTable from "../components/LiveResultsTable";
+import RaceTimer from "../components/HRaceTimer"
+
+
+enum pageModes {
+    live,
+    results
+}
 
 const LiveResults = () => {
     const router = useRouter()
@@ -25,6 +32,10 @@ const LiveResults = () => {
         startTime: 0,
         series: {} as SeriesDataType
     }])
+
+    var [activeRace, setActiveRace] = useState<RaceDataType>({} as RaceDataType)
+
+    var [mode, setMode] = useState<pageModes>(pageModes.results)
 
     const calculateHandicapResults = (race: RaceDataType) => {
         //most nuber of laps.
@@ -54,6 +65,18 @@ const LiveResults = () => {
 
     const calculatePursuitResults = (race: RaceDataType) => {
         return race
+    }
+
+    const checkActive = (race: RaceDataType) => {
+        if (race.startTime != 0) {
+            //race has started, check if all boats have finished
+            return !race.results.every((result) => {
+                if (result.finishTime != 0) {
+                    return true
+                }
+            })
+        }
+        return false
     }
 
     useEffect(() => {
@@ -94,45 +117,85 @@ const LiveResults = () => {
 
     useEffect(() => {
         const timer1 = setTimeout(async () => {
+            let activeFlag = false
             console.log("refreshing results")
             let racesCopy = window.structuredClone(races)
+            //check if any of the races are active
             for (let i = 0; i < racesCopy.length; i++) {
-                var data = await DB.getRaceById(racesCopy[i]!.id)
-                if (data.Type == "Handicap") {
-                    data.results = calculateHandicapResults(data)
-                } else {
-                    calculatePursuitResults(data)
+                if (checkActive(racesCopy[i]!)) {
+                    console.log("here")
+                    setMode(pageModes.live)
+                    if (racesCopy[i]!.Type == "Handicap") {
+                        racesCopy[i]!.results = calculateHandicapResults(racesCopy[i]!)
+                    } else {
+                        calculatePursuitResults(racesCopy[i]!)
+                    }
+                    setActiveRace(racesCopy[i]!)
+                    activeFlag = true
+                    break
                 }
-                racesCopy[i] = data
             }
-            setRaces(racesCopy)
+            if (!activeFlag) {
+                setMode(pageModes.results)
+                for (let i = 0; i < racesCopy.length; i++) {
+                    var data = await DB.getRaceById(racesCopy[i]!.id)
+
+                    if (data.Type == "Handicap") {
+                        data.results = calculateHandicapResults(data)
+                    } else {
+                        calculatePursuitResults(data)
+                    }
+                    racesCopy[i] = data
+                }
+                setRaces(racesCopy)
+            }
         }, 5000);
         return () => {
             clearTimeout(timer1);
         }
-    }, [races]);
+    }, [races, activeRace]);
 
     return (
         <div>
-            {races.length > 0 ?
-                <div key={JSON.stringify(races)}>
-                    {races.map((race, index) => {
+            {(() => {
+                switch (mode) {
+                    case pageModes.live:
                         return (
-                            <div className="m-6" key={race.id}>
-                                <div className="text-4xl font-extrabold text-gray-700 p-6">
-                                    {race.series.name}: {race.number} at {race.Time.slice(10, 16)}
+                            <div key={JSON.stringify(activeRace)}>
+                                <RaceTimer startTime={activeRace.startTime} timerActive={true} onFiveMinutes={null} onFourMinutes={null} onOneMinute={null} onGo={null} onWarning={null} reset={false} />
+
+                                <div className="m-6" key={activeRace.id}>
+                                    <div className="text-4xl font-extrabold text-gray-700 p-6">
+                                        {activeRace.series.name}: {activeRace.number} at {activeRace.Time.slice(10, 16)}
+                                    </div>
+                                    <LiveResultsTable data={activeRace} key={JSON.stringify(activeRace)} />
                                 </div>
-                                <LiveResultsTable data={race} />
+
                             </div>
                         )
-                    })}
-
-                </div>
-                :
-                <div>
-                    <p className="text-6xl font-extrabold text-gray-700 p-6"> No Races Today</p>
-                </div>
-            }
+                    case pageModes.results:
+                        return (
+                            <div key={JSON.stringify(races)}>
+                                {races.map((race, index) => {
+                                    return (
+                                        <div className="m-6" key={race.id}>
+                                            <div className="text-4xl font-extrabold text-gray-700 p-6">
+                                                {race.series.name}: {race.number} at {race.Time.slice(10, 16)}
+                                            </div>
+                                            <LiveResultsTable data={race} />
+                                        </div>
+                                    )
+                                })}
+                            </div>
+                        )
+                    default: //countdown and starting and allStarted
+                        return (
+                            <div>
+                                <p className="text-6xl font-extrabold text-gray-700 p-6"> No Races Today</p>
+                            </div>
+                        )
+                }
+            })()}
         </div>
     );
 }
