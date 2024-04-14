@@ -86,7 +86,7 @@ const columnHelper = createColumnHelper<ResultsDataType>()
 
 const LiveResultsTable = (props: any) => {
     let [race, setRace] = useState<RaceDataType>(props.data)
-    // console.log(race)
+    console.log(race)
 
     let maxLaps = 0
     race.results.forEach((result) => {

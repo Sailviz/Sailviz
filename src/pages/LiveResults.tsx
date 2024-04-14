@@ -45,7 +45,6 @@ const LiveResults = () => {
 
         //calculate corrected time
         resultsData.forEach(result => {
-            console.log(result.lapTimes.times[result.lapTimes.times.length - 1])
             let seconds = result.lapTimes.times[result.lapTimes.times.length - 1] - race.startTime
             result.CorrectedTime = (seconds * 1000 * (maxLaps / result.lapTimes.times.length)) / result.boat.py
             if (result.finishTime == -1) {
@@ -120,6 +119,11 @@ const LiveResults = () => {
             let activeFlag = false
             console.log("refreshing results")
             let racesCopy = window.structuredClone(races)
+            //update local copy of results
+            for (let i = 0; i < racesCopy.length; i++) {
+                var data = await DB.getRaceById(racesCopy[i]!.id)
+                racesCopy[i] = data
+            }
             //check if any of the races are active
             for (let i = 0; i < racesCopy.length; i++) {
                 if (checkActive(racesCopy[i]!)) {
@@ -138,14 +142,11 @@ const LiveResults = () => {
             if (!activeFlag) {
                 setMode(pageModes.results)
                 for (let i = 0; i < racesCopy.length; i++) {
-                    var data = await DB.getRaceById(racesCopy[i]!.id)
-
-                    if (data.Type == "Handicap") {
-                        data.results = calculateHandicapResults(data)
+                    if (racesCopy[i]!.Type == "Handicap") {
+                        racesCopy[i]!.results = calculateHandicapResults(racesCopy[i]!)
                     } else {
-                        calculatePursuitResults(data)
+                        calculatePursuitResults(racesCopy[i]!)
                     }
-                    racesCopy[i] = data
                 }
                 setRaces(racesCopy)
             }
@@ -161,7 +162,7 @@ const LiveResults = () => {
                 switch (mode) {
                     case pageModes.live:
                         return (
-                            <div key={JSON.stringify(activeRace)}>
+                            <div>
                                 <div className="w-1/4 p-2 m-2 border-4 rounded-lg bg-white text-lg font-medium">
                                     Race Time: <RaceTimer startTime={activeRace.startTime} timerActive={true} onFiveMinutes={null} onFourMinutes={null} onOneMinute={null} onGo={null} onWarning={null} reset={false} />
                                 </div>
@@ -169,7 +170,7 @@ const LiveResults = () => {
                                     <div className="text-4xl font-extrabold text-gray-700 p-6">
                                         {activeRace.series.name}: {activeRace.number} at {activeRace.Time.slice(10, 16)}
                                     </div>
-                                    <LiveResultsTable data={activeRace} key={JSON.stringify(activeRace)} />
+                                    <LiveResultsTable data={activeRace} />
                                 </div>
 
                             </div>
