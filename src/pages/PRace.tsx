@@ -112,6 +112,7 @@ const RacePage = () => {
         let newRaceData: RaceDataType = race
         newRaceData.startTime = localTime
         setRace(newRaceData)
+        await DB.updateRaceById(newRaceData)
         startRace()
     }
 
@@ -296,9 +297,11 @@ const RacePage = () => {
     const setOrder = async (newState: ResultsDataType[]) => {
         if (newState.length < 2) return
         console.log(newState)
-        newState.forEach((_, index) => {
-            newState[index]!.Position = index + 1
-        })
+        let position = 1
+        for (let i = 0; i < newState.length; i++) {
+            newState[i]!.Position = position
+            position++
+        }
         let tempResults = { ...race, results: newState }
         setRace(tempResults)
         tempResults.results.forEach(result => {
