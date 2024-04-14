@@ -1,3 +1,3 @@
 const dev = process.env.NODE_ENV !== 'production';
 
-export const server = dev ? 'http://localhost:3000' : 'http://race.whitefriarssc.org';
+export const server = dev ? 'http://192.168.1.220:3308' : 'http://race.whitefriarssc.org';
