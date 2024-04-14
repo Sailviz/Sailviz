@@ -294,15 +294,15 @@ const RacePage = () => {
         router.push({ pathname: '/Race', query: { race: race.id } })
     }
 
-    const setOrder = async (newState: ResultsDataType[]) => {
-        if (newState.length < 2) return
-        console.log(newState)
+    const setOrder = async (updatedResults: ResultsDataType[]) => {
+        if (updatedResults.length < 2) return
+        console.log(updatedResults)
         let position = 1
-        for (let i = 0; i < newState.length; i++) {
-            newState[i]!.Position = position
+        for (let i = 0; i < updatedResults.length; i++) {
+            updatedResults[i]!.Position = position
             position++
         }
-        let tempResults = { ...race, results: newState }
+        let tempResults = { ...race, results: updatedResults }
         setRace(tempResults)
         tempResults.results.forEach(result => {
             DB.updateResult(result)
