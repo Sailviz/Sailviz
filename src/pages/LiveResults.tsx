@@ -162,8 +162,9 @@ const LiveResults = () => {
                     case pageModes.live:
                         return (
                             <div key={JSON.stringify(activeRace)}>
-                                <RaceTimer startTime={activeRace.startTime} timerActive={true} onFiveMinutes={null} onFourMinutes={null} onOneMinute={null} onGo={null} onWarning={null} reset={false} />
-
+                                <div className="w-1/4 p-2 m-2 border-4 rounded-lg bg-white text-lg font-medium">
+                                    Race Time: <RaceTimer startTime={activeRace.startTime} timerActive={true} onFiveMinutes={null} onFourMinutes={null} onOneMinute={null} onGo={null} onWarning={null} reset={false} />
+                                </div>
                                 <div className="m-6" key={activeRace.id}>
                                     <div className="text-4xl font-extrabold text-gray-700 p-6">
                                         {activeRace.series.name}: {activeRace.number} at {activeRace.Time.slice(10, 16)}
