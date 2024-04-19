@@ -319,6 +319,7 @@ const RacePage = () => {
             let seconds = result.finishTime - race.startTime
             console.log(seconds)
             result.CorrectedTime = (seconds * 1000 * (maxLaps / result.lapTimes.times.length)) / result.boat.py
+            result.CorrectedTime = Math.round(result.CorrectedTime*10)/10
             console.log(result.CorrectedTime)
             if (result.finishTime == -1) {
                 result.CorrectedTime = 99999
