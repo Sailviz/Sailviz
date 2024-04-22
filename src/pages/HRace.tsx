@@ -298,7 +298,7 @@ const RacePage = () => {
         orderResults(tempdata.results)
         //send to DB
 
-        let sound = document.getElementById("audio") as HTMLAudioElement
+        let sound = document.getElementById("Beep") as HTMLAudioElement
         sound!.currentTime = 0
         sound!.play();
     }
@@ -378,7 +378,7 @@ const RacePage = () => {
             setRaceState(raceStateType.calculate)
 
         }
-        let sound = document.getElementById("audio") as HTMLAudioElement
+        let sound = document.getElementById("Beep") as HTMLAudioElement
         sound!.currentTime = 0
         sound!.play();
     }
