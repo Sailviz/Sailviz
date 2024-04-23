@@ -12,6 +12,12 @@ enum raceStateType {
     calculate
 }
 
+enum modeType {
+    Retire,
+    Lap,
+    Finish
+}
+
 const RacePage = () => {
 
     const router = useRouter()
@@ -87,7 +93,7 @@ const RacePage = () => {
     var [raceState, setRaceState] = useState<raceStateType>(raceStateType.reset)
     const [timerActive, setTimerActive] = useState(false);
     const [resetTimer, setResetTimer] = useState(false);
-    const [finishMode, setFinishMode] = useState(false)
+    const [mode, setMode] = useState(modeType.Lap)
 
     const startRaceButton = async () => {
         console.log(club.settings.ClockOffset)
@@ -298,7 +304,7 @@ const RacePage = () => {
         orderResults(tempdata.results)
         //send to DB
 
-        let sound = document.getElementById("audio") as HTMLAudioElement
+        let sound = document.getElementById("Beep") as HTMLAudioElement
         sound!.currentTime = 0
         sound!.play();
     }
@@ -319,6 +325,7 @@ const RacePage = () => {
             let seconds = result.finishTime - race.startTime
             console.log(seconds)
             result.CorrectedTime = (seconds * 1000 * (maxLaps / result.lapTimes.times.length)) / result.boat.py
+            result.CorrectedTime = Math.round(result.CorrectedTime * 10) / 10
             console.log(result.CorrectedTime)
             if (result.finishTime == -1) {
                 result.CorrectedTime = 99999
@@ -377,7 +384,7 @@ const RacePage = () => {
             setRaceState(raceStateType.calculate)
 
         }
-        let sound = document.getElementById("audio") as HTMLAudioElement
+        let sound = document.getElementById("Beep") as HTMLAudioElement
         sound!.currentTime = 0
         sound!.play();
     }
@@ -444,6 +451,30 @@ const RacePage = () => {
         }
         orderResults(race.results)
     }, [race])
+
+    useEffect(() => {
+        let RetireModeButton = document.getElementById("RetireModeButton")!.firstChild as HTMLElement
+        let LapModeButton = document.getElementById("LapModeButton")!.firstChild as HTMLElement
+        let FinishModeButton = document.getElementById("FinishModeButton")!.firstChild as HTMLElement
+
+        switch (mode) {
+            case modeType.Retire:
+                RetireModeButton.classList.add("bg-green-600")
+                LapModeButton.classList.remove("bg-green-600")
+                FinishModeButton.classList.remove("bg-green-600")
+                break
+            case modeType.Lap:
+                RetireModeButton.classList.remove("bg-green-600")
+                LapModeButton.classList.add("bg-green-600")
+                FinishModeButton.classList.remove("bg-green-600")
+                break
+            case modeType.Finish:
+                RetireModeButton.classList.remove("bg-green-600")
+                LapModeButton.classList.remove("bg-green-600")
+                FinishModeButton.classList.add("bg-green-600")
+                break
+        }
+    }, [mode])
 
     useEffect(() => {
         setClubId(Cookies.get('clubId') || "")
@@ -540,24 +571,25 @@ const RacePage = () => {
                     </div>
                 </div>
                 <div className="flex w-full shrink flex-row justify-around">
-
-                    <div className="w-6/12 p-2 my-2 mx-4 border-4 rounded-lg bg-white text-lg font-medium">
-                        {Instructions}
-                    </div>
                     <div className="w-1/4 p-2">
-                        <p onClick={() => undo()} className="cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-xl px-5 py-2.5 text-center">
+                        <p onClick={() => undo()} className="cursor-pointer text-white bg-red-600 font-medium rounded-lg text-xl px-5 py-2.5 text-center">
                             Undo
                         </p>
                     </div>
-                    <div className="w-1/4 p-2" id="ModeButton">
-                        {finishMode ?
-                            <p onClick={() => setFinishMode(false)} className="cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-xl px-5 py-2.5 text-center">
-                                Lap Mode
-                            </p> :
-                            <p onClick={() => setFinishMode(true)} className="cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-xl px-5 py-2.5 text-center">
-                                Finish Mode
-                            </p>
-                        }
+                    <div className="w-1/4 p-2" id="RetireModeButton">
+                        <p onClick={() => setMode(modeType.Retire)} className="cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-xl px-5 py-2.5 text-center">
+                            Retire Mode
+                        </p>
+                    </div>
+                    <div className="w-1/4 p-2" id="LapModeButton">
+                        <p onClick={() => setMode(modeType.Lap)} className="cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-xl px-5 py-2.5 text-center">
+                            Lap Mode
+                        </p>
+                    </div>
+                    <div className="w-1/4 p-2" id="FinishModeButton">
+                        <p onClick={() => setMode(modeType.Finish)} className="cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-xl px-5 py-2.5 text-center">
+                            Finish Mode
+                        </p>
                     </div>
                 </div>
                 <div className="overflow-auto">
@@ -577,23 +609,34 @@ const RacePage = () => {
                                             }
                                         </div>
                                         <div className="px-5 py-2 w-2/4">
-                                            {finishMode && raceState == raceStateType.running ?
+                                            {raceState == raceStateType.running ?
                                                 <div>
-                                                    <p onClick={(e) => { finishBoat(result.id) }} className="cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-sm p-5 text-center mb-5">
-                                                        Finish
-                                                    </p>
-                                                    <p onClick={(e) => { confirm("are you sure you retire " + result.SailNumber) ? retireBoat(result.id) : null; }} className="text-white bg-blue-600 font-medium rounded-lg text-sm p-5 text-center mt-5">
-                                                        Retire
-                                                    </p>
+                                                    {(() => {
+                                                        switch (mode) {
+                                                            case modeType.Finish:
+                                                                return (
+                                                                    <p onClick={(e) => { finishBoat(result.id) }} className="cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-sm p-5 text-center mb-5">
+                                                                        Finish
+                                                                    </p>
+
+                                                                )
+                                                            case modeType.Retire:
+                                                                return (
+                                                                    <p onClick={(e) => { confirm("are you sure you retire " + result.SailNumber) ? retireBoat(result.id) : null; }} className="text-white bg-blue-600 font-medium rounded-lg text-sm p-5 text-center mt-5">
+                                                                        Retire
+                                                                    </p>
+                                                                )
+                                                            case modeType.Lap:
+                                                                return (
+                                                                    <p onClick={(e) => { lapBoat(result.id) }} className="text-white bg-blue-600 font-medium rounded-lg text-sm p-5 text-center mt-5">
+                                                                        Lap
+                                                                    </p>
+                                                                )
+                                                        }
+                                                    })()}
                                                 </div>
                                                 :
                                                 <></>
-                                            }
-                                            {!finishMode && raceState == raceStateType.running ?
-                                                <p onClick={(e) => { lapBoat(result.id) }} className="cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-sm p-5 text-center">
-                                                    Lap
-                                                </p>
-                                                : <></>
                                             }
 
                                         </div>
