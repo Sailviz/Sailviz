@@ -3,7 +3,6 @@ import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import * as DB from '../components/apiMethods';
 import Cookies from "js-cookie";
-
 const RaceOfficerGuide = () => {
 
     const router = useRouter()
@@ -82,21 +81,14 @@ const RaceOfficerGuide = () => {
                 <div id="BackToHome" onClick={() => router.push("/Dashboard")} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center w-1/12 mt-4 mx-4">
                     Back To Home
                 </div>
-                <div className="container mx-auto flex flex-col items-center justify-center h-screen p-4">
-                    <p className="text-5xl md:text-[5rem] leading-normal font-extrabold text-gray-700">
-                        Dashboard Page
-                    </p>
-                    <p>This Will be populated with instructions on how to use it.</p>
-                    <p className="text-5xl md:text-[5rem] leading-normal font-extrabold text-gray-700">
-                        Handicap Racing
-                    </p>
-                    <p>This Will be populated with instructions on how to use it.</p>
-                    <p className="text-5xl md:text-[5rem] leading-normal font-extrabold text-gray-700">
-                        Pursuit Racing
-                    </p>
-                    <p>This Will be populated with instructions on how to use it.</p>
-                </div>
+                <div className=' w-11/12 h-full mx-auto my-3'>
+                    <iframe
+                        className=' block w-full h-full'
+                        src="/0.2 Race Management Guide.pdf"
+                        title="Async & Performance"
+                    />
 
+                </div>
             </div>
         </Dashboard>
     );
