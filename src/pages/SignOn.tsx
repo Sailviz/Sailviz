@@ -358,7 +358,7 @@ const SignOnPage = () => {
             <div className="flex w-full shrink flex-row justify-around">
                 {races.map((race, index) => {
                     return (
-                        <p onClick={() => { setActiveRaceData(races[index]!); showPage("Results") }} className="w-1/4 p-2 m-2 cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-xl px-5 py-2.5 text-center">
+                        <p key={index} onClick={() => { setActiveRaceData(races[index]!); showPage("Results") }} className="w-1/4 p-2 m-2 cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-xl px-5 py-2.5 text-center">
                             {race.series.name}: {race.number} Results
                         </p>
                     )
