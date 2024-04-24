@@ -4,19 +4,9 @@ import * as DB from '../components/apiMethods';
 import Cookies from "js-cookie";
 import SignOnTable from "../components/SignOnTable";
 import Select from 'react-select';
-import { InputType } from "zlib";
-import { json } from "stream/consumers";
 import RaceResultsTable from "../components/RaceResultsTable";
-import { active } from "sortablejs";
 import Switch from "../components/Switch";
-import { set } from "cypress/types/lodash";
 
-enum raceStateType {
-    running,
-    stopped,
-    reset,
-    calculate
-}
 
 const SignOnPage = () => {
 
@@ -540,11 +530,12 @@ const SignOnPage = () => {
                 </div>
             </div>
             <div id="Guide" className="hidden" >
-                <div className=' w-11/12 h-full mx-auto my-3'>
+                <div className=' w-11/12 mx-auto my-3'>
                     <iframe
-                        className=' block w-full h-full'
-                        src="/0.2 Signon Guide.pdf"
+                        className='block w-full'
+                        src="/0.2 Race Sign On Guide.pdf"
                         title="Async & Performance"
+                        height="800"
                     />
 
                 </div>
