@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
-import Layout from "../components/Layout";
+import Layout from "../../components/Layout";
 import Cookies from "js-cookie";
 import { useRouter } from "next/router";
-import * as DB from '../components/apiMethods';
-import LiveResultsTable from "../components/LiveResultsTable";
-import RaceTimer from "../components/HRaceTimer"
+import * as DB from '../../components/apiMethods';
+import LiveResultsTable from "../../components/LiveResultsTable";
+import RaceTimer from "../../components/HRaceTimer"
 
 
 enum pageModes {
@@ -14,8 +14,6 @@ enum pageModes {
 
 const LiveResults = () => {
     const router = useRouter()
-
-    const query = router.query
 
     var [clubId, setClubId] = useState<string>("invalid")
     var [races, setRaces] = useState<RaceDataType[]>([{
@@ -79,7 +77,16 @@ const LiveResults = () => {
     }
 
     useEffect(() => {
-        setClubId(Cookies.get('clubId') || "")
+        let clubName = router.query.club
+        if (clubName) {
+            DB.getClubByName(clubName.toString()).then((data) => {
+                if (data) {
+                    setClubId(data.id)
+                } else {
+                    console.log("could not find club")
+                }
+            })
+        }
     }, [router])
 
     useEffect(() => {
