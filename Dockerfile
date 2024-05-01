@@ -2,6 +2,8 @@ FROM node:20-alpine
 
 ENV jwtSecret ${jwtSecret}
 
+ENV NEXT_PUBLIC_SENTRY_DSN ${NEXT_PUBLIC_SENTRY_DSN}
+
 ENV DATABASE_URL mysql://${DATABASE_USER}:${DATABASE_PASSWORD}@${DATABASE_HOST}/pg
 
 # Create app directory

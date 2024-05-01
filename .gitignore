@@ -40,3 +40,6 @@ yarn-error.log*
 *.tsbuildinfo
 /cypress/fixtures/data.json
 /cypress/screenshots
+
+# Sentry Config File
+.sentryclirc
