@@ -851,6 +851,7 @@ const Club = () => {
                                 onBlur={() => DB.UpdateClubById(club)}
                             />
                         </div>
+                        <p onClick={() => { throw new Error("custom error") }}> make error</p>
                     </div>
                     <div id="series" className="hidden w-full">
                         <p className="text-6xl font-extrabold text-gray-700 p-6">

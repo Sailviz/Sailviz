@@ -379,7 +379,7 @@ export async function getRYAPY(): Promise<BoatDataType[]> {
         });
 };
 
-export async function getClub(club: string): Promise<ClubDataType> {
+export async function getClubByName(club: string): Promise<ClubDataType> {
     const body = {
         "name": club,
     }
