@@ -12,7 +12,8 @@ module.exports = withSentryConfig(
     // Suppresses source map uploading logs during build
     silent: true,
     org: "sailviz",
-    project: "javascript-nextjs",
+    project: "dev-sailviz",
+    dryRun: true,
   },
   {
     // For all available options, see:

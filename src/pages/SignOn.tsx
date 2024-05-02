@@ -533,8 +533,7 @@ const SignOnPage = () => {
                 <div className=' w-11/12 mx-auto my-3'>
                     <iframe
                         className='block w-full'
-                        src="/0.2 Race Sign On Guide.pdf"
-                        title="Async & Performance"
+                        src="/0.2 Race Sign On Guide.pdf#toolbar=0"
                         height="800"
                     />
 
