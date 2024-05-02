@@ -1,7 +1,12 @@
 const { withSentryConfig } = require("@sentry/nextjs");
 
 /** @type {import('next').NextConfig} */
-const nextConfig = {};
+const nextConfig = {
+  publicRuntimeConfig: {
+    // Will be available on both server and client
+    NEXT_PUBLIC_SENTRY_DSN: process.env.NEXT_PUBLIC_SENTRY_DSN,
+  },
+};
 
 module.exports = withSentryConfig(
   nextConfig,
