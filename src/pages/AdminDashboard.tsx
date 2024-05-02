@@ -31,7 +31,7 @@ const Club = () => {
 
     var [user, setUser] = useState<UserDataType>({
         id: "",
-        name: "",
+        displayName: "",
         settings: {},
         permLvl: 0,
         clubId: ""
@@ -668,7 +668,7 @@ const Club = () => {
 
 
     return (
-        <Dashboard club={club.name} userName={user.name}>
+        <Dashboard club={club.name} displayName={user.displayName}>
             <div className="w-full flex flex-row items-center justify-start panel-height">
                 <div id="leftBar" className='flex basis-3/12 flex-col justify-start h-full border-pink-500 border-r-2 overflow-y-auto'>
                     <div id="settingsbutton" className='w-full flex cursor-pointer' onClick={showSettings}>

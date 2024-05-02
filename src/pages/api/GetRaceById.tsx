@@ -9,9 +9,13 @@ async function findRace(id: any) {
             id: id
         },
         include: {
-            results: {
+            fleets: {
                 include: {
-                    boat: true
+                    results: {
+                        include: {
+                            boat: true
+                        }
+                    }
                 }
             },
             series: true

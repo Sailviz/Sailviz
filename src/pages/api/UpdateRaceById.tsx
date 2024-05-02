@@ -15,7 +15,6 @@ async function updateRace(race: RaceDataType) {
             ASO: race.ASO,
             Time: race.Time,
             Type: race.Type,
-            startTime: race.startTime,
         }
     })
     return result;

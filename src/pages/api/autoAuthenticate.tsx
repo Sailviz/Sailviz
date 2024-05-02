@@ -39,7 +39,7 @@ const Authenticate = async (req: NextApiRequest, res: NextApiResponse) => {
         var user = await findUser(uuid)
         if (user) {
             const token = jwt.sign(
-                { name: user.name, email: user.email, id: user.id },
+                { displayName: user.displayName, username: user.username, id: user.id },
                 jwtSecret,
                 { expiresIn: '364d' }
             );

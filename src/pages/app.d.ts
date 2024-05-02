@@ -83,7 +83,7 @@ type ClubDataType = {
 
 type UserDataType = {
   id: string;
-  name: string;
+  displayName: string;
   settings: object;
   permLvl: number;
   clubId: string;

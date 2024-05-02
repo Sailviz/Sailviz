@@ -7,17 +7,17 @@ import assert from 'assert';
 const saltRounds = 10;
 const jwtSecret = process.env.jwtSecret;
 
-async function findUser(email: string) {
+async function findUser(username: string) {
     const result = await prisma.users.findUnique({
         where: {
-            email: email,
+            username: username,
         },
     })
     return result;
 }
 
-async function authUser(email: string, password: string) {
-    var user = await findUser(email);
+async function authUser(username: string, password: string) {
+    var user = await findUser(username);
     if (user == null) { return false }
     var result = bcrypt.compare(password, user.password);
     return result;
@@ -29,33 +29,33 @@ const Authenticate = async (req: NextApiRequest, res: NextApiResponse) => {
         // check if we have all data.
         // The website stops this, but just in case
         try {
-            assert.notStrictEqual(null, req.body.email, 'Email required');
+            assert.notStrictEqual(null, req.body.username, 'username required');
             assert.notStrictEqual(null, req.body.password, 'Password required');
         } catch (bodyError) {
-            res.json({ error: true, message: "email or password missing" });
+            res.json({ error: true, message: "username or password missing" });
         }
 
-        const email = req.body.email;
+        const username = req.body.username;
         const password = req.body.password;
 
-        var user = await findUser(email)
+        var user = await findUser(username)
         if (user) {
-            var result = await authUser(email, password)
+            var result = await authUser(username, password)
             if (result) {
                 const token = jwt.sign(
-                    { name: user.name, email: user.email, id: user.id },
+                    { username: user.username, displayName: user.displayName, id: user.id },
                     jwtSecret,
                     { expiresIn: '364d' }
                 );
                 res.json({ error: false, token: token, club: user.clubId, user: user.id });
                 return;
             } else {
-                res.json({ error: true, message: 'Wrong email or password' });
+                res.json({ error: true, message: 'Wrong username or password' });
                 return;
             }
         }
         else {
-            res.json({ error: true, message: 'Wrong email or password' });
+            res.json({ error: true, message: 'Wrong username or password' });
             return;
         }
     }

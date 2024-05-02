@@ -18,7 +18,7 @@ const SignOnPage = () => {
 
     var [user, setUser] = useState<UserDataType>({
         id: "",
-        name: "",
+        displayName: "",
         settings: {},
         permLvl: 0,
         clubId: ""

@@ -83,7 +83,7 @@ const RacePage = () => {
 
     var [user, setUser] = useState<UserDataType>({
         id: "",
-        name: "",
+        displayName: "",
         settings: {},
         permLvl: 0,
         clubId: ""
@@ -526,7 +526,7 @@ const RacePage = () => {
     }, []);
 
     return (
-        <Dashboard club={club.name} userName={user.name}>
+        <Dashboard club={club.name} displayName={user.displayName}>
             <audio id="Beep" src=".\beep-6.mp3" ></audio>
             <audio id="Countdown" src=".\Countdown.mp3" ></audio>
             <div className="w-full flex flex-col items-center justify-start panel-height">
