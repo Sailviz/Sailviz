@@ -84,8 +84,7 @@ const RaceOfficerGuide = () => {
                 <div className=' w-11/12 h-full mx-auto my-3'>
                     <iframe
                         className=' block w-full h-full'
-                        src="/0.2 Race Management Guide.pdf"
-                        title="Async & Performance"
+                        src="/0.2 Race Management Guide.pdf#toolbar=0"
                     />
 
                 </div>
