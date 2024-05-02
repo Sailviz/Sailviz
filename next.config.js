@@ -13,6 +13,7 @@ module.exports = withSentryConfig(
     silent: true,
     org: "sailviz",
     project: "dev-sailviz",
+    dryRun: true,
   },
   {
     // For all available options, see:
