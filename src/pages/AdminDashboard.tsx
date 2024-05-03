@@ -81,19 +81,6 @@ const Club = () => {
 
     const [options, setOptions] = useState([{ label: "", value: {} as BoatDataType }])
 
-
-
-    //adds an entry to a race and updates database
-    const createResult = async (id: string) => {
-        console.log(activeRaceData)
-        const entry = await DB.createResult(id)
-        setActiveRaceData({ ...activeRaceData, results: activeRaceData.results.concat(entry) })
-        var data = await DB.GetSeriesByClubId(clubId)
-        var array = [...data]
-        setSeriesData(array)
-        return entry
-    }
-
     const updateResult = async (result: ResultsDataType) => {
         console.log(result)
 
@@ -150,82 +137,6 @@ const Club = () => {
         var array = [...data]
         setSeriesData(array)
     }
-
-
-    const createHeader = (series: any) => {
-        var li = document.createElement('li');
-
-        var div = document.createElement('div')
-        div.className = 'py-4 flex'
-        var button = document.createElement('button')
-        var title = document.createElement('div')
-        button.className = 'px-4 z-10 relative rotate-90'
-        button.innerHTML = "▶"
-        button.type = "button"
-        button.onclick = function (event) {
-            event.stopPropagation()
-            expandSeries(series.id)
-
-        }
-
-        div.appendChild(button)
-        div.appendChild(title)
-        title.innerHTML += series.name
-
-        div.onclick = function () {
-            selectSeries(li)
-        }
-        li.appendChild(div)
-
-        li.id = series.id
-
-        li.className = 'list-none w-full bg-pink-400 text-lg font-extrabold text-gray-700 cursor-pointer select-none'
-
-
-        var Bar = document.getElementById("leftBar")
-        if (Bar == null) {
-            return
-        }
-        Bar.appendChild(li);
-    }
-    const createChild = (race: any) => {
-        var ul = document.createElement('ul');
-        ul.innerHTML = '<li>' + race.number + " (" + dayjs(race.Time, "YYYY-MM-DD HH:mm").format('ddd D MMM YY [at] HH:mm') + ")" + '</li>';
-
-        ul.className = 'list-none select-none w-full p-4 bg-pink-300 text-lg font-extrabold text-gray-700 ' + race.seriesId
-
-        ul.onclick = function () {
-            selectRace(race.id)
-        }
-
-        var Parent = document.getElementById(race.seriesId)
-        if (Parent == null) {
-            return
-        }
-        Parent.appendChild(ul);
-    }
-
-    const generateBar = () => {
-        removeChildren(document.getElementById("leftBar"))
-        seriesData.forEach(data => {
-            createHeader(data)
-            data.races.sort((a: any, b: any) => {
-                return a.number - b.number;
-            })
-            for (const race in data.races) {
-                createChild(data.races[race])
-            }
-        })
-    }
-
-    const removeChildren = (parent: any) => {
-        var children = [].slice.call(parent.children);
-        children.forEach((child: any) => {
-            if (child.id != 'homebutton' && child.id != 'settingsbutton') {
-                parent.removeChild(child);
-            }
-        })
-    };
 
     const selectSeries = async (element: any) => {
         hidePages()
@@ -289,28 +200,38 @@ const Club = () => {
 
     }
     const hidePages = () => {
-        var settings = document.getElementById('settings')
-        settings?.classList.add('hidden')
-        var home = document.getElementById('home')
-        home?.classList.add('hidden')
-        var series = document.getElementById('series')
-        series?.classList.add('hidden')
-        var race = document.getElementById('race')
-        race?.classList.add('hidden')
-        var blank = document.getElementById('blank')
-        blank?.classList.add('hidden')
+        var settingsPage = document.getElementById('settings')
+        settingsPage?.classList.add('hidden')
+        var homePage = document.getElementById('home')
+        homePage?.classList.add('hidden')
+        var seriesPage = document.getElementById('allSeries')
+        seriesPage?.classList.add('hidden')
+        var racePage = document.getElementById('allRaces')
+        racePage?.classList.add('hidden')
     }
 
     const showSettings = () => {
         hidePages()
-        var settings = document.getElementById('settings')
-        settings?.classList.remove('hidden')
+        var settingsPage = document.getElementById('settings')
+        settingsPage?.classList.remove('hidden')
     }
 
     const showHome = () => {
         hidePages()
-        var settings = document.getElementById('home')
-        settings?.classList.remove('hidden')
+        var homePage = document.getElementById('home')
+        homePage?.classList.remove('hidden')
+    }
+
+    const showSeries = () => {
+        hidePages()
+        var seriespage = document.getElementById('allSeries')
+        seriespage?.classList.remove('hidden')
+    }
+
+    const showRaces = () => {
+        hidePages()
+        var racesPage = document.getElementById('allRaces')
+        racesPage?.classList.remove('hidden')
     }
 
     const saveRaceSettings = (e: ChangeEvent<HTMLInputElement>) => {
@@ -348,34 +269,10 @@ const Club = () => {
         }
     }
 
-    const saveSeriesSettings = (e: ChangeEvent<HTMLInputElement>) => {
-        let newSeriesData: SeriesDataType = activeSeriesData
-        console.log(newSeriesData)
-        newSeriesData.settings[e.target.id] = parseInt(e.target.value)
-        // setActiveSeriesData({ ...activeSeriesData, settings: [...activeSeriesData.settings, [e.target.id]: e.target.value]  })
-        setActiveSeriesData({ ...newSeriesData })
-
-        updateRanges()
-    }
-
     const saveClubSettings = (e: ChangeEvent<HTMLInputElement>) => {
         const tempdata = club
         tempdata.settings[e.target.id] = e.target.value
         setClub(tempdata)
-    }
-
-    const updateRanges = () => {
-        const range = document.getElementById('numberToCount') as HTMLInputElement
-        const rangeV = document.getElementById('rangeV') as HTMLInputElement
-        const newValue = Number((parseInt(range.value) - parseInt(range.min)) * 100 / (parseInt(range.max) - parseInt(range.min)))
-        const newPosition = 10 - (newValue * 0.2);
-        rangeV.innerHTML = `<span>${range.value}</span>`;
-        rangeV.style.left = `calc(${newValue}% + (${newPosition}px))`;
-    }
-
-    const updateBoatsToLatestRYA = async () => {
-        setBoatData(await DB.getRYAPY())
-        DB.setBoats(clubId, await DB.getRYAPY())
     }
 
     const updateBoat = async (boat: BoatDataType) => {
@@ -410,31 +307,7 @@ const Club = () => {
     }
 
 
-    const createRace = async () => {
-        var race = await DB.createRace(clubId, activeSeriesData.id)
-        console.log(race)
 
-        var newSeriesData: SeriesDataType[] = [...seriesData]
-        console.log(newSeriesData)
-        console.log(newSeriesData.findIndex(x => x.id === race.seriesId))
-        newSeriesData[newSeriesData.findIndex(x => x.id === race.seriesId)]?.races.push(race)
-        console.log(newSeriesData)
-        setSeriesData(newSeriesData)
-    }
-
-    const removeRace = async (raceId: string) => {
-        let result = await DB.deleteRace(raceId)
-        if (!result) { return } // failed to delete race
-        let newSeriesData: SeriesDataType[] = [...seriesData]
-        var seriesIndex = newSeriesData.findIndex(y => y.id == activeSeriesData.id)
-        var thisSeries = newSeriesData[seriesIndex]
-        if (thisSeries == undefined) return
-        let raceIndex = thisSeries.races.findIndex(x => x.id === raceId)
-        console.log(raceIndex)
-        newSeriesData[seriesIndex]?.races.splice(raceIndex, 1)
-        console.log(newSeriesData)
-        setSeriesData(newSeriesData)
-    }
 
     const updateSeries = async (series: SeriesDataType) => {
         const tempdata = seriesData
@@ -636,19 +509,6 @@ const Club = () => {
     }, [clubId, router])
 
     useEffect(() => {
-        generateBar()
-        //The below works, but it causes all the folders to open
-        // let timer1 = setTimeout(async () => {
-        //     var data = await DB.GetSeriesByClubId(clubId)
-        //     var array = [...data]
-        //     setSeriesData(array)
-        // }, 5000);
-        // return () => {
-        //     clearTimeout(timer1);
-        // }
-    }, [seriesData]);
-
-    useEffect(() => {
         let timer1 = setTimeout(async () => {
             console.log(activeRaceData)
             console.log(document.activeElement?.tagName)
@@ -679,6 +539,16 @@ const Club = () => {
                     <div id='homebutton' className='w-full flex cursor-pointer' onClick={showHome}>
                         <div className='w-full p-4 bg-pink-500 text-lg font-extrabold text-gray-700 over'>
                             <p>Home</p>
+                        </div>
+                    </div>
+                    <div id='seriesbutton' className='w-full flex cursor-pointer' onClick={showSeries}>
+                        <div className='w-full p-4 bg-pink-500 text-lg font-extrabold text-gray-700 over'>
+                            <p>All Series</p>
+                        </div>
+                    </div>
+                    <div id='racesbutton' className='w-full flex cursor-pointer' onClick={showRaces}>
+                        <div className='w-full p-4 bg-pink-500 text-lg font-extrabold text-gray-700 over'>
+                            <p>All Races</p>
                         </div>
                     </div>
                 </div>
@@ -783,6 +653,22 @@ const Club = () => {
                         <div onClick={() => router.push('/SignOn')} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-lg text-md px-5 py-2.5 text-center mr-3 md:mr-0 font-extrabold tracking-wide"> Open Sign on Sheet </div>
 
                     </div>
+                    <div id="allSeries" className='hidden'>
+                        {/* map series to buttons. */}
+                        {seriesData.map((series, index) => {
+                            return (
+                                <div className="m-6" key={JSON.stringify(series.id)}>
+                                    <div className="text-4xl font-extrabold text-gray-700 p-6" onClick={() => router.push({ pathname: '/Series', query: { series: series.id } })}>
+                                        {series.name}
+                                    </div>
+
+                                </div>
+                            )
+                        })}
+                    </div>
+                    <div id="allRaces" className='hidden'>
+
+                    </div>
                     <div id="settings" className="hidden w-full">
                         <p className="text-6xl font-extrabold text-gray-700 p-6">
                             Settings
@@ -854,45 +740,7 @@ const Club = () => {
                         <div onClick={() => { throw new Error("custom error") }} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-lg text-md px-5 py-2.5 text-center mr-3 md:mr-0 font-extrabold tracking-wide"> make an error </div>
 
                     </div>
-                    <div id="series" className="hidden w-full">
-                        <p className="text-6xl font-extrabold text-gray-700 p-6">
-                            {activeSeriesData.name}
-                        </p>
-                        <div className='p-6'>
-                            <SeriesTable data={activeSeriesData.races} key={JSON.stringify(seriesData)} removeRace={removeRace} />
-                        </div>
-                        <div className="p-6">
-                            <p id='seriesAddRace' onClick={createRace} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
-                                Add Race
-                            </p>
-                        </div>
-                        <div className='flex flex-col px-6 w-full '>
-                            <p className='text-2xl font-bold text-gray-700'>
-                                Races To Count
-                            </p>
-                            {/* padding for range bubble */}
-                            <div className='h-6'></div>
-                            <div className='range-wrap'>
-                                <div className='range-value' id='rangeV'></div>
-                                <input type="range"
-                                    id='numberToCount'
-                                    min="1"
-                                    max={activeSeriesData.races.length}
-                                    defaultValue={activeSeriesData.settings.numberToCount}
-                                    key={activeSeriesData.id}
-                                    onChange={saveSeriesSettings}
-                                    onBlur={() => DB.updateSeries(activeSeriesData)}
-                                />
-                            </div>
-                        </div>
-                        <SeriesResultsTable key={activeSeriesData.settings["numberToCount"] + activeSeriesData.id} data={activeSeriesData} clubId={clubId} />
-                        <div>
-                            <p className="text-6xl font-extrabold text-gray-700 p-6">
-                                Dev info
-                            </p>
-                            <p> id: {activeSeriesData.id}</p>
-                        </div>
-                    </div>
+
                     <div id="race" className="hidden">
                         <p className="text-6xl font-extrabold text-gray-700 p-6">
                             {activeSeriesData.name}: {activeRaceData.number}
@@ -997,7 +845,7 @@ const Club = () => {
                             </p>
                         </div>
                         <div className='p-6 w-full'>
-                            <RaceResultsTable data={activeRaceData.results} startTime={activeRaceData.startTime} key={JSON.stringify(activeRaceData.results)} deleteResult={deleteResult} updateResult={updateResult} createResult={createResult} clubId={clubId} raceId={activeRaceData.id} showEditModal={(id: string) => { showEditModal(id) }} />
+                            <RaceResultsTable data={activeRaceData.results} startTime={activeRaceData.startTime} key={JSON.stringify(activeRaceData.results)} deleteResult={deleteResult} updateResult={updateResult} createResult={null} clubId={clubId} raceId={activeRaceData.id} showEditModal={(id: string) => { showEditModal(id) }} />
                         </div>
                         <div className="p-6 w-3/4">
                             <p onClick={generateResults} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">

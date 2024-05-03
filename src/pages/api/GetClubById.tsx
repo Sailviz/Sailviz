@@ -3,7 +3,7 @@ import prisma from '../../components/prisma'
 import assert from 'assert';
 
 async function getClub(id: string) {
-    var result = await prisma.clubs.findFirst({
+    var result = await prisma.club.findFirst({
         where: {
             id: id
         }

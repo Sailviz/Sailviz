@@ -363,22 +363,6 @@ export async function deleteRace(id: string): Promise<RaceDataType> {
         });
 };
 
-export async function getRYAPY(): Promise<BoatDataType[]> {
-
-    return await fetch(`/api/GetRYAPY`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
-    })
-        .then((res) => res.json())
-        .then(async (data) => {
-            if (data && data.error) {
-                console.log(data.message)
-            } else {
-                return data.boats
-            }
-        });
-};
-
 export async function getClubByName(club: string): Promise<ClubDataType> {
     const body = {
         "name": club,
@@ -419,9 +403,10 @@ export async function setBoats(clubId: string, data: BoatDataType[]): Promise<Cl
         });
 };
 
-export async function createResult(raceId: string): Promise<ResultsDataType> {
+export async function createResult(raceId: string, fleetId: string): Promise<ResultsDataType> {
     const body = {
         "raceId": raceId,
+        "fleetId": fleetId
     }
     return await fetch(`/api/CreateResult`, {
         method: 'POST',
@@ -474,6 +459,82 @@ export async function updateResult(result: ResultsDataType): Promise<RaceDataTyp
                 console.log(data.message)
             } else {
                 return data.race
+            }
+        });
+};
+
+export async function createFleet(seriesId: string): Promise<FleetDataType> {
+    const body = {
+        seriesId: seriesId,
+    }
+    return await fetch(`/api/CreateFleet`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+    })
+        .then((res) => res.json())
+        .then(async (data) => {
+            if (data && data.error) {
+                console.log(data.message)
+            } else {
+                return data.fleet
+            }
+        });
+};
+
+export async function GetFleetsBySeries(seriesId: string): Promise<FleetDataType[]> {
+    const body = {
+        seriesId: seriesId,
+    }
+    return await fetch(`/api/GetFleetsBySeries`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+    })
+        .then((res) => res.json())
+        .then(async (data) => {
+            if (data && data.error) {
+                console.log(data.message)
+            } else {
+                return data.fleet
+            }
+        });
+};
+
+export async function updateFleetById(fleet: FleetDataType): Promise<FleetDataType> {
+    const body = {
+        fleet: fleet,
+    }
+    return await fetch(`/api/UpdateFleetById`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+    })
+        .then((res) => res.json())
+        .then(async (data) => {
+            if (data && data.error) {
+                console.log(data.message)
+            } else {
+                return data.fleet
+            }
+        });
+};
+
+export async function DeleteFleetById(fleetId: string): Promise<FleetDataType> {
+    const body = {
+        fleetId: fleetId,
+    }
+    return await fetch(`/api/DeleteFleetById`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+    })
+        .then((res) => res.json())
+        .then(async (data) => {
+            if (data && data.error) {
+                console.log(data.message)
+            } else {
+                return data.fleet
             }
         });
 };

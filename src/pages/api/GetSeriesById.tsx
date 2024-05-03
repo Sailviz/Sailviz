@@ -8,6 +8,17 @@ async function findSeries(id: any) {
         where: {
             id: id
         },
+        include: {
+            races: {
+                include: {
+                    results: {
+                        include: {
+                            boat: true
+                        }
+                    }
+                }
+            }
+        }
     })
     return result;
 }

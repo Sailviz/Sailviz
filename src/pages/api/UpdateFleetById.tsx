@@ -3,41 +3,36 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 
 import assert from 'assert';
 
-async function findRace(id: any) {
-    var result = await prisma.race.findFirst({
+async function updateFleet(fleet: FleetDataType) {
+    var result = await prisma.fleet.update({
         where: {
-            id: id
+            id: fleet.id
         },
-        include: {
-            results: {
-                include: {
-                    boat: true
-                }
-
-            },
-            series: true
+        data: {
+            name: fleet.name,
+            startTime: fleet.startTime,
         }
     })
     return result;
 }
 
-const GetRaceById = async (req: NextApiRequest, res: NextApiResponse) => {
+const UpdateRaceById = async (req: NextApiRequest, res: NextApiResponse) => {
     if (req.method === 'POST') {
         // check if we have all data.
         // The website stops this, but just in case
         try {
-            assert.notStrictEqual(undefined, req.body.id);
+            assert.notStrictEqual(undefined, req.body.fleet);
 
         } catch (bodyError) {
             res.json({ error: true, message: "information missing" });
             return;
         }
 
-        var id = req.body.id
+        var fleet: FleetDataType = req.body.fleet
 
-        var race = await findRace(id)
-        if (race) {
-            res.json({ error: false, race: race });
+        var updatedRace = await updateFleet(fleet)
+        if (updatedRace) {
+            res.json({ error: false, race: updatedRace });
         } else {
             // User exists
             res.json({ error: true, message: 'race not found' });
@@ -45,4 +40,4 @@ const GetRaceById = async (req: NextApiRequest, res: NextApiResponse) => {
     }
 };
 
-export default GetRaceById
+export default UpdateRaceById

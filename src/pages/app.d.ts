@@ -88,3 +88,11 @@ type UserDataType = {
   permLvl: number;
   clubId: string;
 };
+
+type FleetDataType = {
+  [key: string]: any;
+  id: string;
+  name: string;
+  seriesId: String;
+  startTime: number;
+};

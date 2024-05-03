@@ -4,7 +4,7 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 import assert from 'assert';
 
 async function findClub(name: string) {
-    var result = await prisma.clubs.findUnique({
+    var result = await prisma.club.findUnique({
         where: {
             name: name,
         },
@@ -13,7 +13,7 @@ async function findClub(name: string) {
 }
 
 async function createClub(name: string) {
-    var club = await prisma.clubs.create({
+    var club = await prisma.club.create({
         data: {
             name: name,
             settings: {}

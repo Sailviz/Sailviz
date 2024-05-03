@@ -78,7 +78,7 @@ const RaceOfficerGuide = () => {
     return (
         <Dashboard club={club.name} displayName={user.displayName}>
             <div className='w-full'>
-                <div id="BackToHome" onClick={() => router.push("/Dashboard")} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center w-1/12 mt-4 mx-4">
+                <div id="BackToHome" onClick={() => router.back()} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center w-1/12 mt-4 mx-4">
                     Back To Home
                 </div>
                 <div className=' w-11/12 h-full mx-auto my-3'>

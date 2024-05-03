@@ -17,7 +17,7 @@ async function findUser(username: string) {
 }
 
 async function findClub(clubId: string) {
-    var result = await prisma.clubs.findUnique({
+    var result = await prisma.club.findUnique({
         where: {
             id: clubId,
         },
