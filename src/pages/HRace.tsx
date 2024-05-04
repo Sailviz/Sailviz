@@ -527,11 +527,21 @@ const RacePage = () => {
         };
     }, []);
 
-    const showRetireModal = async () => {
+    const showRetireModal = async (id: string) => {
         const modal = document.getElementById("retireModal")
+        const retiring = document.getElementById("retireModalBoat")
+        retiring.textContent="Retiring: "
         modal?.classList.remove("hidden")
 
+
     }
+
+    const hideRetireModal = async () => {
+        const modal = document.getElementById("retireModal")
+        modal?.classList.add("hidden")
+
+    }
+
 
     return (
         <Dashboard club={club.name} userName={user.name}>
@@ -585,7 +595,7 @@ const RacePage = () => {
                         </p>
                     </div>
                     <div className="w-1/4 p-2" id="RetireModeButton">
-                        <p onClick={showRetireModal} className="cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-xl px-5 py-2.5 text-center">
+                        <p onClick={() => setMode(modeType.Retire)} className="cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-xl px-5 py-2.5 text-center">
                             Retire Mode
                         </p>
                     </div>
@@ -630,7 +640,7 @@ const RacePage = () => {
                                                                 )
                                                             case modeType.Retire:
                                                                 return (
-                                                                    <p onClick={(e) => { confirm("are you sure you retire " + result.SailNumber) ? retireBoat(result.id) : null; }} className="text-white bg-blue-600 font-medium rounded-lg text-sm p-5 text-center mt-5">
+                                                                    <p onClick={(e) => { showRetireModal(result.id) }} className="text-white bg-blue-600 font-medium rounded-lg text-sm p-5 text-center mt-5">
                                                                         Retire
                                                                     </p>
                                                                 )
@@ -677,8 +687,9 @@ const RacePage = () => {
             </div>
             <div id="retireModal" className="hidden fixed z-10 left-0 top-0 w-full h-full overflow-auto bg-gray-400 backdrop-blur-sm bg-opacity-20">
                 <div className="mx-auto my-20 px-a py-5 border w-1/4 bg-gray-300 rounded-sm">
-                    <div className="text-6xl font-extrabold text-gray-700 p-6 flex justify-center">Retire Boat</div>
-                    <div className="flex mb-2 justify-center">
+                    <div className="text-6xl font-extrabold text-gray-700 flex justify-center">Retire Boat</div>
+                    <span className="text-4xl font-extrabold text-gray-700 flex justify-center" id="retireModalBoat"></span>
+                    <div className="flex mb-2 mt-6 justify-center">
                         <p id="retireDNS" className="w-1/2 cursor-pointer text-white bg-blue-600 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
                             Did Not Start (DNS)
                         </p>
@@ -704,7 +715,7 @@ const RacePage = () => {
                         </p>
                     </div>
                     <div className="flex mt-8 justify-center">
-                        <p id="retireCancel" className="w-1/2 cursor-pointer text-white bg-red-600 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
+                        <p id="retireCancel" onClick={hideRetireModal} className="w-1/2 cursor-pointer text-white bg-red-600 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
                             Cancel
                         </p>
                     </div>
