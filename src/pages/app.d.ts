@@ -71,6 +71,7 @@ type BoatDataType = {
   py: number;
   pursuitStartTime: number;
   clubId: string;
+  boats: BoatDataType[];
 };
 
 type ClubDataType = {
@@ -95,4 +96,5 @@ type FleetDataType = {
   name: string;
   seriesId: String;
   startTime: number;
+  boats: BoatDataType[];
 };

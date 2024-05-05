@@ -1,16 +1,28 @@
 import React, { ChangeEvent, MouseEventHandler, useEffect, useState } from 'react';
-import dayjs from 'dayjs';
 import { createColumnHelper, flexRender, getCoreRowModel, RowSelection, useReactTable } from '@tanstack/react-table'
+import Select from 'react-select';
 
-
-const Text = ({ ...props }: any) => {
+const Boats = ({ ...props }: any) => {
     const initialValue = props.getValue()
-    const [value, setValue] = React.useState(initialValue)
+    const [value, setValue] = React.useState<BoatDataType[]>(initialValue)
+    let boats: { value: string, label: string }[] = []
+
+    value.forEach(boat => {
+        boats.push({ value: "", label: boat.name })
+    });
 
     return (
-        <p>
-            {value}
-        </p>
+        <div className="w-full p-2 mx-0 my-2">
+            <Select
+                styles={customStyles}
+                id="editClass"
+                className=' w-full h-full text-3xl'
+                value={boats}
+                isMulti={true}
+                isClearable={false}
+                isDisabled={true}
+            />
+        </div>
     );
 };
 
@@ -27,6 +39,7 @@ const Edit = ({ ...props }: any) => {
 
 };
 
+const customStyles = { multiValueRemove: (base: any) => ({ ...base, display: 'none' }) }
 
 const columnHelper = createColumnHelper<FleetDataType>()
 
@@ -45,7 +58,10 @@ const FleetTable = (props: any) => {
                 id: "name",
                 cell: info => info.getValue(),
             }),
-
+            columnHelper.accessor('boats', {
+                id: "boats",
+                cell: props => <Boats {...props} />,
+            }),
             columnHelper.accessor('', {
                 id: "Edit",
                 cell: props => <Edit {...props} id={props.row.original.id} showFleetModal={showFleetModal} />

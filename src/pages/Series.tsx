@@ -2,7 +2,7 @@ import React, { ChangeEvent, MouseEventHandler, useEffect, useState } from "reac
 import Router, { useRouter } from "next/router"
 import * as DB from '../components/apiMethods';
 import Cookies from "js-cookie";
-
+import Select from 'react-select';
 import SeriesResultsTable from "../components/SeriesResultsTable";
 import Dashboard from "../components/Dashboard";
 import SeriesTable from "../components/SeriesTable";
@@ -28,9 +28,12 @@ const SignOnPage = () => {
 
     var [user, setUser] = useState<UserDataType>({} as UserDataType)
 
+    const [boatData, setBoatData] = useState<BoatDataType[]>([])
+
     const [fleetModal, setFleetModal] = useState(false)
 
     const [options, setOptions] = useState([{ label: "", value: {} as BoatDataType }])
+    const [selectedOption, setSelectedOption] = useState<object[]>([])
 
     const [series, setSeries] = useState<SeriesDataType>({
         id: "",
@@ -107,13 +110,39 @@ const SignOnPage = () => {
 
     const deleteFleet = async (fleetId: string) => {
         let result = await DB.DeleteFleetById(fleetId)
-        if (!result) { return } // failed to delete race
+        if (result == undefined) {
+            console.warn("fleet not found: " + fleetId)
+            return
+        }
         let newfleets = fleets
         let fleetIndex = newfleets.findIndex(x => x.id === fleetId)
         console.log(fleetIndex)
         newfleets.splice(fleetIndex, 1)
         console.log(newfleets)
         setFleets([...newfleets])
+    }
+
+    const editFleet = async () => {
+        var fleet = fleets.find(x => x.id == activeFleetId)
+        if (fleet == undefined) {
+            console.warn("fleet not found: " + activeFleetId)
+            return
+        }
+        const Name = document.getElementById('editFleetName') as HTMLInputElement;
+        fleet.name = Name.value
+
+        fleet.boats = selectedOption.map(x => (x as any).value)
+
+        DB.updateFleetById(fleet)
+
+        //update local copy
+        let newfleets = fleets
+        let fleetIndex = newfleets.findIndex(x => x.id === activeFleetId)
+        newfleets[fleetIndex] = fleet
+        setFleets([...newfleets])
+
+        //hide fleet edit modal
+        setFleetModal(false)
     }
 
     const logout = async () => {
@@ -128,6 +157,19 @@ const SignOnPage = () => {
     const showFleetModal = async (fleetId: string) => {
         setActiveFleetId(fleetId)
         setFleetModal(true)
+        var fleet = fleets.find(x => x.id == fleetId)
+        if (fleet == undefined) {
+            console.warn("fleet not found: " + activeFleetId)
+            return
+        }
+        const Name = document.getElementById('editFleetName') as HTMLInputElement;
+        Name.value = fleet.name
+
+        try {
+            setSelectedOption(fleet.boats.map(x => ({ value: x, label: x.name })))
+        } catch (error) {
+            //result does not have boat assigned
+        }
 
     }
 
@@ -146,10 +188,25 @@ const SignOnPage = () => {
                 setFleets(fleetdata)
             })
         }
+        const getBoats = async () => {
+            var data = await DB.getBoats(clubId)
+            if (data) {
+                let array = [...data]
+                setBoatData(array)
+                let tempoptions: { label: string; value: BoatDataType }[] = []
+                array.forEach(boat => {
+                    tempoptions.push({ value: boat as BoatDataType, label: boat.name })
+                })
+                setOptions(tempoptions)
+            } else {
+                console.log("could not find boats")
+            }
+
+        }
         if (seriesId != undefined) {
             getSeries()
             getFleet()
-
+            getBoats()
         }
     }, [router, query.series])
 
@@ -192,7 +249,8 @@ const SignOnPage = () => {
 
     useEffect(() => {
         console.log("stuff updated")
-    }, [series, fleets])
+        console.log(selectedOption)
+    }, [selectedOption])
 
     return (
         <Dashboard club={club.name} displayName={user.displayName}>
@@ -205,13 +263,33 @@ const SignOnPage = () => {
                         <div className="text-6xl font-extrabold text-gray-700 p-6 float-right cursor-pointer" onClick={() => setFleetModal(false)}>&times;</div>
                         <div className="text-6xl font-extrabold text-gray-700 p-6">Edit Fleet</div>
                         <div className="flex w-3/4">
-
+                            <div className='flex flex-col px-6 w-full'>
+                                <p className='text-2xl font-bold text-gray-700'>
+                                    Name
+                                </p>
+                                <input type="text" id="editFleetName" name="Helm" className="h-full text-2xl p-4" />
+                            </div>
                         </div>
                         <div>
                             <p className="text-6xl font-extrabold text-gray-700 p-6">
                                 Boats
                             </p>
-
+                            <div className='flex flex-col px-6 w-full'>
+                                <p className='text-2xl font-bold text-gray-700'>
+                                    Class
+                                </p>
+                                <div className="w-full p-2 mx-0 my-2">
+                                    <Select
+                                        id="editClass"
+                                        className=' w-full h-full text-3xl'
+                                        options={options}
+                                        isMulti={true}
+                                        isClearable={false}
+                                        value={selectedOption}
+                                        onChange={(choice) => setSelectedOption(choice! as [])}
+                                    />
+                                </div>
+                            </div>
                         </div>
                         <div className="flex flex-row justify-end">
                             <div className=" flex justify-end mt-8">
@@ -223,7 +301,7 @@ const SignOnPage = () => {
                             </div>
                             <div className=" flex justify-end mt-8">
                                 <div className="p-4 mr-2">
-                                    <p id="confirmEdit" onClick={() => updateFleet(activeFleetId)} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-xl px-12 py-4 text-center mr-3 md:mr-0">
+                                    <p id="confirmEdit" onClick={editFleet} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-xl px-12 py-4 text-center mr-3 md:mr-0">
                                         update
                                     </p>
                                 </div>
@@ -247,7 +325,7 @@ const SignOnPage = () => {
                         Fleets
                     </p>
                     <div className='p-6'>
-                        <FleetTable data={fleets} key={fleets} showFleetModal={(fleetId: string) => showFleetModal(fleetId)} />
+                        <FleetTable data={fleets} key={JSON.stringify(fleets)} showFleetModal={(fleetId: string) => showFleetModal(fleetId)} />
                     </div>
                     <div className="p-6">
                         <p id='seriesAddRace' onClick={createFleet} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">

@@ -658,10 +658,11 @@ const Club = () => {
                         {seriesData.map((series, index) => {
                             return (
                                 <div className="m-6" key={JSON.stringify(series.id)}>
-                                    <div className="text-4xl font-extrabold text-gray-700 p-6" onClick={() => router.push({ pathname: '/Series', query: { series: series.id } })}>
+                                    <div className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-lg text-md px-5 py-2.5 text-center mr-3 md:mr-0 font-extrabold tracking-wide"
+                                        onClick={() => router.push({ pathname: '/Series', query: { series: series.id } })}
+                                    >
                                         {series.name}
                                     </div>
-
                                 </div>
                             )
                         })}

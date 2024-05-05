@@ -6,6 +6,9 @@ async function getFleets(seriesId: string) {
     var result = await prisma.fleet.findMany({
         where: {
             seriesId: seriesId
+        },
+        include: {
+            boats: true
         }
     })
     if (result == null) {

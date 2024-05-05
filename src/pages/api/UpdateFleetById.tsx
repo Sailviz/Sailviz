@@ -2,6 +2,7 @@ import prisma from '../../components/prisma'
 import type { NextApiRequest, NextApiResponse } from 'next'
 
 import assert from 'assert';
+import { connect } from 'http2';
 
 async function updateFleet(fleet: FleetDataType) {
     var result = await prisma.fleet.update({
@@ -11,6 +12,10 @@ async function updateFleet(fleet: FleetDataType) {
         data: {
             name: fleet.name,
             startTime: fleet.startTime,
+            boats: {
+                set: fleet.boats.map(boat => { return ({ id: boat.id }) })
+
+            }
         }
     })
     return result;

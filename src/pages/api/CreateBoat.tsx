@@ -3,7 +3,7 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 import assert from 'assert';
 
 async function findBoat(name: string, clubId: string) {
-    var result = await prisma.boats.findFirst({
+    var result = await prisma.boat.findFirst({
         where: {
             AND: [
                 {
@@ -19,7 +19,7 @@ async function findBoat(name: string, clubId: string) {
 }
 
 async function createBoat(name: string, crew: number, py: number, clubId: string) {
-    var boat = await prisma.boats.create({
+    var boat = await prisma.boat.create({
         data: {
             name: name,
             crew: crew,

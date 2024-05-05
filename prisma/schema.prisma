@@ -22,7 +22,7 @@ model Users {
   @@index([clubId])
 }
 
-model Boats {
+model Boat {
   id               String   @id @unique @default(uuid())
   name             String
   crew             Int
@@ -31,7 +31,7 @@ model Boats {
   club             Club     @relation(fields: [clubId], references: [id])
   clubId           String
   results          Result[]
-
+  fleets           Fleet[]
   @@index([clubId])
 }
 
@@ -40,7 +40,7 @@ model Club {
   name     String   @unique
   settings Json
   series   Series[]
-  boats    Boats[]
+  boats    Boat[]
   users    Users[]
 }
 
@@ -79,6 +79,7 @@ model Fleet {
   seriesId  String
   startTime Int
   results   Result[]
+  boats            Boat[]
 
   @@index([seriesId])
 }
@@ -91,7 +92,7 @@ model Result {
   raceId          String
   Helm            String
   Crew            String
-  boat            Boats?  @relation(fields: [boatId], references: [id])
+  boat            Boat?  @relation(fields: [boatId], references: [id])
   boatId          String?
   SailNumber      String
   finishTime      Int
