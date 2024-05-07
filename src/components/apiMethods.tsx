@@ -495,6 +495,7 @@ export async function GetFleetsBySeries(seriesId: string): Promise<FleetDataType
         .then(async (data) => {
             if (data && data.error) {
                 console.log(data.message)
+                return undefined
             } else {
                 return data.fleet
             }

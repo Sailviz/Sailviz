@@ -2,6 +2,15 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 import prisma from '../../components/prisma'
 import assert from 'assert';
 
+
+async function getSeries(seriesId: string) {
+    var result = await prisma.series.findUnique({
+        where: {
+            id: seriesId
+        }
+    })
+    return result;
+}
 async function getFleets(seriesId: string) {
     var result = await prisma.fleet.findMany({
         where: {
@@ -25,7 +34,13 @@ const GetFleetsBySeries = async (req: NextApiRequest, res: NextApiResponse) => {
         return;
     }
     var seriesId = req.body.seriesId
+    let series = await getSeries(seriesId)
+
     if (req.method === 'POST') {
+        if (!series?.fleetsEnabled) {
+            res.json({ error: true, message: 'Fleets not enabled for this series' });
+            return;
+        }
         var fleet = await getFleets(seriesId)
         if (fleet) {
             res.json({ error: false, fleet: fleet });
