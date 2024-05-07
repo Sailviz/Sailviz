@@ -23,7 +23,7 @@ async function updateResult(result: ResultsDataType) {
 async function updateBoat(result: ResultsDataType) {
     var res = await prisma.result.update({
         where: {
-            id: result.raceId
+            id: result.id
         },
         data: {
             boat: {
