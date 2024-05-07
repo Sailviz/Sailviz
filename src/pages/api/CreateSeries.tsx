@@ -7,6 +7,7 @@ async function createSeries(seriesName: string, clubId: string) {
         data: {
             name: seriesName,
             settings: {},
+            fleetsEnabled: false,
             club: {
                 connect: {
                     id: clubId

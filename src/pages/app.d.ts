@@ -19,6 +19,7 @@ type SeriesDataType = {
   id: string;
   name: string;
   clubId: string;
+  fleetsEnabled: boolean;
   settings: SettingsType;
   races: RaceDataType[];
 };

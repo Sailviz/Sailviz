@@ -7,8 +7,8 @@ import SeriesResultsTable from "../components/SeriesResultsTable";
 import Dashboard from "../components/Dashboard";
 import SeriesTable from "../components/SeriesTable";
 import FleetTable from "../components/FleetTable";
-import { set, update } from "cypress/types/lodash";
-import { use } from "chai";
+import Switch from "../components/Switch";
+
 
 const raceOptions = [{ value: "Pursuit", label: "Pursuit" }, { value: "Handicap", label: "Handicap" }]
 
@@ -39,6 +39,7 @@ const SignOnPage = () => {
         id: "",
         name: "",
         clubId: "",
+        fleetsEnabled: false,
         settings: {
             numberToCount: 0
         },
@@ -143,6 +144,15 @@ const SignOnPage = () => {
 
         //hide fleet edit modal
         setFleetModal(false)
+    }
+
+    const setFleetsEnabled = async (enabled: boolean) => {
+        var newSeriesData: SeriesDataType = window.structuredClone(series)
+        newSeriesData.fleetsEnabled = enabled
+        setSeries({ ...newSeriesData })
+        console.log(newSeriesData)
+
+        DB.updateSeries(newSeriesData)
     }
 
     const logout = async () => {
@@ -321,11 +331,22 @@ const SignOnPage = () => {
                             Add Race
                         </p>
                     </div>
-                    <p className="text-6xl font-extrabold text-gray-700 p-6">
-                        Fleets
-                    </p>
+                    <div className="flex flex-row">
+                        <p className="text-6xl font-extrabold text-gray-700 p-6">
+                            Fleets
+                        </p>
+                        <div className="p-2">
+                            <Switch
+                                id={"fleetSwitch"}
+                                isOn={series.fleetsEnabled}
+                                onColour="#02c66f"
+                                handleToggle={() => { setFleetsEnabled(!series.fleetsEnabled); }}
+                            />
+                        </div>
+                    </div>
                     <div className='p-6'>
-                        <FleetTable data={fleets} key={JSON.stringify(fleets)} showFleetModal={(fleetId: string) => showFleetModal(fleetId)} />
+                        {series.fleetsEnabled ? <FleetTable data={fleets} key={JSON.stringify(fleets)} showFleetModal={(fleetId: string) => showFleetModal(fleetId)} /> : <></>}
+
                     </div>
                     <div className="p-6">
                         <p id='seriesAddRace' onClick={createFleet} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">

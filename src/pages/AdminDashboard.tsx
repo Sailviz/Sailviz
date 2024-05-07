@@ -42,6 +42,7 @@ const Club = () => {
         id: "",
         name: "",
         clubId: "",
+        fleetsEnabled: false,
         settings: {
             numberToCount: 0
         },

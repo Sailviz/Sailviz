@@ -51,6 +51,7 @@ model Series {
   clubId   String
   settings Json
   races    Race[]
+  fleetsEnabled Boolean
   fleets   Fleet[]
 
   @@index([clubId])
@@ -86,9 +87,9 @@ model Fleet {
 
 model Result {
   id              String  @id @unique @default(uuid())
-  fleet           Fleet   @relation(fields: [fleetId], references: [id], onDelete: Cascade)
-  fleetId         String
-  race            Race    @relation(fields: [raceId], references: [id], onDelete: Cascade)
+  fleet           Fleet?   @relation(fields: [fleetId], references: [id], onDelete: Cascade)
+  fleetId         String?
+  race            Race?    @relation(fields: [raceId], references: [id], onDelete: Cascade)
   raceId          String
   Helm            String
   Crew            String

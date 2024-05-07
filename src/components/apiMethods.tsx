@@ -403,7 +403,7 @@ export async function setBoats(clubId: string, data: BoatDataType[]): Promise<Cl
         });
 };
 
-export async function createResult(raceId: string, fleetId: string): Promise<ResultsDataType> {
+export async function createResult(raceId: string, fleetId?: string): Promise<ResultsDataType> {
     const body = {
         "raceId": raceId,
         "fleetId": fleetId

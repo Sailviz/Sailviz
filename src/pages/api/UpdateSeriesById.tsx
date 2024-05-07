@@ -14,7 +14,8 @@ async function updateSeries(series: SeriesDataType) {
         },
         data: {
             settings: series.settings,
-            name: series.name
+            name: series.name,
+            fleetsEnabled: series.fleetsEnabled
         }
     })
     return result;
