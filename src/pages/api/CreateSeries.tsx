@@ -7,7 +7,6 @@ async function createSeries(seriesName: string, clubId: string) {
         data: {
             name: seriesName,
             settings: {},
-            fleetsEnabled: false,
             club: {
                 connect: {
                     id: clubId
@@ -16,6 +15,23 @@ async function createSeries(seriesName: string, clubId: string) {
         },
     })
     return res;
+}
+
+async function attachFleet(seriesId: string) {
+    var res = await prisma.fleet.create({
+        data: {
+            name: "Main Fleet",
+            startTime: 0,
+            series: {
+                connect: {
+                    id: seriesId
+                }
+            },
+            boats: {}
+        }
+    })
+    return res;
+
 }
 
 const CreateSeries = async (req: NextApiRequest, res: NextApiResponse) => {
@@ -34,6 +50,7 @@ const CreateSeries = async (req: NextApiRequest, res: NextApiResponse) => {
         var clubId = req.body.clubId
         var Series = await createSeries(seriesName, clubId)
         if (Series) {
+            await attachFleet(Series.id)
             res.json({ error: false, series: Series })
         }
         else {

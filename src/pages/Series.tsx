@@ -39,7 +39,6 @@ const SignOnPage = () => {
         id: "",
         name: "",
         clubId: "",
-        fleetsEnabled: false,
         settings: {
             numberToCount: 0
         },
@@ -144,15 +143,6 @@ const SignOnPage = () => {
 
         //hide fleet edit modal
         setFleetModal(false)
-    }
-
-    const setFleetsEnabled = async (enabled: boolean) => {
-        var newSeriesData: SeriesDataType = window.structuredClone(series)
-        newSeriesData.fleetsEnabled = enabled
-        setSeries({ ...newSeriesData })
-        console.log(newSeriesData)
-
-        DB.updateSeries(newSeriesData)
     }
 
     const logout = async () => {
@@ -331,21 +321,11 @@ const SignOnPage = () => {
                             Add Race
                         </p>
                     </div>
-                    <div className="flex flex-row">
-                        <p className="text-6xl font-extrabold text-gray-700 p-6">
-                            Fleets
-                        </p>
-                        <div className="p-2">
-                            <Switch
-                                id={"fleetSwitch"}
-                                isOn={series.fleetsEnabled}
-                                onColour="#02c66f"
-                                handleToggle={() => { setFleetsEnabled(!series.fleetsEnabled); }}
-                            />
-                        </div>
-                    </div>
+                    <p className="text-6xl font-extrabold text-gray-700 p-6">
+                        Fleets
+                    </p>
                     <div className='p-6'>
-                        {series.fleetsEnabled ? <FleetTable data={fleets} key={JSON.stringify(fleets)} showFleetModal={(fleetId: string) => showFleetModal(fleetId)} /> : <></>}
+                        <FleetTable data={fleets} key={JSON.stringify(fleets)} showFleetModal={(fleetId: string) => showFleetModal(fleetId)} />
 
                     </div>
                     <div className="p-6">

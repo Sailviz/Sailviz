@@ -98,24 +98,20 @@ const CreateResult = async (req: NextApiRequest, res: NextApiResponse) => {
             return
         }
 
-        //check if race series has fleets enabled
-        if (await findSeries(race.seriesId).then(series => series!.fleetsEnabled) == true) {
-            if (!fleetId) {
-                res.json({ error: true, message: 'Fleet required' });
-                return
-            }
-            var fleet = await findFleet(fleetId)
-            if (!fleet) {
-                res.json({ error: true, message: 'Could not find fleet' });
-                return
-            }
-            var result = await createEntryWithFleet(fleetId, race.id)
-        } else {
-            var result = await createEntry(race.id)
-            res.json({ error: false, result: result });
+        if (!fleetId) {
+            res.json({ error: true, message: 'Fleet required' });
+            return
         }
 
+        var fleet = await findFleet(fleetId)
+        if (!fleet) {
+            res.json({ error: true, message: 'Could not find fleet' });
+            return
+        }
+        var result = await createEntryWithFleet(fleetId, race.id)
+        res.json({ error: false, result: result });
     }
-};
+
+}
 
 export default CreateResult

@@ -7,9 +7,11 @@ const Boats = ({ ...props }: any) => {
     const [value, setValue] = React.useState<BoatDataType[]>(initialValue)
     let boats: { value: string, label: string }[] = []
 
-    value.forEach(boat => {
-        boats.push({ value: "", label: boat.name })
-    });
+    if (value) {
+        value.forEach(boat => {
+            boats.push({ value: "", label: boat.name })
+        });
+    }
 
     return (
         <div className="w-full p-2 mx-0 my-2">

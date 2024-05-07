@@ -51,7 +51,6 @@ model Series {
   clubId   String
   settings Json
   races    Race[]
-  fleetsEnabled Boolean
   fleets   Fleet[]
 
   @@index([clubId])
