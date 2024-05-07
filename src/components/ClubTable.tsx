@@ -96,7 +96,7 @@ const ClubTable = (props: any) => {
                 id: "Number to Count",
                 cell: info => info.getValue(),
             }),
-            columnHelper.accessor('', {
+            columnHelper.accessor('id', {
                 id: "Remove",
                 header: _ => <Add {...props} createSeries={createSeries} />,
                 cell: props => <Remove {...props} id={props.row.original.id} deleteSeries={deleteSeries} />

@@ -50,6 +50,15 @@ const SignOnPage = () => {
 
     const [options, setOptions] = useState([{ label: "", value: {} as BoatDataType }])
 
+    var [fleets, setFleets] = useState<FleetDataType[]>([{
+        id: "",
+        name: "",
+        startTime: 0,
+        seriesId: "",
+        boats: [],
+
+    }])
+
     var [race, setRace] = useState<RaceDataType>(({
         id: "",
         number: 0,
@@ -73,14 +82,11 @@ const SignOnPage = () => {
             SailNumber: 0,
             finishTime: 0,
             CorrectedTime: 0,
-            lapTimes: {
-                times: [],
-                number: 0,
-            },
+            fleetId: "",
+            laps: [],
             Position: 0,
         }],
         Type: "",
-        startTime: 0,
         seriesId: "",
         series: {} as SeriesDataType
     }))
@@ -118,8 +124,8 @@ const SignOnPage = () => {
         return ul
     }
 
-    const createResult = async (id: string) => {
-        const entry = await DB.createResult(id)
+    const createResult = async (raceId: string) => {
+        const entry = await DB.createResult(raceId, fleets[0]!.id)
         setRace({ ...race, results: race.results.concat(entry) })
         return entry
     }
@@ -153,8 +159,9 @@ const SignOnPage = () => {
             if (parts[0] == undefined || parts[1] == undefined || parts[2] == undefined) return
             // minutes are 60 seconds. Hours are 60 minutes * 60 seconds.
             var seconds = (+parts[0]) * 60 * 60 + (+parts[1]) * 60 + (+parts[2]);
-            var unixTime = seconds + race.startTime
-            result.lapTimes.times[index] = unixTime
+            //add lap time to fleet start time
+            var unixTime = seconds + fleets.filter(fleet => fleet.id == result.fleetId)[0]!.startTime
+            result.laps[index]!.time = unixTime
 
             if (index == laps.length - 1) {
                 result.finishTime = unixTime
@@ -188,7 +195,29 @@ const SignOnPage = () => {
         const capitalizedWords = sentence.map(word => word.charAt(0).toUpperCase() + word.slice(1));
         const calitalisedSentence = capitalizedWords.join(' ')
 
-        newRaceData[e.target.id] = calitalisedSentence
+        // use e.target.id to update the correct field in the race data
+        switch (e.target.id) {
+            case "OOD":
+                newRaceData.OOD = calitalisedSentence
+                break;
+            case "AOD":
+                newRaceData.AOD = calitalisedSentence
+                break;
+            case "SO":
+                newRaceData.SO = calitalisedSentence
+                break;
+            case "ASO":
+                newRaceData.ASO = calitalisedSentence
+                break;
+            case "Time":
+                newRaceData.Time = e.target.value
+                break;
+            case "raceType":
+                newRaceData.Type = e.target.value
+                break;
+            default:
+                break;
+        }
         setRace(newRaceData)
 
         let inputElement = document.getElementById(e.target.id) as HTMLInputElement
@@ -281,13 +310,15 @@ const SignOnPage = () => {
         let raceId = query.race as string
         setClubId(Cookies.get('clubId') || "")
         const getRace = async () => {
-            await DB.getRaceById(raceId).then((racedata: RaceDataType) => {
-                setRace(racedata)
-                DB.GetSeriesById(racedata.seriesId).then((series: SeriesDataType) => {
-                    setSeriesName(series.name)
-                })
-
+            const racedata = await DB.getRaceById(raceId)
+            setRace(racedata)
+            DB.GetSeriesById(racedata.seriesId).then((series: SeriesDataType) => {
+                setSeriesName(series.name)
             })
+
+            const fleets = await DB.GetFleetsBySeries(racedata.seriesId)
+            setFleets(fleets)
+
         }
 
         if (raceId != undefined) {
@@ -426,14 +457,14 @@ const SignOnPage = () => {
                             </p>
                             <div className='flex flex-row w-full flex-wrap' id='LapData'>
                                 {/* this map loops through laps in results, unless it can't find any. or second argument stops errors */}
-                                {(race.results.find((result) => result.id == activeResultId) || { lapTimes: { times: [] } }).lapTimes.times.map((time: number, index: number) => {
+                                {(race.results.find((result) => result.id == activeResultId) || { laps: [] }).laps.map((lap: LapDataType, index: number) => {
                                     return (
-                                        <div className='flex flex-col px-6 w-min' key={time}>
+                                        <div className='flex flex-col px-6 w-min' key={lap.time}>
                                             <p className='text-2xl font-bold text-gray-700 p-2'>
                                                 Lap {index + 1}
                                             </p>
                                             <div className='flex flex-row'>
-                                                <input type="time" className="h-full text-xl p-4" step={"1"} defaultValue={new Date((time - race.startTime) * 1000).toISOString().substring(11, 19)} />
+                                                <input type="time" className="h-full text-xl p-4" step={"1"} defaultValue={new Date((lap.time - fleets.filter(fleet => fleet.id == race.results.filter((result) => result.id == activeResultId)[0]!.fleetId)[0]!.startTime) * 1000).toISOString().substring(11, 19)} />
                                                 <div className="text-6xl font-extrabold text-red-600 p-6 float-right cursor-pointer" onClick={() => removeLap(index)}>&times;</div>
                                             </div>
 
@@ -566,7 +597,12 @@ const SignOnPage = () => {
                         </p>
                     </div>
                     <div className='p-6 w-full'>
-                        <RaceResultsTable data={race.results} startTime={race.startTime} key={JSON.stringify(race.results)} deleteResult={deleteResult} updateResult={updateResult} createResult={createResult} clubId={clubId} raceId={race.id} showEditModal={(id: string) => { showEditModal(id) }} />
+                        {fleets.map((fleet, index) => {
+                            return (
+                                <RaceResultsTable data={race.results.filter(result => result.fleetId == fleet.id)} startTime={fleet.startTime} key={JSON.stringify(fleets)} deleteResult={deleteResult} updateResult={updateResult} createResult={createResult} raceId={race.id} showEditModal={(id: string) => { showEditModal(id) }} />
+                            )
+                        })
+                        }
                     </div>
                 </div>
             </div>

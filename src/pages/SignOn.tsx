@@ -40,7 +40,6 @@ const SignOnPage = () => {
         results: [],
         Type: "",
         seriesId: "",
-        startTime: 0,
         series: {} as SeriesDataType
     })
 
@@ -65,13 +64,13 @@ const SignOnPage = () => {
         selected?.classList.remove('hidden')
     }
 
-    const createResult = async (id: string) => {
+    const createResult = async (raceId: string) => {
         const HelmElement = document.getElementById("Helm") as HTMLInputElement
         const CrewElement = document.getElementById("Crew") as HTMLInputElement
         const SailNumberElement = document.getElementById("SailNum") as HTMLInputElement
         const Boat = selectedOption.value as BoatDataType
-        //create a result record
-        let entry = await DB.createResult(id)
+        //create a result record with fleet that matches series id
+        let entry = await DB.createResult(raceId, fleets.filter(fleet => fleet.seriesId == races.filter(race => race.id == raceId)[0]!.seriesId)[0]!.id)
 
         entry.Helm = HelmElement.value
         entry.Crew = CrewElement.value
@@ -555,7 +554,7 @@ const SignOnPage = () => {
                     <div className="text-6xl font-extrabold text-gray-700 p-6">
                         {activeRaceData.series.name}: {activeRaceData.number}
                     </div>
-                    <RaceResultsTable data={activeRaceData.results} startTime={activeRaceData.startTime} key={JSON.stringify(activeRaceData.results)} deleteResult={() => { }} updateResult={() => { }} createResult={() => { }} clubId={clubId} raceId={activeRaceData.id} />
+                    <RaceResultsTable data={activeRaceData.results} startTime={null} key={JSON.stringify(activeRaceData.results)} deleteResult={() => { }} updateResult={() => { }} createResult={() => { }} clubId={clubId} raceId={activeRaceData.id} />
                 </div>
             </div>
             <div id="Guide" className="hidden" >

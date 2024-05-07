@@ -64,7 +64,7 @@ const FleetTable = (props: any) => {
                 id: "boats",
                 cell: props => <Boats {...props} />,
             }),
-            columnHelper.accessor('', {
+            columnHelper.accessor('id', {
                 id: "Edit",
                 cell: props => <Edit {...props} id={props.row.original.id} showFleetModal={showFleetModal} />
             }),

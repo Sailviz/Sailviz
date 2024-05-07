@@ -2,15 +2,6 @@ import prisma from '../../components/prisma'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import assert from 'assert';
 
-async function findSeries(seriesId: any) {
-    var result = await prisma.series.findUnique({
-        where: {
-            id: seriesId
-        },
-    })
-    return result;
-}
-
 async function findRace(fleetId: any) {
     var result = await prisma.race.findUnique({
         where: {
@@ -29,7 +20,7 @@ async function findFleet(fleetId: string) {
     return result;
 }
 
-async function createEntryWithFleet(fleetId: string, raceId: string) {
+async function createEntry(fleetId: string, raceId: string) {
     var res = await prisma.result.create({
         data: {
             Helm: "",
@@ -49,33 +40,15 @@ async function createEntryWithFleet(fleetId: string, raceId: string) {
                     id: raceId
                 }
             },
-            boat: {}
+            boat: {},
+            laps: {}
+        },
+        include: {
+            laps: true
         }
     })
     return res;
 }
-
-async function createEntry(raceId: string) {
-    var res = await prisma.result.create({
-        data: {
-            Helm: "",
-            Crew: "",
-            SailNumber: "",
-            finishTime: 0,
-            CorrectedTime: 0,
-            PursuitPosition: 0,
-            isDeleted: false,
-            race: {
-                connect: {
-                    id: raceId
-                }
-            },
-            boat: {}
-        }
-    })
-    return res;
-}
-
 
 const CreateResult = async (req: NextApiRequest, res: NextApiResponse) => {
     if (req.method === 'POST') {
@@ -108,7 +81,7 @@ const CreateResult = async (req: NextApiRequest, res: NextApiResponse) => {
             res.json({ error: true, message: 'Could not find fleet' });
             return
         }
-        var result = await createEntryWithFleet(fleetId, race.id)
+        var result = await createEntry(fleetId, race.id)
         res.json({ error: false, result: result });
     }
 

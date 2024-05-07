@@ -1,8 +1,6 @@
 import React, { ChangeEvent, useState, useEffect } from 'react';
 import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, useReactTable, SortingState } from '@tanstack/react-table'
-import Select from 'react-select';
-import * as DB from './apiMethods';
-import { start } from 'repl';
+
 
 const Text = ({ ...props }) => {
     const value = props.getValue()
@@ -17,16 +15,18 @@ const Text = ({ ...props }) => {
 
 const Laps = ({ ...props }: any) => {
     const value = props.getValue()
+    // value is the array of laps
 
     return (
         <div className=' text-center'>
-            {Math.round(value.number)}
+            {value.length}
         </div>
     );
 };
 
 const Time = ({ ...props }: any) => {
     const initialValue = props.getValue()
+    console.log(initialValue)
     const [value, setValue] = React.useState(new Date((initialValue - props.startTime) * 1000).toISOString().substring(11, 19))
 
     if (initialValue == -1) {
@@ -106,8 +106,8 @@ const columnHelper = createColumnHelper<ResultsDataType>()
 
 const RaceResultsTable = (props: any) => {
     let [data, setData] = useState<ResultsDataType[]>(props.data)
+    console.log(props.data)
     let [startTime, setStartTime] = useState(props.startTime)
-    let clubId = props.clubId
     let raceId = props.raceId
 
     const showEditModal = (id: any) => {
@@ -152,7 +152,7 @@ const RaceResultsTable = (props: any) => {
                 cell: props => <Time {...props} startTime={startTime} />,
                 enableSorting: false
             }),
-            columnHelper.accessor('lapTimes', {
+            columnHelper.accessor('laps', {
                 header: "Laps",
                 cell: props => <Laps {...props} />,
                 enableSorting: false
@@ -162,7 +162,7 @@ const RaceResultsTable = (props: any) => {
                 cell: props => <Text {...props} disabled={true} />,
                 enableSorting: false
             }),
-            columnHelper.accessor('Position', {
+            columnHelper.accessor('PursuitPosition', {
                 header: "Position",
                 cell: props => <Text {...props} disabled={true} />,
                 enableSorting: true

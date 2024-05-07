@@ -58,7 +58,6 @@ const RacePage = () => {
             Position: 0,
         }],
         Type: "",
-        startTime: 0,
         seriesId: "",
         series: {} as SeriesDataType
     }))
