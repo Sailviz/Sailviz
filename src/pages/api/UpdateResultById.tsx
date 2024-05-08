@@ -23,6 +23,7 @@ async function updateResult(result: ResultsDataType) {
                         lapTimes: result.lapTimes,
                         Position: result.Position,
                         finishTime: result.finishTime,
+                        resultCode: result.resultCode,
                     }
                 }
             }
