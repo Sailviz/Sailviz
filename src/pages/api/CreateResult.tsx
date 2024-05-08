@@ -31,7 +31,8 @@ async function createEntry(raceId: string,) {
                     id: raceId
                 }
             },
-            boat: {}
+            boat: {},
+            resultCode: "",
         }
     })
     return res;
