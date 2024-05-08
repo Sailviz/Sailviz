@@ -22,6 +22,7 @@ async function attachFleet(seriesId: string) {
         data: {
             name: "Main Fleet",
             startTime: 0,
+            startDelay: 0,
             series: {
                 connect: {
                     id: seriesId

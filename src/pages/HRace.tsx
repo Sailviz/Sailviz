@@ -4,6 +4,7 @@ import * as DB from '../components/apiMethods';
 import Dashboard from "../components/Dashboard";
 import RaceTimer from "../components/HRaceTimer"
 import Cookies from "js-cookie";
+import { Lap } from "@prisma/client";
 
 enum raceStateType {
     running,
@@ -50,21 +51,30 @@ const RacePage = () => {
                 py: 0,
                 clubId: "",
                 pursuitStartTime: 0
-            },
+            } as BoatDataType,
             SailNumber: "",
             finishTime: 0,
             CorrectedTime: 0,
-            lapTimes: {
-                times: [],
-                number: 0
-            },
-            Position: 0,
-        }],
+            laps: [{
+                id: "",
+                time: 0,
+            } as LapDataType],
+            PursuitPosition: 0,
+        } as ResultsDataType],
         Type: "",
-        startTime: 0,
         seriesId: "",
         series: {} as SeriesDataType
     }))
+
+    var [fleets, setFleets] = useState<FleetDataType[]>([{
+        id: "",
+        name: "",
+        startTime: 0,
+        seriesId: "",
+        startDelay: 0,
+        boats: [],
+
+    }])
 
     var [lastResult, setLastResult] = useState<ResultsDataType | null>(null)
 
@@ -96,7 +106,6 @@ const RacePage = () => {
     const [mode, setMode] = useState(modeType.Lap)
 
     const startRaceButton = async () => {
-        console.log(club.settings.ClockOffset)
         //use time for button
         let localTime = Math.floor((new Date().getTime() / 1000) + startLength)
         const timeoutId = setTimeout(() => controller.abort(), 2000)
@@ -205,8 +214,8 @@ const RacePage = () => {
         results.sort((a, b) => {
             //if done a lap, predicted is sum of lap times + last lap.
             //if no lap done, predicted is py.
-            let aPredicted = a.lapTimes.times.length > 0 ? a.lapTimes.times.reduce((sum: number, time: number) => sum + time, a.lapTimes.times[a.lapTimes.times.length - 1]) : a.boat.py / 10
-            let bPredicted = b.lapTimes.times.length > 0 ? b.lapTimes.times.reduce((sum: number, time: number) => sum + time, b.lapTimes.times[b.lapTimes.times.length - 1]) : b.boat.py / 10
+            let aPredicted = a.laps.length > 0 ? a.laps.reduce((sum: number, lap: LapDataType) => sum + lap.time, a.laps[a.laps.length - 1]!.time) : a.boat.py / 10
+            let bPredicted = b.laps.length > 0 ? b.laps.reduce((sum: number, lap: LapDataType) => sum + lap.time, b.laps[b.laps.length - 1]!.time) : b.boat.py / 10
 
             console.log(aPredicted, bPredicted)
             return aPredicted - bPredicted;
@@ -312,7 +321,7 @@ const RacePage = () => {
     const calculateResults = () => {
         //most nuber of laps.
         console.log(race)
-        const maxLaps = Math.max.apply(null, race.results.map(function (o: ResultsDataType) { return o.lapTimes.times.length }))
+        const maxLaps = Math.max.apply(null, race.results.map(function (o: ResultsDataType) { return o.laps.length }))
         console.log(maxLaps)
         if (!(maxLaps >= 0)) {
             console.log("max laps not more than one")
@@ -431,6 +440,8 @@ const RacePage = () => {
             setRace(data)
 
             setSeriesName(await DB.GetSeriesById(data.seriesId).then((res) => { return (res.name) }))
+            const fleets = await DB.GetFleetsBySeries(data.seriesId)
+            setFleets(fleets)
         }
 
         if (raceId != undefined) {
@@ -540,7 +551,7 @@ const RacePage = () => {
                         Event: {seriesName} - {race.number}
                     </div>
                     <div className="w-1/4 p-2 m-2 border-4 rounded-lg bg-white text-lg font-medium">
-                        Race Time: <RaceTimer startTime={race.startTime} timerActive={timerActive} onFiveMinutes={handleFiveMinutes} onFourMinutes={handleFourMinutes} onOneMinute={handleOneMinute} onGo={handleGo} onWarning={handleWarning} reset={resetTimer} />
+                        {/* Race Time: <RaceTimer startTime={race.startTime} timerActive={timerActive} onFiveMinutes={handleFiveMinutes} onFourMinutes={handleFourMinutes} onOneMinute={handleOneMinute} onGo={handleGo} onWarning={handleWarning} reset={resetTimer} /> */}
                     </div>
                     <div className="w-1/4 p-2 m-2 border-4 rounded-lg bg-white text-lg font-medium">
                         Actual Time:  {time}
@@ -602,11 +613,12 @@ const RacePage = () => {
                                         <div className="flex flex-col ml-4 my-6">
                                             <h2 className="text-2xl text-gray-700">{result.SailNumber} - {result.boat?.name}</h2>
                                             <p className="text-base text-gray-600">{result.Helm} - {result.Crew}</p>
-                                            {result.lapTimes.times.length >= 1 ?
-                                                <p className="text-base text-gray-600">Laps: {result.lapTimes.number} Last: {new Date((result.lapTimes.times[result.lapTimes.times.length - 1] - race.startTime) * 1000).toISOString().slice(14, 19)}</p>
+                                            {/* {result.lapTimes.times.length >= 1 ?
+                                                // <p className="text-base text-gray-600">Laps: {result.lapTimes.number} Last: {new Date((result.lapTimes.times[result.lapTimes.times.length - 1] - race.startTime) * 1000).toISOString().slice(14, 19)}</p>
+                                                <p>line above needs fixing</p>
                                                 :
                                                 <p className="text-base text-gray-600">Laps: {result.lapTimes.number} </p>
-                                            }
+                                            } */}
                                         </div>
                                         <div className="px-5 py-2 w-2/4">
                                             {raceState == raceStateType.running ?
@@ -652,7 +664,7 @@ const RacePage = () => {
                                         <div className="flex flex-col">
                                             <h2 className="text-2xl text-gray-700">{result.SailNumber} - {result.boat.name}</h2>
                                             <p className="text-base text-gray-600">{result.Helm} - {result.Crew}</p>
-                                            <p className="text-base text-gray-600">Laps: {result.lapTimes.number} Finish: {new Date((result.finishTime - race.startTime) * 1000).toISOString().slice(14, 19)}</p>
+                                            {/* <p className="text-base text-gray-600">Laps: {result.lapTimes.number} Finish: {new Date((result.finishTime - race.startTime) * 1000).toISOString().slice(14, 19)}</p> */}
                                         </div>
                                         <div className="px-5 py-1">
                                             <p className="text-white bg-blue-600 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">

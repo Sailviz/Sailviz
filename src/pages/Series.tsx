@@ -131,6 +131,9 @@ const SignOnPage = () => {
         const Name = document.getElementById('editFleetName') as HTMLInputElement;
         fleet.name = Name.value
 
+        const StartDelay = document.getElementById('editFleetStartDelay') as HTMLInputElement;
+        fleet.startDelay = parseInt(StartDelay.value)
+
         fleet.boats = selectedOption.map(x => (x as any).value)
 
         DB.updateFleetById(fleet)
@@ -164,6 +167,9 @@ const SignOnPage = () => {
         }
         const Name = document.getElementById('editFleetName') as HTMLInputElement;
         Name.value = fleet.name
+
+        const StartDelay = document.getElementById('editFleetStartDelay') as HTMLInputElement;
+        StartDelay.value = fleet.startDelay.toString()
 
         try {
             setSelectedOption(fleet.boats.map(x => ({ value: x, label: x.name })))
@@ -267,7 +273,13 @@ const SignOnPage = () => {
                                 <p className='text-2xl font-bold text-gray-700'>
                                     Name
                                 </p>
-                                <input type="text" id="editFleetName" name="Helm" className="h-full text-2xl p-4" />
+                                <input type="text" id="editFleetName" className="h-full text-2xl p-4" />
+                            </div>
+                            <div className='flex flex-col px-6 w-full'>
+                                <p className='text-2xl font-bold text-gray-700'>
+                                    Start Delay
+                                </p>
+                                <input type="text" id="editFleetStartDelay" className="h-full text-2xl p-4" />
                             </div>
                         </div>
                         <div>

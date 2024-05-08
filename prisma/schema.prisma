@@ -80,6 +80,7 @@ model Fleet {
   startTime Int
   results   Result[]
   boats            Boat[]
+  startDelay Int
 
   @@index([seriesId])
 }

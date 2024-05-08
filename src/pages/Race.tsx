@@ -55,6 +55,7 @@ const SignOnPage = () => {
         name: "",
         startTime: 0,
         seriesId: "",
+        startDelay: 0,
         boats: [],
 
     }])
@@ -78,51 +79,21 @@ const SignOnPage = () => {
                 crew: 0,
                 py: 0,
                 clubId: "",
-            },
-            SailNumber: 0,
+            } as BoatDataType,
+            SailNumber: "",
             finishTime: 0,
             CorrectedTime: 0,
             fleetId: "",
-            laps: [],
-            Position: 0,
-        }],
+            laps: [{
+                id: "",
+                time: 0
+            } as LapDataType],
+            PursuitPosition: 0,
+        } as ResultsDataType],
         Type: "",
         seriesId: "",
         series: {} as SeriesDataType
     }))
-
-    function showHome() {
-        let home = document.getElementById("HomeView")
-        home?.classList.remove("hidden")
-
-        let race = document.getElementById("RaceView")
-        race?.classList.add("hidden")
-    }
-
-    function showRace(id: string) {
-        let race = document.getElementById("RaceView")
-        race?.classList.remove("hidden")
-
-        let home = document.getElementById("HomeView")
-        home?.classList.add("hidden")
-    }
-
-    const createChild = (race: NextRaceDataType) => {
-        var ul = document.createElement('ul');
-
-        ul.className = 'list-none select-none w-full p-4 bg-pink-300 text-lg font-extrabold text-gray-700 cursor-pointer my-2'
-
-        ul.onclick = async function () {
-            await DB.getRaceById(race.id).then((data: RaceDataType) => {
-                setRace(data)
-            })
-            setSeriesName(race.series.name)
-        }
-
-        ul.innerHTML = race.series.name + ": " + race.number.toString()
-
-        return ul
-    }
 
     const createResult = async (raceId: string) => {
         const entry = await DB.createResult(raceId, fleets[0]!.id)
@@ -599,7 +570,7 @@ const SignOnPage = () => {
                     <div className='p-6 w-full'>
                         {fleets.map((fleet, index) => {
                             return (
-                                <RaceResultsTable data={race.results.filter(result => result.fleetId == fleet.id)} startTime={fleet.startTime} key={JSON.stringify(fleets)} deleteResult={deleteResult} updateResult={updateResult} createResult={createResult} raceId={race.id} showEditModal={(id: string) => { showEditModal(id) }} />
+                                <RaceResultsTable data={race.results.filter(result => result.fleetId == fleet.id)} startTime={fleet.startTime} key={JSON.stringify(race)} deleteResult={deleteResult} updateResult={updateResult} createResult={createResult} raceId={race.id} showEditModal={(id: string) => { showEditModal(id) }} />
                             )
                         })
                         }

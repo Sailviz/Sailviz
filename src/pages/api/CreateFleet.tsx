@@ -17,6 +17,7 @@ async function createFleet(seriesId: string) {
         data: {
             name: "Fleet",
             startTime: 0,
+            startDelay: 0,
             series: {
                 connect: {
                     id: seriesId

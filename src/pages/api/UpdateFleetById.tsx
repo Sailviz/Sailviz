@@ -12,6 +12,7 @@ async function updateFleet(fleet: FleetDataType) {
         data: {
             name: fleet.name,
             startTime: fleet.startTime,
+            startDelay: fleet.startDelay,
             boats: {
                 set: fleet.boats.map(boat => { return ({ id: boat.id }) })
 

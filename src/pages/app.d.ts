@@ -91,5 +91,6 @@ type FleetDataType = {
   name: string;
   seriesId: String;
   startTime: number;
+  startDelay: number;
   boats: BoatDataType[];
 };

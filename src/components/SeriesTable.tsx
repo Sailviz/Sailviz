@@ -72,7 +72,28 @@ const Text = ({ ...props }: any) => {
 
     const onBlur = (e: ChangeEvent<HTMLInputElement>) => {
         var raceData: RaceDataType = props.row.original
-        raceData[props.column.id] = e.target.value
+        // use props.column.id to update the correct field
+        switch (props.column.id) {
+            case "OOD":
+                raceData.OOD = e.target.value
+                break;
+            case "AOD":
+                raceData.AOD = e.target.value
+                break;
+            case "SO":
+                raceData.SO = e.target.value
+                break;
+            case "ASO":
+                raceData.ASO = e.target.value
+                break;
+            case "Time":
+                raceData.Time = e.target.value
+                break;
+            case "Type":
+                raceData.Type = e.target.value
+                break;
+        }
+
         DB.updateRaceById(raceData)
     }
 
@@ -165,11 +186,11 @@ const SeriesTable = (props: any) => {
                 id: "ASO",
                 cell: props => <Text {...props} />
             }),
-            columnHelper.accessor('', {
+            columnHelper.accessor('id', {
                 id: "Remove",
                 cell: props => <Remove {...props} id={props.row.original.id} removeRace={updateData} />
             }),
-            columnHelper.accessor('', {
+            columnHelper.accessor('id', {
                 id: "GoTo",
                 cell: props => <GoTo {...props} id={props.row.original.id} goToRace={goToRace} />
             }),
