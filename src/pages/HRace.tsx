@@ -747,9 +747,8 @@ const RacePage = () => {
                     <span className="text-4xl font-extrabold text-gray-700 flex justify-center mb-8">{activeResult.Helm} - {activeResult.boat.name}:{activeResult.SailNumber}</span>
                         {resultCodes.map((resultCode) =>{
                             return (
-                                <div className="flex mb-2 justify-center">
+                                <div key={resultCode.code} className="flex mb-2 justify-center">
                                     <div
-                                        key={resultCode.code}
                                         onClick={() => retireBoat(resultCode.code)}
                                         className="w-1/2 cursor-pointer text-white bg-blue-600 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0"
                                     >
