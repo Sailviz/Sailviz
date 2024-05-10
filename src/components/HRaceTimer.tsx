@@ -8,7 +8,7 @@ let zerominsDone = false
 let warningFlag = true
 
 const CountdownTimer = ({ startTime, timerActive, onFiveMinutes, onFourMinutes, onOneMinute, onGo, onWarning, reset }: { startTime: number, timerActive: boolean, onFiveMinutes: any, onFourMinutes: any, onOneMinute: any, onGo: any, onWarning: any, reset: boolean }) => {
-    const [timeLeft, setTimeLeft] = useState({ minutes: 6, seconds: 0, countingUp: false });
+    const [timeLeft, setTimeLeft] = useState({ minutes: 5, seconds: 15, countingUp: false });
 
 
     const calculateTimeLeft = () => {

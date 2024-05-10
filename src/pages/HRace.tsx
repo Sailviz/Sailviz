@@ -6,6 +6,7 @@ import RaceTimer from "../components/HRaceTimer"
 import Cookies from "js-cookie";
 import Select from "react-select";
 import Switch from "../components/Switch";
+import { set } from "cypress/types/lodash";
 
 enum raceStateType {
     running,
@@ -37,7 +38,6 @@ const RacePage = () => {
 
     var [seriesName, setSeriesName] = useState("")
     var [clubId, setClubId] = useState<string>("invalid")
-    var [Instructions, setInstructions] = useState("Hit Start to begin the starting procedure")
 
     var [race, setRace] = useState<RaceDataType>(({
         id: "",
@@ -108,7 +108,7 @@ const RacePage = () => {
 
     })
 
-    var [raceState, setRaceState] = useState<raceStateType>(raceStateType.reset)
+    var [raceState, setRaceState] = useState<raceStateType[]>([])
     var [activeResult, setActiveResult] = useState<ResultsDataType>({
 
         id: "",
@@ -135,37 +135,38 @@ const RacePage = () => {
         resultCode: "",
         fleetId: ""
     })
-    const [timerActive, setTimerActive] = useState(false);
+    const [fleetTimer, setFleetTimer] = useState<boolean[]>([]);
     const [resetTimer, setResetTimer] = useState(false);
     const [mode, setMode] = useState(modeType.Lap)
 
-    const startRaceButton = async () => {
+    const startRaceButton = async (fleetId: string) => {
         //use time for button
         let localTime = Math.floor((new Date().getTime() / 1000) + startLength)
-        const timeoutId = setTimeout(() => controller.abort(), 2000)
         //start the timer
-        fetch("http://" + club.settings.clockIP + "/set?startTime=" + (localTime - club.settings.clockOffset).toString(), { signal: controller.signal, mode: 'no-cors' }).then(response => {
-            //configure race start
-        }).catch((err) => {
+        fetch("http://" + club.settings.clockIP + "/set?startTime=" + (localTime - club.settings.clockOffset).toString(), { signal: controller.signal, mode: 'no-cors' }).catch((err) => {
             console.log("clock not connected")
             console.log(err)
         })
 
         //Update database
-        let newRaceData: RaceDataType = race
-        newRaceData.startTime = localTime
-        setRace(newRaceData)
+        let fleet = fleets.find(fleet => fleet.id == fleetId)
+        if (fleet == undefined) {
+            console.error("fleet not found")
+            return
+        }
+        fleet.startTime = localTime
+        DB.updateFleetById(fleet)
         //send to DB
-        DB.updateRaceById(newRaceData)
-        startRace()
+        startRace(fleetId)
     }
 
-    const startRace = async () => {
+    const startRace = async (fleetId: string) => {
+        let index = fleets.findIndex(fleet => fleet.id == fleetId)
         setResetTimer(false)
-        setRaceState(raceStateType.running)
-        setInstructions("Get Ready!.")
+        //modify racestate at index to match fleet index
+        setRaceState([...raceState.slice(0, index), raceStateType.running, ...raceState.slice(index + 1)])
         //start countdown timer
-        setTimerActive(true)
+        setFleetTimer([...fleetTimer.slice(0, index), true, ...fleetTimer.slice(index + 1)])
 
         let sound = document.getElementById("Beep") as HTMLAudioElement
         sound!.currentTime = 0
@@ -182,7 +183,6 @@ const RacePage = () => {
 
     const handleFiveMinutes = () => {
         console.log('5 minutes left')
-        setInstructions("show class flag")
 
         //sound horn
         fetch("http://" + club.settings.hornIP + "/medium", { signal: controller.signal, mode: 'no-cors' }).then(response => {
@@ -198,7 +198,6 @@ const RacePage = () => {
 
     const handleFourMinutes = () => {
         console.log('4 minutes left')
-        setInstructions("show preparatory and class flag")
 
         //sound horn
         fetch("http://" + club.settings.hornIP + "/medium", { signal: controller.signal, mode: 'no-cors' }).then(response => {
@@ -214,7 +213,6 @@ const RacePage = () => {
 
     const handleOneMinute = () => {
         console.log('1 minute left')
-        setInstructions("show class flag")
 
         //sound horn
         fetch("http://" + club.settings.hornIP + "/long", { signal: controller.signal, mode: 'no-cors' }).then(response => {
@@ -230,7 +228,6 @@ const RacePage = () => {
 
     const handleGo = () => {
         console.log('GO!')
-        setInstructions("show no flags")
 
         //sound horn
         fetch("http://" + club.settings.hornIP + "/medium", { signal: controller.signal, mode: 'no-cors' }).then(response => {
@@ -263,39 +260,36 @@ const RacePage = () => {
         })
     }
 
-    const stopRace = async () => {
-        //add are you sure here
-        setRaceState(raceStateType.stopped)
-        setTimerActive(false)
-        setInstructions("Hit reset to start from the beginning")
-        const timeoutId = setTimeout(() => controller.abort(), 2000)
-        fetch("http://" + club.settings.clockIP + "/reset", { signal: controller.signal, mode: 'no-cors' }).then(response => {
-            clearTimeout(timeoutId)
-        }).catch(function (err) {
+    const stopRace = async (fleetId: string) => {
+        let index = fleets.findIndex(fleet => fleet.id == fleetId)
+        //modify racestate at index to match fleet index
+        setRaceState([...raceState.slice(0, index), raceStateType.stopped, ...raceState.slice(index + 1)])
+        setFleetTimer([...fleetTimer.slice(0, index), false, ...fleetTimer.slice(index + 1)])
+        fetch("http://" + club.settings.clockIP + "/reset", { signal: controller.signal, mode: 'no-cors' }).catch(function (err) {
             console.log('Clock not connected: ', err);
         });
     }
 
-    const resetRace = async () => {
+    const resetRace = async (fleetId: string) => {
+        let fleet = fleets.find(fleet => fleet.id == fleetId)
+        if (fleet == undefined) {
+            console.error("fleet not found")
+            return
+        }
         //add are you sure here
-        const timeoutId = setTimeout(() => controller.abort(), 2000)
-        fetch("http://" + club.settings.clockIP + "/reset", { signal: controller.signal, mode: 'no-cors' }).then(response => {
-            clearTimeout(timeoutId)
-        }).catch(function (err) {
+        fetch("http://" + club.settings.clockIP + "/reset", { signal: controller.signal, mode: 'no-cors' }).catch(function (err) {
             console.log('Clock not connected: ', err);
         });
 
-        setRaceState(raceStateType.reset)
+        let index = fleets.findIndex(fleet => fleet.id == fleetId)
+        setResetTimer(false)
+        //modify racestate at index to match fleet index
+        setRaceState([...raceState.slice(0, index), raceStateType.running, ...raceState.slice(index + 1)])
         setResetTimer(true)
-        setInstructions("Hit Start to begin the starting procedure")
 
         //Update database
-        let newRaceData: RaceDataType = race
-        newRaceData.startTime = 0
-        setRace({ ...newRaceData })
-        //send to DB
-        console.log(newRaceData)
-        await DB.updateRaceById(newRaceData)
+        fleet.startTime = 0
+        await DB.updateFleetById(fleet)
 
         //remove race laps/times for racers.
         race.results.forEach(result => {
@@ -313,20 +307,6 @@ const RacePage = () => {
     }
 
     const retireBoat = async (resultCode: string) => {
-        // //modify race data
-        // const data = window.structuredClone(race)
-        // let index = data.results.findIndex((x: ResultsDataType) => x.id === id)
-        // setLastResult({ ...data.results[index] })
-        //
-        // //re copy to avoid problems
-        // let tempdata = window.structuredClone(race)
-        // index = tempdata.results.findIndex((x: ResultsDataType) => x.id === id)
-        // tempdata.results[index].finishTime = -1
-        // setRace({ ...tempdata })
-        // console.log(tempdata.results[index])
-        // //send to DB
-        // await DB.updateResult(tempdata.results[index])
-
         let tempdata = activeResult
         tempdata.resultCode = resultCode
         await DB.updateResult(tempdata)
@@ -363,40 +343,40 @@ const RacePage = () => {
     }
 
     const calculateResults = () => {
-        //most nuber of laps.
-        console.log(race)
-        const maxLaps = Math.max.apply(null, race.results.map(function (o: ResultsDataType) { return o.laps.length }))
-        console.log(maxLaps)
-        if (!(maxLaps >= 0)) {
-            console.log("max laps not more than one")
-            return
-        }
-        const resultsData = [...race.results]
+        // //most nuber of laps.
+        // console.log(race)
+        // const maxLaps = Math.max.apply(null, race.results.map(function (o: ResultsDataType) { return o.laps.length }))
+        // console.log(maxLaps)
+        // if (!(maxLaps >= 0)) {
+        //     console.log("max laps not more than one")
+        //     return
+        // }
+        // const resultsData = [...race.results]
 
-        //calculate corrected time
-        resultsData.forEach(result => {
-            let seconds = result.finishTime - race.startTime
-            console.log(seconds)
-            result.CorrectedTime = (seconds * 1000 * (maxLaps / result.lapTimes.times.length)) / result.boat.py
-            result.CorrectedTime = Math.round(result.CorrectedTime * 10) / 10
-            console.log(result.CorrectedTime)
-            if (result.finishTime == -1) {
-                result.CorrectedTime = 99999
-            }
-        });
+        // //calculate corrected time
+        // resultsData.forEach(result => {
+        //     let seconds = result.finishTime - race.startTime
+        //     console.log(seconds)
+        //     result.CorrectedTime = (seconds * 1000 * (maxLaps / result.lapTimes.times.length)) / result.boat.py
+        //     result.CorrectedTime = Math.round(result.CorrectedTime * 10) / 10
+        //     console.log(result.CorrectedTime)
+        //     if (result.finishTime == -1) {
+        //         result.CorrectedTime = 99999
+        //     }
+        // });
 
-        //calculate finish position
+        // //calculate finish position
 
-        const sortedResults = resultsData.sort((a, b) => a.CorrectedTime - b.CorrectedTime);
-        sortedResults.forEach((result, index) => {
-            result.Position = index + 1;
-        });
+        // const sortedResults = resultsData.sort((a, b) => a.CorrectedTime - b.CorrectedTime);
+        // sortedResults.forEach((result, index) => {
+        //     result.Position = index + 1;
+        // });
 
-        sortedResults.forEach(result => {
-            DB.updateResult(result)
-        })
+        // sortedResults.forEach(result => {
+        //     DB.updateResult(result)
+        // })
 
-        console.log(sortedResults)
+        // console.log(sortedResults)
         router.push({ pathname: '/Race', query: { race: race.id } })
     }
 
@@ -429,12 +409,13 @@ const RacePage = () => {
         await DB.updateResult(tempdata.results[index])
         //moved finished to bottom of screen
         orderResults(tempdata.results)
-        setInstructions(tempdata.results[index].name + "finished")
 
-        if (checkAllFinished()) {
+        if (checkAllFinished(tempdata.results[index].fleetId)) {
             //show popup to say race is finished.
-            stopRace()
-            setRaceState(raceStateType.calculate)
+            stopRace(tempdata.results[index].fleetId)
+            let fleetindex = fleets.findIndex(fleet => fleet.id == tempdata.results[index].fleetId)
+            setRaceState([...raceState.slice(0, fleetindex), raceStateType.running, ...raceState.slice(fleetindex + 1)])
+
 
         }
         let sound = document.getElementById("Beep") as HTMLAudioElement
@@ -442,9 +423,11 @@ const RacePage = () => {
         sound!.play();
     }
 
-    const checkAllFinished = () => {
+    const checkAllFinished = (fleetId: string) => {
+        //check if all boats in fleet have finished
+        let results = race.results.filter(result => result.fleetId == fleetId)
         let allFinished = true
-        race.results.forEach(data => {
+        results.forEach(data => {
             if (data.finishTime == 0) {
                 allFinished = false
             }
@@ -486,6 +469,7 @@ const RacePage = () => {
             setSeriesName(await DB.GetSeriesById(data.seriesId).then((res) => { return (res.name) }))
             const fleets = await DB.GetFleetsBySeries(data.seriesId)
             setFleets(fleets)
+            setRaceState(fleets.map(() => raceStateType.reset))
         }
 
         if (raceId != undefined) {
@@ -495,16 +479,17 @@ const RacePage = () => {
     }, [query.race])
 
     useEffect(() => {
-        if (checkAllFinished()) {
-            setInstructions("race is finished, calculate the results")
-            setRaceState(raceStateType.calculate)
-        }
-        else if (race.startTime != 0) {
-            setRaceState(raceStateType.running)
-            setResetTimer(false)
-            setTimerActive(true)
-        }
-        orderResults(race.results)
+        fleets.forEach((fleet, index) => {
+            if (checkAllFinished(fleet.id)) {
+                setRaceState([...raceState.slice(0, index), raceStateType.running, ...raceState.slice(index + 1)])
+            }
+            else if (fleet.startTime != 0) {
+                setRaceState([...raceState.slice(0, index), raceStateType.running, ...raceState.slice(index + 1)])
+                setResetTimer(false)
+                setFleetTimer([...fleetTimer.slice(0, index), true, ...fleetTimer.slice(index + 1)])
+            }
+            orderResults(race.results)
+        })
     }, [race])
 
     useEffect(() => {
@@ -602,45 +587,52 @@ const RacePage = () => {
             <audio id="Beep" src=".\beep-6.mp3" ></audio>
             <audio id="Countdown" src=".\Countdown.mp3" ></audio>
             <div className="w-full flex flex-col items-center justify-start panel-height">
-                <div className="flex w-full flex-row justify-around">
+                <div className="flex w-full flex-col justify-around">
                     <div className="w-1/4 p-2">
                         <p onClick={() => router.back()} className="cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-xl px-5 py-2.5 text-center">
                             Back To Home
                         </p>
                     </div>
                     <div className="w-1/4 p-2 m-2 border-4 rounded-lg bg-white text-lg font-medium">
-                        Event: {seriesName} - {race.number}
-                    </div>
-                    <div className="w-1/4 p-2 m-2 border-4 rounded-lg bg-white text-lg font-medium">
-                        {/* Race Time: <RaceTimer startTime={race.startTime} timerActive={timerActive} onFiveMinutes={handleFiveMinutes} onFourMinutes={handleFourMinutes} onOneMinute={handleOneMinute} onGo={handleGo} onWarning={handleWarning} reset={resetTimer} /> */}
-                    </div>
-                    <div className="w-1/4 p-2 m-2 border-4 rounded-lg bg-white text-lg font-medium">
                         Actual Time:  {time}
                     </div>
-                    <div className="p-2 w-1/4" id="RaceStateButton">
-                        {(() => {
-                            switch (raceState) {
-                                case raceStateType.reset:
-                                    return (<p onClick={startRaceButton} className="cursor-pointer text-white bg-green-600 font-medium rounded-lg text-xl px-5 py-2.5 text-center">
-                                        Start
-                                    </p>)
-                                case raceStateType.running:
-                                    return (<p onClick={(e) => { confirm("are you sure you want to stop the race?") ? stopRace() : null; }} className="cursor-pointer text-white bg-red-600 font-medium rounded-lg text-xl px-5 py-2.5 text-center">
-                                        Stop
-                                    </p>)
-                                case raceStateType.stopped:
-                                    return (<p onClick={resetRace} className="cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-xl px-5 py-2.5 text-center">
-                                        Reset
-                                    </p>)
-                                case raceStateType.calculate:
-                                    return (<p id="CalcResultsButton" onClick={calculateResults} className="cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-xl px-5 py-2.5 text-center">
-                                        Calculate Results
-                                    </p>)
-                                default:
-                                    return (<p></p>)
-                            }
-                        })()}
-                    </div>
+                    {fleets.map((fleet, index) => {
+                        return (
+                            <div className="flex flex-row">
+                                <div className="w-1/4 p-2 m-2 border-4 rounded-lg bg-white text-lg font-medium">
+                                    Event: {seriesName} - {race.number} - {fleet.name}
+                                </div>
+                                <div className="w-1/4 p-2 m-2 border-4 rounded-lg bg-white text-lg font-medium">
+                                    Race Time: <RaceTimer startTime={fleet.startTime} timerActive={fleetTimer[index]!} onFiveMinutes={handleFiveMinutes} onFourMinutes={handleFourMinutes} onOneMinute={handleOneMinute} onGo={handleGo} onWarning={handleWarning} reset={resetTimer} />
+                                </div>
+                                <div className="p-2 w-1/4" id="RaceStateButton">
+                                    {(() => {
+                                        switch (raceState[index]) {
+                                            case raceStateType.reset:
+                                                return (<p onClick={() => startRaceButton(fleet.id)} className="cursor-pointer text-white bg-green-600 font-medium rounded-lg text-xl px-5 py-2.5 text-center">
+                                                    Start
+                                                </p>)
+                                            case raceStateType.running:
+                                                return (<p onClick={(e) => { confirm("are you sure you want to stop the race?") ? stopRace(fleet.id) : null; }} className="cursor-pointer text-white bg-red-600 font-medium rounded-lg text-xl px-5 py-2.5 text-center">
+                                                    Stop
+                                                </p>)
+                                            case raceStateType.stopped:
+                                                return (<p onClick={() => resetRace(fleet.id)} className="cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-xl px-5 py-2.5 text-center">
+                                                    Reset
+                                                </p>)
+                                            case raceStateType.calculate:
+                                                return (<p id="CalcResultsButton" onClick={calculateResults} className="cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-xl px-5 py-2.5 text-center">
+                                                    Calculate Results
+                                                </p>)
+                                            default:
+                                                return (<p></p>)
+                                        }
+                                    })()}
+                                </div>
+                            </div>
+                        )
+                    })
+                    }
                 </div>
                 <div className="flex w-full shrink flex-row justify-around">
                     <div className="w-1/4 p-2">
@@ -674,7 +666,7 @@ const RacePage = () => {
                                         <div className="flex flex-col">
                                             <h2 className="text-2xl text-gray-700">{result.SailNumber} - {result.boat.name}</h2>
                                             <p className="text-base text-gray-600">{result.Helm} - {result.Crew}</p>
-                                            <p className="text-base text-gray-600">Laps: {result.lapTimes.number} Finish: {new Date((result.finishTime - race.startTime) * 1000).toISOString().slice(14, 19)}</p>
+                                            {/* <p className="text-base text-gray-600">Laps: {result.lapTimes.number} Finish: {new Date((result.finishTime - race.startTime) * 1000).toISOString().slice(14, 19)}</p> */}
                                         </div>
                                         <div className="px-5 py-1">
                                             <p className="text-2xl text-gray-700 px-5 py-2.5 text-center mr-3 md:mr-0">
@@ -699,7 +691,7 @@ const RacePage = () => {
                                             } */}
                                         </div>
                                         <div className="px-5 py-2 w-2/4">
-                                            {raceState == raceStateType.running ?
+                                            {raceState.some((state) => state == raceStateType.running) ?
                                                 <div>
                                                     {(() => {
                                                         switch (mode) {
