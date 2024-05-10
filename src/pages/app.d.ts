@@ -32,6 +32,7 @@ type ResultsDataType = {
   laps: LapDataType[];
   CorrectedTime: number;
   PursuitPosition: number;
+  resultCode: string;
 };
 
 type LapDataType = {

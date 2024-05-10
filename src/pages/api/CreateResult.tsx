@@ -42,9 +42,10 @@ async function createEntry(fleetId: string, raceId: string) {
             },
             boat: {},
             laps: {}
+            resultCode: "",
         },
         include: {
-            laps: true
+            laps: true,
         }
     })
     return res;

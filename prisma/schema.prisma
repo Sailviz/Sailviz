@@ -101,6 +101,7 @@ model Result {
   CorrectedTime   Float
   PursuitPosition Int
   isDeleted       Boolean
+  resultCode String
 
   @@index([fleetId])
   @@index([boatId])

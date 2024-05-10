@@ -15,6 +15,7 @@ async function updateResult(result: ResultsDataType) {
             Crew: result.Crew,
             Helm: result.Helm,
             finishTime: result.finishTime,
+            resultCode: result.resultCode,
         }
     })
     return res;
