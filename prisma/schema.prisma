@@ -85,6 +85,7 @@ model Result {
   lapTimes      Json
   CorrectedTime Float
   Position      Int
+  resultCode    String
 
   @@index([raceId])
   @@index([boatId])

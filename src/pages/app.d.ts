@@ -35,6 +35,7 @@ type ResultsDataType = {
   lapTimes: lapTimesType;
   CorrectedTime: number;
   Position: number;
+  resultCode: string;
 };
 
 type lapTimesType = {

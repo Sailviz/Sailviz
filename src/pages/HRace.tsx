@@ -4,6 +4,8 @@ import * as DB from '../components/apiMethods';
 import Dashboard from "../components/Dashboard";
 import RaceTimer from "../components/HRaceTimer"
 import Cookies from "js-cookie";
+import Select from "react-select";
+import Switch from "../components/Switch";
 
 enum raceStateType {
     running,
@@ -17,6 +19,13 @@ enum modeType {
     Lap,
     Finish
 }
+
+const resultCodes =[
+    {'desc': 'Did Not Finish', 'code':'DNF'},
+    {'desc': 'Did Not Start', 'code':'DNS'},
+    {'desc': 'Disqualified', 'code':'DSQ'},
+    {'desc': 'On Course Side', 'code':'OCS'},
+    {'desc': 'Not Sailed Course', 'code':'NSC'}]
 
 const RacePage = () => {
 
@@ -91,6 +100,30 @@ const RacePage = () => {
     })
 
     var [raceState, setRaceState] = useState<raceStateType>(raceStateType.reset)
+    var [activeResult, setActiveResult] = useState<ResultsDataType>({
+
+            id: "",
+            raceId: "",
+            Helm: "",
+            Crew: "",
+            boat: {
+                id: "",
+                name: "",
+                crew: 0,
+                py: 0,
+                clubId: "",
+                pursuitStartTime: 0
+            },
+            SailNumber: "",
+            finishTime: 0,
+            CorrectedTime: 0,
+            lapTimes: {
+                times: [],
+                number: 0
+            },
+            Position: 0,
+            resultCode: "",
+        })
     const [timerActive, setTimerActive] = useState(false);
     const [resetTimer, setResetTimer] = useState(false);
     const [mode, setMode] = useState(modeType.Lap)
@@ -269,20 +302,30 @@ const RacePage = () => {
 
     }
 
-    const retireBoat = async (id: string) => {
-        //modify race data
-        const data = window.structuredClone(race)
-        let index = data.results.findIndex((x: ResultsDataType) => x.id === id)
-        setLastResult({ ...data.results[index] })
+    const retireBoat = async (resultCode: string) => {
+        // //modify race data
+        // const data = window.structuredClone(race)
+        // let index = data.results.findIndex((x: ResultsDataType) => x.id === id)
+        // setLastResult({ ...data.results[index] })
+        //
+        // //re copy to avoid problems
+        // let tempdata = window.structuredClone(race)
+        // index = tempdata.results.findIndex((x: ResultsDataType) => x.id === id)
+        // tempdata.results[index].finishTime = -1
+        // setRace({ ...tempdata })
+        // console.log(tempdata.results[index])
+        // //send to DB
+        // await DB.updateResult(tempdata.results[index])
 
-        //re copy to avoid problems
-        let tempdata = window.structuredClone(race)
-        index = tempdata.results.findIndex((x: ResultsDataType) => x.id === id)
-        tempdata.results[index].finishTime = -1
-        setRace({ ...tempdata })
-        console.log(tempdata.results[index])
-        //send to DB
-        await DB.updateResult(tempdata.results[index])
+        let tempdata = activeResult
+        tempdata.resultCode = resultCode
+        await DB.updateResult(tempdata)
+
+        let data = await DB.getRaceById(race.id)
+        setRace(data)
+
+        await hideRetireModal()
+
     }
 
     const lapBoat = async (id: string) => {
@@ -525,6 +568,23 @@ const RacePage = () => {
         };
     }, []);
 
+    const showRetireModal = (id: String) => {
+        const modal = document.getElementById("retireModal")
+        setActiveResult(race.results.find(result=> result.id == id))
+        modal?.classList.remove("hidden")
+
+
+    }
+
+    const hideRetireModal = () => {
+        const modal = document.getElementById("retireModal")
+        modal?.classList.add("hidden")
+
+    }
+
+    //const
+
+
     return (
         <Dashboard club={club.name} userName={user.name}>
             <audio id="Beep" src=".\beep-6.mp3" ></audio>
@@ -595,6 +655,23 @@ const RacePage = () => {
                 <div className="overflow-auto">
                     <div className="flex flex-row justify-around flex-wrap" id="EntrantCards">
                         {race.results.map((result, index) => {
+                            if (result.resultCode != "") {
+                                let text = result.resultCode
+                                return (
+                                    <div key={index} id={result.id} className='flex bg-red-300 flex-row justify-between p-6 m-4 border-2 border-pink-500 rounded-lg shadow-xl w-96 shrink-0'>
+                                        <div className="flex flex-col">
+                                            <h2 className="text-2xl text-gray-700">{result.SailNumber} - {result.boat.name}</h2>
+                                            <p className="text-base text-gray-600">{result.Helm} - {result.Crew}</p>
+                                            <p className="text-base text-gray-600">Laps: {result.lapTimes.number} Finish: {new Date((result.finishTime - race.startTime) * 1000).toISOString().slice(14, 19)}</p>
+                                        </div>
+                                        <div className="px-5 py-1">
+                                            <p className="text-2xl text-gray-700 px-5 py-2.5 text-center mr-3 md:mr-0">
+                                                {text}
+                                            </p>
+                                        </div>
+                                    </div>
+                                )
+                            }
                             if (result.finishTime == 0) {
                                 //no defined finish time so we assume they have not finished
                                 return (
@@ -622,7 +699,7 @@ const RacePage = () => {
                                                                 )
                                                             case modeType.Retire:
                                                                 return (
-                                                                    <p onClick={(e) => { confirm("are you sure you retire " + result.SailNumber) ? retireBoat(result.id) : null; }} className="text-white bg-blue-600 font-medium rounded-lg text-sm p-5 text-center mt-5">
+                                                                    <p onClick={(e) => { showRetireModal(result.id) }} className="text-white bg-blue-600 font-medium rounded-lg text-sm p-5 text-center mt-5">
                                                                         Retire
                                                                     </p>
                                                                 )
@@ -644,9 +721,6 @@ const RacePage = () => {
                                 )
                             } else {
                                 let text = "Finished"
-                                if (result.finishTime == -1) {
-                                    text = "Retired"
-                                }
                                 return (
                                     <div key={index} id={result.id} className='flex bg-red-300 flex-row justify-between p-6 m-4 border-2 border-pink-500 rounded-lg shadow-xl w-96 shrink-0'>
                                         <div className="flex flex-col">
@@ -664,6 +738,30 @@ const RacePage = () => {
                                 )
                             }
                         })}
+                    </div>
+                </div>
+            </div>
+            <div id="retireModal" className="hidden fixed z-10 left-0 top-0 w-full h-full overflow-auto bg-gray-400 backdrop-blur-sm bg-opacity-20">
+                <div className="mx-auto my-20 px-a py-5 border w-1/4 bg-gray-300 rounded-sm">
+                    <div className="text-6xl font-extrabold text-gray-700 flex justify-center">Retire Boat</div>
+                    <span className="text-4xl font-extrabold text-gray-700 flex justify-center mb-8">{activeResult.Helm} - {activeResult.boat.name}:{activeResult.SailNumber}</span>
+                        {resultCodes.map((resultCode) =>{
+                            return (
+                                <div key={resultCode.code} className="flex mb-2 justify-center">
+                                    <div
+                                        onClick={() => retireBoat(resultCode.code)}
+                                        className="w-1/2 cursor-pointer text-white bg-blue-600 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0"
+                                    >
+                                        {resultCode.desc} ({resultCode.code})
+                                    </div>
+                                </div>
+                            )
+                        })
+                        }
+                    <div className="flex mt-8 justify-center">
+                        <p id="retireCancel" onClick={hideRetireModal} className="w-1/2 cursor-pointer text-white bg-red-600 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
+                            Cancel
+                        </p>
                     </div>
                 </div>
             </div>
