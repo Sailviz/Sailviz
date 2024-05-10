@@ -68,7 +68,6 @@ type BoatDataType = {
   py: number;
   pursuitStartTime: number;
   clubId: string;
-  boats: BoatDataType[];
 };
 
 type ClubDataType = {

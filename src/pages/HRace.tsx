@@ -126,12 +126,14 @@ const RacePage = () => {
         SailNumber: "",
         finishTime: 0,
         CorrectedTime: 0,
-        lapTimes: {
-            times: [],
-            number: 0
-        },
-        Position: 0,
+        laps: [{
+            time: 0,
+            id: "",
+            resultId: ""
+        }],
+        PursuitPosition: 0,
         resultCode: "",
+        fleetId: ""
     })
     const [timerActive, setTimerActive] = useState(false);
     const [resetTimer, setResetTimer] = useState(false);
