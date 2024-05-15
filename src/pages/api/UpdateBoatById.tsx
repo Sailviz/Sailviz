@@ -4,7 +4,7 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 import assert from 'assert';
 
 async function updateBoat(boat: BoatDataType) {
-    var result = await prisma.boats.update({
+    var result = await prisma.boat.update({
         where: {
             id: boat.id
         },

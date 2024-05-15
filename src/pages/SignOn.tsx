@@ -18,7 +18,7 @@ const SignOnPage = () => {
 
     var [user, setUser] = useState<UserDataType>({
         id: "",
-        name: "",
+        displayName: "",
         settings: {},
         permLvl: 0,
         clubId: ""
@@ -40,10 +40,10 @@ const SignOnPage = () => {
         results: [],
         Type: "",
         seriesId: "",
-        startTime: 0,
         series: {} as SeriesDataType
     })
 
+    var [fleets, setFleets] = useState<FleetDataType[]>([])
 
     const [options, setOptions] = useState([{ label: "", value: {} }])
 
@@ -64,13 +64,13 @@ const SignOnPage = () => {
         selected?.classList.remove('hidden')
     }
 
-    const createResult = async (id: string) => {
+    const createResult = async (raceId: string) => {
         const HelmElement = document.getElementById("Helm") as HTMLInputElement
         const CrewElement = document.getElementById("Crew") as HTMLInputElement
         const SailNumberElement = document.getElementById("SailNum") as HTMLInputElement
         const Boat = selectedOption.value as BoatDataType
-        //create a result record
-        let entry = await DB.createResult(id)
+        //create a result record with fleet that matches series id
+        let entry = await DB.createResult(raceId, fleets.filter(fleet => fleet.seriesId == races.filter(race => race.id == raceId)[0]!.seriesId)[0]!.id)
 
         entry.Helm = HelmElement.value
         entry.Crew = CrewElement.value
@@ -217,6 +217,12 @@ const SignOnPage = () => {
         modal?.classList.remove("hidden")
     }
 
+    const GetFleetsBySeries = (seriesId: string) => {
+        return fleets.filter((fleet) => {
+            return fleet.seriesId == seriesId
+        })
+    }
+
     const hideEditBoatModal = async () => {
         const modal = document.getElementById("editModal")
         modal?.classList.add("hidden")
@@ -306,13 +312,26 @@ const SignOnPage = () => {
                 console.log(data)
                 if (data) {
                     let racesCopy: RaceDataType[] = []
+                    let fleetsCopy: FleetDataType[] = []
                     for (let i = 0; i < data.length; i++) {
                         console.log(data[i]!.number)
                         const res = await DB.getRaceById(data[i]!.id)
                         racesCopy[i] = res
+                        //add fleets to list if fleets are enabled for series.
+                        const fleets = await DB.GetFleetsBySeries(res.seriesId)
+                        if (fleets) {
+                            fleetsCopy = fleetsCopy.concat(fleets)
+                        }
                     }
-                    console.log(racesCopy)
                     setRaces(racesCopy)
+
+                    //remove duplicates from fleets
+                    let uniqueFleets = fleetsCopy.filter((fleet, index, self) =>
+                        index === self.findIndex((t) => (
+                            t.id === fleet.id
+                        ))
+                    )
+                    setFleets(uniqueFleets)
                     setSelectedRaces(new Array(data.length).fill(false))
                 } else {
                     console.log("could not find todays race")
@@ -417,6 +436,15 @@ const SignOnPage = () => {
                                             handleToggle={() => { setSelectedRaces([...selectedRaces.slice(0, index), !selectedRaces[index], ...selectedRaces.slice(index + 1)]) }}
                                         />
                                         <label className=" pl-6 py-auto text-2xl font-bold text-gray-700" htmlFor={race.id}>{race.series.name} {race.number}</label>
+                                        {/* show buttons for each fleet in a series */}
+                                        {GetFleetsBySeries(race.seriesId).map((fleet: FleetDataType, index) => {
+                                            return (
+                                                <div key={fleet.id + race.id} className="ml-6 cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
+                                                    {fleet.name}
+                                                </div>
+                                            )
+                                        })}
+
                                     </div>
                                 </div>
                             )
@@ -526,7 +554,7 @@ const SignOnPage = () => {
                     <div className="text-6xl font-extrabold text-gray-700 p-6">
                         {activeRaceData.series.name}: {activeRaceData.number}
                     </div>
-                    <RaceResultsTable data={activeRaceData.results} startTime={activeRaceData.startTime} key={JSON.stringify(activeRaceData.results)} deleteResult={() => { }} updateResult={() => { }} createResult={() => { }} clubId={clubId} raceId={activeRaceData.id} />
+                    <RaceResultsTable data={activeRaceData.results} startTime={null} key={JSON.stringify(activeRaceData.results)} deleteResult={() => { }} updateResult={() => { }} createResult={() => { }} clubId={clubId} raceId={activeRaceData.id} />
                 </div>
             </div>
             <div id="Guide" className="hidden" >

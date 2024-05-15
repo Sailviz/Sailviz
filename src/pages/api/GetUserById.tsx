@@ -8,9 +8,9 @@ async function getUser(id: string) {
             id: id
         },
         select: {
-            name: true,
+            displayName: true,
             id: true,
-            email: false,
+            username: false,
             password: false,
             settings: true,
             permLvl: true,

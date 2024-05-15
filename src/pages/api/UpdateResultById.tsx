@@ -5,61 +5,36 @@ import assert from 'assert';
 
 
 async function updateResult(result: ResultsDataType) {
-    var res = await prisma.race.update({
+    var res = await prisma.result.update({
         where: {
-            id: result.raceId
+            id: result.id
         },
         data: {
-            results: {
-                update: {
-                    where: {
-                        id: result.id
-                    },
-                    data: {
-                        SailNumber: result.SailNumber,
-                        CorrectedTime: result.CorrectedTime,
-                        Crew: result.Crew,
-                        Helm: result.Helm,
-                        lapTimes: result.lapTimes,
-                        Position: result.Position,
-                        finishTime: result.finishTime,
-                        resultCode: result.resultCode,
-                    }
-                }
-            }
-
-        },
-        include: {
-            results: true
+            SailNumber: result.SailNumber,
+            CorrectedTime: result.CorrectedTime,
+            Crew: result.Crew,
+            Helm: result.Helm,
+            finishTime: result.finishTime,
+            resultCode: result.resultCode,
         }
     })
     return res;
 }
 
 async function updateBoat(result: ResultsDataType) {
-    var res = await prisma.race.update({
+    var res = await prisma.result.update({
         where: {
-            id: result.raceId
+            id: result.id
         },
         data: {
-            results: {
-                update: {
-                    where: {
-                        id: result.id
-                    },
-                    data: {
-                        boat: {
-                            connect: {
-                                id: result.boat.id
-                            }
-                        }
-                    }
+            boat: {
+                connect: {
+                    id: result.boat.id
                 }
             }
-
         },
         include: {
-            results: true
+            boat: true
         }
     })
     return res;

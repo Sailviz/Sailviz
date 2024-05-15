@@ -4,7 +4,7 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 import assert from 'assert';
 
 async function findRace(boatId: any) {
-    var result = await prisma.boats.findFirst({
+    var result = await prisma.boat.findFirst({
         where: {
             id: boatId
         }

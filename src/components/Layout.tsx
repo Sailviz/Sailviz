@@ -18,7 +18,7 @@ export default function Layout({
                 <title>{siteTitle}</title>
                 <meta
                     name="description"
-                    content="Play the pirate game with your friends"
+                    content="manage sailing races"
                 />
                 {/* image for when link is shared on social media */}
                 <meta

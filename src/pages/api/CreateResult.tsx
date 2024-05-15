@@ -1,19 +1,26 @@
 import prisma from '../../components/prisma'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import assert from 'assert';
-import { createRace } from '../../components/apiMethods';
 
-
-async function findRace(raceId: any) {
+async function findRace(fleetId: any) {
     var result = await prisma.race.findUnique({
         where: {
-            id: raceId
+            id: fleetId
         },
     })
     return result;
 }
 
-async function createEntry(raceId: string,) {
+async function findFleet(fleetId: string) {
+    var result = await prisma.fleet.findUnique({
+        where: {
+            id: fleetId
+        },
+    })
+    return result;
+}
+
+async function createEntry(fleetId: string, raceId: string) {
     var res = await prisma.result.create({
         data: {
             Helm: "",
@@ -21,25 +28,30 @@ async function createEntry(raceId: string,) {
             SailNumber: "",
             finishTime: 0,
             CorrectedTime: 0,
-            lapTimes: {
-                "times": [],
-                "number": 0,
+            PursuitPosition: 0,
+            isDeleted: false,
+            fleet: {
+                connect: {
+                    id: fleetId
+                }
             },
-            Position: 0,
             race: {
                 connect: {
                     id: raceId
                 }
             },
             boat: {},
+            laps: {},
             resultCode: "",
+        },
+        include: {
+            laps: true,
         }
     })
     return res;
 }
 
-
-const CreateRace = async (req: NextApiRequest, res: NextApiResponse) => {
+const CreateResult = async (req: NextApiRequest, res: NextApiResponse) => {
     if (req.method === 'POST') {
         // check if we have all data.
         // The website stops this, but just in case
@@ -52,16 +64,28 @@ const CreateRace = async (req: NextApiRequest, res: NextApiResponse) => {
         }
 
         var raceId = req.body.raceId
+        var fleetId = req.body.fleetId
+
         var race = await findRace(raceId)
+        if (!race) {
+            res.json({ error: true, message: 'Could not find race' });
+            return
+        }
 
-        if (race) {
-            var result = await createEntry(raceId)
-            res.json({ error: false, result: result });
+        if (!fleetId) {
+            res.json({ error: true, message: 'Fleet required' });
+            return
         }
-        else {
-            res.json({ error: true, message: 'Could not find series' });
+
+        var fleet = await findFleet(fleetId)
+        if (!fleet) {
+            res.json({ error: true, message: 'Could not find fleet' });
+            return
         }
+        var result = await createEntry(fleetId, race.id)
+        res.json({ error: false, result: result });
     }
-};
 
-export default CreateRace
+}
+
+export default CreateResult

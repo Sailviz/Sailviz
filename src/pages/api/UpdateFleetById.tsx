@@ -2,19 +2,21 @@ import prisma from '../../components/prisma'
 import type { NextApiRequest, NextApiResponse } from 'next'
 
 import assert from 'assert';
+import { connect } from 'http2';
 
-async function updateRace(race: RaceDataType) {
-    var result = await prisma.race.update({
+async function updateFleet(fleet: FleetDataType) {
+    var result = await prisma.fleet.update({
         where: {
-            id: race.id
+            id: fleet.id
         },
         data: {
-            OOD: race.OOD,
-            AOD: race.AOD,
-            SO: race.SO,
-            ASO: race.ASO,
-            Time: race.Time,
-            Type: race.Type,
+            name: fleet.name,
+            startTime: fleet.startTime,
+            startDelay: fleet.startDelay,
+            boats: {
+                set: fleet.boats.map(boat => { return ({ id: boat.id }) })
+
+            }
         }
     })
     return result;
@@ -25,16 +27,16 @@ const UpdateRaceById = async (req: NextApiRequest, res: NextApiResponse) => {
         // check if we have all data.
         // The website stops this, but just in case
         try {
-            assert.notStrictEqual(undefined, req.body.race);
+            assert.notStrictEqual(undefined, req.body.fleet);
 
         } catch (bodyError) {
             res.json({ error: true, message: "information missing" });
             return;
         }
 
-        var race: RaceDataType = req.body.race
+        var fleet: FleetDataType = req.body.fleet
 
-        var updatedRace = await updateRace(race)
+        var updatedRace = await updateFleet(fleet)
         if (updatedRace) {
             res.json({ error: false, race: updatedRace });
         } else {

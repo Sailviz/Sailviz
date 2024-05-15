@@ -75,7 +75,6 @@ const columnHelper = createColumnHelper<SeriesResultsType>()
 
 const SeriesResultsTable = (props: any) => {
     let [seriesData, setSeriesData] = useState<SeriesDataType>(props.data)
-    let clubId = props.clubId
 
     //calculate results table from data.
     let [data, setData] = useState<SeriesResultsType[]>([])
@@ -138,6 +137,7 @@ const SeriesResultsTable = (props: any) => {
 
     useEffect(() => {
         if (seriesData != undefined) {
+            console.log(seriesData)
             calcTable()
         }
     }, [seriesData])
@@ -161,7 +161,7 @@ const SeriesResultsTable = (props: any) => {
         columnHelper.accessor((data) => data.Boat?.name, {
             header: "Class",
             id: "Class",
-            cell: props => <Text {...props} clubId={clubId} />,
+            cell: props => <Text {...props} />,
             enableSorting: false
         }),
         columnHelper.accessor((data) => data.SailNumber, {

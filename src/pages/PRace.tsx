@@ -58,7 +58,6 @@ const RacePage = () => {
             Position: 0,
         }],
         Type: "",
-        startTime: 0,
         seriesId: "",
         series: {} as SeriesDataType
     }))
@@ -78,7 +77,7 @@ const RacePage = () => {
 
     var [user, setUser] = useState<UserDataType>({
         id: "",
-        name: "",
+        displayName: "",
         settings: {},
         permLvl: 0,
         clubId: ""
@@ -418,14 +417,14 @@ const RacePage = () => {
     }, []);
 
     return (
-        <Dashboard club={club.name} userName={user.name}>
+        <Dashboard club={club.name} displayName={user.displayName}>
 
             <audio id="Beep" src=".\beep-6.mp3" ></audio>
             <audio id="Countdown" src=".\Countdown.mp3" ></audio>
             <div className="w-full flex flex-col items-center justify-start panel-height overflow-auto">
                 <div className="flex w-full flex-row justify-around">
                     <div className="w-1/4 p-2">
-                        <p onClick={() => router.push({ pathname: '/Race', query: { race: race.id } })} className="cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-xl px-5 py-2.5 text-center">
+                        <p onClick={() => router.back()} className="cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-xl px-5 py-2.5 text-center">
                             Back To Home
                         </p>
                     </div>

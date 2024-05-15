@@ -1,21 +1,18 @@
 type RaceDataType = {
-  [key: string]: any;
   id: string;
   number: number;
+  Time: string;
   OOD: string;
   AOD: string;
   SO: string;
   ASO: string;
   results: ResultsType[];
-  Time: string;
-  startTime: number;
   Type: string;
   seriesId: string;
   series: SeriesDataType;
 };
 
 type SeriesDataType = {
-  [key: string]: any;
   id: string;
   name: string;
   clubId: string;
@@ -24,23 +21,24 @@ type SeriesDataType = {
 };
 
 type ResultsDataType = {
-  [key: string]: any;
   id: string;
+  fleetId: string;
   raceId: string;
   Helm: string;
   Crew: string;
   boat: BoatDataType;
   SailNumber: string;
   finishTime: number;
-  lapTimes: lapTimesType;
+  laps: LapDataType[];
   CorrectedTime: number;
-  Position: number;
+  PursuitPosition: number;
   resultCode: string;
 };
 
-type lapTimesType = {
-  times: Array;
-  number: number;
+type LapDataType = {
+  id: string;
+  resultId: string;
+  time: Array;
 };
 
 type NextRaceDataType = {
@@ -53,12 +51,10 @@ type NextRaceDataType = {
 };
 
 type RaceSettingsType = {
-  [key: string]: any;
   numberToCount: number;
 };
 
 type ClubSettingsType = {
-  [key: string]: any;
   clockIP: string;
   hornIP: string;
   pursuitLength: number;
@@ -84,8 +80,17 @@ type ClubDataType = {
 
 type UserDataType = {
   id: string;
-  name: string;
+  displayName: string;
   settings: object;
   permLvl: number;
   clubId: string;
+};
+
+type FleetDataType = {
+  id: string;
+  name: string;
+  seriesId: String;
+  startTime: number;
+  startDelay: number;
+  boats: BoatDataType[];
 };

@@ -6,7 +6,7 @@ import assert from 'assert';
 //this only updates the settings part of the club record
 
 async function updateClub(club: ClubDataType) {
-    var result = await prisma.clubs.update({
+    var result = await prisma.club.update({
         where: {
             id: club.id
         },

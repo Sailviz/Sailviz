@@ -11,8 +11,10 @@ async function findRace(id: any) {
         include: {
             results: {
                 include: {
-                    boat: true
+                    boat: true,
+                    laps: true
                 }
+
             },
             series: true
         }

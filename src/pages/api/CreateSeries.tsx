@@ -17,6 +17,24 @@ async function createSeries(seriesName: string, clubId: string) {
     return res;
 }
 
+async function attachFleet(seriesId: string) {
+    var res = await prisma.fleet.create({
+        data: {
+            name: "Main Fleet",
+            startTime: 0,
+            startDelay: 0,
+            series: {
+                connect: {
+                    id: seriesId
+                }
+            },
+            boats: {}
+        }
+    })
+    return res;
+
+}
+
 const CreateSeries = async (req: NextApiRequest, res: NextApiResponse) => {
     if (req.method === 'POST') {
         // check if we have all data.
@@ -33,6 +51,7 @@ const CreateSeries = async (req: NextApiRequest, res: NextApiResponse) => {
         var clubId = req.body.clubId
         var Series = await createSeries(seriesName, clubId)
         if (Series) {
+            await attachFleet(Series.id)
             res.json({ error: false, series: Series })
         }
         else {
