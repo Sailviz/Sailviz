@@ -72,15 +72,7 @@ const RacePage = () => {
         series: {} as SeriesDataType
     }))
 
-    var [fleets, setFleets] = useState<FleetDataType[]>([{
-        id: "",
-        name: "",
-        startTime: 0,
-        seriesId: "",
-        startDelay: 0,
-        boats: [],
-
-    }])
+    var [fleets, setFleets] = useState<FleetDataType[]>([])
 
     var [lastResult, setLastResult] = useState<ResultsDataType | null>(null)
 
@@ -448,12 +440,12 @@ const RacePage = () => {
         let raceId = query.race as string
         const fetchRace = async () => {
             let data = await DB.getRaceById(raceId)
+            setRace(data)
 
             setSeriesName(await DB.GetSeriesById(data.seriesId).then((res) => { return (res.name) }))
             const fleets = await DB.GetFleetsBySeries(data.seriesId)
             setFleets(fleets)
             setRaceState(fleets.map(() => raceStateType.reset))
-            setRace(data)
         }
 
         if (raceId != undefined) {
@@ -641,6 +633,8 @@ const RacePage = () => {
                 <div className="overflow-auto">
                     <div className="flex flex-row justify-around flex-wrap" id="EntrantCards">
                         {race.results.map((result: ResultsDataType, index) => {
+                            //check wait until fleets have loaded
+                            if (fleets.length < 1) return <></>
                             if (result.resultCode != "") {
                                 let text = result.resultCode
                                 console.log(result)
