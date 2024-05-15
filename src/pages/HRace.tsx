@@ -4,9 +4,6 @@ import * as DB from '../components/apiMethods';
 import Dashboard from "../components/Dashboard";
 import RaceTimer from "../components/HRaceTimer"
 import Cookies from "js-cookie";
-import Select from "react-select";
-import Switch from "../components/Switch";
-import { set } from "cypress/types/lodash";
 
 enum raceStateType {
     running,
@@ -108,8 +105,8 @@ const RacePage = () => {
 
     })
 
-    var [raceState, setRaceState] = useState<raceStateType[]>([])
-    var [activeResult, setActiveResult] = useState<ResultsDataType>({
+    const [raceState, setRaceState] = useState<raceStateType[]>([])
+    const [activeResult, setActiveResult] = useState<ResultsDataType>({
 
         id: "",
         raceId: "",
@@ -135,8 +132,7 @@ const RacePage = () => {
         resultCode: "",
         fleetId: ""
     })
-    const [fleetTimer, setFleetTimer] = useState<boolean[]>([]);
-    const [resetTimer, setResetTimer] = useState(false);
+
     const [mode, setMode] = useState(modeType.Lap)
 
     const startRaceButton = async (fleetId: string) => {
@@ -162,11 +158,8 @@ const RacePage = () => {
 
     const startRace = async (fleetId: string) => {
         let index = fleets.findIndex(fleet => fleet.id == fleetId)
-        setResetTimer(false)
         //modify racestate at index to match fleet index
         setRaceState([...raceState.slice(0, index), raceStateType.running, ...raceState.slice(index + 1)])
-        //start countdown timer
-        setFleetTimer([...fleetTimer.slice(0, index), true, ...fleetTimer.slice(index + 1)])
 
         let sound = document.getElementById("Beep") as HTMLAudioElement
         sound!.currentTime = 0
@@ -248,7 +241,6 @@ const RacePage = () => {
             let aPredicted = a.laps.length > 0 ? a.laps.reduce((sum: number, lap: LapDataType) => sum + lap.time, a.laps[a.laps.length - 1]!.time) : a.boat.py / 10
             let bPredicted = b.laps.length > 0 ? b.laps.reduce((sum: number, lap: LapDataType) => sum + lap.time, b.laps[b.laps.length - 1]!.time) : b.boat.py / 10
 
-            console.log(aPredicted, bPredicted)
             return aPredicted - bPredicted;
         });
 
@@ -264,7 +256,6 @@ const RacePage = () => {
         let index = fleets.findIndex(fleet => fleet.id == fleetId)
         //modify racestate at index to match fleet index
         setRaceState([...raceState.slice(0, index), raceStateType.stopped, ...raceState.slice(index + 1)])
-        setFleetTimer([...fleetTimer.slice(0, index), false, ...fleetTimer.slice(index + 1)])
         fetch("http://" + club.settings.clockIP + "/reset", { signal: controller.signal, mode: 'no-cors' }).catch(function (err) {
             console.log('Clock not connected: ', err);
         });
@@ -282,10 +273,8 @@ const RacePage = () => {
         });
 
         let index = fleets.findIndex(fleet => fleet.id == fleetId)
-        setResetTimer(false)
         //modify racestate at index to match fleet index
-        setRaceState([...raceState.slice(0, index), raceStateType.running, ...raceState.slice(index + 1)])
-        setResetTimer(true)
+        setRaceState([...raceState.slice(0, index), raceStateType.reset, ...raceState.slice(index + 1)])
 
         //Update database
         fleet.startTime = 0
@@ -325,15 +314,8 @@ const RacePage = () => {
         //save state for undo
         setLastResult({ ...data.results[index] })
 
-        //re copy to avoid problems
+        await DB.CreateLap(id, Math.floor(new Date().getTime() / 1000))
         let tempdata = window.structuredClone(race)
-        index = tempdata.results.findIndex((x: ResultsDataType) => x.id === id)
-
-        tempdata.results[index].lapTimes.times.push(Math.floor(new Date().getTime() / 1000))
-        tempdata.results[index].lapTimes.number += 1 //increment number of laps
-        console.log(tempdata.results[index])
-        await DB.updateResult(tempdata.results[index])
-        setRace({ ...tempdata })
         orderResults(tempdata.results)
         //send to DB
 
@@ -388,6 +370,9 @@ const RacePage = () => {
             console.log(err)
         })
 
+        const time = Math.floor(new Date().getTime() / 1000)
+        await DB.CreateLap(id, time)
+
         //modify race data
         let data = window.structuredClone(race)
         let index = data.results.findIndex((x: ResultsDataType) => x.id === id)
@@ -399,12 +384,7 @@ const RacePage = () => {
         index = tempdata.results.findIndex((x: ResultsDataType) => x.id === id)
         console.log(tempdata.results[index])
         //set finish time
-        tempdata.results[index].finishTime = Math.floor(new Date().getTime() / 1000)
-        //add final lap to lap info
-        tempdata.results[index].lapTimes.times.push(Math.floor(new Date().getTime() / 1000))
-        tempdata.results[index].lapTimes.number += 1 //increment number of laps
-        //update local race copy
-        setRace({ ...tempdata })
+        tempdata.results[index].finishTime = time
         //send to DB
         await DB.updateResult(tempdata.results[index])
         //moved finished to bottom of screen
@@ -485,8 +465,6 @@ const RacePage = () => {
             }
             else if (fleet.startTime != 0) {
                 setRaceState([...raceState.slice(0, index), raceStateType.running, ...raceState.slice(index + 1)])
-                setResetTimer(false)
-                setFleetTimer([...fleetTimer.slice(0, index), true, ...fleetTimer.slice(index + 1)])
             }
             orderResults(race.results)
         })
@@ -600,10 +578,10 @@ const RacePage = () => {
                         return (
                             <div className="flex flex-row">
                                 <div className="w-1/4 p-2 m-2 border-4 rounded-lg bg-white text-lg font-medium">
-                                    Event: {seriesName} - {race.number} - {fleet.name}
+                                    Event: {seriesName} - {race.number} - {fleet.name} {index}
                                 </div>
                                 <div className="w-1/4 p-2 m-2 border-4 rounded-lg bg-white text-lg font-medium">
-                                    Race Time: <RaceTimer startTime={fleet.startTime} timerActive={fleetTimer[index]!} onFiveMinutes={handleFiveMinutes} onFourMinutes={handleFourMinutes} onOneMinute={handleOneMinute} onGo={handleGo} onWarning={handleWarning} reset={resetTimer} />
+                                    Race Time: <RaceTimer key={"fleetTimer" + index} startTime={fleet.startTime} timerActive={raceState[index] == raceStateType.running} onFiveMinutes={handleFiveMinutes} onFourMinutes={handleFourMinutes} onOneMinute={handleOneMinute} onGo={handleGo} onWarning={handleWarning} reset={raceState[index] == raceStateType.reset} />
                                 </div>
                                 <div className="p-2 w-1/4" id="RaceStateButton">
                                     {(() => {

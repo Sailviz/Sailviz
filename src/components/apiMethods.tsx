@@ -539,3 +539,23 @@ export async function DeleteFleetById(fleetId: string): Promise<FleetDataType> {
             }
         });
 };
+
+export async function CreateLap(resultId: string, time: number): Promise<LapDataType> {
+    const body = {
+        resultId: resultId,
+        time: time,
+    }
+    return await fetch(`/api/CreateLap`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+    })
+        .then((res) => res.json())
+        .then(async (data) => {
+            if (data && data.error) {
+                console.log(data.message)
+            } else {
+                return data.fleet
+            }
+        });
+};

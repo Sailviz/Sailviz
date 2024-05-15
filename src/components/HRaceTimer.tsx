@@ -1,9 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-let fiveminsDone = false
-let fourminsDone = false
-let oneminsDone = false
-let zerominsDone = false
+let hootFlag = true
 
 let warningFlag = true
 
@@ -30,68 +27,76 @@ const CountdownTimer = ({ startTime, timerActive, onFiveMinutes, onFourMinutes, 
     useEffect(() => {
         if (!timerActive) return
         const timer = setTimeout(() => {
-            setTimeLeft(calculateTimeLeft());
+            const time = calculateTimeLeft()
+            setTimeLeft(time);
+            //full minute signals
+            if (time.minutes == 0 && time.seconds == 0 && time.countingUp == false) {
+                if (onGo && hootFlag) {
+                    onGo();
+                    hootFlag = false
+                    warningFlag = true
+                }
+            } else if (time.minutes == 1 && time.seconds == 0 && time.countingUp == false) {
+                if (onOneMinute && hootFlag) {
+                    onOneMinute();
+                    hootFlag = false
+                    warningFlag = true
+                }
+            } else if (time.minutes == 4 && time.seconds == 0 && time.countingUp == false) {
+                if (onFourMinutes && hootFlag) {
+                    onFourMinutes();
+                    hootFlag = false
+                    warningFlag = true
+                }
+            }
+            else if (time.minutes == 5 && time.seconds == 0 && time.countingUp == false) {
+                if (onFiveMinutes && hootFlag) {
+                    onFiveMinutes();
+                    hootFlag = false
+                    warningFlag = true
+                }
+            }
+
+            //5 second warnings
+            if (time.minutes == 0 && time.seconds == 5 && time.countingUp == false) {
+                if (onWarning && warningFlag) {
+                    onWarning();
+                    warningFlag = false
+                    hootFlag = true
+                }
+            } else if (time.minutes == 1 && time.seconds == 5 && time.countingUp == false) {
+                if (onWarning && warningFlag) {
+                    onWarning();
+                    warningFlag = false
+                    hootFlag = true
+                }
+            } else if (time.minutes == 4 && time.seconds == 5 && time.countingUp == false) {
+                if (onWarning && warningFlag) {
+                    onWarning();
+                    warningFlag = false
+                    hootFlag = true
+                }
+            } else if (time.minutes == 5 && time.seconds == 5 && time.countingUp == false) {
+                if (onWarning && warningFlag) {
+                    onWarning();
+                    warningFlag = false
+                    hootFlag = true
+                }
+            }
         }, 100);
+
+
 
         return () => clearTimeout(timer);
     }, [timerActive, timeLeft, startTime]);
 
     useEffect(() => {
         if (reset) {
-            setTimeLeft(calculateTimeLeft());
+            setTimeLeft({ minutes: 5, seconds: 15, countingUp: false });
         }
     }, [reset]);
 
-    //full minute signals
-    if (timeLeft.minutes == 0 && timeLeft.seconds == 0 && timeLeft.countingUp == false) {
-        if (!zerominsDone) {
-            if (onGo) onGo();
-            zerominsDone = true
-            warningFlag = true
-        }
-    } else if (timeLeft.minutes == 1 && timeLeft.seconds == 0 && timeLeft.countingUp == false) {
-        if (!oneminsDone) {
-            if (onOneMinute) onOneMinute();
-            oneminsDone = true
-            warningFlag = true
-        }
-    } else if (timeLeft.minutes == 4 && timeLeft.seconds == 0 && timeLeft.countingUp == false) {
-        if (!fourminsDone) {
-            if (onFourMinutes) onFourMinutes();
-            fourminsDone = true
-            warningFlag = true
-        }
-    }
-    else if (timeLeft.minutes == 5 && timeLeft.seconds == 0 && timeLeft.countingUp == false) {
-        if (!fiveminsDone) {
-            if (onFiveMinutes) onFiveMinutes();
-            fiveminsDone = true
-            warningFlag = true
-        }
-    }
 
-    //5 second warnings
-    if (timeLeft.minutes == 0 && timeLeft.seconds == 5 && timeLeft.countingUp == false) {
-        if (onWarning && warningFlag) {
-            onWarning();
-            warningFlag = false
-        }
-    } else if (timeLeft.minutes == 1 && timeLeft.seconds == 5 && timeLeft.countingUp == false) {
-        if (onWarning && warningFlag) {
-            onWarning();
-            warningFlag = false
-        }
-    } else if (timeLeft.minutes == 4 && timeLeft.seconds == 5 && timeLeft.countingUp == false) {
-        if (onWarning && warningFlag) {
-            onWarning();
-            warningFlag = false
-        }
-    } else if (timeLeft.minutes == 5 && timeLeft.seconds == 5 && timeLeft.countingUp == false) {
-        if (onWarning && warningFlag) {
-            onWarning();
-            warningFlag = false
-        }
-    }
 
     return (
         <>
