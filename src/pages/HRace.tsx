@@ -65,6 +65,7 @@ const RacePage = () => {
                 time: 0,
             } as LapDataType],
             PursuitPosition: 0,
+            resultCode: "",
         } as ResultsDataType],
         Type: "",
         seriesId: "",
@@ -315,9 +316,10 @@ const RacePage = () => {
         setLastResult({ ...data.results[index] })
 
         await DB.CreateLap(id, Math.floor(new Date().getTime() / 1000))
-        let tempdata = window.structuredClone(race)
-        orderResults(tempdata.results)
+        let updatedData = await DB.getRaceById(race.id)
+        orderResults(updatedData.results)
         //send to DB
+        setRace(updatedData)
 
         let sound = document.getElementById("Beep") as HTMLAudioElement
         sound!.currentTime = 0
@@ -390,6 +392,8 @@ const RacePage = () => {
         //moved finished to bottom of screen
         orderResults(tempdata.results)
 
+        setRace(await DB.getRaceById(race.id))
+
         if (checkAllFinished(tempdata.results[index].fleetId)) {
             //show popup to say race is finished.
             stopRace(tempdata.results[index].fleetId)
@@ -444,12 +448,12 @@ const RacePage = () => {
         let raceId = query.race as string
         const fetchRace = async () => {
             let data = await DB.getRaceById(raceId)
-            setRace(data)
 
             setSeriesName(await DB.GetSeriesById(data.seriesId).then((res) => { return (res.name) }))
             const fleets = await DB.GetFleetsBySeries(data.seriesId)
             setFleets(fleets)
             setRaceState(fleets.map(() => raceStateType.reset))
+            setRace(data)
         }
 
         if (raceId != undefined) {
@@ -636,15 +640,16 @@ const RacePage = () => {
                 </div>
                 <div className="overflow-auto">
                     <div className="flex flex-row justify-around flex-wrap" id="EntrantCards">
-                        {race.results.map((result, index) => {
+                        {race.results.map((result: ResultsDataType, index) => {
                             if (result.resultCode != "") {
                                 let text = result.resultCode
+                                console.log(result)
                                 return (
                                     <div key={index} id={result.id} className='flex bg-red-300 flex-row justify-between p-6 m-4 border-2 border-pink-500 rounded-lg shadow-xl w-96 shrink-0'>
                                         <div className="flex flex-col">
                                             <h2 className="text-2xl text-gray-700">{result.SailNumber} - {result.boat.name}</h2>
                                             <p className="text-base text-gray-600">{result.Helm} - {result.Crew}</p>
-                                            {/* <p className="text-base text-gray-600">Laps: {result.lapTimes.number} Finish: {new Date((result.finishTime - race.startTime) * 1000).toISOString().slice(14, 19)}</p> */}
+                                            <p className="text-base text-gray-600">Laps: {result.laps.length} Finish: {new Date(((result.finishTime - fleets.filter((fleet) => fleet.id == result.fleetId)[0]!.startTime)) * 1000).toISOString().slice(14, 19)}</p>
                                         </div>
                                         <div className="px-5 py-1">
                                             <p className="text-2xl text-gray-700 px-5 py-2.5 text-center mr-3 md:mr-0">
@@ -661,12 +666,11 @@ const RacePage = () => {
                                         <div className="flex flex-col ml-4 my-6">
                                             <h2 className="text-2xl text-gray-700">{result.SailNumber} - {result.boat?.name}</h2>
                                             <p className="text-base text-gray-600">{result.Helm} - {result.Crew}</p>
-                                            {/* {result.lapTimes.times.length >= 1 ?
-                                                // <p className="text-base text-gray-600">Laps: {result.lapTimes.number} Last: {new Date((result.lapTimes.times[result.lapTimes.times.length - 1] - race.startTime) * 1000).toISOString().slice(14, 19)}</p>
-                                                <p>line above needs fixing</p>
+                                            {result.laps.length >= 1 ?
+                                                <p className="text-base text-gray-600">Laps: {result.laps.length} Last: {new Date((result.laps[result.laps.length - 1]?.time - fleets.filter((fleet) => fleet.id == result.fleetId)[0]!.startTime) * 1000).toISOString().slice(14, 19)}</p>
                                                 :
-                                                <p className="text-base text-gray-600">Laps: {result.lapTimes.number} </p>
-                                            } */}
+                                                <p className="text-base text-gray-600">Laps: {result.laps.length} </p>
+                                            }
                                         </div>
                                         <div className="px-5 py-2 w-2/4">
                                             {raceState.some((state) => state == raceStateType.running) ?
@@ -709,7 +713,7 @@ const RacePage = () => {
                                         <div className="flex flex-col">
                                             <h2 className="text-2xl text-gray-700">{result.SailNumber} - {result.boat.name}</h2>
                                             <p className="text-base text-gray-600">{result.Helm} - {result.Crew}</p>
-                                            {/* <p className="text-base text-gray-600">Laps: {result.lapTimes.number} Finish: {new Date((result.finishTime - race.startTime) * 1000).toISOString().slice(14, 19)}</p> */}
+                                            <p className="text-base text-gray-600">Laps: {result.laps.length} Finish: {new Date((result.finishTime - fleets.filter((fleet) => fleet.id == result.fleetId)[0]!.startTime) * 1000).toISOString().slice(14, 19)}</p>
                                         </div>
                                         <div className="px-5 py-1">
                                             <p className="text-white bg-blue-600 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
