@@ -4,7 +4,7 @@ import cookie from 'js-cookie'
 import Link from 'next/link'
 import Image from 'next/image'
 
-export const siteTitle = 'SRM'
+export const siteTitle = 'SailViz'
 
 
 export default function Dashboard({
@@ -38,7 +38,7 @@ export default function Dashboard({
                     <div className="container flex flex-wrap justify-between items-center mx-auto">
                         <div className="flex items-center">
                             <div className='flex flex-row'>
-                                <div className=' text-4xl font-bold text-blue-600 p-1 cursor-pointer' onClick={() => Router.push("/Dashboard")}>SRM - </div>
+                                <div className=' text-4xl font-bold text-blue-600 p-1 cursor-pointer' onClick={() => Router.push("/Dashboard")}>SailViz - </div>
                                 <p className="text-4xl font-bold text-blue-600 p-1 cursor-pointer">
                                     {club}
                                 </p>

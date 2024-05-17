@@ -1,7 +1,7 @@
 import Head from 'next/head'
 import Link from 'next/link'
 import Image from 'next/image'
-export const siteTitle = 'SRM'
+export const siteTitle = 'SailViz'
 
 
 export default function Layout({
@@ -33,7 +33,7 @@ export default function Layout({
                     <div className="container flex flex-wrap justify-between items-center mx-auto">
                         <Link href={"/"}>
                             <div className='flex flex-row'>
-                                <Image src="/favicon.ico" className="mr-3 h-6 sm:h-9" width={40} height={40} alt='SRM' />
+                                <Image src="/favicon.ico" className="mr-3 h-6 sm:h-9" width={40} height={40} alt='SailViz' />
                             </div>
                         </Link>
                         <div className="hidden w-full md:block md:w-auto" id="navbar-default">

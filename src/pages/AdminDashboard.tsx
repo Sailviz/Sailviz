@@ -359,7 +359,7 @@ const Club = () => {
                 <div id="page" className='flex basis-9/12 h-full w-full overflow-y-auto'>
                     <div id="home" className="">
                         <p className="text-6xl font-extrabold text-gray-700 p-6">
-                            Welcome to Sailing Race Manager
+                            Welcome to SailViz
                         </p>
                         {nextRace != undefined ?
                             <div onClick={() => selectRace(nextRace.id)} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0"> Go to Next Race {nextRace.series.name}: {nextRace.number} </div>
