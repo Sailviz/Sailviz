@@ -1,15 +1,10 @@
 import React, { useState, useEffect } from 'react';
 
-let fiveminsDone = false
-let fourminsDone = false
-let oneminsDone = false
-let zerominsDone = false
-let onEndDone = false
-
+let hootFlag = true
 let warningFlag = true
 
 const CountdownTimer = ({ startTime, endTime, timerActive, onFiveMinutes, onFourMinutes, onOneMinute, onGo, onEnd, onTimeUpdate, onWarning, reset }: { startTime: number, endTime: number | null, timerActive: boolean, onFiveMinutes: any, onFourMinutes: any, onOneMinute: any, onGo: any, onEnd: any, onTimeUpdate: any, onWarning: any, reset: boolean }) => {
-    const [timeLeft, setTimeLeft] = useState({ minutes: 6, seconds: 0, countingUp: false });
+    const [timeLeft, setTimeLeft] = useState({ minutes: 5, seconds: 15, countingUp: false });
 
 
     const calculateTimeLeft = () => {
@@ -31,82 +26,90 @@ const CountdownTimer = ({ startTime, endTime, timerActive, onFiveMinutes, onFour
     useEffect(() => {
         if (!timerActive) return
         const timer = setTimeout(() => {
-            setTimeLeft(calculateTimeLeft());
+            const time = calculateTimeLeft();
+            setTimeLeft(time);
+            //full minute signals
+            if (timeLeft.minutes == 0 && timeLeft.seconds == 0 && timeLeft.countingUp == false) {
+                if (onGo && hootFlag) {
+                    onGo()
+                    hootFlag = false
+                    warningFlag = true
+                }
+            } else if (timeLeft.minutes == 1 && timeLeft.seconds == 0 && timeLeft.countingUp == false) {
+                if (onOneMinute && hootFlag) {
+                    onOneMinute()
+                    hootFlag = false
+                    warningFlag = true
+                }
+            } else if (timeLeft.minutes == 4 && timeLeft.seconds == 0 && timeLeft.countingUp == false) {
+                if (onFourMinutes && hootFlag) {
+                    onFourMinutes()
+                    hootFlag = false
+                    warningFlag = true
+                }
+            }
+            else if (timeLeft.minutes == 5 && timeLeft.seconds == 0 && timeLeft.countingUp == false) {
+                if (onFiveMinutes && hootFlag) {
+                    onFiveMinutes()
+                    hootFlag = false
+                    warningFlag = true
+                }
+            }
+
+            //end race signal
+            else if (timeLeft.minutes == endTime && timeLeft.seconds == 0 && timeLeft.countingUp == true) {
+                if (onEnd && hootFlag) {
+                    onEnd()
+                    hootFlag = false
+                    warningFlag = true
+                }
+            }
+            //5 second warning for end race
+            if (timeLeft.minutes == (endTime! - 1) && timeLeft.seconds == 55 && timeLeft.countingUp == true) {
+                if (onWarning && warningFlag) {
+                    onWarning();
+                    warningFlag = false
+                    hootFlag = true
+                }
+            }
+            //5 second warnings
+            if (timeLeft.minutes == 0 && timeLeft.seconds == 5 && timeLeft.countingUp == false) {
+                if (onWarning && warningFlag) {
+                    onWarning();
+                    warningFlag = false
+                    hootFlag = true
+                }
+            } else if (timeLeft.minutes == 1 && timeLeft.seconds == 5 && timeLeft.countingUp == false) {
+                if (onWarning && warningFlag) {
+                    onWarning();
+                    warningFlag = false
+                    hootFlag = true
+                }
+            } else if (timeLeft.minutes == 4 && timeLeft.seconds == 5 && timeLeft.countingUp == false) {
+                if (onWarning && warningFlag) {
+                    onWarning();
+                    warningFlag = false
+                    hootFlag = true
+                }
+            } else if (timeLeft.minutes == 5 && timeLeft.seconds == 5 && timeLeft.countingUp == false) {
+                if (onWarning && warningFlag) {
+                    onWarning();
+                    warningFlag = false
+                    hootFlag = true
+                }
+            }
         }, 100);
+
+
 
         return () => clearTimeout(timer);
     }, [timerActive, timeLeft, startTime]);
 
     useEffect(() => {
         if (reset) {
-            setTimeLeft(calculateTimeLeft());
+            setTimeLeft({ minutes: 5, seconds: 15, countingUp: false });
         }
     }, [reset]);
-
-    useEffect(() => {
-        onTimeUpdate
-    }, [timeLeft]);
-
-
-    //full minute signals
-    if (timeLeft.minutes == 0 && timeLeft.seconds == 0 && timeLeft.countingUp == false) {
-        if (!zerominsDone) {
-            if (onGo) onGo();
-            zerominsDone = true
-            warningFlag = true
-        }
-    } else if (timeLeft.minutes == 1 && timeLeft.seconds == 0 && timeLeft.countingUp == false) {
-        if (!oneminsDone) {
-            if (onOneMinute) onOneMinute();
-            oneminsDone = true
-            warningFlag = true
-        }
-    } else if (timeLeft.minutes == 4 && timeLeft.seconds == 0 && timeLeft.countingUp == false) {
-        if (!fourminsDone) {
-            if (onFourMinutes) onFourMinutes();
-            fourminsDone = true
-            warningFlag = true
-        }
-    }
-    else if (timeLeft.minutes == 5 && timeLeft.seconds == 0 && timeLeft.countingUp == false) {
-        if (!fiveminsDone) {
-            if (onFiveMinutes) onFiveMinutes();
-            fiveminsDone = true
-            warningFlag = true
-        }
-    }
-
-    //end race signal
-    else if (timeLeft.minutes == endTime && timeLeft.seconds == 0 && timeLeft.countingUp == true) {
-        if (!onEndDone) {
-            if (onEnd) onEnd();
-            onEndDone = true
-            warningFlag = true
-        }
-    }
-    //5 second warnings
-    if (timeLeft.minutes == 0 && timeLeft.seconds == 5 && timeLeft.countingUp == false) {
-        if (onWarning && warningFlag) {
-            onWarning();
-            warningFlag = false
-        }
-    } else if (timeLeft.minutes == 1 && timeLeft.seconds == 5 && timeLeft.countingUp == false) {
-        if (onWarning && warningFlag) {
-            onWarning();
-            warningFlag = false
-        }
-    } else if (timeLeft.minutes == 4 && timeLeft.seconds == 5 && timeLeft.countingUp == false) {
-        if (onWarning && warningFlag) {
-            onWarning();
-            warningFlag = false
-        }
-    } else if (timeLeft.minutes == 5 && timeLeft.seconds == 5 && timeLeft.countingUp == false) {
-        if (onWarning && warningFlag) {
-            onWarning();
-            warningFlag = false
-        }
-    }
-
 
     return (
         <>
