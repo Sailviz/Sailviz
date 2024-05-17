@@ -5,7 +5,6 @@ import Cookies from "js-cookie";
 import dayjs from 'dayjs';
 import Select from 'react-select';
 
-import RaceResultsTable from '../components/RaceResultsTable';
 import Dashboard from "../components/Dashboard";
 
 enum raceStateType {

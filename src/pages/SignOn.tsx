@@ -4,7 +4,7 @@ import * as DB from '../components/apiMethods';
 import Cookies from "js-cookie";
 import SignOnTable from "../components/SignOnTable";
 import Select from 'react-select';
-import RaceResultsTable from "../components/RaceResultsTable";
+import FleetResultsTable from "../components/FleetResultsTable";
 import Switch from "../components/Switch";
 
 
@@ -554,7 +554,7 @@ const SignOnPage = () => {
                     <div className="text-6xl font-extrabold text-gray-700 p-6">
                         {activeRaceData.series.name}: {activeRaceData.number}
                     </div>
-                    <RaceResultsTable data={activeRaceData.results} startTime={null} key={JSON.stringify(activeRaceData.results)} deleteResult={() => { }} updateResult={() => { }} createResult={() => { }} clubId={clubId} raceId={activeRaceData.id} />
+                    <FleetResultsTable data={activeRaceData.results} startTime={null} key={JSON.stringify(activeRaceData.results)} deleteResult={() => { }} updateResult={() => { }} createResult={() => { }} clubId={clubId} raceId={activeRaceData.id} />
                 </div>
             </div>
             <div id="Guide" className="hidden" >

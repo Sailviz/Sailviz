@@ -104,7 +104,7 @@ function Sort({ column, table }: { column: any, table: any }) {
 const columnHelper = createColumnHelper<ResultsDataType>()
 
 
-const RaceResultsTable = (props: any) => {
+const FleetResultsTable = (props: any) => {
     let [data, setData] = useState<ResultsDataType[]>(props.data)
     console.log(props.data)
     let [startTime, setStartTime] = useState(props.startTime)
@@ -226,4 +226,4 @@ const RaceResultsTable = (props: any) => {
     )
 }
 
-export default RaceResultsTable
+export default FleetResultsTable

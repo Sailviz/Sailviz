@@ -85,13 +85,13 @@ const columnHelper = createColumnHelper<ResultsDataType>()
 
 
 const LiveResultsTable = (props: any) => {
-    let [race, setRace] = useState<RaceDataType>(props.data)
-    console.log(race)
+    let [results, setRace] = useState<ResultsDataType[]>(props.data)
+    let [startTime, setStartTime] = useState<number>(props.startTime)
 
     let maxLaps = 0
-    race.results.forEach((result) => {
-        if (result.lapTimes.number > maxLaps) {
-            maxLaps = result.lapTimes.number
+    results.forEach((result, index) => {
+        if (result.laps.length > maxLaps) {
+            maxLaps = result.laps.length
         }
     })
 
@@ -123,18 +123,18 @@ const LiveResultsTable = (props: any) => {
             cell: props => <Number {...props} />,
             enableSorting: false
         }),
-        columnHelper.accessor((data) => data.lapTimes.number, {
+        columnHelper.accessor((data) => data.laps.length, {
             header: "Laps",
             cell: props => <Number {...props} />,
             enableSorting: false,
         })
     ];
 
-    // add column for each race in series
+    // add column for each lap
     for (let i = 0; i < maxLaps; i++) {
-        const newColumn = columnHelper.accessor((data) => data.lapTimes.times[i], {
+        const newColumn = columnHelper.accessor((data) => data.laps[i]?.time, {
             header: "LAP " + (i + 1).toString(),
-            cell: props => <Time {...props} disabled={true} startTime={race.startTime} />,
+            cell: props => <Time {...props} disabled={true} startTime={startTime} />,
             enableSorting: false
         })
         columns.push(newColumn)
@@ -146,7 +146,8 @@ const LiveResultsTable = (props: any) => {
         enableSorting: false
     })
 
-    const Position = columnHelper.accessor('Position', {
+    //results are ordered by corrected time so the index is the position
+    const Position = columnHelper.accessor((data) => results.findIndex(result => result.id == data.id), {
         header: "Position",
         cell: props => <Number {...props} />,
         enableSorting: true
@@ -156,7 +157,7 @@ const LiveResultsTable = (props: any) => {
     columns.push(Position)
 
     let table = useReactTable({
-        data: race.results,
+        data: results,
         columns,
         state: {
             sorting,

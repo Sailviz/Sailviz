@@ -6,7 +6,6 @@ import dayjs, { unix } from 'dayjs';
 import SeriesTable from '../components/SeriesTable';
 import ClubTable from '../components/ClubTable';
 import BoatTable from '../components/BoatTable';
-import RaceResultsTable from '../components/RaceResultsTable';
 import * as DB from '../components/apiMethods';
 import Cookies from 'js-cookie';
 import SeriesResultsTable from '../components/SeriesResultsTable';

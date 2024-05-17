@@ -5,7 +5,7 @@ import Cookies from "js-cookie";
 import dayjs from 'dayjs';
 import Select from 'react-select';
 
-import RaceResultsTable from '../components/RaceResultsTable';
+import FleetResultsTable from '../components/FleetResultsTable';
 import Dashboard from "../components/Dashboard";
 
 const raceOptions = [{ value: "Pursuit", label: "Pursuit" }, { value: "Handicap", label: "Handicap" }]
@@ -570,11 +570,11 @@ const SignOnPage = () => {
                     <div className='p-6 w-full'>
                         {fleets.map((fleet, index) => {
                             return (
-                                <div>
+                                <div key={"fleetResults" + index}>
                                     <p className='text-2xl font-bold text-gray-700'>
                                         {fleet.name}
                                     </p>
-                                    <RaceResultsTable data={race.results.filter(result => result.fleetId == fleet.id)} startTime={fleet.startTime} key={JSON.stringify(race)} deleteResult={deleteResult} updateResult={updateResult} createResult={createResult} raceId={race.id} showEditModal={(id: string) => { showEditModal(id) }} />
+                                    <FleetResultsTable data={race.results.filter(result => result.fleetId == fleet.id)} startTime={fleet.startTime} key={JSON.stringify(race)} deleteResult={deleteResult} updateResult={updateResult} createResult={createResult} raceId={race.id} showEditModal={(id: string) => { showEditModal(id) }} />
                                 </div>
                             )
                         })

@@ -572,7 +572,7 @@ const RacePage = () => {
                     </div>
                     {fleets.map((fleet, index) => {
                         return (
-                            <div className="flex flex-row">
+                            <div className="flex flex-row" key={"fleetBar" + index}>
                                 <div className="w-1/4 p-2 m-2 border-4 rounded-lg bg-white text-lg font-medium">
                                     Event: {seriesName} - {race.number} - {fleet.name} {index}
                                 </div>
