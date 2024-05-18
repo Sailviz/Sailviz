@@ -44,7 +44,8 @@ const Club = () => {
         settings: {
             numberToCount: 0
         },
-        races: []
+        races: [],
+        fleetSettings: [] as FleetSettingsType[]
     })
     var [activeRaceData, setActiveRaceData] = useState<RaceDataType>({
         id: "",
@@ -54,7 +55,7 @@ const Club = () => {
         AOD: "",
         SO: "",
         ASO: "",
-        results: [],
+        fleets: [],
         Type: "",
         seriesId: "",
         series: {} as SeriesDataType

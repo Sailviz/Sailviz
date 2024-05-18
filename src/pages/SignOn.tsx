@@ -37,13 +37,13 @@ const SignOnPage = () => {
         AOD: "",
         SO: "",
         ASO: "",
-        results: [],
+        fleets: [],
         Type: "",
         seriesId: "",
         series: {} as SeriesDataType
     })
 
-    var [fleets, setFleets] = useState<FleetDataType[]>([])
+    const [activeResult, setActiveResult] = useState<ResultsDataType>({} as ResultsDataType)
 
     const [options, setOptions] = useState([{ label: "", value: {} }])
 
@@ -69,8 +69,8 @@ const SignOnPage = () => {
         const CrewElement = document.getElementById("Crew") as HTMLInputElement
         const SailNumberElement = document.getElementById("SailNum") as HTMLInputElement
         const Boat = selectedOption.value as BoatDataType
-        //create a result record with fleet that matches series id
-        let entry = await DB.createResult(raceId, fleets.filter(fleet => fleet.seriesId == races.filter(race => race.id == raceId)[0]!.seriesId)[0]!.id)
+        //TODO : create on correct fleet
+        let entry = await DB.createResult(raceId, activeRaceData.fleets[0]!.id)
 
         entry.Helm = HelmElement.value
         entry.Crew = CrewElement.value
@@ -120,21 +120,7 @@ const SignOnPage = () => {
     }
 
     const updateResult = async () => {
-        const resultid = document.getElementById("EditResultId") as HTMLInputElement
-        let id = resultid.innerHTML
-
-        let result = {} as ResultsDataType
-        for (let race of races) {
-            let index = race.results.findIndex((rac) => {
-                return rac.id == id
-            })
-            console.log(index, race)
-            if (index != -1) {
-                result = race.results[index]
-                console.log(result)
-                break
-            }
-        }
+        let result = activeResult
         console.log(result)
 
         const Helm = document.getElementById('editHelm') as HTMLInputElement;
@@ -182,20 +168,20 @@ const SignOnPage = () => {
         setRaces([...racesCopy])
     }
 
-    const showEditModal = async (id: string) => {
-        console.log(id)
+    const showEditModal = async (resultId: string) => {
         let result = {} as ResultsDataType
         for (let race of races) {
-            let index = race.results.findIndex((rac) => {
-                return rac.id == id
-            })
-            console.log(index, race)
-            if (index != -1) {
-                result = race.results[index]
-                console.log(result)
-                break
+            let result: ResultsDataType | undefined;
+            race.fleets.some(fleet => {
+                result = fleet.results.find(result => result.id === resultId);
+                return result !== undefined;
+            });
+            if (result == undefined) {
+                console.error("Could not find result with id: " + resultId);
+                return
             }
         }
+        setActiveResult(result)
         console.log(result)
         const Helm = document.getElementById('editHelm') as HTMLInputElement;
         Helm.value = result.Helm
@@ -215,12 +201,6 @@ const SignOnPage = () => {
 
         const modal = document.getElementById("editModal")
         modal?.classList.remove("hidden")
-    }
-
-    const GetFleetsBySeries = (seriesId: string) => {
-        return fleets.filter((fleet) => {
-            return fleet.seriesId == seriesId
-        })
     }
 
     const hideEditBoatModal = async () => {
@@ -317,11 +297,6 @@ const SignOnPage = () => {
                         console.log(data[i]!.number)
                         const res = await DB.getRaceById(data[i]!.id)
                         racesCopy[i] = res
-                        //add fleets to list if fleets are enabled for series.
-                        const fleets = await DB.GetFleetsBySeries(res.seriesId)
-                        if (fleets) {
-                            fleetsCopy = fleetsCopy.concat(fleets)
-                        }
                     }
                     setRaces(racesCopy)
 
@@ -331,7 +306,6 @@ const SignOnPage = () => {
                             t.id === fleet.id
                         ))
                     )
-                    setFleets(uniqueFleets)
                     setSelectedRaces(new Array(data.length).fill(false))
                 } else {
                     console.log("could not find todays race")
@@ -426,6 +400,10 @@ const SignOnPage = () => {
                         </div>
                         <div className="text-4xl font-extrabold text-gray-700 p-6">Select Race</div>
                         {races.map((race, index) => {
+                            if (race.fleets.some(fleet => fleet.startTime != 0)) {
+                                //a fleet in the race has started so don't allow entry
+                                return <></>
+                            }
                             return (
                                 <div className="mx-6 mb-10" key={race.id}>
                                     <div className="flex flex-row">
@@ -437,10 +415,10 @@ const SignOnPage = () => {
                                         />
                                         <label className=" pl-6 py-auto text-2xl font-bold text-gray-700" htmlFor={race.id}>{race.series.name} {race.number}</label>
                                         {/* show buttons for each fleet in a series */}
-                                        {GetFleetsBySeries(race.seriesId).map((fleet: FleetDataType, index) => {
+                                        {race.fleets.map((fleet: FleetDataType, index) => {
                                             return (
                                                 <div key={fleet.id + race.id} className="ml-6 cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
-                                                    {fleet.name}
+                                                    {fleet.fleetSettings.name}
                                                 </div>
                                             )
                                         })}
@@ -537,7 +515,7 @@ const SignOnPage = () => {
                                     <div className="text-4xl font-extrabold text-gray-700 p-6">
                                         {race.series.name}: {race.number} at {race.Time.slice(10, 16)}
                                     </div>
-                                    <SignOnTable data={race.results} updateResult={updateResult} createResult={createResult} clubId={clubId} showEditModal={showEditModal} />
+                                    <SignOnTable data={race.fleets.flatMap((fleet) => (fleet.results))} updateResult={updateResult} createResult={createResult} clubId={clubId} showEditModal={showEditModal} />
                                 </div>
                             )
                         })}
@@ -554,7 +532,7 @@ const SignOnPage = () => {
                     <div className="text-6xl font-extrabold text-gray-700 p-6">
                         {activeRaceData.series.name}: {activeRaceData.number}
                     </div>
-                    <FleetResultsTable data={activeRaceData.results} startTime={null} key={JSON.stringify(activeRaceData.results)} deleteResult={() => { }} updateResult={() => { }} createResult={() => { }} clubId={clubId} raceId={activeRaceData.id} />
+                    <FleetResultsTable data={activeRaceData.fleets.flatMap((fleet) => (fleet.results))} startTime={null} key={JSON.stringify(activeRaceData)} deleteResult={() => { }} updateResult={() => { }} createResult={() => { }} clubId={clubId} raceId={activeRaceData.id} />
                 </div>
             </div>
             <div id="Guide" className="hidden" >

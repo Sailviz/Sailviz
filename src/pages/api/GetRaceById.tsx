@@ -9,10 +9,21 @@ async function findRace(id: any) {
             id: id
         },
         include: {
-            results: {
+            fleets: {
                 include: {
-                    boat: true,
-                    laps: true
+                    results: {
+                        where: {
+                            isDeleted: false
+                        },
+                        include: {
+                            boat: true,
+                            laps: {
+                                where: {
+                                    isDeleted: false
+                                }
+                            }
+                        }
+                    }
                 }
 
             },

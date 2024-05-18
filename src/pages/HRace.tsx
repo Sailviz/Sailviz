@@ -44,35 +44,11 @@ const RacePage = () => {
         AOD: "",
         SO: "",
         ASO: "",
-        results: [{
-            id: "",
-            raceId: "",
-            Helm: "",
-            Crew: "",
-            boat: {
-                id: "",
-                name: "",
-                crew: 0,
-                py: 0,
-                clubId: "",
-                pursuitStartTime: 0
-            } as BoatDataType,
-            SailNumber: "",
-            finishTime: 0,
-            CorrectedTime: 0,
-            laps: [{
-                id: "",
-                time: 0,
-            } as LapDataType],
-            PursuitPosition: 0,
-            resultCode: "",
-        } as ResultsDataType],
+        fleets: [],
         Type: "",
         seriesId: "",
         series: {} as SeriesDataType
     }))
-
-    var [fleets, setFleets] = useState<FleetDataType[]>([])
 
     var [lastResult, setLastResult] = useState<ResultsDataType | null>(null)
 
@@ -122,6 +98,7 @@ const RacePage = () => {
             resultId: ""
         }],
         PursuitPosition: 0,
+        HandicapPosition: 0,
         resultCode: "",
         fleetId: ""
     })
@@ -138,7 +115,7 @@ const RacePage = () => {
         })
 
         //Update database
-        let fleet = fleets.find(fleet => fleet.id == fleetId)
+        let fleet = race.fleets.find(fleet => fleet.id == fleetId)
         if (fleet == undefined) {
             console.error("fleet not found")
             return
@@ -150,7 +127,7 @@ const RacePage = () => {
     }
 
     const startRace = async (fleetId: string) => {
-        let index = fleets.findIndex(fleet => fleet.id == fleetId)
+        let index = race.fleets.findIndex(fleet => fleet.id == fleetId)
         //modify racestate at index to match fleet index
         setRaceState([...raceState.slice(0, index), raceStateType.running, ...raceState.slice(index + 1)])
 
@@ -246,7 +223,7 @@ const RacePage = () => {
     }
 
     const stopRace = async (fleetId: string) => {
-        let index = fleets.findIndex(fleet => fleet.id == fleetId)
+        let index = race.fleets.findIndex(fleet => fleet.id == fleetId)
         //modify racestate at index to match fleet index
         setRaceState([...raceState.slice(0, index), raceStateType.stopped, ...raceState.slice(index + 1)])
         fetch("http://" + club.settings.clockIP + "/reset", { signal: controller.signal, mode: 'no-cors' }).catch(function (err) {
@@ -255,7 +232,7 @@ const RacePage = () => {
     }
 
     const resetRace = async (fleetId: string) => {
-        let fleet = fleets.find(fleet => fleet.id == fleetId)
+        let fleet = race.fleets.find(fleet => fleet.id == fleetId)
         if (fleet == undefined) {
             console.error("fleet not found")
             return
@@ -265,27 +242,13 @@ const RacePage = () => {
             console.log('Clock not connected: ', err);
         });
 
-        let index = fleets.findIndex(fleet => fleet.id == fleetId)
+        let index = race.fleets.findIndex(fleet => fleet.id == fleetId)
         //modify racestate at index to match fleet index
         setRaceState([...raceState.slice(0, index), raceStateType.reset, ...raceState.slice(index + 1)])
 
         //Update database
         fleet.startTime = 0
         await DB.updateFleetById(fleet)
-
-        //remove race laps/times for racers.
-        race.results.forEach(result => {
-            result.lapTimes = {
-                times: [],
-                number: 0
-            }
-            result.finishTime = 0
-            result.CorrectedTime = 0
-            result.Position = 0
-
-            DB.updateResult(result)
-        })
-
     }
 
     const retireBoat = async (resultCode: string) => {
@@ -300,18 +263,22 @@ const RacePage = () => {
 
     }
 
-    const lapBoat = async (id: string) => {
-        let data = window.structuredClone(race)
-        //modify race data
-        let index = data.results.findIndex((x: ResultsDataType) => x.id === id)
+    const lapBoat = async (resultId: string) => {
+        let result: ResultsDataType | undefined;
+        race.fleets.some(fleet => {
+            result = fleet.results.find(result => result.id === resultId);
+            return result !== undefined;
+        });
+        if (result == undefined) {
+            console.error("Could not find result with id: " + resultId);
+            return
+        }
         //save state for undo
-        setLastResult({ ...data.results[index] })
+        setLastResult(result)
 
-        await DB.CreateLap(id, Math.floor(new Date().getTime() / 1000))
-        let updatedData = await DB.getRaceById(race.id)
-        orderResults(updatedData.results)
-        //send to DB
-        setRace(updatedData)
+        await DB.CreateLap(resultId, Math.floor(new Date().getTime() / 1000))
+        //load back race data
+        setRace(await DB.getRaceById(race.id))
 
         let sound = document.getElementById("Beep") as HTMLAudioElement
         sound!.currentTime = 0
@@ -356,7 +323,8 @@ const RacePage = () => {
         router.push({ pathname: '/Race', query: { race: race.id } })
     }
 
-    const finishBoat = async (id: string) => {
+    const finishBoat = async (resultId: string) => {
+        const time = Math.floor(new Date().getTime() / 1000)
         //sound horn
         fetch("http://" + club.settings.hornIP + "/short", { signal: controller.signal, mode: 'no-cors' }).then(response => {
         }).catch((err) => {
@@ -364,36 +332,27 @@ const RacePage = () => {
             console.log(err)
         })
 
-        const time = Math.floor(new Date().getTime() / 1000)
-        await DB.CreateLap(id, time)
+        await DB.CreateLap(resultId, time)
 
-        //modify race data
-        let data = window.structuredClone(race)
-        let index = data.results.findIndex((x: ResultsDataType) => x.id === id)
+        let result: ResultsDataType | undefined;
+        race.fleets.some(fleet => {
+            result = fleet.results.find(result => result.id === resultId);
+            return result !== undefined;
+        });
+        if (result == undefined) {
+            console.error("Could not find result with id: " + resultId);
+            return
+        }
         //save state for undo
-        setLastResult({ ...data.results[index] })
+        setLastResult(result)
 
         let tempdata = window.structuredClone(race)
 
-        index = tempdata.results.findIndex((x: ResultsDataType) => x.id === id)
-        console.log(tempdata.results[index])
-        //set finish time
-        tempdata.results[index].finishTime = time
         //send to DB
-        await DB.updateResult(tempdata.results[index])
-        //moved finished to bottom of screen
-        orderResults(tempdata.results)
+        await DB.updateResult({ ...result, finishTime: time })
 
         setRace(await DB.getRaceById(race.id))
 
-        if (checkAllFinished(tempdata.results[index].fleetId)) {
-            //show popup to say race is finished.
-            stopRace(tempdata.results[index].fleetId)
-            let fleetindex = fleets.findIndex(fleet => fleet.id == tempdata.results[index].fleetId)
-            setRaceState([...raceState.slice(0, fleetindex), raceStateType.running, ...raceState.slice(fleetindex + 1)])
-
-
-        }
         let sound = document.getElementById("Beep") as HTMLAudioElement
         sound!.currentTime = 0
         sound!.play();
@@ -401,7 +360,7 @@ const RacePage = () => {
 
     const checkAllFinished = (fleetId: string) => {
         //check if all boats in fleet have finished
-        let results = race.results.filter(result => result.fleetId == fleetId)
+        let results = race.fleets.find(fleet => fleet.id == fleetId)!.results
         let allFinished = true
         results.forEach(data => {
             if (data.finishTime == 0) {
@@ -420,10 +379,19 @@ const RacePage = () => {
         }
         //revert to last result
         const tempdata = race
-        let index = tempdata.results.findIndex((x: ResultsDataType) => x.id === lastResult!.id)
-        console.log(index)
-        console.log(lastResult)
-        tempdata.results[index] = lastResult
+        let index = 0
+        let fleetindex = 0
+        race.fleets.some((fleet, index) => {
+            index = fleet.results.findIndex(result => result.id === lastResult!.id);
+            fleetindex = index
+            return index !== undefined;
+        });
+        if (index == undefined) {
+            console.error("Could not find result with id: " + lastResult.id);
+            return
+        }
+
+        tempdata.fleets[fleetindex]!.results[index] = lastResult
         //update local race copy
         setRace({ ...tempdata })
         //send to DB
@@ -443,9 +411,7 @@ const RacePage = () => {
             setRace(data)
 
             setSeriesName(await DB.GetSeriesById(data.seriesId).then((res) => { return (res.name) }))
-            const fleets = await DB.GetFleetsBySeries(data.seriesId)
-            setFleets(fleets)
-            setRaceState(fleets.map(() => raceStateType.reset))
+            setRaceState(race.fleets.map(() => raceStateType.reset))
         }
 
         if (raceId != undefined) {
@@ -455,15 +421,15 @@ const RacePage = () => {
     }, [query.race])
 
     useEffect(() => {
-        fleets.forEach((fleet, index) => {
+        race.fleets.forEach((fleet, index) => {
             if (checkAllFinished(fleet.id)) {
-                setRaceState([...raceState.slice(0, index), raceStateType.running, ...raceState.slice(index + 1)])
+                setRaceState([...raceState.slice(0, index), raceStateType.calculate, ...raceState.slice(index + 1)])
             }
             else if (fleet.startTime != 0) {
                 setRaceState([...raceState.slice(0, index), raceStateType.running, ...raceState.slice(index + 1)])
             }
-            orderResults(race.results)
         })
+        orderResults(race.fleets.flatMap(fleet => fleet.results))
     }, [race])
 
     useEffect(() => {
@@ -539,9 +505,18 @@ const RacePage = () => {
         };
     }, []);
 
-    const showRetireModal = (id: String) => {
+    const showRetireModal = (resultId: String) => {
         const modal = document.getElementById("retireModal")
-        setActiveResult(race.results.find(result => result.id == id))
+        let result: ResultsDataType | undefined;
+        race.fleets.some(fleet => {
+            result = fleet.results.find(result => result.id === resultId);
+            return result !== undefined;
+        });
+        if (result == undefined) {
+            console.error("Could not find result with id: " + resultId);
+            return
+        }
+        setActiveResult(result)
         modal?.classList.remove("hidden")
 
 
@@ -570,11 +545,11 @@ const RacePage = () => {
                     <div className="w-1/4 p-2 m-2 border-4 rounded-lg bg-white text-lg font-medium">
                         Actual Time:  {time}
                     </div>
-                    {fleets.map((fleet, index) => {
+                    {race.fleets.map((fleet, index) => {
                         return (
                             <div className="flex flex-row" key={"fleetBar" + index}>
                                 <div className="w-1/4 p-2 m-2 border-4 rounded-lg bg-white text-lg font-medium">
-                                    Event: {seriesName} - {race.number} - {fleet.name} {index}
+                                    Event: {seriesName} - {race.number} - {fleet.fleetSettings.name} {index}
                                 </div>
                                 <div className="w-1/4 p-2 m-2 border-4 rounded-lg bg-white text-lg font-medium">
                                     Race Time: <RaceTimer key={"fleetTimer" + index} startTime={fleet.startTime} timerActive={raceState[index] == raceStateType.running} onFiveMinutes={handleFiveMinutes} onFourMinutes={handleFourMinutes} onOneMinute={handleOneMinute} onGo={handleGo} onWarning={handleWarning} reset={raceState[index] == raceStateType.reset} />
@@ -632,9 +607,7 @@ const RacePage = () => {
                 </div>
                 <div className="overflow-auto">
                     <div className="flex flex-row justify-around flex-wrap" id="EntrantCards">
-                        {race.results.map((result: ResultsDataType, index) => {
-                            //check wait until fleets have loaded
-                            if (fleets.length < 1) return <></>
+                        {race.fleets.flatMap(fleets => fleets.results).map((result: ResultsDataType, index) => {
                             if (result.resultCode != "") {
                                 let text = result.resultCode
                                 console.log(result)
@@ -643,7 +616,7 @@ const RacePage = () => {
                                         <div className="flex flex-col">
                                             <h2 className="text-2xl text-gray-700">{result.SailNumber} - {result.boat.name}</h2>
                                             <p className="text-base text-gray-600">{result.Helm} - {result.Crew}</p>
-                                            <p className="text-base text-gray-600">Laps: {result.laps.length} Finish: {new Date(((result.finishTime - fleets.filter((fleet) => fleet.id == result.fleetId)[0]!.startTime)) * 1000).toISOString().slice(14, 19)}</p>
+                                            <p className="text-base text-gray-600">Laps: {result.laps.length} Finish: {new Date(((result.finishTime - race.fleets.filter((fleet) => fleet.id == result.fleetId)[0]!.startTime)) * 1000).toISOString().slice(14, 19)}</p>
                                         </div>
                                         <div className="px-5 py-1">
                                             <p className="text-2xl text-gray-700 px-5 py-2.5 text-center mr-3 md:mr-0">
@@ -661,7 +634,7 @@ const RacePage = () => {
                                             <h2 className="text-2xl text-gray-700">{result.SailNumber} - {result.boat?.name}</h2>
                                             <p className="text-base text-gray-600">{result.Helm} - {result.Crew}</p>
                                             {result.laps.length >= 1 ?
-                                                <p className="text-base text-gray-600">Laps: {result.laps.length} Last: {new Date((result.laps[result.laps.length - 1]?.time - fleets.filter((fleet) => fleet.id == result.fleetId)[0]!.startTime) * 1000).toISOString().slice(14, 19)}</p>
+                                                <p className="text-base text-gray-600">Laps: {result.laps.length} Last: {new Date((result.laps[result.laps.length - 1]?.time - race.fleets.filter((fleet) => fleet.id == result.fleetId)[0]!.startTime) * 1000).toISOString().slice(14, 19)}</p>
                                                 :
                                                 <p className="text-base text-gray-600">Laps: {result.laps.length} </p>
                                             }
@@ -707,7 +680,7 @@ const RacePage = () => {
                                         <div className="flex flex-col">
                                             <h2 className="text-2xl text-gray-700">{result.SailNumber} - {result.boat.name}</h2>
                                             <p className="text-base text-gray-600">{result.Helm} - {result.Crew}</p>
-                                            <p className="text-base text-gray-600">Laps: {result.laps.length} Finish: {new Date((result.finishTime - fleets.filter((fleet) => fleet.id == result.fleetId)[0]!.startTime) * 1000).toISOString().slice(14, 19)}</p>
+                                            <p className="text-base text-gray-600">Laps: {result.laps.length} Finish: {new Date((result.finishTime - race.fleets.filter((fleet) => fleet.id == result.fleetId)[0]!.startTime) * 1000).toISOString().slice(14, 19)}</p>
                                         </div>
                                         <div className="px-5 py-1">
                                             <p className="text-white bg-blue-600 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">

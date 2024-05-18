@@ -35,11 +35,6 @@ async function createEntry(fleetId: string, raceId: string) {
                     id: fleetId
                 }
             },
-            race: {
-                connect: {
-                    id: raceId
-                }
-            },
             boat: {},
             laps: {},
             resultCode: "",

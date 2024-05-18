@@ -11,9 +11,13 @@ async function findSeries(id: any) {
         include: {
             races: {
                 include: {
-                    results: {
+                    fleets: {
                         include: {
-                            boat: true
+                            results: {
+                                include: {
+                                    boat: true
+                                }
+                            }
                         }
                     }
                 }

@@ -31,7 +31,7 @@ model Boat {
   club             Club     @relation(fields: [clubId], references: [id])
   clubId           String
   results          Result[]
-  fleets           Fleet[]
+  fleets           FleetSettings[]
   @@index([clubId])
 }
 
@@ -51,7 +51,7 @@ model Series {
   clubId   String
   settings Json
   races    Race[]
-  fleets   Fleet[]
+  fleetSettings FleetSettings[]
 
   @@index([clubId])
 }
@@ -64,7 +64,7 @@ model Race {
   AOD      String
   SO       String
   ASO      String
-  results  Result[]
+  fleets   Fleet[]
   Type     String
   series   Series   @relation(fields: [seriesId], references: [id], onDelete: Cascade)
   seriesId String
@@ -72,25 +72,34 @@ model Race {
   @@index([seriesId])
 }
 
+model FleetSettings {
+  id        String @id @unique @default(uuid())
+  series     Series  @relation(fields: [seriesId], references: [id], onDelete: Cascade)
+  seriesId   String
+  boats Boat[]
+  startDelay Int
+  fleets Fleet[]
+  name String
+  @@index([seriesId])
+}
+
 model Fleet {
   id        String   @id @unique @default(uuid())
-  series    Series   @relation(fields: [seriesId], references: [id], onDelete: Cascade)
-  name      String
-  seriesId  String
+  race    Race   @relation(fields: [raceId], references: [id], onDelete: Cascade)
+  raceId  String
   startTime Int
   results   Result[]
-  boats            Boat[]
-  startDelay Int
+  fleetSettings FleetSettings @relation(fields: [settingsId], references: [id])
+  settingsId String
 
-  @@index([seriesId])
+  @@index([raceId])
+  @@index([settingsId])
 }
 
 model Result {
   id              String  @id @unique @default(uuid())
   fleet           Fleet?   @relation(fields: [fleetId], references: [id], onDelete: Cascade)
   fleetId         String?
-  race            Race?    @relation(fields: [raceId], references: [id], onDelete: Cascade)
-  raceId          String
   Helm            String
   Crew            String
   boat            Boat?  @relation(fields: [boatId], references: [id])
@@ -99,13 +108,13 @@ model Result {
   finishTime      Int
   laps            Lap[]
   CorrectedTime   Float
+  HandicapPosition Int
   PursuitPosition Int
   isDeleted       Boolean
   resultCode String
 
   @@index([fleetId])
   @@index([boatId])
-  @@index([raceId])
 }
 
 model Lap {
@@ -113,6 +122,7 @@ model Lap {
   result   Result @relation(fields: [resultId], references: [id], onDelete: Cascade)
   resultId String
   time     Int
+  isDeleted Boolean
 
   @@index([resultId])
 }

@@ -24,34 +24,34 @@ const LiveResults = () => {
         AOD: "",
         SO: "",
         ASO: "",
-        results: [],
+        fleets: [],
         Type: "",
         seriesId: "",
         series: {} as SeriesDataType
     }])
 
-    const [fleets, setFleets] = useState<FleetDataType[][]>([[] as FleetDataType[]])
+    var results
 
     var [activeRace, setActiveRace] = useState<RaceDataType>({} as RaceDataType)
-    const [activeFleets, setActiveFleets] = useState<FleetDataType[]>([])
 
     var [mode, setMode] = useState<pageModes>(pageModes.results)
 
     const calculateHandicapResults = (race: RaceDataType) => {
         //most nuber of laps.
-        const maxLaps = Math.max.apply(null, race.results.map(function (o: ResultsDataType) { return o.laps.length }))
+        const maxLaps = Math.max.apply(null, race.fleets.flatMap(fleet => fleet.results).map(function (o: ResultsDataType) { return o.laps.length }))
 
-        const resultsData = [...race.results]
+        const resultsData = race.fleets.flatMap(fleet => fleet.results)
 
         //calculate corrected time
         resultsData.forEach(result => {
-            const fleet = fleets.flat().find(fleet => fleet.id == result.fleetId)
-            if (!fleet) {
+            const fleet = race.fleets.find(fleet => fleet.id == result.fleetId)
+            if (fleet == undefined) {
                 console.error("fleet not found")
                 return
             }
-            let seconds = result.lapTimes.times[result.lapTimes.times.length - 1] - fleet.startTime
-            result.CorrectedTime = (seconds * 1000 * (maxLaps / result.lapTimes.times.length)) / result.boat.py
+            //don't know why types aren't quite working here
+            let seconds = result.laps[result.laps.length - 1] as unknown as number - fleet.startTime
+            result.CorrectedTime = (seconds * 1000 * (maxLaps / result.laps.length)) / result.boat.py
             if (result.finishTime == -1) {
                 result.CorrectedTime = 99999
             }
@@ -69,15 +69,14 @@ const LiveResults = () => {
     }
 
     const checkActive = (race: RaceDataType) => {
-        const fleet = fleets.flat().filter(fleet => fleet.seriesId == race.seriesId)
-        if (fleet.length == 0) {
+        if (race.fleets.length == 0) {
             console.error("no fleets found")
         }
 
         //if any fleets have been started
-        if (fleet.some((fleet) => fleet.startTime != 0)) {
+        if (race.fleets.some((fleet) => fleet.startTime != 0)) {
             //race has started, check if all boats have finished
-            return !race.results.every((result) => {
+            return !race.fleets.flatMap(fleet => fleet.results).every((result) => {
                 if (result.finishTime != 0) {
                     return true
                 }
@@ -115,12 +114,9 @@ const LiveResults = () => {
                     for (let i = 0; i < data.length; i++) {
                         const res = await DB.getRaceById(data[i]!.id)
                         racesCopy[i] = res
-                        const fleetData = await DB.GetFleetsBySeries(res.seriesId)
-                        fleetsCopy[i] = fleetData
                     }
                     console.log(racesCopy)
                     setRaces(racesCopy)
-                    setFleets(fleetsCopy)
                 } else {
                     console.log("could not find todays race")
                 }
@@ -146,15 +142,13 @@ const LiveResults = () => {
             //check if any of the races are active
             for (let i = 0; i < racesCopy.length; i++) {
                 if (checkActive(racesCopy[i]!)) {
-                    console.log("here")
                     setMode(pageModes.live)
                     if (racesCopy[i]!.Type == "Handicap") {
-                        racesCopy[i]!.results = calculateHandicapResults(racesCopy[i]!)
+                        calculateHandicapResults(racesCopy[i]!) //do something with this
                     } else {
                         calculatePursuitResults(racesCopy[i]!)
                     }
                     setActiveRace(racesCopy[i]!)
-                    setActiveFleets(fleets.flat().filter(fleet => fleet.seriesId == racesCopy[i]!.seriesId))
                     activeFlag = true
                     break
                 }
@@ -163,7 +157,7 @@ const LiveResults = () => {
                 setMode(pageModes.results)
                 for (let i = 0; i < racesCopy.length; i++) {
                     if (racesCopy[i]!.Type == "Handicap") {
-                        racesCopy[i]!.results = calculateHandicapResults(racesCopy[i]!)
+                        calculateHandicapResults(racesCopy[i]!) //same as above
                     } else {
                         calculatePursuitResults(racesCopy[i]!)
                     }
@@ -183,7 +177,8 @@ const LiveResults = () => {
                     case pageModes.live:
                         return (
                             <div>
-                                {activeFleets.map((fleet, index) => {
+                                {races[0]!.fleets.map((fleet, index) => {
+                                    //change this to select the active race.
                                     return (
                                         <>
                                             <div className="w-1/4 p-2 m-2 border-4 rounded-lg bg-white text-lg font-medium">
@@ -195,7 +190,7 @@ const LiveResults = () => {
                                                 <div className="text-4xl font-extrabold text-gray-700 p-6">
                                                     {activeRace.series.name}: {activeRace.number} at {activeRace.Time.slice(10, 16)}
                                                 </div>
-                                                <LiveFleetResultsTable data={activeRace.results} startTime={fleet.startTime} />
+                                                <LiveFleetResultsTable data={activeRace.fleets.flatMap(fleet => fleet.results)} startTime={fleet.startTime} />
                                             </div>
                                         </>
                                     )
@@ -212,7 +207,7 @@ const LiveResults = () => {
                                             <div className="text-4xl font-extrabold text-gray-700 p-6">
                                                 {race.series.name}: {race.number} at {race.Time.slice(10, 16)}
                                             </div>
-                                            <LiveFleetResultsTable data={race.results} startTime={0} />
+                                            <LiveFleetResultsTable data={activeRace.fleets.flatMap(fleet => fleet.results)} startTime={0} />
                                         </div>
                                     )
                                 })}

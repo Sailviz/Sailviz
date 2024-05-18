@@ -3,12 +3,12 @@ import prisma from '../../components/prisma'
 import assert from 'assert';
 
 async function getFleets(seriesId: string) {
-    var result = await prisma.fleet.findMany({
+    var result = await prisma.fleetSettings.findMany({
         where: {
             seriesId: seriesId
         },
         include: {
-            boats: true
+            fleets: true
         }
     })
     if (result == null) {

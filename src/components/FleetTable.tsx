@@ -43,7 +43,7 @@ const Edit = ({ ...props }: any) => {
 
 const customStyles = { multiValueRemove: (base: any) => ({ ...base, display: 'none' }) }
 
-const columnHelper = createColumnHelper<FleetDataType>()
+const columnHelper = createColumnHelper<FleetSettingsType>()
 
 
 const FleetTable = (props: any) => {

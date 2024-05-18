@@ -482,11 +482,30 @@ export async function createFleet(seriesId: string): Promise<FleetDataType> {
         });
 };
 
-export async function GetFleetsBySeries(seriesId: string): Promise<FleetDataType[]> {
+export async function createFleetSettings(seriesId: string): Promise<FleetSettingsType> {
     const body = {
         seriesId: seriesId,
     }
-    return await fetch(`/api/GetFleetsBySeries`, {
+    return await fetch(`/api/CreateFleetSettings`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+    })
+        .then((res) => res.json())
+        .then(async (data) => {
+            if (data && data.error) {
+                console.log(data.message)
+            } else {
+                return data.fleet
+            }
+        });
+};
+
+export async function GetFleetSettingsBySeries(seriesId: string): Promise<FleetSettingsType[]> {
+    const body = {
+        seriesId: seriesId,
+    }
+    return await fetch(`/api/GetFleetSettingsBySeries`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
@@ -507,6 +526,25 @@ export async function updateFleetById(fleet: FleetDataType): Promise<FleetDataTy
         fleet: fleet,
     }
     return await fetch(`/api/UpdateFleetById`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+    })
+        .then((res) => res.json())
+        .then(async (data) => {
+            if (data && data.error) {
+                console.log(data.message)
+            } else {
+                return data.fleet
+            }
+        });
+};
+
+export async function updateFleetSettingsById(fleet: FleetSettingsType): Promise<FleetSettingsType> {
+    const body = {
+        fleet: fleet,
+    }
+    return await fetch(`/api/UpdateFleetSettingsById`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
@@ -546,6 +584,25 @@ export async function CreateLap(resultId: string, time: number): Promise<LapData
         time: time,
     }
     return await fetch(`/api/CreateLap`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+    })
+        .then((res) => res.json())
+        .then(async (data) => {
+            if (data && data.error) {
+                console.log(data.message)
+            } else {
+                return data.fleet
+            }
+        });
+};
+
+export async function DeleteLapById(lapId: string): Promise<LapDataType> {
+    const body = {
+        id: lapId,
+    }
+    return await fetch(`/api/DeleteLapById`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),

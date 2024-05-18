@@ -10,7 +10,7 @@ type SeriesResultsType = {
     Helm: string;
     Crew: string;
     Boat: BoatDataType;
-    SailNumber: number;
+    SailNumber: string;
     Total: number;
     Net: number;
     racePositions: number[];
@@ -84,7 +84,7 @@ const SeriesResultsTable = (props: any) => {
         console.log(tempresults)
         //collate results from same person.
         seriesData.races.forEach(race => {
-            race.results.forEach(result => {
+            race.fleets.flatMap(fleet => fleet.results).forEach(result => {
                 //if new racer, add to tempresults
                 let index = tempresults.findIndex(function (t) {
                     return (t.Helm == result.Helm && t.Boat?.id == result.boat?.id)
@@ -104,9 +104,9 @@ const SeriesResultsTable = (props: any) => {
                     console.log("updated index: ", index)
                 }
                 //add result to tempresults
-                console.log("pushing ", result.Position, " to ", index, " ", tempresults[index])
+                console.log("pushing ", result.PursuitPosition, " to ", index, " ", tempresults[index])
                 if (tempresults[index]) {
-                    tempresults[index]!.racePositions[race.number - 1] = (result.Position)
+                    tempresults[index]!.racePositions[race.number - 1] = (result.PursuitPosition)
                 } else {
                     console.log("something went wrong")
                 }

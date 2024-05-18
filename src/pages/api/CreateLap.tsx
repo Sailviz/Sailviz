@@ -24,6 +24,7 @@ async function createLap(resultId: string, time: number) {
     var res = await prisma.lap.create({
         data: {
             time: time,
+            isDeleted: false,
             result: {
                 connect: {
                     id: resultId

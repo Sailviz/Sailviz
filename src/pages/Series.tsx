@@ -42,10 +42,11 @@ const SignOnPage = () => {
         settings: {
             numberToCount: 0
         },
-        races: []
+        races: [],
+        fleetSettings: []
     })
 
-    const [fleets, setFleets] = useState<FleetDataType[]>([])
+    const [fleetSettings, setFleetSettings] = useState<FleetSettingsType[]>([])
 
     const createRace = async () => {
         var race = await DB.createRace(clubId, series.id)
@@ -90,22 +91,10 @@ const SignOnPage = () => {
     }
 
     const createFleet = async () => {
-        var fleet = await DB.createFleet(series.id)
-        var newFleets = fleets;
+        var fleet = await DB.createFleetSettings(series.id)
+        var newFleets = fleetSettings;
         newFleets.push(fleet)
-        setFleets([...newFleets])
-    }
-
-    const updateFleet = async (fleetId: string) => {
-        var fleet = fleets.find(x => x.id == fleetId)
-        if (fleet == undefined) {
-            console.warn("fleet not found: " + fleetId)
-            return
-        }
-        await DB.updateFleetById(fleet)
-        var newFleets = [...fleets]
-        newFleets.concat(fleet)
-        setFleets(newFleets)
+        setFleetSettings([...newFleets])
     }
 
     const deleteFleet = async (fleetId: string) => {
@@ -114,16 +103,16 @@ const SignOnPage = () => {
             console.warn("fleet not found: " + fleetId)
             return
         }
-        let newfleets = fleets
+        let newfleets = fleetSettings
         let fleetIndex = newfleets.findIndex(x => x.id === fleetId)
         console.log(fleetIndex)
         newfleets.splice(fleetIndex, 1)
         console.log(newfleets)
-        setFleets([...newfleets])
+        setFleetSettings([...newfleets])
     }
 
     const editFleet = async () => {
-        var fleet = fleets.find(x => x.id == activeFleetId)
+        var fleet = fleetSettings.find(x => x.id == activeFleetId)
         if (fleet == undefined) {
             console.warn("fleet not found: " + activeFleetId)
             return
@@ -136,13 +125,13 @@ const SignOnPage = () => {
 
         fleet.boats = selectedOption.map(x => (x as any).value)
 
-        DB.updateFleetById(fleet)
+        await DB.updateFleetSettingsById(fleet)
 
         //update local copy
-        let newfleets = fleets
+        let newfleets = fleetSettings
         let fleetIndex = newfleets.findIndex(x => x.id === activeFleetId)
         newfleets[fleetIndex] = fleet
-        setFleets([...newfleets])
+        setFleetSettings([...newfleets])
 
         //hide fleet edit modal
         setFleetModal(false)
@@ -160,7 +149,7 @@ const SignOnPage = () => {
     const showFleetModal = async (fleetId: string) => {
         setActiveFleetId(fleetId)
         setFleetModal(true)
-        var fleet = fleets.find(x => x.id == fleetId)
+        var fleet = fleetSettings.find(x => x.id == fleetId)
         if (fleet == undefined) {
             console.warn("fleet not found: " + activeFleetId)
             return
@@ -189,9 +178,9 @@ const SignOnPage = () => {
             })
         }
 
-        const getFleet = async () => {
-            await DB.GetFleetsBySeries(seriesId).then((fleetdata: FleetDataType[]) => {
-                setFleets(fleetdata)
+        const getFleetSettings = async () => {
+            await DB.GetFleetSettingsBySeries(seriesId).then((fleetdata: FleetSettingsType[]) => {
+                setFleetSettings(fleetdata)
             })
         }
         const getBoats = async () => {
@@ -211,7 +200,7 @@ const SignOnPage = () => {
         }
         if (seriesId != undefined) {
             getSeries()
-            getFleet()
+            getFleetSettings()
             getBoats()
         }
     }, [router, query.series])
@@ -337,7 +326,7 @@ const SignOnPage = () => {
                         Fleets
                     </p>
                     <div className='p-6'>
-                        <FleetTable data={fleets} key={JSON.stringify(fleets)} showFleetModal={(fleetId: string) => showFleetModal(fleetId)} />
+                        <FleetTable data={fleetSettings} key={JSON.stringify(fleetSettings)} showFleetModal={(fleetId: string) => showFleetModal(fleetId)} />
 
                     </div>
                     <div className="p-6">

@@ -1,7 +1,6 @@
 import prisma from '../../components/prisma'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import assert from 'assert';
-import { connect } from 'http2';
 
 
 async function findSeries(seriesId: any) {
@@ -13,18 +12,14 @@ async function findSeries(seriesId: any) {
     return result;
 }
 
-async function createFleet(raceId: string, fleetSettingsId: string) {
-    var res = await prisma.fleet.create({
+async function createFleet(seriesId: string) {
+    var res = await prisma.fleetSettings.create({
         data: {
-            startTime: 0,
-            race: {
+            name: "Fleet",
+            startDelay: 0,
+            series: {
                 connect: {
-                    id: raceId
-                }
-            },
-            fleetSettings: {
-                connect: {
-                    id: fleetSettingsId
+                    id: seriesId
                 }
             }
         },
@@ -45,12 +40,11 @@ const CreateFleet = async (req: NextApiRequest, res: NextApiResponse) => {
         }
 
         var seriesId = req.body.seriesId
-        var fleetSettingsId = req.body.fleetSettingsId
 
         var series = await findSeries(seriesId)
 
         if (series) {
-            var fleet = await createFleet(seriesId, fleetSettingsId)
+            var fleet = await createFleet(seriesId)
             res.json({ error: false, fleet: fleet });
         }
         else {

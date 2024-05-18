@@ -6,8 +6,8 @@ type RaceDataType = {
   AOD: string;
   SO: string;
   ASO: string;
-  results: ResultsType[];
   Type: string;
+  fleets: FleetDataType[];
   seriesId: string;
   series: SeriesDataType;
 };
@@ -18,6 +18,16 @@ type SeriesDataType = {
   clubId: string;
   settings: SettingsType;
   races: RaceDataType[];
+  fleetSettings: FleetSettingsType[];
+};
+
+type FleetSettingsType = {
+  id: string;
+  name: string;
+  raceId: string;
+  boats: BoatDataType[];
+  startDelay: number;
+  fleets: FleetDataType[];
 };
 
 type ResultsDataType = {
@@ -32,6 +42,7 @@ type ResultsDataType = {
   laps: LapDataType[];
   CorrectedTime: number;
   PursuitPosition: number;
+  HandicapPosition: number;
   resultCode: string;
 };
 
@@ -88,9 +99,8 @@ type UserDataType = {
 
 type FleetDataType = {
   id: string;
-  name: string;
-  seriesId: String;
+  raceId: String;
   startTime: number;
-  startDelay: number;
-  boats: BoatDataType[];
+  fleetSettings: FleetSettingsType;
+  results: ResultsDataType[];
 };
