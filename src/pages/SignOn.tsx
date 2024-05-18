@@ -393,7 +393,7 @@ const SignOnPage = () => {
                                 <p className='text-2xl font-bold text-gray-700'>
                                     Helm
                                 </p>
-                                <input type="text" id="Helm" name="Helm" className="h-full text-2xl p-4" onChange={CapitaliseInput} />
+                                <input type="text" id="Helm" name="Helm" className="h-full text-2xl p-4" onChange={CapitaliseInput} placeholder="J Bloggs" />
                             </div>
                             <div className='flex flex-col px-6 w-full'>
                                 <p className='text-2xl font-bold text-gray-700'>
