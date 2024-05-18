@@ -230,7 +230,8 @@ const RacePage = () => {
         let updatedData = await DB.getRaceById(race.id)
 
         //recalculate position
-        updatedData.results.sort((a: ResultsDataType, b: ResultsDataType) => {
+        // there is just one fleet so grab the first one
+        updatedData.fleets[0]!.results.sort((a: ResultsDataType, b: ResultsDataType) => {
             // get the number of laps for each boat
             console.log(b.laps.at(-1))
             let lapsA = a.laps.length;
@@ -242,8 +243,9 @@ const RacePage = () => {
             return lapsB - lapsA || lastA - lastB;
         });
 
-        updatedData.results.forEach((_, index) => {
-            updatedData.results[index]!.PursuitPosition = index + 1
+        updatedData.fleets.flatMap(fleet => fleet.results).forEach((_, index) => {
+            //there is only one fleet
+            updatedData.fleets[0]!.results[index]!.PursuitPosition = index + 1
         })
 
         setRace({ ...updatedData })
@@ -324,7 +326,7 @@ const RacePage = () => {
             let data = await DB.getRaceById(raceId)
             //sort race results by pursuit position
             const sortedResults = data.fleets[0]!.results.sort((a: ResultsDataType, b: ResultsDataType) => a.PursuitPosition - b.PursuitPosition);
-            setRace({ ...data, fleets: [data.fleets[0], results: sortedResults] })
+            setRace({ ...data, fleets: [{ ...data.fleets[0] as FleetDataType, results: sortedResults }] })
 
             if (race.fleets[0]?.startTime != 0) {
                 setRaceState(raceStateType.running)
