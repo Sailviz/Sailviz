@@ -16,6 +16,8 @@ const SignOnPage = () => {
 
     const query = router.query
 
+    const [isLoading, setLoading] = useState(true)
+
     var [clubId, setClubId] = useState<string>("invalid")
 
     var [club, setClub] = useState<ClubDataType>({
@@ -42,13 +44,31 @@ const SignOnPage = () => {
 
     const [seriesName, setSeriesName] = useState("")
 
-    var [activeResult, setActiveResult] = useState({} as ResultsDataType)
+    var [activeResult, setActiveResult] = useState<ResultsDataType>({
+        id: "",
+        raceId: "",
+        Helm: "",
+        Crew: "",
+        boat: {} as BoatDataType,
+        SailNumber: "",
+        finishTime: 0,
+        CorrectedTime: 0,
+        laps: [{
+            time: 0,
+            id: "",
+            resultId: ""
+        }],
+        PursuitPosition: 0,
+        HandicapPosition: 0,
+        resultCode: "",
+        fleetId: ""
+    })
 
     const [selectedOption, setSelectedOption] = useState({ label: "", value: {} as BoatDataType })
 
     const [options, setOptions] = useState([{ label: "", value: {} as BoatDataType }])
 
-    var [race, setRace] = useState<RaceDataType>(({
+    var [race, setRace] = useState<RaceDataType>({
         id: "",
         number: 0,
         Time: "",
@@ -61,13 +81,31 @@ const SignOnPage = () => {
             startTime: 0,
             raceId: "",
             fleetSettings: {} as FleetSettingsType,
-            results: [{} as ResultsDataType]
+            results: [{
+                id: "",
+                raceId: "",
+                Helm: "",
+                Crew: "",
+                boat: {} as BoatDataType,
+                SailNumber: "",
+                finishTime: 0,
+                CorrectedTime: 0,
+                laps: [{
+                    time: 0,
+                    id: "",
+                    resultId: ""
+                }],
+                PursuitPosition: 0,
+                HandicapPosition: 0,
+                resultCode: "",
+                fleetId: ""
+            } as ResultsDataType]
 
         }],
         Type: "",
         seriesId: "",
         series: {} as SeriesDataType
-    }))
+    })
 
     const createResult = async (fleetId: string) => {
         await DB.createResult(race.id, fleetId)
@@ -231,6 +269,8 @@ const SignOnPage = () => {
     const hideEditModal = async () => {
         const modal = document.getElementById("editModal")
         modal?.classList.add("hidden")
+
+        setActiveResult({} as ResultsDataType)
     }
 
     const addLap = async () => {
@@ -261,13 +301,12 @@ const SignOnPage = () => {
             DB.GetSeriesById(racedata.seriesId).then((series: SeriesDataType) => {
                 setSeriesName(series.name)
             })
-
         }
 
         if (raceId != undefined) {
             getRace()
-
         }
+
     }, [router])
 
     useEffect(() => {
@@ -300,7 +339,7 @@ const SignOnPage = () => {
 
             }
             fetchUser()
-
+            setLoading(false)
 
         } else {
             console.log("user not signed in")
@@ -326,8 +365,11 @@ const SignOnPage = () => {
             clearTimeout(timer1);
         }
     }, [race]);
-
-
+    if (isLoading) {
+        return (
+            <p>Loading...</p>
+        )
+    }
     return (
         <Dashboard club={club.name} displayName={user.displayName}>
             <div id="race" className='h-full w-full overflow-y-auto'>
@@ -382,7 +424,7 @@ const SignOnPage = () => {
                                 Lap Info
                             </p>
                             <div className='flex flex-row w-full flex-wrap' id='LapData'>
-                                {/* this map loops through laps in results, unless it can't find any. or second argument stops errors */}
+                                {/* this map loops through laps in results, unless it can't find any*/}
                                 {activeResult.laps.map((lap: LapDataType, index: number) => {
                                     return (
                                         <div className='flex flex-col px-6 w-min' key={lap.time}>
@@ -390,7 +432,7 @@ const SignOnPage = () => {
                                                 Lap {index + 1}
                                             </p>
                                             <div className='flex flex-row'>
-                                                <input type="time" className="h-full text-xl p-4" step={"1"} defaultValue={new Date((lap.time - race.fleets.filter(fleet => fleet.id == activeResult.fleetId)[0]!.startTime) * 1000).toISOString().substring(11, 19)} />
+                                                <input type="time" className="h-full text-xl p-4" step={"1"} defaultValue={new Date((lap.time - (race.fleets.filter(fleet => fleet.id == activeResult.fleetId)[0] || { startTime: 0 } as FleetDataType).startTime) * 1000).toISOString().substring(11, 19)} />
                                                 <div className="text-6xl font-extrabold text-red-600 p-6 float-right cursor-pointer" onClick={() => removeLap(index)}>&times;</div>
                                             </div>
 
@@ -524,12 +566,13 @@ const SignOnPage = () => {
                     </div>
                     <div className='p-6 w-full'>
                         {race.fleets.map((fleet, index) => {
+                            console.log(fleet)
                             return (
                                 <div key={"fleetResults" + index}>
                                     <p className='text-2xl font-bold text-gray-700'>
                                         {fleet.fleetSettings.name}
                                     </p>
-                                    <FleetResultsTable data={fleet.results} startTime={fleet.startTime} key={JSON.stringify(race)} deleteResult={deleteResult} updateResult={updateResult} createResult={() => createResult(fleet.id)} raceId={race.id} showEditModal={(id: string) => { showEditModal(id) }} />
+                                    <FleetResultsTable data={fleet.results} startTime={fleet.startTime} key={"resultstable" + index} deleteResult={deleteResult} updateResult={updateResult} createResult={() => createResult(fleet.id)} raceId={race.id} showEditModal={(id: string) => { showEditModal(id) }} />
                                 </div>
                             )
                         })
@@ -540,5 +583,4 @@ const SignOnPage = () => {
         </Dashboard >
     )
 }
-
 export default SignOnPage
