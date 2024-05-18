@@ -29,6 +29,7 @@ async function createEntry(fleetId: string, raceId: string) {
             finishTime: 0,
             CorrectedTime: 0,
             PursuitPosition: 0,
+            HandicapPosition: 0,
             isDeleted: false,
             fleet: {
                 connect: {

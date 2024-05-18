@@ -37,31 +37,7 @@ const RacePage = () => {
         AOD: "",
         SO: "",
         ASO: "",
-        results: [{
-            id: "",
-            raceId: "",
-            fleetId: "",
-            Helm: "",
-            Crew: "",
-            boat: {
-                id: "",
-                name: "",
-                crew: 0,
-                py: 0,
-                clubId: "",
-                pursuitStartTime: 0,
-            },
-            SailNumber: "",
-            finishTime: 0,
-            CorrectedTime: 0,
-            resultCode: "",
-            laps: [{
-                id: "",
-                time: 0,
-                resultId: "",
-            }],
-            PursuitPosition: 0,
-        } as ResultsDataType],
+        fleets: [],
         Type: "",
         seriesId: "",
         series: {} as SeriesDataType
@@ -89,8 +65,6 @@ const RacePage = () => {
 
     })
 
-    var [fleets, setFleets] = useState<FleetDataType[]>([])
-
     var [raceState, setRaceState] = useState<raceStateType>(raceStateType.reset)
 
     const startRaceButton = async () => {
@@ -112,7 +86,7 @@ const RacePage = () => {
         })
 
         //Update database
-        fleets.forEach(fleet => {
+        race.fleets.forEach(fleet => {
             fleet.startTime = localTime
             DB.updateFleetById(fleet)
         })
@@ -223,7 +197,7 @@ const RacePage = () => {
             console.log('Clock not connected: ', err);
         });
         //Update database
-        fleets.forEach(fleet => {
+        race.fleets.forEach(fleet => {
             fleet.startTime = 0
             DB.updateFleetById(fleet)
         })
@@ -233,14 +207,20 @@ const RacePage = () => {
 
     }
 
-    const retireBoat = async (id: string) => {
-        //modify local race data
-        const tempdata = race
-        let index = tempdata.results.findIndex((x: ResultsDataType) => x.id === id)
-        tempdata.results[index].finishTime = -1 //finish time is a string so we can put in status
-        setRace({ ...tempdata })
+    const retireBoat = async (resultId: string) => {
+        let result: ResultsDataType | undefined;
+        race.fleets.some(fleet => {
+            result = fleet.results.find(result => result.id === resultId);
+            return result !== undefined;
+        });
+        if (result == undefined) {
+            console.error("Could not find result with id: " + resultId);
+            return
+        }
+        result.resultCode = "RET"
+        await DB.updateResult(result)
+        setRace(await DB.getRaceById(race.id))
         //send to DB
-        await DB.updateResult(tempdata.results[index])
     }
 
     const lapBoat = async (id: string) => {
@@ -289,7 +269,7 @@ const RacePage = () => {
     }
 
     const submitResults = async () => {
-        for (const result of race.results) {
+        for (const result of race.fleets.flatMap(fleet => fleet.results)) {
             await DB.updateResult(result)
         }
         router.push({ pathname: '/Race', query: { race: race.id } })
@@ -314,7 +294,7 @@ const RacePage = () => {
 
         let allStarted = true
 
-        race.results.forEach(result => {
+        race.fleets.flatMap(fleet => fleet.results).forEach(result => {
             if ((result.boat?.pursuitStartTime || 0) < timeInSeconds && time.countingUp == true) {
                 //boat has started
 
@@ -343,16 +323,13 @@ const RacePage = () => {
         const fetchRace = async () => {
             let data = await DB.getRaceById(raceId)
             //sort race results by pursuit position
-            const sortedResults = data.results.sort((a: ResultsDataType, b: ResultsDataType) => a.PursuitPosition - b.PursuitPosition);
-            setRace({ ...data, results: sortedResults })
+            const sortedResults = data.fleets[0]!.results.sort((a: ResultsDataType, b: ResultsDataType) => a.PursuitPosition - b.PursuitPosition);
+            setRace({ ...data, fleets: [data.fleets[0], results: sortedResults] })
 
-            const fleets = await DB.GetFleetsBySeries(data.seriesId)
-            setFleets(fleets)
-
-            if (fleets[0]?.startTime != 0) {
+            if (race.fleets[0]?.startTime != 0) {
                 setRaceState(raceStateType.running)
                 //check if race has already finished
-                if (Math.floor((new Date().getTime() / 1000) - fleets[0]!.startTime) > club.settings.pursuitLength) {
+                if (Math.floor((new Date().getTime() / 1000) - race.fleets[0]!.startTime) > club.settings.pursuitLength) {
                     setRaceState(raceStateType.calculate)
                 }
             }
@@ -431,11 +408,11 @@ const RacePage = () => {
                         Event: {seriesName} - {race.number}
                     </div>
                     {
-                        (fleets.length < 1) ?
+                        (race.fleets.length < 1) ?
                             <p>Waiting for boats to be added to fleets</p>
                             :
                             <div className="w-1/4 p-2 m-2 border-4 rounded-lg bg-white text-lg font-medium">
-                                Race Time: <PursuitTimer startTime={fleets[0]!.startTime} endTime={club.settings.pursuitLength} timerActive={raceState == raceStateType.running} onFiveMinutes={handleFiveMinutes} onFourMinutes={handleFourMinutes} onOneMinute={handleOneMinute} onGo={handleGo} onEnd={endRace} onTimeUpdate={ontimeupdate} onWarning={handleWarning} reset={raceState == raceStateType.reset} />
+                                Race Time: <PursuitTimer startTime={race.fleets[0]!.startTime} endTime={club.settings.pursuitLength} timerActive={raceState == raceStateType.running} onFiveMinutes={handleFiveMinutes} onFourMinutes={handleFourMinutes} onOneMinute={handleOneMinute} onGo={handleGo} onEnd={endRace} onTimeUpdate={ontimeupdate} onWarning={handleWarning} reset={raceState == raceStateType.reset} />
                             </div>
                     }
                     <div className="w-1/4 p-2 m-2 border-4 rounded-lg bg-white text-lg font-medium">
@@ -472,8 +449,8 @@ const RacePage = () => {
                 </div>
 
                 <div className="">
-                    <ReactSortable handle=".handle" list={race.results} setList={(newState) => setOrder(newState)}>
-                        {race.results.map((result: ResultsDataType, index) => {
+                    <ReactSortable handle=".handle" list={race.fleets.flatMap(fleet => fleet.results)} setList={(newState) => setOrder(newState)}>
+                        {race.fleets.flatMap(fleet => fleet.results).map((result: ResultsDataType, index) => {
                             return (
                                 <div key={index} id={result.id} className={result.finishTime == -1 ? 'bg-red-300 border-2 border-pink-500' : 'bg-green-300 border-2 border-pink-500'}>
                                     <div className="flex flex-row m-4 justify-between">
