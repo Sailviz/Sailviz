@@ -188,10 +188,12 @@ const SeriesTable = (props: any) => {
             }),
             columnHelper.accessor('id', {
                 id: "Remove",
+                header: "Remove",
                 cell: props => <Remove {...props} id={props.row.original.id} removeRace={updateData} />
             }),
             columnHelper.accessor('id', {
                 id: "GoTo",
+                header: "GoTo",
                 cell: props => <GoTo {...props} id={props.row.original.id} goToRace={goToRace} />
             }),
         ],

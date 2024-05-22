@@ -21,7 +21,8 @@ async function findSeries(id: any) {
                         }
                     }
                 }
-            }
+            },
+            fleetSettings: true
         }
     })
     return result;

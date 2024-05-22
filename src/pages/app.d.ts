@@ -24,7 +24,6 @@ type SeriesDataType = {
 type FleetSettingsType = {
   id: string;
   name: string;
-  raceId: string;
   boats: BoatDataType[];
   startDelay: number;
   fleets: FleetDataType[];

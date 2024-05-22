@@ -8,6 +8,7 @@ import Dashboard from "../components/Dashboard";
 import SeriesTable from "../components/SeriesTable";
 import FleetTable from "../components/FleetTable";
 import Switch from "../components/Switch";
+import { set } from "cypress/types/lodash";
 
 
 const raceOptions = [{ value: "Pursuit", label: "Pursuit" }, { value: "Handicap", label: "Handicap" }]
@@ -43,10 +44,14 @@ const SignOnPage = () => {
             numberToCount: 0
         },
         races: [],
-        fleetSettings: []
+        fleetSettings: [{
+            id: "",
+            name: "",
+            boats: [],
+            startDelay: 0,
+            fleets: []
+        } as FleetSettingsType]
     })
-
-    const [fleetSettings, setFleetSettings] = useState<FleetSettingsType[]>([])
 
     const createRace = async () => {
         var race = await DB.createRace(clubId, series.id)
@@ -91,10 +96,8 @@ const SignOnPage = () => {
     }
 
     const createFleet = async () => {
-        var fleet = await DB.createFleetSettings(series.id)
-        var newFleets = fleetSettings;
-        newFleets.push(fleet)
-        setFleetSettings([...newFleets])
+        await DB.createFleetSettings(series.id)
+        setSeries(await DB.GetSeriesById(series.id))
     }
 
     const deleteFleet = async (fleetId: string) => {
@@ -103,16 +106,13 @@ const SignOnPage = () => {
             console.warn("fleet not found: " + fleetId)
             return
         }
-        let newfleets = fleetSettings
-        let fleetIndex = newfleets.findIndex(x => x.id === fleetId)
-        console.log(fleetIndex)
-        newfleets.splice(fleetIndex, 1)
-        console.log(newfleets)
-        setFleetSettings([...newfleets])
+        await DB.DeleteFleetById(fleetId)
+
+        setSeries(await DB.GetSeriesById(series.id))
     }
 
     const editFleet = async () => {
-        var fleet = fleetSettings.find(x => x.id == activeFleetId)
+        var fleet = series.fleetSettings.find(x => x.id == activeFleetId)
         if (fleet == undefined) {
             console.warn("fleet not found: " + activeFleetId)
             return
@@ -128,10 +128,7 @@ const SignOnPage = () => {
         await DB.updateFleetSettingsById(fleet)
 
         //update local copy
-        let newfleets = fleetSettings
-        let fleetIndex = newfleets.findIndex(x => x.id === activeFleetId)
-        newfleets[fleetIndex] = fleet
-        setFleetSettings([...newfleets])
+        setSeries(await DB.GetSeriesById(series.id))
 
         //hide fleet edit modal
         setFleetModal(false)
@@ -149,7 +146,7 @@ const SignOnPage = () => {
     const showFleetModal = async (fleetId: string) => {
         setActiveFleetId(fleetId)
         setFleetModal(true)
-        var fleet = fleetSettings.find(x => x.id == fleetId)
+        var fleet = series.fleetSettings.find(x => x.id == fleetId)
         if (fleet == undefined) {
             console.warn("fleet not found: " + activeFleetId)
             return
@@ -178,11 +175,6 @@ const SignOnPage = () => {
             })
         }
 
-        const getFleetSettings = async () => {
-            await DB.GetFleetSettingsBySeries(seriesId).then((fleetdata: FleetSettingsType[]) => {
-                setFleetSettings(fleetdata)
-            })
-        }
         const getBoats = async () => {
             var data = await DB.getBoats(clubId)
             if (data) {
@@ -200,7 +192,6 @@ const SignOnPage = () => {
         }
         if (seriesId != undefined) {
             getSeries()
-            getFleetSettings()
             getBoats()
         }
     }, [router, query.series])
@@ -326,7 +317,7 @@ const SignOnPage = () => {
                         Fleets
                     </p>
                     <div className='p-6'>
-                        <FleetTable data={fleetSettings} key={JSON.stringify(fleetSettings)} showFleetModal={(fleetId: string) => showFleetModal(fleetId)} />
+                        <FleetTable data={series.fleetSettings} key={JSON.stringify(series.fleetSettings)} showFleetModal={(fleetId: string) => showFleetModal(fleetId)} />
 
                     </div>
                     <div className="p-6">

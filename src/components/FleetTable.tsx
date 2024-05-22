@@ -48,6 +48,7 @@ const columnHelper = createColumnHelper<FleetSettingsType>()
 
 const FleetTable = (props: any) => {
     var [data, setData] = useState(props.data)
+    console.log(props.data)
 
     const showFleetModal = (data: any) => {
         props.showFleetModal(data)
