@@ -32,7 +32,19 @@ const LiveResults = () => {
 
     var results
 
-    var [activeRace, setActiveRace] = useState<RaceDataType>({} as RaceDataType)
+    var [activeRace, setActiveRace] = useState<RaceDataType>({
+        id: "",
+        number: 0,
+        Time: "",
+        OOD: "",
+        AOD: "",
+        SO: "",
+        ASO: "",
+        fleets: [],
+        Type: "",
+        seriesId: "",
+        series: {} as SeriesDataType
+    } as RaceDataType)
 
     var [mode, setMode] = useState<pageModes>(pageModes.results)
 
