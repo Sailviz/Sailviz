@@ -80,7 +80,13 @@ const SignOnPage = () => {
             id: "",
             startTime: 0,
             raceId: "",
-            fleetSettings: {} as FleetSettingsType,
+            fleetSettings: {
+                id: "",
+                name: "",
+                boats: [],
+                startDelay: 0,
+                fleets: []
+            } as FleetSettingsType,
             results: [{
                 id: "",
                 raceId: "",

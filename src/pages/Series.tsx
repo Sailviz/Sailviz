@@ -57,9 +57,7 @@ const SignOnPage = () => {
         var race = await DB.createRace(clubId, series.id)
         console.log(race)
 
-        var newSeriesData: SeriesDataType = window.structuredClone(series)
-        newSeriesData.races.push(race)
-        setSeries(newSeriesData)
+        setSeries(await DB.GetSeriesById(series.id))
     }
 
     const removeRace = async (raceId: string) => {
@@ -101,12 +99,7 @@ const SignOnPage = () => {
     }
 
     const deleteFleet = async (fleetId: string) => {
-        let result = await DB.DeleteFleetById(fleetId)
-        if (result == undefined) {
-            console.warn("fleet not found: " + fleetId)
-            return
-        }
-        await DB.DeleteFleetById(fleetId)
+        await DB.DeleteFleetSettingsById(fleetId)
 
         setSeries(await DB.GetSeriesById(series.id))
     }
