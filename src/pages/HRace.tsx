@@ -205,14 +205,7 @@ const RacePage = () => {
     };
 
     const orderResults = async (results: ResultsDataType[]) => {
-        results.sort((a, b) => {
-            //if done a lap, predicted is sum of lap times + last lap.
-            //if no lap done, predicted is py.
-            let aPredicted = a.laps.length > 0 ? a.laps.reduce((sum: number, lap: LapDataType) => sum + lap.time, a.laps[a.laps.length - 1]!.time) : a.boat.py / 10
-            let bPredicted = b.laps.length > 0 ? b.laps.reduce((sum: number, lap: LapDataType) => sum + lap.time, b.laps[b.laps.length - 1]!.time) : b.boat.py / 10
-
-            return aPredicted - bPredicted;
-        });
+        results.sort((a, b) => { return a.boat.py - b.boat.py; });
 
         results.forEach((res, index) => {
             const element = document.getElementById(res.id)
@@ -429,7 +422,6 @@ const RacePage = () => {
                 setRaceState([...raceState.slice(0, index), raceStateType.running, ...raceState.slice(index + 1)])
             }
         })
-        orderResults(race.fleets.flatMap(fleet => fleet.results))
     }, [race])
 
     useEffect(() => {
