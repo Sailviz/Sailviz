@@ -234,9 +234,6 @@ const SignOnPage = () => {
     return (
         <Dashboard club={club.name} displayName={user.displayName}>
             <div className='h-full w-full overflow-y-auto'>
-                <div id="BackToHome" onClick={() => router.push("/Dashboard")} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center w-1/12 mt-4 mx-4">
-                    Back To Home
-                </div>
                 <div id="fleetEditModal" className={"fixed z-10 left-0 top-0 w-full h-full overflow-auto bg-gray-400 backdrop-blur-sm bg-opacity-20" + (fleetModal ? "" : " hidden")} key={activeRaceId}>
                     <div className="mx-40 my-20 px-10 py-5 border w-4/5 bg-gray-300 rounded-sm">
                         <div className="text-6xl font-extrabold text-gray-700 p-6 float-right cursor-pointer" onClick={() => setFleetModal(false)}>&times;</div>

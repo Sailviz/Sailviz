@@ -37,7 +37,26 @@ const RacePage = () => {
         AOD: "",
         SO: "",
         ASO: "",
-        fleets: [],
+        fleets: [{
+            startTime: 0,
+            id: "",
+            results: [{
+                id: "",
+                fleetId: "",
+                raceId: "",
+                Helm: "",
+                Crew: "",
+                boat: {} as BoatDataType,
+                SailNumber: "",
+                finishTime: 0,
+                laps: [],
+                CorrectedTime: 0,
+                PursuitPosition: 0,
+                HandicapPosition: 0,
+                resultCode: ""
+            } as ResultsDataType],
+        } as FleetDataType
+        ],
         Type: "",
         seriesId: "",
         series: {} as SeriesDataType
@@ -401,11 +420,6 @@ const RacePage = () => {
             <audio id="Countdown" src=".\Countdown.mp3" ></audio>
             <div className="w-full flex flex-col items-center justify-start panel-height overflow-auto">
                 <div className="flex w-full flex-row justify-around">
-                    <div className="w-1/4 p-2">
-                        <p onClick={() => router.back()} className="cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-xl px-5 py-2.5 text-center">
-                            Back To Home
-                        </p>
-                    </div>
                     <div className="w-1/4 p-2 m-2 border-4 rounded-lg bg-white text-lg font-medium">
                         Event: {seriesName} - {race.number}
                     </div>
