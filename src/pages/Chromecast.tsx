@@ -1,17 +1,69 @@
-import React from 'react'
-//tls fs
-const Chromecast = () => {
-    /**
- * Main JavaScript for handling Chromecast interactions.
- */
+import React, { useEffect } from 'react'
+import Script from 'next/script';
 
-    var applicationID = 'F7FD2183';
-    var namespace = 'urn:x-cast:com.boombatower.chromecast-dashboard';
-    var session = null;
-    var chrome: chrome.cast.ApiConfig = window.chrome;
 
-    if (!chrome.cast || !chrome.cast.isAvailable) {
-        setTimeout(initializeCastApi, 1000);
+var applicationID = '0AA4CA7E'; //mine
+var namespace = 'urn:x-cast:com.sailviz';
+
+
+const Dashboard = () => {
+    const [url, setUrl] = React.useState('')
+    var session: any = null
+
+    const connect = () => {
+        console.log('connect()');
+        sendMessage({
+            type: 'load',
+            url: "https://www.example.com",
+            refresh: 0,
+        });
+    }
+
+    function sessionListener(e: any) {
+        console.log('New session ID: ' + e.sessionId);
+        session = e;
+        e.addUpdateListener(sessionUpdateListener);
+    }
+
+    function sessionUpdateListener(isAlive: any) {
+        console.log((isAlive ? 'Session Updated' : 'Session Removed') + ': ' + session.sessionId);
+        if (!isAlive) {
+            session = null;
+        }
+    };
+
+    const sendMessage = (message: object) => {
+        if (session != null) {
+            session.sendMessage(namespace, message, onSuccess.bind(this, message), onError);
+        }
+        else {
+            chrome.cast.requestSession((e: any) => {
+                session = e;
+                sessionListener(e);
+                session.sendMessage(namespace, message, onSuccess.bind(this, message), onError);
+            }, onError);
+        }
+    }
+
+    function onInitSuccess(e: any) {
+        console.log('onInitSuccess');
+    }
+
+    function onError(message: any) {
+        console.log('onError: ' + JSON.stringify(message));
+    }
+
+    function onStopAppSuccess() {
+        console.log('onStopAppSuccess');
+    }
+
+
+    function receiverListener(e) {
+        // Due to API changes just ignore this.
+    }
+
+    function stopApp() {
+        session.stop(onStopAppSuccess, onError);
     }
 
     function initializeCastApi() {
@@ -23,99 +75,33 @@ const Chromecast = () => {
         chrome.cast.initialize(apiConfig, onInitSuccess, onError);
     };
 
-    function onInitSuccess() {
-        console.log('onInitSuccess');
-    }
-
-    function onError(message) {
-        console.log('onError: ' + JSON.stringify(message));
-    }
-
-    function onSuccess(message) {
+    function onSuccess(message: any) {
         console.log('onSuccess: ' + JSON.stringify(message));
-
-        if (message['type'] == 'load') {
-            $('#kill').prop('disabled', false);
-            $('#post-note').show();
-        }
     }
 
-    function onStopAppSuccess() {
-        console.log('onStopAppSuccess');
-
-        $('#kill').prop('disabled', true);
-        $('#post-note').hide();
-    }
-
-    function sessionListener(e) {
-        console.log('New session ID: ' + e.sessionId);
-        session = e;
-        session.addUpdateListener(sessionUpdateListener);
-    }
-
-    function sessionUpdateListener(isAlive) {
-        console.log((isAlive ? 'Session Updated' : 'Session Removed') + ': ' + session.sessionId);
-        if (!isAlive) {
-            session = null;
+    useEffect(() => {
+        if (!chrome.cast || !chrome.cast.isAvailable) {
+            setTimeout(initializeCastApi, 1000);
         }
-    };
+    }, [])
 
-    function receiverListener(e) {
-        // Due to API changes just ignore this.
-    }
-
-    function sendMessage(message) {
-        if (session != null) {
-            session.sendMessage(namespace, message, onSuccess.bind(this, message), onError);
-        }
-        else {
-            chrome.cast.requestSession(function (e) {
-                session = e;
-                sessionListener(e);
-                session.sendMessage(namespace, message, onSuccess.bind(this, message), onError);
-            }, onError);
-        }
-    }
-
-    function stopApp() {
-        session.stop(onStopAppSuccess, onError);
-    }
-
-    function connect() {
-        console.log('connect()');
-        sendMessage({
-            type: 'load',
-            url: $('#url').val(),
-            refresh: $('#refresh').val(),
-        });
-    }
-
-    $('#kill').on('click', stopApp);
-
-    // Populate input fields from query params
-    $(function () {
-        if (!'URLSearchParams' in window) {
-            return;
-        }
-
-        var params = new URLSearchParams(window.location.search);
-        if (params.has('url')) {
-            $('#url').val(params.get('url'));
-        }
-
-        if (params.has('refresh')) {
-            $('#refresh').val(params.get('refresh'));
-        }
-    });
     return (
         <div>
+            <Script src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js"></Script>
             <p>
                 Enter a Url for to display on dashboard and if the page does not update
                 itself then enter an appropriate refresh interval in seconds.
             </p>
-            <div onClick={connect}>Connect</div>
+            <label>Url <input type="text" id="url" placeholder="http://www.gabenewell.org/" /></label>
+            <div onClick={connect}>Launch</div>
+            <label>Refresh <input type="number" id="refresh" min="0" value="0" /></label>
+            <button id="kill" className='disabled'>Stop casting</button>
+            <p id="post-note" className="hidden">
+                If the page does not load please be sure HTTP header X-Frame-Options
+                allows the page to be loaded inside a frame not on the same origin.
+            </p>
         </div>
     )
 }
 
-export default Chromecast
+export default Dashboard
