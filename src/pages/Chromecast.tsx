@@ -1,9 +1,9 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import Script from 'next/script';
+import Cookies from 'js-cookie';
 
-
-var applicationID = '0AA4CA7E'; //mine
-var namespace = 'urn:x-cast:com.sailviz';
+const applicationID = '0AA4CA7E';
+const namespace = 'urn:x-cast:com.sailviz';
 
 
 const Dashboard = () => {
@@ -13,9 +13,8 @@ const Dashboard = () => {
     const connect = () => {
         console.log('connect()');
         sendMessage({
-            type: 'load',
-            url: "https://www.example.com",
-            refresh: 0,
+            type: 'clubId',
+            clubId: clubId,
         });
     }
 
@@ -41,7 +40,9 @@ const Dashboard = () => {
                 session = e;
                 sessionListener(e);
                 session.sendMessage(namespace, message, onSuccess.bind(this, message), onError);
+                session.addMessageListener(namespace, console.log)
             }, onError);
+
         }
     }
 
@@ -58,11 +59,12 @@ const Dashboard = () => {
     }
 
 
-    function receiverListener(e) {
+    function receiverListener(e: any) {
         // Due to API changes just ignore this.
     }
 
     function stopApp() {
+        console.log(session)
         session.stop(onStopAppSuccess, onError);
     }
 
@@ -85,6 +87,19 @@ const Dashboard = () => {
         }
     }, [])
 
+    var [clubId, setClubId] = useState<string>("invalid")
+
+    const showPage = () => {
+        sendMessage({
+            type: 'showPage',
+            page: 'id'
+        });
+    }
+
+    useEffect(() => {
+        setClubId(Cookies.get('clubId') || "")
+    }, [])
+
     return (
         <div>
             <Script src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js"></Script>
@@ -92,13 +107,17 @@ const Dashboard = () => {
                 Enter a Url for to display on dashboard and if the page does not update
                 itself then enter an appropriate refresh interval in seconds.
             </p>
-            <label>Url <input type="text" id="url" placeholder="http://www.gabenewell.org/" /></label>
+
+            <input type="text" id="url" onChange={() => { }} />
             <div onClick={connect}>Launch</div>
-            <label>Refresh <input type="number" id="refresh" min="0" value="0" /></label>
-            <button id="kill" className='disabled'>Stop casting</button>
+            Refresh <input type="number" id="refresh" min="0" value="0" />
+            <button id="kill" className='disabled' onClick={stopApp}>Stop casting</button>
             <p id="post-note" className="hidden">
                 If the page does not load please be sure HTTP header X-Frame-Options
                 allows the page to be loaded inside a frame not on the same origin.
+            </p>
+            <p onClick={showPage} className="w-1/4 p-2 m-2 cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-xl px-5 py-2.5 text-center">
+                Results
             </p>
         </div>
     )

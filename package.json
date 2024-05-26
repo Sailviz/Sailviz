@@ -27,6 +27,7 @@
     "zod": "^3.17.3"
   },
   "devDependencies": {
+    "@types/chrome": "^0.0.268",
     "@types/js-cookie": "^3.0.2",
     "@types/node": "18.0.0",
     "@types/react": "18.0.14",
