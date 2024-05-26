@@ -23,7 +23,8 @@ async function findRace(id: any) {
                                 }
                             }
                         }
-                    }
+                    },
+                    fleetSettings: true
                 }
 
             },

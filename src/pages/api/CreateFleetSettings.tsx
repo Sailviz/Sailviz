@@ -8,11 +8,14 @@ async function findSeries(seriesId: any) {
         where: {
             id: seriesId
         },
+        include: {
+            races: true
+        }
     })
     return result;
 }
 
-async function createFleet(seriesId: string) {
+async function createFleetSettings(seriesId: string) {
     var res = await prisma.fleetSettings.create({
         data: {
             name: "Fleet",
@@ -23,6 +26,25 @@ async function createFleet(seriesId: string) {
                 }
             }
         },
+    })
+    return res;
+}
+
+async function createFleet(raceId: string, fleetSettingsId: string) {
+    var res = await prisma.fleet.create({
+        data: {
+            startTime: 0,
+            fleetSettings: {
+                connect: {
+                    id: fleetSettingsId
+                }
+            },
+            race: {
+                connect: {
+                    id: raceId
+                }
+            }
+        }
     })
     return res;
 }
@@ -44,8 +66,13 @@ const CreateFleet = async (req: NextApiRequest, res: NextApiResponse) => {
         var series = await findSeries(seriesId)
 
         if (series) {
-            var fleet = await createFleet(seriesId)
-            res.json({ error: false, fleet: fleet });
+            var fleetSettings = await createFleetSettings(seriesId)
+            series.races.forEach((race) => {
+                createFleet(race.id, fleetSettings.id)
+
+            }
+            )
+            res.json({ error: false, fleet: fleetSettings });
         }
         else {
             res.json({ error: true, message: 'Could not find series' });

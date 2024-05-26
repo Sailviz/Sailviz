@@ -170,22 +170,6 @@ const SeriesTable = (props: any) => {
                 id: "Type",
                 cell: props => <Type {...props} />
             }),
-            columnHelper.accessor('OOD', {
-                id: "OOD",
-                cell: props => <Text {...props} />
-            }),
-            columnHelper.accessor('AOD', {
-                id: "AOD",
-                cell: props => <Text {...props} />
-            }),
-            columnHelper.accessor('SO', {
-                id: "SO",
-                cell: props => <Text {...props} />
-            }),
-            columnHelper.accessor('ASO', {
-                id: "ASO",
-                cell: props => <Text {...props} />
-            }),
             columnHelper.accessor('id', {
                 id: "Remove",
                 header: "Remove",

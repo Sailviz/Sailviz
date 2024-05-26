@@ -40,4 +40,4 @@ const UpdateFleetSettingsById = async (req: NextApiRequest, res: NextApiResponse
     }
 };
 
-export default updateFleetSettingsById
+export default UpdateFleetSettingsById

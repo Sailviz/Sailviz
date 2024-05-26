@@ -3,19 +3,19 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 
 import assert from 'assert';
 
-async function findFleet(fleetId: any) {
-    var result = await prisma.fleet.findFirst({
+async function findFleet(fleetSettingsId: any) {
+    var result = await prisma.fleetSettings.findFirst({
         where: {
-            id: fleetId
+            id: fleetSettingsId
         },
     })
     return result;
 }
 
-async function deleteFleet(fleetId: any) {
-    var result = await prisma.fleet.delete({
+async function deleteFleet(fleetSettingsId: any) {
+    var result = await prisma.fleetSettings.delete({
         where: {
-            id: fleetId
+            id: fleetSettingsId
         }
     })
     return result;
@@ -26,18 +26,18 @@ const DeleteFleetById = async (req: NextApiRequest, res: NextApiResponse) => {
         // check if we have all data.
         // The website stops this, but just in case
         try {
-            assert.notStrictEqual(undefined, req.body.fleetId, 'fleetId required');
+            assert.notStrictEqual(undefined, req.body.fleetSettingsId, 'fleetSettingsId required');
 
         } catch (bodyError) {
             res.json({ error: true, message: "information missing" });
             return;
         }
 
-        var fleetId = req.body.fleetId
+        var fleetSettingsId = req.body.fleetSettingsId
 
-        var fleet = await findFleet(fleetId)
+        var fleet = await findFleet(fleetSettingsId)
         if (fleet) {
-            await deleteFleet(fleetId)
+            await deleteFleet(fleetSettingsId)
             res.json({ error: false, fleet: fleet });
         } else {
             // User exists

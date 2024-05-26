@@ -559,11 +559,11 @@ export async function updateFleetSettingsById(fleet: FleetSettingsType): Promise
         });
 };
 
-export async function DeleteFleetById(fleetId: string): Promise<FleetDataType> {
+export async function DeleteFleetSettingsById(fleetSettingsId: string): Promise<FleetDataType> {
     const body = {
-        fleetId: fleetId,
+        fleetSettingsId: fleetSettingsId,
     }
-    return await fetch(`/api/DeleteFleetById`, {
+    return await fetch(`/api/DeleteFleetSettingsById`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),

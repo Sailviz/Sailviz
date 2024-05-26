@@ -205,14 +205,7 @@ const RacePage = () => {
     };
 
     const orderResults = async (results: ResultsDataType[]) => {
-        results.sort((a, b) => {
-            //if done a lap, predicted is sum of lap times + last lap.
-            //if no lap done, predicted is py.
-            let aPredicted = a.laps.length > 0 ? a.laps.reduce((sum: number, lap: LapDataType) => sum + lap.time, a.laps[a.laps.length - 1]!.time) : a.boat.py / 10
-            let bPredicted = b.laps.length > 0 ? b.laps.reduce((sum: number, lap: LapDataType) => sum + lap.time, b.laps[b.laps.length - 1]!.time) : b.boat.py / 10
-
-            return aPredicted - bPredicted;
-        });
+        results.sort((a, b) => { return a.boat.py - b.boat.py; });
 
         results.forEach((res, index) => {
             const element = document.getElementById(res.id)
@@ -429,7 +422,6 @@ const RacePage = () => {
                 setRaceState([...raceState.slice(0, index), raceStateType.running, ...raceState.slice(index + 1)])
             }
         })
-        orderResults(race.fleets.flatMap(fleet => fleet.results))
     }, [race])
 
     useEffect(() => {
@@ -528,20 +520,12 @@ const RacePage = () => {
 
     }
 
-    //const
-
-
     return (
         <Dashboard club={club.name} displayName={user.displayName}>
             <audio id="Beep" src=".\beep-6.mp3" ></audio>
             <audio id="Countdown" src=".\Countdown.mp3" ></audio>
             <div className="w-full flex flex-col items-center justify-start panel-height">
                 <div className="flex w-full flex-col justify-around">
-                    <div className="w-1/4 p-2">
-                        <p onClick={() => router.back()} className="cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-xl px-5 py-2.5 text-center">
-                            Back To Home
-                        </p>
-                    </div>
                     <div className="w-1/4 p-2 m-2 border-4 rounded-lg bg-white text-lg font-medium">
                         Actual Time:  {time}
                     </div>
