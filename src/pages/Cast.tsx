@@ -5,6 +5,13 @@ import * as DB from '../components/apiMethods'
 import FleetResultsTable from '../components/FleetResultsTable';
 const namespace = 'urn:x-cast:com.sailviz';
 
+declare global {
+    interface Window { castReceiverManager: any; messageBus: any; }
+}
+
+declare var cast: any;
+
+
 const CastPage = () => {
     var senderId = '';
     const initializeCastApi = () => {
@@ -13,16 +20,16 @@ const CastPage = () => {
         window.castReceiverManager = cast.receiver.CastReceiverManager.getInstance();
         console.log('Starting Receiver Manager');
 
-        window.castReceiverManager.onReady = function (event) {
+        window.castReceiverManager.onReady = function (event: any) {
             console.log('Received Ready event: ' + JSON.stringify(event.data));
             window.castReceiverManager.setApplicationState('chromecast-dashboard is ready...');
         };
 
-        window.castReceiverManager.onSenderConnected = function (event) {
+        window.castReceiverManager.onSenderConnected = function (event: any) {
             console.log('Received Sender Connected event: ' + event.senderId);
         };
 
-        window.castReceiverManager.onSenderDisconnected = function (event) {
+        window.castReceiverManager.onSenderDisconnected = function (event: any) {
             console.log('Received Sender Disconnected event: ' + event.senderId);
         };
 
@@ -30,7 +37,7 @@ const CastPage = () => {
             window.castReceiverManager.getCastMessageBus(
                 namespace, cast.receiver.CastMessageBus.MessageType.JSON);
 
-        window.messageBus.onMessage = function (event) {
+        window.messageBus.onMessage = function (event: any) {
             senderId = event.senderId;
             console.log('Message [' + event.senderId + ']: ' + event.data);
 
