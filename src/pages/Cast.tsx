@@ -11,9 +11,9 @@ declare global {
 
 declare var cast: any;
 
+// sessions must be stored by google, as you can request to resume a session. store a list of sessions in DB
 
 const CastPage = () => {
-    var senderId = '';
     const initializeCastApi = () => {
         // Initialize the CastReceiverManager with an application status message.
         // cast.receiver.logger.setLevelValue(0);
@@ -38,7 +38,6 @@ const CastPage = () => {
                 namespace, cast.receiver.CastMessageBus.MessageType.JSON);
 
         window.messageBus.onMessage = function (event: any) {
-            senderId = event.senderId;
             console.log('Message [' + event.senderId + ']: ' + event.data);
 
             if (event.data['type'] == 'clubId') {
