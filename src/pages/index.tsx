@@ -10,9 +10,9 @@ const Home = () => {
                 </h1>
                 <div className="grid gap-3 pt-3 mt-3 text-center md:grid-cols-1 lg:w-2/3">
                     <Card
-                        name="Login"
+                        name="Hansa UK Nationals 2024"
                         description=""
-                        link="/Login"
+                        link="/whitefriarssc"
                     />
                 </div>
             </main>
