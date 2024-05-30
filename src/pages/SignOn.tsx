@@ -70,7 +70,12 @@ const SignOnPage = () => {
         const SailNumberElement = document.getElementById("SailNum") as HTMLInputElement
         const Boat = selectedOption.value as BoatDataType
         //TODO : create on correct fleet
-        let entry = await DB.createResult(raceId, activeRaceData.fleets[0]!.id)
+        let race = races.find((race) => race.id == raceId)
+        if (race == undefined) {
+            console.warn("could not find race with id: " + raceId)
+            return
+        }
+        let entry = await DB.createResult(raceId, race.fleets[0]!.id)
 
         entry.Helm = HelmElement.value
         entry.Crew = CrewElement.value
@@ -335,7 +340,7 @@ const SignOnPage = () => {
     }, [races]);
 
     return (
-        <div>
+        <div className="h-screen">
             <div className="flex w-full flex-row justify-start">
 
                 <p onClick={() => showPage("Signon")} className=" w-1/4 p-2 m-2 cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-xl px-5 py-2.5 text-center">
@@ -357,7 +362,7 @@ const SignOnPage = () => {
                     )
                 })}
             </div>
-            <div id="Signon" className="">
+            <div id="Signon" className="signon-height overflow-y-auto">
                 <div id="addModal" className="hidden fixed z-10 left-0 top-0 w-full h-full overflow-auto bg-gray-400 backdrop-blur-sm bg-opacity-20">
                     <div className="mx-40 my-20 px-10 py-5 border w-4/5 bg-gray-300 rounded-sm">
                         <div className="text-6xl font-extrabold text-gray-700 p-6 float-right cursor-pointer" onClick={hideAddBoatModal}>&times;</div>
@@ -504,12 +509,13 @@ const SignOnPage = () => {
                         </div>
                         <div className='w-full my-0 mx-auto'>
                             <div className="p-6 w-3/4 m-auto">
-                                <p id="addEntry" onClick={showAddBoatModal} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
+                                <p id="addEntry" onClick={showAddBoatModal} className="cursor-pointer text-white bg-green-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
                                     Add Entry
                                 </p>
                             </div>
                         </div>
                         {races.map((race, index) => {
+                            console.log(race.series.name, race.number)
                             return (
                                 <div className="m-6" key={JSON.stringify(races) + index}>
                                     <div className="text-4xl font-extrabold text-gray-700 p-6">
