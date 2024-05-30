@@ -45,21 +45,6 @@ const SeriesResults = () => {
         }
     }, [router])
 
-    useEffect(() => {
-        if (clubId != "") {
-            //catch if not fully updated
-            if (clubId == "invalid") {
-                return
-            }
-
-
-
-        } else {
-            console.log("user not signed in")
-            router.push("/")
-        }
-    }, [clubId])
-
     // list of current series
     //list of 
 
