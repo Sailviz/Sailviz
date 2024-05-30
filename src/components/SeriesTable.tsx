@@ -1,6 +1,6 @@
-import React, { ChangeEvent, MouseEventHandler, useState } from 'react';
+import React, { ChangeEvent, useState } from 'react';
 import dayjs from 'dayjs';
-import { createColumnHelper, flexRender, getCoreRowModel, RowSelection, useReactTable } from '@tanstack/react-table'
+import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, RowSelection, SortingState, useReactTable } from '@tanstack/react-table'
 import * as DB from './apiMethods';
 import Select from 'react-select';
 
@@ -141,9 +141,13 @@ const GoTo = ({ ...props }: any) => {
 
 const columnHelper = createColumnHelper<RaceDataType>()
 
-
 const SeriesTable = (props: any) => {
     var [data, setData] = useState(props.data)
+
+    const [sorting, setSorting] = useState<SortingState>([{
+        id: "number",
+        desc: false,
+    }]);
 
     const updateData = (data: any) => {
         console.log(data)
@@ -161,6 +165,7 @@ const SeriesTable = (props: any) => {
             columnHelper.accessor('number', {
                 id: "number",
                 cell: info => info.getValue(),
+                enableSorting: true
             }),
             columnHelper.accessor('Time', {
                 id: "Number of Races",
@@ -181,7 +186,12 @@ const SeriesTable = (props: any) => {
                 cell: props => <GoTo {...props} id={props.row.original.id} goToRace={goToRace} />
             }),
         ],
+        state: {
+            sorting,
+        },
+        onSortingChange: setSorting,
         getCoreRowModel: getCoreRowModel(),
+        getSortedRowModel: getSortedRowModel(),
     })
     return (
         <div key={props.data}>
