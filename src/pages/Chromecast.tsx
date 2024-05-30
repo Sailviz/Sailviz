@@ -328,7 +328,7 @@ const CCDashboard = () => {
                         } else {
                             return (
                                 <div key={"addcast" + cast.host} className="flex mb-2 justify-center">
-                                    <div onClick={() => connectCast(cast.host)} className="w-1/2 cursor-pointer text-white bg-blue-600 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
+                                    <div onClick={() => addCast(cast.host)} className="w-1/2 cursor-pointer text-white bg-blue-600 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
                                         {cast.name}
                                     </div>
                                 </div>
