@@ -5,7 +5,7 @@ import type { AppProps } from 'next/app'
 function MyApp({ Component, pageProps }: AppProps) {
     return (
         <ErrorBoundary>
-            <Component {...pageProps} />;
+            <Component {...pageProps} />
         </ErrorBoundary>
     );
 };
