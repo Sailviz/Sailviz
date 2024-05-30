@@ -105,6 +105,8 @@ const columnHelper = createColumnHelper<ResultsDataType>()
 
 
 const FleetResultsTable = (props: any) => {
+    let [editable, setEditable] = useState(props.editable)
+    let [showTime, setShowTime] = useState(props.showTime)
     let [data, setData] = useState<ResultsDataType[]>(props.data)
     console.log(props.data)
     let [startTime, setStartTime] = useState(props.startTime)
@@ -115,62 +117,72 @@ const FleetResultsTable = (props: any) => {
     }
 
 
-    const createResult = async () => {
-        await props.createResult()
+    const [sorting, setSorting] = useState<SortingState>([]);
+
+    let columns = [
+        columnHelper.accessor('Helm', {
+            header: "Helm",
+            cell: props => <Text {...props} />,
+            enableSorting: false
+        }),
+        columnHelper.accessor('Crew', {
+            header: "Crew",
+            cell: props => <Text {...props} />,
+            enableSorting: false
+        }),
+        columnHelper.accessor('boat', {
+            header: "Class",
+            id: "Class",
+            size: 300,
+            cell: props => <Class {...props} />,
+            enableSorting: false
+        }),
+        columnHelper.accessor('SailNumber', {
+            header: "Sail Number",
+            cell: props => <Text {...props} />,
+            enableSorting: false
+        }),
+        columnHelper.accessor('laps', {
+            header: "Laps",
+            cell: props => <Laps {...props} />,
+            enableSorting: false
+        }),
+        columnHelper.accessor('PursuitPosition', {
+            header: "Position",
+            cell: props => <Text {...props} disabled={true} />,
+            enableSorting: true
+        })
+    ]
+
+    const timeColumn = columnHelper.accessor('finishTime', {
+        header: "Time",
+        cell: props => <Time {...props} startTime={startTime} />,
+        enableSorting: false
+    })
+
+    const correctedTimeColumn = columnHelper.accessor('CorrectedTime', {
+        header: "Corrected Time",
+        cell: props => <Text {...props} disabled={true} />,
+        enableSorting: false
+    })
+
+    if (showTime) {
+        columns.splice(5, 0, timeColumn)
+        columns.splice(6, 0, correctedTimeColumn)
     }
 
-    const [sorting, setSorting] = useState<SortingState>([]);
+    const editColumn = columnHelper.display({
+        id: "Edit",
+        cell: props => <Edit {...props} showEditModal={(id: string) => { showEditModal(id) }} />
+    })
+
+    if (editable) {
+        columns.push(editColumn)
+    }
 
     let table = useReactTable({
         data,
-        columns: [
-            columnHelper.accessor('Helm', {
-                header: "Helm",
-                cell: props => <Text {...props} />,
-                enableSorting: false
-            }),
-            columnHelper.accessor('Crew', {
-                header: "Crew",
-                cell: props => <Text {...props} />,
-                enableSorting: false
-            }),
-            columnHelper.accessor('boat', {
-                header: "Class",
-                id: "Class",
-                size: 300,
-                cell: props => <Class {...props} />,
-                enableSorting: false
-            }),
-            columnHelper.accessor('SailNumber', {
-                header: "Sail Number",
-                cell: props => <Text {...props} />,
-                enableSorting: false
-            }),
-            columnHelper.accessor('finishTime', {
-                header: "Time",
-                cell: props => <Time {...props} startTime={startTime} />,
-                enableSorting: false
-            }),
-            columnHelper.accessor('laps', {
-                header: "Laps",
-                cell: props => <Laps {...props} />,
-                enableSorting: false
-            }),
-            columnHelper.accessor('CorrectedTime', {
-                header: "Corrected Time",
-                cell: props => <Text {...props} disabled={true} />,
-                enableSorting: false
-            }),
-            columnHelper.accessor('PursuitPosition', {
-                header: "Position",
-                cell: props => <Text {...props} disabled={true} />,
-                enableSorting: true
-            }),
-            columnHelper.display({
-                id: "Edit",
-                cell: props => <Edit {...props} showEditModal={(id: string) => { showEditModal(id) }} />
-            }),
-        ],
+        columns: columns,
         state: {
             sorting,
         },
@@ -214,13 +226,6 @@ const FleetResultsTable = (props: any) => {
                     ))}
                 </tbody>
             </table>
-            <div className='w-full my-0 mx-auto'>
-                <div className="p-6 w-3/4 m-auto">
-                    <p onClick={createResult} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
-                        Add Entry
-                    </p>
-                </div>
-            </div>
         </div>
     )
 }

@@ -1,7 +1,11 @@
 const { withSentryConfig } = require("@sentry/nextjs");
 
 /** @type {import('next').NextConfig} */
-const nextConfig = {};
+const nextConfig = {
+  env: {
+    SOCKET_URL: process.env.SOCKET_URL,
+  },
+};
 
 module.exports = withSentryConfig(
   nextConfig,

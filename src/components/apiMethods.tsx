@@ -616,3 +616,41 @@ export async function DeleteLapById(lapId: string): Promise<LapDataType> {
             }
         });
 };
+
+export async function GetChromecastByClubId(clubId: string): Promise<ChromecastDataType[]> {
+    const body = {
+        clubId: clubId,
+    }
+    return await fetch(`/api/GetChromecastByClubId`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+    })
+        .then((res) => res.json())
+        .then(async (data) => {
+            if (data && data.error) {
+                console.log(data.message)
+            } else {
+                return data.chromecasts
+            }
+        });
+};
+
+export async function CreateChromecast(chromecast: ChromecastDataType): Promise<ChromecastDataType> {
+    const body = {
+        chromecast: chromecast,
+    }
+    return await fetch(`/api/CreateChromecast`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+    })
+        .then((res) => res.json())
+        .then(async (data) => {
+            if (data && data.error) {
+                console.log(data.message)
+            } else {
+                return data.chromecast
+            }
+        });
+};

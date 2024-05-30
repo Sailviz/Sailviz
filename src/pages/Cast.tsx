@@ -3,6 +3,8 @@ import Script from 'next/script';
 import SignOnTable from '../components/SignOnTable';
 import * as DB from '../components/apiMethods'
 import FleetResultsTable from '../components/FleetResultsTable';
+import SeriesResultsTable from '../components/SeriesResultsTable';
+import { set } from 'cypress/types/lodash';
 const namespace = 'urn:x-cast:com.sailviz';
 
 declare global {
@@ -11,9 +13,8 @@ declare global {
 
 declare var cast: any;
 
-// sessions must be stored by google, as you can request to resume a session. store a list of sessions in DB
-
 const CastPage = () => {
+    var interval: NodeJS.Timer | null = null
     const initializeCastApi = () => {
         // Initialize the CastReceiverManager with an application status message.
         // cast.receiver.logger.setLevelValue(0);
@@ -21,7 +22,7 @@ const CastPage = () => {
         console.log('Starting Receiver Manager');
 
         window.castReceiverManager.onReady = function (event: any) {
-            console.log('Received Ready event: ' + JSON.stringify(event.data));
+            setLastMessage('Received Ready event: ' + JSON.stringify(event.data));
             window.castReceiverManager.setApplicationState('chromecast-dashboard is ready...');
         };
 
@@ -38,12 +39,22 @@ const CastPage = () => {
                 namespace, cast.receiver.CastMessageBus.MessageType.JSON);
 
         window.messageBus.onMessage = function (event: any) {
+            //remove any existing intervals
+            if (interval != null) { clearInterval(interval) }
+
+            setLastMessage(JSON.stringify(event))
             console.log('Message [' + event.senderId + ']: ' + event.data);
 
             if (event.data['type'] == 'clubId') {
                 window.messageBus.send(event.senderId, "test");
                 setClubId(event.data['clubId'])
             } else if (event.data['type'] == 'showPage') {
+                setClubId(event.data['clubId'])
+                showPage(event.data['id'], event.data['pageType'])
+                window.messageBus.send(event.senderId, new Date().toISOString());
+            } else if (event.data['type'] == 'slideShow') {
+                setClubId(event.data['clubId'])
+                slideShow(event.data['ids'], event.data['pageType'])
                 window.messageBus.send(event.senderId, new Date().toISOString());
             }
         }
@@ -55,10 +66,62 @@ const CastPage = () => {
 
     }
 
-    var [races, setRaces] = useState<RaceDataType[]>([])
+
+
+    const slideShow = (ids: string[], type: string) => {
+        var i = 0
+        showPage(ids[i]!, type) // Run immediately
+        interval = setInterval(() => {
+            i++
+            //reset count if at end of array.
+            if (i >= ids.length) {
+                i = 0
+            }
+            showPage(ids[i]!, type) // Run on interval
+        }, 30000)
+    }
+
+    const showPage = (id: string, type: string) => {
+        const home = document.getElementById("homepage")
+        home?.classList.add("hidden")
+        const race = document.getElementById("RaceResults")
+        const series = document.getElementById("SeriesResults")
+        switch (type) {
+            case "race":
+                const fetchRace = async () => {
+                    var data = await DB.getRaceById(id)
+                    setActiveRaceData(data)
+                    series?.classList.add("hidden")
+                    race?.classList.remove("hidden")
+                }
+                fetchRace()
+                break;
+            case "series":
+                const fetchSeries = async () => {
+                    var data = await DB.GetSeriesById(id)
+                    setActiveSeriesData(data)
+                    race?.classList.add("hidden")
+                    series?.classList.remove("hidden")
+                }
+                fetchSeries()
+                break;
+        }
+    }
 
     const [clubId, setClubId] = useState<string>("")
-
+    const [lastMessage, setLastMessage] = useState<string>("test")
+    var [club, setClub] = useState<ClubDataType>({
+        id: "",
+        name: "",
+        settings: {
+            clockIP: "",
+            hornIP: "",
+            pursuitLength: 0,
+            clockOffset: 0
+        },
+        series: [],
+        boats: [],
+    })
     var [activeRaceData, setActiveRaceData] = useState<RaceDataType>({
         id: "",
         number: 0,
@@ -72,6 +135,16 @@ const CastPage = () => {
         seriesId: "",
         series: {} as SeriesDataType
     })
+    var [activeSeriesData, setActiveSeriesData] = useState<SeriesDataType>({
+        id: "",
+        name: "",
+        clubId: "",
+        settings: {
+            numberToCount: 0
+        },
+        races: [],
+        fleetSettings: []
+    })
 
     useEffect(() => {
         if (clubId != "") {
@@ -79,24 +152,9 @@ const CastPage = () => {
             if (clubId == "invalid") {
                 return
             }
-
-            const fetchTodaysRaces = async () => {
-                var data = await DB.getTodaysRaceByClubId(clubId)
-                console.log(data)
-                if (data) {
-                    let racesCopy: RaceDataType[] = []
-                    let fleetsCopy: FleetDataType[] = []
-                    for (let i = 0; i < data.length; i++) {
-                        console.log(data[i]!.number)
-                        const res = await DB.getRaceById(data[i]!.id)
-                        racesCopy[i] = res
-                    }
-                    setRaces(racesCopy)
-                } else {
-                    console.log("could not find todays race")
-                }
-            }
-            fetchTodaysRaces()
+            DB.GetClubById(clubId).then((data) => {
+                setClub(data)
+            })
         }
     }, [clubId])
 
@@ -106,57 +164,34 @@ const CastPage = () => {
             <Script type="text/javascript" src="//www.gstatic.com/cast/sdk/libs/receiver/2.0.0/cast_receiver.js" onReady={() => {
                 initializeCastApi()
             }}></Script>
-
-            <div>
-                <div className="flex w-full shrink flex-row justify-around">
-                    {races.map((race, index) => {
-                        return (
-                            <p key={index} className="w-1/4 p-2 m-2 cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-xl px-5 py-2.5 text-center">
-                                {race.series.name}: {race.number} Results
-                            </p>
-                        )
-                    })}
+            <div id="homepage" className="p-4">
+                <div className="text-6xl font-extrabold text-gray-700 p-6">
+                    SailViz - Cast
                 </div>
-                {races.length > 0 ?
-                    <div>
-                        {races.map((race, index) => {
-                            return (
-                                <div className="m-6" key={JSON.stringify(races) + index}>
-                                    <div className="text-4xl font-extrabold text-gray-700 p-6">
-                                        {race.series.name}: {race.number} at {race.Time.slice(10, 16)}
-                                    </div>
-                                    <SignOnTable data={race.fleets.flatMap((fleet) => (fleet.results))} updateResult={null} createResult={null} clubId={clubId} showEditModal={null} />
-                                </div>
-                            )
-                        })}
-
-                    </div>
-                    :
-                    <div>
-                        <p className="text-6xl font-extrabold text-gray-700 p-6"> No Races Today</p>
-                    </div>
-                }
             </div>
-            <div id="Results" className="hidden" >
+            <div id="RaceResults" className="hidden" >
                 <div className="p-4">
-                    <div className="text-6xl font-extrabold text-gray-700 p-6">
+                    <div className="text-xl font-extrabold text-gray-700 p-6">
                         {activeRaceData.series.name}: {activeRaceData.number}
                     </div>
-                    <FleetResultsTable data={activeRaceData.fleets.flatMap((fleet) => (fleet.results))} startTime={null} key={JSON.stringify(activeRaceData)} deleteResult={() => { }} updateResult={() => { }} createResult={() => { }} clubId={clubId} raceId={activeRaceData.id} />
+                    <FleetResultsTable data={activeRaceData.fleets.flatMap((fleet) => (fleet.results))} startTime={null} key={JSON.stringify(activeRaceData)} clubId={clubId} raceId={activeRaceData.id} />
                 </div>
             </div>
-            <div id="Guide" className="hidden" >
-                <div className=' w-11/12 mx-auto my-3'>
-                    <iframe
-                        className='block w-full'
-                        src="/0.2 Race Sign On Guide.pdf#toolbar=0"
-                        height="800"
-                    />
-
+            <div id="SeriesResults" className="hidden" >
+                <div className="p-4">
+                    <div className="text-xl font-extrabold text-gray-700 p-6">
+                        {activeSeriesData.name}
+                    </div>
+                    <SeriesResultsTable data={activeSeriesData} startTime={null} key={JSON.stringify(activeRaceData)} clubId={clubId} raceId={activeRaceData.id} />
+                </div>
+            </div>
+            <div className="p-4">
+                <div className="text-xl font-extrabold text-gray-700 p-6">
+                    Full reults available at sailviz.com/{club.name}
                 </div>
             </div>
         </div>
     )
-};
+}
 
 export default CastPage;
