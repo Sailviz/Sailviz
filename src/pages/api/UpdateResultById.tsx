@@ -16,7 +16,8 @@ async function updateResult(result: ResultsDataType) {
             Helm: result.Helm,
             finishTime: result.finishTime,
             resultCode: result.resultCode,
-            PursuitPosition: result.PursuitPosition
+            PursuitPosition: result.PursuitPosition,
+            HandicapPosition: result.HandicapPosition
         }
     })
     return res;

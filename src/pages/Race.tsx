@@ -7,6 +7,8 @@ import Select from 'react-select';
 
 import FleetResultsTable from '../components/FleetResultsTable';
 import Dashboard from "../components/Dashboard";
+import { json } from "stream/consumers";
+import { set } from "cypress/types/lodash";
 
 const raceOptions = [{ value: "Pursuit", label: "Pursuit" }, { value: "Handicap", label: "Handicap" }]
 
@@ -17,6 +19,10 @@ const SignOnPage = () => {
     const query = router.query
 
     const [isLoading, setLoading] = useState(true)
+
+    const [boatData, setBoatData] = useState<BoatDataType[]>([])
+
+    const [resultEditModal, setResultEditModal] = useState(false)
 
     var [clubId, setClubId] = useState<string>("invalid")
 
@@ -137,6 +143,9 @@ const SignOnPage = () => {
         const sailNum = document.getElementById("editSailNum") as HTMLInputElement
         result.SailNumber = sailNum.value
 
+        const Position = document.getElementById("editPosition") as HTMLInputElement
+        result.HandicapPosition = parseInt(Position.value)
+
         const LapData = document.getElementById("LapData") as HTMLElement
         let laps = Array.from(LapData.childNodes)
         laps.pop()
@@ -156,11 +165,12 @@ const SignOnPage = () => {
             }
         });
 
+        console.log(result)
         DB.updateResult(result)
 
-        setRace({ ...race }) //force update as content has changed
+        setRace(await DB.getRaceById(race.id)) //force update as content has changed
 
-        hideEditModal()
+        setResultEditModal(false)
     }
 
     const deleteResult = async (resultId: string) => {
@@ -236,16 +246,14 @@ const SignOnPage = () => {
     const showEditModal = async (resultId: string) => {
         console.log(resultId)
         let result: ResultsDataType | undefined;
-        race.fleets.some(fleet => {
-            result = fleet.results.find(result => result.id === resultId);
-            return result !== undefined;
-        });
+        let results = race.fleets.flatMap(fleet => fleet.results)
+        result = results.find(result => result.id == resultId)
         if (result == undefined) {
             console.error("Could not find result with id: " + resultId);
             return
         }
-
-        setActiveResult(result)
+        console.log(result)
+        setActiveResult({ ...result })
 
         console.log(result)
         const Helm = document.getElementById('editHelm') as HTMLInputElement;
@@ -263,20 +271,14 @@ const SignOnPage = () => {
         const sailNum = document.getElementById("editSailNum") as HTMLInputElement
         sailNum.value = result.SailNumber
 
+        const position = document.getElementById("editPosition") as HTMLInputElement
+        position.value = result.HandicapPosition.toString()
+
         const resultid = document.getElementById("EditResultId") as HTMLInputElement
         resultid.innerHTML = result.id
 
 
-        const modal = document.getElementById("editModal")
-
-        modal?.classList.remove("hidden")
-    }
-
-    const hideEditModal = async () => {
-        const modal = document.getElementById("editModal")
-        modal?.classList.add("hidden")
-
-        setActiveResult({} as ResultsDataType)
+        setResultEditModal(true)
     }
 
     const addLap = async () => {
@@ -345,6 +347,23 @@ const SignOnPage = () => {
 
             }
             fetchUser()
+
+            const fetchBoats = async () => {
+                var data = await DB.getBoats(clubId)
+                if (data) {
+                    let array = [...data]
+                    setBoatData(array)
+                    let tempoptions: { label: string; value: BoatDataType }[] = []
+                    array.forEach(boat => {
+                        tempoptions.push({ value: boat as BoatDataType, label: boat.name })
+                    })
+                    setOptions(tempoptions)
+                } else {
+                    console.log("could not find boats")
+                }
+
+            }
+            fetchBoats()
             setLoading(false)
 
         } else {
@@ -356,15 +375,12 @@ const SignOnPage = () => {
 
     useEffect(() => {
         let timer1 = setTimeout(async () => {
-            console.log(race)
             console.log(document.activeElement?.tagName)
             if (document.activeElement?.tagName == "INPUT") {
                 return
             }
             if (race.id == "") return
-            console.log(race.id)
             var data = await DB.getRaceById(race.id)
-            console.log(data)
             setRace({ ...data })
         }, 5000);
         return () => {
@@ -379,9 +395,9 @@ const SignOnPage = () => {
     return (
         <Dashboard club={club.name} displayName={user.displayName}>
             <div id="race" className='h-full w-full overflow-y-auto'>
-                <div id="editModal" className="hidden fixed z-10 left-0 top-0 w-full h-full overflow-auto bg-gray-400 backdrop-blur-sm bg-opacity-20" key={activeResult.id}>
+                <div id="editModal" className={"fixed z-10 left-0 top-0 w-full h-full overflow-auto bg-gray-400 backdrop-blur-sm bg-opacity-20" + (resultEditModal ? "" : " hidden")} key={activeResult.id}>
                     <div className="mx-40 my-20 px-10 py-5 border w-4/5 bg-gray-300 rounded-sm">
-                        <div className="text-6xl font-extrabold text-gray-700 p-6 float-right cursor-pointer" onClick={hideEditModal}>&times;</div>
+                        <div className="text-6xl font-extrabold text-gray-700 p-6 float-right cursor-pointer" onClick={() => setResultEditModal(false)}>&times;</div>
                         <div className="text-6xl font-extrabold text-gray-700 p-6">Edit Entry</div>
                         <div className="flex w-3/4">
                             <div className='flex flex-col px-6 w-full'>
@@ -423,6 +439,15 @@ const SignOnPage = () => {
                             </div>
                         </div>
                         <div>
+                            <div className='flex flex-col px-6 w-1/4'>
+                                <p className='text-2xl font-bold text-gray-700'>
+                                    Position
+                                </p>
+
+                                <input type="number" id="editPosition" className="h-full text-2xl p-4" />
+                            </div>
+                        </div>
+                        <div>
                             <p className="text-6xl font-extrabold text-gray-700 p-6">
                                 Lap Info
                             </p>
@@ -452,7 +477,7 @@ const SignOnPage = () => {
                         <div className="flex flex-row justify-end">
                             <div className=" flex justify-end mt-8">
                                 <div className="p-4 mr-2">
-                                    <p id="confirmRemove" onClick={() => { deleteResult(activeResult.id); hideEditModal() }} className="cursor-pointer text-white bg-red-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-xl text-lg px-12 py-4 text-center mr-3 md:mr-0">
+                                    <p id="confirmRemove" onClick={() => { deleteResult(activeResult.id); setResultEditModal(false) }} className="cursor-pointer text-white bg-red-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-xl text-lg px-12 py-4 text-center mr-3 md:mr-0">
                                         Remove
                                     </p>
                                 </div>
@@ -567,15 +592,19 @@ const SignOnPage = () => {
                             Race Panel
                         </p>
                     </div>
+                    <div className="p-6 w-full">
+                    </div>
                     <div className='p-6 w-full'>
                         {race.fleets.map((fleet, index) => {
-                            console.log(fleet)
                             return (
                                 <div key={"fleetResults" + index}>
                                     <p className='text-2xl font-bold text-gray-700'>
                                         {fleet.fleetSettings.name}
                                     </p>
-                                    <FleetResultsTable data={fleet.results} startTime={fleet.startTime} key={"resultstable" + index} deleteResult={deleteResult} updateResult={updateResult} createResult={() => createResult(fleet.id)} raceId={race.id} showEditModal={(id: string) => { showEditModal(id) }} />
+                                    <FleetResultsTable showTime={true} editable={true} data={fleet.results} startTime={fleet.startTime} key={JSON.stringify(race)} deleteResult={deleteResult} updateResult={updateResult} createResult={() => createResult(fleet.id)} raceId={race.id} showEditModal={(id: string) => { showEditModal(id) }} />
+                                    <p onClick={() => createResult(fleet.id)} id="RacePanelButton" className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0 my-5">
+                                        Add Result
+                                    </p>
                                 </div>
                             )
                         })

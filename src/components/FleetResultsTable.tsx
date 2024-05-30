@@ -1,4 +1,4 @@
-import React, { ChangeEvent, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, useReactTable, SortingState } from '@tanstack/react-table'
 
 
@@ -26,7 +26,6 @@ const Laps = ({ ...props }: any) => {
 
 const Time = ({ ...props }: any) => {
     const initialValue = props.getValue()
-    console.log(initialValue)
     const [value, setValue] = React.useState(new Date((initialValue - props.startTime) * 1000).toISOString().substring(11, 19))
 
     if (initialValue == -1) {
@@ -105,19 +104,20 @@ const columnHelper = createColumnHelper<ResultsDataType>()
 
 
 const FleetResultsTable = (props: any) => {
-    let [editable, setEditable] = useState(props.editable)
-    let [showTime, setShowTime] = useState(props.showTime)
     let [data, setData] = useState<ResultsDataType[]>(props.data)
     console.log(props.data)
+    let [editable, setEditable] = useState(props.editable)
+    let [showTime, setShowTime] = useState(props.showTime)
     let [startTime, setStartTime] = useState(props.startTime)
-    let raceId = props.raceId
 
     const showEditModal = (id: any) => {
         props.showEditModal(id)
     }
 
-
-    const [sorting, setSorting] = useState<SortingState>([]);
+    const [sorting, setSorting] = useState<SortingState>([{
+        id: "HandicapPosition",
+        desc: false,
+    }]);
 
     let columns = [
         columnHelper.accessor('Helm', {
@@ -147,7 +147,7 @@ const FleetResultsTable = (props: any) => {
             cell: props => <Laps {...props} />,
             enableSorting: false
         }),
-        columnHelper.accessor('PursuitPosition', {
+        columnHelper.accessor('HandicapPosition', {
             header: "Position",
             cell: props => <Text {...props} disabled={true} />,
             enableSorting: true
@@ -179,7 +179,6 @@ const FleetResultsTable = (props: any) => {
     if (editable) {
         columns.push(editColumn)
     }
-
     let table = useReactTable({
         data,
         columns: columns,
