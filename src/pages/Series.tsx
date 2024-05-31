@@ -233,7 +233,7 @@ const SignOnPage = () => {
 
     return (
         <Dashboard club={club.name} displayName={user.displayName}>
-            <div className='h-full w-full overflow-y-auto'>
+            <div className='panel-height w-full overflow-y-auto'>
                 <div id="fleetEditModal" className={"fixed z-10 left-0 top-0 w-full h-full overflow-auto bg-gray-400 backdrop-blur-sm bg-opacity-20" + (fleetModal ? "" : " hidden")} key={activeRaceId}>
                     <div className="mx-40 my-20 px-10 py-5 border w-4/5 bg-gray-300 rounded-sm">
                         <div className="text-6xl font-extrabold text-gray-700 p-6 float-right cursor-pointer" onClick={() => setFleetModal(false)}>&times;</div>

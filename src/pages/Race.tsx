@@ -22,8 +22,6 @@ const SignOnPage = () => {
 
     const [boatData, setBoatData] = useState<BoatDataType[]>([])
 
-    const [resultEditModal, setResultEditModal] = useState(false)
-
     var [clubId, setClubId] = useState<string>("invalid")
 
     var [club, setClub] = useState<ClubDataType>({
@@ -170,7 +168,8 @@ const SignOnPage = () => {
 
         setRace(await DB.getRaceById(race.id)) //force update as content has changed
 
-        setResultEditModal(false)
+        const modal = document.getElementById("editModal")
+        modal?.classList.add("hidden")
     }
 
     const deleteResult = async (resultId: string) => {
@@ -256,17 +255,14 @@ const SignOnPage = () => {
         setActiveResult({ ...result })
 
         console.log(result)
-        const Helm = document.getElementById('editHelm') as HTMLInputElement;
-        Helm.value = result.Helm
+        const Helm = document.getElementById("editHelm") as HTMLInputElement
+        console.log(Helm.value)
+        Helm.setAttribute("value", result.Helm)
+        console.log(Helm.value)
 
         const Crew = document.getElementById("editCrew") as HTMLInputElement
         Crew.value = result.Crew
 
-        try {
-            setSelectedOption({ value: result.boat, label: result.boat.name })
-        } catch (error) {
-            //result does not have boat assigned
-        }
 
         const sailNum = document.getElementById("editSailNum") as HTMLInputElement
         sailNum.value = result.SailNumber
@@ -277,8 +273,13 @@ const SignOnPage = () => {
         const resultid = document.getElementById("EditResultId") as HTMLInputElement
         resultid.innerHTML = result.id
 
-
-        setResultEditModal(true)
+        try {
+            setSelectedOption({ value: result.boat, label: result.boat.name })
+        } catch (error) {
+            //result does not have boat assigned
+        }
+        const modal = document.getElementById("editModal")
+        modal!.classList.remove("hidden")
     }
 
     const addLap = async () => {
@@ -395,9 +396,9 @@ const SignOnPage = () => {
     return (
         <Dashboard club={club.name} displayName={user.displayName}>
             <div id="race" className='h-full w-full overflow-y-auto'>
-                <div id="editModal" className={"fixed z-10 left-0 top-0 w-full h-full overflow-auto bg-gray-400 backdrop-blur-sm bg-opacity-20" + (resultEditModal ? "" : " hidden")} key={activeResult.id}>
+                <div id="editModal" className={"fixed z-10 left-0 top-0 w-full h-full overflow-auto bg-gray-400 backdrop-blur-sm bg-opacity-20 hidden"} key={activeResult.id}>
                     <div className="mx-40 my-20 px-10 py-5 border w-4/5 bg-gray-300 rounded-sm">
-                        <div className="text-6xl font-extrabold text-gray-700 p-6 float-right cursor-pointer" onClick={() => setResultEditModal(false)}>&times;</div>
+                        <div className="text-6xl font-extrabold text-gray-700 p-6 float-right cursor-pointer" onClick={() => { document.getElementById("editModal")!.classList.add("hidden") }}>&times;</div>
                         <div className="text-6xl font-extrabold text-gray-700 p-6">Edit Entry</div>
                         <div className="flex w-3/4">
                             <div className='flex flex-col px-6 w-full'>
@@ -407,7 +408,7 @@ const SignOnPage = () => {
                                 <p className='text-2xl font-bold text-gray-700'>
                                     Helm
                                 </p>
-                                <input type="text" id="editHelm" name="Helm" className="h-full text-2xl p-4" />
+                                <input type="text" id="editHelm" className="h-full text-2xl p-4" />
                             </div>
                             <div className='flex flex-col px-6 w-full'>
                                 <p className='text-2xl font-bold text-gray-700'>
@@ -477,7 +478,7 @@ const SignOnPage = () => {
                         <div className="flex flex-row justify-end">
                             <div className=" flex justify-end mt-8">
                                 <div className="p-4 mr-2">
-                                    <p id="confirmRemove" onClick={() => { deleteResult(activeResult.id); setResultEditModal(false) }} className="cursor-pointer text-white bg-red-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-xl text-lg px-12 py-4 text-center mr-3 md:mr-0">
+                                    <p id="confirmRemove" onClick={() => { deleteResult(activeResult.id); document.getElementById("editModal")!.classList.add("hidden") }} className="cursor-pointer text-white bg-red-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-xl text-lg px-12 py-4 text-center mr-3 md:mr-0">
                                         Remove
                                     </p>
                                 </div>
@@ -601,7 +602,7 @@ const SignOnPage = () => {
                                     <p className='text-2xl font-bold text-gray-700'>
                                         {fleet.fleetSettings.name}
                                     </p>
-                                    <FleetResultsTable showTime={true} editable={true} data={fleet.results} startTime={fleet.startTime} key={JSON.stringify(race)} deleteResult={deleteResult} updateResult={updateResult} createResult={() => createResult(fleet.id)} raceId={race.id} showEditModal={(id: string) => { showEditModal(id) }} />
+                                    <FleetResultsTable showTime={true} editable={true} data={fleet.results} startTime={fleet.startTime} key={JSON.stringify(race)} deleteResult={deleteResult} updateResult={updateResult} raceId={race.id} showEditModal={(id: string) => { showEditModal(id) }} />
                                     <p onClick={() => createResult(fleet.id)} id="RacePanelButton" className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0 my-5">
                                         Add Result
                                     </p>

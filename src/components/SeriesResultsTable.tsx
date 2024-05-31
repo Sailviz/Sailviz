@@ -5,7 +5,6 @@ import * as DB from '../components/apiMethods';
 
 //not a db type, only used here
 type SeriesResultsType = {
-    [key: string]: any;
     Rank: number;
     Helm: string;
     Crew: string;
@@ -18,19 +17,12 @@ type SeriesResultsType = {
 
 
 const Text = ({ ...props }) => {
-    const initialValue = props.getValue()
-    const [value, setValue] = React.useState(initialValue)
+    const value = props.getValue()
 
     return (
-        <>
-            <input type="text"
-                id=''
-                className=" text-center"
-                defaultValue={value}
-                key={value}
-                disabled={true}
-            />
-        </>
+        <div className=' text-center'>
+            {value}
+        </div>
     );
 };
 
@@ -104,15 +96,15 @@ const SeriesResultsTable = (props: any) => {
                     console.log("updated index: ", index)
                 }
                 //add result to tempresults
-                console.log("pushing ", result.PursuitPosition, " to ", index, " ", tempresults[index])
                 if (tempresults[index]) {
-                    tempresults[index]!.racePositions[race.number - 1] = (result.PursuitPosition)
+                    tempresults[index]!.racePositions.splice(race.number - 1, 1, result.HandicapPosition)
                 } else {
                     console.log("something went wrong")
                 }
 
             })
         });
+
         //fill dnc
         //calculate total
         tempresults.forEach(result => {
@@ -120,9 +112,13 @@ const SeriesResultsTable = (props: any) => {
         })
         //calculate discards/net
         tempresults.forEach(result => {
-            result.racePositions.sort((a, b) => a - b)
+            let sortedResult = structuredClone(result)
+            sortedResult.racePositions.sort((a, b) => a - b)
             let Net = 0
-            result.racePositions.forEach((position, index) => {
+            //remove 0 results
+            sortedResult.racePositions = sortedResult.racePositions.filter(result => result != 0)
+            console.log(sortedResult.racePositions)
+            sortedResult.racePositions.forEach((position, index) => {
                 if (index < seriesData.settings.numberToCount) {
                     Net += position
                 }
@@ -153,11 +149,11 @@ const SeriesResultsTable = (props: any) => {
             cell: props => <Text {...props} />,
             enableSorting: false
         }),
-        columnHelper.accessor("Crew", {
-            header: "Crew",
-            cell: props => <Text {...props} />,
-            enableSorting: false
-        }),
+        // columnHelper.accessor("Crew", {
+        //     header: "Crew",
+        //     cell: props => <Text {...props} />,
+        //     enableSorting: false
+        // }),
         columnHelper.accessor((data) => data.Boat?.name, {
             header: "Class",
             id: "Class",
@@ -172,8 +168,10 @@ const SeriesResultsTable = (props: any) => {
 
     ];
 
+    seriesData.races.sort((a, b) => a.number - b.number)
+
     //add column for each race in series
-    props.data.races.forEach((race: RaceDataType, index: number) => {
+    seriesData.races.forEach((race: RaceDataType, index: number) => {
         const newColumn = columnHelper.accessor((data) => data.racePositions[index], {
             header: "R" + race.number.toString(),
             cell: props => <Number {...props} disabled={true} />,
@@ -197,7 +195,10 @@ const SeriesResultsTable = (props: any) => {
     columns.push(totalColumn)
     columns.push(netColumn)
 
-    const [sorting, setSorting] = useState<SortingState>([]);
+    const [sorting, setSorting] = useState<SortingState>([{
+        id: "Rank",
+        desc: false,
+    }]);
 
     let table = useReactTable({
         data,
