@@ -57,7 +57,7 @@ const ClubPage = () => {
 
     return (
         <Layout>
-            <div className="m-6" key={race.id}>
+            <div className="m-6 panel-height w-full overflow-y-auto" key={race.id}>
                 <div className="text-4xl font-extrabold text-gray-700 p-6">
                     {race.series.name}: {race.number}
                 </div>

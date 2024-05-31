@@ -50,7 +50,7 @@ const SeriesResults = () => {
 
     return (
         <Layout>
-            <div className="m-6">
+            <div className="m-6 panel-height w-full overflow-y-auto">
                 <div className="text-4xl font-extrabold text-gray-700 p-6">
                     {series.name}
                 </div>

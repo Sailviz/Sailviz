@@ -113,7 +113,7 @@ const ClubPage = () => {
 
     return (
         <Layout>
-            <div className="flex flex-row mb-2 justify-center">
+            <div className="flex flex-row mb-2 justify-center panel-height w-full overflow-y-auto">
                 <div className='flex flex-col'>
                     <div className="mx-4">
                         <div className="text-xl font-extrabold text-gray-700 p-6">
