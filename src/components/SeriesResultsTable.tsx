@@ -20,7 +20,7 @@ const Text = ({ ...props }) => {
     const value = props.getValue()
 
     return (
-        <div className=' text-center'>
+        <div className=' text-center text-lg font-medium'>
             {value}
         </div>
     );
@@ -33,7 +33,7 @@ const Number = ({ ...props }: any) => {
         <>
             <input type="number"
                 id=''
-                className="p-2 m-2 text-center w-full"
+                className="text-center w-full font-medium"
                 defaultValue={Math.round(value)}
                 key={value}
                 disabled={true}
@@ -112,7 +112,7 @@ const SeriesResultsTable = (props: any) => {
         })
         //calculate discards/net
         tempresults.forEach(result => {
-            let sortedResult = structuredClone(result)
+            let sortedResult = JSON.parse(JSON.stringify(result)) as SeriesResultsType
             sortedResult.racePositions.sort((a, b) => a - b)
             let Net = 0
             //remove 0 results
@@ -218,7 +218,7 @@ const SeriesResultsTable = (props: any) => {
                     {table.getHeaderGroups().map(headerGroup => (
                         <tr key={headerGroup.id}>
                             {headerGroup.headers.map(header => (
-                                <th key={header.id} className='border-4 p-2' style={{ width: header.getSize() }}>
+                                <th key={header.id} className='border-4 font-extrabold' style={{ width: header.getSize() }}>
                                     {header.isPlaceholder
                                         ? null
                                         : flexRender(
@@ -239,7 +239,7 @@ const SeriesResultsTable = (props: any) => {
                     {table.getRowModel().rows.map(row => (
                         <tr key={row.id}>
                             {row.getVisibleCells().map(cell => (
-                                <td key={cell.id} className='border-4 p-2 w-1'>
+                                <td key={cell.id} className='border-4 w-1'>
                                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                 </td>
                             ))}

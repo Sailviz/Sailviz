@@ -90,8 +90,7 @@ const CastPage = () => {
         switch (type) {
             case "race":
                 const fetchRace = async () => {
-                    var data = await DB.getRaceById(id)
-                    setActiveRaceData(data)
+                    setActiveRaceData(await DB.getRaceById(id))
                     series?.classList.add("hidden")
                     race?.classList.remove("hidden")
                 }
@@ -99,8 +98,7 @@ const CastPage = () => {
                 break;
             case "series":
                 const fetchSeries = async () => {
-                    var data = await DB.GetSeriesById(id)
-                    setActiveSeriesData(data)
+                    setActiveSeriesData(await DB.GetSeriesById(id))
                     race?.classList.add("hidden")
                     series?.classList.remove("hidden")
                 }
@@ -212,23 +210,22 @@ const CastPage = () => {
                     <div className="text-xl font-extrabold text-gray-700 p-6">
                         {activeRaceData.series.name}: {activeRaceData.number}
                     </div>
-                    <FleetResultsTable data={activeRaceData.fleets.flatMap(fleet => fleet.results)} startTime={activeRaceData.fleets[0]?.startTime} editable={false} showTime={false} />
-                    {/* {JSON.stringify(activeRaceData)} */}
+                    <FleetResultsTable data={activeRaceData.fleets.flatMap(fleet => fleet.results)} startTime={activeRaceData.fleets[0]?.startTime} key={activeRaceData.id} editable={false} showTime={false} />
 
                 </div>
             </div>
-            <div id="SeriesResults" className="hidden" >
+            <div id="SeriesResults" className="hidden" key={activeSeriesData.id}>
                 <div className="p-4">
-                    <div className="text-xl font-extrabold text-gray-700 p-6">
+                    <div className="text-xl font-extrabold text-gray-700 px-6 pt-2">
                         {activeSeriesData.name}
                     </div>
-                    <SeriesResultsTable data={activeSeriesData} editable={false} showTime={false} key={JSON.stringify(activeRaceData)} />
+                    <SeriesResultsTable data={activeSeriesData} editable={false} showTime={false} key={activeRaceData.id} />
                     {/* {JSON.stringify(activeSeriesData)} */}
                 </div>
             </div>
-            <div className="p-4">
+            <div className="px-4">
                 <div className="text-xl font-extrabold text-gray-700 p-6">
-                    Full reults available at sailviz.com/{club.name}
+                    Full results available at sailviz.com/{club.name}
                 </div>
             </div>
         </div>
