@@ -131,7 +131,38 @@ const CastPage = () => {
         AOD: "",
         SO: "",
         ASO: "",
-        fleets: [],
+        fleets: [{
+            id: "",
+            startTime: 0,
+            raceId: "",
+            fleetSettings: {
+                id: "",
+                name: "",
+                boats: [],
+                startDelay: 0,
+                fleets: []
+            } as FleetSettingsType,
+            results: [{
+                id: "",
+                raceId: "",
+                Helm: "",
+                Crew: "",
+                boat: {} as BoatDataType,
+                SailNumber: "",
+                finishTime: 0,
+                CorrectedTime: 0,
+                laps: [{
+                    time: 0,
+                    id: "",
+                    resultId: ""
+                }],
+                PursuitPosition: 0,
+                HandicapPosition: 0,
+                resultCode: "",
+                fleetId: ""
+            } as ResultsDataType]
+
+        }],
         Type: "",
         seriesId: "",
         series: {} as SeriesDataType
@@ -144,7 +175,13 @@ const CastPage = () => {
             numberToCount: 0
         },
         races: [],
-        fleetSettings: []
+        fleetSettings: [{
+            id: "",
+            name: "",
+            boats: [],
+            startDelay: 0,
+            fleets: []
+        } as FleetSettingsType]
     })
 
     useEffect(() => {
