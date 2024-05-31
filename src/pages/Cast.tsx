@@ -174,7 +174,7 @@ const CastPage = () => {
                     <div className="text-xl font-extrabold text-gray-700 p-6">
                         {activeRaceData.series.name}: {activeRaceData.number}
                     </div>
-                    <FleetResultsTable data={activeRaceData.fleets.flatMap((fleet) => (fleet.results))} startTime={null} key={JSON.stringify(activeRaceData)} clubId={clubId} raceId={activeRaceData.id} />
+                    <FleetResultsTable data={activeRaceData.fleets.flatMap(fleet => fleet.results)} startTime={activeRaceData.fleets[0]?.startTime} editable={false} showTime={false} />
                 </div>
             </div>
             <div id="SeriesResults" className="hidden" >
@@ -182,7 +182,7 @@ const CastPage = () => {
                     <div className="text-xl font-extrabold text-gray-700 p-6">
                         {activeSeriesData.name}
                     </div>
-                    <SeriesResultsTable data={activeSeriesData} startTime={null} key={JSON.stringify(activeRaceData)} clubId={clubId} raceId={activeRaceData.id} />
+                    <SeriesResultsTable data={activeSeriesData} editable={false} showTime={false} key={JSON.stringify(activeRaceData)} />
                 </div>
             </div>
             <div className="p-4">
