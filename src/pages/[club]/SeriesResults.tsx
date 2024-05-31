@@ -54,7 +54,7 @@ const SeriesResults = () => {
                 <div className="text-4xl font-extrabold text-gray-700 p-6">
                     {series.name}
                 </div>
-                <SeriesResultsTable data={series} editable={false} showTime={false} />
+                <SeriesResultsTable data={series} editable={false} showTime={false} key={JSON.stringify(series)} />
             </div>
 
 
