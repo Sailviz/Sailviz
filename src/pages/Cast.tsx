@@ -5,6 +5,7 @@ import * as DB from '../components/apiMethods'
 import FleetResultsTable from '../components/FleetResultsTable';
 import SeriesResultsTable from '../components/SeriesResultsTable';
 import { set } from 'cypress/types/lodash';
+import { active } from 'sortablejs';
 const namespace = 'urn:x-cast:com.sailviz';
 
 declare global {
@@ -174,7 +175,9 @@ const CastPage = () => {
                     <div className="text-xl font-extrabold text-gray-700 p-6">
                         {activeRaceData.series.name}: {activeRaceData.number}
                     </div>
-                    <FleetResultsTable data={activeRaceData.fleets.flatMap(fleet => fleet.results)} startTime={activeRaceData.fleets[0]?.startTime} editable={false} showTime={false} />
+                    {/* <FleetResultsTable data={activeRaceData.fleets.flatMap(fleet => fleet.results)} startTime={activeRaceData.fleets[0]?.startTime} editable={false} showTime={false} /> */}
+                    {JSON.stringify(activeRaceData)}
+
                 </div>
             </div>
             <div id="SeriesResults" className="hidden" >
@@ -182,7 +185,8 @@ const CastPage = () => {
                     <div className="text-xl font-extrabold text-gray-700 p-6">
                         {activeSeriesData.name}
                     </div>
-                    <SeriesResultsTable data={activeSeriesData} editable={false} showTime={false} key={JSON.stringify(activeRaceData)} />
+                    {/* <SeriesResultsTable data={activeSeriesData} editable={false} showTime={false} key={JSON.stringify(activeRaceData)} /> */}
+                    {JSON.stringify(activeSeriesData)}
                 </div>
             </div>
             <div className="p-4">
