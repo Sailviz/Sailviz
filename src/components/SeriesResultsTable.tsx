@@ -144,7 +144,7 @@ const SeriesResultsTable = (props: any) => {
             cell: props => <Number {...props} />,
             enableSorting: true
         }),
-        columnHelper.accessor("Helm", {
+        columnHelper.accessor('Helm', {
             header: "Helm",
             size: 600,
             cell: props => <Text {...props} />,
@@ -155,12 +155,12 @@ const SeriesResultsTable = (props: any) => {
         //     cell: props => <Text {...props} />,
         //     enableSorting: false
         // }),
-        columnHelper.accessor((data) => data.Boat?.name, {
-            header: "Class",
-            id: "Class",
-            cell: props => <Text {...props} />,
-            enableSorting: false
-        }),
+        // columnHelper.accessor((data) => data.Boat?.name, {
+        //     header: "Class",
+        //     id: "Class",
+        //     cell: props => <Text {...props} />,
+        //     enableSorting: false
+        // }),
         columnHelper.accessor((data) => data.SailNumber, {
             header: "Sail Number",
             cell: props => <Number {...props} />,
@@ -176,7 +176,7 @@ const SeriesResultsTable = (props: any) => {
         const newColumn = columnHelper.accessor((data) => data.racePositions[index], {
             header: "R" + race.number.toString(),
             cell: props => <Number {...props} disabled={true} />,
-            enableSorting: true
+            enableSorting: false
         })
         columns.push(newColumn)
     })
@@ -187,17 +187,17 @@ const SeriesResultsTable = (props: any) => {
         enableSorting: true
     })
 
-    const netColumn = columnHelper.accessor('Net', {
-        header: "Net",
-        cell: props => <Number {...props} disabled={true} />,
-        enableSorting: true
-    })
+    // const netColumn = columnHelper.accessor('Net', {
+    //     header: "Net",
+    //     cell: props => <Number {...props} disabled={true} />,
+    //     enableSorting: true
+    // })
 
     columns.push(totalColumn)
-    columns.push(netColumn)
+    // columns.push(netColumn)
 
     const [sorting, setSorting] = useState<SortingState>([{
-        id: "Rank",
+        id: "Total",
         desc: false,
     }]);
 
