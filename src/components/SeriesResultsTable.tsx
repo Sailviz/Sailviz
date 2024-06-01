@@ -146,6 +146,7 @@ const SeriesResultsTable = (props: any) => {
         }),
         columnHelper.accessor("Helm", {
             header: "Helm",
+            size: 600,
             cell: props => <Text {...props} />,
             enableSorting: false
         }),
