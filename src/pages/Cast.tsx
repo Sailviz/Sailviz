@@ -83,21 +83,21 @@ const CastPage = () => {
     }
 
     const showPage = async (id: string, type: string) => {
-        const home = document.getElementById("homepage")
-        home?.classList.add("hidden")
-        const race = document.getElementById("RaceResults")
-        const series = document.getElementById("SeriesResults")
+        // const home = document.getElementById("homepage")
+        // home?.classList.add("hidden")
+        // const race = document.getElementById("RaceResults")
+        // const series = document.getElementById("SeriesResults")
         switch (type) {
             case "race":
                 setActiveRaceData(await DB.getRaceById(id))
-                series?.classList.add("hidden")
-                race?.classList.remove("hidden")
+                // series?.classList.add("hidden")
+                // race?.classList.remove("hidden")
                 break;
 
             case "series":
                 setActiveSeriesData(await DB.GetSeriesById(id))
-                race?.classList.add("hidden")
-                series?.classList.remove("hidden")
+                // race?.classList.add("hidden")
+                // series?.classList.remove("hidden")
 
                 break;
         }
@@ -196,7 +196,7 @@ const CastPage = () => {
             <Script type="text/javascript" src="//www.gstatic.com/cast/sdk/libs/receiver/2.0.0/cast_receiver.js" onReady={() => {
                 initializeCastApi()
             }}></Script>
-            <div id="homepage" className="p-4">
+            <div id="homepage" className="p-4 hidden">
                 <div className="text-6xl font-extrabold text-gray-700 p-6">
                     SailViz - Cast
                 </div>
@@ -210,7 +210,7 @@ const CastPage = () => {
 
                 </div>
             </div>
-            <div id="SeriesResults" className="hidden" key={activeSeriesData.id}>
+            <div id="SeriesResults" className="" key={activeSeriesData.id}>
                 <div className="p-4">
                     <div className="text-xl font-extrabold text-gray-700 px-6 pt-2">
                         {activeSeriesData.name}
