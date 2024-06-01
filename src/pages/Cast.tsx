@@ -82,27 +82,23 @@ const CastPage = () => {
         }, 30000)
     }
 
-    const showPage = (id: string, type: string) => {
+    const showPage = async (id: string, type: string) => {
         const home = document.getElementById("homepage")
         home?.classList.add("hidden")
         const race = document.getElementById("RaceResults")
         const series = document.getElementById("SeriesResults")
         switch (type) {
             case "race":
-                const fetchRace = async () => {
-                    setActiveRaceData(await DB.getRaceById(id))
-                    series?.classList.add("hidden")
-                    race?.classList.remove("hidden")
-                }
-                fetchRace()
+                setActiveRaceData(await DB.getRaceById(id))
+                series?.classList.add("hidden")
+                race?.classList.remove("hidden")
                 break;
+
             case "series":
-                const fetchSeries = async () => {
-                    setActiveSeriesData(await DB.GetSeriesById(id))
-                    race?.classList.add("hidden")
-                    series?.classList.remove("hidden")
-                }
-                fetchSeries()
+                setActiveSeriesData(await DB.GetSeriesById(id))
+                race?.classList.add("hidden")
+                series?.classList.remove("hidden")
+
                 break;
         }
     }
