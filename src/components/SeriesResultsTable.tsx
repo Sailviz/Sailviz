@@ -126,6 +126,41 @@ const SeriesResultsTable = (props: any) => {
             result.Net = Net
         })
 
+        //sort results by Net, split results if necessary
+        tempresults.sort((a, b) => {
+            if(a.Net < b.Net) {
+                return -1
+            } else if (a.Net > b.Net){
+                return 1
+            } else {
+                //two results with same Net Score.
+                //loop through positions.
+                for(let i = 1; i < 1000; i++){
+                    //calculate number of positions.
+                    let aNumber = a.racePositions.reduce((partialSum, position) => {
+                        if (position == i){
+                            return partialSum + 1
+                        }
+                    })
+                    let bNumber = b.racePositions.reduce((partialSum, position) => {
+                        if (position == i){
+                            return partialSum + 1
+                        }
+                    })
+                    if(aNumber < bNumber){
+                        return -1
+                    } else if (aNumber > bNumber){
+                        return 1
+                    }
+                }
+            }
+        })
+
+        //set rank value.
+        tempresults.forEach((result, index) => {
+            result.Rank = index
+        })
+
         console.log(tempresults)
         setData(tempresults)
 
@@ -150,17 +185,17 @@ const SeriesResultsTable = (props: any) => {
             cell: props => <Text {...props} />,
             enableSorting: false
         }),
-        // columnHelper.accessor("Crew", {
-        //     header: "Crew",
-        //     cell: props => <Text {...props} />,
-        //     enableSorting: false
-        // }),
-        // columnHelper.accessor((data) => data.Boat?.name, {
-        //     header: "Class",
-        //     id: "Class",
-        //     cell: props => <Text {...props} />,
-        //     enableSorting: false
-        // }),
+        columnHelper.accessor("Crew", {
+            header: "Crew",
+            cell: props => <Text {...props} />,
+            enableSorting: false
+        }),
+        columnHelper.accessor((data) => data.Boat?.name, {
+            header: "Class",
+            id: "Class",
+            cell: props => <Text {...props} />,
+            enableSorting: false
+        }),
         columnHelper.accessor((data) => data.SailNumber, {
             header: "Sail Number",
             cell: props => <Number {...props} />,
@@ -187,14 +222,14 @@ const SeriesResultsTable = (props: any) => {
         enableSorting: true
     })
 
-    // const netColumn = columnHelper.accessor('Net', {
-    //     header: "Net",
-    //     cell: props => <Number {...props} disabled={true} />,
-    //     enableSorting: true
-    // })
+    const netColumn = columnHelper.accessor('Net', {
+        header: "Net",
+        cell: props => <Number {...props} disabled={true} />,
+        enableSorting: true
+    })
 
     columns.push(totalColumn)
-    // columns.push(netColumn)
+    columns.push(netColumn)
 
     const [sorting, setSorting] = useState<SortingState>([{
         id: "Total",
