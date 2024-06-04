@@ -61,6 +61,7 @@ const SignOnPage = () => {
     }
 
     const removeRace = async (raceId: string) => {
+        if (confirm("Are you sure you want to delete the race?") == false) return
         let result = await DB.deleteRace(raceId)
         if (!result) { return } // failed to delete race
         let newSeriesData: SeriesDataType = window.structuredClone(series)
@@ -126,15 +127,6 @@ const SignOnPage = () => {
         //hide fleet edit modal
         setFleetModal(false)
     }
-
-    const logout = async () => {
-        if (confirm("Are you sure you want to log out") == true) {
-            Cookies.remove('token')
-            Cookies.remove('clubId')
-            Router.push('/')
-        }
-    }
-
 
     const showFleetModal = async (fleetId: string) => {
         setActiveFleetId(fleetId)

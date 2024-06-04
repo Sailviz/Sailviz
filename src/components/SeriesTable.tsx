@@ -150,8 +150,6 @@ const SeriesTable = (props: any) => {
     }]);
 
     const updateData = (data: any) => {
-        console.log(data)
-        setData(data)
         props.removeRace(data)
     }
 
