@@ -1,7 +1,5 @@
 import React, { ChangeEvent, useState, useEffect } from 'react';
 import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, useReactTable, SortingState } from '@tanstack/react-table'
-import Select from 'react-select';
-import * as DB from '../components/apiMethods';
 
 //not a db type, only used here
 type SeriesResultsType = {
@@ -93,7 +91,6 @@ const SeriesResultsTable = (props: any) => {
                         racePositions: Array(seriesData.races.length).fill(0),
                     })
                     index -= 1
-                    console.log("updated index: ", index)
                 }
                 //add result to tempresults
                 if (tempresults[index]) {
@@ -117,7 +114,6 @@ const SeriesResultsTable = (props: any) => {
             let Net = 0
             //remove 0 results
             sortedResult.racePositions = sortedResult.racePositions.filter(result => result != 0)
-            console.log(sortedResult.racePositions)
             sortedResult.racePositions.forEach((position, index) => {
                 if (index < seriesData.settings.numberToCount) {
                     Net += position
@@ -127,38 +123,52 @@ const SeriesResultsTable = (props: any) => {
         })
 
         //sort results by Net, split results if necessary
-        tempresults.sort((a, b) => {
-            if(a.Net < b.Net) {
+        tempresults.sort((a: SeriesResultsType, b: SeriesResultsType) => {
+            if (a.Net < b.Net) {
                 return -1
-            } else if (a.Net > b.Net){
+            } else if (a.Net > b.Net) {
                 return 1
             } else {
+                console.log("same net score")
                 //two results with same Net Score.
                 //loop through positions.
-                for(let i = 1; i < 1000; i++){
+                let result = 0
+                for (let i = 1; i < 1000; i++) {
                     //calculate number of positions.
-                    let aNumber = a.racePositions.reduce((partialSum, position) => {
-                        if (position == i){
+                    let aNumber = a.racePositions.reduce((partialSum: number, position: number) => {
+                        if (position == i) {
+                            console.log("found position", i)
+                            return partialSum + 1
+                        } else {
+                            return partialSum
+                        }
+                    }, 0)
+                    let bNumber = b.racePositions.reduce((partialSum: number, position: number) => {
+                        if (position == i) {
                             return partialSum + 1
                         }
-                    })
-                    let bNumber = b.racePositions.reduce((partialSum, position) => {
-                        if (position == i){
-                            return partialSum + 1
+                        else {
+                            return partialSum
                         }
-                    })
-                    if(aNumber < bNumber){
-                        return -1
-                    } else if (aNumber > bNumber){
-                        return 1
+                    }, 0)
+                    //if a has more positions, a wins.
+                    console.log(i, aNumber, bNumber)
+                    if (aNumber < bNumber) {
+                        result = 1
+                        break
+                    } else if (aNumber > bNumber) {
+                        result = -1
+                        break
                     }
                 }
+                console.log(result)
+                return result
             }
         })
 
         //set rank value.
         tempresults.forEach((result, index) => {
-            result.Rank = index
+            result.Rank = index + 1
         })
 
         console.log(tempresults)
@@ -232,7 +242,7 @@ const SeriesResultsTable = (props: any) => {
     columns.push(netColumn)
 
     const [sorting, setSorting] = useState<SortingState>([{
-        id: "Total",
+        id: "Rank",
         desc: false,
     }]);
 

@@ -334,7 +334,9 @@ const SignOnPage = () => {
                             />
                         </div>
                     </div>
-                    <SeriesResultsTable key={JSON.stringify(series)} data={series} />
+                    <div className="mb-6">
+                        <SeriesResultsTable key={JSON.stringify(series)} data={series} />
+                    </div>
                 </div>
             </div>
         </Dashboard >
