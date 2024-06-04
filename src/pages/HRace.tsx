@@ -394,6 +394,12 @@ const RacePage = () => {
 
     }
 
+    const secondsToTimeString = (seconds: number) => {
+        let minutes = Math.floor(seconds / 60)
+        let remainder = seconds % 60
+        return minutes.toString().padStart(2, '0') + ":" + remainder.toString().padStart(2, '0')
+    }
+
     const controller = new AbortController()
 
 
@@ -600,7 +606,7 @@ const RacePage = () => {
                                         <div className="flex flex-col">
                                             <h2 className="text-2xl text-gray-700">{result.SailNumber} - {result.boat.name}</h2>
                                             <p className="text-base text-gray-600">{result.Helm} - {result.Crew}</p>
-                                            <p className="text-base text-gray-600">Laps: {result.laps.length} Finish: {new Date(((result.finishTime - race.fleets.filter((fleet) => fleet.id == result.fleetId)[0]!.startTime)) * 1000).toISOString().slice(14, 19)}</p>
+                                            <p className="text-base text-gray-600">Laps: {result.laps.length} Finish: {secondsToTimeString(result.finishTime - race.fleets.filter((fleet) => fleet.id == result.fleetId)[0]!.startTime)}</p>
                                         </div>
                                         <div className="px-5 py-1">
                                             <p className="text-2xl text-gray-700 px-5 py-2.5 text-center mr-3 md:mr-0">
@@ -618,7 +624,7 @@ const RacePage = () => {
                                             <h2 className="text-2xl text-gray-700">{result.SailNumber} - {result.boat?.name}</h2>
                                             <p className="text-base text-gray-600">{result.Helm} - {result.Crew}</p>
                                             {result.laps.length >= 1 ?
-                                                <p className="text-base text-gray-600">Laps: {result.laps.length} Last: {new Date((result.laps[result.laps.length - 1]?.time - race.fleets.filter((fleet) => fleet.id == result.fleetId)[0]!.startTime) * 1000).toISOString().slice(14, 19)}</p>
+                                                <p className="text-base text-gray-600">Laps: {result.laps.length} Last: {secondsToTimeString(result.laps[result.laps.length - 1]?.time - race.fleets.filter((fleet) => fleet.id == result.fleetId)[0]!.startTime)}</p>
                                                 :
                                                 <p className="text-base text-gray-600">Laps: {result.laps.length} </p>
                                             }
@@ -664,7 +670,7 @@ const RacePage = () => {
                                         <div className="flex flex-col">
                                             <h2 className="text-2xl text-gray-700">{result.SailNumber} - {result.boat.name}</h2>
                                             <p className="text-base text-gray-600">{result.Helm} - {result.Crew}</p>
-                                            <p className="text-base text-gray-600">Laps: {result.laps.length} Finish: {new Date((result.finishTime - race.fleets.filter((fleet) => fleet.id == result.fleetId)[0]!.startTime) * 1000).toISOString().slice(14, 19)}</p>
+                                            <p className="text-base text-gray-600">Laps: {result.laps.length} Finish: {secondsToTimeString(result.finishTime - race.fleets.filter((fleet) => fleet.id == result.fleetId)[0]!.startTime)}</p>
                                         </div>
                                         <div className="px-5 py-1">
                                             <p className="text-white bg-blue-600 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
