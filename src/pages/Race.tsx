@@ -180,7 +180,7 @@ const SignOnPage = () => {
             }
         });
         //check that all data is present
-        if (result.Helm == "" || result.SailNumber == "" || lapErrorFlag) {
+        if (result.Helm == "" || result.boat.id == undefined || result.SailNumber == "" || lapErrorFlag) {
             alert("missing Helm or Sail Number or Lap Time")
             return
         }
@@ -196,6 +196,7 @@ const SignOnPage = () => {
 
     const deleteResult = async (resultId: string) => {
         await DB.DeleteResultById(resultId)
+        setRace(await DB.getRaceById(race.id))
     }
 
     //Capitalise the first letter of each word, and maintain cursor pos.
