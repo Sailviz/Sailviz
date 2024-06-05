@@ -20,6 +20,9 @@ async function findRace(id: any) {
                             laps: {
                                 where: {
                                     isDeleted: false
+                                },
+                                orderBy: {
+                                    time: 'asc'
                                 }
                             }
                         }

@@ -256,8 +256,8 @@ const RacePage = () => {
             let lapsA = a.laps.length;
             let lapsB = b.laps.length;
             // get the last lap time for each boat
-            let lastA = a.laps.at(-1)?.time;
-            let lastB = b.laps.at(-1)?.time;
+            let lastA = a.laps.at(-1)?.time!;
+            let lastB = b.laps.at(-1)?.time!;
             // compare the number of laps first, then the last lap time
             return lapsB - lapsA || lastA - lastB;
         });

@@ -185,6 +185,21 @@ export async function getNextRaceByClubId(clubId: string): Promise<NextRaceDataT
         });
 };
 
+export async function GetResultById(resultId: string): Promise<ResultsDataType> {
+    const body = {
+        "id": resultId
+    }
+    return await fetch(`/api/GetResultById`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+    })
+        .then((res) => res.json())
+        .then(async (data) => {
+            return data.result
+        });
+};
+
 export async function getTodaysRaceByClubId(clubId: string): Promise<NextRaceDataType[]> {
     const body = {
         "clubId": clubId

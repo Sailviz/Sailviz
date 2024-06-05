@@ -7,8 +7,6 @@ import Select from 'react-select';
 
 import FleetResultsTable from '../components/FleetResultsTable';
 import Dashboard from "../components/Dashboard";
-import { json } from "stream/consumers";
-import { set } from "cypress/types/lodash";
 
 const raceOptions = [{ value: "Pursuit", label: "Pursuit" }, { value: "Handicap", label: "Handicap" }]
 
@@ -146,6 +144,7 @@ const SignOnPage = () => {
 
         const LapData = document.getElementById("LapData") as HTMLElement
         let laps = Array.from(LapData.childNodes)
+        console.log(laps)
         laps.pop()
         laps.forEach((element, index) => {
             let inputElement = element.childNodes[1]?.childNodes[0] as HTMLInputElement
@@ -174,14 +173,6 @@ const SignOnPage = () => {
 
     const deleteResult = async (resultId: string) => {
         await DB.DeleteResultById(resultId)
-    }
-
-    const logout = async () => {
-        if (confirm("Are you sure you want to log out") == true) {
-            Cookies.remove('token')
-            Cookies.remove('clubId')
-            Router.push('/')
-        }
     }
 
     //Capitalise the first letter of each word, and maintain cursor pos.
@@ -252,6 +243,7 @@ const SignOnPage = () => {
             return
         }
         console.log(result)
+        result.laps.sort((a, b) => b.time - a.time)
         setActiveResult({ ...result })
 
         console.log(result)
@@ -283,16 +275,31 @@ const SignOnPage = () => {
     }
 
     const addLap = async () => {
-        DB.CreateLap(activeResult.id, 0)
+        await DB.CreateLap(activeResult.id, 0)
+        let result = await DB.GetResultById(activeResult.id)
 
-        setRace(await DB.getRaceById(race.id))
+        //order by time, but force 0 times to end
+        result.laps.sort((a, b) => {
+            if (a.time == 0) return 1
+            if (b.time == 0) return -1
+            return a.time - b.time
+        })
+
+        setActiveResult(result)
     }
 
     const removeLap = async (index: number) => {
+        await DB.DeleteLapById(activeResult.laps[index]!.id)
+        let result = await DB.GetResultById(activeResult.id)
 
-        DB.DeleteLapById(activeResult.laps[index]!.id)
+        //order by time, but force 0 times to end
+        result.laps.sort((a, b) => {
+            if (a.time == 0) return 1
+            if (b.time == 0) return -1
+            return a.time - b.time
+        })
 
-        setRace(await DB.getRaceById(race.id))
+        setActiveResult(result)
     }
 
     const saveRaceType = async (newValue: any) => {
@@ -452,16 +459,16 @@ const SignOnPage = () => {
                             <p className="text-6xl font-extrabold text-gray-700 p-6">
                                 Lap Info
                             </p>
-                            <div className='flex flex-row w-full flex-wrap' id='LapData'>
+                            <div className='flex flex-row w-full flex-wrap' id='LapData' key={JSON.stringify(activeResult)}>
                                 {/* this map loops through laps in results, unless it can't find any*/}
                                 {activeResult.laps.map((lap: LapDataType, index: number) => {
                                     return (
-                                        <div className='flex flex-col px-6 w-min' key={lap.time}>
+                                        <div className='flex flex-col px-6 w-min' key={lap.time + index}>
                                             <p className='text-2xl font-bold text-gray-700 p-2'>
                                                 Lap {index + 1}
                                             </p>
                                             <div className='flex flex-row'>
-                                                <input type="time" className="h-full text-xl p-4" step={"1"} defaultValue={new Date((lap.time - (race.fleets.filter(fleet => fleet.id == activeResult.fleetId)[0] || { startTime: 0 } as FleetDataType).startTime) * 1000).toISOString().substring(11, 19)} />
+                                                <input type="time" className="h-full text-xl p-4" step={"1"} defaultValue={new Date(Math.max(0, (lap.time - (race.fleets.find(fleet => fleet.id == activeResult.fleetId) || { startTime: 0 } as FleetDataType).startTime) * 1000)).toISOString().substring(11, 19)} />
                                                 <div className="text-6xl font-extrabold text-red-600 p-6 float-right cursor-pointer" onClick={() => removeLap(index)}>&times;</div>
                                             </div>
 

@@ -48,7 +48,7 @@ type ResultsDataType = {
 type LapDataType = {
   id: string;
   resultId: string;
-  time: Array;
+  time: number;
 };
 
 type NextRaceDataType = {
