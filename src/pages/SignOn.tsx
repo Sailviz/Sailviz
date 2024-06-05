@@ -135,6 +135,7 @@ const SignOnPage = () => {
         result.Crew = Crew.value
 
         setSelectedOption({ value: result.boat, label: result.boat.name })
+        result.boat = selectedOption.value as BoatDataType
 
         const sailNum = document.getElementById("editSailNum") as HTMLInputElement
         result.SailNumber = sailNum.value
@@ -175,17 +176,7 @@ const SignOnPage = () => {
 
     const showEditModal = async (resultId: string) => {
         let result = {} as ResultsDataType
-        for (let race of races) {
-            let result: ResultsDataType | undefined;
-            race.fleets.some(fleet => {
-                result = fleet.results.find(result => result.id === resultId);
-                return result !== undefined;
-            });
-            if (result == undefined) {
-                console.error("Could not find result with id: " + resultId);
-                return
-            }
-        }
+        result = races.flatMap(race => race.fleets.flatMap(fleet => fleet.results)).find(result => result.id == resultId)!
         setActiveResult(result)
         console.log(result)
         const Helm = document.getElementById('editHelm') as HTMLInputElement;
