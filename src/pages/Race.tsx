@@ -10,6 +10,14 @@ import Dashboard from "../components/Dashboard";
 
 const raceOptions = [{ value: "Pursuit", label: "Pursuit" }, { value: "Handicap", label: "Handicap" }]
 
+const resultCodeOptions = [
+    { label: 'None', value: '' },
+    { label: 'Did Not Finish', value: 'DNF' },
+    { label: 'Did Not Start', value: 'DNS' },
+    { label: 'Disqualified', value: 'DSQ' },
+    { label: 'On Course Side', value: 'OCS' },
+    { label: 'Not Sailed Course', value: 'NSC' }]
+
 const SignOnPage = () => {
 
     const router = useRouter()
@@ -66,7 +74,8 @@ const SignOnPage = () => {
         fleetId: ""
     })
 
-    const [selectedOption, setSelectedOption] = useState({ label: "", value: {} as BoatDataType })
+    const [boatOption, setBoatOption] = useState({ label: "", value: {} as BoatDataType })
+    const [resultCodeOption, setResultCodeOption] = useState({ label: "", value: "" })
 
     const [options, setOptions] = useState([{ label: "", value: {} as BoatDataType }])
 
@@ -134,7 +143,9 @@ const SignOnPage = () => {
         const Crew = document.getElementById("editCrew") as HTMLInputElement
         result.Crew = Crew.value
 
-        result.boat = selectedOption.value
+        result.boat = boatOption.value
+
+        result.resultCode = resultCodeOption.value
 
         const sailNum = document.getElementById("editSailNum") as HTMLInputElement
         result.SailNumber = sailNum.value
@@ -266,7 +277,13 @@ const SignOnPage = () => {
         resultid.innerHTML = result.id
 
         try {
-            setSelectedOption({ value: result.boat, label: result.boat.name })
+            setBoatOption({ value: result.boat, label: result.boat.name })
+        } catch (error) {
+            //result does not have boat assigned
+        }
+
+        try {
+            setResultCodeOption({ value: result.resultCode, label: resultCodeOptions.find(code => code.value == result.resultCode)!.label })
         } catch (error) {
             //result does not have boat assigned
         }
@@ -433,8 +450,8 @@ const SignOnPage = () => {
                                         id="editClass"
                                         className=' w-56 h-full text-3xl'
                                         options={options}
-                                        value={selectedOption}
-                                        onChange={(choice) => setSelectedOption(choice!)}
+                                        value={boatOption}
+                                        onChange={(choice) => setBoatOption(choice!)}
                                     />
                                 </div>
                             </div>
@@ -446,13 +463,27 @@ const SignOnPage = () => {
                                 <input type="text" id="editSailNum" className="h-full text-2xl p-4" />
                             </div>
                         </div>
-                        <div>
+                        <div className="flex flex-row mt-2">
                             <div className='flex flex-col px-6 w-1/4'>
                                 <p className='text-2xl font-bold text-gray-700'>
                                     Position
                                 </p>
 
                                 <input type="number" id="editPosition" className="h-full text-2xl p-4" />
+                            </div>
+                            <div className='flex flex-col px-6 w-1/4'>
+                                <p className='text-2xl font-bold text-gray-700'>
+                                    Finish Code
+                                </p>
+                                <div className="w-full p-2 mx-0 my-2">
+                                    <Select
+                                        id="editResultCode"
+                                        className=' w-56 h-full text-3xl'
+                                        options={resultCodeOptions}
+                                        value={resultCodeOption}
+                                        onChange={(choice) => setResultCodeOption(choice!)}
+                                    />
+                                </div>
                             </div>
                         </div>
                         <div>
