@@ -144,6 +144,7 @@ const SignOnPage = () => {
         result.Crew = Crew.value
 
         result.boat = boatOption.value
+        console.log(result.boat)
 
         result.resultCode = resultCodeOption.value
 
@@ -157,11 +158,17 @@ const SignOnPage = () => {
         let laps = Array.from(LapData.childNodes)
         console.log(laps)
         laps.pop()
+        let lapErrorFlag = false
         laps.forEach((element, index) => {
             let inputElement = element.childNodes[1]?.childNodes[0] as HTMLInputElement
 
             var parts = inputElement.value.split(':'); // split it at the colons
             if (parts[0] == undefined || parts[1] == undefined || parts[2] == undefined) return
+            //check that time isn't 0
+            if (parts[0] == "00" && parts[1] == "00" && parts[2] == "00") {
+                lapErrorFlag = true
+                return
+            }
             // minutes are 60 seconds. Hours are 60 minutes * 60 seconds.
             var seconds = (+parts[0]) * 60 * 60 + (+parts[1]) * 60 + (+parts[2]);
             //add lap time to fleet start time
@@ -172,9 +179,14 @@ const SignOnPage = () => {
                 result.finishTime = unixTime
             }
         });
+        //check that all data is present
+        if (result.Helm == "" || result.SailNumber == "" || lapErrorFlag) {
+            alert("missing Helm or Sail Number or Lap Time")
+            return
+        }
 
         console.log(result)
-        DB.updateResult(result)
+        await DB.updateResult(result)
 
         setRace(await DB.getRaceById(race.id)) //force update as content has changed
 
@@ -254,7 +266,7 @@ const SignOnPage = () => {
             return
         }
         console.log(result)
-        result.laps.sort((a, b) => b.time - a.time)
+        result.laps.sort((a, b) => a.time - b.time)
         setActiveResult({ ...result })
 
         console.log(result)
