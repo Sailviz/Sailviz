@@ -239,8 +239,8 @@ const CCDashboard = () => {
             }
             fetchChromecasts()
 
-            var _socket = io("https://sailviz-castcontroller.local:3030/")
-            // var _socket = io("https://localhost:3001/")
+            // var _socket = io("https://sailviz-castcontroller.local:3030/")
+            var _socket = io("https://localhost:3001/")
             if (!_socket) return
             setConnection(_socket)
             _socket.on('connect', () => {
