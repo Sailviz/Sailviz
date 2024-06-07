@@ -294,9 +294,8 @@ const SignOnPage = () => {
         } catch (error) {
             //result does not have boat assigned
         }
-
         try {
-            setResultCodeOption({ value: result.resultCode, label: resultCodeOptions.find(code => code.value == result.resultCode)!.label })
+            setResultCodeOption({ value: result.resultCode, label: resultCodeOptions.find(code => code.value == result!.resultCode!)!.label })
         } catch (error) {
             //result does not have boat assigned
         }
