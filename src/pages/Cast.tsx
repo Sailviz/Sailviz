@@ -213,7 +213,6 @@ const CastPage = () => {
         const timer1 = setTimeout(async () => {
             console.log("refreshing results")
             let activeFlag = false
-            if (clubId == "") { return }
             var data = await DB.getTodaysRaceByClubId(clubId)
             if (data) {
                 let racesCopy: RaceDataType[] = []
