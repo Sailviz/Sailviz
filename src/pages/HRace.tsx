@@ -315,7 +315,28 @@ const RacePage = () => {
 
             //calculate finish position
 
-            const sortedResults = resultsData.sort((a, b) => a.CorrectedTime - b.CorrectedTime);
+            const sortedResults = fleet.results.sort((a, b) => {
+                if (a.resultCode != "") {
+                    return 1
+                }
+                if (b.resultCode != "") {
+                    return -1
+                }
+                if (a.CorrectedTime == 0) {
+                    return 1
+                }
+                if (b.CorrectedTime == 0) {
+                    return 1
+                }
+                if (a.CorrectedTime > b.CorrectedTime) {
+                    return 1
+                }
+                if (a.CorrectedTime < b.CorrectedTime) {
+                    return -1
+                }
+                return 0
+            })
+
             sortedResults.forEach((result, index) => {
                 result.HandicapPosition = index + 1;
             });
