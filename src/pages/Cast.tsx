@@ -213,7 +213,7 @@ const CastPage = () => {
         const timer1 = setTimeout(async () => {
             console.log("refreshing results")
             let activeFlag = false
-            var data = await DB.getTodaysRaceByClubId(clubId)
+            var data = await DB.getTodaysRaceByClubId(club.id)
             if (data.length > 0) {
                 let racesCopy: RaceDataType[] = []
                 for (let i = 0; i < data.length; i++) {
@@ -233,7 +233,7 @@ const CastPage = () => {
         return () => {
             clearTimeout(timer1);
         }
-    }, [club]);
+    }, [club, activeRaceData, pagestate]);
 
 
     return (
