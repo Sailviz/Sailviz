@@ -208,9 +208,11 @@ const RacePage = () => {
         results.sort((a, b) => {
             //if done a lap, predicted is sum of lap times + last lap.
             //if no lap done, predicted is py.
-            let aPredicted = a.laps.length > 0 ? a.laps.reduce((sum: number, lap: LapDataType) => sum + lap.time, 0) : a.boat.py / 10
-            let bPredicted = b.laps.length > 0 ? b.laps.reduce((sum: number, lap: LapDataType) => sum + lap.time, 0) : b.boat.py / 10
+            let aPredicted = a.laps.length > 0 ? a.laps.reduce((sum: number, lap: LapDataType) => sum + lap.time, 0) + (a.laps[a.laps.length - 1]!.time - (a.laps[a.laps.length - 2]?.time || 0)) : a.boat.py / 10
+            let bPredicted = b.laps.length > 0 ? b.laps.reduce((sum: number, lap: LapDataType) => sum + lap.time, 0) + (b.laps[b.laps.length - 1]!.time - (b.laps[b.laps.length - 2]?.time || 0)) : b.boat.py / 10
 
+            console.log(a.SailNumber, aPredicted)
+            console.log(b.SailNumber, bPredicted)
             return aPredicted - bPredicted;
         });
 
