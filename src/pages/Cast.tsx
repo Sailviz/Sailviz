@@ -245,7 +245,7 @@ const CastPage = () => {
                 switch (pagestate) {
                     case pageStateType.live:
                         return (
-                            <div>
+                            <div key={JSON.stringify(activeRaceData)}>
                                 {activeRaceData.fleets.map((fleet, index) => {
                                     //change this to select the active race.
                                     return (
