@@ -366,7 +366,7 @@ const RacePage = () => {
         let results = fleet.results
         let allFinished = true
         results.forEach(data => {
-            if (data.finishTime == 0) {
+            if (data.finishTime == 0 && data.resultCode == "") {
                 allFinished = false
             }
         })
