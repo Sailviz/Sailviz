@@ -80,7 +80,9 @@ const CastPage = () => {
         }],
         Type: "",
         seriesId: "",
-        series: {} as SeriesDataType
+        series: {
+            name: "",
+        } as SeriesDataType
     })
     var [activeSeriesData, setActiveSeriesData] = useState<SeriesDataType>({
         id: "",
@@ -211,6 +213,7 @@ const CastPage = () => {
         const timer1 = setTimeout(async () => {
             console.log("refreshing results")
             let activeFlag = false
+            if (clubId == "") { return }
             var data = await DB.getTodaysRaceByClubId(clubId)
             if (data) {
                 let racesCopy: RaceDataType[] = []
