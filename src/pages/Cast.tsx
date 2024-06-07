@@ -210,7 +210,7 @@ const CastPage = () => {
     }, [clubId])
 
     useEffect(() => {
-        const timer1 = setTimeout(async () => {
+        const timer1 = setInterval(async () => {
             console.log("refreshing results")
             let activeFlag = false
             var data = await DB.getTodaysRaceByClubId(club.id)
@@ -233,7 +233,7 @@ const CastPage = () => {
         return () => {
             clearTimeout(timer1);
         }
-    }, [club, activeRaceData, pagestate]);
+    }, [club]);
 
 
     return (
