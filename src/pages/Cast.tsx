@@ -214,7 +214,7 @@ const CastPage = () => {
             console.log("refreshing results")
             let activeFlag = false
             var data = await DB.getTodaysRaceByClubId(clubId)
-            if (data) {
+            if (data.length > 0) {
                 let racesCopy: RaceDataType[] = []
                 for (let i = 0; i < data.length; i++) {
                     const res = await DB.getRaceById(data[i]!.id)
@@ -227,7 +227,7 @@ const CastPage = () => {
                 }
             }
             if (!activeFlag) {
-                slideShow(data.map((race) => race.id), "race")
+                setPageState(pageStateType.info)
             }
         }, 5000);
         return () => {
