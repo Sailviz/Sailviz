@@ -1,11 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import Script from 'next/script';
-import SignOnTable from '../components/SignOnTable';
 import * as DB from '../components/apiMethods'
 import FleetResultsTable from '../components/FleetResultsTable';
 import SeriesResultsTable from '../components/SeriesResultsTable';
-import { set } from 'cypress/types/lodash';
-import { active } from 'sortablejs';
 const namespace = 'urn:x-cast:com.sailviz';
 
 declare global {
@@ -13,6 +10,13 @@ declare global {
 }
 
 declare var cast: any;
+
+enum pageStateType {
+    live,
+    series,
+    race,
+    info
+}
 
 const CastPage = () => {
     var interval: NodeJS.Timer | null = null
@@ -23,7 +27,6 @@ const CastPage = () => {
         console.log('Starting Receiver Manager');
 
         window.castReceiverManager.onReady = function (event: any) {
-            setLastMessage('Received Ready event: ' + JSON.stringify(event.data));
             window.castReceiverManager.setApplicationState('chromecast-dashboard is ready...');
         };
 
@@ -43,7 +46,6 @@ const CastPage = () => {
             //remove any existing intervals
             if (interval != null) { clearInterval(interval) }
 
-            setLastMessage(JSON.stringify(event))
             console.log('Message [' + event.senderId + ']: ' + event.data);
 
             if (event.data['type'] == 'clubId') {
@@ -64,7 +66,6 @@ const CastPage = () => {
         window.castReceiverManager.start({ statusText: 'Application is starting' });
         console.log('Receiver Manager started');
 
-
     }
 
 
@@ -83,28 +84,22 @@ const CastPage = () => {
     }
 
     const showPage = async (id: string, type: string) => {
-        // const home = document.getElementById("homepage")
-        // home?.classList.add("hidden")
-        // const race = document.getElementById("RaceResults")
-        // const series = document.getElementById("SeriesResults")
         switch (type) {
             case "race":
                 setActiveRaceData(await DB.getRaceById(id))
-                // series?.classList.add("hidden")
-                // race?.classList.remove("hidden")
+                setPageState(pageStateType.race)
                 break;
 
             case "series":
                 setActiveSeriesData(await DB.GetSeriesById(id))
-                // race?.classList.add("hidden")
-                // series?.classList.remove("hidden")
+                setPageState(pageStateType.series)
 
                 break;
         }
     }
 
     const [clubId, setClubId] = useState<string>("")
-    const [lastMessage, setLastMessage] = useState<string>("test")
+    const [pagestate, setPageState] = useState<pageStateType>(pageStateType.info)
     var [club, setClub] = useState<ClubDataType>({
         id: "",
         name: "",
@@ -196,29 +191,44 @@ const CastPage = () => {
             <Script type="text/javascript" src="//www.gstatic.com/cast/sdk/libs/receiver/2.0.0/cast_receiver.js" onReady={() => {
                 initializeCastApi()
             }}></Script>
-            <div id="homepage" className="p-4 hidden">
-                <div className="text-6xl font-extrabold text-gray-700 p-6">
-                    SailViz - Cast
-                </div>
-            </div>
-            <div id="RaceResults" className="hidden" >
-                <div className="p-4">
-                    <div className="text-xl font-extrabold text-gray-700 p-6">
-                        {activeRaceData.series.name}: {activeRaceData.number}
-                    </div>
-                    <FleetResultsTable data={activeRaceData.fleets.flatMap(fleet => fleet.results)} startTime={activeRaceData.fleets[0]?.startTime} key={activeRaceData.id} editable={false} showTime={false} />
+            {(() => {
+                switch (pagestate) {
+                    case pageStateType.live:
+                        return (
+                            <div>
+                                {/* Live page content */}
+                            </div>
+                        );
+                    case pageStateType.series:
+                        return (
+                            <div className="p-4">
+                                <div className="text-xl font-extrabold text-gray-700 px-6 pt-2">
+                                    {activeSeriesData.name}
+                                </div>
+                                <SeriesResultsTable data={activeSeriesData} editable={false} showTime={false} key={activeRaceData.id} />
+                                {/* {JSON.stringify(activeSeriesData)} */}
+                            </div>
+                        );
+                    case pageStateType.race:
+                        return (
+                            <div className="p-4">
+                                <div className="text-xl font-extrabold text-gray-700 p-6">
+                                    {activeRaceData.series.name}: {activeRaceData.number}
+                                </div>
+                                <FleetResultsTable data={activeRaceData.fleets.flatMap(fleet => fleet.results)} startTime={activeRaceData.fleets[0]?.startTime} key={activeRaceData.id} editable={false} showTime={false} />
 
-                </div>
-            </div>
-            <div id="SeriesResults" className="" key={activeSeriesData.id}>
-                <div className="p-4">
-                    <div className="text-xl font-extrabold text-gray-700 px-6 pt-2">
-                        {activeSeriesData.name}
-                    </div>
-                    <SeriesResultsTable data={activeSeriesData} editable={false} showTime={false} key={activeRaceData.id} />
-                    {/* {JSON.stringify(activeSeriesData)} */}
-                </div>
-            </div>
+                            </div>
+                        );
+                    case pageStateType.info:
+                        return (
+                            <div className="text-6xl font-extrabold text-gray-700 p-6">
+                                SailViz - Cast
+                            </div>
+                        );
+                    default:
+                        return null;
+                }
+            })()}
             <div className="px-4">
                 <div className="text-xl font-extrabold text-gray-700 p-6">
                     Full results available at sailviz.com/{club.name}
