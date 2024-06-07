@@ -50,6 +50,24 @@ const Time = ({ ...props }: any) => {
     }
 };
 
+const CorrectedTime = ({ ...props }) => {
+    let value = Math.round(props.getValue())
+    let result = props.result
+    let valueString = ""
+    if (result.resultCode != "") {
+        valueString = result.resultCode
+    } else {
+        valueString = value.toString()
+    }
+    //round value to nearest integer
+
+    return (
+        <div className=' text-center'>
+            {valueString}
+        </div>
+    );
+};
+
 const Class = ({ ...props }: any) => {
     let value = props.getValue()
     try {
@@ -162,7 +180,7 @@ const FleetResultsTable = (props: any) => {
 
     const correctedTimeColumn = columnHelper.accessor('CorrectedTime', {
         header: "Corrected Time",
-        cell: props => <Text {...props} disabled={true} />,
+        cell: props => <CorrectedTime {...props} result={data.find((result) => result.id == props.row.original.id)} />,
         enableSorting: false
     })
 
