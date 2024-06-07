@@ -25,9 +25,10 @@ const Number = ({ ...props }) => {
 
 const CorrectedTime = ({ ...props }) => {
     let value = Math.round(props.getValue())
+    let result = props.result
     let valueString = ""
-    if (value == 99999) {
-        valueString = "RTD"
+    if (result.resultCode != "") {
+        valueString = result.resultCode
     } else {
         valueString = value.toString()
     }
@@ -97,10 +98,10 @@ const calculateHandicapResults = (fleet: FleetDataType) => {
 
     //sort by corrected time, if corrected time is 0 move to end, and rtd to end
     fleet.results.sort((a, b) => {
-        if (a.resultCode == "RTD") {
+        if (a.resultCode != "") {
             return 1
         }
-        if (b.resultCode == "RTD") {
+        if (b.resultCode != "") {
             return -1
         }
         if (a.CorrectedTime == 0) {
@@ -196,7 +197,7 @@ const LiveResultsTable = (props: any) => {
 
     const Correctedtime = columnHelper.accessor('CorrectedTime', {
         header: "Corrected Time",
-        cell: props => <CorrectedTime {...props} />,
+        cell: props => <CorrectedTime {...props} result={results.find(result => result.id == props.row.original.id)} />,
         enableSorting: false
     })
 
