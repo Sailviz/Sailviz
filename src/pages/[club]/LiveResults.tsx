@@ -9,7 +9,7 @@ import RaceTimer from "../../components/HRaceTimer"
 
 enum pageModes {
     live,
-    results
+    notLive
 }
 
 const LiveResults = () => {
@@ -46,34 +46,50 @@ const LiveResults = () => {
         series: {} as SeriesDataType
     } as RaceDataType)
 
-    var [mode, setMode] = useState<pageModes>(pageModes.results)
+    var [mode, setMode] = useState<pageModes>(pageModes.notLive)
 
-    const calculateHandicapResults = (race: RaceDataType) => {
+    const calculateHandicapResults = (fleet: FleetDataType) => {
         //most nuber of laps.
-        const maxLaps = Math.max.apply(null, race.fleets.flatMap(fleet => fleet.results).map(function (o: ResultsDataType) { return o.laps.length }))
-
-        const resultsData = race.fleets.flatMap(fleet => fleet.results)
+        const maxLaps = Math.max.apply(null, fleet.results.map(function (o: ResultsDataType) { return o.laps.length }))
 
         //calculate corrected time
-        resultsData.forEach(result => {
-            const fleet = race.fleets.find(fleet => fleet.id == result.fleetId)
-            if (fleet == undefined) {
-                console.error("fleet not found")
-                return
-            }
+        fleet.results.forEach(result => {
             //don't know why types aren't quite working here
-            let seconds = result.laps[result.laps.length - 1] as unknown as number - fleet.startTime
+            if (result.laps.length == 0) { return }
+            let seconds = result.laps[result.laps.length - 1]!.time - fleet.startTime
             result.CorrectedTime = (seconds * 1000 * (maxLaps / result.laps.length)) / result.boat.py
-            if (result.finishTime == -1) {
-                result.CorrectedTime = 99999
-            }
+            console.log(result.CorrectedTime)
         });
 
         //calculate finish position
 
-        const sortedResults: ResultsDataType[] = resultsData.sort((a, b) => a.CorrectedTime - b.CorrectedTime);
+        //sort by corrected time, if corrected time is 0 move to end, and rtd to end
+        fleet.results.sort((a, b) => {
+            if (a.resultCode == "RTD") {
+                return 1
+            }
+            if (b.resultCode == "RTD") {
+                return -1
+            }
+            if (a.CorrectedTime == 0) {
+                return 1
+            }
+            if (b.CorrectedTime == 0) {
+                return 1
+            }
+            if (a.CorrectedTime > b.CorrectedTime) {
+                return 1
+            }
+            if (a.CorrectedTime < b.CorrectedTime) {
+                return -1
+            }
+            return 0
+        })
 
-        return (sortedResults)
+        fleet.results.forEach((result, index) => {
+            result.HandicapPosition = index + 1
+        })
+        return fleet
     }
 
     const calculatePursuitResults = (race: RaceDataType) => {
@@ -122,10 +138,13 @@ const LiveResults = () => {
                 var data = await DB.getTodaysRaceByClubId(clubId)
                 if (data) {
                     let racesCopy: RaceDataType[] = []
-                    let fleetsCopy: FleetDataType[][] = []
                     for (let i = 0; i < data.length; i++) {
                         const res = await DB.getRaceById(data[i]!.id)
                         racesCopy[i] = res
+                        if (checkActive(racesCopy[i]!)) {
+                            setMode(pageModes.live)
+                            setActiveRace(racesCopy[i]!)
+                        }
                     }
                     console.log(racesCopy)
                     setRaces(racesCopy)
@@ -156,25 +175,20 @@ const LiveResults = () => {
                 if (checkActive(racesCopy[i]!)) {
                     setMode(pageModes.live)
                     if (racesCopy[i]!.Type == "Handicap") {
-                        calculateHandicapResults(racesCopy[i]!) //do something with this
+                        racesCopy[i]!.fleets.forEach((fleet, index) => {
+                            racesCopy[i]!.fleets[index] = calculateHandicapResults(fleet) //do something with this
+                        })
                     } else {
                         calculatePursuitResults(racesCopy[i]!)
                     }
+                    console.log(racesCopy[i]!)
                     setActiveRace(racesCopy[i]!)
                     activeFlag = true
                     break
                 }
             }
             if (!activeFlag) {
-                setMode(pageModes.results)
-                for (let i = 0; i < racesCopy.length; i++) {
-                    if (racesCopy[i]!.Type == "Handicap") {
-                        calculateHandicapResults(racesCopy[i]!) //same as above
-                    } else {
-                        calculatePursuitResults(racesCopy[i]!)
-                    }
-                }
-                setRaces(racesCopy)
+                setMode(pageModes.notLive)
             }
         }, 5000);
         return () => {
@@ -188,8 +202,8 @@ const LiveResults = () => {
                 switch (mode) {
                     case pageModes.live:
                         return (
-                            <div>
-                                {races[0]!.fleets.map((fleet, index) => {
+                            <div key={JSON.stringify(activeRace)}>
+                                {activeRace.fleets.map((fleet, index) => {
                                     //change this to select the active race.
                                     return (
                                         <>
@@ -200,9 +214,9 @@ const LiveResults = () => {
                                             </div>
                                             <div className="m-6" key={activeRace.id}>
                                                 <div className="text-4xl font-extrabold text-gray-700 p-6">
-                                                    {activeRace.series.name}: {activeRace.number} at {activeRace.Time.slice(10, 16)}
+                                                    {activeRace.series.name}: {activeRace.number} - {fleet.fleetSettings.name}
                                                 </div>
-                                                <LiveFleetResultsTable data={activeRace.fleets.flatMap(fleet => fleet.results)} startTime={fleet.startTime} />
+                                                <LiveFleetResultsTable data={fleet.results} startTime={fleet.startTime} handicap={activeRace.Type} />
                                             </div>
                                         </>
                                     )
@@ -210,25 +224,10 @@ const LiveResults = () => {
 
                             </div>
                         )
-                    case pageModes.results:
-                        return (
-                            <div key={JSON.stringify(races)}>
-                                {races.map((race, index) => {
-                                    return (
-                                        <div className="m-6" key={race.id}>
-                                            <div className="text-4xl font-extrabold text-gray-700 p-6">
-                                                {race.series.name}: {race.number} at {race.Time.slice(10, 16)}
-                                            </div>
-                                            <LiveFleetResultsTable data={activeRace.fleets.flatMap(fleet => fleet.results)} startTime={0} />
-                                        </div>
-                                    )
-                                })}
-                            </div>
-                        )
-                    default: //countdown and starting and allStarted
+                    default: //includes notLive state
                         return (
                             <div>
-                                <p className="text-6xl font-extrabold text-gray-700 p-6"> No Races Today</p>
+                                <p className="text-6xl font-extrabold text-gray-700 p-6"> {router.query.club} <br /> No Races Currently Active</p>
                             </div>
                         )
                 }

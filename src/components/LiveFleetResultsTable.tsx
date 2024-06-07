@@ -85,8 +85,10 @@ const columnHelper = createColumnHelper<ResultsDataType>()
 
 
 const LiveResultsTable = (props: any) => {
-    let [results, setRace] = useState<ResultsDataType[]>(props.data)
+    let [results, setResults] = useState<ResultsDataType[]>(props.data)
     let [startTime, setStartTime] = useState<number>(props.startTime)
+    console.log(props.handicap)
+    let [handicap, setHandicap] = useState<boolean>(props.handicap == "Handicap" ? true : false)
 
     let maxLaps = 0
     results.forEach((result, index) => {
@@ -94,6 +96,8 @@ const LiveResultsTable = (props: any) => {
             maxLaps = result.laps.length
         }
     })
+
+    console.log(results)
 
     //sets sorting to position by default
     const [sorting, setSorting] = useState<SortingState>([{
@@ -147,7 +151,7 @@ const LiveResultsTable = (props: any) => {
     })
 
     //results are ordered by corrected time so the index is the position
-    const Position = columnHelper.accessor((data) => results.findIndex(result => result.id == data.id), {
+    const Position = columnHelper.accessor((data) => handicap ? data.HandicapPosition : data.PursuitPosition, {
         header: "Position",
         cell: props => <Number {...props} />,
         enableSorting: true
