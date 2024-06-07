@@ -80,16 +80,66 @@ function Sort({ column, table }: { column: any, table: any }) {
     )
 }
 
+const calculateHandicapResults = (fleet: FleetDataType) => {
+    //most nuber of laps.
+    const maxLaps = Math.max.apply(null, fleet.results.map(function (o: ResultsDataType) { return o.laps.length }))
+
+    //calculate corrected time
+    fleet.results.forEach(result => {
+        //don't know why types aren't quite working here
+        if (result.laps.length == 0) { return }
+        let seconds = result.laps[result.laps.length - 1]!.time - fleet.startTime
+        result.CorrectedTime = (seconds * 1000 * (maxLaps / result.laps.length)) / result.boat.py
+        console.log(result.CorrectedTime)
+    });
+
+    //calculate finish position
+
+    //sort by corrected time, if corrected time is 0 move to end, and rtd to end
+    fleet.results.sort((a, b) => {
+        if (a.resultCode == "RTD") {
+            return 1
+        }
+        if (b.resultCode == "RTD") {
+            return -1
+        }
+        if (a.CorrectedTime == 0) {
+            return 1
+        }
+        if (b.CorrectedTime == 0) {
+            return 1
+        }
+        if (a.CorrectedTime > b.CorrectedTime) {
+            return 1
+        }
+        if (a.CorrectedTime < b.CorrectedTime) {
+            return -1
+        }
+        return 0
+    })
+
+    fleet.results.forEach((result, index) => {
+        result.HandicapPosition = index + 1
+    })
+    return fleet
+}
+
+
+const calculatePursuitResults = (fleet: FleetDataType) => {
+    return fleet
+}
+
 
 const columnHelper = createColumnHelper<ResultsDataType>()
 
 
 const LiveResultsTable = (props: any) => {
-    let [results, setResults] = useState<ResultsDataType[]>(props.data)
+    let [fleet, setFleet] = useState<FleetDataType>(props.fleet)
     let [startTime, setStartTime] = useState<number>(props.startTime)
     console.log(props.handicap)
     let [handicap, setHandicap] = useState<boolean>(props.handicap == "Handicap" ? true : false)
 
+    let [results, setResults] = useState<ResultsDataType[]>(props.handicap == "Handicap" ? calculateHandicapResults(fleet).results : calculatePursuitResults(fleet).results)
     let maxLaps = 0
     results.forEach((result, index) => {
         if (result.laps.length > maxLaps) {

@@ -48,53 +48,6 @@ const LiveResults = () => {
 
     var [mode, setMode] = useState<pageModes>(pageModes.notLive)
 
-    const calculateHandicapResults = (fleet: FleetDataType) => {
-        //most nuber of laps.
-        const maxLaps = Math.max.apply(null, fleet.results.map(function (o: ResultsDataType) { return o.laps.length }))
-
-        //calculate corrected time
-        fleet.results.forEach(result => {
-            //don't know why types aren't quite working here
-            if (result.laps.length == 0) { return }
-            let seconds = result.laps[result.laps.length - 1]!.time - fleet.startTime
-            result.CorrectedTime = (seconds * 1000 * (maxLaps / result.laps.length)) / result.boat.py
-            console.log(result.CorrectedTime)
-        });
-
-        //calculate finish position
-
-        //sort by corrected time, if corrected time is 0 move to end, and rtd to end
-        fleet.results.sort((a, b) => {
-            if (a.resultCode == "RTD") {
-                return 1
-            }
-            if (b.resultCode == "RTD") {
-                return -1
-            }
-            if (a.CorrectedTime == 0) {
-                return 1
-            }
-            if (b.CorrectedTime == 0) {
-                return 1
-            }
-            if (a.CorrectedTime > b.CorrectedTime) {
-                return 1
-            }
-            if (a.CorrectedTime < b.CorrectedTime) {
-                return -1
-            }
-            return 0
-        })
-
-        fleet.results.forEach((result, index) => {
-            result.HandicapPosition = index + 1
-        })
-        return fleet
-    }
-
-    const calculatePursuitResults = (race: RaceDataType) => {
-        return race
-    }
 
     const checkActive = (race: RaceDataType) => {
         if (race.fleets.length == 0) {
@@ -164,25 +117,13 @@ const LiveResults = () => {
         const timer1 = setTimeout(async () => {
             let activeFlag = false
             console.log("refreshing results")
-            let racesCopy = window.structuredClone(races)
-            //update local copy of results
-            for (let i = 0; i < racesCopy.length; i++) {
-                var data = await DB.getRaceById(racesCopy[i]!.id)
-                racesCopy[i] = data
-            }
+
             //check if any of the races are active
-            for (let i = 0; i < racesCopy.length; i++) {
-                if (checkActive(racesCopy[i]!)) {
+            for (let race of races) {
+                race = await DB.getRaceById(race.id)
+                if (checkActive(race)) {
                     setMode(pageModes.live)
-                    if (racesCopy[i]!.Type == "Handicap") {
-                        racesCopy[i]!.fleets.forEach((fleet, index) => {
-                            racesCopy[i]!.fleets[index] = calculateHandicapResults(fleet) //do something with this
-                        })
-                    } else {
-                        calculatePursuitResults(racesCopy[i]!)
-                    }
-                    console.log(racesCopy[i]!)
-                    setActiveRace(racesCopy[i]!)
+                    setActiveRace(race)
                     activeFlag = true
                     break
                 }
@@ -216,7 +157,7 @@ const LiveResults = () => {
                                                 <div className="text-4xl font-extrabold text-gray-700 p-6">
                                                     {activeRace.series.name}: {activeRace.number} - {fleet.fleetSettings.name}
                                                 </div>
-                                                <LiveFleetResultsTable data={fleet.results} startTime={fleet.startTime} handicap={activeRace.Type} />
+                                                <LiveFleetResultsTable fleet={fleet} startTime={fleet.startTime} handicap={activeRace.Type} />
                                             </div>
                                         </>
                                     )
