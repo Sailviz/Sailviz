@@ -6,6 +6,7 @@ import SeriesResultsTable from '../components/SeriesResultsTable';
 import RaceTimer from "../components/HRaceTimer"
 import LiveFleetResultsTable from '../components/LiveFleetResultsTable';
 import { animateScroll, Events } from 'react-scroll';
+import { delay } from 'cypress/types/bluebird';
 
 const namespace = 'urn:x-cast:com.sailviz';
 
@@ -23,7 +24,7 @@ enum pageStateType {
 }
 
 const scrollOptions = {
-    // Your options here, for example:
+    delay: 10000,
     duration: 15000,
     smooth: true,
 };
@@ -229,36 +230,36 @@ const CastPage = () => {
             }
             DB.GetClubById(clubId).then((data) => {
                 setClub(data)
-
+                showPage("2766fcf5-f538-4898-b6b6-abcdb1d98454", "series")
             })
         }
     }, [clubId])
 
-    useEffect(() => {
-        const timer1 = setInterval(async () => {
-            console.log("refreshing results")
-            let activeFlag = false
-            var data = await DB.getTodaysRaceByClubId(club.id)
-            if (data.length > 0) {
-                let racesCopy: RaceDataType[] = []
-                for (let i = 0; i < data.length; i++) {
-                    const res = await DB.getRaceById(data[i]!.id)
-                    racesCopy[i] = res
-                    if (checkActive(racesCopy[i]!)) {
-                        setActiveRaceData(racesCopy[i]!)
-                        showPage("", "live")
-                        activeFlag = true
-                    }
-                }
-            }
-            if (!activeFlag) {
-                showPage("2766fcf5-f538-4898-b6b6-abcdb1d98454", "series")
-            }
-        }, 5000);
-        return () => {
-            clearTimeout(timer1);
-        }
-    }, [club]);
+    // useEffect(() => {
+    //     const timer1 = setInterval(async () => {
+    //         console.log("refreshing results")
+    //         let activeFlag = false
+    //         var data = await DB.getTodaysRaceByClubId(club.id)
+    //         if (data.length > 0) {
+    //             let racesCopy: RaceDataType[] = []
+    //             for (let i = 0; i < data.length; i++) {
+    //                 const res = await DB.getRaceById(data[i]!.id)
+    //                 racesCopy[i] = res
+    //                 if (checkActive(racesCopy[i]!)) {
+    //                     setActiveRaceData(racesCopy[i]!)
+    //                     showPage("", "live")
+    //                     activeFlag = true
+    //                 }
+    //             }
+    //         }
+    //         if (!activeFlag) {
+    //             showPage("2766fcf5-f538-4898-b6b6-abcdb1d98454", "series")
+    //         }
+    //     }, 5000);
+    //     return () => {
+    //         clearTimeout(timer1);
+    //     }
+    // }, [club]);
 
 
     return (
