@@ -351,6 +351,25 @@ const RacePage = () => {
 
     }
 
+    const finishSort = (results: ResultsDataType[]) => {
+        results.sort((a, b) => {
+            //if done a lap, predicted is sum of lap times + last lap.
+            //if no lap done, predicted is py.
+            let aLast = a.laps[a.laps.length - 1]?.time || 0
+            let bLast = b.laps[b.laps.length - 1]?.time || 0
+
+            return aLast - bLast;
+        });
+
+        // results.forEach((res, index) => {
+        //     const element = document.getElementById(res.id)
+        //     if (element) {
+        //         element.style.order = index.toString()
+        //     }
+        // })
+        return results
+    }
+
     const finishBoat = async (resultId: string) => {
         const time = Math.floor(new Date().getTime() / 1000)
         //sound horn
@@ -375,7 +394,9 @@ const RacePage = () => {
         await DB.updateResult({ ...result, finishTime: time })
 
         //this actually changes the order of results annoyingly.
-        setRace(await DB.getRaceById(race.id))
+        let tempRace = await DB.getRaceById(race.id)
+        finishSort(tempRace.fleets.flatMap(fleet => fleet.results))
+        setRace(tempRace)
 
         let sound = document.getElementById("Beep") as HTMLAudioElement
         sound!.currentTime = 0
