@@ -5,7 +5,8 @@ import FleetResultsTable from '../components/FleetResultsTable';
 import SeriesResultsTable from '../components/SeriesResultsTable';
 import RaceTimer from "../components/HRaceTimer"
 import LiveFleetResultsTable from '../components/LiveFleetResultsTable';
-import { set } from 'zod';
+import { animateScroll, Events } from 'react-scroll';
+
 const namespace = 'urn:x-cast:com.sailviz';
 
 declare global {
@@ -20,6 +21,12 @@ enum pageStateType {
     race,
     info
 }
+
+const scrollOptions = {
+    // Your options here, for example:
+    duration: 15000,
+    smooth: true,
+};
 
 const CastPage = () => {
     var interval: NodeJS.Timer | null = null
@@ -197,7 +204,24 @@ const CastPage = () => {
         }
     }
 
+    let scrollFlag = false
+    Events.scrollEvent.register('end', () => {
+        if (scrollFlag) {
+            console.log("scrolling up")
+            scrollFlag = false
+            animateScroll.scrollToTop({
+                duration: 0,
+                smooth: false
+            });
+        } else {
+            scrollFlag = true
+            console.log("scrolling down")
+            animateScroll.scrollToBottom(scrollOptions);
+        }
+    });
+
     useEffect(() => {
+        animateScroll.scrollToBottom(scrollOptions)
         if (clubId != "") {
             //catch if not fully updated
             if (clubId == "invalid") {
@@ -205,6 +229,7 @@ const CastPage = () => {
             }
             DB.GetClubById(clubId).then((data) => {
                 setClub(data)
+
             })
         }
     }, [clubId])
@@ -250,6 +275,9 @@ const CastPage = () => {
                                     //change this to select the active race.
                                     return (
                                         <>
+                                            <div className="text-xl font-extrabold text-gray-700 p-6">
+                                                Full results available at sailviz.com/{club.name}
+                                            </div>
                                             <div className="w-1/4 p-2 m-2 border-4 rounded-lg bg-white text-lg font-medium">
                                                 <div key={fleet.id}>
                                                     Race Time: <RaceTimer startTime={fleet.startTime} timerActive={true} onFiveMinutes={null} onFourMinutes={null} onOneMinute={null} onGo={null} onWarning={null} reset={false} />
