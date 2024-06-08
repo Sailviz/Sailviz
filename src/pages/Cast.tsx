@@ -252,7 +252,7 @@ const CastPage = () => {
                 }
             }
             if (!activeFlag) {
-                setPageState(pageStateType.info)
+                showPage("2766fcf5-f538-4898-b6b6-abcdb1d98454", "series")
             }
         }, 5000);
         return () => {
