@@ -31,7 +31,7 @@ const scrollOptions = {
 const CastPage = () => {
     var interval: NodeJS.Timer | null = null
 
-    const [clubId, setClubId] = useState<string>("")
+    const [clubId, setClubId] = useState<string>("ac1869e8-aa2b-46e5-b649-234410459a07")
     const [pagestate, setPageState] = useState<pageStateType>(pageStateType.info)
     var [club, setClub] = useState<ClubDataType>({
         id: "",
