@@ -4,7 +4,7 @@ import * as DB from '../components/apiMethods';
 import Cookies from "js-cookie";
 import dayjs from 'dayjs';
 import Select from 'react-select';
-
+import Papa from 'papaparse';
 import FleetResultsTable from '../components/FleetResultsTable';
 import Dashboard from "../components/Dashboard";
 
@@ -125,7 +125,7 @@ const SignOnPage = () => {
     })
 
     const createResult = async (fleetId: string) => {
-        await DB.createResult(race.id, fleetId)
+        await DB.createResult(fleetId)
         setRace(await DB.getRaceById(race.id))
     }
 
@@ -335,6 +335,50 @@ const SignOnPage = () => {
         console.log(newValue)
         setRace({ ...race, Type: newValue.value })
         await DB.updateRaceById({ ...race, Type: newValue.value })
+    }
+
+    const entryFileUploadHandler = async (e: ChangeEvent<HTMLInputElement>) => {
+        Papa.parse(e.target.files![0]!, {
+            header: true,
+            skipEmptyLines: true,
+            complete: async function (results: any) {
+                console.log(results.data)
+                for (const line of results.data) {
+                    //check if all fields are present
+                    if (line.Helm == undefined || line.Crew == undefined || line.Boat == undefined || line.SailNumber == undefined) {
+                        alert("missing fields")
+                        return
+                    }
+                    let result: ResultsDataType = {} as ResultsDataType
+                    if (line.Fleet == undefined) {
+                        if (race.fleets.length > 1) {
+                            alert("fleets aren't defined and there is more than one fleet in race")
+                            return
+                        } else {
+                            result = await DB.createResult(race.fleets[0]!.id)
+                        }
+                    } else {
+                        //fleet is defined
+                        result = await DB.createResult(race.fleets.find(fleet => fleet.fleetSettings.name == line.Fleet)!.id)
+                    }
+                    result.Helm = line.Helm
+                    result.Crew = line.Crew
+                    result.SailNumber = line.sailNumber
+                    const boatName = line.Boat
+                    let boat = boatData.find(boat => boat.name == boatName)
+                    if (boat == undefined) {
+                        console.error("Boat not found")
+                        return
+                    }
+                    result.boat = boat
+                    console.log(result)
+                    //update with info
+                    await DB.updateResult(result)
+
+                }
+                setRace(await DB.getRaceById(race.id))
+            },
+        });
     }
 
     useEffect(() => {
@@ -643,6 +687,20 @@ const SignOnPage = () => {
                             Race Panel
                         </p>
                     </div>
+                    <div className="p-6 w-full">
+                        <label className="">
+                            <p className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
+                                Upload Entries
+                            </p>
+                            <input
+                                type="file"
+                                accept=".csv"
+                                onChange={entryFileUploadHandler}
+                                className="display-none"
+                            />
+                        </label>
+                    </div>
+
                     <div className="p-6 w-full">
                     </div>
                     <div className='p-6 w-full'>

@@ -75,7 +75,7 @@ const SignOnPage = () => {
             console.warn("could not find race with id: " + raceId)
             return
         }
-        let entry = await DB.createResult(raceId, race.fleets[0]!.id)
+        let entry = await DB.createResult(race.fleets[0]!.id)
 
         entry.Helm = HelmElement.value
         entry.Crew = CrewElement.value
