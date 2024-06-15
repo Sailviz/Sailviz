@@ -363,7 +363,7 @@ const SignOnPage = () => {
                     }
                     result.Helm = line.Helm
                     result.Crew = line.Crew
-                    result.SailNumber = line.sailNumber
+                    result.SailNumber = line.SailNumber
                     const boatName = line.Boat
                     let boat = boatData.find(boat => boat.name == boatName)
                     if (boat == undefined) {
