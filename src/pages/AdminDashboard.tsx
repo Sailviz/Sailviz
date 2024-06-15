@@ -221,8 +221,19 @@ const Club = () => {
                         alert("missing fields")
                         return
                     }
-                    await DB.createBoat(boat.Name, parseInt(boat.Crew), parseInt(boat.PY), parseInt(boat.pursuitStartTime || 0), clubId)
+                    let DBboat = boatData.find(DBboat => DBboat.name == boat.Name)
+                    if (DBboat == undefined) {
+                        await DB.createBoat(boat.Name, parseInt(boat.Crew), parseInt(boat.PY), parseInt(boat.pursuitStartTime || 0), clubId)
+                    } else {
+                        //check if uploaded boat is different from existing boat
+                        if (DBboat.name == boat.Name && DBboat.crew == parseInt(boat.Crew) && DBboat.py == parseInt(boat.PY) && DBboat.pursuitStartTime == parseInt(boat.pursuitStartTime || 0)) {
+                            return
+                        }
+                        DB.updateBoatById({ ...DBboat, name: boat.Name, crew: parseInt(boat.Crew), py: parseInt(boat.PY), pursuitStartTime: parseInt(boat.pursuitStartTime || 0) })
+                    }
                 }
+                await fetchBoats()
+                alert("boats updated")
             },
         });
     }
@@ -265,7 +276,21 @@ const Club = () => {
     //     a.click()
     // }
 
+    const fetchBoats = async () => {
+        var data = await DB.getBoats(clubId)
+        if (data) {
+            let array = [...data]
+            setBoatData(array)
+            let tempoptions: { label: string; value: BoatDataType }[] = []
+            array.forEach(boat => {
+                tempoptions.push({ value: boat as BoatDataType, label: boat.name })
+            })
+            setOptions(tempoptions)
+        } else {
+            console.log("could not find boats")
+        }
 
+    }
     useEffect(() => {
         setClubId(Cookies.get('clubId') || "")
     }, [])
@@ -310,21 +335,7 @@ const Club = () => {
             }
             fetchRaces()
 
-            const fetchBoats = async () => {
-                var data = await DB.getBoats(clubId)
-                if (data) {
-                    let array = [...data]
-                    setBoatData(array)
-                    let tempoptions: { label: string; value: BoatDataType }[] = []
-                    array.forEach(boat => {
-                        tempoptions.push({ value: boat as BoatDataType, label: boat.name })
-                    })
-                    setOptions(tempoptions)
-                } else {
-                    console.log("could not find boats")
-                }
 
-            }
             fetchBoats()
 
         } else {
@@ -427,7 +438,7 @@ const Club = () => {
                         <div className="p-6 w-full">
                             <label className="">
                                 <p className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
-                                    Upload Boats
+                                    Import Boats
                                 </p>
                                 <input
                                     type="file"
