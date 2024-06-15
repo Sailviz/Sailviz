@@ -235,11 +235,12 @@ export async function updateBoatById(boatData: BoatDataType) {
         });
 };
 
-export async function createBoat(boatName: string, crew: number, py: number, clubId: string): Promise<BoatDataType> {
+export async function createBoat(boatName: string, crew: number, py: number, pursuitStartTime: number, clubId: string): Promise<BoatDataType> {
     const body = {
         "name": boatName,
         "crew": crew,
         "py": py,
+        "pursuitStartTime": pursuitStartTime,
         "clubId": clubId
     }
     return await fetch(`/api/CreateBoat`, {

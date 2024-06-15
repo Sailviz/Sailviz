@@ -9,6 +9,7 @@ import BoatTable from '../components/BoatTable';
 import * as DB from '../components/apiMethods';
 import Cookies from 'js-cookie';
 import SeriesResultsTable from '../components/SeriesResultsTable';
+import Papa from 'papaparse';
 
 const raceOptions = [{ value: "Pursuit", label: "Pursuit" }, { value: "Handicap", label: "Handicap" }]
 
@@ -174,7 +175,7 @@ const Club = () => {
 
     const createBoat = async () => {
         const tempdata = boatData
-        const Boat: BoatDataType = await DB.createBoat("", 0, 0, clubId)
+        const Boat: BoatDataType = await DB.createBoat("", 0, 0, 0, clubId)
         console.log(Boat)
         if (Boat) {
             setBoatData([Boat, ...tempdata])
@@ -207,6 +208,25 @@ const Club = () => {
         setSeriesData([...newSeriesData])
         await DB.deleteSeries(series)
     }
+
+    const boatFileUploadHandler = async (e: ChangeEvent<HTMLInputElement>) => {
+        Papa.parse(e.target.files![0]!, {
+            header: true,
+            skipEmptyLines: true,
+            complete: async function (boats: any) {
+                console.log(boats.data)
+                for (const boat of boats.data) {
+                    //check if all fields are present
+                    if (boat.Name == undefined || boat.Crew == undefined || boat.PY == undefined) {
+                        alert("missing fields")
+                        return
+                    }
+                    await DB.createBoat(boat.Name, parseInt(boat.Crew), parseInt(boat.PY), parseInt(boat.pursuitStartTime || 0), clubId)
+                }
+            },
+        });
+    }
+
 
     // const generateResults = async () => {
     //     var currentRace = activeRaceData
@@ -403,6 +423,19 @@ const Club = () => {
                         </p>
                         <div className='p-6'>
                             <BoatTable data={boatData} key={boatData} updateBoat={updateBoat} deleteBoat={deleteBoat} createBoat={createBoat} />
+                        </div>
+                        <div className="p-6 w-full">
+                            <label className="">
+                                <p className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
+                                    Upload Boats
+                                </p>
+                                <input
+                                    type="file"
+                                    accept=".csv"
+                                    onChange={boatFileUploadHandler}
+                                    className="display-none"
+                                />
+                            </label>
                         </div>
                         <p className='text-2xl font-bold text-gray-700 p-6'>
                             Pursuit Race Length
