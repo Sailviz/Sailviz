@@ -105,6 +105,8 @@ const RacePage = () => {
 
     const [mode, setMode] = useState(modeType.Lap)
 
+    const [dynamicSorting, setDynamicSorting] = useState(true)
+
     const startRaceButton = async (fleetId: string) => {
         //use time for button
         let localTime = Math.floor((new Date().getTime() / 1000) + startLength)
@@ -204,13 +206,43 @@ const RacePage = () => {
         sound!.play();
     };
 
-    const orderResults = async (results: ResultsDataType[]) => {
+    const sortByPY = async (results: ResultsDataType[]) => {
+        results.sort((a, b) => {
+            if (a.boat.py - b.boat.py != 0) {
+                return a.boat.py - b.boat.py
+            } else {
+                return parseInt(a.SailNumber) - parseInt(b.SailNumber)
+            }
+        });
+
+        results.forEach((res, index) => {
+            const element = document.getElementById(res.id)
+            if (element) {
+                element.style.order = index.toString()
+            }
+        })
+    }
+
+    const dynamicSort = async (results: ResultsDataType[]) => {
         results.sort((a, b) => {
             //if done a lap, predicted is sum of lap times + last lap.
             //if no lap done, predicted is py.
-            let aPredicted = a.laps.length > 0 ? a.laps.reduce((sum: number, lap: LapDataType) => sum + lap.time, 0) + (a.laps[a.laps.length - 1]!.time - (a.laps[a.laps.length - 2]?.time || 0)) : a.boat.py / 10
-            let bPredicted = b.laps.length > 0 ? b.laps.reduce((sum: number, lap: LapDataType) => sum + lap.time, 0) + (b.laps[b.laps.length - 1]!.time - (b.laps[b.laps.length - 2]?.time || 0)) : b.boat.py / 10
-
+            let aPredicted = a.laps.length > 0 ? a.laps[a.laps.length - 1]!.time + (a.laps[a.laps.length - 1]!.time - (a.laps[a.laps.length - 2]?.time || 0)) : a.boat.py / 100
+            let bPredicted = b.laps.length > 0 ? b.laps[b.laps.length - 1]!.time + (b.laps[b.laps.length - 1]!.time - (b.laps[b.laps.length - 2]?.time || 0)) : b.boat.py / 100
+            //force resultcodes to the end
+            if (a.resultCode != "") {
+                aPredicted = Number.MAX_SAFE_INTEGER
+            }
+            if (b.resultCode != "") {
+                bPredicted = Number.MAX_SAFE_INTEGER
+            }
+            //force finished one off end
+            if (a.finishTime != 0) {
+                aPredicted = Number.MAX_SAFE_INTEGER - 1
+            }
+            if (b.finishTime != 0) {
+                bPredicted = Number.MAX_SAFE_INTEGER - 1
+            }
             console.log(a.SailNumber, aPredicted)
             console.log(b.SailNumber, bPredicted)
             return aPredicted - bPredicted;
@@ -222,6 +254,39 @@ const RacePage = () => {
                 element.style.order = index.toString()
             }
         })
+    }
+
+    const sortByLastLap = (results: ResultsDataType[]) => {
+        results.sort((a, b) => {
+            //if done a lap, predicted is sum of lap times + last lap.
+            //if no lap done, predicted is py.
+            let aLast = a.laps[a.laps.length - 1]?.time || 0
+            let bLast = b.laps[b.laps.length - 1]?.time || 0
+
+            //force resultcodes to the end
+            if (a.resultCode != "") {
+                aLast = Number.MAX_SAFE_INTEGER
+            }
+            if (b.resultCode != "") {
+                bLast = Number.MAX_SAFE_INTEGER
+            }
+            //force finished one off end
+            if (a.finishTime != 0) {
+                aLast = Number.MAX_SAFE_INTEGER - 1
+            }
+            if (b.finishTime != 0) {
+                bLast = Number.MAX_SAFE_INTEGER - 1
+            }
+            return aLast - bLast;
+        });
+
+        results.forEach((res, index) => {
+            const element = document.getElementById(res.id)
+            if (element) {
+                element.style.order = index.toString()
+            }
+        })
+        return results
     }
 
     const stopRace = async (fleetId: string) => {
@@ -281,11 +346,7 @@ const RacePage = () => {
         await DB.CreateLap(resultId, Math.floor(new Date().getTime() / 1000))
         //load back race data
 
-        let temp = await DB.getRaceById(race.id)
-        temp.fleets.forEach((fleet, index) => {
-            orderResults(fleet.results)
-        })
-        setRace(temp)
+        setRace(await DB.getRaceById(race.id))
 
         let sound = document.getElementById("Beep") as HTMLAudioElement
         sound!.currentTime = 0
@@ -351,25 +412,6 @@ const RacePage = () => {
 
     }
 
-    const finishSort = (results: ResultsDataType[]) => {
-        results.sort((a, b) => {
-            //if done a lap, predicted is sum of lap times + last lap.
-            //if no lap done, predicted is py.
-            let aLast = a.laps[a.laps.length - 1]?.time || 0
-            let bLast = b.laps[b.laps.length - 1]?.time || 0
-
-            return aLast - bLast;
-        });
-
-        // results.forEach((res, index) => {
-        //     const element = document.getElementById(res.id)
-        //     if (element) {
-        //         element.style.order = index.toString()
-        //     }
-        // })
-        return results
-    }
-
     const finishBoat = async (resultId: string) => {
         const time = Math.floor(new Date().getTime() / 1000)
         //sound horn
@@ -393,10 +435,7 @@ const RacePage = () => {
         //send to DB
         await DB.updateResult({ ...result, finishTime: time })
 
-        //this actually changes the order of results annoyingly.
-        let tempRace = await DB.getRaceById(race.id)
-        finishSort(tempRace.fleets.flatMap(fleet => fleet.results))
-        setRace(tempRace)
+        setRace(await DB.getRaceById(race.id))
 
         let sound = document.getElementById("Beep") as HTMLAudioElement
         sound!.currentTime = 0
@@ -480,6 +519,19 @@ const RacePage = () => {
     }, [query.race])
 
     useEffect(() => {
+        //sort results
+        if (dynamicSorting) {
+            if (mode == modeType.Finish) {
+                sortByLastLap(race.fleets.flatMap(fleet => fleet.results))
+            }
+            else if (mode == modeType.Lap) {
+                dynamicSort(race.fleets.flatMap(fleet => fleet.results))
+            }
+        }
+        else {
+            sortByPY(race.fleets.flatMap(fleet => fleet.results))
+        }
+
         race.fleets.forEach((fleet, index) => {
             if (checkAllFinished(fleet)) {
                 setRaceState([...raceState.slice(0, index), raceStateType.calculate, ...raceState.slice(index + 1)])
@@ -488,7 +540,7 @@ const RacePage = () => {
                 setRaceState([...raceState.slice(0, index), raceStateType.running, ...raceState.slice(index + 1)])
             }
         })
-    }, [race])
+    }, [race, dynamicSorting])
 
     useEffect(() => {
         let RetireModeButton = document.getElementById("RetireModeButton")!.firstChild as HTMLElement
@@ -592,8 +644,11 @@ const RacePage = () => {
             <audio id="Countdown" src=".\Countdown.mp3" ></audio>
             <div className="w-full flex flex-col items-center justify-start panel-height">
                 <div className="flex w-full flex-col justify-around" key={JSON.stringify(raceState)}>
-                    <div className="w-1/4 p-2 m-2 border-4 rounded-lg bg-white text-lg font-medium">
-                        Actual Time:  {time}
+                    <div className="flex flex-row">
+                        <div className="w-1/4 p-2 m-2 border-4 rounded-lg bg-white text-lg font-medium">
+                            Actual Time:  {time}
+                        </div>
+
                     </div>
                     {race.fleets.map((fleet, index) => {
                         return (
@@ -634,22 +689,33 @@ const RacePage = () => {
                     }
                 </div>
                 <div className="flex w-full shrink flex-row justify-around">
-                    <div className="w-1/4 p-2">
+                    <div className="w-1/5 p-2">
+                        {dynamicSorting ?
+                            <p onClick={() => setDynamicSorting(false)} className="cursor-pointer text-white bg-green-600 font-medium rounded-lg text-xl px-5 py-2.5 text-center">
+                                Dynamic Sorting: On
+                            </p>
+                            :
+                            <p onClick={() => setDynamicSorting(true)} className="cursor-pointer text-white bg-red-600 font-medium rounded-lg text-xl px-5 py-2.5 text-center">
+                                Dynamic Sorting: Off
+                            </p>
+                        }
+                    </div>
+                    <div className="w-1/5 p-2">
                         <p onClick={() => undo()} className="cursor-pointer text-white bg-red-600 font-medium rounded-lg text-xl px-5 py-2.5 text-center">
                             Undo
                         </p>
                     </div>
-                    <div className="w-1/4 p-2" id="RetireModeButton">
+                    <div className="w-1/5 p-2" id="RetireModeButton">
                         <p onClick={() => setMode(modeType.Retire)} className="cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-xl px-5 py-2.5 text-center">
                             Retire Mode
                         </p>
                     </div>
-                    <div className="w-1/4 p-2" id="LapModeButton">
+                    <div className="w-1/5 p-2" id="LapModeButton">
                         <p onClick={() => setMode(modeType.Lap)} className="cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-xl px-5 py-2.5 text-center">
                             Lap Mode
                         </p>
                     </div>
-                    <div className="w-1/4 p-2" id="FinishModeButton">
+                    <div className="w-1/5 p-2" id="FinishModeButton">
                         <p onClick={() => setMode(modeType.Finish)} className="cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-xl px-5 py-2.5 text-center">
                             Finish Mode
                         </p>
@@ -659,14 +725,14 @@ const RacePage = () => {
                     <div className="flex flex-row justify-around flex-wrap" id="EntrantCards">
                         {race.fleets.flatMap(fleets => fleets.results).map((result: ResultsDataType, index) => {
                             if (result.resultCode != "") {
+                                //result has a result code so we display it
                                 let text = result.resultCode
-                                console.log(result)
                                 return (
                                     <div key={index} id={result.id} className='flex bg-red-300 flex-row justify-between p-6 m-4 border-2 border-pink-500 rounded-lg shadow-xl w-96 shrink-0'>
                                         <div className="flex flex-col">
-                                            <h2 className="text-2xl text-gray-700">{result.SailNumber} - {result.boat.name}</h2>
+                                            <h2 className="text-2xl text-gray-700">{result.SailNumber}</h2>
+                                            <h2 className="text-2xl text-gray-700">{result.boat?.name}</h2>
                                             <p className="text-base text-gray-600">{result.Helm} - {result.Crew}</p>
-                                            <p className="text-base text-gray-600">Laps: {result.laps.length} Finish: {secondsToTimeString(result.finishTime - race.fleets.find((fleet) => fleet.id == result.fleetId)!.startTime)}</p>
                                         </div>
                                         <div className="px-5 py-1">
                                             <p className="text-2xl text-gray-700 px-5 py-2.5 text-center mr-3 md:mr-0">
@@ -677,11 +743,12 @@ const RacePage = () => {
                                 )
                             }
                             if (result.finishTime == 0) {
-                                //no defined finish time so we assume they have not finished
+                                //result has not finished
                                 return (
                                     <div key={index} id={result.id} className='flex bg-green-300 flex-row justify-between m-4 border-2 border-pink-500 rounded-lg shadow-xl w-96 shrink-0'>
                                         <div className="flex flex-col ml-4 my-6">
-                                            <h2 className="text-2xl text-gray-700">{result.SailNumber} - {result.boat?.name}</h2>
+                                            <h2 className="text-2xl text-gray-700">{result.SailNumber}</h2>
+                                            <h2 className="text-2xl text-gray-700">{result.boat?.name}</h2>
                                             <p className="text-base text-gray-600">{result.Helm} - {result.Crew}</p>
                                             {result.laps.length >= 1 ?
                                                 <p className="text-base text-gray-600">Laps: {result.laps.length} Last: {secondsToTimeString(result.laps[result.laps.length - 1]?.time! - race.fleets.find((fleet) => fleet.id == result.fleetId)!.startTime)}</p>
@@ -724,11 +791,13 @@ const RacePage = () => {
                                     </div>
                                 )
                             } else {
+                                //result has finished
                                 let text = "Finished"
                                 return (
                                     <div key={index} id={result.id} className='flex bg-red-300 flex-row justify-between p-6 m-4 border-2 border-pink-500 rounded-lg shadow-xl w-96 shrink-0'>
                                         <div className="flex flex-col">
-                                            <h2 className="text-2xl text-gray-700">{result.SailNumber} - {result.boat.name}</h2>
+                                            <h2 className="text-2xl text-gray-700">{result.SailNumber}</h2>
+                                            <h2 className="text-2xl text-gray-700">{result.boat?.name}</h2>
                                             <p className="text-base text-gray-600">{result.Helm} - {result.Crew}</p>
                                             <p className="text-base text-gray-600">Laps: {result.laps.length} Finish: {secondsToTimeString(result.finishTime - race.fleets.find((fleet) => fleet.id == result.fleetId)!.startTime)}</p>
                                         </div>
