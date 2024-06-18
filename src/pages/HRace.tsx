@@ -258,25 +258,12 @@ const RacePage = () => {
 
     const sortByLastLap = (results: ResultsDataType[]) => {
         results.sort((a, b) => {
-            //if done a lap, predicted is sum of lap times + last lap.
-            //if no lap done, predicted is py.
-            let aLast = a.laps[a.laps.length - 1]?.time || 0
-            let bLast = b.laps[b.laps.length - 1]?.time || 0
+            //get last lap time, not including last lap.
+            let aIndex = a.finishTime != 0 ? 2 : 1
+            let bIndex = b.finishTime != 0 ? 2 : 1
+            let aLast = a.laps[a.laps.length - aIndex]?.time || 0
+            let bLast = b.laps[b.laps.length - bIndex]?.time || 0
 
-            //force resultcodes to the end
-            if (a.resultCode != "") {
-                aLast = Number.MAX_SAFE_INTEGER
-            }
-            if (b.resultCode != "") {
-                bLast = Number.MAX_SAFE_INTEGER
-            }
-            //force finished one off end
-            if (a.finishTime != 0) {
-                aLast = Number.MAX_SAFE_INTEGER - 1
-            }
-            if (b.finishTime != 0) {
-                bLast = Number.MAX_SAFE_INTEGER - 1
-            }
             return aLast - bLast;
         });
 
@@ -540,7 +527,7 @@ const RacePage = () => {
                 setRaceState([...raceState.slice(0, index), raceStateType.running, ...raceState.slice(index + 1)])
             }
         })
-    }, [race, dynamicSorting])
+    }, [race, dynamicSorting, mode])
 
     useEffect(() => {
         let RetireModeButton = document.getElementById("RetireModeButton")!.firstChild as HTMLElement
@@ -654,7 +641,7 @@ const RacePage = () => {
                         return (
                             <div className="flex flex-row" key={"fleetBar" + index}>
                                 <div className="w-1/4 p-2 m-2 border-4 rounded-lg bg-white text-lg font-medium">
-                                    Event: {seriesName} - {race.number} - {fleet.fleetSettings.name} {index}
+                                    Event: {seriesName} - {race.number} - {fleet.fleetSettings.name}
                                 </div>
                                 <div className="w-1/4 p-2 m-2 border-4 rounded-lg bg-white text-lg font-medium">
                                     Race Time: <RaceTimer key={"fleetTimer" + index} startTime={fleet.startTime} timerActive={raceState[index] == raceStateType.running} onFiveMinutes={handleFiveMinutes} onFourMinutes={handleFourMinutes} onOneMinute={handleOneMinute} onGo={handleGo} onWarning={handleWarning} reset={raceState[index] == raceStateType.reset} />
