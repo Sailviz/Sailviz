@@ -238,43 +238,40 @@ const Club = () => {
         });
     }
 
+    const downloadBoats = async () => {
+        var csvRows: string[] = []
+        const headers = ['Name', 'Crew', 'PY', 'PursuitStartTime']
 
-    // const generateResults = async () => {
-    //     var currentRace = activeRaceData
-    //     var csvRows = []
-    //     const headers = ['HelmName', 'CrewName', 'Class', 'SailNo', 'Laps', 'Elapsed', 'Code']
+        csvRows.push(headers.join(','));
 
-    //     csvRows.push(headers.join(','));
+        boatData.forEach(boat => {
+            var values = [boat.name, boat.crew, boat.py, boat.pursuitStartTime]
+            //join values with comma
+            csvRows.push(values.join(','))
+        })
+        //join results with new line
+        let data = csvRows.join('\n')
 
-    //     currentRace.results.forEach(data => {
-    //         var time = new Date((data.finishTime - currentRace.startTime) * 1000).toISOString().substring(11, 19)
-    //         var values = [data.Helm, data.Crew, data.boat.name, data.SailNumber, data.lapTimes.number, (data.finishTime == -1 ? '' : time), (data.finishTime == -1 ? 'RET' : '')]
-    //         csvRows.push(values.join(','))
-    //     })
-    //     downloadResults(csvRows.join('\n'))
-    // }
+        // Creating a Blob for having a csv file format  
+        // and passing the data with type 
+        const blob = new Blob([data], { type: 'text/csv' });
 
-    // const downloadResults = async (data: any) => {
-    //     // Creating a Blob for having a csv file format  
-    //     // and passing the data with type 
-    //     const blob = new Blob([data], { type: 'text/csv' });
+        // Creating an object for downloading url 
+        const url = window.URL.createObjectURL(blob)
 
-    //     // Creating an object for downloading url 
-    //     const url = window.URL.createObjectURL(blob)
+        // Creating an anchor(a) tag of HTML 
+        const a = document.createElement('a')
 
-    //     // Creating an anchor(a) tag of HTML 
-    //     const a = document.createElement('a')
+        // Passing the blob downloading url  
+        a.setAttribute('href', url)
 
-    //     // Passing the blob downloading url  
-    //     a.setAttribute('href', url)
+        // Setting the anchor tag attribute for downloading 
+        // and passing the download file name 
+        a.setAttribute('download', club.name + 'boats.csv');
 
-    //     // Setting the anchor tag attribute for downloading 
-    //     // and passing the download file name 
-    //     a.setAttribute('download', activeSeriesData.name + ' ' + activeRaceData.number + ' ' + 'results.csv');
-
-    //     // Performing a download with click 
-    //     a.click()
-    // }
+        // Performing a download with click 
+        a.click()
+    }
 
     const fetchBoats = async () => {
         var data = await DB.getBoats(clubId)
@@ -433,20 +430,25 @@ const Club = () => {
                             Boats
                         </p>
                         <div className='p-6'>
-                            <BoatTable data={boatData} key={boatData} updateBoat={updateBoat} deleteBoat={deleteBoat} createBoat={createBoat} />
-                        </div>
-                        <div className="p-6 w-full">
-                            <label className="">
-                                <p className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
-                                    Import Boats
+                            <div className='flex flex-row p-6 justify-around'>
+                                <div className="w-1/2 flex px-4">
+                                    <label className="w-full">
+                                        <p className=" w-full cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0 ">
+                                            Import Boats
+                                        </p>
+                                        <input
+                                            type="file"
+                                            accept=".csv"
+                                            onChange={boatFileUploadHandler}
+                                            className="display-none"
+                                        />
+                                    </label>
+                                </div>
+                                <p onClick={downloadBoats} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0 w-1/2">
+                                    Download Boats
                                 </p>
-                                <input
-                                    type="file"
-                                    accept=".csv"
-                                    onChange={boatFileUploadHandler}
-                                    className="display-none"
-                                />
-                            </label>
+                            </div>
+                            <BoatTable data={boatData} key={boatData} updateBoat={updateBoat} deleteBoat={deleteBoat} createBoat={createBoat} />
                         </div>
                         <p className='text-2xl font-bold text-gray-700 p-6'>
                             Pursuit Race Length
