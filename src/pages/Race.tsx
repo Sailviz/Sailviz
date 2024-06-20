@@ -381,6 +381,44 @@ const SignOnPage = () => {
         });
     }
 
+    const downloadResults = async () => {
+        var csvRows: string[] = []
+        const headers = ['HelmName', 'CrewName', 'Class', 'SailNo', 'Laps', 'Elapsed', 'Code']
+
+        csvRows.push(headers.join(','));
+
+        race.fleets.forEach(fleet => {
+            fleet.results.forEach(result => {
+                var time = new Date((result.finishTime - fleet.startTime) * 1000).toISOString().substring(11, 19)
+                var values = [result.Helm, result.Crew, result.boat.name, result.SailNumber, result.laps.length, (result.finishTime == -1 ? '' : time), result.resultCode]
+                //join values with comma
+                csvRows.push(values.join(','))
+            })
+            //join results with new line
+            let data = csvRows.join('\n')
+
+            // Creating a Blob for having a csv file format  
+            // and passing the data with type 
+            const blob = new Blob([data], { type: 'text/csv' });
+
+            // Creating an object for downloading url 
+            const url = window.URL.createObjectURL(blob)
+
+            // Creating an anchor(a) tag of HTML 
+            const a = document.createElement('a')
+
+            // Passing the blob downloading url  
+            a.setAttribute('href', url)
+
+            // Setting the anchor tag attribute for downloading 
+            // and passing the download file name 
+            a.setAttribute('download', seriesName + ' ' + race.number + ': ' + fleet.fleetSettings.name + ' ' + 'results.csv');
+
+            // Performing a download with click 
+            a.click()
+        })
+    }
+
     useEffect(() => {
         let raceId = query.race as string
         setClubId(Cookies.get('clubId') || "")
@@ -713,6 +751,9 @@ const SignOnPage = () => {
                                     <FleetResultsTable showTime={true} editable={true} data={fleet.results} startTime={fleet.startTime} key={JSON.stringify(race)} deleteResult={deleteResult} updateResult={updateResult} raceId={race.id} showEditModal={(id: string) => { showEditModal(id) }} />
                                     <p onClick={() => createResult(fleet.id)} id="RacePanelButton" className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0 my-5">
                                         Add Result
+                                    </p>
+                                    <p onClick={downloadResults} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
+                                        Download Results
                                     </p>
                                 </div>
                             )
