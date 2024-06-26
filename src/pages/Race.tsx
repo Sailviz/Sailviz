@@ -232,6 +232,10 @@ const SignOnPage = () => {
         setRace(await DB.getRaceById(race.id))
     }
 
+    const printRaceSheet = async () => {
+        router.push({ pathname: '/GeneratePaperResults', query: { race: race.id } })
+    }
+
     //Capitalise the first letter of each word, and maintain cursor pos.
     const saveRaceSettings = (e: ChangeEvent<HTMLInputElement>) => {
         let newRaceData: RaceDataType = race
@@ -791,6 +795,11 @@ const SignOnPage = () => {
                     <div className="p-6 w-full">
                         <p onClick={openRacePanel} id="RacePanelButton" className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
                             Race Panel
+                        </p>
+                    </div>
+                    <div className="p-6 w-full">
+                        <p onClick={printRaceSheet} id="printRaceSheetButton" className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
+                            Print Race Sheet
                         </p>
                     </div>
                     <div className="p-6 w-full">
