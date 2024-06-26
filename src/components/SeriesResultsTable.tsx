@@ -186,17 +186,19 @@ const SeriesResultsTable = (props: any) => {
         }),
         columnHelper.accessor('Helm', {
             header: "Helm",
-            size: 600,
+            size: 300,
             cell: props => <Text {...props} />,
             enableSorting: false
         }),
         columnHelper.accessor("Crew", {
             header: "Crew",
+            size: 300,
             cell: props => <Text {...props} />,
             enableSorting: false
         }),
         columnHelper.accessor((data) => data.Boat?.name, {
             header: "Class",
+            size: 300,
             id: "Class",
             cell: props => <Text {...props} />,
             enableSorting: false
