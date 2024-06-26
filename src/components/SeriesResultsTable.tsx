@@ -71,7 +71,6 @@ const SeriesResultsTable = (props: any) => {
 
     const calcTable = () => {
         let tempresults: SeriesResultsType[] = []
-        console.log(tempresults)
         //collate results from same person.
         seriesData.races.forEach(race => {
             race.fleets.flatMap(fleet => fleet.results).forEach(result => {
@@ -151,8 +150,6 @@ const SeriesResultsTable = (props: any) => {
                             return partialSum
                         }
                     }, 0)
-                    //if a has more positions, a wins.
-                    console.log(i, aNumber, bNumber)
                     if (aNumber < bNumber) {
                         result = 1
                         break
@@ -171,14 +168,12 @@ const SeriesResultsTable = (props: any) => {
             result.Rank = index + 1
         })
 
-        console.log(tempresults)
         setData(tempresults)
 
     }
 
     useEffect(() => {
         if (seriesData != undefined) {
-            console.log(seriesData)
             calcTable()
         }
     }, [seriesData])
