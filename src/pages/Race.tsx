@@ -367,10 +367,10 @@ const SignOnPage = () => {
                     const boatName = line.Boat
                     let boat = boatData.find(boat => boat.name == boatName)
                     if (boat == undefined) {
-                        console.error("Boat not found")
-                        return
+                        console.error("Boat " + boatName + " not found")
+                    } else {
+                        result.boat = boat
                     }
-                    result.boat = boat
                     console.log(result)
                     //update with info
                     await DB.updateResult(result)
