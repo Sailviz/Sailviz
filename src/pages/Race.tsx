@@ -7,6 +7,7 @@ import Select from 'react-select';
 import Papa from 'papaparse';
 import FleetResultsTable from '../components/FleetResultsTable';
 import Dashboard from "../components/Dashboard";
+import Switch from "../components/Switch";
 
 const raceOptions = [{ value: "Pursuit", label: "Pursuit" }, { value: "Handicap", label: "Handicap" }]
 
@@ -76,7 +77,7 @@ const SignOnPage = () => {
 
     const [boatOption, setBoatOption] = useState({ label: "", value: {} as BoatDataType })
     const [resultCodeOption, setResultCodeOption] = useState({ label: "", value: "" })
-
+    const [lapsAdvancedMode, setLapsAdvancedMode] = useState(false)
     const [options, setOptions] = useState([{ label: "", value: {} as BoatDataType }])
 
     var [race, setRace] = useState<RaceDataType>({
@@ -154,33 +155,65 @@ const SignOnPage = () => {
         const Position = document.getElementById("editPosition") as HTMLInputElement
         result.HandicapPosition = parseInt(Position.value)
 
-        const LapData = document.getElementById("LapData") as HTMLElement
-        let laps = Array.from(LapData.childNodes)
-        console.log(laps)
-        laps.pop()
-        let lapErrorFlag = false
-        laps.forEach((element, index) => {
-            let inputElement = element.childNodes[1]?.childNodes[0] as HTMLInputElement
+        if (lapsAdvancedMode) {
 
-            var parts = inputElement.value.split(':'); // split it at the colons
-            if (parts[0] == undefined || parts[1] == undefined || parts[2] == undefined) return
-            //check that time isn't 0
-            if (parts[0] == "00" && parts[1] == "00" && parts[2] == "00") {
-                lapErrorFlag = true
-                return
-            }
+            const LapData = document.getElementById("LapData") as HTMLElement
+            let laps = Array.from(LapData.childNodes)
+            console.log(laps)
+            laps.pop()
+
+            laps.forEach((element, index) => {
+                let inputElement = element.childNodes[1]?.childNodes[0] as HTMLInputElement
+
+                var parts = inputElement.value.split(':'); // split it at the colons
+
+                // minutes are 60 seconds. Hours are 60 minutes * 60 seconds.
+                var seconds = (+parts[0]!) * 60 * 60 + (+parts[1]!) * 60 + (+parts[2]!);
+                //add lap time to fleet start time
+                var unixTime = seconds + race.fleets.filter(fleet => fleet.id == result.fleetId)[0]!.startTime
+                result.laps[index]!.time = unixTime
+
+                if (index == laps.length - 1) {
+                    result.finishTime = unixTime
+                }
+            });
+        } else {
+            const Laps = document.getElementById("NumberofLaps") as HTMLInputElement
+            const numberofLaps = parseInt(Laps.value)
+            const Finish = document.getElementById("FinishTime") as HTMLInputElement
+            var parts = Finish.value.split(':'); // split it at the colons
+
             // minutes are 60 seconds. Hours are 60 minutes * 60 seconds.
-            var seconds = (+parts[0]) * 60 * 60 + (+parts[1]) * 60 + (+parts[2]);
+            var seconds = (+parts[0]!) * 60 * 60 + (+parts[1]!) * 60 + (+parts[2]!);
             //add lap time to fleet start time
-            var unixTime = seconds + race.fleets.filter(fleet => fleet.id == result.fleetId)[0]!.startTime
-            result.laps[index]!.time = unixTime
+            var finishTime = seconds + race.fleets.filter(fleet => fleet.id == result.fleetId)[0]!.startTime
 
-            if (index == laps.length - 1) {
-                result.finishTime = unixTime
+            console.log(finishTime)
+            let entryLaps = activeResult.laps.length
+            if (entryLaps == numberofLaps) {
+                //don't have an update for the last lap
+                await DB.DeleteLapById(activeResult.laps[entryLaps - 1]!.id)
+                await DB.CreateLap(result.id, finishTime)
+            } else if (entryLaps < numberofLaps) {
+                let difference = numberofLaps - entryLaps
+                for (let i = 0; i < difference - 1; i++) {
+                    await DB.CreateLap(result.id, 0)
+                }
+                await DB.CreateLap(result.id, finishTime)
+            } else {
+                let difference = entryLaps - numberofLaps
+                console.log(difference)
+                console.log(result.laps)
+                for (let i = 0; i <= difference; i++) {
+                    await DB.DeleteLapById(activeResult.laps[entryLaps - 1 - i]!.id)
+                }
+                await DB.CreateLap(result.id, finishTime)
+
             }
-        });
+            result.finishTime = finishTime
+        }
         //check that all data is present
-        if (result.Helm == "" || result.boat.id == undefined || result.SailNumber == "" || lapErrorFlag) {
+        if (result.Helm == "" || result.boat.id == undefined || result.SailNumber == "") {
             alert("missing Helm or Sail Number or Lap Time")
             return
         }
@@ -581,31 +614,64 @@ const SignOnPage = () => {
                             </div>
                         </div>
                         <div>
-                            <p className="text-6xl font-extrabold text-gray-700 p-6">
-                                Lap Info
-                            </p>
-                            <div className='flex flex-row w-full flex-wrap' id='LapData' key={JSON.stringify(activeResult)}>
-                                {/* this map loops through laps in results, unless it can't find any*/}
-                                {activeResult.laps.map((lap: LapDataType, index: number) => {
-                                    return (
-                                        <div className='flex flex-col px-6 w-min' key={lap.time + index}>
-                                            <p className='text-2xl font-bold text-gray-700 p-2'>
-                                                Lap {index + 1}
-                                            </p>
-                                            <div className='flex flex-row'>
-                                                <input type="time" className="h-full text-xl p-4" step={"1"} defaultValue={new Date(Math.max(0, (lap.time - (race.fleets.find(fleet => fleet.id == activeResult.fleetId) || { startTime: 0 } as FleetDataType).startTime) * 1000)).toISOString().substring(11, 19)} />
-                                                <div className="text-6xl font-extrabold text-red-600 p-6 float-right cursor-pointer" onClick={() => removeLap(index)}>&times;</div>
-                                            </div>
-
-                                        </div>
-                                    )
-                                })}
-                                <div className="p-4 mr-2 w-96 flex justify-end">
-                                    <p onClick={addLap} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-xl px-12 py-4 text-center mr-3 md:mr-0">
-                                        Add Lap
-                                    </p>
+                            <div className="flex flex-row">
+                                <p className="text-6xl font-extrabold text-gray-700 p-6">
+                                    Result Info
+                                </p>
+                                <div className="flex flex-row">
+                                    <div className="py-4">
+                                        <Switch
+                                            id={"AdvancedModeSwitch"}
+                                            isOn={lapsAdvancedMode}
+                                            onColour="#02c66f"
+                                            handleToggle={() => { setLapsAdvancedMode(!lapsAdvancedMode) }}
+                                        />
+                                    </div>
+                                    <label className=" pl-6 py-12 text-2xl font-bold text-gray-700" htmlFor={"AdvancedModeSwitch"}>Advanced Mode</label>
                                 </div>
                             </div>
+                            {lapsAdvancedMode ?
+                                <div className='flex flex-row w-full flex-wrap' id='LapData' key={JSON.stringify(activeResult)}>
+                                    {/* this map loops through laps in results, unless it can't find any*/}
+                                    {activeResult.laps.map((lap: LapDataType, index: number) => {
+                                        return (
+                                            <div className='flex flex-col px-6 w-min' key={lap.time + index}>
+                                                <p className='text-2xl font-bold text-gray-700 p-2'>
+                                                    Lap {index + 1}
+                                                </p>
+                                                <div className='flex flex-row'>
+                                                    <input type="time" className="h-full text-xl p-4" step={"1"} defaultValue={new Date(Math.max(0, (lap.time - (race.fleets.find(fleet => fleet.id == activeResult.fleetId) || { startTime: 0 } as FleetDataType).startTime) * 1000)).toISOString().substring(11, 19)} />
+                                                    <div className="text-6xl font-extrabold text-red-600 p-6 float-right cursor-pointer" onClick={() => removeLap(index)}>&times;</div>
+                                                </div>
+
+                                            </div>
+                                        )
+                                    })}
+                                    <div className="p-4 mr-2 w-96 flex justify-end">
+                                        <p onClick={addLap} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-xl px-12 py-4 text-center mr-3 md:mr-0">
+                                            Add Lap
+                                        </p>
+                                    </div>
+                                </div>
+                                :
+                                <div className="flex flex-row mt-2">
+                                    <div className='flex flex-col px-6 w-1/4'>
+                                        <p className='text-2xl font-bold text-gray-700'>
+                                            Laps
+                                        </p>
+
+                                        <input type="number" id="NumberofLaps" className="h-full text-2xl p-4" defaultValue={activeResult.laps.length} />
+                                    </div>
+                                    <div className='flex flex-col px-6 w-1/4'>
+                                        <p className='text-2xl font-bold text-gray-700'>
+                                            Finish Time
+                                        </p>
+
+                                        <input type="time" id="FinishTime" className="h-full text-xl p-4" step={"1"} defaultValue={new Date(Math.max(0, (activeResult.finishTime - (race.fleets.find(fleet => fleet.id == activeResult.fleetId) || { startTime: 0 } as FleetDataType).startTime) * 1000)).toISOString().substring(11, 19)} />
+
+                                    </div>
+                                </div>
+                            }
                         </div>
                         <div className="flex flex-row justify-end">
                             <div className=" flex justify-end mt-8">
