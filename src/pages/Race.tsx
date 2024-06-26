@@ -270,12 +270,13 @@ const SignOnPage = () => {
         inputElement.selectionStart = cursorPos
     }
 
-    const saveRaceDate = (e: ChangeEvent<HTMLInputElement>) => {
+    const saveRaceDate = async (e: ChangeEvent<HTMLInputElement>) => {
         var time = e.target.value
         time = time.replace('T', ' ')
         var day = dayjs(time)
         if (day.isValid()) {
-            setRace({ ...race, Time: time })
+            console.log(time)
+            await DB.updateRaceById({ ...race, Time: time })
         } else {
             console.log("date is not valid input")
         }
@@ -735,8 +736,9 @@ const SignOnPage = () => {
                             <input type="datetime-local"
                                 id='Time'
                                 className="w-full p-2 mx-0 my-2 border-4 rounded focus:border-pink-500 focus:outline-none"
-                                defaultValue={dayjs(race.Time).format('YYYY-MM-DDTHH:ss')}
+                                defaultValue={dayjs(race.Time).format('YYYY-MM-DDTHH:mm')}
                                 key={race.id}
+                                onChange={saveRaceDate}
                             />
                         </div>
 

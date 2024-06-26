@@ -31,7 +31,7 @@ const Time = ({ ...props }: any) => {
             <input type="datetime-local"
                 id='Time'
                 className="w-full"
-                value={dayjs(value).format('YYYY-MM-DDTHH:ss')}
+                value={dayjs(value).format('YYYY-MM-DDTHH:mm')}
                 onChange={e => setValue(e.target.value)}
                 onBlur={onBlur}
             />
