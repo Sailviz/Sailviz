@@ -1,12 +1,12 @@
-import React, { ChangeEvent, MouseEventHandler, useEffect, useState } from "react"
+import React, { ChangeEvent, MouseEventHandler, useEffect, useRef, useState } from "react"
 import Router, { useRouter } from "next/router"
 import * as DB from '../components/apiMethods';
 import Cookies from "js-cookie";
 
-import FleetResultsTable from "../components/FleetResultsTable";
+import { useReactToPrint } from "react-to-print";
 import PaperResultsTable from "../components/PaperResultsTable";
 
-const SignOnPage = () => {
+const PrintPaperResults = () => {
 
     const router = useRouter()
 
@@ -85,6 +85,14 @@ const SignOnPage = () => {
         series: {} as SeriesDataType
     })
 
+    const componentRef = useRef()
+
+    const handlePrint = useReactToPrint({
+        content: () => componentRef.current as any,
+        onAfterPrint: () => {
+            Router.back()
+        }
+    });
 
     useEffect(() => {
         let raceId = query.race as string
@@ -137,13 +145,19 @@ const SignOnPage = () => {
             router.push("/")
         }
     }, [clubId])
+
+    useEffect(() => {
+        handlePrint()
+    }, [race])
     if (isLoading) {
         return (
             <p>Loading...</p>
         )
     }
     return (
-        <PaperResultsTable results={race.fleets.flatMap(fleet => fleet.results)} key={JSON.stringify(race)} />
+        <div className="h-full overflow-y-auto p-6">
+            <PaperResultsTable results={race.fleets.flatMap(fleet => fleet.results)} key={JSON.stringify(race)} ref={componentRef} />
+        </div>
     )
 }
-export default SignOnPage
+export default PrintPaperResults

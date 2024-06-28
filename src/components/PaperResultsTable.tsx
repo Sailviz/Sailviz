@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { forwardRef, useState } from 'react';
 import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, useReactTable, SortingState } from '@tanstack/react-table'
 
 
@@ -34,7 +34,7 @@ function Sort({ column, table }: { column: any, table: any }) {
 const columnHelper = createColumnHelper<ResultsDataType>()
 
 
-const PaperResultsTable = (props: any) => {
+const PaperResultsTable = forwardRef((props: { results: ResultsDataType[] }, ref: any) => {
     let [results, setResults] = useState<ResultsDataType[]>(props.results)
 
 
@@ -71,21 +71,22 @@ const PaperResultsTable = (props: any) => {
     // add column for each lap
     for (let i = 0; i < 6; i++) {
         const newColumn = columnHelper.accessor((data) => data.laps[i]?.time, {
-            header: "LAP " + (i + 1).toString(),
+            header: (i + 1).toString(),
+            size: 40,
             cell: props => <Empty {...props} />,
             enableSorting: false
         })
         columns.push(newColumn)
     }
 
-    const ElapsedTime = columnHelper.accessor('id', {
+    const ElapsedTime = columnHelper.display({
         header: "Elapsed Time",
         cell: props => <Empty {...props} />,
         enableSorting: false
     })
     columns.push(ElapsedTime)
 
-    const Seconds = columnHelper.accessor('id', {
+    const Seconds = columnHelper.display({
         header: "Seconds",
         cell: props => <Empty {...props} />,
         enableSorting: false
@@ -99,14 +100,14 @@ const PaperResultsTable = (props: any) => {
     })
     columns.push(PY)
 
-    const Correctedtime = columnHelper.accessor('id', {
+    const Correctedtime = columnHelper.display({
         header: "Corrected Time",
         cell: props => <Empty {...props} />,
         enableSorting: false
     })
     columns.push(Correctedtime)
 
-    const Position = columnHelper.accessor('id', {
+    const Position = columnHelper.display({
         header: "Position",
         cell: props => <Empty {...props} />,
         enableSorting: false
@@ -125,13 +126,13 @@ const PaperResultsTable = (props: any) => {
         getSortedRowModel: getSortedRowModel(),
     })
     return (
-        <div key={props.data} className='block max-w-full'>
+        <div key={JSON.stringify(props.results)} className='block max-w-full' ref={ref}>
             <table className='w-full border-spacing-0'>
                 <thead>
                     {table.getHeaderGroups().map(headerGroup => (
                         <tr key={headerGroup.id}>
                             {headerGroup.headers.map(header => (
-                                <th key={header.id} className='border-4 p-2 text-sm' style={{ width: header.getSize() }}>
+                                <th key={header.id} className='border-2 p-2 text-sm border-black' style={{ width: header.getSize() }}>
                                     {header.isPlaceholder
                                         ? null
                                         : flexRender(
@@ -152,7 +153,7 @@ const PaperResultsTable = (props: any) => {
                     {table.getRowModel().rows.map(row => (
                         <tr key={row.id}>
                             {row.getVisibleCells().map(cell => (
-                                <td key={cell.id} className='border-4 p-2 w-1 text-xs'>
+                                <td key={cell.id} className='border-2 p-2 w-1 text-xs border-black'>
                                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                 </td>
                             ))}
@@ -162,6 +163,6 @@ const PaperResultsTable = (props: any) => {
             </table>
         </div>
     )
-}
+})
 
 export default PaperResultsTable

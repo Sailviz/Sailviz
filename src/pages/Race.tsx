@@ -233,7 +233,7 @@ const SignOnPage = () => {
     }
 
     const printRaceSheet = async () => {
-        router.push({ pathname: '/GeneratePaperResults', query: { race: race.id } })
+        router.push({ pathname: '/PrintPaperResults', query: { race: race.id } })
     }
 
     //Capitalise the first letter of each word, and maintain cursor pos.
