@@ -70,7 +70,7 @@ const PaperResultsTable = forwardRef((props: { results: ResultsDataType[] }, ref
 
     // add column for each lap
     for (let i = 0; i < 6; i++) {
-        const newColumn = columnHelper.accessor((data) => data.laps[i]?.time, {
+        const newColumn = columnHelper.display({
             header: (i + 1).toString(),
             size: 40,
             cell: props => <Empty {...props} />,
@@ -93,7 +93,7 @@ const PaperResultsTable = forwardRef((props: { results: ResultsDataType[] }, ref
     })
     columns.push(Seconds)
 
-    const PY = columnHelper.accessor((data) => data.boat?.py || 0, {
+    const PY = columnHelper.accessor((data) => (data.boat?.py.toString() || "-"), {
         header: "PY",
         cell: props => <Text {...props} />,
         enableSorting: true
@@ -164,5 +164,8 @@ const PaperResultsTable = forwardRef((props: { results: ResultsDataType[] }, ref
         </div>
     )
 })
+
+//This fixes a build error
+PaperResultsTable.displayName = 'PaperResultsTable'
 
 export default PaperResultsTable
