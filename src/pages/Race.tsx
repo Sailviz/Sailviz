@@ -191,9 +191,12 @@ const SignOnPage = () => {
             console.log(finishTime)
             let entryLaps = activeResult.laps.length
             if (entryLaps == numberofLaps) {
-                //don't have an update for the last lap
-                await DB.DeleteLapById(activeResult.laps[entryLaps - 1]!.id)
-                await DB.CreateLap(result.id, finishTime)
+                //don't do anything if there aren't any laps
+                if (numberofLaps != 0) {
+                    //don't have an update for the last lap
+                    await DB.DeleteLapById(activeResult.laps[entryLaps - 1]!.id)
+                    await DB.CreateLap(result.id, finishTime)
+                }
             } else if (entryLaps < numberofLaps) {
                 let difference = numberofLaps - entryLaps
                 for (let i = 0; i < difference - 1; i++) {
