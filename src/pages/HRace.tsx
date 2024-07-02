@@ -50,7 +50,7 @@ const RacePage = () => {
         series: {} as SeriesDataType
     }))
 
-    var [lastResult, setLastResult] = useState<ResultsDataType | null>(null)
+    var [lastAction, setLastAction] = useState<{ type: string, resultId: string }>({ type: "", resultId: "" })
 
     var [club, setClub] = useState<ClubDataType>({
         id: "",
@@ -327,7 +327,7 @@ const RacePage = () => {
             return
         }
         //save state for undo
-        setLastResult(result)
+        setLastAction({ type: "lap", resultId: resultId })
 
         await DB.CreateLap(resultId, Math.floor(new Date().getTime() / 1000))
         //load back race data
@@ -416,7 +416,7 @@ const RacePage = () => {
             return
         }
         //save state for undo
-        setLastResult(result)
+        setLastAction({ type: "finish", resultId: resultId })
 
         //send to DB
         await DB.updateResult({ ...result, finishTime: time })
@@ -441,33 +441,40 @@ const RacePage = () => {
     }
 
     const undo = async () => {
-        if (lastResult == null) {
+        if (lastAction.type == "") {
+            //no action has been done yet
             return;
         }
-        if (!confirm("are you sure you want to undo your last action?")) {
+        if (!confirm("are you sure you want to undo your last " + lastAction.type + "?")) {
+            return
+        }
+
+        let actionResult = race.fleets.flatMap(fleet => fleet.results).find(result => result.id === lastAction.resultId);
+        if (actionResult == undefined) {
+            console.error("Could not find result with id: " + lastAction.resultId);
             return
         }
         //revert to last result
-        const tempdata = race
-        let index = 0
-        let fleetindex = 0
-        race.fleets.some((fleet, index) => {
-            index = fleet.results.findIndex(result => result.id === lastResult!.id);
-            fleetindex = index
-            return index !== undefined;
-        });
-        if (index == undefined) {
-            console.error("Could not find result with id: " + lastResult.id);
-            return
+        if (lastAction.type == "lap") {
+            let lapId = actionResult.laps.slice(-1)[0]?.id
+            if (lapId == undefined) {
+                console.error("no lap to delete")
+                return
+            }
+            await DB.DeleteLapById(lapId)
+        }
+        else if (lastAction.type == "finish") {
+            let lapId = actionResult.laps.slice(-1)[0]?.id
+            if (lapId == undefined) {
+                console.error("no finish lap to delete")
+                return
+            }
+            await DB.DeleteLapById(lapId)
+            await DB.updateResult({ ...actionResult, finishTime: 0 })
         }
 
-        tempdata.fleets[fleetindex]!.results[index] = lastResult
-        //update local race copy
-        setRace({ ...tempdata })
-        //send to DB
-        await DB.updateResult(lastResult)
 
-        setLastResult(null)
+        setRace(await DB.getRaceById(race.id))
 
     }
 
