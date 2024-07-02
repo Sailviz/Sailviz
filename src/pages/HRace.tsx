@@ -227,8 +227,9 @@ const RacePage = () => {
         results.sort((a, b) => {
             //if done a lap, predicted is sum of lap times + last lap.
             //if no lap done, predicted is py.
-            let aPredicted = a.laps.length > 0 ? a.laps[a.laps.length - 1]!.time + (a.laps[a.laps.length - 1]!.time - (a.laps[a.laps.length - 2]?.time || 0)) : a.boat.py / 100
-            let bPredicted = b.laps.length > 0 ? b.laps[b.laps.length - 1]!.time + (b.laps[b.laps.length - 1]!.time - (b.laps[b.laps.length - 2]?.time || 0)) : b.boat.py / 100
+            let start = race.fleets.find(fleet => fleet.id == a.fleetId)?.startTime || 0
+            let aPredicted = a.laps.length > 0 ? (a.laps[a.laps.length - 1]!.time) + (a.laps[a.laps.length - 1]!.time) - ((a.laps[a.laps.length - 2]?.time) || start) : a.boat.py
+            let bPredicted = b.laps.length > 0 ? (b.laps[b.laps.length - 1]!.time) + (b.laps[b.laps.length - 1]!.time) - ((b.laps[b.laps.length - 2]?.time) || start) : b.boat.py
             //force resultcodes to the end
             if (a.resultCode != "") {
                 aPredicted = Number.MAX_SAFE_INTEGER
@@ -243,8 +244,6 @@ const RacePage = () => {
             if (b.finishTime != 0) {
                 bPredicted = Number.MAX_SAFE_INTEGER - 1
             }
-            console.log(a.SailNumber, aPredicted)
-            console.log(b.SailNumber, bPredicted)
             return aPredicted - bPredicted;
         });
 
@@ -593,14 +592,14 @@ const RacePage = () => {
         }
     }, [clubId])
 
-    const [time, setTime] = useState("");
+    // const [time, setTime] = useState("");
 
-    useEffect(() => {
-        const interval = setInterval(() => setTime(new Date().toTimeString().split(' ')[0]!), 1000);
-        return () => {
-            clearInterval(interval);
-        };
-    }, []);
+    // useEffect(() => {
+    //     const interval = setInterval(() => setTime(new Date().toTimeString().split(' ')[0]!), 1000);
+    //     return () => {
+    //         clearInterval(interval);
+    //     };
+    // }, []);
 
     const showRetireModal = (resultId: String) => {
         const modal = document.getElementById("retireModal")
@@ -631,12 +630,12 @@ const RacePage = () => {
             <audio id="Countdown" src=".\Countdown.mp3" ></audio>
             <div className="w-full flex flex-col items-center justify-start panel-height">
                 <div className="flex w-full flex-col justify-around" key={JSON.stringify(raceState)}>
-                    <div className="flex flex-row">
+                    {/* <div className="flex flex-row">
                         <div className="w-1/4 p-2 m-2 border-4 rounded-lg bg-white text-lg font-medium">
                             Actual Time:  {time}
                         </div>
 
-                    </div>
+                    </div> */}
                     {race.fleets.map((fleet, index) => {
                         return (
                             <div className="flex flex-row" key={"fleetBar" + index}>
@@ -804,7 +803,7 @@ const RacePage = () => {
             <div id="retireModal" className="hidden fixed z-10 left-0 top-0 w-full h-full overflow-auto bg-gray-400 backdrop-blur-sm bg-opacity-20">
                 <div className="mx-auto my-20 px-a py-5 border w-1/4 bg-gray-300 rounded-sm">
                     <div className="text-6xl font-extrabold text-gray-700 flex justify-center">Retire Boat</div>
-                    <span className="text-4xl font-extrabold text-gray-700 flex justify-center mb-8">{activeResult.Helm} - {activeResult.boat.name}:{activeResult.SailNumber}</span>
+                    <span className="text-4xl font-extrabold text-gray-700 flex justify-center mb-8 text-center">{activeResult.boat.name} : {activeResult.SailNumber} <br /> {activeResult.Helm} </span>
                     {resultCodes.map((resultCode) => {
                         return (
                             <div key={resultCode.code} className="flex mb-2 justify-center">
