@@ -310,6 +310,12 @@ const RacePage = () => {
         })
     }
 
+    const sortByPY = async () => {
+        let tempResults = race.fleets[0]!.results
+        tempResults.sort((a: ResultsDataType, b: ResultsDataType) => a.boat.py - b.boat.py)
+        setRace({ ...race, fleets: [{ ...race.fleets[0], results: tempResults }] as FleetDataType[] })
+    }
+
     const ontimeupdate = async (time: { minutes: number, seconds: number, countingUp: boolean }) => {
         let timeInSeconds = time.minutes * 60 + time.seconds
 
@@ -347,12 +353,14 @@ const RacePage = () => {
             const sortedResults = data.fleets[0]!.results.sort((a: ResultsDataType, b: ResultsDataType) => a.PursuitPosition - b.PursuitPosition);
             setRace({ ...data, fleets: [{ ...data.fleets[0] as FleetDataType, results: sortedResults }] })
 
-            if (race.fleets[0]?.startTime != 0) {
+            if (data.fleets[0]?.startTime != 0) {
                 setRaceState(raceStateType.running)
                 //check if race has already finished
-                if (Math.floor((new Date().getTime() / 1000) - race.fleets[0]!.startTime) > club.settings.pursuitLength) {
+                if (Math.floor((new Date().getTime() / 1000) - race.fleets[0]!.startTime) > club.settings.pursuitLength * 60) {
                     setRaceState(raceStateType.calculate)
                 }
+            } else {
+                sortByPY()
             }
 
             setSeriesName(await DB.GetSeriesById(data.seriesId).then((res) => { return (res.name) }))
