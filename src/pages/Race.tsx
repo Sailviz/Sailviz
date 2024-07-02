@@ -204,13 +204,22 @@ const SignOnPage = () => {
                 }
                 await DB.CreateLap(result.id, finishTime)
             } else {
-                let difference = entryLaps - numberofLaps
-                console.log(difference)
-                console.log(result.laps)
-                for (let i = 0; i <= difference; i++) {
-                    await DB.DeleteLapById(activeResult.laps[entryLaps - 1 - i]!.id)
+                if (numberofLaps == 0) {
+                    //delete all laps
+                    for (let i = 0; i < entryLaps; i++) {
+                        await DB.DeleteLapById(activeResult.laps[i]!.id)
+                    }
+                } else {
+                    //delete the extra laps
+                    let difference = entryLaps - numberofLaps
+                    console.log(difference)
+                    console.log(result.laps)
+                    for (let i = 0; i <= difference; i++) {
+                        console.log(activeResult.laps[entryLaps - 1 - i]!.id)
+                        await DB.DeleteLapById(activeResult.laps[entryLaps - 1 - i]!.id)
+                    }
+                    await DB.CreateLap(result.id, finishTime)
                 }
-                await DB.CreateLap(result.id, finishTime)
 
             }
             result.finishTime = finishTime
