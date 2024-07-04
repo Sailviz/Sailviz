@@ -227,9 +227,10 @@ const Club = () => {
                     } else {
                         //check if uploaded boat is different from existing boat
                         if (DBboat.name == boat.Name && DBboat.crew == parseInt(boat.Crew) && DBboat.py == parseInt(boat.PY) && DBboat.pursuitStartTime == parseInt(boat.pursuitStartTime || 0)) {
-                            return
+
+                        } else {
+                            DB.updateBoatById({ ...DBboat, name: boat.Name, crew: parseInt(boat.Crew), py: parseInt(boat.PY), pursuitStartTime: parseInt(boat.pursuitStartTime || 0) })
                         }
-                        DB.updateBoatById({ ...DBboat, name: boat.Name, crew: parseInt(boat.Crew), py: parseInt(boat.PY), pursuitStartTime: parseInt(boat.pursuitStartTime || 0) })
                     }
                 }
                 await fetchBoats()
