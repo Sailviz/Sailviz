@@ -353,11 +353,13 @@ const RacePage = () => {
 
             //calculate corrected time
             resultsData.forEach(result => {
+                if (result.finishTime == 0) {
+                    result.CorrectedTime = 0
+                    return
+                }
                 let seconds = result.finishTime - fleet.startTime
-                console.log(seconds)
                 result.CorrectedTime = (seconds * 1000 * (maxLaps / result.laps.length)) / result.boat.py
                 result.CorrectedTime = Math.round(result.CorrectedTime * 10) / 10
-                console.log(result.CorrectedTime)
             });
 
             //calculate finish position
@@ -369,12 +371,6 @@ const RacePage = () => {
                 if (b.resultCode != "") {
                     return -1
                 }
-                if (a.CorrectedTime == 0) {
-                    return 1
-                }
-                if (b.CorrectedTime == 0) {
-                    return 1
-                }
                 if (a.CorrectedTime > b.CorrectedTime) {
                     return 1
                 }
@@ -384,8 +380,15 @@ const RacePage = () => {
                 return 0
             })
 
+            console.log(sortedResults)
+
             sortedResults.forEach((result, index) => {
-                result.HandicapPosition = index + 1;
+                if (result.resultCode != "") {
+                    console.log(result)
+                    result.HandicapPosition = fleet.results.length
+                } else {
+                    result.HandicapPosition = index + 1;
+                }
             });
 
             sortedResults.forEach(result => {
