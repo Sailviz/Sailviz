@@ -257,12 +257,19 @@ const RacePage = () => {
 
     const sortByLastLap = (results: ResultsDataType[]) => {
         results.sort((a, b) => {
+
             //get last lap time, not including last lap.
             let aIndex = a.finishTime != 0 ? 2 : 1
             let bIndex = b.finishTime != 0 ? 2 : 1
             let aLast = a.laps[a.laps.length - aIndex]?.time || 0
             let bLast = b.laps[b.laps.length - bIndex]?.time || 0
-
+            //force resultcodes to the end
+            if (a.resultCode != "") {
+                aLast = Number.MAX_SAFE_INTEGER
+            }
+            if (b.resultCode != "") {
+                bLast = Number.MAX_SAFE_INTEGER
+            }
             return aLast - bLast;
         });
 
