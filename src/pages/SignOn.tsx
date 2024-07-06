@@ -524,12 +524,19 @@ const SignOnPage = () => {
                     </div>
                 }
             </div>
-            <div id="Results" className="hidden" >
-                <div className="p-4">
-                    <div className="text-6xl font-extrabold text-gray-700 p-6">
-                        {activeRaceData.series.name}: {activeRaceData.number}
-                    </div>
-                    <FleetResultsTable data={activeRaceData.fleets.flatMap((fleet) => (fleet.results))} startTime={null} key={JSON.stringify(activeRaceData)} deleteResult={() => { }} updateResult={() => { }} createResult={() => { }} clubId={clubId} raceId={activeRaceData.id} />
+            <div id="Results" className="hidden signon-height overflow-y-auto" >
+                <div className='p-6 w-full'>
+                    {activeRaceData.fleets.map((fleet, index) => {
+                        return (
+                            <div key={"fleetResults" + index}>
+                                <p className='text-2xl font-bold text-gray-700'>
+                                    {fleet.fleetSettings.name}
+                                </p>
+                                <FleetResultsTable showTime={true} data={fleet.results} startTime={fleet.startTime} key={JSON.stringify(activeRaceData)} deleteResult={deleteResult} updateResult={updateResult} raceId={activeRaceData.id} showEditModal={(id: string) => { showEditModal(id) }} />
+                            </div>
+                        )
+                    })
+                    }
                 </div>
             </div>
             <div id="Guide" className="hidden" >
