@@ -340,7 +340,7 @@ const SignOnPage = () => {
                 <p onClick={() => showPage("Guide")} className=" w-1/4 p-2 m-2 cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-xl px-5 py-2.5 text-center">
                     Guide
                 </p>
-                <p onClick={() => logout()} className="ml-auto w-1/4 p-2 m-2 cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-xl px-5 py-2.5 text-center">
+                <p onClick={() => logout()} className="ml-auto w-1/8 p-2 m-2 cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-xl px-5 py-2.5 text-center">
                     logout
                 </p>
             </div>
