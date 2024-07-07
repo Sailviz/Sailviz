@@ -104,7 +104,10 @@ const RacePage = () => {
         })
 
         //Update database
+        console.log("here")
+
         race.fleets.forEach(fleet => async () => {
+            console.log("here")
             fleet.startTime = localTime
             await DB.updateFleetById(fleet)
         })
@@ -334,7 +337,7 @@ const RacePage = () => {
         const fetchRace = async () => {
             let data = await DB.getRaceById(raceId)
             //sort race results by pursuit position
-
+            console.log(data.fleets[0]?.startTime)
             if (data.fleets[0]?.startTime != 0) {
                 const sortedResults = data.fleets[0]!.results.sort((a: ResultsDataType, b: ResultsDataType) => a.PursuitPosition - b.PursuitPosition);
                 setRace({ ...data, fleets: [{ ...data.fleets[0] as FleetDataType, results: sortedResults }] })
@@ -345,8 +348,8 @@ const RacePage = () => {
                     setRaceState(raceStateType.calculate)
                 }
             } else {
-                const sortedResults = race.fleets[0]!.results.sort((a: ResultsDataType, b: ResultsDataType) => b.boat.py - a.boat.py);
-                setRace({ ...race, fleets: [{ ...race.fleets[0] as FleetDataType, results: sortedResults }] })
+                const sortedResults = data.fleets[0]!.results.sort((a: ResultsDataType, b: ResultsDataType) => b.boat.py - a.boat.py);
+                setRace({ ...data, fleets: [{ ...data.fleets[0] as FleetDataType, results: sortedResults }] })
             }
 
             setSeriesName(await DB.GetSeriesById(data.seriesId).then((res) => { return (res.name) }))
@@ -456,7 +459,7 @@ const RacePage = () => {
                     <ReactSortable handle=".handle" list={race.fleets.flatMap(fleet => fleet.results)} setList={(newState) => setOrder(newState)}>
                         {race.fleets.flatMap(fleet => fleet.results).map((result: ResultsDataType, index) => {
                             return (
-                                <div>
+                                <div key={index}>
                                     {(result.resultCode != "") ?
                                         <div key={index} id={result.id} className={'bg-red-300 border-2 border-pink-500'}>
                                             <div className="flex flex-row m-4 justify-between">
@@ -468,7 +471,7 @@ const RacePage = () => {
                                             </div>
                                         </div>
                                         :
-                                        <div key={index} id={result.id} className={'bg-green-300 border-2 border-pink-500'}>
+                                        <div id={result.id} className={'bg-green-300 border-2 border-pink-500'}>
                                             <div className="flex flex-row m-4 justify-between">
                                                 <h2 className="text-2xl text-gray-700 flex my-auto mr-5"> <span className="handle cursor-row-resize px-3">☰</span>{result.SailNumber} - {result.boat?.name} : {result.Helm} - {result.Crew} -</h2>
                                                 {(raceState == raceStateType.running) ?
