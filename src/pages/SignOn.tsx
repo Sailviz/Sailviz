@@ -546,12 +546,10 @@ const SignOnPage = () => {
             </div>
             <div id="Guide" className="hidden" >
                 <div className=' w-11/12 mx-auto my-3'>
-                    <iframe
-                        className='block w-full'
+                    <embed
                         src="/0.2 Race Sign On Guide.pdf#toolbar=0"
-                        height="800"
+                        height="750" width={1450}
                     />
-
                 </div>
             </div>
         </div>

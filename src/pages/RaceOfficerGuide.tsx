@@ -82,11 +82,10 @@ const RaceOfficerGuide = () => {
                     Back To Home
                 </div>
                 <div className=' w-11/12 h-full mx-auto my-3'>
-                    <iframe
-                        className=' block w-full h-full'
-                        src="/0.2 Race Management Guide.pdf#toolbar=0"
+                    <embed
+                        src="/0.2 Race Sign On Guide.pdf#toolbar=0"
+                        height="750" width={1450}
                     />
-
                 </div>
             </div>
         </Dashboard>
