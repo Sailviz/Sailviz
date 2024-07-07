@@ -116,9 +116,14 @@ const SignOnPage = () => {
             return
         }
         races.forEach(race => {
-            let raceToggle = document.getElementById(race.id + "Switch") as HTMLInputElement
-            if (raceToggle.checked) {
-                createResult(race.id)
+            //check that race hasn't started
+            if (race.fleets.some(fleet => fleet.startTime != 0)) {
+                //don't check for entry choice
+            } else {
+                let raceToggle = document.getElementById(race.id + "Switch") as HTMLInputElement
+                if (raceToggle.checked) {
+                    createResult(race.id)
+                }
             }
         })
         hideAddBoatModal()
