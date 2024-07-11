@@ -4,7 +4,9 @@ import * as DB from '../components/apiMethods';
 import Cookies from "js-cookie";
 
 import { useReactToPrint } from "react-to-print";
-import PaperResultsTable from "../components/PaperResultsTable";
+import PaperResultsTable from "../components/HandicapPaperResultsTable";
+import HandicapPaperResultsTable from "../components/HandicapPaperResultsTable";
+import PursuitPaperResultsTable from "../components/PursuitPaperResultsTable";
 
 const PrintPaperResults = () => {
 
@@ -64,6 +66,7 @@ const PrintPaperResults = () => {
                 Crew: "",
                 boat: {
                     py: 0,
+                    pursuitStartTime: 0,
                 } as BoatDataType,
                 SailNumber: "",
                 finishTime: 0,
@@ -80,7 +83,7 @@ const PrintPaperResults = () => {
             } as ResultsDataType]
 
         }],
-        Type: "",
+        Type: "Handicap",
         seriesId: "",
         series: {} as SeriesDataType
     })
@@ -156,7 +159,11 @@ const PrintPaperResults = () => {
     }
     return (
         <div className="h-full overflow-y-auto p-6">
-            <PaperResultsTable results={race.fleets.flatMap(fleet => fleet.results)} key={JSON.stringify(race)} ref={componentRef} />
+            {race.Type == "Handicap" ?
+                <HandicapPaperResultsTable results={race.fleets.flatMap(fleet => fleet.results)} key={JSON.stringify(race)} ref={componentRef} />
+                :
+                <PursuitPaperResultsTable results={race.fleets.flatMap(fleet => fleet.results)} key={JSON.stringify(race)} ref={componentRef} />
+            }
         </div>
     )
 }

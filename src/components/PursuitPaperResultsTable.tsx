@@ -1,5 +1,5 @@
 import React, { forwardRef, useState } from 'react';
-import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, useReactTable, SortingState } from '@tanstack/react-table'
+import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, useReactTable, SortingState, ColumnDef } from '@tanstack/react-table'
 
 
 const Text = ({ ...props }) => {
@@ -8,6 +8,18 @@ const Text = ({ ...props }) => {
     return (
         <div className=' text-center'>
             {value}
+        </div>
+    );
+};
+
+const Time = ({ ...props }) => {
+    const value = props.getValue()
+    const minutes = Math.floor(value / 60)
+    const seconds = value % 60
+
+    return (
+        <div className=' text-center'>
+            {minutes < 10 ? `0${minutes}` : minutes}:{seconds < 10 ? `0${seconds}` : seconds}
         </div>
     );
 };
@@ -34,17 +46,17 @@ function Sort({ column, table }: { column: any, table: any }) {
 const columnHelper = createColumnHelper<ResultsDataType>()
 
 
-const PaperResultsTable = forwardRef((props: { results: ResultsDataType[] }, ref: any) => {
+const PursuitPaperResultsTable = forwardRef((props: { results: ResultsDataType[] }, ref: any) => {
     let [results, setResults] = useState<ResultsDataType[]>(props.results)
 
 
     //sets sorting to position by default
     const [sorting, setSorting] = useState<SortingState>([{
-        id: "PY",
+        id: "startTime",
         desc: false,
     }]);
 
-    let columns = [
+    let columns: ColumnDef<ResultsDataType, any>[] = [
         columnHelper.accessor("Helm", {
             header: "Helm",
             cell: props => <Text {...props} />,
@@ -68,6 +80,15 @@ const PaperResultsTable = forwardRef((props: { results: ResultsDataType[] }, ref
         }),
     ];
 
+
+    const startTime = columnHelper.accessor((data) => (data.boat?.pursuitStartTime || 0), {
+        header: "Start Time",
+        id: "startTime",
+        cell: props => <Time {...props} />,
+        enableSorting: true
+    })
+    columns.push(startTime)
+
     // add column for each lap
     for (let i = 0; i < 6; i++) {
         const newColumn = columnHelper.display({
@@ -79,33 +100,6 @@ const PaperResultsTable = forwardRef((props: { results: ResultsDataType[] }, ref
         columns.push(newColumn)
     }
 
-    const ElapsedTime = columnHelper.display({
-        header: "Elapsed Time",
-        cell: props => <Empty {...props} />,
-        enableSorting: false
-    })
-    columns.push(ElapsedTime)
-
-    const Seconds = columnHelper.display({
-        header: "Seconds",
-        cell: props => <Empty {...props} />,
-        enableSorting: false
-    })
-    columns.push(Seconds)
-
-    const PY = columnHelper.accessor((data) => (data.boat?.py.toString() || "-"), {
-        header: "PY",
-        cell: props => <Text {...props} />,
-        enableSorting: true
-    })
-    columns.push(PY)
-
-    const Correctedtime = columnHelper.display({
-        header: "Corrected Time",
-        cell: props => <Empty {...props} />,
-        enableSorting: false
-    })
-    columns.push(Correctedtime)
 
     const Position = columnHelper.display({
         header: "Position",
@@ -166,6 +160,6 @@ const PaperResultsTable = forwardRef((props: { results: ResultsDataType[] }, ref
 })
 
 //This fixes a build error
-PaperResultsTable.displayName = 'PaperResultsTable'
+PursuitPaperResultsTable.displayName = 'PursuitPaperResultsTable'
 
-export default PaperResultsTable
+export default PursuitPaperResultsTable
