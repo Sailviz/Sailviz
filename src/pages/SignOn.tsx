@@ -45,9 +45,9 @@ const SignOnPage = () => {
 
     const [activeResult, setActiveResult] = useState<ResultsDataType>({} as ResultsDataType)
 
-    const [options, setOptions] = useState([{ label: "", value: {} }])
+    const [options, setOptions] = useState([{ label: "", value: {} as BoatDataType }])
 
-    const [selectedOption, setSelectedOption] = useState({ label: "", value: {} })
+    const [selectedOption, setSelectedOption] = useState({ label: "", value: {} as BoatDataType })
 
     const [selectedRaces, setSelectedRaces] = useState<boolean[]>([]);
 
@@ -233,7 +233,7 @@ const SignOnPage = () => {
             inputSelect.checked = false
         })
 
-        setSelectedOption({ label: "", value: {} })
+        setSelectedOption({ label: "", value: {} as BoatDataType })
 
 
         const modal = document.getElementById("addModal")
@@ -276,9 +276,9 @@ const SignOnPage = () => {
                 if (data) {
                     let array = [...data]
                     setBoatData(array)
-                    let tempoptions: { label: string; value: {} }[] = []
+                    let tempoptions: { label: string; value: BoatDataType }[] = []
                     array.forEach(boat => {
-                        tempoptions.push({ value: boat, label: boat.name })
+                        tempoptions.push({ value: boat as BoatDataType, label: boat.name })
                     })
                     setOptions(tempoptions)
                 } else {
@@ -423,6 +423,13 @@ const SignOnPage = () => {
                                                 </div>
                                             )
                                         })}
+                                        {race.Type == "Pursuit" ?
+                                            <div className="pl-6 py-auto text-2xl font-bold text-gray-700">
+                                                Start Time: {String(Math.floor((selectedOption.value.pursuitStartTime || 0) / 60)).padStart(2, '0')}:{String((selectedOption.value.pursuitStartTime || 0) % 60).padStart(2, '0')}
+                                            </div>
+                                            :
+                                            <></>
+                                        }
 
                                     </div>
                                 </div>
