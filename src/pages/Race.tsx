@@ -721,7 +721,7 @@ const SignOnPage = () => {
                             </p>
                             <input type="text"
                                 id='OOD'
-                                className="w-full p-2 mx-0 my-2 border-4 rounded focus:border-pink-500 focus:outline-none"
+                                className="w-full p-2 mx-0 my-2 border-4 rounded focus:border-blue-500 focus:outline-none"
                                 defaultValue={race.OOD}
                                 key={race.id}
                                 onChange={(e) => saveRaceSettings(e)}
@@ -736,7 +736,7 @@ const SignOnPage = () => {
                             </p>
                             <input type="text"
                                 id='AOD'
-                                className="w-full p-2 mx-0 my-2 border-4 rounded focus:border-pink-500 focus:outline-none"
+                                className="w-full p-2 mx-0 my-2 border-4 rounded focus:border-blue-500 focus:outline-none"
                                 defaultValue={race.AOD}
                                 key={race.id}
                                 onChange={saveRaceSettings}
@@ -752,7 +752,7 @@ const SignOnPage = () => {
                             </p>
                             <input type="datetime-local"
                                 id='Time'
-                                className="w-full p-2 mx-0 my-2 border-4 rounded focus:border-pink-500 focus:outline-none"
+                                className="w-full p-2 mx-0 my-2 border-4 rounded focus:border-blue-500 focus:outline-none"
                                 defaultValue={dayjs(race.Time).format('YYYY-MM-DDTHH:mm')}
                                 key={race.id}
                                 onChange={saveRaceDate}
@@ -767,7 +767,7 @@ const SignOnPage = () => {
                             </p>
                             <input type="text"
                                 id='SO'
-                                className="w-full p-2 mx-0 my-2 border-4 rounded focus:border-pink-500 focus:outline-none"
+                                className="w-full p-2 mx-0 my-2 border-4 rounded focus:border-blue-500 focus:outline-none"
                                 defaultValue={race.SO}
                                 key={race.id}
                                 onChange={saveRaceSettings}
@@ -782,7 +782,7 @@ const SignOnPage = () => {
                             </p>
                             <input type="text"
                                 id='ASO'
-                                className="w-full p-2 mx-0 my-2 border-4 rounded focus:border-pink-500 focus:outline-none"
+                                className="w-full p-2 mx-0 my-2 border-4 rounded focus:border-blue-500 focus:outline-none"
                                 defaultValue={race.ASO}
                                 key={race.id}
                                 onChange={saveRaceSettings}
@@ -801,7 +801,19 @@ const SignOnPage = () => {
                                 key={race.Type}
                                 onChange={saveRaceType}
                                 className='w-full'
-                                options={raceOptions} />
+                                options={raceOptions}
+                                styles={{
+                                    control: (baseStyles, state) => ({
+                                        ...baseStyles,
+                                        margin: '12px 0px',
+                                        border: state.isFocused ? '4px solid #2684ff' : '4px solid #e5e7eb',
+                                        borderRadius: '4px',
+                                        '&:hover': {
+                                            border: '4px solid #e5e7eb',
+                                        },
+                                    }),
+                                }}
+                            />
                         </div>
 
                     </div>
