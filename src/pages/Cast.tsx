@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Script from 'next/script';
 import * as DB from '../components/apiMethods'
-import FleetResultsTable from '../components/FleetResultsTable';
+import FleetResultsTable from '../components/FleetHandicapResultsTable';
 import SeriesResultsTable from '../components/SeriesResultsTable';
 import RaceTimer from "../components/HRaceTimer"
 import LiveFleetResultsTable from '../components/LiveFleetResultsTable';

@@ -4,7 +4,7 @@ import * as DB from '../components/apiMethods';
 import Cookies from "js-cookie";
 import SignOnTable from "../components/SignOnTable";
 import Select from 'react-select';
-import FleetResultsTable from "../components/FleetResultsTable";
+import FleetResultsTable from "../components/FleetHandicapResultsTable";
 import Switch from "../components/Switch";
 
 

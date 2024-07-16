@@ -5,7 +5,7 @@ import { useRouter } from "next/router";
 import * as DB from '../../components/apiMethods';
 import LiveFleetResultsTable from "../../components/LiveFleetResultsTable";
 import RaceTimer from "../../components/HRaceTimer"
-import FleetResultsTable from "../../components/FleetResultsTable";
+import FleetResultsTable from "../../components/FleetHandicapResultsTable";
 
 const ClubPage = () => {
     const router = useRouter()
