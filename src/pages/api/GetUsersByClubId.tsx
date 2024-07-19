@@ -12,7 +12,6 @@ async function getUsers(clubId: string) {
             id: true,
             username: false,
             password: false,
-            settings: true,
             roles: true,
             clubId: true
         }
