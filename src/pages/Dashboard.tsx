@@ -2,8 +2,8 @@ import React, { ChangeEvent, MouseEventHandler, useEffect, useState } from "reac
 import Router, { useRouter } from "next/router"
 import * as DB from '../components/apiMethods';
 import Cookies from "js-cookie";
-import dayjs from 'dayjs';
-import Select from 'react-select';
+import * as Fetcher from '../components/Fetchers';
+
 
 import Dashboard from "../components/Dashboard";
 
@@ -20,29 +20,8 @@ const SignOnPage = () => {
 
     const query = router.query
 
-    var [clubId, setClubId] = useState<string>("invalid")
-
-    var [club, setClub] = useState<ClubDataType>({
-        id: "",
-        name: "",
-        settings: {
-            clockIP: "",
-            pursuitLength: 0,
-            hornIP: "",
-            clockOffset: 0,
-        },
-        series: [],
-        boats: [],
-    })
-
-    var [user, setUser] = useState<UserDataType>({
-        id: "",
-        displayName: "",
-        settings: {},
-        permLvl: 0,
-        clubId: ""
-
-    })
+    const { user, userIsError, userIsValidating } = Fetcher.UseUser()
+    const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
 
 
     var [todaysRaces, setTodaysRaces] = useState<NextRaceDataType[]>([])
@@ -57,9 +36,9 @@ const SignOnPage = () => {
             //show error saying data is invalid
             return
         }
-        let series = await DB.createSeries(clubId, name)
+        let series = await DB.createSeries(club.id, name)
         for (let i = 0; i < numberOfRaces; i++) {
-            await DB.createRace(clubId, series.id)
+            await DB.createRace(club.id, series.id)
         }
         hideCreateModal()
     }
@@ -75,51 +54,11 @@ const SignOnPage = () => {
         modal?.classList.add("hidden")
     }
 
-    useEffect(() => {
-        setClubId(Cookies.get('clubId') || "")
-
-    }, [router])
 
     useEffect(() => {
-        if (clubId != "") {
-            //catch if not fully updated
-            if (clubId == "invalid") {
-                return
-            }
-
-            const fetchClub = async () => {
-                var data = await DB.GetClubById(clubId)
-                if (data) {
-                    setClub(data)
-                } else {
-                    console.log("could not fetch club settings")
-                }
-
-            }
-            fetchClub()
-
-            const fetchUser = async () => {
-                var userid = Cookies.get('userId')
-                if (userid == undefined) return
-                var data = await DB.GetUserById(userid)
-                if (data) {
-                    setUser(data)
-                    if (data.permLvl == 2) {
-                        router.push('/SignOn')
-                    }
-                    if (data.permLvl == 0) {
-                        router.push('/AdminDashboard')
-                    }
-                } else {
-                    console.log("could not fetch club settings")
-                }
-
-            }
-            fetchUser()
-
-
+        if (club?.id != undefined) {
             const fetchTodaysRaces = async () => {
-                var data = await DB.getTodaysRaceByClubId(clubId)
+                var data = await DB.getTodaysRaceByClubId(club.id)
                 if (data) {
                     setTodaysRaces(data)
                 } else {
@@ -132,12 +71,12 @@ const SignOnPage = () => {
             console.log("user not signed in")
             router.push("/")
         }
-    }, [clubId])
+    }, [club])
 
 
     useEffect(() => {
         let timer1 = setTimeout(async () => {
-            var data = await DB.getTodaysRaceByClubId(clubId)
+            var data = await DB.getTodaysRaceByClubId(club.id)
             if (data) {
                 setTodaysRaces(data)
             } else {
@@ -150,7 +89,7 @@ const SignOnPage = () => {
     }, [todaysRaces]);
 
     return (
-        <Dashboard club={club.name} displayName={user.displayName}>
+        <Dashboard >
             <div id="editModal" className="hidden fixed z-10 left-0 top-0 w-full h-full overflow-auto bg-gray-400 backdrop-blur-sm bg-opacity-20">
                 <div className="mx-40 my-20 px-10 py-5 border w-4/5 bg-gray-300 rounded-sm">
                     <div className="text-6xl font-extrabold text-gray-700 p-6 float-right cursor-pointer" onClick={hideCreateModal}>&times;</div>

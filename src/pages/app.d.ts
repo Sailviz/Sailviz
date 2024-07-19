@@ -106,9 +106,25 @@ type AvailableCastType = {
 type UserDataType = {
   id: string;
   displayName: string;
-  settings: object;
-  permLvl: number;
+  username: string;
+  roles: RoleDataType[];
   clubId: string;
+  startPage: string;
+  uuid: string;
+};
+
+type RoleDataType = {
+  id: string;
+  name: string;
+  clubId: string;
+  permissions: {
+    allowed: PermissionType[];
+  };
+};
+
+type PermissionType = {
+  value: string;
+  label: string;
 };
 
 type FleetDataType = {

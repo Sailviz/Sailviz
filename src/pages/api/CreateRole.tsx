@@ -1,5 +1,6 @@
 import prisma from '../../components/prisma'
 import type { NextApiRequest, NextApiResponse } from 'next'
+
 import assert from 'assert';
 
 async function findClub(clubId: string) {
@@ -11,21 +12,18 @@ async function findClub(clubId: string) {
     return result;
 }
 
-async function createUser(clubId: string) {
-    var user = await prisma.user.create({
+async function createRole(clubId: string) {
+    var user = await prisma.role.create({
         data: {
-            username: "",
-            displayName: "",
-            password: null,
             clubId: clubId,
-            roles: {},
-            startPage: 'Dashboard',
+            name: "",
+            permissions: {},
         },
     })
     return user;
 }
 
-const CreateUser = async (req: NextApiRequest, res: NextApiResponse) => {
+const CreateRole = async (req: NextApiRequest, res: NextApiResponse) => {
     if (req.method === 'POST') {
         // check if we have all data.
         // The website stops this, but just in case
@@ -36,7 +34,6 @@ const CreateUser = async (req: NextApiRequest, res: NextApiResponse) => {
             res.status(400).json({ error: true, message: "information missing" });
             return;
         }
-
         var clubId = req.body.clubId
 
         //check club exists
@@ -46,16 +43,16 @@ const CreateUser = async (req: NextApiRequest, res: NextApiResponse) => {
             return;
         }
 
-        var user = await createUser(club.id)
-        if (user) {
-            res.json({ error: false, user: user });
+        var role = createRole(club.id)
+        if (role) {
+            res.json({ error: false, role: role });
             return;
         }
         else {
-            res.json({ error: true, message: 'Something went wrong crating user account' });
+            res.json({ error: true, message: 'Something went wrong crating role account' });
         }
 
     }
 };
 
-export default CreateUser
+export default CreateRole

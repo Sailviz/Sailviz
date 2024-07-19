@@ -4,6 +4,7 @@ import * as DB from '../components/apiMethods';
 import Dashboard from "../components/Dashboard";
 import RaceTimer from "../components/HRaceTimer"
 import Cookies from "js-cookie";
+import * as Fetcher from '../components/Fetchers';
 
 enum raceStateType {
     running,
@@ -33,8 +34,10 @@ const RacePage = () => {
 
     const query = router.query
 
+    const { user, userIsError, userIsValidating } = Fetcher.UseUser()
+    const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
+
     var [seriesName, setSeriesName] = useState("")
-    var [clubId, setClubId] = useState<string>("invalid")
 
     var [race, setRace] = useState<RaceDataType>(({
         id: "",
@@ -51,28 +54,6 @@ const RacePage = () => {
     }))
 
     var [lastAction, setLastAction] = useState<{ type: string, resultId: string }>({ type: "", resultId: "" })
-
-    var [club, setClub] = useState<ClubDataType>({
-        id: "",
-        name: "",
-        settings: {
-            clockIP: "",
-            hornIP: "",
-            pursuitLength: 0,
-            clockOffset: 0
-        },
-        series: [],
-        boats: [],
-    })
-
-    var [user, setUser] = useState<UserDataType>({
-        id: "",
-        displayName: "",
-        settings: {},
-        permLvl: 0,
-        clubId: ""
-
-    })
 
     const [raceState, setRaceState] = useState<raceStateType[]>([])
     const [activeResult, setActiveResult] = useState<ResultsDataType>({
@@ -569,46 +550,6 @@ const RacePage = () => {
         }
     }, [mode])
 
-    useEffect(() => {
-        setClubId(Cookies.get('clubId') || "")
-    }, [])
-
-    useEffect(() => {
-        if (clubId != "") {
-            //catch if not fully updated
-            if (clubId == "invalid") {
-                return
-            }
-            const fetchClub = async () => {
-                var data = await DB.GetClubById(clubId)
-                if (data) {
-                    console.log(data)
-                    setClub(data)
-                } else {
-                    console.log("could not fetch club settings")
-                }
-
-            }
-            fetchClub()
-
-            const fetchUser = async () => {
-                var userid = Cookies.get('userId')
-                if (userid == undefined) return
-                var data = await DB.GetUserById(userid)
-                if (data) {
-                    setUser(data)
-                } else {
-                    console.log("could not fetch club settings")
-                }
-
-            }
-            fetchUser()
-        } else {
-            console.log("user not signed in")
-            router.push("/")
-        }
-    }, [clubId])
-
     // const [time, setTime] = useState("");
 
     // useEffect(() => {
@@ -642,7 +583,7 @@ const RacePage = () => {
     }
 
     return (
-        <Dashboard club={club.name} displayName={user.displayName}>
+        <Dashboard >
             <audio id="Beep" src=".\beep-6.mp3" ></audio>
             <audio id="Countdown" src=".\Countdown.mp3" ></audio>
             <div className="w-full flex flex-col items-center justify-start panel-height">

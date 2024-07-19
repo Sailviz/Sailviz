@@ -9,6 +9,8 @@ import FleetHandicapResultsTable from '../components/FleetHandicapResultsTable';
 import FleetPursuitResultsTable from '../components/FleetPursuitResultsTable';
 import Dashboard from "../components/Dashboard";
 import Switch from "../components/Switch";
+import * as Fetcher from '../components/Fetchers';
+import { AVAILABLE_PERMISSIONS, userHasPermission } from "../components/helpers/users";
 
 const raceOptions = [{ value: "Pursuit", label: "Pursuit" }, { value: "Handicap", label: "Handicap" }]
 
@@ -26,33 +28,12 @@ const SignOnPage = () => {
 
     const query = router.query
 
+    const { user, userIsError, userIsValidating } = Fetcher.UseUser()
+    const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
+
     const [isLoading, setLoading] = useState(true)
 
     const [boatData, setBoatData] = useState<BoatDataType[]>([])
-
-    var [clubId, setClubId] = useState<string>("invalid")
-
-    var [club, setClub] = useState<ClubDataType>({
-        id: "",
-        name: "",
-        settings: {
-            clockIP: "",
-            pursuitLength: 0,
-            hornIP: "",
-            clockOffset: 0,
-        },
-        series: [],
-        boats: [],
-    })
-
-    var [user, setUser] = useState<UserDataType>({
-        id: "",
-        displayName: "",
-        settings: {},
-        permLvl: 0,
-        clubId: ""
-
-    })
 
     const [seriesName, setSeriesName] = useState("")
 
@@ -472,7 +453,6 @@ const SignOnPage = () => {
 
     useEffect(() => {
         let raceId = query.race as string
-        setClubId(Cookies.get('clubId') || "")
         const getRace = async () => {
             const racedata = await DB.getRaceById(raceId)
             setRace(racedata)
@@ -488,38 +468,10 @@ const SignOnPage = () => {
     }, [router])
 
     useEffect(() => {
-        if (clubId != "") {
-            //catch if not fully updated
-            if (clubId == "invalid") {
-                return
-            }
-
-            const fetchClub = async () => {
-                var data = await DB.GetClubById(clubId)
-                if (data) {
-                    setClub(data)
-                } else {
-                    console.log("could not fetch club settings")
-                }
-
-            }
-            fetchClub()
-
-            const fetchUser = async () => {
-                var userid = Cookies.get('userId')
-                if (userid == undefined) return
-                var data = await DB.GetUserById(userid)
-                if (data) {
-                    setUser(data)
-                } else {
-                    console.log("could not fetch club settings")
-                }
-
-            }
-            fetchUser()
+        if (club?.id != undefined) {
 
             const fetchBoats = async () => {
-                var data = await DB.getBoats(clubId)
+                var data = await DB.getBoats(club.id)
                 if (data) {
                     let array = [...data]
                     setBoatData(array)
@@ -536,11 +488,8 @@ const SignOnPage = () => {
             fetchBoats()
             setLoading(false)
 
-        } else {
-            console.log("user not signed in")
-            router.push("/")
         }
-    }, [clubId])
+    }, [club])
 
 
     useEffect(() => {
@@ -557,13 +506,13 @@ const SignOnPage = () => {
             clearTimeout(timer1);
         }
     }, [race]);
-    if (isLoading) {
+    if (isLoading || userIsValidating || clubIsValidating) {
         return (
-            <p>Loading...</p>
+            <p></p>
         )
     }
     return (
-        <Dashboard club={club.name} displayName={user.displayName}>
+        <Dashboard >
             <div id="race" className='h-full w-full overflow-y-auto'>
                 <div id="editModal" className={"fixed z-10 left-0 top-0 w-full h-full overflow-auto bg-gray-400 backdrop-blur-sm bg-opacity-20 hidden"} key={activeResult.id}>
                     <div className="mx-40 my-20 px-10 py-5 border w-4/5 bg-gray-300 rounded-sm">
@@ -827,19 +776,24 @@ const SignOnPage = () => {
                             Print Race Sheet
                         </p>
                     </div>
-                    <div className="p-6 w-full">
-                        <label className="">
-                            <p className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
-                                Upload Entries
-                            </p>
-                            <input
-                                type="file"
-                                accept=".csv"
-                                onChange={entryFileUploadHandler}
-                                className="display-none"
-                            />
-                        </label>
-                    </div>
+
+                    {userHasPermission(user, AVAILABLE_PERMISSIONS.UploadEntires) ?
+                        <div className="p-6 w-full">
+                            <label className="">
+                                <p className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
+                                    Upload Entries
+                                </p>
+                                <input
+                                    type="file"
+                                    accept=".csv"
+                                    onChange={entryFileUploadHandler}
+                                    className="display-none"
+                                />
+                            </label>
+                        </div>
+                        :
+                        <></>
+                    }
 
                     <div className="p-6 w-full">
                     </div>
@@ -858,9 +812,13 @@ const SignOnPage = () => {
                                     <p onClick={() => createResult(fleet.id)} id="RacePanelButton" className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0 my-5">
                                         Add Entry
                                     </p>
-                                    <p onClick={downloadResults} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
-                                        Download Results
-                                    </p>
+                                    {userHasPermission(user, AVAILABLE_PERMISSIONS.DownloadResults) ?
+                                        <p onClick={downloadResults} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
+                                            Download Results
+                                        </p>
+                                        :
+                                        <></>
+                                    }
                                 </div>
                             )
                         })

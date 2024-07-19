@@ -8,7 +8,7 @@ const saltRounds = 10;
 const jwtSecret = process.env.jwtSecret;
 
 async function findUser(uuid: string) {
-    const result = await prisma.users.findUnique({
+    const result = await prisma.user.findUnique({
         where: {
             uuid: uuid,
         },

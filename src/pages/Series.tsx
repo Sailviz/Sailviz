@@ -7,9 +7,7 @@ import SeriesResultsTable from "../components/SeriesResultsTable";
 import Dashboard from "../components/Dashboard";
 import SeriesTable from "../components/SeriesTable";
 import FleetTable from "../components/FleetTable";
-import Switch from "../components/Switch";
-import { set } from "cypress/types/lodash";
-
+import * as Fetcher from '../components/Fetchers';
 
 const raceOptions = [{ value: "Pursuit", label: "Pursuit" }, { value: "Handicap", label: "Handicap" }]
 
@@ -19,15 +17,11 @@ const SignOnPage = () => {
 
     const query = router.query
 
-    var [clubId, setClubId] = useState<string>("invalid")
+    const { user, userIsError, userIsValidating } = Fetcher.UseUser()
+    const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
 
     var [activeRaceId, setActiveRaceId] = useState("")
     var [activeFleetId, setActiveFleetId] = useState("")
-
-
-    var [club, setClub] = useState<ClubDataType>({} as ClubDataType)
-
-    var [user, setUser] = useState<UserDataType>({} as UserDataType)
 
     const [boatData, setBoatData] = useState<BoatDataType[]>([])
 
@@ -54,7 +48,7 @@ const SignOnPage = () => {
     })
 
     const createRace = async () => {
-        var race = await DB.createRace(clubId, series.id)
+        var race = await DB.createRace(club.id, series.id)
         console.log(race)
 
         setSeries(await DB.GetSeriesById(series.id))
@@ -153,7 +147,6 @@ const SignOnPage = () => {
 
     useEffect(() => {
         let seriesId = query.series as string
-        setClubId(Cookies.get('clubId') || "")
         const getSeries = async () => {
             await DB.GetSeriesById(seriesId).then((seriesdata: SeriesDataType) => {
                 setSeries(seriesdata)
@@ -161,7 +154,7 @@ const SignOnPage = () => {
         }
 
         const getBoats = async () => {
-            var data = await DB.getBoats(clubId)
+            var data = await DB.getBoats(club.id)
             if (data) {
                 let array = [...data]
                 setBoatData(array)
@@ -179,52 +172,20 @@ const SignOnPage = () => {
             getSeries()
             getBoats()
         }
-    }, [router, query.series])
-
-    useEffect(() => {
-        if (clubId != "") {
-            //catch if not fully updated
-            if (clubId == "invalid") {
-                return
-            }
-
-            const fetchClub = async () => {
-                var data = await DB.GetClubById(clubId)
-                if (data) {
-                    setClub(data)
-                } else {
-                    console.log("could not fetch club settings")
-                }
-
-            }
-            fetchClub()
-
-            const fetchUser = async () => {
-                var userid = Cookies.get('userId')
-                if (userid == undefined) return
-                var data = await DB.GetUserById(userid)
-                if (data) {
-                    setUser(data)
-                } else {
-                    console.log("could not fetch club settings")
-                }
-
-            }
-            fetchUser()
-
-        } else {
-            console.log("user not signed in")
-            router.push("/")
-        }
-    }, [clubId, router])
+    }, [club])
 
     useEffect(() => {
         console.log("stuff updated")
         console.log(selectedOption)
     }, [selectedOption])
 
+    if (userIsValidating || clubIsValidating) {
+        return (
+            <p></p>
+        )
+    }
     return (
-        <Dashboard club={club.name} displayName={user.displayName}>
+        <Dashboard >
             <div className='panel-height w-full overflow-y-auto'>
                 <div id="fleetEditModal" className={"fixed z-10 left-0 top-0 w-full h-full overflow-auto bg-gray-400 backdrop-blur-sm bg-opacity-20" + (fleetModal ? "" : " hidden")} key={activeRaceId}>
                     <div className="mx-40 my-20 px-10 py-5 border w-4/5 bg-gray-300 rounded-sm">
