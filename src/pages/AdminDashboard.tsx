@@ -436,6 +436,10 @@ const AdminDashboard = ({ clubId, userId }: { clubId: string, userId: string }) 
                                         <Select
                                             id="editRoles"
                                             className=' w-56 h-full text-3xl'
+                                            isMulti={true}
+                                            options={roles.map((x: RoleDataType) => { return { value: x, label: x.name } }) as any}
+                                            onChange={(e) => setActiveUser({ ...activeUser, roles: e.map((x: any) => x.value) }) as any}
+                                            value={activeUser.roles?.map((x: RoleDataType) => { return { value: x, label: x.name } }) as any}
                                         />
                                     </div>
                                 </div>
