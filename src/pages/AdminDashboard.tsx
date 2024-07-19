@@ -10,11 +10,12 @@ import UsersTable from '../components/UsersTable';
 import RoleTable from '../components/RoleTable';
 import { mutate } from 'swr';
 import * as Fetcher from '../components/Fetchers';
-import { AVAILABLE_PERMISSIONS } from '../components/helpers/users';
+import { PERMISSIONS } from '../components/helpers/users';
 
 
 
 const AdminDashboard = ({ clubId, userId }: { clubId: string, userId: string }) => {
+    console.log(PERMISSIONS)
     const router = useRouter()
     const { user, userIsError, userIsValidating } = Fetcher.UseUser()
     const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
@@ -494,9 +495,9 @@ const AdminDashboard = ({ clubId, userId }: { clubId: string, userId: string }) 
                                             id="editRoles"
                                             className=' w-56 h-full text-3xl'
                                             isMulti={true}
-                                            options={AVAILABLE_PERMISSIONS}
+                                            options={PERMISSIONS}
                                             onChange={(e) => setActiveRole({ ...activeRole, permissions: { allowed: e.map((x: any) => x) } })}
-                                            value={activeRole.permissions?.allowed?.map((x: PermissionType) => { return AVAILABLE_PERMISSIONS.find((y: any) => y.value == x.value) })}
+                                            value={activeRole.permissions?.allowed?.map((x: PermissionType) => { return PERMISSIONS.find((y: any) => y.value == x.value) })}
                                         />
                                     </div>
                                 </div>
