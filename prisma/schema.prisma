@@ -1,5 +1,6 @@
 generator client {
   provider = "prisma-client-js"
+  previewFeatures = ["omitApi"]
 }
 
 datasource db {
@@ -12,7 +13,7 @@ model User {
   id          String  @id @unique @default(uuid())
   displayName String
   username    String  @unique
-  password    String
+  password    String?
   club        Club    @relation(fields: [clubId], references: [id])
   clubId      String
   uuid        String? @unique

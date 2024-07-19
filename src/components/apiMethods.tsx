@@ -728,3 +728,117 @@ export async function GetRolesByClubId(clubId: string): Promise<RoleDataType[]> 
 export function hasPermission() {
     console.log("hasPermission")
 };
+
+export async function createUser(clubId: string): Promise<UserDataType[]> {
+    const body = {
+        clubId: clubId,
+    }
+    return await fetch(`${server}/api/CreateUser`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+    })
+        .then((res) => res.json())
+        .then(async (data) => {
+            if (data && data.error) {
+                console.log(data.message)
+            } else {
+                return data.user
+            }
+        });
+};
+
+export async function updateUser(user: UserDataType): Promise<UserDataType[]> {
+    const body = {
+        user: user,
+    }
+    return await fetch(`${server}/api/UpdateUserById`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+    })
+        .then((res) => res.json())
+        .then(async (data) => {
+            if (data && data.error) {
+                console.log(data.message)
+            } else {
+                return data.user
+            }
+        });
+};
+
+export async function deleteUser(user: UserDataType): Promise<UserDataType[]> {
+    const body = {
+        user: user,
+    }
+    return await fetch(`${server}/api/DeleteUserById`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+    })
+        .then((res) => res.json())
+        .then(async (data) => {
+            if (data && data.error) {
+                console.log(data.message)
+            } else {
+                return data.user
+            }
+        });
+};
+
+export async function createRole(clubId: string) {
+    const body = {
+        clubId: clubId,
+    }
+    return await fetch(`${server}/api/CreateRole`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+    })
+        .then((res) => res.json())
+        .then(async (data) => {
+            if (data && data.error) {
+                console.log(data.message)
+            } else {
+                return data.role
+            }
+        });
+};
+
+export async function updateRole(role: RoleDataType): Promise<RoleDataType[]> {
+    const body = {
+        role: role,
+    }
+    return await fetch(`${server}/api/UpdateRoleById`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+    })
+        .then((res) => res.json())
+        .then(async (data) => {
+            if (data && data.error) {
+                console.log(data.message)
+            } else {
+                return data.role
+            }
+        });
+};
+
+export async function deleteRole(role: RoleDataType): Promise<RoleDataType[]> {
+    const body = {
+        role: role,
+    }
+    return await fetch(`${server}/api/DeleteRoleById`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+    })
+        .then((res) => res.json())
+        .then(async (data) => {
+            if (data && data.error) {
+                console.log(data.message)
+            } else {
+                return data.role
+            }
+        });
+};

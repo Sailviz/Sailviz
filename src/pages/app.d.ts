@@ -104,20 +104,19 @@ type AvailableCastType = {
 };
 
 type UserDataType = {
-  hasPermission(): any;
   id: string;
   displayName: string;
   username: string;
   roles: RoleDataType[];
   clubId: string;
   startPage: string;
+  uuid: string;
 };
 
 type RoleDataType = {
   id: string;
   name: string;
   clubId: string;
-  uuid: string;
   permissions: object;
 };
 

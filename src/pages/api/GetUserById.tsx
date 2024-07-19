@@ -7,13 +7,11 @@ async function getUser(id: string) {
         where: {
             id: id
         },
-        select: {
-            displayName: true,
-            id: true,
-            username: false,
-            password: false,
-            roles: true,
-            clubId: true
+        omit: {
+            password: true
+        },
+        include: {
+            roles: true
         }
     })
     if (result == null) {

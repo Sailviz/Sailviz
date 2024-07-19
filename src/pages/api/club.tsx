@@ -16,7 +16,6 @@ async function getClub(id: string) {
 const GetClubById = async (req: NextApiRequest, res: NextApiResponse) => {
     if (req.method === 'GET') {
         var id = req.cookies.clubId
-        console.log(id)
         if (id == null) {
             res.status(400).end()
             return
