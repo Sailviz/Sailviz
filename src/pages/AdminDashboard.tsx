@@ -1,10 +1,7 @@
 import { useRouter } from 'next/router'
-import type { InferGetServerSidePropsType, GetServerSideProps } from 'next'
 import { ChangeEvent, useEffect, useState, useId, useCallback } from 'react';
 import Dashboard from '../components/Dashboard'
 import Select from 'react-select';
-import dayjs, { unix } from 'dayjs';
-import SeriesTable from '../components/SeriesTable';
 import ClubTable from '../components/ClubTable';
 import BoatTable from '../components/BoatTable';
 import * as DB from '../components/apiMethods';
@@ -13,7 +10,7 @@ import UsersTable from '../components/UsersTable';
 import RoleTable from '../components/RoleTable';
 import { mutate } from 'swr';
 import * as Fetcher from '../components/Fetchers';
-import { create } from 'cypress/types/lodash';
+import { AVAILABLE_PERMISSIONS } from '../components/helpers/users';
 
 
 
@@ -492,6 +489,10 @@ const AdminDashboard = ({ clubId, userId }: { clubId: string, userId: string }) 
                                         <Select
                                             id="editRoles"
                                             className=' w-56 h-full text-3xl'
+                                            isMulti={true}
+                                            options={AVAILABLE_PERMISSIONS}
+                                            onChange={(e) => setActiveRole({ ...activeRole, permissions: { allowed: e.map((x: any) => x) } })}
+                                            value={activeRole.permissions?.allowed?.map((x: PermissionType) => { return AVAILABLE_PERMISSIONS.find((y: any) => y.value == x.value) })}
                                         />
                                     </div>
                                 </div>

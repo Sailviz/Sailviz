@@ -117,7 +117,14 @@ type RoleDataType = {
   id: string;
   name: string;
   clubId: string;
-  permissions: object;
+  permissions: {
+    allowed: PermissionType[];
+  };
+};
+
+type PermissionType = {
+  value: string;
+  label: string;
 };
 
 type FleetDataType = {
