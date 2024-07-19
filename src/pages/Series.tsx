@@ -172,13 +172,18 @@ const SignOnPage = () => {
             getSeries()
             getBoats()
         }
-    }, [router, query.series])
+    }, [club])
 
     useEffect(() => {
         console.log("stuff updated")
         console.log(selectedOption)
     }, [selectedOption])
 
+    if (userIsValidating || clubIsValidating) {
+        return (
+            <p></p>
+        )
+    }
     return (
         <Dashboard >
             <div className='panel-height w-full overflow-y-auto'>
