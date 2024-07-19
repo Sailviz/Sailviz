@@ -32,7 +32,6 @@ async function createUser(displayName: string, username: string, password: strin
             username: username,
             displayName: displayName,
             password: hash,
-            settings: {},
             clubId: clubId,
             roles: {},
             startPage: 'Dashboard',
