@@ -1,6 +1,6 @@
 services:
   front:
-    image: ghcr.io/alex40144/sailingracemanager:main
+    image: ghcr.io/alex40144/sailviz:main
     depends_on:
       mysql:
         condition: service_healthy
