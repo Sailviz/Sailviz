@@ -15,7 +15,6 @@ import { PERMISSIONS } from '../components/helpers/users';
 
 
 const AdminDashboard = ({ clubId, userId }: { clubId: string, userId: string }) => {
-    console.log(PERMISSIONS)
     const router = useRouter()
     const { user, userIsError, userIsValidating } = Fetcher.UseUser()
     const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
