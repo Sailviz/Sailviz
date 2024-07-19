@@ -1,19 +1,17 @@
 import prisma from '../../components/prisma'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import assert from 'assert';
-import { createRace } from '../../components/apiMethods';
 
-
-async function findRace(raceId: any) {
-    var result = await prisma.race.findUnique({
+async function findFleet(fleetId: string) {
+    var result = await prisma.fleet.findUnique({
         where: {
-            id: raceId
+            id: fleetId
         },
     })
     return result;
 }
 
-async function createEntry(raceId: string,) {
+async function createEntry(fleetId: string) {
     var res = await prisma.result.create({
         data: {
             Helm: "",
@@ -21,46 +19,48 @@ async function createEntry(raceId: string,) {
             SailNumber: "",
             finishTime: 0,
             CorrectedTime: 0,
-            lapTimes: {
-                "times": [],
-                "number": 0,
-            },
-            Position: 0,
-            race: {
+            PursuitPosition: 0,
+            HandicapPosition: 0,
+            isDeleted: false,
+            fleet: {
                 connect: {
-                    id: raceId
+                    id: fleetId
                 }
             },
-            boat: {}
+            boat: {},
+            laps: {},
+            resultCode: "",
+        },
+        include: {
+            laps: true,
         }
     })
     return res;
 }
 
-
-const CreateRace = async (req: NextApiRequest, res: NextApiResponse) => {
+const CreateResult = async (req: NextApiRequest, res: NextApiResponse) => {
     if (req.method === 'POST') {
         // check if we have all data.
         // The website stops this, but just in case
         try {
-            assert.notStrictEqual(undefined, req.body.raceId, 'Id required');
+            assert.notStrictEqual(undefined, req.body.fleetId, 'Id required');
 
         } catch (bodyError) {
             res.json({ error: true, message: "information missing" });
             return;
         }
 
-        var raceId = req.body.raceId
-        var race = await findRace(raceId)
+        var fleetId = req.body.fleetId
 
-        if (race) {
-            var result = await createEntry(raceId)
-            res.json({ error: false, result: result });
+        var fleet = await findFleet(fleetId)
+        if (!fleet) {
+            res.json({ error: true, message: 'Could not find fleet' });
+            return
         }
-        else {
-            res.json({ error: true, message: 'Could not find series' });
-        }
+        var result = await createEntry(fleetId)
+        res.json({ error: false, result: result });
     }
-};
 
-export default CreateRace
+}
+
+export default CreateResult

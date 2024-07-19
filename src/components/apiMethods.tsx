@@ -185,6 +185,21 @@ export async function getNextRaceByClubId(clubId: string): Promise<NextRaceDataT
         });
 };
 
+export async function GetResultById(resultId: string): Promise<ResultsDataType> {
+    const body = {
+        "id": resultId
+    }
+    return await fetch(`/api/GetResultById`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+    })
+        .then((res) => res.json())
+        .then(async (data) => {
+            return data.result
+        });
+};
+
 export async function getTodaysRaceByClubId(clubId: string): Promise<NextRaceDataType[]> {
     const body = {
         "clubId": clubId
@@ -220,11 +235,12 @@ export async function updateBoatById(boatData: BoatDataType) {
         });
 };
 
-export async function createBoat(boatName: string, crew: number, py: number, clubId: string): Promise<BoatDataType> {
+export async function createBoat(boatName: string, crew: number, py: number, pursuitStartTime: number, clubId: string): Promise<BoatDataType> {
     const body = {
         "name": boatName,
         "crew": crew,
         "py": py,
+        "pursuitStartTime": pursuitStartTime,
         "clubId": clubId
     }
     return await fetch(`/api/CreateBoat`, {
@@ -363,22 +379,6 @@ export async function deleteRace(id: string): Promise<RaceDataType> {
         });
 };
 
-export async function getRYAPY(): Promise<BoatDataType[]> {
-
-    return await fetch(`/api/GetRYAPY`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
-    })
-        .then((res) => res.json())
-        .then(async (data) => {
-            if (data && data.error) {
-                console.log(data.message)
-            } else {
-                return data.boats
-            }
-        });
-};
-
 export async function getClubByName(club: string): Promise<ClubDataType> {
     const body = {
         "name": club,
@@ -419,9 +419,9 @@ export async function setBoats(clubId: string, data: BoatDataType[]): Promise<Cl
         });
 };
 
-export async function createResult(raceId: string): Promise<ResultsDataType> {
+export async function createResult(fleetId: string): Promise<ResultsDataType> {
     const body = {
-        "raceId": raceId,
+        "fleetId": fleetId
     }
     return await fetch(`/api/CreateResult`, {
         method: 'POST',
@@ -474,6 +474,198 @@ export async function updateResult(result: ResultsDataType): Promise<RaceDataTyp
                 console.log(data.message)
             } else {
                 return data.race
+            }
+        });
+};
+
+export async function createFleet(seriesId: string): Promise<FleetDataType> {
+    const body = {
+        seriesId: seriesId,
+    }
+    return await fetch(`/api/CreateFleet`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+    })
+        .then((res) => res.json())
+        .then(async (data) => {
+            if (data && data.error) {
+                console.log(data.message)
+            } else {
+                return data.fleet
+            }
+        });
+};
+
+export async function createFleetSettings(seriesId: string): Promise<FleetSettingsType> {
+    const body = {
+        seriesId: seriesId,
+    }
+    return await fetch(`/api/CreateFleetSettings`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+    })
+        .then((res) => res.json())
+        .then(async (data) => {
+            if (data && data.error) {
+                console.log(data.message)
+            } else {
+                return data.fleet
+            }
+        });
+};
+
+export async function GetFleetSettingsBySeries(seriesId: string): Promise<FleetSettingsType[]> {
+    const body = {
+        seriesId: seriesId,
+    }
+    return await fetch(`/api/GetFleetSettingsBySeries`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+    })
+        .then((res) => res.json())
+        .then(async (data) => {
+            if (data && data.error) {
+                console.log(data.message)
+                return undefined
+            } else {
+                return data.fleet
+            }
+        });
+};
+
+export async function updateFleetById(fleet: FleetDataType): Promise<FleetDataType> {
+    const body = {
+        fleet: fleet,
+    }
+    return await fetch(`/api/UpdateFleetById`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+    })
+        .then((res) => res.json())
+        .then(async (data) => {
+            if (data && data.error) {
+                console.log(data.message)
+            } else {
+                return data.fleet
+            }
+        });
+};
+
+export async function updateFleetSettingsById(fleet: FleetSettingsType): Promise<FleetSettingsType> {
+    const body = {
+        fleet: fleet,
+    }
+    return await fetch(`/api/UpdateFleetSettingsById`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+    })
+        .then((res) => res.json())
+        .then(async (data) => {
+            if (data && data.error) {
+                console.log(data.message)
+            } else {
+                return data.fleet
+            }
+        });
+};
+
+export async function DeleteFleetSettingsById(fleetSettingsId: string): Promise<FleetDataType> {
+    const body = {
+        fleetSettingsId: fleetSettingsId,
+    }
+    return await fetch(`/api/DeleteFleetSettingsById`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+    })
+        .then((res) => res.json())
+        .then(async (data) => {
+            if (data && data.error) {
+                console.log(data.message)
+            } else {
+                return data.fleet
+            }
+        });
+};
+
+export async function CreateLap(resultId: string, time: number): Promise<LapDataType> {
+    const body = {
+        resultId: resultId,
+        time: time,
+    }
+    return await fetch(`/api/CreateLap`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+    })
+        .then((res) => res.json())
+        .then(async (data) => {
+            if (data && data.error) {
+                console.log(data.message)
+            } else {
+                return data.fleet
+            }
+        });
+};
+
+export async function DeleteLapById(lapId: string): Promise<LapDataType> {
+    const body = {
+        id: lapId,
+    }
+    return await fetch(`/api/DeleteLapById`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+    })
+        .then((res) => res.json())
+        .then(async (data) => {
+            if (data && data.error) {
+                console.log(data.message)
+            } else {
+                return data.fleet
+            }
+        });
+};
+
+export async function GetChromecastByClubId(clubId: string): Promise<ChromecastDataType[]> {
+    const body = {
+        clubId: clubId,
+    }
+    return await fetch(`/api/GetChromecastByClubId`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+    })
+        .then((res) => res.json())
+        .then(async (data) => {
+            if (data && data.error) {
+                console.log(data.message)
+            } else {
+                return data.chromecasts
+            }
+        });
+};
+
+export async function CreateChromecast(chromecast: ChromecastDataType): Promise<ChromecastDataType> {
+    const body = {
+        chromecast: chromecast,
+    }
+    return await fetch(`/api/CreateChromecast`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+    })
+        .then((res) => res.json())
+        .then(async (data) => {
+            if (data && data.error) {
+                console.log(data.message)
+            } else {
+                return data.chromecast
             }
         });
 };

@@ -3,16 +3,16 @@ import Card from '../components/Card'
 
 const Home = () => {
     return (
-        <Layout home>
+        <Layout>
             <main className="container mx-auto flex flex-col items-center justify-center h-full p-4">
                 <h1 className="text-5xl md:text-[5rem] leading-normal font-extrabold text-gray-700">
-                    SRM
+                    SailViz
                 </h1>
                 <div className="grid gap-3 pt-3 mt-3 text-center md:grid-cols-1 lg:w-2/3">
                     <Card
-                        name="Login"
+                        name="Sailing Race System and Results Management"
                         description=""
-                        link="/Login"
+                        link="/"
                     />
                 </div>
             </main>

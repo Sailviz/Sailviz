@@ -1,6 +1,6 @@
-import React, { ChangeEvent, MouseEventHandler, useState } from 'react';
+import React, { ChangeEvent, useState } from 'react';
 import dayjs from 'dayjs';
-import { createColumnHelper, flexRender, getCoreRowModel, RowSelection, useReactTable } from '@tanstack/react-table'
+import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, RowSelection, SortingState, useReactTable } from '@tanstack/react-table'
 import * as DB from './apiMethods';
 import Select from 'react-select';
 
@@ -31,7 +31,7 @@ const Time = ({ ...props }: any) => {
             <input type="datetime-local"
                 id='Time'
                 className="w-full"
-                value={dayjs(value).format('YYYY-MM-DDTHH:ss')}
+                value={dayjs(value).format('YYYY-MM-DDTHH:mm')}
                 onChange={e => setValue(e.target.value)}
                 onBlur={onBlur}
             />
@@ -72,7 +72,28 @@ const Text = ({ ...props }: any) => {
 
     const onBlur = (e: ChangeEvent<HTMLInputElement>) => {
         var raceData: RaceDataType = props.row.original
-        raceData[props.column.id] = e.target.value
+        // use props.column.id to update the correct field
+        switch (props.column.id) {
+            case "OOD":
+                raceData.OOD = e.target.value
+                break;
+            case "AOD":
+                raceData.AOD = e.target.value
+                break;
+            case "SO":
+                raceData.SO = e.target.value
+                break;
+            case "ASO":
+                raceData.ASO = e.target.value
+                break;
+            case "Time":
+                raceData.Time = e.target.value
+                break;
+            case "Type":
+                raceData.Type = e.target.value
+                break;
+        }
+
         DB.updateRaceById(raceData)
     }
 
@@ -105,16 +126,35 @@ const Remove = ({ ...props }: any) => {
 
 };
 
-const columnHelper = createColumnHelper<RaceDataType>()
+const GoTo = ({ ...props }: any) => {
+    const onClick = () => {
+        props.goToRace(props.id)
+    }
+    return (
+        <p className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0"
+            onClick={onClick} >
+            GoTo
+        </p>
+    );
 
+};
+
+const columnHelper = createColumnHelper<RaceDataType>()
 
 const SeriesTable = (props: any) => {
     var [data, setData] = useState(props.data)
 
+    const [sorting, setSorting] = useState<SortingState>([{
+        id: "number",
+        desc: false,
+    }]);
+
     const updateData = (data: any) => {
-        console.log(data)
-        setData(data)
         props.removeRace(data)
+    }
+
+    const goToRace = (data: any) => {
+        props.goToRace(data)
     }
 
     var table = useReactTable({
@@ -123,6 +163,7 @@ const SeriesTable = (props: any) => {
             columnHelper.accessor('number', {
                 id: "number",
                 cell: info => info.getValue(),
+                enableSorting: true
             }),
             columnHelper.accessor('Time', {
                 id: "Number of Races",
@@ -132,28 +173,23 @@ const SeriesTable = (props: any) => {
                 id: "Type",
                 cell: props => <Type {...props} />
             }),
-            columnHelper.accessor('OOD', {
-                id: "OOD",
-                cell: props => <Text {...props} />
-            }),
-            columnHelper.accessor('AOD', {
-                id: "AOD",
-                cell: props => <Text {...props} />
-            }),
-            columnHelper.accessor('SO', {
-                id: "SO",
-                cell: props => <Text {...props} />
-            }),
-            columnHelper.accessor('ASO', {
-                id: "ASO",
-                cell: props => <Text {...props} />
-            }),
-            columnHelper.accessor('', {
+            columnHelper.accessor('id', {
                 id: "Remove",
+                header: "Remove",
                 cell: props => <Remove {...props} id={props.row.original.id} removeRace={updateData} />
             }),
+            columnHelper.accessor('id', {
+                id: "GoTo",
+                header: "GoTo",
+                cell: props => <GoTo {...props} id={props.row.original.id} goToRace={goToRace} />
+            }),
         ],
+        state: {
+            sorting,
+        },
+        onSortingChange: setSorting,
         getCoreRowModel: getCoreRowModel(),
+        getSortedRowModel: getSortedRowModel(),
     })
     return (
         <div key={props.data}>

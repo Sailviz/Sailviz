@@ -2,15 +2,25 @@
 @tailwind components;
 @tailwind utilities;
 
+html, body {width: 100%; height: 100%; padding: 0; margin: 0;}
+      body {overflow:hidden; background: rgb(255, 255, 255);}
+
 .panel-height {
   /* this should be -80px but 75 fits nicely */
   height: calc(100vh - 75px);
 }
 
+.signon-height {
+  /* this should be -80px but 75 fits nicely */
+  height: calc(100vh - 128px);
+}
+
 input[disabled] {
   background: white;
 }
-
+input[type="file"] {
+  display: none;
+}
 input[type="range"] {
   -webkit-appearance: none;
   margin: 20px 0;
@@ -19,6 +29,7 @@ input[type="range"] {
 input[type="range"]:focus {
   outline: none;
 }
+
 input[type="range"]::-webkit-slider-runnable-track {
   width: 100%;
   height: 4px;

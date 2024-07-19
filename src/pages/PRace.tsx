@@ -8,13 +8,14 @@ import { ReactSortable } from "react-sortablejs";
 import { Series } from "@prisma/client";
 
 enum raceStateType {
-    countdown,
-    starting,
-    allStarted,
+    running,
     stopped,
     reset,
     calculate
 }
+
+//pursuit races don't work with fleets, why would you?
+//all fleets have same status.
 
 const RacePage = () => {
 
@@ -26,7 +27,6 @@ const RacePage = () => {
 
     var [seriesName, setSeriesName] = useState("")
     var [clubId, setClubId] = useState<string>("invalid")
-    var [Instructions, setInstructions] = useState("Hit Start to begin the starting procedure")
 
     var [race, setRace] = useState<RaceDataType>(({
         id: "",
@@ -36,29 +36,27 @@ const RacePage = () => {
         AOD: "",
         SO: "",
         ASO: "",
-        results: [{
+        fleets: [{
+            startTime: 0,
             id: "",
-            raceId: "",
-            Helm: "",
-            Crew: "",
-            boat: {
+            results: [{
                 id: "",
-                name: "",
-                crew: 0,
-                py: 0,
-                clubId: "",
-            },
-            SailNumber: 0,
-            finishTime: 0,
-            CorrectedTime: 0,
-            lapTimes: {
-                times: [],
-                number: 0
-            },
-            Position: 0,
-        }],
+                fleetId: "",
+                raceId: "",
+                Helm: "",
+                Crew: "",
+                boat: {} as BoatDataType,
+                SailNumber: "",
+                finishTime: 0,
+                laps: [],
+                CorrectedTime: 0,
+                PursuitPosition: 0,
+                HandicapPosition: 0,
+                resultCode: ""
+            } as ResultsDataType],
+        } as FleetDataType
+        ],
         Type: "",
-        startTime: 0,
         seriesId: "",
         series: {} as SeriesDataType
     }))
@@ -78,7 +76,7 @@ const RacePage = () => {
 
     var [user, setUser] = useState<UserDataType>({
         id: "",
-        name: "",
+        displayName: "",
         settings: {},
         permLvl: 0,
         clubId: ""
@@ -86,9 +84,6 @@ const RacePage = () => {
     })
 
     var [raceState, setRaceState] = useState<raceStateType>(raceStateType.reset)
-    const [timerActive, setTimerActive] = useState(false);
-    const [resetTimer, setResetTimer] = useState(false);
-    const [startTime, setStartTime] = useState(0);
 
     const startRaceButton = async () => {
         let localTime = Math.floor((new Date().getTime() / 1000) + startLength)
@@ -109,19 +104,19 @@ const RacePage = () => {
         })
 
         //Update database
-        let newRaceData: RaceDataType = race
-        newRaceData.startTime = localTime
-        setRace(newRaceData)
-        await DB.updateRaceById(newRaceData)
+        console.log("here")
+
+        race.fleets.forEach(fleet => async () => {
+            console.log("here")
+            fleet.startTime = localTime
+            await DB.updateFleetById(fleet)
+        })
         startRace()
     }
 
     const startRace = async () => {
-        setResetTimer(false)
-        setRaceState(raceStateType.countdown)
-        setInstructions("show class flag.")
+        setRaceState(raceStateType.running)
         //start countdown timer
-        setTimerActive(true)
 
         let sound = document.getElementById("Beep") as HTMLAudioElement
         sound!.currentTime = 0
@@ -137,7 +132,6 @@ const RacePage = () => {
 
     const handleFiveMinutes = () => {
         console.log('5 minutes left')
-        setInstructions("show class flag")
 
         //sound horn
         fetch("http://" + club.settings.hornIP + "/medium", { signal: controller.signal, mode: 'no-cors' }).then(response => {
@@ -152,7 +146,6 @@ const RacePage = () => {
     };
     const handleFourMinutes = () => {
         console.log('4 minutes left')
-        setInstructions("show preparatory and class flag")
 
         //sound horn
         fetch("http://" + club.settings.hornIP + "/medium", { signal: controller.signal, mode: 'no-cors' }).then(response => {
@@ -168,7 +161,6 @@ const RacePage = () => {
 
     const handleOneMinute = () => {
         console.log('1 minute left')
-        setInstructions("show class flag")
 
 
 
@@ -186,7 +178,6 @@ const RacePage = () => {
 
     const handleGo = () => {
         console.log('GO!')
-        setInstructions("show no flags")
 
         //sound horn
         fetch("http://" + club.settings.hornIP + "/medium", { signal: controller.signal, mode: 'no-cors' }).then(response => {
@@ -204,8 +195,6 @@ const RacePage = () => {
     const stopRace = async () => {
         //add are you sure here
         setRaceState(raceStateType.stopped)
-        setTimerActive(false)
-        setInstructions("Hit reset to start from the beginning")
         const timeoutId = setTimeout(() => controller.abort(), 2000)
         fetch("http://" + club.settings.clockIP + "/reset", { signal: controller.signal, mode: 'no-cors' }).then(response => {
             clearTimeout(timeoutId)
@@ -222,49 +211,60 @@ const RacePage = () => {
         }).catch(function (err) {
             console.log('Clock not connected: ', err);
         });
+        //Update database
+        race.fleets.forEach(fleet => {
+            fleet.startTime = 0
+            DB.updateFleetById(fleet)
+        })
 
         setRaceState(raceStateType.reset)
-        setStartTime((new Date().getTime() / 1000) + startLength)
-        setResetTimer(true)
-        setInstructions("Hit Start to begin the starting procedure")
 
     }
 
-    const retireBoat = async (id: string) => {
-        //modify local race data
-        const tempdata = race
-        let index = tempdata.results.findIndex((x: ResultsDataType) => x.id === id)
-        tempdata.results[index].finishTime = -1 //finish time is a string so we can put in status
-        setRace({ ...tempdata })
+    const retireBoat = async (resultId: string) => {
+        let result: ResultsDataType | undefined;
+        race.fleets.some(fleet => {
+            result = fleet.results.find(result => result.id === resultId);
+            return result !== undefined;
+        });
+        if (result == undefined) {
+            console.error("Could not find result with id: " + resultId);
+            return
+        }
+        result.resultCode = "RET"
+        await DB.updateResult(result)
+        setRace(await DB.getRaceById(race.id))
         //send to DB
-        await DB.updateResult(tempdata.results[index])
     }
 
     const lapBoat = async (id: string) => {
         //modify local race data
-        const tempdata = race
-        let index = tempdata.results.findIndex((x: ResultsDataType) => x.id === id)
-        tempdata.results[index].lapTimes.times.push(Math.floor(new Date().getTime() / 1000))
-        tempdata.results[index].lapTimes.number += 1 //increment number of laps
-        await DB.updateResult(tempdata.results[index])
+
+        await DB.CreateLap(id, Math.floor(new Date().getTime() / 1000))
+        let updatedData = await DB.getRaceById(race.id)
 
         //recalculate position
-        tempdata.results.sort((a, b) => {
-            // get the number of laps for each car
-            let lapsA = a.lapTimes.number;
-            let lapsB = b.lapTimes.number;
-            // get the last lap time for each car
-            let lastA = a.lapTimes.times.slice(-1)[0];
-            let lastB = b.lapTimes.times.slice(-1)[0];
+        // there is just one fleet so grab the first one
+        updatedData.fleets[0]!.results.sort((a: ResultsDataType, b: ResultsDataType) => {
+            // get the number of laps for each boat
+            if (a.resultCode != "") return 1
+            if (b.resultCode != "") return -1
+            console.log(b.laps.at(-1))
+            let lapsA = a.laps.length;
+            let lapsB = b.laps.length;
+            // get the last lap time for each boat
+            let lastA = a.laps.at(-1)?.time!;
+            let lastB = b.laps.at(-1)?.time!;
             // compare the number of laps first, then the last lap time
             return lapsB - lapsA || lastA - lastB;
         });
 
-        tempdata.results.forEach((_, index) => {
-            tempdata.results[index]!.Position = index + 1
+        updatedData.fleets.flatMap(fleet => fleet.results).forEach((_, index) => {
+            //there is only one fleet
+            updatedData.fleets[0]!.results[index]!.PursuitPosition = index + 1
         })
 
-        setRace({ ...tempdata })
+        setRace({ ...updatedData })
 
         let sound = document.getElementById("Beep") as HTMLAudioElement
         sound!.currentTime = 0
@@ -274,7 +274,6 @@ const RacePage = () => {
 
     const endRace = async () => {
         setRaceState(raceStateType.calculate)
-        setTimerActive(false)
 
         //sound horn
         fetch("http://" + club.settings.hornIP + "/medium", { signal: controller.signal, mode: 'no-cors' }).then(response => {
@@ -288,23 +287,22 @@ const RacePage = () => {
     }
 
     const submitResults = async () => {
-        race.results.forEach(result => {
-            DB.updateResult(result)
-        })
+        for (const result of race.fleets.flatMap(fleet => fleet.results)) {
+            await DB.updateResult(result)
+        }
         router.push({ pathname: '/Race', query: { race: race.id } })
     }
 
     const setOrder = async (updatedResults: ResultsDataType[]) => {
         if (updatedResults.length < 2) return
         console.log(updatedResults)
-        let position = 1
+
         for (let i = 0; i < updatedResults.length; i++) {
-            updatedResults[i]!.Position = position
-            position++
+            updatedResults[i]!.PursuitPosition = i + 1
         }
         let tempResults = { ...race, results: updatedResults }
         setRace(tempResults)
-        tempResults.results.forEach(result => {
+        updatedResults.forEach(result => {
             DB.updateResult(result)
         })
     }
@@ -314,7 +312,7 @@ const RacePage = () => {
 
         let allStarted = true
 
-        race.results.forEach(result => {
+        race.fleets.flatMap(fleet => fleet.results).forEach(result => {
             if ((result.boat?.pursuitStartTime || 0) < timeInSeconds && time.countingUp == true) {
                 //boat has started
 
@@ -323,17 +321,11 @@ const RacePage = () => {
                 allStarted = false
             }
 
-        });
-
-        if (allStarted) {
-            setRaceState(raceStateType.allStarted)
-            setInstructions("All boats have started")
-        }
+        })
 
         //to catch race being finished on page load
         if (time.minutes > club.settings.pursuitLength && time.countingUp == true) {
             setRaceState(raceStateType.calculate)
-            setTimerActive(false)
         }
 
     }
@@ -343,20 +335,21 @@ const RacePage = () => {
     useEffect(() => {
         let raceId = query.race as string
         const fetchRace = async () => {
-            setRaceState(raceStateType.reset)
             let data = await DB.getRaceById(raceId)
-            //sort race results
-            console.log(data.results)
-            const sortedResults = data.results.sort((a: ResultsDataType, b: ResultsDataType) => a.Position - b.Position);
-            console.log(sortedResults)
-            setRace({ ...data, results: sortedResults })
-
-            if (data.startTime != 0) {
-                //race has been started
-                setRaceState(raceStateType.starting)
-                setStartTime(race.startTime)
-                setResetTimer(false)
-                setTimerActive(true)
+            //sort race results by pursuit position
+            console.log(data.fleets[0]?.startTime)
+            if (data.fleets[0]?.startTime != 0) {
+                const sortedResults = data.fleets[0]!.results.sort((a: ResultsDataType, b: ResultsDataType) => a.PursuitPosition - b.PursuitPosition);
+                setRace({ ...data, fleets: [{ ...data.fleets[0] as FleetDataType, results: sortedResults }] })
+                setRaceState(raceStateType.running)
+                //check if race has already finished
+                if (Math.floor((new Date().getTime() / 1000) - data.fleets[0]!.startTime) > (club.settings.pursuitLength * 60)) {
+                    console.log(data.fleets[0]!.startTime)
+                    setRaceState(raceStateType.calculate)
+                }
+            } else {
+                const sortedResults = data.fleets[0]!.results.sort((a: ResultsDataType, b: ResultsDataType) => b.boat.py - a.boat.py);
+                setRace({ ...data, fleets: [{ ...data.fleets[0] as FleetDataType, results: sortedResults }] })
             }
 
             setSeriesName(await DB.GetSeriesById(data.seriesId).then((res) => { return (res.name) }))
@@ -366,7 +359,7 @@ const RacePage = () => {
             fetchRace()
         }
 
-    }, [router])
+    }, [router, club])
 
     useEffect(() => {
         setClubId(Cookies.get('clubId') || "")
@@ -418,23 +411,23 @@ const RacePage = () => {
     }, []);
 
     return (
-        <Dashboard club={club.name} userName={user.name}>
+        <Dashboard club={club.name} displayName={user.displayName}>
 
             <audio id="Beep" src=".\beep-6.mp3" ></audio>
             <audio id="Countdown" src=".\Countdown.mp3" ></audio>
             <div className="w-full flex flex-col items-center justify-start panel-height overflow-auto">
                 <div className="flex w-full flex-row justify-around">
-                    <div className="w-1/4 p-2">
-                        <p onClick={() => router.push({ pathname: '/Race', query: { race: race.id } })} className="cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-xl px-5 py-2.5 text-center">
-                            Back To Home
-                        </p>
-                    </div>
                     <div className="w-1/4 p-2 m-2 border-4 rounded-lg bg-white text-lg font-medium">
                         Event: {seriesName} - {race.number}
                     </div>
-                    <div className="w-1/4 p-2 m-2 border-4 rounded-lg bg-white text-lg font-medium">
-                        Race Time: <PursuitTimer startTime={race.startTime} endTime={club.settings.pursuitLength} timerActive={timerActive} onFiveMinutes={handleFiveMinutes} onFourMinutes={handleFourMinutes} onOneMinute={handleOneMinute} onGo={handleGo} onEnd={endRace} onTimeUpdate={ontimeupdate} onWarning={handleWarning} reset={resetTimer} />
-                    </div>
+                    {
+                        (race.fleets.length < 1) ?
+                            <p>Waiting for boats to be added to fleets</p>
+                            :
+                            <div className="w-1/4 p-2 m-2 border-4 rounded-lg bg-white text-lg font-medium">
+                                Race Time: <PursuitTimer startTime={race.fleets[0]!.startTime} endTime={club.settings.pursuitLength} timerActive={raceState == raceStateType.running} onFiveMinutes={handleFiveMinutes} onFourMinutes={handleFourMinutes} onOneMinute={handleOneMinute} onGo={handleGo} onEnd={endRace} onTimeUpdate={ontimeupdate} onWarning={handleWarning} reset={raceState == raceStateType.reset} />
+                            </div>
+                    }
                     <div className="w-1/4 p-2 m-2 border-4 rounded-lg bg-white text-lg font-medium">
                         Actual Time:  {time}
                     </div>
@@ -461,43 +454,51 @@ const RacePage = () => {
                         })()}
                     </div>
                 </div>
-                <div className="flex w-full shrink flex-row justify-around">
-                    <div className="w-11/12 p-2 my-2 mx-4 border-4 rounded-lg bg-white text-lg font-medium">
-                        {Instructions}
-                    </div>
-
-                </div>
 
                 <div className="">
-                    <ReactSortable handle=".handle" list={race.results} setList={(newState) => setOrder(newState)}>
-                        {race.results.map((result, index) => {
+                    <ReactSortable handle=".handle" list={race.fleets.flatMap(fleet => fleet.results)} setList={(newState) => setOrder(newState)}>
+                        {race.fleets.flatMap(fleet => fleet.results).map((result: ResultsDataType, index) => {
                             return (
-                                <div key={index} id={result.id} className={result.finishTime == -1 ? 'bg-red-300 border-2 border-pink-500' : 'bg-green-300 border-2 border-pink-500'}>
-                                    <div className="flex flex-row m-4 justify-between">
-                                        <h2 className="text-2xl text-gray-700 flex my-auto mr-5"> <span className="handle cursor-row-resize px-3">☰</span>{result.SailNumber} - {result.boat?.name} : {result.Helm} - {result.Crew} -</h2>
-                                        {(raceState == raceStateType.allStarted || raceState == raceStateType.calculate) ?
-                                            <div className="flex">
-                                                <h2 className="text-2xl text-gray-700 flex my-auto mr-5">Laps: {result.lapTimes.number} Position: {result.Position} </h2>
-                                                <p onClick={(e) => { confirm("are you sure you want to retire " + result.SailNumber) ? retireBoat(result.id) : null; }} className="cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-sm p-5 mx-2 ml-auto text-center flex">
-                                                    Retire
-                                                </p>
-                                                <p onClick={() => lapBoat(result.id)} className="cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-sm p-5 mx-2 text-center flex">
-                                                    lap
-                                                </p>
-                                            </div>
-                                            :
-                                            <div className="flex">
-                                                <h2 className="text-2xl text-gray-700 flex my-auto mr-5"> Start Time: {String(Math.floor((result.boat?.pursuitStartTime || 0) / 60)).padStart(2, '0')}:{String((result.boat?.pursuitStartTime || 0) % 60).padStart(2, '0')}</h2>
-                                                <p onClick={() => lapBoat(result.id)} className="cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-sm p-5 mx-2 text-center flex">
-                                                    lap
-                                                </p>
-                                            </div>
-                                        }
+                                <div key={index}>
+                                    {(result.resultCode != "") ?
+                                        <div key={index} id={result.id} className={'bg-red-300 border-2 border-pink-500'}>
+                                            <div className="flex flex-row m-4 justify-between">
+                                                <h2 className="text-2xl text-gray-700 flex my-auto mr-5"> <span className="handle cursor-row-resize px-3">☰</span>{result.SailNumber} - {result.boat?.name} : {result.Helm} - {result.Crew} -</h2>
+                                                <div className="flex">
+                                                    <h2 className="text-2xl text-gray-700 flex my-auto mr-5">{result.resultCode} </h2>
 
-                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        :
+                                        <div id={result.id} className={'bg-green-300 border-2 border-pink-500'}>
+                                            <div className="flex flex-row m-4 justify-between">
+                                                <h2 className="text-2xl text-gray-700 flex my-auto mr-5"> <span className="handle cursor-row-resize px-3">☰</span>{result.SailNumber} - {result.boat?.name} : {result.Helm} - {result.Crew} -</h2>
+                                                {(raceState == raceStateType.running) ?
+                                                    <div className="flex">
+                                                        <p onClick={(e) => { confirm("are you sure you want to retire " + result.SailNumber) ? retireBoat(result.id) : null; }} className="cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-sm p-5 mx-2 ml-auto text-center flex">
+                                                            Retire
+                                                        </p>
+                                                        <h2 className="text-2xl text-gray-700 flex my-auto mr-5">Laps: {result.laps.length} Position: {result.PursuitPosition} </h2>
+                                                        <h2 className="text-2xl text-gray-700 flex my-auto mr-5"> Start Time: {String(Math.floor((result.boat?.pursuitStartTime || 0) / 60)).padStart(2, '0')}:{String((result.boat?.pursuitStartTime || 0) % 60).padStart(2, '0')}</h2>
+                                                        <p onClick={() => lapBoat(result.id)} className="cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-sm p-5 mx-2 text-center flex">
+                                                            lap
+                                                        </p>
+                                                    </div>
+                                                    :
+                                                    <>
+                                                        <h2 className="text-2xl text-gray-700 flex my-auto mr-5">Laps: {result.laps.length} Position: {result.PursuitPosition} </h2>
+                                                        <h2 className="text-2xl text-gray-700 flex my-auto mr-5"> Start Time: {String(Math.floor((result.boat?.pursuitStartTime || 0) / 60)).padStart(2, '0')}:{String((result.boat?.pursuitStartTime || 0) % 60).padStart(2, '0')}</h2>
+
+                                                    </>
+                                                }
+                                            </div>
+                                        </div>
+                                    }
                                 </div>
                             )
-                        })}
+                        })
+                        }
                     </ReactSortable>
                 </div>
             </div>

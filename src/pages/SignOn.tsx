@@ -4,7 +4,7 @@ import * as DB from '../components/apiMethods';
 import Cookies from "js-cookie";
 import SignOnTable from "../components/SignOnTable";
 import Select from 'react-select';
-import RaceResultsTable from "../components/RaceResultsTable";
+import FleetResultsTable from "../components/FleetHandicapResultsTable";
 import Switch from "../components/Switch";
 
 
@@ -18,7 +18,7 @@ const SignOnPage = () => {
 
     var [user, setUser] = useState<UserDataType>({
         id: "",
-        name: "",
+        displayName: "",
         settings: {},
         permLvl: 0,
         clubId: ""
@@ -37,17 +37,17 @@ const SignOnPage = () => {
         AOD: "",
         SO: "",
         ASO: "",
-        results: [],
+        fleets: [],
         Type: "",
         seriesId: "",
-        startTime: 0,
         series: {} as SeriesDataType
     })
 
+    const [activeResult, setActiveResult] = useState<ResultsDataType>({} as ResultsDataType)
 
-    const [options, setOptions] = useState([{ label: "", value: {} }])
+    const [options, setOptions] = useState([{ label: "", value: {} as BoatDataType }])
 
-    const [selectedOption, setSelectedOption] = useState({ label: "", value: {} })
+    const [selectedOption, setSelectedOption] = useState({ label: "", value: {} as BoatDataType })
 
     const [selectedRaces, setSelectedRaces] = useState<boolean[]>([]);
 
@@ -64,13 +64,18 @@ const SignOnPage = () => {
         selected?.classList.remove('hidden')
     }
 
-    const createResult = async (id: string) => {
+    const createResult = async (raceId: string) => {
         const HelmElement = document.getElementById("Helm") as HTMLInputElement
         const CrewElement = document.getElementById("Crew") as HTMLInputElement
         const SailNumberElement = document.getElementById("SailNum") as HTMLInputElement
         const Boat = selectedOption.value as BoatDataType
-        //create a result record
-        let entry = await DB.createResult(id)
+        //TODO : create on correct fleet
+        let race = races.find((race) => race.id == raceId)
+        if (race == undefined) {
+            console.warn("could not find race with id: " + raceId)
+            return
+        }
+        let entry = await DB.createResult(race.fleets[0]!.id)
 
         entry.Helm = HelmElement.value
         entry.Crew = CrewElement.value
@@ -111,30 +116,21 @@ const SignOnPage = () => {
             return
         }
         races.forEach(race => {
-            let raceToggle = document.getElementById(race.id + "Switch") as HTMLInputElement
-            if (raceToggle.checked) {
-                createResult(race.id)
+            //check that race hasn't started
+            if (race.fleets.some(fleet => fleet.startTime != 0)) {
+                //don't check for entry choice
+            } else {
+                let raceToggle = document.getElementById(race.id + "Switch") as HTMLInputElement
+                if (raceToggle.checked) {
+                    createResult(race.id)
+                }
             }
         })
         hideAddBoatModal()
     }
 
     const updateResult = async () => {
-        const resultid = document.getElementById("EditResultId") as HTMLInputElement
-        let id = resultid.innerHTML
-
-        let result = {} as ResultsDataType
-        for (let race of races) {
-            let index = race.results.findIndex((rac) => {
-                return rac.id == id
-            })
-            console.log(index, race)
-            if (index != -1) {
-                result = race.results[index]
-                console.log(result)
-                break
-            }
-        }
+        let result = activeResult
         console.log(result)
 
         const Helm = document.getElementById('editHelm') as HTMLInputElement;
@@ -144,6 +140,7 @@ const SignOnPage = () => {
         result.Crew = Crew.value
 
         setSelectedOption({ value: result.boat, label: result.boat.name })
+        result.boat = selectedOption.value as BoatDataType
 
         const sailNum = document.getElementById("editSailNum") as HTMLInputElement
         result.SailNumber = sailNum.value
@@ -182,20 +179,10 @@ const SignOnPage = () => {
         setRaces([...racesCopy])
     }
 
-    const showEditModal = async (id: string) => {
-        console.log(id)
+    const showEditModal = async (resultId: string) => {
         let result = {} as ResultsDataType
-        for (let race of races) {
-            let index = race.results.findIndex((rac) => {
-                return rac.id == id
-            })
-            console.log(index, race)
-            if (index != -1) {
-                result = race.results[index]
-                console.log(result)
-                break
-            }
-        }
+        result = races.flatMap(race => race.fleets.flatMap(fleet => fleet.results)).find(result => result.id == resultId)!
+        setActiveResult(result)
         console.log(result)
         const Helm = document.getElementById('editHelm') as HTMLInputElement;
         Helm.value = result.Helm
@@ -246,7 +233,7 @@ const SignOnPage = () => {
             inputSelect.checked = false
         })
 
-        setSelectedOption({ label: "", value: {} })
+        setSelectedOption({ label: "", value: {} as BoatDataType })
 
 
         const modal = document.getElementById("addModal")
@@ -289,9 +276,9 @@ const SignOnPage = () => {
                 if (data) {
                     let array = [...data]
                     setBoatData(array)
-                    let tempoptions: { label: string; value: {} }[] = []
+                    let tempoptions: { label: string; value: BoatDataType }[] = []
                     array.forEach(boat => {
-                        tempoptions.push({ value: boat, label: boat.name })
+                        tempoptions.push({ value: boat as BoatDataType, label: boat.name })
                     })
                     setOptions(tempoptions)
                 } else {
@@ -306,13 +293,20 @@ const SignOnPage = () => {
                 console.log(data)
                 if (data) {
                     let racesCopy: RaceDataType[] = []
+                    let fleetsCopy: FleetDataType[] = []
                     for (let i = 0; i < data.length; i++) {
                         console.log(data[i]!.number)
                         const res = await DB.getRaceById(data[i]!.id)
                         racesCopy[i] = res
                     }
-                    console.log(racesCopy)
                     setRaces(racesCopy)
+
+                    //remove duplicates from fleets
+                    let uniqueFleets = fleetsCopy.filter((fleet, index, self) =>
+                        index === self.findIndex((t) => (
+                            t.id === fleet.id
+                        ))
+                    )
                     setSelectedRaces(new Array(data.length).fill(false))
                 } else {
                     console.log("could not find todays race")
@@ -342,7 +336,7 @@ const SignOnPage = () => {
     }, [races]);
 
     return (
-        <div>
+        <div className="h-screen">
             <div className="flex w-full flex-row justify-start">
 
                 <p onClick={() => showPage("Signon")} className=" w-1/4 p-2 m-2 cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-xl px-5 py-2.5 text-center">
@@ -351,7 +345,7 @@ const SignOnPage = () => {
                 <p onClick={() => showPage("Guide")} className=" w-1/4 p-2 m-2 cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-xl px-5 py-2.5 text-center">
                     Guide
                 </p>
-                <p onClick={() => logout()} className="ml-auto w-1/4 p-2 m-2 cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-xl px-5 py-2.5 text-center">
+                <p onClick={() => logout()} className="ml-auto w-1/8 p-2 m-2 cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-xl px-5 py-2.5 text-center">
                     logout
                 </p>
             </div>
@@ -364,7 +358,7 @@ const SignOnPage = () => {
                     )
                 })}
             </div>
-            <div id="Signon" className="">
+            <div id="Signon" className="signon-height overflow-y-auto">
                 <div id="addModal" className="hidden fixed z-10 left-0 top-0 w-full h-full overflow-auto bg-gray-400 backdrop-blur-sm bg-opacity-20">
                     <div className="mx-40 my-20 px-10 py-5 border w-4/5 bg-gray-300 rounded-sm">
                         <div className="text-6xl font-extrabold text-gray-700 p-6 float-right cursor-pointer" onClick={hideAddBoatModal}>&times;</div>
@@ -374,7 +368,7 @@ const SignOnPage = () => {
                                 <p className='text-2xl font-bold text-gray-700'>
                                     Helm
                                 </p>
-                                <input type="text" id="Helm" name="Helm" className="h-full text-2xl p-4" onChange={CapitaliseInput} />
+                                <input type="text" id="Helm" name="Helm" className="h-full text-2xl p-4" onChange={CapitaliseInput} placeholder="J Bloggs" />
                             </div>
                             <div className='flex flex-col px-6 w-full'>
                                 <p className='text-2xl font-bold text-gray-700'>
@@ -407,6 +401,10 @@ const SignOnPage = () => {
                         </div>
                         <div className="text-4xl font-extrabold text-gray-700 p-6">Select Race</div>
                         {races.map((race, index) => {
+                            if (race.fleets.some(fleet => fleet.startTime != 0)) {
+                                //a fleet in the race has started so don't allow entry
+                                return <></>
+                            }
                             return (
                                 <div className="mx-6 mb-10" key={race.id}>
                                     <div className="flex flex-row">
@@ -417,6 +415,22 @@ const SignOnPage = () => {
                                             handleToggle={() => { setSelectedRaces([...selectedRaces.slice(0, index), !selectedRaces[index], ...selectedRaces.slice(index + 1)]) }}
                                         />
                                         <label className=" pl-6 py-auto text-2xl font-bold text-gray-700" htmlFor={race.id}>{race.series.name} {race.number}</label>
+                                        {/* show buttons for each fleet in a series */}
+                                        {race.fleets.map((fleet: FleetDataType, index) => {
+                                            return (
+                                                <div key={fleet.id + race.id} className="ml-6 cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
+                                                    {fleet.fleetSettings.name}
+                                                </div>
+                                            )
+                                        })}
+                                        {race.Type == "Pursuit" ?
+                                            <div className="pl-6 py-auto text-2xl font-bold text-gray-700">
+                                                Start Time: {String(Math.floor((selectedOption.value.pursuitStartTime || 0) / 60)).padStart(2, '0')}:{String((selectedOption.value.pursuitStartTime || 0) % 60).padStart(2, '0')}
+                                            </div>
+                                            :
+                                            <></>
+                                        }
+
                                     </div>
                                 </div>
                             )
@@ -498,18 +512,19 @@ const SignOnPage = () => {
                         </div>
                         <div className='w-full my-0 mx-auto'>
                             <div className="p-6 w-3/4 m-auto">
-                                <p id="addEntry" onClick={showAddBoatModal} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
+                                <p id="addEntry" onClick={showAddBoatModal} className="cursor-pointer text-white bg-green-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
                                     Add Entry
                                 </p>
                             </div>
                         </div>
                         {races.map((race, index) => {
+                            console.log(race.series.name, race.number)
                             return (
                                 <div className="m-6" key={JSON.stringify(races) + index}>
                                     <div className="text-4xl font-extrabold text-gray-700 p-6">
                                         {race.series.name}: {race.number} at {race.Time.slice(10, 16)}
                                     </div>
-                                    <SignOnTable data={race.results} updateResult={updateResult} createResult={createResult} clubId={clubId} showEditModal={showEditModal} />
+                                    <SignOnTable data={race.fleets.flatMap((fleet) => (fleet.results))} updateResult={updateResult} createResult={createResult} clubId={clubId} showEditModal={showEditModal} />
                                 </div>
                             )
                         })}
@@ -521,22 +536,27 @@ const SignOnPage = () => {
                     </div>
                 }
             </div>
-            <div id="Results" className="hidden" >
-                <div className="p-4">
-                    <div className="text-6xl font-extrabold text-gray-700 p-6">
-                        {activeRaceData.series.name}: {activeRaceData.number}
-                    </div>
-                    <RaceResultsTable data={activeRaceData.results} startTime={activeRaceData.startTime} key={JSON.stringify(activeRaceData.results)} deleteResult={() => { }} updateResult={() => { }} createResult={() => { }} clubId={clubId} raceId={activeRaceData.id} />
+            <div id="Results" className="hidden signon-height overflow-y-auto" >
+                <div className='p-6 w-full'>
+                    {activeRaceData.fleets.map((fleet, index) => {
+                        return (
+                            <div key={"fleetResults" + index}>
+                                <p className='text-2xl font-bold text-gray-700'>
+                                    {fleet.fleetSettings.name}
+                                </p>
+                                <FleetResultsTable showTime={true} data={fleet.results} startTime={fleet.startTime} key={JSON.stringify(activeRaceData)} deleteResult={deleteResult} updateResult={updateResult} raceId={activeRaceData.id} showEditModal={(id: string) => { showEditModal(id) }} />
+                            </div>
+                        )
+                    })
+                    }
                 </div>
             </div>
             <div id="Guide" className="hidden" >
                 <div className=' w-11/12 mx-auto my-3'>
-                    <iframe
-                        className='block w-full'
+                    <embed
                         src="/0.2 Race Sign On Guide.pdf#toolbar=0"
-                        height="800"
+                        height="750" width={1450}
                     />
-
                 </div>
             </div>
         </div>

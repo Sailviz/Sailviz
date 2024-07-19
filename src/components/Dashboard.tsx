@@ -1,21 +1,23 @@
 import Head from 'next/head'
-import Router from 'next/router'
+import Router, { useRouter } from 'next/router'
 import cookie from 'js-cookie'
 import Link from 'next/link'
 import Image from 'next/image'
 
-export const siteTitle = 'SRM'
+
+export const siteTitle = 'SailViz'
 
 
 export default function Dashboard({
     children,
     club,
-    userName
+    displayName
 }: {
     children: React.ReactNode
     club?: string
-    userName?: string
+    displayName?: string
 }) {
+    const router = useRouter()
     return (
         <div className="h-screen">
             <Head>
@@ -38,12 +40,15 @@ export default function Dashboard({
                     <div className="container flex flex-wrap justify-between items-center mx-auto">
                         <div className="flex items-center">
                             <div className='flex flex-row'>
-                                <div className=' text-4xl font-bold text-blue-600 p-1 cursor-pointer' onClick={() => Router.push("/Dashboard")}>SRM - </div>
+                                <div id="Back" onClick={() => router.back()} className="flex cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-lg px-5 py-2.5 text-center mr-6">
+                                    Back
+                                </div>
+                                <div className=' text-4xl font-bold text-blue-600 p-1 cursor-pointer' onClick={() => Router.push("/Dashboard")}>SailViz - </div>
                                 <p className="text-4xl font-bold text-blue-600 p-1 cursor-pointer">
                                     {club}
                                 </p>
                                 <p className=" text-xl font-semibold whitespace-nowrap text-gray-700 p-3">
-                                    logged in as {userName}
+                                    logged in as {displayName}
                                 </p>
                             </div>
                         </div>

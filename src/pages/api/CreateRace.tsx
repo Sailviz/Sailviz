@@ -17,7 +17,6 @@ async function createRace(number: number, seriesId: any, time: any) {
         data: {
             number: number,
             Time: time,
-            startTime: 0,
             Type: "Handicap",
             OOD: "",
             AOD: "",
@@ -31,6 +30,33 @@ async function createRace(number: number, seriesId: any, time: any) {
         },
     })
     return res;
+}
+
+async function createFleets(raceId: string, seriesId: string) {
+    // find fleets on series
+    var fleets = await prisma.fleetSettings.findMany({
+        where: {
+            seriesId: seriesId
+        }
+    })
+    // create fleet for each fleet setting
+    fleets.forEach(async (fleet) => {
+        await prisma.fleet.create({
+            data: {
+                startTime: 0,
+                fleetSettings: {
+                    connect: {
+                        id: fleet.id
+                    }
+                },
+                race: {
+                    connect: {
+                        id: raceId
+                    }
+                }
+            }
+        })
+    })
 }
 
 const CreateRace = async (req: NextApiRequest, res: NextApiResponse) => {
@@ -59,6 +85,7 @@ const CreateRace = async (req: NextApiRequest, res: NextApiResponse) => {
         }
         if (races) {
             var race = await createRace(number, seriesId, time)
+            createFleets(race.id, seriesId)
             res.json({ error: false, race: race });
         }
         else {

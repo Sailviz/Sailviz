@@ -1,16 +1,13 @@
 import React, { ChangeEvent, useState, useEffect } from 'react';
 import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, useReactTable, SortingState } from '@tanstack/react-table'
-import Select from 'react-select';
-import * as DB from '../components/apiMethods';
 
 //not a db type, only used here
 type SeriesResultsType = {
-    [key: string]: any;
     Rank: number;
     Helm: string;
     Crew: string;
     Boat: BoatDataType;
-    SailNumber: number;
+    SailNumber: string;
     Total: number;
     Net: number;
     racePositions: number[];
@@ -18,19 +15,12 @@ type SeriesResultsType = {
 
 
 const Text = ({ ...props }) => {
-    const initialValue = props.getValue()
-    const [value, setValue] = React.useState(initialValue)
+    const value = props.getValue()
 
     return (
-        <>
-            <input type="text"
-                id=''
-                className=" text-center"
-                defaultValue={value}
-                key={value}
-                disabled={true}
-            />
-        </>
+        <div className=' text-center text-lg font-medium'>
+            {value}
+        </div>
     );
 };
 
@@ -41,7 +31,7 @@ const Number = ({ ...props }: any) => {
         <>
             <input type="number"
                 id=''
-                className="p-2 m-2 text-center w-full"
+                className="text-center w-full font-medium"
                 defaultValue={Math.round(value)}
                 key={value}
                 disabled={true}
@@ -75,17 +65,15 @@ const columnHelper = createColumnHelper<SeriesResultsType>()
 
 const SeriesResultsTable = (props: any) => {
     let [seriesData, setSeriesData] = useState<SeriesDataType>(props.data)
-    let clubId = props.clubId
 
     //calculate results table from data.
     let [data, setData] = useState<SeriesResultsType[]>([])
 
     const calcTable = () => {
         let tempresults: SeriesResultsType[] = []
-        console.log(tempresults)
         //collate results from same person.
         seriesData.races.forEach(race => {
-            race.results.forEach(result => {
+            race.fleets.flatMap(fleet => fleet.results).forEach(result => {
                 //if new racer, add to tempresults
                 let index = tempresults.findIndex(function (t) {
                     return (t.Helm == result.Helm && t.Boat?.id == result.boat?.id)
@@ -102,18 +90,17 @@ const SeriesResultsTable = (props: any) => {
                         racePositions: Array(seriesData.races.length).fill(0),
                     })
                     index -= 1
-                    console.log("updated index: ", index)
                 }
                 //add result to tempresults
-                console.log("pushing ", result.Position, " to ", index, " ", tempresults[index])
                 if (tempresults[index]) {
-                    tempresults[index]!.racePositions[race.number - 1] = (result.Position)
+                    tempresults[index]!.racePositions.splice(race.number - 1, 1, result.HandicapPosition)
                 } else {
                     console.log("something went wrong")
                 }
 
             })
         });
+
         //fill dnc
         //calculate total
         tempresults.forEach(result => {
@@ -121,9 +108,12 @@ const SeriesResultsTable = (props: any) => {
         })
         //calculate discards/net
         tempresults.forEach(result => {
-            result.racePositions.sort((a, b) => a - b)
+            let sortedResult = JSON.parse(JSON.stringify(result)) as SeriesResultsType
+            sortedResult.racePositions.sort((a, b) => a - b)
             let Net = 0
-            result.racePositions.forEach((position, index) => {
+            //remove 0 results
+            sortedResult.racePositions = sortedResult.racePositions.filter(result => result != 0)
+            sortedResult.racePositions.forEach((position, index) => {
                 if (index < seriesData.settings.numberToCount) {
                     Net += position
                 }
@@ -131,7 +121,53 @@ const SeriesResultsTable = (props: any) => {
             result.Net = Net
         })
 
-        console.log(tempresults)
+        //sort results by Net, split results if necessary
+        tempresults.sort((a: SeriesResultsType, b: SeriesResultsType) => {
+            if (a.Net < b.Net) {
+                return -1
+            } else if (a.Net > b.Net) {
+                return 1
+            } else {
+                console.log("same net score")
+                //two results with same Net Score.
+                //loop through positions.
+                let result = 0
+                for (let i = 1; i < 1000; i++) {
+                    //calculate number of positions.
+                    let aNumber = a.racePositions.reduce((partialSum: number, position: number) => {
+                        if (position == i) {
+                            console.log("found position", i)
+                            return partialSum + 1
+                        } else {
+                            return partialSum
+                        }
+                    }, 0)
+                    let bNumber = b.racePositions.reduce((partialSum: number, position: number) => {
+                        if (position == i) {
+                            return partialSum + 1
+                        }
+                        else {
+                            return partialSum
+                        }
+                    }, 0)
+                    if (aNumber < bNumber) {
+                        result = 1
+                        break
+                    } else if (aNumber > bNumber) {
+                        result = -1
+                        break
+                    }
+                }
+                console.log(result)
+                return result
+            }
+        })
+
+        //set rank value.
+        tempresults.forEach((result, index) => {
+            result.Rank = index + 1
+        })
+
         setData(tempresults)
 
     }
@@ -148,20 +184,23 @@ const SeriesResultsTable = (props: any) => {
             cell: props => <Number {...props} />,
             enableSorting: true
         }),
-        columnHelper.accessor("Helm", {
+        columnHelper.accessor('Helm', {
             header: "Helm",
+            size: 300,
             cell: props => <Text {...props} />,
             enableSorting: false
         }),
         columnHelper.accessor("Crew", {
             header: "Crew",
+            size: 300,
             cell: props => <Text {...props} />,
             enableSorting: false
         }),
         columnHelper.accessor((data) => data.Boat?.name, {
             header: "Class",
+            size: 300,
             id: "Class",
-            cell: props => <Text {...props} clubId={clubId} />,
+            cell: props => <Text {...props} />,
             enableSorting: false
         }),
         columnHelper.accessor((data) => data.SailNumber, {
@@ -172,12 +211,14 @@ const SeriesResultsTable = (props: any) => {
 
     ];
 
+    seriesData.races.sort((a, b) => a.number - b.number)
+
     //add column for each race in series
-    props.data.races.forEach((race: RaceDataType, index: number) => {
+    seriesData.races.forEach((race: RaceDataType, index: number) => {
         const newColumn = columnHelper.accessor((data) => data.racePositions[index], {
             header: "R" + race.number.toString(),
             cell: props => <Number {...props} disabled={true} />,
-            enableSorting: true
+            enableSorting: false
         })
         columns.push(newColumn)
     })
@@ -197,7 +238,10 @@ const SeriesResultsTable = (props: any) => {
     columns.push(totalColumn)
     columns.push(netColumn)
 
-    const [sorting, setSorting] = useState<SortingState>([]);
+    const [sorting, setSorting] = useState<SortingState>([{
+        id: "Rank",
+        desc: false,
+    }]);
 
     let table = useReactTable({
         data,
@@ -217,7 +261,7 @@ const SeriesResultsTable = (props: any) => {
                     {table.getHeaderGroups().map(headerGroup => (
                         <tr key={headerGroup.id}>
                             {headerGroup.headers.map(header => (
-                                <th key={header.id} className='border-4 p-2' style={{ width: header.getSize() }}>
+                                <th key={header.id} className='border-4 font-extrabold' style={{ width: header.getSize() }}>
                                     {header.isPlaceholder
                                         ? null
                                         : flexRender(
@@ -238,7 +282,7 @@ const SeriesResultsTable = (props: any) => {
                     {table.getRowModel().rows.map(row => (
                         <tr key={row.id}>
                             {row.getVisibleCells().map(cell => (
-                                <td key={cell.id} className='border-4 p-2 w-1'>
+                                <td key={cell.id} className='border-4 w-1'>
                                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                 </td>
                             ))}

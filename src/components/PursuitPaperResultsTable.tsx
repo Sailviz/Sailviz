@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, useReactTable, SortingState } from '@tanstack/react-table'
+import React, { forwardRef, useState } from 'react';
+import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, useReactTable, SortingState, ColumnDef } from '@tanstack/react-table'
 
 
 const Text = ({ ...props }) => {
@@ -12,54 +12,23 @@ const Text = ({ ...props }) => {
     );
 };
 
-const Number = ({ ...props }) => {
-    const value = Math.round(props.getValue())
-    //round value to nearest integer
-
-    return (
-        <div className=' text-center'>
-            {value}
-        </div>
-    );
-};
-
-const CorrectedTime = ({ ...props }) => {
-    let value = Math.round(props.getValue())
-    let valueString = ""
-    if (value == 99999) {
-        valueString = "RTD"
-    } else {
-        valueString = value.toString()
-    }
-    //round value to nearest integer
-
-    return (
-        <div className=' text-center'>
-            {valueString}
-        </div>
-    );
-};
-
-
-
 const Time = ({ ...props }) => {
     const value = props.getValue()
-    if (value === undefined) {
-        return (
-            <div className=' text-center'>
-                -
-            </div>
-        )
-    }
-    let time = new Date((value - props.startTime) * 1000).toISOString().substring(11, 19)
+    const minutes = Math.floor(value / 60)
+    const seconds = value % 60
 
     return (
         <div className=' text-center'>
-            {time}
+            {minutes < 10 ? `0${minutes}` : minutes}:{seconds < 10 ? `0${seconds}` : seconds}
         </div>
     );
 };
 
+const Empty = ({ ...props }) => {
+    return (
+        <div />
+    );
+};
 
 function Sort({ column, table }: { column: any, table: any }) {
     const firstValue = table
@@ -69,14 +38,7 @@ function Sort({ column, table }: { column: any, table: any }) {
     const columnFilterValue = column.getFilterValue();
 
     return (
-        <div className='flex flex-row justify-center'>
-            <p onClick={(e) => column.toggleSorting(true)} className='cursor-pointer'>
-                ▲
-            </p>
-            <p onClick={(e) => column.toggleSorting(false)} className='cursor-pointer'>
-                ▼
-            </p>
-        </div>
+        <></>
     )
 }
 
@@ -84,24 +46,17 @@ function Sort({ column, table }: { column: any, table: any }) {
 const columnHelper = createColumnHelper<ResultsDataType>()
 
 
-const LiveResultsTable = (props: any) => {
-    let [race, setRace] = useState<RaceDataType>(props.data)
-    console.log(race)
+const PursuitPaperResultsTable = forwardRef((props: { results: ResultsDataType[] }, ref: any) => {
+    let [results, setResults] = useState<ResultsDataType[]>(props.results)
 
-    let maxLaps = 0
-    race.results.forEach((result) => {
-        if (result.lapTimes.number > maxLaps) {
-            maxLaps = result.lapTimes.number
-        }
-    })
 
     //sets sorting to position by default
     const [sorting, setSorting] = useState<SortingState>([{
-        id: "Position",
+        id: "startTime",
         desc: false,
     }]);
 
-    let columns = [
+    let columns: ColumnDef<ResultsDataType, any>[] = [
         columnHelper.accessor("Helm", {
             header: "Helm",
             cell: props => <Text {...props} />,
@@ -120,43 +75,42 @@ const LiveResultsTable = (props: any) => {
         }),
         columnHelper.accessor((data) => data.SailNumber, {
             header: "Sail Number",
-            cell: props => <Number {...props} />,
+            cell: props => <Text {...props} />,
             enableSorting: false
         }),
-        columnHelper.accessor((data) => data.lapTimes.number, {
-            header: "Laps",
-            cell: props => <Number {...props} />,
-            enableSorting: false,
-        })
     ];
 
-    // add column for each race in series
-    for (let i = 0; i < maxLaps; i++) {
-        const newColumn = columnHelper.accessor((data) => data.lapTimes.times[i], {
-            header: "LAP " + (i + 1).toString(),
-            cell: props => <Time {...props} disabled={true} startTime={race.startTime} />,
+
+    const startTime = columnHelper.accessor((data) => (data.boat?.pursuitStartTime || 0), {
+        header: "Start Time",
+        id: "startTime",
+        cell: props => <Time {...props} />,
+        enableSorting: true
+    })
+    columns.push(startTime)
+
+    // add column for each lap
+    for (let i = 0; i < 6; i++) {
+        const newColumn = columnHelper.display({
+            header: (i + 1).toString(),
+            size: 40,
+            cell: props => <Empty {...props} />,
             enableSorting: false
         })
         columns.push(newColumn)
     }
 
-    const Correctedtime = columnHelper.accessor('CorrectedTime', {
-        header: "Corrected Time",
-        cell: props => <CorrectedTime {...props} />,
+
+    const Position = columnHelper.display({
+        header: "Position",
+        cell: props => <Empty {...props} />,
         enableSorting: false
     })
-
-    const Position = columnHelper.accessor('Position', {
-        header: "Position",
-        cell: props => <Number {...props} />,
-        enableSorting: true
-    })
-
-    columns.push(Correctedtime)
     columns.push(Position)
 
+
     let table = useReactTable({
-        data: race.results,
+        data: results,
         columns,
         state: {
             sorting,
@@ -166,13 +120,13 @@ const LiveResultsTable = (props: any) => {
         getSortedRowModel: getSortedRowModel(),
     })
     return (
-        <div key={props.data} className='block max-w-full'>
+        <div key={JSON.stringify(props.results)} className='block max-w-full' ref={ref}>
             <table className='w-full border-spacing-0'>
                 <thead>
                     {table.getHeaderGroups().map(headerGroup => (
                         <tr key={headerGroup.id}>
                             {headerGroup.headers.map(header => (
-                                <th key={header.id} className='border-4 p-2' style={{ width: header.getSize() }}>
+                                <th key={header.id} className='border-2 p-2 text-sm border-black' style={{ width: header.getSize() }}>
                                     {header.isPlaceholder
                                         ? null
                                         : flexRender(
@@ -193,7 +147,7 @@ const LiveResultsTable = (props: any) => {
                     {table.getRowModel().rows.map(row => (
                         <tr key={row.id}>
                             {row.getVisibleCells().map(cell => (
-                                <td key={cell.id} className='border-4 p-2 w-1'>
+                                <td key={cell.id} className='border-2 p-2 w-1 text-xs border-black'>
                                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                 </td>
                             ))}
@@ -203,6 +157,9 @@ const LiveResultsTable = (props: any) => {
             </table>
         </div>
     )
-}
+})
 
-export default LiveResultsTable
+//This fixes a build error
+PursuitPaperResultsTable.displayName = 'PursuitPaperResultsTable'
+
+export default PursuitPaperResultsTable

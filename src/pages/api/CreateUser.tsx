@@ -7,17 +7,17 @@ import assert from 'assert';
 const saltRounds = 10;
 const jwtSecret = process.env.jwtSecret;
 
-async function findUser(email: string) {
+async function findUser(username: string) {
     var result = await prisma.users.findUnique({
         where: {
-            email: email,
+            username: username,
         },
     })
     return result;
 }
 
 async function findClub(clubId: string) {
-    var result = await prisma.clubs.findUnique({
+    var result = await prisma.club.findUnique({
         where: {
             id: clubId,
         },
@@ -25,12 +25,12 @@ async function findClub(clubId: string) {
     return result;
 }
 
-async function createUser(name: string, email: string, password: string, clubId: string, permLvl: number) {
+async function createUser(displayName: string, username: string, password: string, clubId: string, permLvl: number) {
     var hash = await bcrypt.hash(password, saltRounds)
     var user = await prisma.users.create({
         data: {
-            email: email,
-            name: name,
+            username: username,
+            displayName: displayName,
             password: hash,
             settings: {},
             clubId: clubId,
@@ -45,9 +45,9 @@ const CreateUser = async (req: NextApiRequest, res: NextApiResponse) => {
         // check if we have all data.
         // The website stops this, but just in case
         try {
-            assert.notStrictEqual(undefined, req.body.email, 'Email required');
+            assert.notStrictEqual(undefined, req.body.username, 'username required');
             assert.notStrictEqual(undefined, req.body.password, 'Password required');
-            assert.notStrictEqual(undefined, req.body.name, 'Name required');
+            assert.notStrictEqual(undefined, req.body.displayName, 'Name required');
             assert.notStrictEqual(undefined, req.body.clubId, 'club required');
             assert.notStrictEqual(undefined, req.body.permLvl, 'permLvl required');
 
@@ -56,8 +56,8 @@ const CreateUser = async (req: NextApiRequest, res: NextApiResponse) => {
             return;
         }
 
-        var name = req.body.name
-        var email = req.body.email
+        var displayName = req.body.displayName
+        var username = req.body.username
         var password = req.body.password
         var clubId = req.body.clubId
         var permLvl = req.body.permLvl
@@ -69,13 +69,13 @@ const CreateUser = async (req: NextApiRequest, res: NextApiResponse) => {
             return;
         }
 
-        var Existinguser = await findUser(email)
+        var Existinguser = await findUser(username)
         if (!Existinguser) {
-            var creationResult = await createUser(name, email, password, club.id, permLvl)
+            var creationResult = await createUser(displayName, username, password, club.id, permLvl)
             if (creationResult) {
                 var user = creationResult;
                 var token = jwt.sign(
-                    { userId: user.name, email: user.email, id: user.id },
+                    { userId: user.displayName, username: user.username, id: user.id },
                     jwtSecret,
                     {
                         expiresIn: '1d', //1 day
@@ -89,7 +89,7 @@ const CreateUser = async (req: NextApiRequest, res: NextApiResponse) => {
             }
         } else {
             // User exists
-            res.json({ error: true, message: 'Email already exists' });
+            res.json({ error: true, message: 'username already exists' });
             return;
         }
     }

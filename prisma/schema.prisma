@@ -9,83 +9,133 @@ datasource db {
 }
 
 model Users {
-  name     String
-  id       String  @id @unique @default(uuid())
-  email    String  @unique
-  password String
-  settings Json
-  club     Clubs   @relation(fields: [clubId], references: [id])
-  clubId   String
-  permLvl  Int
-  uuid     String? @unique
+  displayName String
+  id          String  @id @unique @default(uuid())
+  username    String  @unique
+  password    String
+  settings    Json
+  club        Club    @relation(fields: [clubId], references: [id])
+  clubId      String
+  permLvl     Int
+  uuid        String? @unique
 
   @@index([clubId])
 }
 
-model Boats {
+model Boat {
   id               String   @id @unique @default(uuid())
   name             String
   crew             Int
   py               Int
   pursuitStartTime Int
-  club             Clubs    @relation(fields: [clubId], references: [id])
+  club             Club     @relation(fields: [clubId], references: [id])
   clubId           String
   results          Result[]
-
+  fleets           FleetSettings[]
   @@index([clubId])
 }
 
-model Clubs {
+model Club {
   id       String   @id @unique @default(uuid())
   name     String   @unique
   settings Json
   series   Series[]
-  boats    Boats[]
+  boats    Boat[]
   users    Users[]
+  chromecasts Chromecasts[]
+}
+
+model Chromecasts {
+  id       String @id @unique @default(uuid())
+  club     Club   @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  clubId   String
+  name     String
+  host  String
+  settings Json
+
+
+  @@index([clubId])
 }
 
 model Series {
-  id       String @id @unique @default(uuid())
+  id       String  @id @unique @default(uuid())
   name     String
-  club     Clubs  @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  club     Club    @relation(fields: [clubId], references: [id], onDelete: Cascade)
   clubId   String
   settings Json
   races    Race[]
+  fleetSettings FleetSettings[]
 
   @@index([clubId])
 }
 
 model Race {
-  id        String   @id @unique @default(uuid())
-  number    Int
-  Time      String
-  OOD       String
-  AOD       String
-  SO        String
-  ASO       String
-  results   Result[]
-  Type      String
-  series    Series   @relation(fields: [seriesId], references: [id], onDelete: Cascade)
-  seriesId  String
-  startTime Int
+  id       String   @id @unique @default(uuid())
+  number   Int
+  Time     String
+  OOD      String
+  AOD      String
+  SO       String
+  ASO      String
+  fleets   Fleet[]
+  Type     String
+  series   Series   @relation(fields: [seriesId], references: [id], onDelete: Cascade)
+  seriesId String
 
   @@index([seriesId])
 }
 
-model Result {
-  id            String  @id @unique @default(uuid())
-  race          Race    @relation(fields: [raceId], references: [id], onDelete: Cascade)
-  raceId        String
-  Helm          String
-  Crew          String
-  boat          Boats?  @relation(fields: [boatId], references: [id])
-  boatId        String?
-  SailNumber    String
-  finishTime    Int
-  lapTimes      Json
-  CorrectedTime Float
-  Position      Int
+model FleetSettings {
+  id        String @id @unique @default(uuid())
+  series     Series  @relation(fields: [seriesId], references: [id], onDelete: Cascade)
+  seriesId   String
+  boats Boat[]
+  startDelay Int
+  fleets Fleet[]
+  name String
+  @@index([seriesId])
+}
+
+model Fleet {
+  id        String   @id @unique @default(uuid())
+  race    Race   @relation(fields: [raceId], references: [id], onDelete: Cascade)
+  raceId  String
+  startTime Int
+  results   Result[]
+  fleetSettings FleetSettings @relation(fields: [settingsId], references: [id])
+  settingsId String
 
   @@index([raceId])
+  @@index([settingsId])
+}
+
+model Result {
+  id              String  @id @unique @default(uuid())
+  fleet           Fleet?   @relation(fields: [fleetId], references: [id], onDelete: Cascade)
+  fleetId         String?
+  Helm            String
+  Crew            String
+  boat            Boat?  @relation(fields: [boatId], references: [id])
+  boatId          String?
+  SailNumber      String
+  finishTime      Int
+  laps            Lap[]
+  CorrectedTime   Float
+  HandicapPosition Int
+  PursuitPosition Int
+  isDeleted       Boolean
+  resultCode String
+
+  @@index([fleetId])
   @@index([boatId])
+}
+
+model Lap {
+  id       String @id @unique @default(uuid())
+  result   Result @relation(fields: [resultId], references: [id], onDelete: Cascade)
+  resultId String
+  time     Int
+  isDeleted Boolean
+
+  @@index([resultId])
 }

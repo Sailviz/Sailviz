@@ -15,13 +15,13 @@ const Login = () => {
         }
     }
 
-    const [email, setEmail] = useState('')
+    const [username, setUsername] = useState('')
     const [password, setPassword] = useState('')
     const [error, setError] = useState('')
 
     const submitData = async (e: React.SyntheticEvent) => {
         e.preventDefault()
-        const body = { email, password }
+        const body = { username, password }
         const res = await fetch(`/api/Authenticate`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -52,14 +52,14 @@ const Login = () => {
         <>
             <div className="container mx-auto flex flex-col items-center justify-center h-screen p-4">
                 <h1 className="text-5xl md:text-[5rem] leading-normal font-extrabold text-gray-700">
-                    SRM Login
+                    SailViz Login
                 </h1>
                 <form onSubmit={submitData} >
                     <input
-                        onChange={e => setEmail(e.target.value)}
-                        placeholder="Email address"
+                        onChange={e => setUsername(e.target.value)}
+                        placeholder="Username"
                         type="text"
-                        value={email}
+                        value={username}
                         className="w-full p-2 mx-0 my-2 border-4 rounded focus:border-pink-500 focus:outline-none"
                     />
                     <input
@@ -71,7 +71,7 @@ const Login = () => {
                     />
                     <p>{error}</p>
                     <input
-                        disabled={!email || !password}
+                        disabled={!username || !password}
                         type="submit"
                         value="Login"
                         className="m-2 bg-slate-300 border-0 py-4 px-6 text-lg font-medium enabled:bg-pink-500 enabled:hover:bg-pink-400"

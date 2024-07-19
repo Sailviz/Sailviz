@@ -5,7 +5,6 @@ import Cookies from "js-cookie";
 import dayjs from 'dayjs';
 import Select from 'react-select';
 
-import RaceResultsTable from '../components/RaceResultsTable';
 import Dashboard from "../components/Dashboard";
 
 enum raceStateType {
@@ -38,7 +37,7 @@ const SignOnPage = () => {
 
     var [user, setUser] = useState<UserDataType>({
         id: "",
-        name: "",
+        displayName: "",
         settings: {},
         permLvl: 0,
         clubId: ""
@@ -151,7 +150,7 @@ const SignOnPage = () => {
     }, [todaysRaces]);
 
     return (
-        <Dashboard club={club.name} userName={user.name}>
+        <Dashboard club={club.name} displayName={user.displayName}>
             <div id="editModal" className="hidden fixed z-10 left-0 top-0 w-full h-full overflow-auto bg-gray-400 backdrop-blur-sm bg-opacity-20">
                 <div className="mx-40 my-20 px-10 py-5 border w-4/5 bg-gray-300 rounded-sm">
                     <div className="text-6xl font-extrabold text-gray-700 p-6 float-right cursor-pointer" onClick={hideCreateModal}>&times;</div>
