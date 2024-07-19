@@ -1,11 +1,28 @@
 import React from 'react';
 import dayjs from 'dayjs';
+import { server } from './URL';
+
+export async function User(): Promise<UserDataType> {
+    return await fetch(`${server}/api/user`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+    })
+        .then((res) => res.json())
+        .then((data) => {
+            if (data && data.error) {
+                console.log(data.message)
+            } else {
+                return (data.user)
+            }
+        });
+};
 
 export async function GetSeriesByClubId(clubId: string): Promise<SeriesDataType[]> {
     const body = {
         "clubId": clubId
     }
-    return await fetch(`/api/GetSeriesByClubId`, {
+    return await fetch(`${server}/api/GetSeriesByClubId`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
@@ -24,7 +41,7 @@ export async function GetSeriesById(id: string): Promise<SeriesDataType> {
     const body = {
         "id": id,
     }
-    return await fetch(`/api/GetSeriesById`, {
+    return await fetch(`${server}/api/GetSeriesById`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
@@ -43,7 +60,7 @@ export async function GetClubById(id: string): Promise<ClubDataType> {
     const body = {
         "id": id,
     }
-    return await fetch(`/api/GetClubById`, {
+    return await fetch(`${server}/api/GetClubById`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
@@ -62,7 +79,7 @@ export async function GetUserById(id: string): Promise<UserDataType> {
     const body = {
         "id": id,
     }
-    return await fetch(`/api/GetUserById`, {
+    return await fetch(`${server}/api/GetUserById`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
@@ -82,7 +99,7 @@ export async function UpdateClubById(clubData: ClubDataType): Promise<ClubDataTy
         "club": clubData
     }
     console.log(body)
-    return await fetch(`/api/UpdateClubById`, {
+    return await fetch(`${server}/api/UpdateClubById`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
@@ -101,7 +118,7 @@ export async function getBoats(clubId: string): Promise<BoatDataType[]> {
     const body = {
         "clubId": clubId
     }
-    return await fetch(`/api/GetBoats`, {
+    return await fetch(`${server}/api/GetBoats`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
@@ -120,7 +137,7 @@ export async function getBoatById(boatId: string): Promise<BoatDataType> {
     const body = {
         "boatId": boatId
     }
-    return await fetch(`/api/GetBoatById`, {
+    return await fetch(`${server}/api/GetBoatById`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
@@ -139,7 +156,7 @@ export async function updateRaceById(raceData: RaceDataType) {
     const body = {
         "race": raceData
     }
-    return await fetch(`/api/UpdateRaceById`, {
+    return await fetch(`${server}/api/UpdateRaceById`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
@@ -159,7 +176,7 @@ export async function getRaceById(raceId: string): Promise<RaceDataType> {
     const body = {
         "id": raceId
     }
-    return await fetch(`/api/GetRaceById`, {
+    return await fetch(`${server}/api/GetRaceById`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
@@ -174,7 +191,7 @@ export async function getNextRaceByClubId(clubId: string): Promise<NextRaceDataT
     const body = {
         "clubId": clubId
     }
-    return await fetch(`/api/GetNextRaceByClubId`, {
+    return await fetch(`${server}/api/GetNextRaceByClubId`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
@@ -189,7 +206,7 @@ export async function GetResultById(resultId: string): Promise<ResultsDataType> 
     const body = {
         "id": resultId
     }
-    return await fetch(`/api/GetResultById`, {
+    return await fetch(`${server}/api/GetResultById`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
@@ -204,7 +221,7 @@ export async function getTodaysRaceByClubId(clubId: string): Promise<NextRaceDat
     const body = {
         "clubId": clubId
     }
-    return await fetch(`/api/GetTodaysRaceByClubId`, {
+    return await fetch(`${server}/api/GetTodaysRaceByClubId`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
@@ -220,7 +237,7 @@ export async function updateBoatById(boatData: BoatDataType) {
     const body = {
         "boat": boatData
     }
-    return await fetch(`/api/UpdateBoatById`, {
+    return await fetch(`${server}/api/UpdateBoatById`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
@@ -243,7 +260,7 @@ export async function createBoat(boatName: string, crew: number, py: number, pur
         "pursuitStartTime": pursuitStartTime,
         "clubId": clubId
     }
-    return await fetch(`/api/CreateBoat`, {
+    return await fetch(`${server}/api/CreateBoat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
@@ -263,7 +280,7 @@ export async function deleteBoatById(id: string): Promise<BoatDataType> {
     const body = {
         "id": id,
     }
-    return await fetch(`/api/DeleteBoatById`, {
+    return await fetch(`${server}/api/DeleteBoatById`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
@@ -282,7 +299,7 @@ export async function updateSeries(seriesData: SeriesDataType) {
     const body = {
         "series": seriesData
     }
-    return await fetch(`/api/UpdateSeriesById`, {
+    return await fetch(`${server}/api/UpdateSeriesById`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
@@ -304,7 +321,7 @@ export async function createRace(clubId: string, seriesId: string): Promise<Race
         "seriesId": seriesId,
         "time": time
     }
-    return await fetch(`/api/CreateRace`, {
+    return await fetch(`${server}/api/CreateRace`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
@@ -325,7 +342,7 @@ export async function createSeries(clubId: string, seriesName: string): Promise<
         "clubId": clubId,
         "seriesName": seriesName
     }
-    return await fetch(`/api/CreateSeries`, {
+    return await fetch(`${server}/api/CreateSeries`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
@@ -344,7 +361,7 @@ export async function deleteSeries(series: SeriesDataType): Promise<SeriesDataTy
     const body = {
         "series": series
     }
-    return await fetch(`/api/DeleteSeries`, {
+    return await fetch(`${server}/api/DeleteSeries`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
@@ -363,7 +380,7 @@ export async function deleteRace(id: string): Promise<RaceDataType> {
     const body = {
         "raceId": id,
     }
-    return await fetch(`/api/DeleteRaceById`, {
+    return await fetch(`${server}/api/DeleteRaceById`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
@@ -383,7 +400,7 @@ export async function getClubByName(club: string): Promise<ClubDataType> {
     const body = {
         "name": club,
     }
-    return await fetch(`/api/GetClubByName`, {
+    return await fetch(`${server}/api/GetClubByName`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
@@ -404,7 +421,7 @@ export async function setBoats(clubId: string, data: BoatDataType[]): Promise<Cl
         "data": data
     }
     console.log(body)
-    return await fetch(`/api/SetBoats`, {
+    return await fetch(`${server}/api/SetBoats`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
@@ -423,7 +440,7 @@ export async function createResult(fleetId: string): Promise<ResultsDataType> {
     const body = {
         "fleetId": fleetId
     }
-    return await fetch(`/api/CreateResult`, {
+    return await fetch(`${server}/api/CreateResult`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
@@ -442,7 +459,7 @@ export async function DeleteResultById(resultId: string): Promise<ResultsDataTyp
     const body = {
         "resultId": resultId,
     }
-    return await fetch(`/api/DeleteResultById`, {
+    return await fetch(`${server}/api/DeleteResultById`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
@@ -461,7 +478,7 @@ export async function updateResult(result: ResultsDataType): Promise<RaceDataTyp
     const body = {
         result: result,
     }
-    return await fetch(`/api/UpdateResultById`, {
+    return await fetch(`${server}/api/UpdateResultById`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body,
@@ -482,7 +499,7 @@ export async function createFleet(seriesId: string): Promise<FleetDataType> {
     const body = {
         seriesId: seriesId,
     }
-    return await fetch(`/api/CreateFleet`, {
+    return await fetch(`${server}/api/CreateFleet`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
@@ -501,7 +518,7 @@ export async function createFleetSettings(seriesId: string): Promise<FleetSettin
     const body = {
         seriesId: seriesId,
     }
-    return await fetch(`/api/CreateFleetSettings`, {
+    return await fetch(`${server}/api/CreateFleetSettings`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
@@ -520,7 +537,7 @@ export async function GetFleetSettingsBySeries(seriesId: string): Promise<FleetS
     const body = {
         seriesId: seriesId,
     }
-    return await fetch(`/api/GetFleetSettingsBySeries`, {
+    return await fetch(`${server}/api/GetFleetSettingsBySeries`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
@@ -540,7 +557,7 @@ export async function updateFleetById(fleet: FleetDataType): Promise<FleetDataTy
     const body = {
         fleet: fleet,
     }
-    return await fetch(`/api/UpdateFleetById`, {
+    return await fetch(`${server}/api/UpdateFleetById`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
@@ -559,7 +576,7 @@ export async function updateFleetSettingsById(fleet: FleetSettingsType): Promise
     const body = {
         fleet: fleet,
     }
-    return await fetch(`/api/UpdateFleetSettingsById`, {
+    return await fetch(`${server}/api/UpdateFleetSettingsById`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
@@ -578,7 +595,7 @@ export async function DeleteFleetSettingsById(fleetSettingsId: string): Promise<
     const body = {
         fleetSettingsId: fleetSettingsId,
     }
-    return await fetch(`/api/DeleteFleetSettingsById`, {
+    return await fetch(`${server}/api/DeleteFleetSettingsById`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
@@ -598,7 +615,7 @@ export async function CreateLap(resultId: string, time: number): Promise<LapData
         resultId: resultId,
         time: time,
     }
-    return await fetch(`/api/CreateLap`, {
+    return await fetch(`${server}/api/CreateLap`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
@@ -617,7 +634,7 @@ export async function DeleteLapById(lapId: string): Promise<LapDataType> {
     const body = {
         id: lapId,
     }
-    return await fetch(`/api/DeleteLapById`, {
+    return await fetch(`${server}/api/DeleteLapById`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
@@ -636,7 +653,7 @@ export async function GetChromecastByClubId(clubId: string): Promise<ChromecastD
     const body = {
         clubId: clubId,
     }
-    return await fetch(`/api/GetChromecastByClubId`, {
+    return await fetch(`${server}/api/GetChromecastByClubId`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
@@ -655,7 +672,7 @@ export async function CreateChromecast(chromecast: ChromecastDataType): Promise<
     const body = {
         chromecast: chromecast,
     }
-    return await fetch(`/api/CreateChromecast`, {
+    return await fetch(`${server}/api/CreateChromecast`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
@@ -668,4 +685,46 @@ export async function CreateChromecast(chromecast: ChromecastDataType): Promise<
                 return data.chromecast
             }
         });
+};
+
+export async function GetUsersByClubId(clubId: string): Promise<UserDataType[]> {
+    const body = {
+        clubId: clubId,
+    }
+    return await fetch(`${server}/api/GetUsersByClubId`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+    })
+        .then((res) => res.json())
+        .then(async (data) => {
+            if (data && data.error) {
+                console.log(data.message)
+            } else {
+                return data.users
+            }
+        });
+};
+
+export async function GetRolesByClubId(clubId: string): Promise<RoleDataType[]> {
+    const body = {
+        clubId: clubId,
+    }
+    return await fetch(`${server}/api/GetRolesByClubId`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+    })
+        .then((res) => res.json())
+        .then(async (data) => {
+            if (data && data.error) {
+                console.log(data.message)
+            } else {
+                return data.roles
+            }
+        });
+};
+
+export function hasPermission() {
+    console.log("hasPermission")
 };

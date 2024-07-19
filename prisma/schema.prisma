@@ -8,16 +8,27 @@ datasource db {
   relationMode = "prisma"
 }
 
-model Users {
-  displayName String
+model User {
   id          String  @id @unique @default(uuid())
+  displayName String
   username    String  @unique
   password    String
-  settings    Json
   club        Club    @relation(fields: [clubId], references: [id])
   clubId      String
-  permLvl     Int
   uuid        String? @unique
+  roles       Role[]
+  startPage   String
+
+  @@index([clubId])
+}
+
+model Role {
+  id   String @id @unique @default(uuid())
+  name String
+  club Club  @relation(fields: [clubId], references: [id])
+  clubId String
+  users User[]
+  permissions Json
 
   @@index([clubId])
 }
@@ -41,8 +52,9 @@ model Club {
   settings Json
   series   Series[]
   boats    Boat[]
-  users    Users[]
+  users    User[]
   chromecasts Chromecasts[]
+  roles Role[]
 }
 
 model Chromecasts {

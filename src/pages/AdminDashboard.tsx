@@ -1,4 +1,5 @@
 import { useRouter } from 'next/router'
+import type { InferGetServerSidePropsType, GetServerSideProps } from 'next'
 import { ChangeEvent, useEffect, useState, useId, useCallback } from 'react';
 import Dashboard from '../components/Dashboard'
 import Select from 'react-select';
@@ -7,36 +8,18 @@ import SeriesTable from '../components/SeriesTable';
 import ClubTable from '../components/ClubTable';
 import BoatTable from '../components/BoatTable';
 import * as DB from '../components/apiMethods';
-import Cookies from 'js-cookie';
-import SeriesResultsTable from '../components/SeriesResultsTable';
 import Papa from 'papaparse';
+import UsersTable from '../components/UsersTable';
+import RoleTable from '../components/RoleTable';
+import useSWR from 'swr';
+import * as Fetcher from '../components/Fetchers';
 
-const raceOptions = [{ value: "Pursuit", label: "Pursuit" }, { value: "Handicap", label: "Handicap" }]
 
-const Club = () => {
+
+const AdminDashboard = ({ clubId, userId }: { clubId: string, userId: string }) => {
     const router = useRouter()
-    var [clubId, setClubId] = useState<string>("invalid")
-    var [club, setClub] = useState<ClubDataType>({
-        id: "",
-        name: "",
-        settings: {
-            clockIP: "",
-            pursuitLength: 0,
-            hornIP: "",
-            clockOffset: 0
-        },
-        series: [],
-        boats: [],
-    })
-
-    var [user, setUser] = useState<UserDataType>({
-        id: "",
-        displayName: "",
-        settings: {},
-        permLvl: 0,
-        clubId: ""
-
-    })
+    const { user, userIsError, userIsValidating } = Fetcher.UseUser()
+    const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
 
     var [activeSeriesData, setActiveSeriesData] = useState<SeriesDataType>({
         id: "",
@@ -48,60 +31,20 @@ const Club = () => {
         races: [],
         fleetSettings: [] as FleetSettingsType[]
     })
-    var [activeRaceData, setActiveRaceData] = useState<RaceDataType>({
-        id: "",
-        number: 0,
-        Time: "",
-        OOD: "",
-        AOD: "",
-        SO: "",
-        ASO: "",
-        fleets: [],
-        Type: "",
-        seriesId: "",
-        series: {} as SeriesDataType
-    })
 
     var [activeResultId, setActiveResultId] = useState("")
 
-    var [nextRace, setNextRace] = useState<NextRaceDataType>({
-        id: "",
-        number: 0,
-        Time: "",
-        series: {
-            name: ""
-        }
-    })
-
-    const [seriesData, setSeriesData] = useState<SeriesDataType[]>([])
+    var [nextRace, setNextRace] = useState(undefined)
 
     const [boatData, setBoatData] = useState<BoatDataType[]>([])
 
     const [options, setOptions] = useState([{ label: "", value: {} as BoatDataType }])
 
-    const selectRace = async (raceId: string) => {
-        console.log(raceId)
-        hidePages()
-        //set active race
-        console.log(seriesData)
-        seriesData.forEach(series => {
-            var races = series.races
-            console.log(races)
-            if (!races) return
-            races.forEach(race => {
-                if (race.id == raceId) {
-                    console.log(race)
-                    console.log(series)
-                    setActiveRaceData(race)
-                    setActiveSeriesData(series)
-                }
-            })
-        })
-        var race = document.getElementById('race')
-        if (race == null) { return }
-        race.classList.remove('hidden')
-    }
+    const [users, setUsers] = useState<UserDataType[]>([])
 
+    const [roles, setRoles] = useState<RoleDataType[]>([])
+
+    const [seriesData, setSeriesData] = useState<SeriesDataType[]>([])
 
     const hidePages = () => {
         var settingsPage = document.getElementById('settings')
@@ -112,6 +55,8 @@ const Club = () => {
         seriesPage?.classList.add('hidden')
         var racePage = document.getElementById('allRaces')
         racePage?.classList.add('hidden')
+        var usersPage = document.getElementById('users')
+        usersPage?.classList.add('hidden')
     }
 
     const showSettings = () => {
@@ -126,7 +71,7 @@ const Club = () => {
         homePage?.classList.remove('hidden')
     }
 
-    const showSeries = () => {
+    const showSeries = async () => {
         hidePages()
         var seriespage = document.getElementById('allSeries')
         seriespage?.classList.remove('hidden')
@@ -136,6 +81,30 @@ const Club = () => {
         hidePages()
         var racesPage = document.getElementById('allRaces')
         racesPage?.classList.remove('hidden')
+    }
+
+    const showUsers = async () => {
+        hidePages()
+        var usersPage = document.getElementById('users')
+        usersPage?.classList.remove('hidden')
+
+        //fetch users
+        var data = await DB.GetUsersByClubId(club.id)
+        if (data) {
+            setUsers(data)
+            console.log(data)
+        } else {
+            console.log("could not fetch users")
+        }
+
+        //fetch roles
+        var roles = await DB.GetRolesByClubId(club.id)
+        if (roles) {
+            setRoles(roles)
+            console.log(roles)
+        } else {
+            console.log("could not fetch roles")
+        }
     }
 
 
@@ -156,7 +125,6 @@ const Club = () => {
                 tempdata.settings.hornIP = e.target.value
                 break
         }
-        setClub(tempdata)
     }
 
     const updateBoat = async (boat: BoatDataType) => {
@@ -175,7 +143,7 @@ const Club = () => {
 
     const createBoat = async () => {
         const tempdata = boatData
-        const Boat: BoatDataType = await DB.createBoat("", 0, 0, 0, clubId)
+        const Boat: BoatDataType = await DB.createBoat("", 0, 0, 0, club.id)
         console.log(Boat)
         if (Boat) {
             setBoatData([Boat, ...tempdata])
@@ -185,7 +153,7 @@ const Club = () => {
     }
 
     const createSeries = async () => {
-        var newSeries = await DB.createSeries(clubId, "NewSeries")
+        var newSeries = await DB.createSeries(club.id, "NewSeries")
         newSeries.races = []
         setSeriesData(seriesData.concat(newSeries))
     }
@@ -223,7 +191,7 @@ const Club = () => {
                     }
                     let DBboat = boatData.find(DBboat => DBboat.name == boat.Name)
                     if (DBboat == undefined) {
-                        await DB.createBoat(boat.Name, parseInt(boat.Crew), parseInt(boat.PY), parseInt(boat.pursuitStartTime || 0), clubId)
+                        await DB.createBoat(boat.Name, parseInt(boat.Crew), parseInt(boat.PY), parseInt(boat.pursuitStartTime || 0), club.id)
                     } else {
                         //check if uploaded boat is different from existing boat
                         if (DBboat.name == boat.Name && DBboat.crew == parseInt(boat.Crew) && DBboat.py == parseInt(boat.PY) && DBboat.pursuitStartTime == parseInt(boat.pursuitStartTime || 0)) {
@@ -275,7 +243,7 @@ const Club = () => {
     }
 
     const fetchBoats = async () => {
-        var data = await DB.getBoats(clubId)
+        var data = await DB.getBoats(club.id)
         if (data) {
             let array = [...data]
             setBoatData(array)
@@ -289,80 +257,27 @@ const Club = () => {
         }
 
     }
-    useEffect(() => {
-        setClubId(Cookies.get('clubId') || "")
-    }, [])
 
-    useEffect(() => {
-        if (clubId != "") {
-            //catch if not fully updated
-            if (clubId == "invalid") {
-                return
-            }
-            const fetchClub = async () => {
-                var data = await DB.GetClubById(clubId)
-                if (data) {
-                    setClub(data)
-                } else {
-                    console.log("could not fetch club settings")
-                }
-
-            }
-            fetchClub()
-
-            const fetchUser = async () => {
-                var userid = Cookies.get('userId')
-                if (userid == undefined) return
-                var data = await DB.GetUserById(userid)
-                if (data) {
-                    setUser(data)
-                    if (data.permLvl !== 0) {
-                        router.push('/Dashboard')
-                    }
-                } else {
-                    console.log("could not fetch club settings")
-                }
-
-            }
-            fetchUser()
-
-            const fetchRaces = async () => {
-                var data = await DB.GetSeriesByClubId(clubId)
-                var array = [...data]
-                setSeriesData(array)
-            }
-            fetchRaces()
-
-
-            fetchBoats()
-
+    const fetchSeries = async () => {
+        var data = await DB.GetSeriesByClubId(club.id)
+        if (data) {
+            setSeriesData(data)
         } else {
-            console.log("user not signed in")
-            router.push("/")
+            console.log("could not find series")
         }
-    }, [clubId, router])
+    }
 
     useEffect(() => {
-        let timer1 = setTimeout(async () => {
-            console.log(activeRaceData)
-            console.log(document.activeElement?.tagName)
-            if (document.activeElement?.tagName == "INPUT") {
-                return
-            }
-            if (activeRaceData.id == "") return
-            console.log(activeRaceData.id)
-            var data = await DB.getRaceById(activeRaceData.id)
-            console.log(data)
-            setActiveRaceData({ ...data })
-        }, 5000);
-        return () => {
-            clearTimeout(timer1);
+        if (club?.id != undefined) {
+            fetchBoats()
+            fetchSeries()
         }
-    }, [activeRaceData]);
+
+    }, [club])
 
 
     return (
-        <Dashboard club={club.name} displayName={user.displayName}>
+        <Dashboard >
             <div className="w-full flex flex-row items-center justify-start panel-height">
                 <div id="leftBar" className='flex basis-3/12 flex-col justify-start h-full border-pink-500 border-r-2 overflow-y-auto'>
                     <div id="settingsbutton" className='w-full flex cursor-pointer' onClick={showSettings}>
@@ -373,6 +288,11 @@ const Club = () => {
                     <div id='homebutton' className='w-full flex cursor-pointer' onClick={showHome}>
                         <div className='w-full p-4 bg-pink-500 text-lg font-extrabold text-gray-700 over'>
                             <p>Home</p>
+                        </div>
+                    </div>
+                    <div id='usersbutton' className='w-full flex cursor-pointer' onClick={showUsers}>
+                        <div className='w-full p-4 bg-pink-500 text-lg font-extrabold text-gray-700 over'>
+                            <p>Users</p>
                         </div>
                     </div>
                     <div id='seriesbutton' className='w-full flex cursor-pointer' onClick={showSeries}>
@@ -392,7 +312,7 @@ const Club = () => {
                             Welcome to SailViz
                         </p>
                         {nextRace != undefined ?
-                            <div onClick={() => selectRace(nextRace.id)} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0"> Go to Next Race {nextRace.series.name}: {nextRace.number} </div>
+                            <div onClick={() => router.push({ pathname: '/Race', query: { race: "fix this" } })} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0"> Go to Next Race NOT IMPLEMENTED </div>
                             :
                             <div />
                         }
@@ -416,6 +336,14 @@ const Club = () => {
                     </div>
                     <div id="allRaces" className='hidden'>
 
+                    </div>
+                    <div id="users" className='hidden'>
+                        <div className='p-6'>
+                            <UsersTable data={users} key={JSON.stringify(users)} />
+                        </div>
+                        <div className='p-6'>
+                            <RoleTable data={roles} key={JSON.stringify(roles)} />
+                        </div>
                     </div>
                     <div id="settings" className="hidden w-full">
                         <p className="text-6xl font-extrabold text-gray-700 p-6">
@@ -458,7 +386,7 @@ const Club = () => {
                             <input type="text"
                                 id='pursuitLength'
                                 className="w-1/3 p-2 mx-0 my-2 border-4 rounded focus:border-pink-500 focus:outline-none"
-                                defaultValue={club.settings.pursuitLength}
+                                defaultValue={club?.settings?.pursuitLength}
                                 onChange={saveClubSettings}
                                 onBlur={() => DB.UpdateClubById(club)}
                             />
@@ -473,7 +401,7 @@ const Club = () => {
                             <input type="text"
                                 id='clockIP'
                                 className="w-1/3 p-2 mx-0 my-2 border-4 rounded focus:border-pink-500 focus:outline-none"
-                                defaultValue={club.settings.clockIP}
+                                defaultValue={club?.settings?.clockIP}
                                 onChange={saveClubSettings}
                                 onBlur={() => DB.UpdateClubById(club)}
                             />
@@ -483,7 +411,7 @@ const Club = () => {
                             <input type="text"
                                 id='clockOffset'
                                 className="w-1/3 p-2 mx-0 my-2 border-4 rounded focus:border-pink-500 focus:outline-none"
-                                defaultValue={club.settings.clockOffset}
+                                defaultValue={club?.settings?.clockOffset}
                                 onChange={saveClubSettings}
                                 onBlur={() => DB.UpdateClubById(club)}
                             />
@@ -498,7 +426,7 @@ const Club = () => {
                             <input type="text"
                                 id='hornIP'
                                 className="w-1/3 p-2 mx-0 my-2 border-4 rounded focus:border-pink-500 focus:outline-none"
-                                defaultValue={club.settings.hornIP}
+                                defaultValue={club?.settings?.hornIP}
                                 onChange={saveClubSettings}
                                 onBlur={() => DB.UpdateClubById(club)}
                             />
@@ -512,4 +440,4 @@ const Club = () => {
     )
 }
 
-export default Club
+export default AdminDashboard

@@ -6,7 +6,7 @@ import SignOnTable from "../components/SignOnTable";
 import Select from 'react-select';
 import FleetResultsTable from "../components/FleetHandicapResultsTable";
 import Switch from "../components/Switch";
-
+import * as Fetcher from '../components/Fetchers';
 
 const SignOnPage = () => {
 
@@ -14,16 +14,8 @@ const SignOnPage = () => {
 
     const query = router.query
 
-    var [clubId, setClubId] = useState<string>("invalid")
-
-    var [user, setUser] = useState<UserDataType>({
-        id: "",
-        displayName: "",
-        settings: {},
-        permLvl: 0,
-        clubId: ""
-
-    })
+    const { user, userIsError, userIsValidating } = Fetcher.UseUser()
+    const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
 
     const [boatData, setBoatData] = useState<BoatDataType[]>([])
 
@@ -248,31 +240,11 @@ const SignOnPage = () => {
 
 
     useEffect(() => {
-        setClubId(Cookies.get('clubId') || "")
-    }, [router])
-
-    useEffect(() => {
-        if (clubId != "") {
+        if (club.id != "") {
             //catch if not fully updated
-            if (clubId == "invalid") {
-                return
-            }
-
-            const fetchUser = async () => {
-                var userid = Cookies.get('userId')
-                if (userid == undefined) return
-                var data = await DB.GetUserById(userid)
-                if (data) {
-                    setUser(data)
-                } else {
-                    console.log("could not fetch club settings")
-                }
-
-            }
-            fetchUser()
 
             const fetchBoats = async () => {
-                var data = await DB.getBoats(clubId)
+                var data = await DB.getBoats(club.id)
                 if (data) {
                     let array = [...data]
                     setBoatData(array)
@@ -289,7 +261,7 @@ const SignOnPage = () => {
             fetchBoats()
 
             const fetchTodaysRaces = async () => {
-                var data = await DB.getTodaysRaceByClubId(clubId)
+                var data = await DB.getTodaysRaceByClubId(club.id)
                 console.log(data)
                 if (data) {
                     let racesCopy: RaceDataType[] = []
@@ -317,7 +289,7 @@ const SignOnPage = () => {
             console.log("user not signed in")
             router.push("/")
         }
-    }, [clubId])
+    }, [club])
 
 
     useEffect(() => {
@@ -524,7 +496,7 @@ const SignOnPage = () => {
                                     <div className="text-4xl font-extrabold text-gray-700 p-6">
                                         {race.series.name}: {race.number} at {race.Time.slice(10, 16)}
                                     </div>
-                                    <SignOnTable data={race.fleets.flatMap((fleet) => (fleet.results))} updateResult={updateResult} createResult={createResult} clubId={clubId} showEditModal={showEditModal} />
+                                    <SignOnTable data={race.fleets.flatMap((fleet) => (fleet.results))} updateResult={updateResult} createResult={createResult} clubId={club.id} showEditModal={showEditModal} />
                                 </div>
                             )
                         })}

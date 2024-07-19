@@ -8,7 +8,7 @@ const saltRounds = 10;
 const jwtSecret = process.env.jwtSecret;
 
 async function findUser(username: string) {
-    const result = await prisma.users.findUnique({
+    const result = await prisma.user.findUnique({
         where: {
             username: username,
         },
@@ -47,7 +47,7 @@ const Authenticate = async (req: NextApiRequest, res: NextApiResponse) => {
                     jwtSecret,
                     { expiresIn: '364d' }
                 );
-                res.json({ error: false, token: token, club: user.clubId, user: user.id });
+                res.json({ error: false, token: token, user: user });
                 return;
             } else {
                 res.json({ error: true, message: 'Wrong username or password' });

@@ -14,32 +14,6 @@ const PrintPaperResults = () => {
 
     const query = router.query
 
-    const [isLoading, setLoading] = useState(true)
-
-    var [clubId, setClubId] = useState<string>("invalid")
-
-    var [club, setClub] = useState<ClubDataType>({
-        id: "",
-        name: "",
-        settings: {
-            clockIP: "",
-            pursuitLength: 0,
-            hornIP: "",
-            clockOffset: 0,
-        },
-        series: [],
-        boats: [],
-    })
-
-    var [user, setUser] = useState<UserDataType>({
-        id: "",
-        displayName: "",
-        settings: {},
-        permLvl: 0,
-        clubId: ""
-
-    })
-
     var [race, setRace] = useState<RaceDataType>({
         id: "",
         number: 0,
@@ -99,7 +73,6 @@ const PrintPaperResults = () => {
 
     useEffect(() => {
         let raceId = query.race as string
-        setClubId(Cookies.get('clubId') || "")
         const getRace = async () => {
             const racedata = await DB.getRaceById(raceId)
             setRace(racedata)
@@ -112,51 +85,9 @@ const PrintPaperResults = () => {
     }, [router])
 
     useEffect(() => {
-        if (clubId != "") {
-            //catch if not fully updated
-            if (clubId == "invalid") {
-                return
-            }
-
-            const fetchClub = async () => {
-                var data = await DB.GetClubById(clubId)
-                if (data) {
-                    setClub(data)
-                } else {
-                    console.log("could not fetch club settings")
-                }
-
-            }
-            fetchClub()
-
-            const fetchUser = async () => {
-                var userid = Cookies.get('userId')
-                if (userid == undefined) return
-                var data = await DB.GetUserById(userid)
-                if (data) {
-                    setUser(data)
-                } else {
-                    console.log("could not fetch club settings")
-                }
-
-            }
-            fetchUser()
-            setLoading(false)
-
-        } else {
-            console.log("user not signed in")
-            router.push("/")
-        }
-    }, [clubId])
-
-    useEffect(() => {
         handlePrint()
     }, [race])
-    if (isLoading) {
-        return (
-            <p>Loading...</p>
-        )
-    }
+
     return (
         <div className="h-full overflow-y-auto p-6">
             {race.Type == "Handicap" ?

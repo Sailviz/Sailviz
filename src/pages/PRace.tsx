@@ -5,7 +5,7 @@ import Dashboard from "../components/Dashboard";
 import PursuitTimer from "../components/PRaceTimer"
 import Cookies from "js-cookie";
 import { ReactSortable } from "react-sortablejs";
-import { Series } from "@prisma/client";
+import * as Fetcher from '../components/Fetchers';
 
 enum raceStateType {
     running,
@@ -26,7 +26,6 @@ const RacePage = () => {
     const query = router.query
 
     var [seriesName, setSeriesName] = useState("")
-    var [clubId, setClubId] = useState<string>("invalid")
 
     var [race, setRace] = useState<RaceDataType>(({
         id: "",
@@ -61,27 +60,8 @@ const RacePage = () => {
         series: {} as SeriesDataType
     }))
 
-    var [club, setClub] = useState<ClubDataType>({
-        id: "",
-        name: "",
-        settings: {
-            clockIP: "",
-            pursuitLength: 0,
-            hornIP: "",
-            clockOffset: 0
-        },
-        series: [],
-        boats: [],
-    })
-
-    var [user, setUser] = useState<UserDataType>({
-        id: "",
-        displayName: "",
-        settings: {},
-        permLvl: 0,
-        clubId: ""
-
-    })
+    const { user, userIsError, userIsValidating } = Fetcher.UseUser()
+    const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
 
     var [raceState, setRaceState] = useState<raceStateType>(raceStateType.reset)
 
@@ -361,46 +341,6 @@ const RacePage = () => {
 
     }, [router, club])
 
-    useEffect(() => {
-        setClubId(Cookies.get('clubId') || "")
-    }, [])
-
-    useEffect(() => {
-        if (clubId != "") {
-            //catch if not fully updated
-            if (clubId == "invalid") {
-                return
-            }
-            const fetchClub = async () => {
-                var data = await DB.GetClubById(clubId)
-                if (data) {
-                    setClub(data)
-                    console.log(data.settings.pursuitLength)
-                } else {
-                    console.log("could not fetch club settings")
-                }
-
-            }
-            fetchClub()
-
-            const fetchUser = async () => {
-                var userid = Cookies.get('userId')
-                if (userid == undefined) return
-                var data = await DB.GetUserById(userid)
-                if (data) {
-                    setUser(data)
-                } else {
-                    console.log("could not fetch club settings")
-                }
-
-            }
-            fetchUser()
-        } else {
-            console.log("user not signed in")
-            router.push("/")
-        }
-    }, [clubId])
-
     const [time, setTime] = useState("");
 
     useEffect(() => {
@@ -411,7 +351,7 @@ const RacePage = () => {
     }, []);
 
     return (
-        <Dashboard club={club.name} displayName={user.displayName}>
+        <Dashboard >
 
             <audio id="Beep" src=".\beep-6.mp3" ></audio>
             <audio id="Countdown" src=".\Countdown.mp3" ></audio>
@@ -425,7 +365,7 @@ const RacePage = () => {
                             <p>Waiting for boats to be added to fleets</p>
                             :
                             <div className="w-1/4 p-2 m-2 border-4 rounded-lg bg-white text-lg font-medium">
-                                Race Time: <PursuitTimer startTime={race.fleets[0]!.startTime} endTime={club.settings.pursuitLength} timerActive={raceState == raceStateType.running} onFiveMinutes={handleFiveMinutes} onFourMinutes={handleFourMinutes} onOneMinute={handleOneMinute} onGo={handleGo} onEnd={endRace} onTimeUpdate={ontimeupdate} onWarning={handleWarning} reset={raceState == raceStateType.reset} />
+                                Race Time: <PursuitTimer startTime={race.fleets[0]!.startTime} endTime={club?.settings.pursuitLength} timerActive={raceState == raceStateType.running} onFiveMinutes={handleFiveMinutes} onFourMinutes={handleFourMinutes} onOneMinute={handleOneMinute} onGo={handleGo} onEnd={endRace} onTimeUpdate={ontimeupdate} onWarning={handleWarning} reset={raceState == raceStateType.reset} />
                             </div>
                     }
                     <div className="w-1/4 p-2 m-2 border-4 rounded-lg bg-white text-lg font-medium">

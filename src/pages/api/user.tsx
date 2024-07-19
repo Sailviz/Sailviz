@@ -1,9 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import prisma from '../../components/prisma'
-import assert from 'assert';
 
 async function getUser(id: string) {
-    var result = await prisma.user.findFirst({
+    var result = await prisma.user.findUnique({
         where: {
             id: id
         },
@@ -24,21 +23,18 @@ async function getUser(id: string) {
 }
 
 const GetUserById = async (req: NextApiRequest, res: NextApiResponse) => {
-    try {
-        assert.notStrictEqual(undefined, req.body.id);
-    } catch (bodyError) {
-        res.json({ error: true, message: "information missing" });
-        return;
-    }
-    var id = req.body.id
-    console.log(id)
-    if (req.method === 'POST') {
+    if (req.method === 'GET') {
+        var id = req.cookies.userId
+        if (id == null) {
+            res.status(400).end()
+            return
+        }
         var user = await getUser(id)
         if (user) {
-            res.json({ error: false, user: user });
+            res.json(user);
         }
         else {
-            res.json({ error: true, message: 'Could not find user' });
+            res.status(406).end()
         }
     }
 };

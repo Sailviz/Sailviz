@@ -5,6 +5,7 @@ import Dashboard from "../components/Dashboard";
 import { useRouter } from 'next/router';
 import * as DB from '../components/apiMethods'
 import { io, Socket } from "socket.io-client";
+import * as Fetcher from '../components/Fetchers';
 
 const applicationID = '0AA4CA7E';
 const namespace = 'urn:x-cast:com.sailviz';
@@ -16,32 +17,12 @@ const CCDashboard = () => {
     const [activeHost, setActiveHost] = useState<string>("")
     const [connection, setConnection] = useState<Socket>()
 
-    var [clubId, setClubId] = useState<string>("invalid")
     var [availiableCasts, setAvailiableCasts] = useState<AvailableCastType[]>([])
     var [races, setRaces] = useState<RaceDataType[]>([])
     var [series, setSeries] = useState<SeriesDataType[]>([])
 
-    var [club, setClub] = useState<ClubDataType>({
-        id: "",
-        name: "",
-        settings: {
-            clockIP: "",
-            hornIP: "",
-            pursuitLength: 0,
-            clockOffset: 0
-        },
-        series: [],
-        boats: [],
-    })
-
-    var [user, setUser] = useState<UserDataType>({
-        id: "",
-        displayName: "",
-        settings: {},
-        permLvl: 0,
-        clubId: ""
-
-    })
+    const { user, userIsError, userIsValidating } = Fetcher.UseUser()
+    const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
 
     const addCast = async (host: string) => {
         //send socket message to connect to cast
@@ -59,15 +40,15 @@ const CCDashboard = () => {
             DB.CreateChromecast({
                 id: "",
                 name: response.cast.name,
-                clubId: clubId,
+                clubId: club.id,
                 host: response.cast.host,
                 settings: {}
             })
         })
-        setChromecasts(await DB.GetChromecastByClubId(clubId))
+        setChromecasts(await DB.GetChromecastByClubId(club.id))
         hideAddCastModal()
         setTimeout(() => {
-            connection.emit("messageCast", host, { type: "clubId", clubId: clubId }, (response: any) => {
+            connection.emit("messageCast", host, { type: "clubId", clubId: club.id }, (response: any) => {
                 console.log(response)
             })
         }, 10000)
@@ -86,10 +67,10 @@ const CCDashboard = () => {
                 return
             }
         })
-        setChromecasts(await DB.GetChromecastByClubId(clubId))
+        setChromecasts(await DB.GetChromecastByClubId(club.id))
         hideAddCastModal()
         setTimeout(() => {
-            connection.emit("messageCast", host, { type: "clubId", clubId: clubId }, (response: any) => {
+            connection.emit("messageCast", host, { type: "clubId", clubId: club.id }, (response: any) => {
                 console.log(response)
             })
         }, 10000)
@@ -109,7 +90,7 @@ const CCDashboard = () => {
             }
 
         })
-        setChromecasts(await DB.GetChromecastByClubId(clubId))
+        setChromecasts(await DB.GetChromecastByClubId(club.id))
         hideAddCastModal()
     }
 
@@ -192,43 +173,13 @@ const CCDashboard = () => {
 
     }
 
-    useEffect(() => {
-        setClubId(Cookies.get('clubId') || "")
-    }, [])
 
     useEffect(() => {
-        if (clubId != "") {
-            //catch if not fully updated
-            if (clubId == "invalid") {
-                return
-            }
-            const fetchClub = async () => {
-                var data = await DB.GetClubById(clubId)
-                if (data) {
-                    console.log(data)
-                    setClub(data)
-                } else {
-                    console.log("could not fetch club settings")
-                }
+        if (club.id != undefined) {
 
-            }
-            fetchClub()
-
-            const fetchUser = async () => {
-                var userid = Cookies.get('userId')
-                if (userid == undefined) return
-                var data = await DB.GetUserById(userid)
-                if (data) {
-                    setUser(data)
-                } else {
-                    console.log("could not fetch club settings")
-                }
-
-            }
-            fetchUser()
 
             const fetchChromecasts = async () => {
-                var data = await DB.GetChromecastByClubId(clubId)
+                var data = await DB.GetChromecastByClubId(club.id)
                 if (data) {
                     console.log(data)
                     setChromecasts(data)
@@ -246,7 +197,7 @@ const CCDashboard = () => {
             _socket.on('connect', () => {
                 console.log('connected to socket')
             })
-            _socket.emit("register", clubId, (response: any) => {
+            _socket.emit("register", club.id, (response: any) => {
                 console.log(response)
                 if (response.status == false) {
                     console.log("could not register club")
@@ -254,7 +205,7 @@ const CCDashboard = () => {
             })
 
             const fetchTodaysRaces = async () => {
-                var data = await DB.getTodaysRaceByClubId(clubId)
+                var data = await DB.getTodaysRaceByClubId(club.id)
                 console.log(data)
                 if (data) {
                     let racesCopy: RaceDataType[] = []
@@ -298,7 +249,7 @@ const CCDashboard = () => {
             console.log("user not signed in")
             router.push("/")
         }
-    }, [clubId])
+    }, [club])
 
     useEffect(() => {
         //update chromecasts status based on available casts
@@ -316,7 +267,7 @@ const CCDashboard = () => {
     }, [availiableCasts])
 
     return (
-        <Dashboard club={club.name} displayName={user.displayName}>
+        <Dashboard >
             <Script src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js"></Script>
             <div id="addCastModal" className="hidden fixed z-10 left-0 top-0 w-full h-full overflow-auto bg-gray-400 backdrop-blur-sm bg-opacity-20">
                 <div className="mx-auto my-20 px-a py-5 border w-1/4 bg-gray-300 rounded-sm">

@@ -35,11 +35,13 @@ const Login = () => {
                     //alert(data.message)
                 }
                 if (data && data.token) {
+                    console.log(data)
+                    const user: UserDataType = data.user;
                     //set cookie
                     cookie.set('token', data.token, { expires: 2 });
-                    cookie.set('clubId', data.club, { expires: 2 });
-                    cookie.set('userId', data.user, { expires: 2 })
-                    Router.push("/Dashboard");
+                    cookie.set('clubId', user.clubId, { expires: 2 });
+                    cookie.set('userId', user.id, { expires: 2 })
+                    Router.push(user.startPage);
                 }
                 else {
                     console.error("no token with login request")

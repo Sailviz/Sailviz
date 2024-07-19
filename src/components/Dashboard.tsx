@@ -3,6 +3,7 @@ import Router, { useRouter } from 'next/router'
 import cookie from 'js-cookie'
 import Link from 'next/link'
 import Image from 'next/image'
+import * as Fetcher from '../components/Fetchers';
 
 
 export const siteTitle = 'SailViz'
@@ -10,14 +11,13 @@ export const siteTitle = 'SailViz'
 
 export default function Dashboard({
     children,
-    club,
-    displayName
 }: {
     children: React.ReactNode
-    club?: string
-    displayName?: string
 }) {
     const router = useRouter()
+
+    const { user, userIsValidating, userIsError } = Fetcher.UseUser()
+    const { club, clubIsValidating, clubIsError } = Fetcher.UseClub()
     return (
         <div className="h-screen">
             <Head>
@@ -45,10 +45,10 @@ export default function Dashboard({
                                 </div>
                                 <div className=' text-4xl font-bold text-blue-600 p-1 cursor-pointer' onClick={() => Router.push("/Dashboard")}>SailViz - </div>
                                 <p className="text-4xl font-bold text-blue-600 p-1 cursor-pointer">
-                                    {club}
+                                    {club?.name}
                                 </p>
                                 <p className=" text-xl font-semibold whitespace-nowrap text-gray-700 p-3">
-                                    logged in as {displayName}
+                                    logged in as {user?.displayName}
                                 </p>
                             </div>
                         </div>

@@ -8,7 +8,7 @@ const saltRounds = 10;
 const jwtSecret = process.env.jwtSecret;
 
 async function findUser(username: string) {
-    var result = await prisma.users.findUnique({
+    var result = await prisma.user.findUnique({
         where: {
             username: username,
         },
@@ -27,14 +27,15 @@ async function findClub(clubId: string) {
 
 async function createUser(displayName: string, username: string, password: string, clubId: string, permLvl: number) {
     var hash = await bcrypt.hash(password, saltRounds)
-    var user = await prisma.users.create({
+    var user = await prisma.user.create({
         data: {
             username: username,
             displayName: displayName,
             password: hash,
             settings: {},
             clubId: clubId,
-            permLvl: permLvl,
+            roles: {},
+            startPage: 'Dashboard',
         },
     })
     return user;
