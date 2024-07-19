@@ -10,14 +10,11 @@ ENV DATABASE_URL mysql://${DATABASE_USER}:${DATABASE_PASSWORD}@${DATABASE_HOST}/
 RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
 
+COPY . /usr/src/app
+COPY prisma ./prisma/
 # Installing dependencies
 COPY package*.json /usr/src/app/
 RUN npm install
-
-# Copying source files
-COPY . /usr/src/app
-COPY prisma ./prisma/
-RUN npx prisma generate
 
 # Building app
 RUN npm run build
