@@ -3,6 +3,7 @@ import Router, { useRouter } from 'next/router'
 import cookie from 'js-cookie'
 import Link from 'next/link'
 import Image from 'next/image'
+import React from "react";
 
 
 export const siteTitle = 'SailViz'
