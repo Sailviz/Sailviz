@@ -37,12 +37,12 @@ export default function Dashboard({
 
                             &lt; Back
                         </div>
-                        <a href="/Dashboard" className="flex space-x-3">
-                            <img src="/favicon.ico" className="h-8"
+                        <Link href="/Dashboard" className="flex space-x-3">
+                            <Image src="/favicon.ico" width={100} height={100} className="w-8"
                                  alt="Logo"/>
                             <span
                                 className="self-center text-xl font-semibold md:text-2xl">Sailviz - {club}</span>
-                        </a>
+                        </Link>
                         <div className="w-full text-center md:block md:w-auto" id="navbar-default">
                             <a href="#" className="block">
                                 Logged In:
