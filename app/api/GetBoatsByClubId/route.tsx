@@ -3,21 +3,21 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 
 import assert from 'assert';
 
-async function findSeries(clubId: any) {
-    var result = await prisma.series.findMany({
+async function findBoats(boatId: any) {
+    var result = await prisma.boat.findMany({
         where: {
-            clubId: clubId
-        },
-        include: {
-            races: true
+            clubId: boatId
         }
     })
     return result;
 }
 
 
+
 export async function POST(request: Request) {
     const req = await request.json()
+    // check if we have all data.
+    // The website stops this, but just in case
     try {
         assert.notStrictEqual(undefined, req.clubId)
     } catch (e) {
@@ -25,12 +25,12 @@ export async function POST(request: Request) {
     }
 
     var clubId = req.clubId
-    var Series = await findSeries(clubId)
-    if (Series) {
-        return Response.json({ error: false, series: Series });
+    var boat = await findBoats(clubId)
+    if (boat) {
+        return Response.json({ error: false, boats: boat });
     }
     else {
-        return Response.json({ error: "can't find series" }, { status: 406 });
+        return Response.json({ error: "can't find boat" }, { status: 406 });
     }
 
 };
