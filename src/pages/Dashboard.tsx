@@ -155,7 +155,7 @@ const SignOnPage = () => {
                     </a>
                 </div>
                 <div className="w-full text-center px-4">
-                    <div onClick={() => { router.push({ pathname: '/RaceOfficerGuide' }) }}
+                    <div onClick={() => { router.push({ pathname: '/help/RaceOfficerGuide' }) }}
                        className="block p-6 bg-white border border-gray-200 rounded-lg shadow hover:border-pink-500">
                         <svg xmlns="http://www.w3.org/2000/svg" height="4em" fill="currentColor" viewBox="0 0 512 512" className="mx-auto">
                             <path

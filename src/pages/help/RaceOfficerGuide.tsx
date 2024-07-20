@@ -1,7 +1,7 @@
-import Dashboard from '../components/Dashboard';
+import Dashboard from '../../components/Dashboard';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
-import * as DB from '../components/apiMethods';
+import * as DB from '../../components/apiMethods';
 import Cookies from "js-cookie";
 const RaceOfficerGuide = () => {
 
