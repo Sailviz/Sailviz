@@ -45,6 +45,11 @@ const Page = () => {
     }, [router])
 
     useEffect(() => {
+        document.getElementById('nav_back')?.classList.add('hidden')
+
+    }, [router])
+
+    useEffect(() => {
         if (clubId != "") {
             //catch if not fully updated
             if (clubId == "invalid") {
