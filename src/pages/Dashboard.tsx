@@ -5,7 +5,7 @@ import Cookies from "js-cookie";
 import dayjs from 'dayjs';
 import Select from 'react-select';
 
-import Dashboard from "../components/Dashboard";
+import Dashboard from "../components/layouts/dashboard";
 
 enum raceStateType {
     running,
@@ -46,34 +46,6 @@ const SignOnPage = () => {
 
 
     var [todaysRaces, setTodaysRaces] = useState<NextRaceDataType[]>([])
-
-    const createEvent = async () => {
-        //create a series
-        let nameElement = document.getElementById("eventName") as HTMLInputElement
-        let name = nameElement.value
-        let numberOfRacesElement = document.getElementById("eventRaces") as HTMLInputElement
-        let numberOfRaces = parseInt(numberOfRacesElement.value)
-        if (name == "" || numberOfRaces < 1) {
-            //show error saying data is invalid
-            return
-        }
-        let series = await DB.createSeries(clubId, name)
-        for (let i = 0; i < numberOfRaces; i++) {
-            await DB.createRace(clubId, series.id)
-        }
-        hideCreateModal()
-    }
-
-    const showCreateModal = () => {
-        const modal = document.getElementById("editModal")
-
-        modal?.classList.remove("hidden")
-    }
-
-    const hideCreateModal = async () => {
-        const modal = document.getElementById("editModal")
-        modal?.classList.add("hidden")
-    }
 
     useEffect(() => {
         setClubId(Cookies.get('clubId') || "")
@@ -151,73 +123,56 @@ const SignOnPage = () => {
 
     return (
         <Dashboard club={club.name} displayName={user.displayName}>
-            <div id="editModal" className="hidden fixed z-10 left-0 top-0 w-full h-full overflow-auto bg-gray-400 backdrop-blur-sm bg-opacity-20">
-                <div className="mx-40 my-20 px-10 py-5 border w-4/5 bg-gray-300 rounded-sm">
-                    <div className="text-6xl font-extrabold text-gray-700 p-6 float-right cursor-pointer" onClick={hideCreateModal}>&times;</div>
-                    <div className="text-6xl font-extrabold text-gray-700 p-6">Create Event</div>
-                    <div className="flex w-3/4">
-                        <div className='flex flex-col px-6 w-full'>
-                            <p className='hidden' id="EditResultId">
-
-                            </p>
-                            <p className='text-2xl font-bold text-gray-700'>
-                                Name
-                            </p>
-                            <input type="text" id="eventName" className="h-full text-2xl p-4" />
-                        </div>
-                        <div className='flex flex-col px-6 w-full'>
-                            <p className='text-2xl font-bold text-gray-700'>
-                                Number of Races
-                            </p>
-
-                            <input type="number" id="eventRaces" className="h-full text-2xl p-4" />
-                        </div>
-                    </div>
-                    <div className="flex flex-row justify-end">
-                        <div className=" flex justify-end mt-8">
-                            <div className="p-4 mr-2">
-                                <p id="confirmEdit" onClick={createEvent} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-xl px-12 py-4 text-center mr-3 md:mr-0">
-                                    Create
-                                </p>
-                            </div>
-                        </div>
+            <div className="grid grid-flow-row sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-4 justify-center items-center gap-4 mt-8">
+                <div className="w-full text-center px-4">
+                    <a href="#"
+                       className="block p-6 bg-white border border-gray-200 rounded-lg shadow hover:border-pink-500 ">
+                        <svg xmlns="http://www.w3.org/2000/svg" height="4em" fill="currentColor" viewBox="0 0 512 512" className="mx-auto">
+                            <path
+                                d="M 458.5826771653543 41.32283464566929 L 470.6771653543307 53.41732283464567 L 458.5826771653543 41.32283464566929 L 470.6771653543307 53.41732283464567 Q 479.748031496063 63.496062992125985 479.748031496063 76.5984251968504 Q 479.748031496063 89.7007874015748 470.6771653543307 99.77952755905511 L 443.46456692913387 125.98425196850394 L 443.46456692913387 125.98425196850394 L 386.01574803149606 68.53543307086615 L 386.01574803149606 68.53543307086615 L 412.2204724409449 41.32283464566929 L 412.2204724409449 41.32283464566929 Q 422.2992125984252 32.25196850393701 435.40157480314963 32.25196850393701 Q 448.503937007874 32.25196850393701 458.5826771653543 41.32283464566929 L 458.5826771653543 41.32283464566929 Z M 190.48818897637796 264.06299212598424 L 362.8346456692913 91.71653543307086 L 190.48818897637796 264.06299212598424 L 362.8346456692913 91.71653543307086 L 420.2834645669291 149.16535433070865 L 420.2834645669291 149.16535433070865 L 247.93700787401573 321.51181102362204 L 247.93700787401573 321.51181102362204 Q 241.88976377952756 327.5590551181102 232.8188976377953 330.5826771653543 L 166.29921259842519 345.7007874015748 L 166.29921259842519 345.7007874015748 L 182.4251968503937 279.18110236220474 L 182.4251968503937 279.18110236220474 Q 184.44094488188978 270.1102362204724 190.48818897637796 264.06299212598424 L 190.48818897637796 264.06299212598424 Z M 390.0472440944882 19.1496062992126 L 167.30708661417322 240.88188976377953 L 390.0472440944882 19.1496062992126 L 167.30708661417322 240.88188976377953 Q 154.20472440944883 253.98425196850394 150.17322834645668 272.12598425196853 L 129.00787401574803 363.84251968503935 L 129.00787401574803 363.84251968503935 Q 128 371.90551181102364 134.04724409448818 377.9527559055118 Q 140.09448818897638 384 149.16535433070865 382.99212598425197 L 239.8740157480315 361.8267716535433 L 239.8740157480315 361.8267716535433 Q 258.01574803149606 357.79527559055117 271.11811023622045 344.6929133858268 L 492.8503937007874 121.95275590551181 L 492.8503937007874 121.95275590551181 Q 512 102.80314960629921 512 76.5984251968504 Q 512 51.40157480314961 492.8503937007874 31.244094488188978 L 480.755905511811 19.1496062992126 L 480.755905511811 19.1496062992126 Q 461.6062992125984 0 435.40157480314963 0 Q 410.20472440944883 0 390.0472440944882 19.1496062992126 L 390.0472440944882 19.1496062992126 Z M 80.62992125984252 60.47244094488189 Q 46.36220472440945 61.48031496062992 23.181102362204726 83.65354330708661 L 23.181102362204726 83.65354330708661 L 23.181102362204726 83.65354330708661 Q 1.0078740157480315 106.83464566929133 0 141.10236220472441 L 0 431.37007874015745 L 0 431.37007874015745 Q 1.0078740157480315 465.6377952755906 23.181102362204726 488.81889763779526 Q 46.36220472440945 510.99212598425197 80.62992125984252 512 L 370.8976377952756 512 L 370.8976377952756 512 Q 405.1653543307087 510.99212598425197 428.34645669291336 488.81889763779526 Q 450.5196850393701 465.6377952755906 451.5275590551181 431.37007874015745 L 451.5275590551181 302.3622047244094 L 451.5275590551181 302.3622047244094 Q 450.5196850393701 287.244094488189 435.40157480314963 286.23622047244095 Q 420.2834645669291 287.244094488189 419.2755905511811 302.3622047244094 L 419.2755905511811 431.37007874015745 L 419.2755905511811 431.37007874015745 Q 418.26771653543307 451.5275590551181 405.1653543307087 465.6377952755906 Q 391.0551181102362 478.74015748031496 370.8976377952756 479.748031496063 L 80.62992125984252 479.748031496063 L 80.62992125984252 479.748031496063 Q 60.47244094488189 478.74015748031496 46.36220472440945 465.6377952755906 Q 33.25984251968504 451.5275590551181 32.25196850393701 431.37007874015745 L 32.25196850393701 141.10236220472441 L 32.25196850393701 141.10236220472441 Q 33.25984251968504 120.94488188976378 46.36220472440945 106.83464566929133 Q 60.47244094488189 93.73228346456693 80.62992125984252 92.7244094488189 L 209.63779527559055 92.7244094488189 L 209.63779527559055 92.7244094488189 Q 224.75590551181102 91.71653543307086 225.76377952755905 76.5984251968504 Q 224.75590551181102 61.48031496062992 209.63779527559055 60.47244094488189 L 80.62992125984252 60.47244094488189 L 80.62992125984252 60.47244094488189 Z"/>
+                        </svg>
+                        <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Sign On</h5>
+                    </a>
+                </div>
+                <div className="w-full text-center px-4">
+                    <a href="#"
+                       className=" block p-6 bg-white border border-gray-200 rounded-lg shadow hover:border-pink-500">
+                        <svg xmlns="http://www.w3.org/2000/svg" height="4em" fill="currentColor" viewBox="0 0 512 512" className="mx-auto">
+                            <path
+                                d="M 256 0 Q 241 1 240 16 L 240 112 L 240 112 Q 241 127 256 128 Q 271 127 272 112 L 272 33 L 272 33 Q 361 41 420 103 Q 478 165 480 256 Q 479 319 449 369 Q 420 420 369 449 Q 319 479 256 480 Q 193 479 143 449 Q 92 420 63 369 Q 33 319 32 256 Q 32 209 50 169 Q 67 128 98 98 Q 107 86 98 75 Q 86 66 75 75 Q 40 110 20 156 Q 0 203 0 256 Q 1 328 35 385 Q 69 443 127 477 Q 184 511 256 512 Q 328 511 385 477 Q 443 443 477 385 Q 511 328 512 256 Q 511 184 477 127 Q 443 69 385 35 Q 328 1 256 0 L 256 0 Z M 171 149 Q 160 139 149 149 Q 139 160 149 171 L 245 267 L 245 267 Q 256 277 267 267 Q 277 256 267 245 L 171 149 L 171 149 Z"/>
+                        </svg>
+                        <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Race</h5>
+                    </a>
+                </div>
+                <div className="card w-full text-center px-4">
+                    <a href="#"
+                       className="block p-6 bg-white border border-gray-200 rounded-lg shadow hover:border-pink-500">
+                        <svg xmlns="http://www.w3.org/2000/svg" height="4em" fill="currentColor" viewBox="0 0 512 512" className="mx-auto">
+                            <path
+                                d="M 128 32 Q 114 32 105 41 L 105 41 L 105 41 Q 96 50 96 64 L 96 448 L 96 448 Q 96 462 105 471 Q 114 480 128 480 L 384 480 L 384 480 Q 398 480 407 471 Q 416 462 416 448 L 416 64 L 416 64 Q 416 50 407 41 Q 398 32 384 32 L 128 32 L 128 32 Z M 64 64 Q 65 37 83 19 L 83 19 L 83 19 Q 101 1 128 0 L 384 0 L 384 0 Q 411 1 429 19 Q 447 37 448 64 L 448 448 L 448 448 Q 447 475 429 493 Q 411 511 384 512 L 128 512 L 128 512 Q 101 511 83 493 Q 65 475 64 448 L 64 64 L 64 64 Z M 144 128 L 368 128 L 144 128 L 368 128 Q 383 129 384 144 Q 383 159 368 160 L 144 160 L 144 160 Q 129 159 128 144 Q 129 129 144 128 L 144 128 Z M 144 224 L 368 224 L 144 224 L 368 224 Q 383 225 384 240 Q 383 255 368 256 L 144 256 L 144 256 Q 129 255 128 240 Q 129 225 144 224 L 144 224 Z M 144 320 L 272 320 L 144 320 L 272 320 Q 287 321 288 336 Q 287 351 272 352 L 144 352 L 144 352 Q 129 351 128 336 Q 129 321 144 320 L 144 320 Z"/>
+                        </svg>
+                        <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Results</h5>
+                    </a>
+                </div>
+                <div className="w-full text-center px-4">
+                    <div onClick={() => { router.push({ pathname: '/RaceOfficerGuide' }) }}
+                       className="block p-6 bg-white border border-gray-200 rounded-lg shadow hover:border-pink-500">
+                        <svg xmlns="http://www.w3.org/2000/svg" height="4em" fill="currentColor" viewBox="0 0 512 512" className="mx-auto">
+                            <path
+                                d="M 237.38181818181818 37.236363636363635 Q 189.6727272727273 38.4 158.25454545454545 69.81818181818181 L 158.25454545454545 69.81818181818181 L 158.25454545454545 69.81818181818181 Q 126.83636363636364 101.23636363636363 125.67272727272727 148.94545454545454 Q 124.50909090909092 166.4 107.05454545454545 167.56363636363636 Q 89.6 166.4 88.43636363636364 148.94545454545454 Q 89.6 86.10909090909091 131.4909090909091 43.054545454545455 Q 174.54545454545453 1.1636363636363636 237.38181818181818 0 L 274.6181818181818 0 L 274.6181818181818 0 Q 337.45454545454544 1.1636363636363636 380.5090909090909 43.054545454545455 Q 422.4 86.10909090909091 423.56363636363636 148.94545454545454 Q 422.4 212.94545454545454 371.2 253.6727272727273 L 300.2181818181818 306.03636363636366 L 300.2181818181818 306.03636363636366 Q 275.7818181818182 325.8181818181818 274.6181818181818 358.4 L 274.6181818181818 372.3636363636364 L 274.6181818181818 372.3636363636364 Q 273.45454545454544 389.8181818181818 256 390.9818181818182 Q 238.54545454545453 389.8181818181818 237.38181818181818 372.3636363636364 L 237.38181818181818 358.4 L 237.38181818181818 358.4 Q 238.54545454545453 307.2 278.1090909090909 276.94545454545454 L 349.09090909090907 223.4181818181818 L 349.09090909090907 223.4181818181818 Q 385.1636363636364 195.4909090909091 386.3272727272727 148.94545454545454 Q 385.1636363636364 101.23636363636363 353.74545454545455 69.81818181818181 Q 322.3272727272727 38.4 274.6181818181818 37.236363636363635 L 237.38181818181818 37.236363636363635 L 237.38181818181818 37.236363636363635 Z M 228.07272727272726 484.07272727272726 Q 230.4 458.4727272727273 256 456.1454545454545 Q 281.6 458.4727272727273 283.92727272727274 484.07272727272726 Q 281.6 509.6727272727273 256 512 Q 230.4 509.6727272727273 228.07272727272726 484.07272727272726 L 228.07272727272726 484.07272727272726 Z"/>
+                        </svg>
+                        <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Help</h5>
                     </div>
                 </div>
-            </div>
-            <div className="flex flex-col w-full">
-                <p className="text-6xl font-extrabold text-gray-700 p-6 mx-36">
-                    This is still new software! Please write down finish Times!
-                </p>
-                <div onClick={() => { router.push({ pathname: '/RaceOfficerGuide' }) }} className="cursor-pointer w-2/12 mx-36 text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-xl px-12 py-4 text-center mr-3 md:mr-0">
-                    Race Officer Guide
-                </div>
-                {/* show all races that are happening today */}
-                {todaysRaces.length > 0 ?
-                    <div>
-                        <p className="text-6xl font-extrabold text-gray-700 p-6 mx-36">
-                            Races Happening Today:
-                        </p>
-                        <div className="flex flex-row flex-wrap p-6 mx-36">
-                            {todaysRaces.map((race, index) => {
-                                return (
-                                    <div className="m-6" key={race.id}>
-                                        <div onClick={() => { router.push({ pathname: '/Race', query: { race: race.id } }) }} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-xl px-12 py-4 text-center mr-3 md:mr-0">
-                                            {race.series.name}: {race.number} at {race.Time.slice(11, 16)}
-                                        </div>
-                                    </div>
-                                )
-                            })}
-                        </div>
-                    </div>
-                    :
-                    <div>
-                        <p className="text-6xl font-extrabold text-gray-700 p-6 mx-36"> No Races Today</p>
-                    </div>
-                }
-                <div className="m-6">
-                    <div onClick={showCreateModal} className="mx-36 cursor-pointer text-white bg-green-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-xl px-12 py-4 text-center w-2/12">
-                        Create New Event
-                    </div>
+                <div className="w-full text-center px-4">
+                    <a href="#"
+                       className="block p-6 bg-white border border-gray-200 rounded-lg shadow hover:border-pink-500">
+                        <svg xmlns="http://www.w3.org/2000/svg" height="4em" fill="currentColor" viewBox="0 0 512 512" className="mx-auto">
+                            <path
+                                d="M 223 38 Q 224 36 226 34 Q 241 32 256 32 Q 271 32 286 34 Q 288 36 289 38 L 302 86 L 302 86 Q 309 104 325 112 Q 336 117 347 124 Q 361 134 381 131 L 429 119 L 429 119 Q 431 118 433 119 Q 441 129 448 141 L 452 148 L 452 148 Q 459 159 464 171 Q 463 174 461 175 L 427 211 L 427 211 Q 414 225 416 244 Q 416 250 416 256 Q 416 262 416 269 Q 414 287 427 301 L 461 337 L 461 337 Q 463 338 463 341 Q 458 353 452 364 L 448 371 L 448 371 Q 441 383 433 393 Q 431 394 429 393 L 380 381 L 380 381 Q 362 378 347 388 Q 336 395 325 400 Q 308 408 302 427 L 289 474 L 289 474 Q 288 476 286 478 Q 271 480 256 480 Q 241 480 226 478 Q 224 476 223 474 L 210 427 L 210 427 Q 203 408 187 400 Q 176 395 165 388 Q 151 378 131 381 L 83 393 L 83 393 Q 81 394 79 393 Q 71 383 64 371 L 60 364 L 60 364 Q 53 353 48 341 Q 49 338 51 337 L 85 301 L 85 301 Q 98 287 97 269 Q 96 262 96 256 Q 96 250 97 244 Q 98 225 85 211 L 51 175 L 51 175 Q 49 173 49 171 Q 54 159 60 148 L 64 141 L 64 141 Q 71 129 79 119 Q 81 118 83 119 L 132 131 L 132 131 Q 151 134 166 124 Q 176 117 187 112 Q 204 104 210 85 L 223 38 L 223 38 Z M 256 0 Q 236 0 218 3 Q 215 3 213 5 Q 198 12 193 29 L 179 77 L 179 77 Q 178 80 173 83 Q 160 89 147 98 Q 143 100 139 100 L 91 88 L 91 88 Q 74 84 60 93 Q 58 94 56 96 Q 45 109 37 124 L 36 124 L 36 124 L 32 132 L 32 132 L 32 132 L 32 132 Q 24 147 18 163 Q 17 165 16 168 Q 16 185 28 198 L 62 233 L 62 233 Q 65 236 65 241 Q 64 245 64 249 Q 64 252 64 256 Q 64 264 65 271 Q 65 276 62 279 L 28 315 L 28 315 Q 16 328 17 344 Q 17 347 18 349 Q 24 365 32 380 L 32 380 L 32 380 L 36 388 L 36 388 L 37 388 L 37 388 Q 45 403 56 416 Q 58 418 60 420 Q 74 428 91 425 L 139 413 L 139 413 Q 143 412 147 414 Q 160 423 173 429 Q 178 432 179 435 L 193 483 L 193 483 Q 198 500 213 508 Q 215 509 218 509 Q 236 512 256 512 Q 276 512 294 509 Q 297 509 299 508 Q 314 500 319 483 L 333 435 L 333 435 Q 334 432 339 429 Q 352 423 365 414 Q 369 412 373 413 L 421 425 L 421 425 Q 438 428 452 419 Q 454 418 456 416 Q 467 403 475 388 L 476 388 L 476 388 L 480 380 L 480 380 L 480 380 L 480 380 Q 488 365 494 349 Q 495 347 496 344 Q 496 327 484 315 L 450 279 L 450 279 Q 447 276 447 271 Q 448 264 448 256 Q 448 248 447 241 Q 447 236 450 233 L 484 198 L 484 198 Q 496 185 496 168 Q 495 165 494 163 Q 488 147 480 132 L 480 132 L 480 132 L 476 124 L 476 124 L 476 124 L 476 124 Q 467 109 456 96 Q 454 94 452 93 Q 438 84 421 88 L 373 100 L 373 100 Q 369 100 365 98 Q 352 89 339 83 Q 334 80 333 77 L 319 29 L 319 29 Q 314 12 299 5 Q 297 3 294 3 Q 276 0 256 0 L 256 0 Z M 200 256 Q 201 224 228 208 Q 256 192 284 208 Q 311 224 312 256 Q 311 288 284 304 Q 256 320 228 304 Q 201 288 200 256 L 200 256 Z M 344 256 Q 342 206 300 180 Q 256 156 212 180 Q 170 206 168 256 Q 170 306 212 332 Q 256 356 300 332 Q 342 306 344 256 L 344 256 Z"/>
+                        </svg>
+                        <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Admin</h5>
+                    </a>
                 </div>
             </div>
         </Dashboard>
