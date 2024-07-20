@@ -77,16 +77,21 @@ const RaceOfficerGuide = () => {
 
     return (
         <Dashboard club={club.name} displayName={user.displayName}>
-            <div className='w-full'>
-                <div className=' w-full h-full mx-auto my-4'>
-                    <object
-                        data="/0.2 Race Sign On Guide.pdf#toolbar=0"
-                        type="application/pdf" width="100%" height="1000px"
-                    />
-                </div>
+            <div className="w-full h-full mx-auto my-4">
+                <object
+                    data="/0.2 Race Sign On Guide.pdf#toolbar=0"
+                    type="application/pdf" width="100%" height="1000px"
+                >
+                    <div className="flex">
+                        <p className="my-auto mx-auto">Race Officer's Guide</p>
+                        <a href="/0.2 Race Sign On Guide.pdf" className="text-white bg-pink-500 hover:bg-white hover:text-gray-700 hover:border-pink-500 border shadow font-medium px-5 py-3 text-center mr-6">
+                            Download
+                        </a>
+                    </div>
+                </object>
             </div>
         </Dashboard>
-    );
+);
 };
 
 
