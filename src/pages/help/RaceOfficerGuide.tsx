@@ -1,4 +1,4 @@
-import Dashboard from '../../components/Dashboard';
+import Dashboard from '../../components/layouts/dashboard';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import * as DB from '../../components/apiMethods';
@@ -78,13 +78,10 @@ const RaceOfficerGuide = () => {
     return (
         <Dashboard club={club.name} displayName={user.displayName}>
             <div className='w-full'>
-                <div id="BackToHome" onClick={() => router.back()} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center w-1/12 mt-4 mx-4">
-                    Back To Home
-                </div>
-                <div className=' w-11/12 h-full mx-auto my-3'>
-                    <embed
-                        src="/0.2 Race Sign On Guide.pdf#toolbar=0"
-                        height="750" width={1450}
+                <div className=' w-full h-full mx-auto my-4'>
+                    <object
+                        data="/0.2 Race Sign On Guide.pdf#toolbar=0"
+                        type="application/pdf" width="100%" height="1000px"
                     />
                 </div>
             </div>
