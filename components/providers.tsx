@@ -7,7 +7,7 @@ import { NextUIProvider } from '@nextui-org/react'
 import { ThemeProvider as NextThemesProvider } from 'next-themes';
 import { type ThemeProviderProps } from 'next-themes/dist/types';
 
-//this avoids type issues because the ty
+//this avoids type issues because the types are not up do date.
 export const ThemeProvider = (props: ThemeProviderProps): React.JSX.Element => {
     return NextThemesProvider(props) as React.JSX.Element;
 };

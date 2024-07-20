@@ -1,25 +1,25 @@
-import React, { ChangeEvent, MouseEventHandler, useEffect, useState } from "react"
-import Router, { useRouter } from "next/router"
-import * as DB from '../../components/apiMethods';
+'use client'
+import { ChangeEvent, MouseEventHandler, useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
+import * as DB from '../../../components/apiMethods';
 import Cookies from "js-cookie";
-import SignOnTable from "../../components/tables/SignOnTable";
+import SignOnTable from "../../../components/tables/SignOnTable";
 import Select from 'react-select';
-import FleetResultsTable from "../../components/tables/FleetHandicapResultsTable";
-import Switch from "../../components/ui/Switch";
-import * as Fetcher from '../../components/Fetchers';
+import FleetResultsTable from "../../../components/tables/FleetHandicapResultsTable";
+import Switch from "../../../components/ui/Switch";
+import * as Fetcher from '../../../components/Fetchers';
+import { PageSkeleton } from "components/ui/PageSkeleton";
 
 const SignOnPage = () => {
 
-    const router = useRouter()
-
-    const query = router.query
+    const Router = useRouter()
 
     const { user, userIsError, userIsValidating } = Fetcher.UseUser()
     const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
+    const { boats, boatsIsError, boatsIsValidating } = Fetcher.Boats(club)
+    const { todaysRaces, todaysRacesIsError, todaysRacesIsValidating } = Fetcher.GetTodaysRaceByClubId(club)
 
-    const [boatData, setBoatData] = useState<BoatDataType[]>([])
-
-    var [races, setRaces] = useState<RaceDataType[]>([])
+    const [races, setRaces] = useState<RaceDataType[]>([])
 
     var [activeRaceData, setActiveRaceData] = useState<RaceDataType>({
         id: "",
@@ -83,7 +83,7 @@ const SignOnPage = () => {
             console.log(racesCopy[i]!.id)
             racesCopy[i] = await DB.getRaceById(racesCopy[i]!.id)
         }
-        setRaces([...racesCopy])
+        // mutate races
         return true
 
     }
@@ -168,7 +168,7 @@ const SignOnPage = () => {
             console.log(racesCopy[i]!.id)
             racesCopy[i] = await DB.getRaceById(racesCopy[i]!.id)
         }
-        setRaces([...racesCopy])
+        //mutate races
     }
 
     const showEditModal = async (resultId: string) => {
@@ -238,98 +238,36 @@ const SignOnPage = () => {
         modal?.classList.add("hidden")
     }
 
+    useEffect(() => {
+        if (boats == undefined) return
+        let tempoptions: { label: string; value: BoatDataType }[] = []
+        boats.forEach(boat => {
+            tempoptions.push({ value: boat as BoatDataType, label: boat.name })
+        })
+        setOptions(tempoptions)
+
+
+    }, [boats])
 
     useEffect(() => {
-        if (club.id != "") {
-            //catch if not fully updated
+        if (todaysRaces == undefined) return
 
-            const fetchBoats = async () => {
-                var data = await DB.getBoats(club.id)
-                if (data) {
-                    let array = [...data]
-                    setBoatData(array)
-                    let tempoptions: { label: string; value: BoatDataType }[] = []
-                    array.forEach(boat => {
-                        tempoptions.push({ value: boat as BoatDataType, label: boat.name })
-                    })
-                    setOptions(tempoptions)
-                } else {
-                    console.log("could not find boats")
-                }
+        setSelectedRaces(new Array(todaysRaces.length).fill(true))
+        let tempRaces: RaceDataType[] = []
+        todaysRaces.forEach(async (r) => {
+            tempRaces.push(await DB.getRaceById(r.id))
+        })
+        setRaces(tempRaces)
 
-            }
-            fetchBoats()
-
-            const fetchTodaysRaces = async () => {
-                var data = await DB.getTodaysRaceByClubId(club.id)
-                console.log(data)
-                if (data) {
-                    let racesCopy: RaceDataType[] = []
-                    let fleetsCopy: FleetDataType[] = []
-                    for (let i = 0; i < data.length; i++) {
-                        console.log(data[i]!.number)
-                        const res = await DB.getRaceById(data[i]!.id)
-                        racesCopy[i] = res
-                    }
-                    setRaces(racesCopy)
-
-                    //remove duplicates from fleets
-                    let uniqueFleets = fleetsCopy.filter((fleet, index, self) =>
-                        index === self.findIndex((t) => (
-                            t.id === fleet.id
-                        ))
-                    )
-                    setSelectedRaces(new Array(data.length).fill(false))
-                } else {
-                    console.log("could not find todays race")
-                }
-            }
-            fetchTodaysRaces()
-        } else {
-            console.log("user not signed in")
-            router.push("/")
-        }
-    }, [club])
+    }, [todaysRaces])
 
 
-    useEffect(() => {
-        let timer1 = setTimeout(async () => {
-            console.log("updating local copy of results")
-            let racesCopy = window.structuredClone(races)
-            for (let i = 0; i < racesCopy.length; i++) {
-                var data = await DB.getRaceById(racesCopy[i]!.id)
-                racesCopy[i] = data
-            }
-            setRaces(racesCopy)
-        }, 5000);
-        return () => {
-            clearTimeout(timer1);
-        }
-    }, [races]);
+    if (clubIsValidating || userIsValidating || boatsIsValidating || races == undefined) {
+        return <PageSkeleton />
+    }
 
     return (
         <div className="h-screen">
-            <div className="flex w-full flex-row justify-start">
-
-                <p onClick={() => showPage("Signon")} className=" w-1/4 p-2 m-2 cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-xl px-5 py-2.5 text-center">
-                    Sign On Sheet
-                </p>
-                <p onClick={() => showPage("Guide")} className=" w-1/4 p-2 m-2 cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-xl px-5 py-2.5 text-center">
-                    Guide
-                </p>
-                <p onClick={() => logout()} className="ml-auto w-1/8 p-2 m-2 cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-xl px-5 py-2.5 text-center">
-                    logout
-                </p>
-            </div>
-            <div className="flex w-full shrink flex-row justify-around">
-                {races.map((race, index) => {
-                    return (
-                        <p key={index} onClick={() => { setActiveRaceData(races[index]!); showPage("Results") }} className="w-1/4 p-2 m-2 cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-xl px-5 py-2.5 text-center">
-                            {race.series.name}: {race.number} Results
-                        </p>
-                    )
-                })}
-            </div>
             <div id="Signon" className="signon-height overflow-y-auto">
                 <div id="addModal" className="hidden fixed z-10 left-0 top-0 w-full h-full overflow-auto bg-gray-400 backdrop-blur-sm bg-opacity-20">
                     <div className="mx-40 my-20 px-10 py-5 border w-4/5 bg-gray-300 rounded-sm">

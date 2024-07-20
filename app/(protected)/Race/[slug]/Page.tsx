@@ -1,16 +1,16 @@
 import React, { ChangeEvent, MouseEventHandler, useEffect, useState } from "react"
 import Router, { useRouter } from "next/router"
-import * as DB from '../../components/apiMethods';
+import * as DB from '../../../../components/apiMethods';
 import Cookies from "js-cookie";
 import dayjs from 'dayjs';
 import Select from 'react-select';
 import Papa from 'papaparse';
-import FleetHandicapResultsTable from '../../components/tables/FleetHandicapResultsTable';
-import FleetPursuitResultsTable from '../../components/tables/FleetPursuitResultsTable';
-import Dashboard from "../../components/ui/Dashboard";
-import Switch from "../../components/ui/Switch";
-import * as Fetcher from '../../components/Fetchers';
-import { AVAILABLE_PERMISSIONS, userHasPermission } from "../../components/helpers/users";
+import FleetHandicapResultsTable from '../../../../components/tables/FleetHandicapResultsTable';
+import FleetPursuitResultsTable from '../../../../components/tables/FleetPursuitResultsTable';
+import Dashboard from "../../../../components/ui/Dashboard";
+import Switch from "../../../../components/ui/Switch";
+import * as Fetcher from '../../../../components/Fetchers';
+import { AVAILABLE_PERMISSIONS, userHasPermission } from "../../../../components/helpers/users";
 
 const raceOptions = [{ value: "Pursuit", label: "Pursuit" }, { value: "Handicap", label: "Handicap" }]
 

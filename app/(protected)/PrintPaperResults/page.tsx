@@ -1,18 +1,19 @@
+'use client'
 import React, { ChangeEvent, MouseEventHandler, useEffect, useRef, useState } from "react"
-import Router, { useRouter } from "next/router"
-import * as DB from '../../components/apiMethods';
+import { useRouter, useSearchParams } from "next/navigation"
+import * as DB from '../../../components/apiMethods';
 import Cookies from "js-cookie";
 
 import { useReactToPrint } from "react-to-print";
-import PaperResultsTable from "../../components/tables/HandicapPaperResultsTable";
-import HandicapPaperResultsTable from "../../components/tables/HandicapPaperResultsTable";
-import PursuitPaperResultsTable from "../../components/tables/PursuitPaperResultsTable";
+import PaperResultsTable from "../../../components/tables/HandicapPaperResultsTable";
+import HandicapPaperResultsTable from "../../../components/tables/HandicapPaperResultsTable";
+import PursuitPaperResultsTable from "../../../components/tables/PursuitPaperResultsTable";
 
 const PrintPaperResults = () => {
 
-    const router = useRouter()
+    const Router = useRouter()
 
-    const query = router.query
+    const searchParams = useSearchParams()
 
     var [race, setRace] = useState<RaceDataType>({
         id: "",
@@ -72,17 +73,18 @@ const PrintPaperResults = () => {
     });
 
     useEffect(() => {
-        let raceId = query.race as string
+        let raceId = searchParams.get('race')
+
         const getRace = async () => {
-            const racedata = await DB.getRaceById(raceId)
+            const racedata = await DB.getRaceById(raceId!)
             setRace(racedata)
         }
 
-        if (raceId != undefined) {
+        if (raceId != null) {
             getRace()
         }
 
-    }, [router])
+    }, [Router])
 
     useEffect(() => {
         handlePrint()

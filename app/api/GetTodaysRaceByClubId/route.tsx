@@ -29,7 +29,8 @@ async function findRace(clubId: string) {
             Time: true,
             series: {
                 select: {
-                    name: true
+                    name: true,
+                    id: true
                 }
             }
         }
@@ -50,7 +51,7 @@ export async function POST(request: NextRequest) {
 
     var race = await findRace(clubId)
     if (race) {
-        return NextResponse.json({ error: false, race: race });
+        return NextResponse.json({ error: false, races: race });
     } else {
         // User exists
         return NextResponse.json({ error: true, message: 'race not found' });

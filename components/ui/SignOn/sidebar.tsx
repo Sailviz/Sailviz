@@ -1,22 +1,32 @@
-import { Sidebar } from "./sidebar.styles";
+import { Sidebar } from "../sidebar/sidebar.styles";
 import { Avatar, Tooltip } from "@nextui-org/react";
 import { HomeIcon } from "components/icons/home-icon";
 import { AccountsIcon } from "components/icons/accounts-icon";
 import { DevIcon } from "components/icons/dev-icon";
 import { SettingsIcon } from "components/icons/settings-icon";
-import { CollapseItems } from "./collapse-items";
-import { SidebarItem } from "./sidebar-item";
-import { SidebarMenu } from "./sidebar-menu";
+import { CollapseItems } from "components/ui/sidebar/collapse-items";
+import { SidebarItem } from "components/ui/sidebar/sidebar-item";
+import { SidebarMenu } from "components/ui/sidebar/sidebar-menu";
 import { FilterIcon } from "components/icons/filter-icon";
-import { useSidebarContext } from "components/ui/layout/layout-context";
+import { useSidebarContext } from "components/ui/SignOn/layout-context";
 import { ChangeLogIcon } from "components/icons/changelog-icon";
 import { usePathname } from "next/navigation";
-import { ThemeSwitcher } from "../ThemeSwitcher";
+import { ThemeSwitcher } from "components/ui/ThemeSwitcher";
 import { SailVizIcon } from "components/icons/sailviz-icon";
+
+import * as Fetcher from 'components/Fetchers';
+import { PageSkeleton } from "../PageSkeleton";
 
 export const SidebarWrapper = () => {
     const pathname = usePathname();
     const { collapsed, setCollapsed } = useSidebarContext();
+
+    const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
+    const { todaysRaces, todaysRacesIsError, todaysRacesIsValidating } = Fetcher.GetTodaysRaceByClubId(club)
+
+    if (todaysRacesIsValidating || todaysRacesIsError || todaysRaces == undefined) {
+        return <PageSkeleton />
+    }
 
     return (
         <aside className="h-screen z-[20] sticky top-0">
@@ -43,23 +53,23 @@ export const SidebarWrapper = () => {
 
                     <div className={Sidebar.Body()}>
                         <SidebarItem
-                            title="Home"
+                            title="SignOn Sheet"
                             icon={<HomeIcon />}
-                            isActive={pathname === "/"}
-                            href="/Dashboard"
+                            isActive={pathname === "/SignOn"}
+                            href="/SignOn"
                         />
                         <SidebarMenu title="Main Menu">
-                            <SidebarItem
-                                isActive={pathname === "/Races"}
-                                title="Races"
-                                icon={<AccountsIcon />}
-                                href="/Races"
+                            <CollapseItems
+                                icon={<SettingsIcon />}
+                                items={todaysRaces?.map(race => race.series.name + ": " + race.number)}
+                                title="Today's Races"
+                                hrefs={todaysRaces?.map(race => 'SignOn/Race/' + race.id)}
                             />
-                            <SidebarItem
-                                isActive={pathname === "/Series"}
-                                title="Series"
-                                icon={<HomeIcon />}
-                                href="/Series"
+                            <CollapseItems
+                                icon={<SettingsIcon />}
+                                items={todaysRaces?.map(race => race.series.name)}
+                                title="Today's Series"
+                                hrefs={todaysRaces?.map(race => 'SignOn/Series/' + race.series.id)}
                             />
                             <SidebarItem
                                 isActive={pathname === "/Documentation"}
@@ -70,18 +80,6 @@ export const SidebarWrapper = () => {
                             />
                         </SidebarMenu>
 
-                        <SidebarMenu title="Admin">
-                            <CollapseItems
-                                icon={<SettingsIcon />}
-                                items={["Boats", "Hardware", "Integrations"]}
-                                title="Settings"
-                            />
-                            <SidebarItem
-                                isActive={pathname === "/developers"}
-                                title="Developers"
-                                icon={<DevIcon />}
-                            />
-                        </SidebarMenu>
 
                         <SidebarMenu title="Updates">
                             <SidebarItem

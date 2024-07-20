@@ -1,4 +1,4 @@
-import { Layout } from "components/ui/dashboard/layout";
+import { Layout } from "components/ui/SignOn/layout";
 import { Metadata } from 'next'
 import 'styles/globals.css'
 

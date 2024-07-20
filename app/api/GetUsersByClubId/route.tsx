@@ -23,16 +23,13 @@ export async function POST(request: NextRequest) {
         assert.notStrictEqual(undefined, req.clubId);
     } catch (bodyError) {
         return NextResponse.json({ error: true, message: "information missing" });
-        return;
     }
     var clubId = req.clubId
-    if (req.method === 'POST') {
-        var user = await getUsers(clubId)
-        if (user) {
-            return NextResponse.json({ error: false, users: user });
-        }
-        else {
-            return NextResponse.json({ error: true, message: 'Could not find user' });
-        }
+    var user = await getUsers(clubId)
+    if (user) {
+        return NextResponse.json({ error: false, users: user });
+    }
+    else {
+        return NextResponse.json({ error: true, message: 'Could not find user' });
     }
 }

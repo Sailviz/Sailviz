@@ -1,6 +1,6 @@
 "use client"
 import { ChangeEvent, MouseEventHandler, useEffect, useState } from "react"
-import Router, { useRouter } from "next/router"
+import { useRouter } from "next/navigation"
 import * as DB from 'components/apiMethods';
 import Select from 'react-select';
 import SeriesResultsTable from "components/tables/SeriesResultsTable";
@@ -8,48 +8,28 @@ import Dashboard from "components/ui/Dashboard";
 import SeriesTable from "components/tables/SeriesTable";
 import FleetTable from "components/tables/FleetTable";
 import * as Fetcher from 'components/Fetchers';
+import { PageSkeleton } from "components/ui/PageSkeleton";
 
-export default function Page() {
-
-    const router = useRouter()
-
-    const query = router.query
-
+export default function Page({ params }: { params: { slug: string } }) {
+    const Router = useRouter();
     const { user, userIsError, userIsValidating } = Fetcher.UseUser()
     const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
+    const { series, seriesIsError, seriesIsValidating } = Fetcher.Series(params.slug)
+    const { boats, boatsIsError, boatsIsValidating } = Fetcher.Boats(club)
 
     var [activeRaceId, setActiveRaceId] = useState("")
     var [activeFleetId, setActiveFleetId] = useState("")
-
-    const [boatData, setBoatData] = useState<BoatDataType[]>([])
 
     const [fleetModal, setFleetModal] = useState(false)
 
     const [options, setOptions] = useState([{ label: "", value: {} as BoatDataType }])
     const [selectedOption, setSelectedOption] = useState<object[]>([])
 
-    const [series, setSeries] = useState<SeriesDataType>({
-        id: "",
-        name: "",
-        clubId: "",
-        settings: {
-            numberToCount: 0
-        },
-        races: [],
-        fleetSettings: [{
-            id: "",
-            name: "",
-            boats: [],
-            startDelay: 0,
-            fleets: []
-        } as FleetSettingsType]
-    })
 
     const createRace = async () => {
         var race = await DB.createRace(club.id, series.id)
         console.log(race)
-
-        setSeries(await DB.GetSeriesById(series.id))
+        //mutate series
     }
 
     const removeRace = async (raceId: string) => {
@@ -61,18 +41,18 @@ export default function Page() {
         console.log(raceIndex)
         newSeriesData.races.splice(raceIndex, 1)
         console.log(newSeriesData)
-        setSeries(newSeriesData)
+        //mutate series
     }
 
     const goToRace = async (raceId: string) => {
-        router.push({ pathname: '/Race', query: { race: raceId } })
+        Router.push('/Race/' + raceId)
     }
 
     const saveSeriesSettings = (e: ChangeEvent<HTMLInputElement>) => {
         let newSeriesData: SeriesDataType = window.structuredClone(series)
         console.log(newSeriesData)
         newSeriesData.settings[e.target.id] = parseInt(e.target.value)
-        setSeries(newSeriesData)
+        //mutate series
 
         updateRanges()
     }
@@ -88,13 +68,13 @@ export default function Page() {
 
     const createFleet = async () => {
         await DB.createFleetSettings(series.id)
-        setSeries(await DB.GetSeriesById(series.id))
+        //mutate series
     }
 
     const deleteFleet = async (fleetId: string) => {
         await DB.DeleteFleetSettingsById(fleetId)
 
-        setSeries(await DB.GetSeriesById(series.id))
+        //mutate series
     }
 
     const editFleet = async () => {
@@ -113,8 +93,7 @@ export default function Page() {
 
         await DB.updateFleetSettingsById(fleet)
 
-        //update local copy
-        setSeries(await DB.GetSeriesById(series.id))
+        //mutate series
 
         //hide fleet edit modal
         setFleetModal(false)
@@ -142,48 +121,14 @@ export default function Page() {
 
     }
 
-
-    useEffect(() => {
-        let seriesId = query.series as string
-        const getSeries = async () => {
-            await DB.GetSeriesById(seriesId).then((seriesdata: SeriesDataType) => {
-                setSeries(seriesdata)
-            })
-        }
-
-        const getBoats = async () => {
-            var data = await DB.getBoats(club.id)
-            if (data) {
-                let array = [...data]
-                setBoatData(array)
-                let tempoptions: { label: string; value: BoatDataType }[] = []
-                array.forEach(boat => {
-                    tempoptions.push({ value: boat as BoatDataType, label: boat.name })
-                })
-                setOptions(tempoptions)
-            } else {
-                console.log("could not find boats")
-            }
-
-        }
-        if (seriesId != undefined) {
-            getSeries()
-            getBoats()
-        }
-    }, [club])
-
-    useEffect(() => {
-        console.log("stuff updated")
-        console.log(selectedOption)
-    }, [selectedOption])
-
-    if (userIsValidating || clubIsValidating) {
+    console.log(series)
+    if (userIsValidating || clubIsValidating || seriesIsValidating || boatsIsValidating || seriesIsError || series == undefined || club == undefined || user == undefined || boats == undefined) {
         return (
-            <p></p>
+            <PageSkeleton />
         )
     }
     return (
-        <div className='panel-height w-full overflow-y-auto'>
+        <div className=''>
             <div id="fleetEditModal" className={"fixed z-10 left-0 top-0 w-full h-full overflow-auto bg-gray-400 backdrop-blur-sm bg-opacity-20" + (fleetModal ? "" : " hidden")} key={activeRaceId}>
                 <div className="mx-40 my-20 px-10 py-5 border w-4/5 bg-gray-300 rounded-sm">
                     <div className="text-6xl font-extrabold text-gray-700 p-6 float-right cursor-pointer" onClick={() => setFleetModal(false)}>&times;</div>
@@ -276,8 +221,8 @@ export default function Page() {
                         <input type="range"
                             id='numberToCount'
                             min="1"
-                            max={series.races.length}
-                            defaultValue={series.settings.numberToCount}
+                            max={series.races?.length}
+                            defaultValue={series.settings?.numberToCount}
                             key={series.id}
                             onChange={saveSeriesSettings}
                             onBlur={() => DB.updateSeries(series)}

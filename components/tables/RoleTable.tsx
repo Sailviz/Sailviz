@@ -1,6 +1,8 @@
 import React, { ChangeEvent, useState } from 'react';
 import dayjs from 'dayjs';
 import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, RowSelection, SortingState, useReactTable } from '@tanstack/react-table'
+import { Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Dropdown, DropdownItem, DropdownTrigger, Button, DropdownMenu } from '@nextui-org/react';
+import { VerticalDotsIcon } from 'components/icons/vertical-dots-icon';
 
 const Edit = ({ ...props }: any) => {
     const onClick = () => {
@@ -52,35 +54,32 @@ const UsersTable = (props: any) => {
     })
     return (
         <div key={props.data}>
-            <table>
-                <thead>
-                    {table.getHeaderGroups().map(headerGroup => (
-                        <tr key={headerGroup.id}>
-                            {headerGroup.headers.map(header => (
-                                <th key={header.id} className='border-4 p-1'>
-                                    {header.isPlaceholder
-                                        ? null
-                                        : flexRender(
-                                            header.column.columnDef.header,
-                                            header.getContext()
-                                        )}
-                                </th>
-                            ))}
-                        </tr>
-                    ))}
-                </thead>
-                <tbody>
+            <Table isStriped id={"clubTable"}>
+                <TableHeader>
+                    {table.getHeaderGroups().flatMap(headerGroup => headerGroup.headers).map(header => {
+                        return (
+                            <TableColumn key={header.id}>
+                                {flexRender(
+                                    header.column.columnDef.header,
+                                    header.getContext()
+                                )}
+                            </TableColumn>
+                        );
+                    })}
+                </TableHeader>
+                <TableBody>
                     {table.getRowModel().rows.map(row => (
-                        <tr key={row.id}>
+                        <TableRow key={row.id}>
                             {row.getVisibleCells().map(cell => (
-                                <td key={cell.id} className='border-4 p-2'>
+                                <TableCell key={cell.id}>
                                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                                </td>
+                                </TableCell>
                             ))}
-                        </tr>
+                        </TableRow>
                     ))}
-                </tbody>
-            </table>
+
+                </TableBody>
+            </Table>
         </div>
     )
 }

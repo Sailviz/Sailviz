@@ -1,5 +1,7 @@
 import React, { ChangeEvent, useState, useEffect } from 'react';
 import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, useReactTable, SortingState } from '@tanstack/react-table'
+import { Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Dropdown, DropdownItem, DropdownTrigger, Button, DropdownMenu } from '@nextui-org/react';
+import { VerticalDotsIcon } from 'components/icons/vertical-dots-icon';
 
 //not a db type, only used here
 type SeriesResultsType = {
@@ -255,41 +257,38 @@ const SeriesResultsTable = (props: any) => {
     })
 
     return (
-        <div key={props.data} className='block max-w-full'>
-            <table className='w-full border-spacing-0'>
-                <thead>
-                    {table.getHeaderGroups().map(headerGroup => (
-                        <tr key={headerGroup.id}>
-                            {headerGroup.headers.map(header => (
-                                <th key={header.id} className='border-4 font-extrabold' style={{ width: header.getSize() }}>
-                                    {header.isPlaceholder
-                                        ? null
-                                        : flexRender(
-                                            header.column.columnDef.header,
-                                            header.getContext()
-                                        )}
-                                    {header.column.getCanSort() ? (
-                                        <div>
-                                            <Sort column={header.column} table={table} />
-                                        </div>
-                                    ) : null}
-                                </th>
-                            ))}
-                        </tr>
-                    ))}
-                </thead>
-                <tbody>
+        <div key={props.data}>
+            <Table isStriped id={"clubTable"} isHeaderSticky
+                classNames={{
+                    base: "max-h-[520px] overflow-scroll",
+                    table: "min-h-[400px]",
+                }}
+            >
+                <TableHeader>
+                    {table.getHeaderGroups().flatMap(headerGroup => headerGroup.headers).map(header => {
+                        return (
+                            <TableColumn key={header.id}>
+                                {flexRender(
+                                    header.column.columnDef.header,
+                                    header.getContext()
+                                )}
+                            </TableColumn>
+                        );
+                    })}
+                </TableHeader>
+                <TableBody>
                     {table.getRowModel().rows.map(row => (
-                        <tr key={row.id}>
+                        <TableRow key={row.id}>
                             {row.getVisibleCells().map(cell => (
-                                <td key={cell.id} className='border-4 w-1'>
+                                <TableCell key={cell.id}>
                                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                                </td>
+                                </TableCell>
                             ))}
-                        </tr>
+                        </TableRow>
                     ))}
-                </tbody>
-            </table>
+
+                </TableBody>
+            </Table>
         </div>
     )
 }

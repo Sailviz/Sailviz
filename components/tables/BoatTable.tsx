@@ -1,5 +1,7 @@
 import React, { ChangeEvent, useState } from 'react';
 import { createColumnHelper, flexRender, getCoreRowModel, useReactTable, getFilteredRowModel } from '@tanstack/react-table'
+import { Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Dropdown, DropdownItem, DropdownTrigger, Button, DropdownMenu } from '@nextui-org/react';
+import { VerticalDotsIcon } from 'components/icons/vertical-dots-icon';
 
 const columnHelper = createColumnHelper<BoatDataType>()
 
@@ -181,41 +183,33 @@ const BoatTable = (props: any) => {
     })
 
     return (
-        <div key={props.data} className='overflow-scroll h-64 overflow-x-hidden'>
-            <table className='w-full'>
-                <thead>
-                    {table.getHeaderGroups().map(headerGroup => (
-                        <tr key={headerGroup.id}>
-                            {headerGroup.headers.map(header => (
-                                <th key={header.id} className='border-4 p-2'>
-                                    {header.isPlaceholder
-                                        ? null
-                                        : flexRender(
-                                            header.column.columnDef.header,
-                                            header.getContext()
-                                        )}
-                                    {header.column.getCanFilter() ? (
-                                        <div>
-                                            <Filter column={header.column} table={table} />
-                                        </div>
-                                    ) : null}
-                                </th>
-                            ))}
-                        </tr>
-                    ))}
-                </thead>
-                <tbody>
+        <div key={props.data}>
+            <Table isStriped id={"clubTable"}>
+                <TableHeader>
+                    {table.getHeaderGroups().flatMap(headerGroup => headerGroup.headers).map(header => {
+                        return (
+                            <TableColumn key={header.id}>
+                                {flexRender(
+                                    header.column.columnDef.header,
+                                    header.getContext()
+                                )}
+                            </TableColumn>
+                        );
+                    })}
+                </TableHeader>
+                <TableBody>
                     {table.getRowModel().rows.map(row => (
-                        <tr key={row.id}>
+                        <TableRow key={row.id}>
                             {row.getVisibleCells().map(cell => (
-                                <td key={cell.id} className='border-4 p-2'>
+                                <TableCell key={cell.id}>
                                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                                </td>
+                                </TableCell>
                             ))}
-                        </tr>
+                        </TableRow>
                     ))}
-                </tbody>
-            </table>
+
+                </TableBody>
+            </Table>
         </div>
     )
 }

@@ -57,6 +57,7 @@ type NextRaceDataType = {
   Time: string;
   series: {
     name: string;
+    id: string;
   };
 };
 

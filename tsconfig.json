@@ -33,6 +33,7 @@
     "**/*.tsx",
     "**/*.js",
     "components/ErrorBoundary.jsx",
+    "components/app.d.ts",
     ".next/types/**/*.ts"
   ],
   "exclude": [

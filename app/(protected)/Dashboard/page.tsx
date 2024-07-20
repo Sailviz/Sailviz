@@ -49,21 +49,6 @@ export default function Page() {
     }
 
 
-    useEffect(() => {
-        if (club?.id != undefined) {
-            const fetchTodaysRaces = async () => {
-                var data = await DB.getTodaysRaceByClubId(club.id)
-                if (data) {
-                    setTodaysRaces(data)
-                } else {
-                    console.log("could not find todays race")
-                }
-            }
-            fetchTodaysRaces()
-
-        }
-    }, [club])
-
 
     useEffect(() => {
         let timer1 = setTimeout(async () => {

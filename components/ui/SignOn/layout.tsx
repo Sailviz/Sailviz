@@ -2,8 +2,8 @@
 
 import React from "react";
 import { useLockedBody } from "components/hooks/useBodyLock";
-import { SidebarWrapper } from "components/ui/sidebar/sidebar";
-import { SidebarContext } from "./layout-context";
+import { SidebarWrapper } from "components/ui/SignOn/sidebar";
+import { SidebarContext } from "components/ui/sidebar/layout-context";
 
 interface Props {
     children: React.ReactNode;

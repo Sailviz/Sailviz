@@ -1,11 +1,12 @@
+'use client'
 import React, { ChangeEvent, MouseEventHandler, useEffect, useState } from "react"
 import Router, { useRouter } from "next/router"
-import * as DB from '../../components/apiMethods';
-import Dashboard from "../../components/ui/Dashboard";
-import PursuitTimer from "../../components/PRaceTimer"
+import * as DB from '../../../components/apiMethods';
+import Dashboard from "../../../components/ui/Dashboard";
+import PursuitTimer from "../../../components/PRaceTimer"
 import Cookies from "js-cookie";
 import { ReactSortable } from "react-sortablejs";
-import * as Fetcher from '../../components/Fetchers';
+import * as Fetcher from '../../../components/Fetchers';
 
 enum raceStateType {
     running,

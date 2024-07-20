@@ -1,10 +1,10 @@
 import React, { ChangeEvent, MouseEventHandler, useEffect, useState } from "react"
 import Router, { useRouter } from "next/router"
-import * as DB from '../../components/apiMethods';
-import Dashboard from "../../components/ui/Dashboard";
-import RaceTimer from "../../components/HRaceTimer"
+import * as DB from '../../../components/apiMethods';
+import Dashboard from "../../../components/ui/Dashboard";
+import RaceTimer from "../../../components/HRaceTimer"
 import Cookies from "js-cookie";
-import * as Fetcher from '../../components/Fetchers';
+import * as Fetcher from '../../../components/Fetchers';
 
 enum raceStateType {
     running,

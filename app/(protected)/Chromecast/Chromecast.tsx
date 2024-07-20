@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react'
 import Script from 'next/script';
 import Cookies from 'js-cookie';
-import Dashboard from "../../components/ui/Dashboard";
+import Dashboard from "../../../components/ui/Dashboard";
 import { useRouter } from 'next/router';
-import * as DB from '../../components/apiMethods'
+import * as DB from '../../../components/apiMethods'
 import { io, Socket } from "socket.io-client";
-import * as Fetcher from '../../components/Fetchers';
+import * as Fetcher from '../../../components/Fetchers';
 
 const applicationID = '0AA4CA7E';
 const namespace = 'urn:x-cast:com.sailviz';

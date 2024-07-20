@@ -44,6 +44,50 @@ export function UseClub() {
     }
 }
 
+export function Series(seriesId: string) {
+    let body = { seriesId: seriesId }
+    const { data, error, isValidating } = useSWR(seriesId != "" ? '/api/GetSeriesById' : null, (url) => advancedFetcher(url!, body))
+    console.log(data)
+    return {
+        series: data?.series as SeriesDataType,
+        seriesIsValidating: isValidating,
+        seriesIsError: error
+    }
+}
+
+export function Boats(club: ClubDataType) {
+    let body = { clubId: club?.id }
+    const { data, error, isValidating } = useSWR(club && club.id != "" ? '/api/GetBoatsByClubId' : null, (url) => advancedFetcher(url!, body))
+
+    return {
+        boats: data?.boats as BoatDataType[],
+        boatsIsValidating: isValidating,
+        boatsIsError: error
+    }
+}
+
+export function Users(club: ClubDataType) {
+    let body = { clubId: club?.id }
+    const { data, error, isValidating } = useSWR(club && club.id != "" ? '/api/GetUsersByClubId' : null, (url) => advancedFetcher(url!, body))
+
+    return {
+        users: data?.users as UserDataType[],
+        usersIsValidating: isValidating,
+        usersIsError: error
+    }
+}
+
+export function roles(club: ClubDataType) {
+    let body = { clubId: club?.id }
+    const { data, error, isValidating } = useSWR(club && club.id != "" ? '/api/GetRolesByClubId' : null, (url) => advancedFetcher(url!, body))
+
+    return {
+        roles: data?.roles as RoleDataType[],
+        rolesIsValidating: isValidating,
+        rolesIsError: error
+    }
+}
+
 export function GetSeriesByClubId(club: ClubDataType) {
     let body = { clubId: club?.id }
     const { data, error, isValidating } = useSWR(club && club.id ? '/api/GetSeriesByClubId' : null, (url) => advancedFetcher(url!, body))
@@ -52,5 +96,16 @@ export function GetSeriesByClubId(club: ClubDataType) {
         series: data?.series as SeriesDataType[],
         seriesIsValidating: isValidating,
         seriesIsError: error
+    }
+}
+
+export function GetTodaysRaceByClubId(club: ClubDataType) {
+    let body = { clubId: club?.id }
+    const { data, error, isValidating } = useSWR(club && club.id ? '/api/GetTodaysRaceByClubId' : null, (url) => advancedFetcher(url!, body))
+
+    return {
+        todaysRaces: data?.races as NextRaceDataType[],
+        todaysRacesIsValidating: isValidating,
+        todaysRacesIsError: error
     }
 }

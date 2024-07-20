@@ -1,56 +1,32 @@
 "use client"
 import React, { ChangeEvent, useState } from 'react';
 import { createColumnHelper, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table'
+import { Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Dropdown, DropdownItem, DropdownTrigger, Button, DropdownMenu } from '@nextui-org/react';
+import { VerticalDotsIcon } from 'components/icons/vertical-dots-icon';
 
-const Text = ({ ...props }) => {
-    const initialValue = props.getValue()
-    const [value, setValue] = React.useState(initialValue)
 
-    const onBlur = (e: ChangeEvent<HTMLInputElement>) => {
-        const original = props.row.original
-        original[props.column.id] = e.target.value
-        props.updateSeries(original)
-    }
 
-    return (
-        <>
-            <input type="text"
-                id=''
-                className=" text-center"
-                defaultValue={value}
-                key={value}
-                onBlur={(e) => onBlur(e)}
-            />
-        </>
-    );
-};
-
-const Add = ({ ...props }) => {
-
-    return (
-        <>
-            <div className="px-3 py-1 w-full" id="createSeriesButton">
-                <p onClick={(e) => props.createSeries()} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
-                    Add
-                </p>
-            </div>
-        </>
-    );
-};
-
-const Remove = ({ ...props }: any) => {
+const Action = ({ ...props }: any) => {
     const onClick = () => {
         if (confirm("are you sure you want to do this?")) {
             props.deleteSeries(props.row.original)
         }
     }
     return (
-        <>
-            <p className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0"
-                onClick={onClick} >
-                Remove
-            </p>
-        </>
+        <div className="relative flex justify-end items-center gap-2">
+            <Dropdown>
+                <DropdownTrigger>
+                    <Button isIconOnly size="sm" variant="light">
+                        <VerticalDotsIcon />
+                    </Button>
+                </DropdownTrigger>
+                <DropdownMenu>
+                    <DropdownItem onClick={() => props.viewSeries(props.row.original.id)}>View</DropdownItem>
+                    <DropdownItem>Edit</DropdownItem>
+                    <DropdownItem>Delete</DropdownItem>
+                </DropdownMenu>
+            </Dropdown>
+        </div>
     );
 };
 
@@ -73,6 +49,10 @@ const ClubTable = (props: any) => {
         props.createSeries()
     }
 
+    const viewSeries = (seriesId: string) => {
+        props.viewSeries(seriesId)
+    }
+
     const deleteSeries = (series: SeriesDataType) => {
         console.log(series)
         props.deleteSeries(series)
@@ -86,7 +66,7 @@ const ClubTable = (props: any) => {
         columns: [
             columnHelper.accessor('name', {
                 header: "name",
-                cell: props => <Text {...props} updateSeries={updateSeries} />,
+                cell: info => info.getValue(),
             }),
             columnHelper.accessor(row => row.races.length.toString(), {
                 id: "Number of Races",
@@ -98,43 +78,40 @@ const ClubTable = (props: any) => {
             }),
             columnHelper.accessor('id', {
                 id: "Remove",
-                header: _ => <Add {...props} createSeries={createSeries} />,
-                cell: props => <Remove {...props} id={props.row.original.id} deleteSeries={deleteSeries} />
+                header: "Action",
+                cell: props => <Action {...props} id={props.row.original.id} deleteSeries={deleteSeries} viewSeries={viewSeries} />
             }),
         ],
         getCoreRowModel: getCoreRowModel(),
     })
     return (
         <div key={props.data}>
-            <table id={"clubTable"}>
-                <thead>
-                    {table.getHeaderGroups().map(headerGroup => (
-                        <tr key={headerGroup.id}>
-                            {headerGroup.headers.map(header => (
-                                <th key={header.id} className='border-4 p-2'>
-                                    {header.isPlaceholder
-                                        ? null
-                                        : flexRender(
-                                            header.column.columnDef.header,
-                                            header.getContext()
-                                        )}
-                                </th>
-                            ))}
-                        </tr>
-                    ))}
-                </thead>
-                <tbody>
+            <Table isStriped id={"clubTable"}>
+                <TableHeader>
+                    {table.getHeaderGroups().flatMap(headerGroup => headerGroup.headers).map(header => {
+                        return (
+                            <TableColumn key={header.id}>
+                                {flexRender(
+                                    header.column.columnDef.header,
+                                    header.getContext()
+                                )}
+                            </TableColumn>
+                        );
+                    })}
+                </TableHeader>
+                <TableBody>
                     {table.getRowModel().rows.map(row => (
-                        <tr key={row.id}>
+                        <TableRow key={row.id}>
                             {row.getVisibleCells().map(cell => (
-                                <td key={cell.id} className='border-4 p-2'>
+                                <TableCell key={cell.id}>
                                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                                </td>
+                                </TableCell>
                             ))}
-                        </tr>
+                        </TableRow>
                     ))}
-                </tbody>
-            </table>
+
+                </TableBody>
+            </Table>
         </div>
     )
 }
