@@ -1,5 +1,5 @@
-import prisma from '../../../components/prisma'
-import { type NextRequest } from 'next/server'
+import prisma from 'components/prisma'
+import { NextRequest, NextResponse } from "next/server";
 
 async function getClub(id: string) {
     var result = await prisma.club.findUnique({
@@ -16,13 +16,13 @@ async function getClub(id: string) {
 export async function GET(request: NextRequest) {
     var clubId = request.cookies.get('clubId')?.value
     if (clubId == null) {
-        return Response.json({ error: "information missing" }, { status: 400 });
+        return NextResponse.json({ error: "information missing" }, { status: 400 });
     }
     var club = await getClub(clubId)
     if (club) {
-        return Response.json(club);
+        return NextResponse.json(club);
     }
     else {
-        return Response.json({ error: "can't find club" }, { status: 406 });
+        return NextResponse.json({ error: "can't find club" }, { status: 406 });
     }
 };

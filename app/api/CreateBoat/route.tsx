@@ -1,5 +1,5 @@
 import prisma from 'components/prisma'
-import type { NextApiRequest, NextApiResponse } from 'next'
+import { NextRequest, NextResponse } from "next/server";
 import assert from 'assert';
 
 async function findBoat(name: string, clubId: string) {
@@ -35,7 +35,7 @@ async function createBoat(name: string, crew: number, py: number, pursuitStartTi
     return boat;
 }
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
     const req = await request.json()
     try {
         assert.notStrictEqual(undefined, req.name);
@@ -45,7 +45,7 @@ export async function POST(request: Request) {
         assert.notStrictEqual(undefined, req.pursuitStartTime);
 
     } catch (bodyError) {
-        return Response.json({ error: true, message: "information missing" });
+        return NextResponse.json({ error: true, message: "information missing" });
     }
 
     var name = req.name
@@ -59,13 +59,13 @@ export async function POST(request: Request) {
     if (!ExistingBoat) {
         var creationResult = await createBoat(name, crew, py, pursuitStartTime, clubId)
         if (creationResult) {
-            return Response.json({ error: false, boat: creationResult });
+            return NextResponse.json({ error: false, boat: creationResult });
         }
         else {
-            return Response.json({ error: true, message: 'Something went wrong crating boat' });
+            return NextResponse.json({ error: true, message: 'Something went wrong crating boat' });
         }
     } else {
-        return Response.json({ error: true, message: 'Boat already exists' });
+        return NextResponse.json({ error: true, message: 'Boat already exists' });
     }
 
 };

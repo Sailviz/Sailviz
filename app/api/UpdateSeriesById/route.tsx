@@ -1,5 +1,5 @@
 import prisma from 'components/prisma'
-import type { NextApiRequest, NextApiResponse } from 'next'
+import { NextRequest, NextResponse } from "next/server";
 
 import assert from 'assert';
 
@@ -20,23 +20,23 @@ async function updateSeries(series: SeriesDataType) {
     return result;
 }
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
     const req = await request.json()
 
     try {
         assert.notStrictEqual(undefined, req.series);
 
     } catch (bodyError) {
-        return Response.json({ error: true, message: "information missing" });
+        return NextResponse.json({ error: true, message: "information missing" });
         return;
     }
     var series = req.series
 
     var updatedSeries = await updateSeries(series)
     if (updatedSeries) {
-        return Response.json({ error: false, series: updatedSeries });
+        return NextResponse.json({ error: false, series: updatedSeries });
     } else {
         // User exists
-        return Response.json({ error: true, message: 'series not found' });
+        return NextResponse.json({ error: true, message: 'series not found' });
     }
 }

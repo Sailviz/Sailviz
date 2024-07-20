@@ -1,5 +1,6 @@
 import prisma from 'components/prisma'
-import type { NextApiRequest, NextApiResponse } from 'next'
+import { NextRequest, NextResponse } from "next/server";
+
 
 import assert from 'assert';
 
@@ -21,13 +22,13 @@ async function deleteResult(resultId: any) {
     return result;
 }
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
     const req = await request.json()
     try {
         assert.notStrictEqual(undefined, req.resultId, 'resultId required');
 
     } catch (bodyError) {
-        return Response.json({ error: true, message: "information missing" });
+        return NextResponse.json({ error: true, message: "information missing" });
     }
     console.log(req.body)
 
@@ -36,9 +37,9 @@ export async function POST(request: Request) {
     var result = await findResult(resultId)
     if (result) {
         await deleteResult(resultId)
-        return Response.json({ error: false, result: result });
+        return NextResponse.json({ error: false, result: result });
     } else {
         // User exists
-        return Response.json({ error: true, message: 'result not found' });
+        return NextResponse.json({ error: true, message: 'result not found' });
     }
 }

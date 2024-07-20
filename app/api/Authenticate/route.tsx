@@ -1,4 +1,5 @@
-import prisma from '../../../components/prisma'
+import prisma from 'components/prisma'
+import { NextRequest, NextResponse } from "next/server";
 
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
@@ -22,13 +23,13 @@ async function authUser(username: string, password: string) {
     return result;
 }
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
     const req = await request.json()
     try {
         assert.notStrictEqual(null, req.username, 'username required');
         assert.notStrictEqual(null, req.password, 'Password required');
     } catch (bodyError) {
-        Response.json({ error: true, message: "username or password missing" });
+        return NextResponse.json({ error: true, message: "username or password missing" });
     }
     console.log(req)
     const username = req.username;
@@ -45,13 +46,13 @@ export async function POST(request: Request) {
                 jwtSecret,
                 { expiresIn: '364d' }
             );
-            return Response.json({ error: false, token: token, user: user });
+            return NextResponse.json({ error: false, token: token, user: user });
 
         } else {
-            return Response.json({ error: true, message: 'Wrong username or password' });
+            return NextResponse.json({ error: true, message: 'Wrong username or password' });
         }
     }
     else {
-        return Response.json({ error: true, message: 'Wrong username or password' });
+        return NextResponse.json({ error: true, message: 'Wrong username or password' });
     }
 };

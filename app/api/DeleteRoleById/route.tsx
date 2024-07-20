@@ -1,5 +1,6 @@
 import prisma from 'components/prisma'
-import type { NextApiRequest, NextApiResponse } from 'next'
+import { NextRequest, NextResponse } from "next/server";
+
 import assert from 'assert';
 
 async function findRole(role: RoleDataType) {
@@ -20,13 +21,13 @@ async function deleteRole(role: RoleDataType) {
     return res;
 }
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
     const req = await request.json()
     try {
         assert.notStrictEqual(undefined, req.role, 'role required');
 
     } catch (bodyError) {
-        return Response.json({ error: true, message: "information missing" });
+        return NextResponse.json({ error: true, message: "information missing" });
     }
 
     var role = req.role
@@ -36,10 +37,10 @@ export async function POST(request: Request) {
     var deletedRole = await findRole(role)
     if (deletedRole) {
         await deleteRole(role)
-        return Response.json({ error: false, role: deletedRole });
+        return NextResponse.json({ error: false, role: deletedRole });
     } else {
         // Role exists
-        return Response.json({ error: true, message: 'role not found' });
+        return NextResponse.json({ error: true, message: 'role not found' });
     }
 }
 

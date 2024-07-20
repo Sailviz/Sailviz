@@ -1,5 +1,5 @@
 import prisma from 'components/prisma'
-import type { NextApiRequest, NextApiResponse } from 'next'
+import { NextRequest, NextResponse } from "next/server";
 import assert from 'assert';
 
 
@@ -59,7 +59,7 @@ async function createFleets(raceId: string, seriesId: string) {
     })
 }
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
     const req = await request.json()
     try {
         assert.notStrictEqual(undefined, req.seriesId, 'Id required');
@@ -67,7 +67,7 @@ export async function POST(request: Request) {
         assert.notStrictEqual(undefined, req.time, 'time required');
 
     } catch (bodyError) {
-        return Response.json({ error: true, message: "information missing" });
+        return NextResponse.json({ error: true, message: "information missing" });
         return;
     }
 
@@ -84,10 +84,10 @@ export async function POST(request: Request) {
     if (races) {
         var race = await createRace(number, seriesId, time)
         createFleets(race.id, seriesId)
-        return Response.json({ error: false, race: race });
+        return NextResponse.json({ error: false, race: race });
     }
     else {
-        return Response.json({ error: true, message: 'Could not find series' });
+        return NextResponse.json({ error: true, message: 'Could not find series' });
     }
 
 };

@@ -1,5 +1,5 @@
 import prisma from 'components/prisma'
-import type { NextApiRequest, NextApiResponse } from 'next'
+import { NextRequest, NextResponse } from "next/server";
 
 import assert from 'assert';
 
@@ -21,13 +21,13 @@ async function deleteFleet(fleetSettingsId: any) {
     return result;
 }
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
     const req = await request.json()
     try {
         assert.notStrictEqual(undefined, req.fleetSettingsId, 'fleetSettingsId required');
 
     } catch (bodyError) {
-        return Response.json({ error: true, message: "information missing" });
+        return NextResponse.json({ error: true, message: "information missing" });
         return;
     }
 
@@ -36,9 +36,9 @@ export async function POST(request: Request) {
     var fleet = await findFleet(fleetSettingsId)
     if (fleet) {
         await deleteFleet(fleetSettingsId)
-        return Response.json({ error: false, fleet: fleet });
+        return NextResponse.json({ error: false, fleet: fleet });
     } else {
         // User exists
-        return Response.json({ error: true, message: 'fleet not found' });
+        return NextResponse.json({ error: true, message: 'fleet not found' });
     }
 }

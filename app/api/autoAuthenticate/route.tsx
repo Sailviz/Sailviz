@@ -1,5 +1,5 @@
 import prisma from 'components/prisma'
-import type { NextApiRequest, NextApiResponse } from 'next'
+import { NextRequest, NextResponse } from "next/server";
 
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
@@ -24,14 +24,14 @@ async function authUser(email: string, password: string) {
 }
 
 //synonymous with log in
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
     const req = await request.json()
     // check if we have all data.
     // The website stops this, but just in case
     try {
         assert.notStrictEqual(null, req.uuid, 'Email required');
     } catch (bodyError) {
-        return Response.json({ error: true, message: "email or password missing" });
+        return NextResponse.json({ error: true, message: "email or password missing" });
     }
 
     const uuid = req.uuid;
@@ -43,6 +43,6 @@ export async function POST(request: Request) {
             jwtSecret,
             { expiresIn: '364d' }
         );
-        return Response.json({ error: false, token: token, club: user.clubId, user: user.id });
+        return NextResponse.json({ error: false, token: token, club: user.clubId, user: user.id });
     }
 }

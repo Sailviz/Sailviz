@@ -1,5 +1,5 @@
 import prisma from 'components/prisma'
-import type { NextApiRequest, NextApiResponse } from 'next'
+import { NextRequest, NextResponse } from "next/server";
 
 import assert from 'assert';
 
@@ -19,13 +19,13 @@ async function updateRole(role: RoleDataType) {
     return result;
 }
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
     const req = await request.json()
 
     try {
         assert.notStrictEqual(undefined, req.role);
     } catch (bodyError) {
-        return Response.json({ error: true, message: "information missing" });
+        return NextResponse.json({ error: true, message: "information missing" });
         return;
     }
 
@@ -34,9 +34,9 @@ export async function POST(request: Request) {
 
     var updatedRole = await updateRole(role)
     if (updatedRole) {
-        return Response.json({ error: false, role: updatedRole });
+        return NextResponse.json({ error: false, role: updatedRole });
     } else {
         // role is not there
-        return Response.json({ error: true, message: 'role not found' });
+        return NextResponse.json({ error: true, message: 'role not found' });
     }
 }

@@ -1,5 +1,5 @@
 import prisma from 'components/prisma'
-import type { NextApiRequest, NextApiResponse } from 'next'
+import { NextRequest, NextResponse } from "next/server";
 import assert from 'assert';
 
 async function createChromecast(chromecast: ChromecastDataType) {
@@ -19,23 +19,23 @@ async function createChromecast(chromecast: ChromecastDataType) {
 }
 
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
     const req = await request.json()
     // check if we have all data.
     // The website stops this, but just in case
     try {
         assert.notStrictEqual(undefined, req.chromecast, 'Name required');
     } catch (bodyError) {
-        return Response.json({ error: true, message: "information missing" });
+        return NextResponse.json({ error: true, message: "information missing" });
     }
 
     var chromecastdata = req.chromecast
     var chromecast = await createChromecast(chromecastdata)
     if (chromecast) {
-        return Response.json({ error: false, chromecast: chromecast })
+        return NextResponse.json({ error: false, chromecast: chromecast })
     }
     else {
-        return Response.json({ error: true, message: 'Something went wrong creating chromecast' });
+        return NextResponse.json({ error: true, message: 'Something went wrong creating chromecast' });
     }
 
 };

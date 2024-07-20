@@ -1,5 +1,5 @@
 import prisma from 'components/prisma'
-import type { NextApiRequest, NextApiResponse } from 'next'
+import { NextRequest, NextResponse } from "next/server";
 import assert from 'assert';
 
 async function findRace(fleetId: any) {
@@ -35,7 +35,7 @@ async function createLap(resultId: string, time: number) {
     return res;
 }
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
     const req = await request.json()
     // check if we have all data.
     // The website stops this, but just in case
@@ -43,7 +43,7 @@ export async function POST(request: Request) {
         assert.notStrictEqual(undefined, req.resultId, 'Id required');
 
     } catch (bodyError) {
-        return Response.json({ error: true, message: "information missing" });
+        return NextResponse.json({ error: true, message: "information missing" });
         return;
     }
 
@@ -52,10 +52,10 @@ export async function POST(request: Request) {
 
     var lap = await createLap(resultId, time)
     if (!lap) {
-        return Response.json({ error: true, message: 'Could not create lap' });
+        return NextResponse.json({ error: true, message: 'Could not create lap' });
         return
     }
-    return Response.json({ error: false, result: lap });
+    return NextResponse.json({ error: false, result: lap });
 
 
 }

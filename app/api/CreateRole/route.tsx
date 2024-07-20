@@ -1,5 +1,5 @@
 import prisma from 'components/prisma'
-import type { NextApiRequest, NextApiResponse } from 'next'
+import { NextRequest, NextResponse } from "next/server";
 
 import assert from 'assert';
 
@@ -23,28 +23,28 @@ async function createRole(clubId: string) {
     return user;
 }
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
     const req = await request.json()
     try {
         assert.notStrictEqual(undefined, req.clubId, 'club required');
 
     } catch (bodyError) {
-        return Response.json({ error: true, message: "information missing" });
+        return NextResponse.json({ error: true, message: "information missing" });
     }
     var clubId = req.clubId
 
     //check club exists
     var club = await findClub(clubId)
     if (club == null) {
-        return Response.json({ error: true, message: 'Club does not exist' });
+        return NextResponse.json({ error: true, message: 'Club does not exist' });
     }
 
     var role = createRole(club.id)
     if (role) {
-        return Response.json({ error: false, role: role });
+        return NextResponse.json({ error: false, role: role });
     }
     else {
-        return Response.json({ error: true, message: 'Something went wrong crating role account' });
+        return NextResponse.json({ error: true, message: 'Something went wrong crating role account' });
     }
 
 };

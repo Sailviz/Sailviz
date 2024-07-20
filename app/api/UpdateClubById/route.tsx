@@ -1,5 +1,5 @@
 import prisma from 'components/prisma'
-import type { NextApiRequest, NextApiResponse } from 'next'
+import { NextRequest, NextResponse } from "next/server";
 
 import assert from 'assert';
 
@@ -17,12 +17,12 @@ async function updateClub(club: ClubDataType) {
     return result;
 }
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
     const req = await request.json()
     try {
         assert.notStrictEqual(undefined, req.club);
     } catch (bodyError) {
-        return Response.json({ error: true, message: "information missing" });
+        return NextResponse.json({ error: true, message: "information missing" });
     }
 
     var club: ClubDataType = req.club
@@ -30,9 +30,9 @@ export async function POST(request: Request) {
 
     var updatedBoat = await updateClub(club)
     if (updatedBoat) {
-        return Response.json({ error: false, club: updatedBoat });
+        return NextResponse.json({ error: false, club: updatedBoat });
     } else {
         // club is not there
-        return Response.json({ error: true, message: 'club not found' });
+        return NextResponse.json({ error: true, message: 'club not found' });
     }
 }

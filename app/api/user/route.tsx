@@ -1,5 +1,5 @@
 import prisma from '../../../components/prisma'
-import { type NextRequest } from 'next/server'
+import { NextRequest, NextResponse } from "next/server";
 
 async function getUser(id: string) {
     var result = await prisma.user.findUnique({
@@ -16,13 +16,13 @@ async function getUser(id: string) {
 export async function GET(request: NextRequest) {
     var userId = request.cookies.get('userId')?.value
     if (userId == null) {
-        return Response.json({ error: "information missing" }, { status: 400 });
+        return NextResponse.json({ error: "information missing" }, { status: 400 });
     }
     var user = await getUser(userId)
     if (user) {
-        return Response.json(user);
+        return NextResponse.json(user);
     }
     else {
-        return Response.json({ error: "can't find user" }, { status: 406 });
+        return NextResponse.json({ error: "can't find user" }, { status: 406 });
     }
 };
