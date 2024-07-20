@@ -1,4 +1,5 @@
 import "../styles/globals.css";
+import "../styles/buttons.css";
 import ErrorBoundary from '../components/ErrorBoundary'
 import type { AppProps } from 'next/app'
 import PlausibleProvider from "next-plausible";

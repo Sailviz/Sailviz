@@ -33,7 +33,7 @@ export default function Dashboard({
                 <nav className="bg-white border-pink-500 dark:bg-gray-900 border-b">
                     <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
                         <div id="nav_back" onClick={() => router.back()}
-                             className="hidden md:flex md:visible text-white bg-pink-500 hover:bg-white hover:text-gray-700 hover:border-pink-500 border shadow font-medium px-5 py-3 text-center mr-6">
+                             className="hidden md:flex md:visible btn-pink">
 
                             &lt; Back
                         </div>
