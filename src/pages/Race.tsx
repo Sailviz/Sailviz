@@ -7,7 +7,7 @@ import Select from 'react-select';
 import Papa from 'papaparse';
 import FleetHandicapResultsTable from '../components/FleetHandicapResultsTable';
 import FleetPursuitResultsTable from '../components/FleetPursuitResultsTable';
-import Dashboard from "../components/Dashboard";
+import Dashboard from "../components/layouts/dashboard";
 import Switch from "../components/Switch";
 
 const raceOptions = [{ value: "Pursuit", label: "Pursuit" }, { value: "Handicap", label: "Handicap" }]
@@ -20,7 +20,7 @@ const resultCodeOptions = [
     { label: 'On Course Side', value: 'OCS' },
     { label: 'Not Sailed Course', value: 'NSC' }]
 
-const SignOnPage = () => {
+const Page = () => {
 
     const router = useRouter()
 
@@ -565,9 +565,14 @@ const SignOnPage = () => {
     return (
         <Dashboard club={club.name} displayName={user.displayName}>
             <div id="race" className='h-full w-full overflow-y-auto'>
-                <div id="editModal" className={"fixed z-10 left-0 top-0 w-full h-full overflow-auto bg-gray-400 backdrop-blur-sm bg-opacity-20 hidden"} key={activeResult.id}>
+                <div id="editModal"
+                     className={"fixed z-10 left-0 top-0 w-full h-full overflow-auto bg-gray-400 backdrop-blur-sm bg-opacity-20 hidden"}
+                     key={activeResult.id}>
                     <div className="mx-40 my-20 px-10 py-5 border w-4/5 bg-gray-300 rounded-sm">
-                        <div className="text-6xl font-extrabold text-gray-700 p-6 float-right cursor-pointer" onClick={() => { document.getElementById("editModal")!.classList.add("hidden") }}>&times;</div>
+                        <div className="text-6xl font-extrabold text-gray-700 p-6 float-right cursor-pointer"
+                             onClick={() => {
+                                 document.getElementById("editModal")!.classList.add("hidden")
+                             }}>&times;</div>
                         <div className="text-6xl font-extrabold text-gray-700 p-6">Edit Entry</div>
                         <div className="flex w-3/4">
                             <div className='flex flex-col px-6 w-full'>
@@ -577,14 +582,14 @@ const SignOnPage = () => {
                                 <p className='text-2xl font-bold text-gray-700'>
                                     Helm
                                 </p>
-                                <input type="text" id="editHelm" className="h-full text-2xl p-4" />
+                                <input type="text" id="editHelm" className="h-full text-2xl p-4"/>
                             </div>
                             <div className='flex flex-col px-6 w-full'>
                                 <p className='text-2xl font-bold text-gray-700'>
                                     Crew
                                 </p>
 
-                                <input type="text" id="editCrew" className="h-full text-2xl p-4" />
+                                <input type="text" id="editCrew" className="h-full text-2xl p-4"/>
                             </div>
                             <div className='flex flex-col px-6 w-full'>
                                 <p className='text-2xl font-bold text-gray-700'>
@@ -605,7 +610,7 @@ const SignOnPage = () => {
                                     Sail Number
                                 </p>
 
-                                <input type="text" id="editSailNum" className="h-full text-2xl p-4" />
+                                <input type="text" id="editSailNum" className="h-full text-2xl p-4"/>
                             </div>
                         </div>
                         <div className="flex flex-row mt-2">
@@ -614,7 +619,7 @@ const SignOnPage = () => {
                                     Position
                                 </p>
 
-                                <input type="number" id="editPosition" className="h-full text-2xl p-4" />
+                                <input type="number" id="editPosition" className="h-full text-2xl p-4"/>
                             </div>
                             <div className='flex flex-col px-6 w-1/4'>
                                 <p className='text-2xl font-bold text-gray-700'>
@@ -642,14 +647,18 @@ const SignOnPage = () => {
                                             id={"AdvancedModeSwitch"}
                                             isOn={lapsAdvancedMode}
                                             onColour="#02c66f"
-                                            handleToggle={() => { setLapsAdvancedMode(!lapsAdvancedMode) }}
+                                            handleToggle={() => {
+                                                setLapsAdvancedMode(!lapsAdvancedMode)
+                                            }}
                                         />
                                     </div>
-                                    <label className=" pl-6 py-12 text-2xl font-bold text-gray-700" htmlFor={"AdvancedModeSwitch"}>Advanced Mode</label>
+                                    <label className=" pl-6 py-12 text-2xl font-bold text-gray-700"
+                                           htmlFor={"AdvancedModeSwitch"}>Advanced Mode</label>
                                 </div>
                             </div>
                             {lapsAdvancedMode ?
-                                <div className='flex flex-row w-full flex-wrap' id='LapData' key={JSON.stringify(activeResult)}>
+                                <div className='flex flex-row w-full flex-wrap' id='LapData'
+                                     key={JSON.stringify(activeResult)}>
                                     {/* this map loops through laps in results, unless it can't find any*/}
                                     {activeResult.laps.map((lap: LapDataType, index: number) => {
                                         return (
@@ -658,15 +667,19 @@ const SignOnPage = () => {
                                                     Lap {index + 1}
                                                 </p>
                                                 <div className='flex flex-row'>
-                                                    <input type="time" className="h-full text-xl p-4" step={"1"} defaultValue={new Date(Math.max(0, (lap.time - (race.fleets.find(fleet => fleet.id == activeResult.fleetId) || { startTime: 0 } as FleetDataType).startTime) * 1000)).toISOString().substring(11, 19)} />
-                                                    <div className="text-6xl font-extrabold text-red-600 p-6 float-right cursor-pointer" onClick={() => removeLap(index)}>&times;</div>
+                                                    <input type="time" className="h-full text-xl p-4" step={"1"}
+                                                           defaultValue={new Date(Math.max(0, (lap.time - (race.fleets.find(fleet => fleet.id == activeResult.fleetId) || {startTime: 0} as FleetDataType).startTime) * 1000)).toISOString().substring(11, 19)}/>
+                                                    <div
+                                                        className="text-6xl font-extrabold text-red-600 p-6 float-right cursor-pointer"
+                                                        onClick={() => removeLap(index)}>&times;</div>
                                                 </div>
 
                                             </div>
                                         )
                                     })}
                                     <div className="p-4 mr-2 w-96 flex justify-end">
-                                        <p onClick={addLap} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-xl px-12 py-4 text-center mr-3 md:mr-0">
+                                        <p onClick={addLap}
+                                           className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-xl px-12 py-4 text-center mr-3 md:mr-0">
                                             Add Lap
                                         </p>
                                     </div>
@@ -678,14 +691,16 @@ const SignOnPage = () => {
                                             Laps
                                         </p>
 
-                                        <input type="number" id="NumberofLaps" className="h-full text-2xl p-4" defaultValue={activeResult.laps.length} />
+                                        <input type="number" id="NumberofLaps" className="h-full text-2xl p-4"
+                                               defaultValue={activeResult.laps.length}/>
                                     </div>
                                     <div className='flex flex-col px-6 w-1/4'>
                                         <p className='text-2xl font-bold text-gray-700'>
                                             Finish Time
                                         </p>
 
-                                        <input type="time" id="FinishTime" className="h-full text-xl p-4" step={"1"} defaultValue={new Date(Math.max(0, (activeResult.finishTime - (race.fleets.find(fleet => fleet.id == activeResult.fleetId) || { startTime: 0 } as FleetDataType).startTime) * 1000)).toISOString().substring(11, 19)} />
+                                        <input type="time" id="FinishTime" className="h-full text-xl p-4" step={"1"}
+                                               defaultValue={new Date(Math.max(0, (activeResult.finishTime - (race.fleets.find(fleet => fleet.id == activeResult.fleetId) || {startTime: 0} as FleetDataType).startTime) * 1000)).toISOString().substring(11, 19)}/>
 
                                     </div>
                                 </div>
@@ -694,14 +709,19 @@ const SignOnPage = () => {
                         <div className="flex flex-row justify-end">
                             <div className=" flex justify-end mt-8">
                                 <div className="p-4 mr-2">
-                                    <p id="confirmRemove" onClick={() => { deleteResult(activeResult.id); document.getElementById("editModal")!.classList.add("hidden") }} className="cursor-pointer text-white bg-red-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-xl text-lg px-12 py-4 text-center mr-3 md:mr-0">
+                                    <p id="confirmRemove" onClick={() => {
+                                        deleteResult(activeResult.id);
+                                        document.getElementById("editModal")!.classList.add("hidden")
+                                    }}
+                                       className="cursor-pointer text-white bg-red-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-xl text-lg px-12 py-4 text-center mr-3 md:mr-0">
                                         Remove
                                     </p>
                                 </div>
                             </div>
                             <div className=" flex justify-end mt-8">
                                 <div className="p-4 mr-2">
-                                    <p id="confirmEdit" onClick={editUpdateResult} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-xl px-12 py-4 text-center mr-3 md:mr-0">
+                                    <p id="confirmEdit" onClick={editUpdateResult}
+                                       className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-xl px-12 py-4 text-center mr-3 md:mr-0">
                                         update
                                     </p>
                                 </div>
@@ -709,166 +729,80 @@ const SignOnPage = () => {
                         </div>
                     </div>
                 </div>
-                <div className="px-36 pb-36">
-                    <p className="text-6xl font-extrabold text-gray-700 p-6">
-                        {seriesName}: {race.number}
-                    </p>
-                    <div className="flex w-full">
 
-                        <div className='flex flex-col px-6 w-full '>
-                            <p className='text-2xl font-bold text-gray-700'>
-                                Race Officer
-                            </p>
-                            <input type="text"
-                                id='OOD'
-                                className="w-full p-2 mx-0 my-2 border-4 rounded focus:border-blue-500 focus:outline-none"
-                                defaultValue={race.OOD}
-                                key={race.id}
-                                onChange={(e) => saveRaceSettings(e)}
-                                onBlur={() => DB.updateRaceById(race)}
-                                placeholder={"Unknown"}
-                            />
+                <div className="flex flex-wrap justify-center gap-4 w-full">
+                    <div className="flex flex-wrap px-4 divide-y divide-solid w-full justify-center">
+                        <div className="py-4 w-3/5">
+                            <button className="btn-darkblue float-right">View Series</button>
+                            <p className="text-4xl">{seriesName} - Race {race.number}</p>
+                            <p className="text-2xl">{race.Type} Race</p>
+                            <p className="text-2xl">{dayjs(race.Time).format('DD/MM/YYYY HH:mm')}</p>
                         </div>
-
-                        <div className='flex flex-col px-6 w-full'>
-                            <p className='text-2xl font-bold text-gray-700'>
-                                Assistant Race Officer
-                            </p>
-                            <input type="text"
-                                id='AOD'
-                                className="w-full p-2 mx-0 my-2 border-4 rounded focus:border-blue-500 focus:outline-none"
-                                defaultValue={race.AOD}
-                                key={race.id}
-                                onChange={saveRaceSettings}
-                                onBlur={() => DB.updateRaceById(race)}
-                                placeholder='Unknown'
-                            />
-
-                        </div>
-
-                        <div className='flex flex-col px-6 w-full'>
-                            <p className='text-2xl font-bold text-gray-700'>
-                                Time
-                            </p>
-                            <input type="datetime-local"
-                                id='Time'
-                                className="w-full p-2 mx-0 my-2 border-4 rounded focus:border-blue-500 focus:outline-none"
-                                defaultValue={dayjs(race.Time).format('YYYY-MM-DDTHH:mm')}
-                                key={race.id}
-                                onChange={saveRaceDate}
-                            />
-                        </div>
-
-                    </div>
-                    <div className="flex w-full">
-                        <div className='flex flex-col px-6 w-full'>
-                            <p className='text-2xl font-bold text-gray-700'>
-                                Safety Officer
-                            </p>
-                            <input type="text"
-                                id='SO'
-                                className="w-full p-2 mx-0 my-2 border-4 rounded focus:border-blue-500 focus:outline-none"
-                                defaultValue={race.SO}
-                                key={race.id}
-                                onChange={saveRaceSettings}
-                                onBlur={() => DB.updateRaceById(race)}
-                                placeholder='Unknown'
-                            />
-                        </div>
-
-                        <div className='flex flex-col px-6 w-full'>
-                            <p className='text-2xl font-bold text-gray-700'>
-                                Assistant Safety Officer
-                            </p>
-                            <input type="text"
-                                id='ASO'
-                                className="w-full p-2 mx-0 my-2 border-4 rounded focus:border-blue-500 focus:outline-none"
-                                defaultValue={race.ASO}
-                                key={race.id}
-                                onChange={saveRaceSettings}
-                                onBlur={() => DB.updateRaceById(race)}
-                                placeholder='Unknown'
-                            />
-                        </div>
-
-                        <div className='flex flex-col px-6 w-full'>
-                            <p className='text-2xl font-bold text-gray-700'>
-                                Type
-                            </p>
-                            <Select
-                                defaultValue={{ value: race.Type, label: race.Type }}
-                                id='raceType'
-                                key={race.Type}
-                                onChange={saveRaceType}
-                                className='w-full'
-                                options={raceOptions}
-                                styles={{
-                                    control: (baseStyles, state) => ({
-                                        ...baseStyles,
-                                        margin: '12px 0px',
-                                        border: state.isFocused ? '4px solid #2684ff' : '4px solid #e5e7eb',
-                                        borderRadius: '4px',
-                                        '&:hover': {
-                                            border: '4px solid #e5e7eb',
-                                        },
-                                    }),
-                                }}
-                            />
-                        </div>
-
-                    </div>
-                    <div className="p-6 w-full">
-                        <p onClick={openRacePanel} id="RacePanelButton" className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
-                            Race Panel
-                        </p>
-                    </div>
-                    <div className="p-6 w-full">
-                        <p onClick={printRaceSheet} id="printRaceSheetButton" className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
-                            Print Race Sheet
-                        </p>
-                    </div>
-                    <div className="p-6 w-full">
-                        <label className="">
-                            <p className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
-                                Upload Entries
-                            </p>
-                            <input
-                                type="file"
-                                accept=".csv"
-                                onChange={entryFileUploadHandler}
-                                className="display-none"
-                            />
-                        </label>
-                    </div>
-
-                    <div className="p-6 w-full">
-                    </div>
-                    <div className='p-6 w-full'>
-                        {race.fleets.map((fleet, index) => {
-                            return (
-                                <div key={"fleetResults" + index}>
-                                    <p className='text-2xl font-bold text-gray-700'>
-                                        {fleet.fleetSettings.name} - Boats Entered: {fleet.results.length}
-                                    </p>
-                                    {race.Type == "Handicap" ?
-                                        <FleetHandicapResultsTable showTime={true} editable={true} data={fleet.results} startTime={fleet.startTime} key={JSON.stringify(race)} deleteResult={deleteResult} updateResult={updateResult} raceId={race.id} showEditModal={(id: string) => { showEditModal(id) }} />
-                                        :
-                                        <FleetPursuitResultsTable showTime={true} editable={true} data={fleet.results} startTime={fleet.startTime} key={JSON.stringify(race)} deleteResult={deleteResult} updateResult={updateResult} raceId={race.id} showEditModal={(id: string) => { showEditModal(id) }} />
-                                    }
-                                    <p onClick={() => createResult(fleet.id)} id="RacePanelButton" className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0 my-5">
-                                        Add Entry
-                                    </p>
-                                    <p onClick={downloadResults} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
-                                        Download Results
-                                    </p>
+                        <div className="py-4 w-3/5 justify-center">
+                            <p className="text-xl font-medium text-center">Duty Team</p>
+                            <form className="flex">
+                                <div className="flex-col w-full mr-4">
+                                    <div className="flex items-center py-4">
+                                        <label htmlFor="RO"
+                                               className="block mb-2 font-medium text-gray-900 dark:text-white w-1/4">RO</label>
+                                        <input type="text" id="RO"
+                                               className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 w-full"
+                                               placeholder="Race Officer"/>
+                                    </div>
+                                    <div className="flex items-center">
+                                        <label htmlFor="ARO"
+                                               className="block mb-2 font-medium text-gray-900 dark:text-white w-1/4">ARO</label>
+                                        <input type="text" id="ARO"
+                                               className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 w-full"
+                                               placeholder="Assistant Race Officer"/>
+                                    </div>
                                 </div>
-                            )
-                        })
-                        }
+                                <div className="flex-col w-full mr-4">
+                                    <div className="flex items-center py-4">
+                                        <label htmlFor="SO"
+                                               className="block mb-2 font-medium text-gray-900 dark:text-white w-1/4">SO</label>
+                                        <input type="text" id="SO"
+                                               className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 w-full"
+                                               placeholder="Safety Officer"/>
+                                    </div>
+                                    <div className="flex items-center">
+                                        <label htmlFor="ASO"
+                                               className="block mb-2 font-medium text-gray-900 dark:text-white w-1/4">ASO</label>
+                                        <input type="text" id="ASO"
+                                               className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 w-full"
+                                               placeholder="Assistant Safety Officer"/>
+                                    </div>
+                                </div>
+                                <div className="flex-col w-full mr-4">
+                                    <div className="flex items-center py-4">
+                                        <label htmlFor="DO"
+                                               className="block mb-2 font-medium text-gray-900 dark:text-white w-1/4">DO</label>
+                                        <input type="text" id="DO"
+                                               className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 w-full"
+                                               placeholder="Duty Officer"/>
+                                    </div>
+                                    <div className="flex items-center justify-center">
+                                        <button className="btn-darkblue">Copy from previous race</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div className="py-4 w-3/5">
+                            <div className="flex flex-wrap justify-center">
+                                <button className="btn-green mr-1">Race</button>
+                                <button className="btn-darkblue mr-1">Add Entry</button>
+                                <button className="btn-darkblue mr-1">Calculate</button>
+                                <button className="btn-darkblue mr-1">Print Race Sheet</button>
+                            </div>
+                        </div>
+                        <div className="py-4 w-full">
+                            <p className="text-2xl">Table Here</p>
+                        </div>
                     </div>
                 </div>
+
             </div>
-        </Dashboard >
+        </Dashboard>
     )
 }
-export default SignOnPage
+export default Page
