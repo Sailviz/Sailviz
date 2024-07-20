@@ -33,17 +33,17 @@ export default function Dashboard({
                 <nav className="bg-white border-pink-500 dark:bg-gray-900 border-b">
                     <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
                         <div id="nav_back" onClick={() => router.back()}
-                             className="flex text-white bg-pink-500 hover:bg-white hover:text-gray-700 hover:border-pink-500 border shadow font-medium px-5 py-3 text-center mr-6">
+                             className="hidden md:flex md:visible text-white bg-pink-500 hover:bg-white hover:text-gray-700 hover:border-pink-500 border shadow font-medium px-5 py-3 text-center mr-6">
 
                             &lt; Back
                         </div>
-                        <a href="#" className="flex items-center space-x-3">
+                        <a href="/Dashboard" className="flex space-x-3">
                             <img src="/favicon.ico" className="h-8"
                                  alt="Logo"/>
                             <span
-                                className="self-center text-2xl font-semibold whitespace-nowrap">Sailviz - {club}</span>
+                                className="self-center text-xl font-semibold md:text-2xl">Sailviz - {club}</span>
                         </a>
-                        <div className="hidden w-full md:block md:w-auto" id="navbar-default">
+                        <div className="w-full text-center md:block md:w-auto" id="navbar-default">
                             <a href="#" className="block">
                                 Logged In:
                                 <span className="font-semibold"> {displayName}</span>
