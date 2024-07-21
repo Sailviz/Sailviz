@@ -1,10 +1,11 @@
+'use client'
 import React, { ChangeEvent, MouseEventHandler, useEffect, useState } from "react"
-import Router, { useRouter } from "next/router"
-import * as DB from '../../../components/apiMethods';
-import Dashboard from "../../../components/ui/Dashboard";
-import RaceTimer from "../../../components/HRaceTimer"
+import { useRouter } from "next/navigation"
+import * as DB from '../../../../components/apiMethods';
+import Dashboard from "../../../../components/ui/Dashboard";
+import RaceTimer from "../../../../components/HRaceTimer"
 import Cookies from "js-cookie";
-import * as Fetcher from '../../../components/Fetchers';
+import * as Fetcher from '../../../../components/Fetchers';
 
 enum raceStateType {
     running,
@@ -26,13 +27,11 @@ const resultCodes = [
     { 'desc': 'On Course Side', 'code': 'OCS' },
     { 'desc': 'Not Sailed Course', 'code': 'NSC' }]
 
-const RacePage = () => {
+export default function Page({ params }: { params: { slug: string } }) {
 
-    const router = useRouter()
+    const Router = useRouter()
 
     const startLength = 315 //5 15secs in seconds
-
-    const query = router.query
 
     const { user, userIsError, userIsValidating } = Fetcher.UseUser()
     const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
@@ -385,7 +384,7 @@ const RacePage = () => {
 
             console.log(sortedResults)
         })
-        router.push({ pathname: '/Race', query: { race: race.id } })
+        Router.push('/Race' + race.id)
 
     }
 
@@ -479,7 +478,7 @@ const RacePage = () => {
 
 
     useEffect(() => {
-        let raceId = query.race as string
+        let raceId = params.slug
         const fetchRace = async () => {
             let data = await DB.getRaceById(raceId)
             setRace(data)
@@ -500,7 +499,7 @@ const RacePage = () => {
             fetchRace()
         }
 
-    }, [query.race])
+    }, [params])
 
     useEffect(() => {
         //sort results
@@ -785,5 +784,3 @@ const RacePage = () => {
         </Dashboard >
     )
 }
-
-export default RacePage

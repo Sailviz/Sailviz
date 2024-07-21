@@ -1,12 +1,12 @@
 'use client'
 import React, { ChangeEvent, MouseEventHandler, useEffect, useState } from "react"
-import Router, { useRouter } from "next/router"
-import * as DB from '../../../components/apiMethods';
-import Dashboard from "../../../components/ui/Dashboard";
-import PursuitTimer from "../../../components/PRaceTimer"
+import { useRouter } from "next/navigation"
+import * as DB from 'components/apiMethods';
+import Dashboard from "components/ui/Dashboard";
+import PursuitTimer from "components/PRaceTimer"
 import Cookies from "js-cookie";
 import { ReactSortable } from "react-sortablejs";
-import * as Fetcher from '../../../components/Fetchers';
+import * as Fetcher from 'components/Fetchers';
 
 enum raceStateType {
     running,
@@ -18,13 +18,11 @@ enum raceStateType {
 //pursuit races don't work with fleets, why would you?
 //all fleets have same status.
 
-const RacePage = () => {
+export default function Page({ params }: { params: { slug: string } }) {
 
-    const router = useRouter()
+    const Router = useRouter()
 
     const startLength = 315 //5 mins 15 seconds in seconds
-
-    const query = router.query
 
     var [seriesName, setSeriesName] = useState("")
 
@@ -271,7 +269,7 @@ const RacePage = () => {
         for (const result of race.fleets.flatMap(fleet => fleet.results)) {
             await DB.updateResult(result)
         }
-        router.push({ pathname: '/Race', query: { race: race.id } })
+        Router.push('/Race/' + race.id)
     }
 
     const setOrder = async (updatedResults: ResultsDataType[]) => {
@@ -314,7 +312,7 @@ const RacePage = () => {
     const controller = new AbortController()
 
     useEffect(() => {
-        let raceId = query.race as string
+        let raceId = params.slug
         const fetchRace = async () => {
             let data = await DB.getRaceById(raceId)
             //sort race results by pursuit position
@@ -340,7 +338,7 @@ const RacePage = () => {
             fetchRace()
         }
 
-    }, [router, club])
+    }, [Router, club])
 
     const [time, setTime] = useState("");
 
@@ -446,5 +444,3 @@ const RacePage = () => {
         </Dashboard >
     )
 }
-
-export default RacePage

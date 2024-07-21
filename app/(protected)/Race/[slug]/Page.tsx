@@ -1,16 +1,15 @@
 import React, { ChangeEvent, MouseEventHandler, useEffect, useState } from "react"
-import Router, { useRouter } from "next/router"
-import * as DB from '../../../../components/apiMethods';
-import Cookies from "js-cookie";
+import { useRouter } from "next/navigation"
+import * as DB from 'components/apiMethods';
 import dayjs from 'dayjs';
 import Select from 'react-select';
 import Papa from 'papaparse';
-import FleetHandicapResultsTable from '../../../../components/tables/FleetHandicapResultsTable';
-import FleetPursuitResultsTable from '../../../../components/tables/FleetPursuitResultsTable';
-import Dashboard from "../../../../components/ui/Dashboard";
-import Switch from "../../../../components/ui/Switch";
-import * as Fetcher from '../../../../components/Fetchers';
-import { AVAILABLE_PERMISSIONS, userHasPermission } from "../../../../components/helpers/users";
+import FleetHandicapResultsTable from 'components/tables/FleetHandicapResultsTable';
+import FleetPursuitResultsTable from 'components/tables/FleetPursuitResultsTable';
+import Dashboard from "components/ui/Dashboard";
+import Switch from "components/ui/Switch";
+import * as Fetcher from 'components/Fetchers';
+import { AVAILABLE_PERMISSIONS, userHasPermission } from "components/helpers/users";
 
 const raceOptions = [{ value: "Pursuit", label: "Pursuit" }, { value: "Handicap", label: "Handicap" }]
 
@@ -22,11 +21,9 @@ const resultCodeOptions = [
     { label: 'On Course Side', value: 'OCS' },
     { label: 'Not Sailed Course', value: 'NSC' }]
 
-const SignOnPage = () => {
+export default function Page({ params }: { params: { slug: string } }) {
 
-    const router = useRouter()
-
-    const query = router.query
+    const Router = useRouter()
 
     const { user, userIsError, userIsValidating } = Fetcher.UseUser()
     const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
@@ -227,7 +224,7 @@ const SignOnPage = () => {
     }
 
     const printRaceSheet = async () => {
-        router.push({ pathname: '/PrintPaperResults', query: { race: race.id } })
+        Router.push('/PrintPaperResults/' + race.id)
     }
 
     //Capitalise the first letter of each word, and maintain cursor pos.
@@ -282,10 +279,10 @@ const SignOnPage = () => {
 
     const openRacePanel = async () => {
         if (race.Type == "Handicap") {
-            router.push({ pathname: '/HRace', query: { race: race.id } })
+            Router.push('/HRace' + race.id)
 
         } else {
-            router.push({ pathname: '/PRace', query: { race: race.id } })
+            Router.push('/PRace' + race.id)
         }
     }
 
@@ -452,7 +449,7 @@ const SignOnPage = () => {
     }
 
     useEffect(() => {
-        let raceId = query.race as string
+        let raceId = params.slug
         const getRace = async () => {
             const racedata = await DB.getRaceById(raceId)
             setRace(racedata)
@@ -465,7 +462,7 @@ const SignOnPage = () => {
             getRace()
         }
 
-    }, [router])
+    }, [Router])
 
     useEffect(() => {
         if (club?.id != undefined) {
@@ -829,4 +826,3 @@ const SignOnPage = () => {
         </Dashboard >
     )
 }
-export default SignOnPage

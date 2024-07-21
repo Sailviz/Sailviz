@@ -1,15 +1,12 @@
 'use client'
 import React, { ChangeEvent, MouseEventHandler, useEffect, useRef, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
-import * as DB from '../../../components/apiMethods';
-import Cookies from "js-cookie";
-
+import * as DB from 'components/apiMethods';
 import { useReactToPrint } from "react-to-print";
-import PaperResultsTable from "../../../components/tables/HandicapPaperResultsTable";
-import HandicapPaperResultsTable from "../../../components/tables/HandicapPaperResultsTable";
-import PursuitPaperResultsTable from "../../../components/tables/PursuitPaperResultsTable";
+import HandicapPaperResultsTable from "components/tables/HandicapPaperResultsTable";
+import PursuitPaperResultsTable from "components/tables/PursuitPaperResultsTable";
 
-const PrintPaperResults = () => {
+export default function Page({ params }: { params: { slug: string } }) {
 
     const Router = useRouter()
 
@@ -100,4 +97,3 @@ const PrintPaperResults = () => {
         </div>
     )
 }
-export default PrintPaperResults
