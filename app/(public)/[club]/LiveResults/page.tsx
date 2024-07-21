@@ -1,10 +1,11 @@
+'use client'
 import { useEffect, useState } from "react";
-import Layout from "../../../components/ui/Layout";
+import Layout from "components/ui/Layout";
 import Cookies from "js-cookie";
-import { useRouter } from "next/router";
-import * as DB from '../../../components/apiMethods';
-import LiveFleetResultsTable from "../../../components/tables/LiveFleetResultsTable";
-import RaceTimer from "../../../components/HRaceTimer"
+import { useRouter } from "next/navigation";
+import * as DB from 'components/apiMethods';
+import LiveFleetResultsTable from "components/tables/LiveFleetResultsTable";
+import RaceTimer from "components/HRaceTimer"
 
 
 enum pageModes {
@@ -12,8 +13,8 @@ enum pageModes {
     notLive
 }
 
-const LiveResults = () => {
-    const router = useRouter()
+export default function Page({ params }: { params: { slug: string } }) {
+    const Router = useRouter()
 
     var [clubId, setClubId] = useState<string>("invalid")
     var [races, setRaces] = useState<RaceDataType[]>([{
@@ -67,7 +68,7 @@ const LiveResults = () => {
     }
 
     useEffect(() => {
-        let clubName = router.query.club
+        let clubName = params.slug
         if (clubName) {
             DB.getClubByName(clubName.toString()).then((data) => {
                 if (data) {
@@ -77,7 +78,7 @@ const LiveResults = () => {
                 }
             })
         }
-    }, [router])
+    }, [Router])
 
     useEffect(() => {
         if (clubId != "") {
@@ -108,7 +109,7 @@ const LiveResults = () => {
             fetchTodaysRaces()
         } else {
             console.log("user not signed in")
-            router.push("/")
+            Router.push("/")
         }
     }, [clubId])
 
@@ -168,7 +169,7 @@ const LiveResults = () => {
                     default: //includes notLive state
                         return (
                             <div>
-                                <p className="text-6xl font-extrabold text-gray-700 p-6"> {router.query.club} <br /> No Races Currently Active</p>
+                                <p className="text-6xl font-extrabold text-gray-700 p-6"> {params.slug} <br /> No Races Currently Active</p>
                             </div>
                         )
                 }
@@ -176,5 +177,3 @@ const LiveResults = () => {
         </div>
     );
 }
-
-export default LiveResults;

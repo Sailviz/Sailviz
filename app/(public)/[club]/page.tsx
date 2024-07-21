@@ -1,3 +1,4 @@
+'use client'
 import { useEffect, useState } from "react";
 import Layout from "../../../components/ui/Layout";
 import { useRouter } from "next/router";

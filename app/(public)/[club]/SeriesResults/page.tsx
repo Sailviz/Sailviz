@@ -1,14 +1,15 @@
+'use client'
 import { useEffect, useState } from "react";
-import Layout from "../../../components/ui/Layout";
+import Layout from "components/ui/Layout";
 import Cookies from "js-cookie";
 import { useRouter } from "next/router";
-import * as DB from '../../../components/apiMethods';
-import LiveFleetResultsTable from "../../../components/tables/LiveFleetResultsTable";
-import RaceTimer from "../../../components/HRaceTimer"
-import FleetResultsTable from "../../../components/tables/FleetHandicapResultsTable";
-import SeriesResultsTable from "../../../components/tables/SeriesResultsTable";
+import * as DB from 'components/apiMethods';
+import LiveFleetResultsTable from "components/tables/LiveFleetResultsTable";
+import RaceTimer from "components/HRaceTimer"
+import FleetResultsTable from "components/tables/FleetHandicapResultsTable";
+import SeriesResultsTable from "components/tables/SeriesResultsTable";
 
-const SeriesResults = () => {
+export default function Page({ params }: { params: { slug: string } }) {
     const router = useRouter()
 
     const query = router.query
@@ -61,5 +62,3 @@ const SeriesResults = () => {
         </Layout>
     );
 }
-
-export default SeriesResults;

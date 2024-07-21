@@ -1,16 +1,15 @@
+'use client'
 import { useEffect, useState } from "react";
-import Layout from "../../../components/ui/Layout";
+import Layout from "components/ui/Layout";
 import Cookies from "js-cookie";
-import { useRouter } from "next/router";
-import * as DB from '../../../components/apiMethods';
-import LiveFleetResultsTable from "../../../components/tables/LiveFleetResultsTable";
-import RaceTimer from "../../../components/HRaceTimer"
-import FleetResultsTable from "../../../components/tables/FleetHandicapResultsTable";
+import { useRouter } from "next/navigation";
+import * as DB from 'components/apiMethods';
+import LiveFleetResultsTable from "components/tables/LiveFleetResultsTable";
+import RaceTimer from "components/HRaceTimer"
+import FleetResultsTable from "components/tables/FleetHandicapResultsTable";
 
-const ClubPage = () => {
-    const router = useRouter()
-
-    const query = router.query
+export default function Page({ params }: { params: { slug: string } }) {
+    const Router = useRouter()
 
     var [race, setRace] = useState<RaceDataType>({
         id: "",
@@ -38,7 +37,7 @@ const ClubPage = () => {
 
 
     useEffect(() => {
-        let raceId = query.id as string
+        let raceId = params.slug
         const getRace = async () => {
             const racedata = await DB.getRaceById(raceId)
             setRace(racedata)
@@ -50,7 +49,7 @@ const ClubPage = () => {
         if (raceId != undefined) {
             getRace()
         }
-    }, [router])
+    }, [Router])
 
     // list of current series
     //list of 
@@ -68,5 +67,3 @@ const ClubPage = () => {
         </Layout>
     );
 }
-
-export default ClubPage;

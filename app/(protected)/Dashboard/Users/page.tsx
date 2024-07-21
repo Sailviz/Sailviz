@@ -16,7 +16,7 @@ export default function Page() {
     const { user, userIsError, userIsValidating } = Fetcher.UseUser()
     const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
     const { users, usersIsError, usersIsValidating } = Fetcher.Users(club)
-    const { roles, rolesIsError, rolesIsValidating } = Fetcher.roles(club)
+    const { roles, rolesIsError, rolesIsValidating } = Fetcher.Roles(club)
 
     const [activeUser, setActiveUser] = useState<UserDataType>({} as UserDataType)
     const [activeRole, setActiveRole] = useState<RoleDataType>({} as RoleDataType)

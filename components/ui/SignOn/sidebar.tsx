@@ -60,12 +60,14 @@ export const SidebarWrapper = () => {
                         />
                         <SidebarMenu title="Main Menu">
                             <CollapseItems
+                                isActive={pathname === "/SignOn/Race"}
                                 icon={<SettingsIcon />}
                                 items={todaysRaces?.map(race => race.series.name + ": " + race.number)}
                                 title="Today's Races"
                                 hrefs={todaysRaces?.map(race => 'SignOn/Race/' + race.id)}
                             />
                             <CollapseItems
+                                isActive={pathname === "/SignOn/Series"}
                                 icon={<SettingsIcon />}
                                 items={todaysRaces?.map(race => race.series.name)}
                                 title="Today's Series"
