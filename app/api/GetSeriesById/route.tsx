@@ -32,8 +32,6 @@ async function findSeries(seriesId: any) {
 export async function POST(request: NextRequest) {
     console.log
     const req = await request.json()
-    // check if we have all data.
-    // The website stops this, but just in case
     try {
         assert.notStrictEqual(undefined, req.seriesId)
     } catch (e) {

@@ -58,9 +58,9 @@ export async function GetSeriesByClubId(clubId: string): Promise<SeriesDataType[
         });
 };
 
-export async function GetSeriesById(id: string): Promise<SeriesDataType> {
+export async function GetSeriesById(seriesId: string): Promise<SeriesDataType> {
     const body = {
-        "id": id,
+        "seriesId": seriesId,
     }
     return await fetch(`${server}/api/GetSeriesById`, {
         method: 'POST',

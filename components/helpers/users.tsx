@@ -15,6 +15,7 @@ export class AVAILABLE_PERMISSIONS {
 export const PERMISSIONS: PermissionType[] = Object.values(AVAILABLE_PERMISSIONS);
 
 export function userHasPermission(user: UserDataType, permission: PermissionType) {
+    console.log(user)
     let match = false;
     user.roles.flatMap(role => role.permissions.allowed).forEach(perm => {
         if (perm.value == permission.value) {

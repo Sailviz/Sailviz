@@ -6,6 +6,9 @@ async function getUser(id: string) {
         where: {
             id: id
         },
+        include: {
+            roles: true
+        }
     })
     if (result == null) {
         return
