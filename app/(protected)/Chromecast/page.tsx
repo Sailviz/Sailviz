@@ -1,16 +1,15 @@
 import React, { useEffect, useState } from 'react'
 import Script from 'next/script';
 import Cookies from 'js-cookie';
-import Dashboard from "../../../components/ui/Dashboard";
 import { useRouter } from 'next/router';
-import * as DB from '../../../components/apiMethods'
+import * as DB from 'components/apiMethods'
 import { io, Socket } from "socket.io-client";
-import * as Fetcher from '../../../components/Fetchers';
+import * as Fetcher from 'components/Fetchers';
 
 const applicationID = '0AA4CA7E';
 const namespace = 'urn:x-cast:com.sailviz';
 
-const CCDashboard = () => {
+export default function Page() {
     const router = useRouter()
 
     const [chromecasts, setChromecasts] = useState<ChromecastDataType[]>([])
@@ -267,7 +266,7 @@ const CCDashboard = () => {
     }, [availiableCasts])
 
     return (
-        <Dashboard >
+        <>
             <Script src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js"></Script>
             <div id="addCastModal" className="hidden fixed z-10 left-0 top-0 w-full h-full overflow-auto bg-gray-400 backdrop-blur-sm bg-opacity-20">
                 <div className="mx-auto my-20 px-a py-5 border w-1/4 bg-gray-300 rounded-sm">
@@ -392,8 +391,6 @@ const CCDashboard = () => {
                     )}
                 </div>
             </div>
-        </Dashboard>
+        </>
     )
 }
-
-export default CCDashboard
