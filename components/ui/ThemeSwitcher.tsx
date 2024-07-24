@@ -33,7 +33,6 @@ export function ThemeSwitcher() {
             isSelected={theme == 'dark'}
             onValueChange={updateTheme}
             size="lg"
-            color="primary"
             startContent={<SunIcon />}
             endContent={<MoonIcon />}
             thumbIcon={({ isSelected, className }) =>
