@@ -2,7 +2,6 @@
 import React, { ChangeEvent, MouseEventHandler, useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import * as DB from 'components/apiMethods';
-import Dashboard from "components/ui/Dashboard";
 import PursuitTimer from "components/PRaceTimer"
 import Cookies from "js-cookie";
 import { ReactSortable } from "react-sortablejs";
@@ -350,7 +349,7 @@ export default function Page({ params }: { params: { slug: string } }) {
     }, []);
 
     return (
-        <Dashboard >
+        <>
 
             <audio id="Beep" src=".\beep-6.mp3" ></audio>
             <audio id="Countdown" src=".\Countdown.mp3" ></audio>
@@ -441,6 +440,6 @@ export default function Page({ params }: { params: { slug: string } }) {
                     </ReactSortable>
                 </div>
             </div>
-        </Dashboard >
+        </>
     )
 }

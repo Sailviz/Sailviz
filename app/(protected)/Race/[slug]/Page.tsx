@@ -7,11 +7,13 @@ import Select from 'react-select';
 import Papa from 'papaparse';
 import FleetHandicapResultsTable from 'components/tables/FleetHandicapResultsTable';
 import FleetPursuitResultsTable from 'components/tables/FleetPursuitResultsTable';
-import Dashboard from "components/ui/Dashboard";
 import Switch from "components/ui/Switch";
 import * as Fetcher from 'components/Fetchers';
 import { AVAILABLE_PERMISSIONS, userHasPermission } from "components/helpers/users";
 import { PageSkeleton } from "components/ui/PageSkeleton";
+import { Button, Input, useDisclosure } from "@nextui-org/react";
+import CreateResultModal from "components/ui/CreateResultModal";
+import { set } from "cypress/types/lodash";
 
 const raceOptions = [{ value: "Pursuit", label: "Pursuit" }, { value: "Handicap", label: "Handicap" }]
 
@@ -32,6 +34,8 @@ export default function Page({ params }: { params: { slug: string } }) {
     const { boats, boatsIsError, boatsIsValidating } = Fetcher.Boats(club)
 
     const [seriesName, setSeriesName] = useState("")
+
+    const createModal = useDisclosure();
 
     var [activeResult, setActiveResult] = useState<ResultsDataType>({
         id: "",
@@ -103,8 +107,10 @@ export default function Page({ params }: { params: { slug: string } }) {
         series: {} as SeriesDataType
     })
 
-    const createResult = async (fleetId: string) => {
-        await DB.createResult(fleetId)
+    const createResult = async (helm: string, crew: string, boat: BoatDataType, sailNum: string, fleetId: string[]) => {
+        console.log(helm, crew, boat, sailNum, fleetId)
+        createModal.onClose() //close modal
+        await DB.createResult(fleetId[0]!)
         setRace(await DB.getRaceById(race.id))
     }
 
@@ -278,10 +284,10 @@ export default function Page({ params }: { params: { slug: string } }) {
 
     const openRacePanel = async () => {
         if (race.Type == "Handicap") {
-            Router.push('/HRace' + race.id)
+            Router.push('/HRace/' + race.id)
 
         } else {
-            Router.push('/PRace' + race.id)
+            Router.push('/PRace/' + race.id)
         }
     }
 
@@ -486,6 +492,7 @@ export default function Page({ params }: { params: { slug: string } }) {
     }
     return (
         <div id="race" className='h-full w-full overflow-y-auto'>
+            <CreateResultModal isOpen={createModal.isOpen} onSubmit={createResult} onClose={createModal.onClose} />
             <div id="editModal" className={"fixed z-10 left-0 top-0 w-full h-full overflow-auto bg-gray-400 backdrop-blur-sm bg-opacity-20 hidden"} key={activeResult.id}>
                 <div className="mx-40 my-20 px-10 py-5 border w-4/5 bg-gray-300 rounded-sm">
                     <div className="text-6xl font-extrabold text-gray-700 p-6 float-right cursor-pointer" onClick={() => { document.getElementById("editModal")!.classList.add("hidden") }}>&times;</div>
@@ -630,171 +637,104 @@ export default function Page({ params }: { params: { slug: string } }) {
                     </div>
                 </div>
             </div>
-            <div className="px-36 pb-36">
-                <p className="text-6xl font-extrabold text-gray-700 p-6">
-                    {seriesName}: {race.number}
-                </p>
-                <div className="flex w-full">
-
-                    <div className='flex flex-col px-6 w-full '>
-                        <p className='text-2xl font-bold text-gray-700'>
-                            Race Officer
-                        </p>
-                        <input type="text"
-                            id='OOD'
-                            className="w-full p-2 mx-0 my-2 border-4 rounded focus:border-blue-500 focus:outline-none"
-                            defaultValue={race.OOD}
-                            key={race.id}
-                            onChange={(e) => saveRaceSettings(e)}
-                            onBlur={() => DB.updateRaceById(race)}
-                            placeholder={"Unknown"}
-                        />
+            <div className="flex flex-wrap justify-center gap-4 w-full">
+                <div className="flex flex-wrap px-4 divide-y divide-solid w-full justify-center">
+                    <div className="py-4 w-3/5">
+                        <button className="btn-darkblue float-right">View Series</button>
+                        <p className="text-4xl">{seriesName} - Race {race.number}</p>
+                        <p className="text-2xl">{race.Type} Race</p>
+                        <p className="text-2xl">{dayjs(race.Time).format('DD/MM/YYYY HH:mm')}</p>
                     </div>
-
-                    <div className='flex flex-col px-6 w-full'>
-                        <p className='text-2xl font-bold text-gray-700'>
-                            Assistant Race Officer
-                        </p>
-                        <input type="text"
-                            id='AOD'
-                            className="w-full p-2 mx-0 my-2 border-4 rounded focus:border-blue-500 focus:outline-none"
-                            defaultValue={race.AOD}
-                            key={race.id}
-                            onChange={saveRaceSettings}
-                            onBlur={() => DB.updateRaceById(race)}
-                            placeholder='Unknown'
-                        />
-
-                    </div>
-
-                    <div className='flex flex-col px-6 w-full'>
-                        <p className='text-2xl font-bold text-gray-700'>
-                            Time
-                        </p>
-                        <input type="datetime-local"
-                            id='Time'
-                            className="w-full p-2 mx-0 my-2 border-4 rounded focus:border-blue-500 focus:outline-none"
-                            defaultValue={dayjs(race.Time).format('YYYY-MM-DDTHH:mm')}
-                            key={race.id}
-                            onChange={saveRaceDate}
-                        />
-                    </div>
-
-                </div>
-                <div className="flex w-full">
-                    <div className='flex flex-col px-6 w-full'>
-                        <p className='text-2xl font-bold text-gray-700'>
-                            Safety Officer
-                        </p>
-                        <input type="text"
-                            id='SO'
-                            className="w-full p-2 mx-0 my-2 border-4 rounded focus:border-blue-500 focus:outline-none"
-                            defaultValue={race.SO}
-                            key={race.id}
-                            onChange={saveRaceSettings}
-                            onBlur={() => DB.updateRaceById(race)}
-                            placeholder='Unknown'
-                        />
-                    </div>
-
-                    <div className='flex flex-col px-6 w-full'>
-                        <p className='text-2xl font-bold text-gray-700'>
-                            Assistant Safety Officer
-                        </p>
-                        <input type="text"
-                            id='ASO'
-                            className="w-full p-2 mx-0 my-2 border-4 rounded focus:border-blue-500 focus:outline-none"
-                            defaultValue={race.ASO}
-                            key={race.id}
-                            onChange={saveRaceSettings}
-                            onBlur={() => DB.updateRaceById(race)}
-                            placeholder='Unknown'
-                        />
-                    </div>
-
-                    <div className='flex flex-col px-6 w-full'>
-                        <p className='text-2xl font-bold text-gray-700'>
-                            Type
-                        </p>
-                        <Select
-                            defaultValue={{ value: race.Type, label: race.Type }}
-                            id='raceType'
-                            key={race.Type}
-                            onChange={saveRaceType}
-                            className='w-full'
-                            options={raceOptions}
-                            styles={{
-                                control: (baseStyles, state) => ({
-                                    ...baseStyles,
-                                    margin: '12px 0px',
-                                    border: state.isFocused ? '4px solid #2684ff' : '4px solid #e5e7eb',
-                                    borderRadius: '4px',
-                                    '&:hover': {
-                                        border: '4px solid #e5e7eb',
-                                    },
-                                }),
-                            }}
-                        />
-                    </div>
-
-                </div>
-                <div className="p-6 w-full">
-                    <p onClick={openRacePanel} id="RacePanelButton" className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
-                        Race Panel
-                    </p>
-                </div>
-                <div className="p-6 w-full">
-                    <p onClick={printRaceSheet} id="printRaceSheetButton" className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
-                        Print Race Sheet
-                    </p>
-                </div>
-
-                {userHasPermission(user, AVAILABLE_PERMISSIONS.UploadEntires) ?
-                    <div className="p-6 w-full">
-                        <label className="">
-                            <p className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
-                                Upload Entries
-                            </p>
-                            <input
-                                type="file"
-                                accept=".csv"
-                                onChange={entryFileUploadHandler}
-                                className="display-none"
-                            />
-                        </label>
-                    </div>
-                    :
-                    <></>
-                }
-
-                <div className="p-6 w-full">
-                </div>
-                <div className='p-6 w-full'>
-                    {race.fleets.map((fleet, index) => {
-                        return (
-                            <div key={"fleetResults" + index}>
-                                <p className='text-2xl font-bold text-gray-700'>
-                                    {fleet.fleetSettings.name} - Boats Entered: {fleet.results.length}
-                                </p>
-                                {race.Type == "Handicap" ?
-                                    <FleetHandicapResultsTable showTime={true} editable={true} data={fleet.results} startTime={fleet.startTime} key={JSON.stringify(race)} deleteResult={deleteResult} updateResult={updateResult} raceId={race.id} showEditModal={(id: string) => { showEditModal(id) }} />
-                                    :
-                                    <FleetPursuitResultsTable showTime={true} editable={true} data={fleet.results} startTime={fleet.startTime} key={JSON.stringify(race)} deleteResult={deleteResult} updateResult={updateResult} raceId={race.id} showEditModal={(id: string) => { showEditModal(id) }} />
-                                }
-                                <p onClick={() => createResult(fleet.id)} id="RacePanelButton" className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0 my-5">
-                                    Add Entry
-                                </p>
-                                {userHasPermission(user, AVAILABLE_PERMISSIONS.DownloadResults) ?
-                                    <p onClick={downloadResults} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
-                                        Download Results
-                                    </p>
-                                    :
-                                    <></>
-                                }
+                    <div className="py-4 w-3/5 justify-center">
+                        <p className="text-xl font-medium text-center">Duty Team</p>
+                        <form className="flex">
+                            <div className="flex-col w-full mr-4">
+                                <div className="flex items-center py-4">
+                                    <label htmlFor="RO"
+                                        className="block mb-2 font-medium text-gray-900 dark:text-white w-1/4">RO</label>
+                                    <Input type="text" id="RO"
+                                        placeholder="Race Officer" />
+                                </div>
+                                <div className="flex items-center">
+                                    <label htmlFor="ARO"
+                                        className="block mb-2 font-medium text-gray-900 dark:text-white w-1/4">ARO</label>
+                                    <Input type="text" id="ARO"
+                                        placeholder="Assistant Race Officer" />
+                                </div>
                             </div>
-                        )
-                    })
-                    }
+                            <div className="flex-col w-full mr-4">
+                                <div className="flex items-center py-4">
+                                    <label htmlFor="SO"
+                                        className="block mb-2 font-medium text-gray-900 dark:text-white w-1/4">SO</label>
+                                    <Input type="text" id="SO"
+                                        placeholder="Safety Officer" />
+                                </div>
+                                <div className="flex items-center">
+                                    <label htmlFor="ASO"
+                                        className="block mb-2 font-medium text-gray-900 dark:text-white w-1/4">ASO</label>
+                                    <Input type="text" id="ASO"
+                                        placeholder="Assistant Safety Officer" />
+                                </div>
+                            </div>
+                            <div className="flex-col w-full mr-4">
+                                <div className="flex items-center py-4">
+                                    <label htmlFor="DO"
+                                        className="block mb-2 font-medium text-gray-900 dark:text-white w-1/4">DO</label>
+                                    <Input type="text" id="DO"
+                                        placeholder="Duty Officer" />
+                                </div>
+                                <div className="flex items-center justify-center">
+                                    <button className="btn-darkblue">Copy from previous race</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div className="py-4 w-4/5">
+                        <div className="flex flex-wrap justify-center">
+                            <Button className="mx-1" onClick={() => openRacePanel()}>Race</Button>
+                            <Button className="mx-1" onClick={createModal.onOpen}>Add Entry</Button>
+                            <Button className="mx-1">Calculate</Button>
+                            <Button className="mx-1" onClick={() => printRaceSheet()}>Print Race Sheet</Button>
+                            {userHasPermission(user, AVAILABLE_PERMISSIONS.UploadEntires) ?
+                                <>
+                                    <Button className="mx-1" onClick={() => document.getElementById("entryFileUpload")!.click()}>Upload Entries</Button>
+                                    <Input
+                                        id="entryFileUpload"
+                                        type="file"
+                                        accept=".csv"
+                                        onChange={entryFileUploadHandler}
+                                        className="hidden"
+                                    />
+                                </>
+                                :
+                                <></>
+                            }
+                            {userHasPermission(user, AVAILABLE_PERMISSIONS.DownloadResults) ?
+                                <Button onClick={downloadResults} >
+                                    Download Results
+                                </Button>
+                                :
+                                <></>
+                            }
+                        </div>
+                    </div>
+                    <div className="py-4 w-full">
+                        {race.fleets.map((fleet, index) => {
+                            return (
+                                <div key={"fleetResults" + index}>
+                                    <p className='text-2xl font-bold text-gray-700'>
+                                        {fleet.fleetSettings.name} - Boats Entered: {fleet.results.length}
+                                    </p>
+                                    {race.Type == "Handicap" ?
+                                        <FleetHandicapResultsTable showTime={true} editable={true} data={fleet.results} startTime={fleet.startTime} key={JSON.stringify(race)} deleteResult={deleteResult} updateResult={updateResult} raceId={race.id} showEditModal={(id: string) => { showEditModal(id) }} />
+                                        :
+                                        <FleetPursuitResultsTable showTime={true} editable={true} data={fleet.results} startTime={fleet.startTime} key={JSON.stringify(race)} deleteResult={deleteResult} updateResult={updateResult} raceId={race.id} showEditModal={(id: string) => { showEditModal(id) }} />
+                                    }
+
+                                </div>
+                            )
+                        })}
+                    </div>
                 </div>
             </div>
         </div>

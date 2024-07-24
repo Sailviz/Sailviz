@@ -1,11 +1,10 @@
 'use client'
 import React, { ChangeEvent, MouseEventHandler, useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import * as DB from '../../../../components/apiMethods';
-import Dashboard from "../../../../components/ui/Dashboard";
-import RaceTimer from "../../../../components/HRaceTimer"
+import * as DB from 'components/apiMethods';
+import RaceTimer from "components/HRaceTimer"
 import Cookies from "js-cookie";
-import * as Fetcher from '../../../../components/Fetchers';
+import * as Fetcher from 'components/Fetchers';
 
 enum raceStateType {
     running,
@@ -582,7 +581,7 @@ export default function Page({ params }: { params: { slug: string } }) {
     }
 
     return (
-        <Dashboard >
+        <>
             <audio id="Beep" src=".\beep-6.mp3" ></audio>
             <audio id="Countdown" src=".\Countdown.mp3" ></audio>
             <div className="w-full flex flex-col items-center justify-start panel-height">
@@ -781,6 +780,6 @@ export default function Page({ params }: { params: { slug: string } }) {
                     </div>
                 </div>
             </div>
-        </Dashboard >
+        </>
     )
 }
