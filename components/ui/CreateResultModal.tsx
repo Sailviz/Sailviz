@@ -1,15 +1,20 @@
 'use client'
-import { Button, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Select, SelectItem, useDisclosure, useModalContext } from '@nextui-org/react';
-import { is } from 'cypress/types/bluebird';
-import { set } from 'cypress/types/lodash';
+import { Autocomplete, AutocompleteItem, Button, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Radio, RadioGroup, Select, SelectItem, Switch, useDisclosure, useModalContext } from '@nextui-org/react';
 import { ChangeEvent, useState } from 'react';
 
-export default function CreateResultModal({ isOpen, onSubmit, onClose }: { isOpen: boolean, onSubmit: (helmValue: string, crewValue: string, boat: any, sailNum: string, fleetId: string[]) => void, onClose: () => void }) {
+export default function CreateResultModal({ isOpen, race, boats, onSubmit, onClose }: { isOpen: boolean, race: RaceDataType, boats: BoatDataType[], onSubmit: (helmValue: string, crewValue: string, boat: any, sailNum: string, fleetId: string[]) => void, onClose: () => void }) {
 
     const [helmValue, setHelmValue] = useState('')
     const [crewValue, setCrewValue] = useState('')
-    const [boat, setBoat] = useState('')
     const [sailNumber, setSailNumber] = useState('')
+
+    const [selectedRaces, setSelectedRaces] = useState<boolean[]>([])
+    const [selectedOption, setSelectedOption] = useState<{ label: string, key: BoatDataType }>({ label: "", key: {} as BoatDataType })
+
+    let options: { label: string; key: BoatDataType }[] = []
+    boats.forEach(boat => {
+        options.push({ key: boat as BoatDataType, label: boat.name })
+    })
 
     const CapitaliseInput = (e: ChangeEvent<HTMLInputElement>) => {
         console.log(e.target.id)
@@ -71,12 +76,13 @@ export default function CreateResultModal({ isOpen, onSubmit, onClose }: { isOpe
                                         <p className='text-2xl font-bold'>
                                             Class
                                         </p>
-                                        <Select
-                                        // value={selectedOption}
-                                        // onChange={(choice) => setSelectedOption(choice!)}
+                                        <Autocomplete
+                                            defaultItems={options}
+                                            className="max-w-xs"
+                                        // onSelectionChange={(choice) => setSelectedOption(choice)}
                                         >
-                                            <SelectItem key={''}>fun</SelectItem>
-                                        </Select>
+                                            {(option) => <AutocompleteItem key={option.key.name}>{option.label}</AutocompleteItem>}
+                                        </Autocomplete>
                                     </div>
                                     <div className='flex flex-col px-6 w-full'>
                                         <p className='text-2xl font-bold'>
@@ -92,14 +98,34 @@ export default function CreateResultModal({ isOpen, onSubmit, onClose }: { isOpe
                                     </div>
                                 </div>
 
-                                <div className="text-4xl font-extrabold p-6">Select Race</div>
+                                <div className="text-4xl font-extrabold p-6">Select Fleet</div>
+
+                                <div className="mx-6 mb-10" key={race.id}>
+                                    <div className="flex flex-row">
+                                        {/* show buttons for each fleet in a series */}
+                                        <RadioGroup
+                                            defaultValue={race.fleets[0]!.id}
+                                        >
+                                            {
+                                                race.fleets.map((fleet: FleetDataType, index) => {
+                                                    return (
+                                                        <Radio value={fleet.id} >
+                                                            {fleet.fleetSettings.name}
+                                                        </Radio>
+                                                    )
+                                                })
+                                            }
+                                        </RadioGroup>
+                                    </div >
+                                </div >
+
 
                             </ModalBody>
                             <ModalFooter>
                                 <Button color="danger" variant="light" onPress={onClose}>
                                     Close
                                 </Button>
-                                <Button color="primary" onPress={() => onSubmit(helmValue, crewValue, boat, sailNumber, [])}>
+                                <Button color="primary" onPress={() => onSubmit(helmValue, crewValue, selectedOption, sailNumber, [])}>
                                     Add
                                 </Button>
                             </ModalFooter>
@@ -110,90 +136,3 @@ export default function CreateResultModal({ isOpen, onSubmit, onClose }: { isOpe
         </>
     );
 };
-
-{/* <div className="mx-40 my-20 px-10 py-5 border w-4/5 bg-gray-300 rounded-sm">
-                        <div className="text-6xl font-extrabold p-6 float-right cursor-pointer" onClick={hideAddBoatModal}>&times;</div>
-                        <div className="text-6xl font-extrabold p-6">Add Entry</div>
-                        <div className="flex w-3/4">
-                            <div className='flex flex-col px-6 w-full'>
-                                <p className='text-2xl font-bold'>
-                                    Helm
-                                </p>
-                                <input type="text" id="Helm" name="Helm" className="h-full text-2xl p-4" onChange={CapitaliseInput} placeholder="J Bloggs" />
-                            </div>
-                            <div className='flex flex-col px-6 w-full'>
-                                <p className='text-2xl font-bold'>
-                                    Crew
-                                </p>
-
-                                <input type="text" id="Crew" className="h-full text-2xl p-4" onChange={CapitaliseInput} />
-                            </div>
-                            <div className='flex flex-col px-6 w-full'>
-                                <p className='text-2xl font-bold'>
-                                    Class
-                                </p>
-                                <div className="w-full p-2 mx-0 my-2">
-                                    <Select
-                                        id="Class"
-                                        className=' w-56 h-full text-3xl'
-                                        options={options}
-                                        value={selectedOption}
-                                        onChange={(choice) => setSelectedOption(choice!)}
-                                    />
-                                </div>
-                            </div>
-                            <div className='flex flex-col px-6 w-full'>
-                                <p className='text-2xl font-bold'>
-                                    Sail Number
-                                </p>
-
-                                <input type="text" id="SailNum" className="h-full text-2xl p-4" />
-                            </div>
-                        </div>
-                        <div className="text-4xl font-extrabold p-6">Select Race</div>
-                        {races.map((race, index) => {
-                            if (race.fleets.some(fleet => fleet.startTime != 0)) {
-                                //a fleet in the race has started so don't allow entry
-                                return <></>
-                            }
-                            return (
-                                <div className="mx-6 mb-10" key={race.id}>
-                                    <div className="flex flex-row">
-                                        <Switch
-                                            id={race.id + "Switch"}
-                                            isOn={selectedRaces[index]!}
-                                            onColour="#02c66f"
-                                            handleToggle={() => { setSelectedRaces([...selectedRaces.slice(0, index), !selectedRaces[index], ...selectedRaces.slice(index + 1)]) }}
-                                        />
-                                        <label className=" pl-6 py-auto text-2xl font-bold" htmlFor={race.id}>{race.series.name} {race.number}</label>
-                                        {/* show buttons for each fleet in a series */}
-// {
-//     race.fleets.map((fleet: FleetDataType, index) => {
-//         return (
-//             <div key={fleet.id + race.id} className="ml-6 cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
-//                 {fleet.fleetSettings.name}
-//             </div>
-//         )
-//     })
-// }
-// {
-//     race.Type == "Pursuit" ?
-//         <div className="pl-6 py-auto text-2xl font-bold">
-//             Start Time: {String(Math.floor((selectedOption.value.pursuitStartTime || 0) / 60)).padStart(2, '0')}:{String((selectedOption.value.pursuitStartTime || 0) % 60).padStart(2, '0')}
-//         </div>
-//         :
-//         <></>
-// }
-
-//                                     </div >
-//                                 </div >
-//                             )
-//                         })}
-// <div className=" flex justify-end mt-8">
-//     <div className="p-6 w-1/4 mr-2">
-//         <p id="confirmEntry" onClick={createResults} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
-//             Add
-//         </p>
-//     </div>
-// </div>
-//                     </div > */}

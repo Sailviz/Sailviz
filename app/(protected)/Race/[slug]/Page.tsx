@@ -485,14 +485,14 @@ export default function Page({ params }: { params: { slug: string } }) {
             clearTimeout(timer1);
         }
     }, [race]);
-    if (userIsValidating || clubIsValidating || user == undefined || club == undefined) {
+    if (userIsValidating || clubIsValidating || user == undefined || club == undefined || boats == undefined) {
         return (
             <PageSkeleton />
         )
     }
     return (
         <div id="race" className='h-full w-full overflow-y-auto'>
-            <CreateResultModal isOpen={createModal.isOpen} onSubmit={createResult} onClose={createModal.onClose} />
+            <CreateResultModal isOpen={createModal.isOpen} race={race} boats={boats} onSubmit={createResult} onClose={createModal.onClose} />
             <div id="editModal" className={"fixed z-10 left-0 top-0 w-full h-full overflow-auto bg-gray-400 backdrop-blur-sm bg-opacity-20 hidden"} key={activeResult.id}>
                 <div className="mx-40 my-20 px-10 py-5 border w-4/5 bg-gray-300 rounded-sm">
                     <div className="text-6xl font-extrabold text-gray-700 p-6 float-right cursor-pointer" onClick={() => { document.getElementById("editModal")!.classList.add("hidden") }}>&times;</div>
