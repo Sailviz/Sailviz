@@ -24,7 +24,7 @@ export default function Page() {
     }
     return (
         <div>
-            <p className='text-2xl font-bold text-gray-700 p-6'>
+            <p className='text-2xl font-bold p-6'>
                 Series
             </p>
             <div className='p-6'>

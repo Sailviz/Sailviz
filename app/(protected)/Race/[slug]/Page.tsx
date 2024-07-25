@@ -12,7 +12,7 @@ import * as Fetcher from 'components/Fetchers';
 import { AVAILABLE_PERMISSIONS, userHasPermission } from "components/helpers/users";
 import { PageSkeleton } from "components/ui/PageSkeleton";
 import { Button, Input, useDisclosure } from "@nextui-org/react";
-import CreateResultModal from "components/ui/CreateResultModal";
+import CreateResultModal from "components/ui/dashboard/CreateResultModal";
 import { set } from "cypress/types/lodash";
 
 const raceOptions = [{ value: "Pursuit", label: "Pursuit" }, { value: "Handicap", label: "Handicap" }]
