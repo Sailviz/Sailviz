@@ -722,7 +722,7 @@ export default function Page({ params }: { params: { slug: string } }) {
                         {race.fleets.map((fleet, index) => {
                             return (
                                 <div key={"fleetResults" + index}>
-                                    <p className='text-2xl font-bold text-gray-700'>
+                                    <p className='text-2xl font-bol'>
                                         {fleet.fleetSettings.name} - Boats Entered: {fleet.results.length}
                                     </p>
                                     {race.Type == "Handicap" ?

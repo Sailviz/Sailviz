@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, useReactTable, SortingState } from '@tanstack/react-table'
-import { Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Dropdown, DropdownItem, DropdownTrigger, Button, DropdownMenu } from '@nextui-org/react';
+import { Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Dropdown, DropdownItem, DropdownTrigger, Button, DropdownMenu, Input } from '@nextui-org/react';
 import { VerticalDotsIcon } from 'components/icons/vertical-dots-icon';
+import dayjs from 'dayjs';
 
 
 const Text = ({ ...props }) => {
@@ -38,16 +39,7 @@ const Time = ({ ...props }: any) => {
         )
     } else {
         return (
-            <>
-                <input type="time"
-                    id=''
-                    className="p-2 m-2 text-center w-full"
-                    value={value}
-                    key={value}
-                    step={"1"}
-                    disabled
-                />
-            </>
+            <p> {value}</p>
         )
     }
 };
