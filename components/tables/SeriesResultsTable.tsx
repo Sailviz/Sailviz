@@ -20,7 +20,7 @@ const Text = ({ ...props }) => {
     const value = props.getValue()
 
     return (
-        <div className=' text-center text-lg font-medium'>
+        <div>
             {value}
         </div>
     );
@@ -30,15 +30,9 @@ const Number = ({ ...props }: any) => {
     const initialValue = props.getValue()
     const [value, setValue] = React.useState(initialValue)
     return (
-        <>
-            <input type="number"
-                id=''
-                className="text-center w-full font-medium"
-                defaultValue={Math.round(value)}
-                key={value}
-                disabled={true}
-            />
-        </>
+        <div>
+            {Math.round(value)}
+        </div>
     );
 };
 
@@ -104,6 +98,14 @@ const SeriesResultsTable = (props: any) => {
         });
 
         //fill dnc
+        tempresults.forEach((result, i) => {
+            result.racePositions.forEach((position, j) => {
+                if (position == 0) {
+                    //set to number of series entrants + 1
+                    tempresults[i]!.racePositions[j] = tempresults.length + 1
+                }
+            })
+        })
         //calculate total
         tempresults.forEach(result => {
             result.Total = result.racePositions.reduce((partialSum, a) => partialSum + a, 0)
@@ -113,8 +115,6 @@ const SeriesResultsTable = (props: any) => {
             let sortedResult = JSON.parse(JSON.stringify(result)) as SeriesResultsType
             sortedResult.racePositions.sort((a, b) => a - b)
             let Net = 0
-            //remove 0 results
-            sortedResult.racePositions = sortedResult.racePositions.filter(result => result != 0)
             sortedResult.racePositions.forEach((position, index) => {
                 if (index < seriesData.settings.numberToCount) {
                     Net += position

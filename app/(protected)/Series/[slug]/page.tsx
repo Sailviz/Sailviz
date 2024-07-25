@@ -8,6 +8,7 @@ import SeriesTable from "components/tables/SeriesTable";
 import FleetTable from "components/tables/FleetTable";
 import * as Fetcher from 'components/Fetchers';
 import { PageSkeleton } from "components/ui/PageSkeleton";
+import { Slider } from "@nextui-org/react";
 
 export default function Page({ params }: { params: { slug: string } }) {
     const Router = useRouter();
@@ -47,22 +48,14 @@ export default function Page({ params }: { params: { slug: string } }) {
         Router.push('/Race/' + raceId)
     }
 
-    const saveSeriesSettings = (e: ChangeEvent<HTMLInputElement>) => {
+    const saveSeriesToCount = async (value: number | number[]) => {
         let newSeriesData: SeriesDataType = window.structuredClone(series)
         console.log(newSeriesData)
-        newSeriesData.settings[e.target.id] = parseInt(e.target.value)
+        newSeriesData.settings['numberToCount'] = value
         //mutate series
 
-        updateRanges()
-    }
 
-    const updateRanges = () => {
-        const range = document.getElementById('numberToCount') as HTMLInputElement
-        const rangeV = document.getElementById('rangeV') as HTMLInputElement
-        const newValue = Number((parseInt(range.value) - parseInt(range.min)) * 100 / (parseInt(range.max) - parseInt(range.min)))
-        const newPosition = 10 - (newValue * 0.2);
-        rangeV.innerHTML = `<span>${range.value}</span>`;
-        rangeV.style.left = `calc(${newValue}% + (${newPosition}px))`;
+        await DB.updateSeries(newSeriesData)
     }
 
     const createFleet = async () => {
@@ -209,24 +202,16 @@ export default function Page({ params }: { params: { slug: string } }) {
                         Add Fleet
                     </p>
                 </div>
-                <div className='flex flex-col px-6 w-full '>
-                    <p className='text-2xl font-bold text-gray-700'>
-                        Races To Count
-                    </p>
-                    {/* padding for range bubble */}
-                    <div className='h-6'></div>
-                    <div className='range-wrap'>
-                        <div className='range-value' id='rangeV'></div>
-                        <input type="range"
-                            id='numberToCount'
-                            min="1"
-                            max={series.races?.length}
-                            defaultValue={series.settings?.numberToCount}
-                            key={series.id}
-                            onChange={saveSeriesSettings}
-                            onBlur={() => DB.updateSeries(series)}
-                        />
-                    </div>
+                <div className='flex flex-col px-6 w-1/4 '>
+                    <Slider
+                        label="Races To Count"
+                        minValue={1}
+                        maxValue={series.races.length}
+                        defaultValue={series.settings.numberToCount}
+                        onChangeEnd={(value) => saveSeriesToCount(value)}
+                        showTooltip={true}
+                        getValue={(races) => `${races} of ${series.races.length} races`}
+                    />
                 </div>
                 <div className="mb-6">
                     <SeriesResultsTable key={JSON.stringify(series)} data={series} />
