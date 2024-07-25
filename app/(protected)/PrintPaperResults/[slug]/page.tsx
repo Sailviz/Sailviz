@@ -70,8 +70,8 @@ export default function Page({ params }: { params: { slug: string } }) {
     });
 
     useEffect(() => {
-        let raceId = searchParams.get('race')
-
+        let raceId = params.slug
+        console.log(raceId)
         const getRace = async () => {
             const racedata = await DB.getRaceById(raceId!)
             setRace(racedata)
@@ -84,7 +84,9 @@ export default function Page({ params }: { params: { slug: string } }) {
     }, [Router])
 
     useEffect(() => {
-        handlePrint()
+        if (race.id != "") {
+            handlePrint()
+        }
     }, [race])
 
     return (
