@@ -186,7 +186,7 @@ export default function Page({ params }: { params: { slug: string } }) {
                 </div>
             </div>
             <div id="series" className="w-full">
-                <p className="text-6xl font-extrabold text-gray-700 p-6">
+                <p className="text-6xl font-extrabold p-6">
                     {series.name}
                 </p>
                 <div className='p-6'>

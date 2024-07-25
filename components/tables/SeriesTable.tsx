@@ -3,9 +3,14 @@ import React, { ChangeEvent, useState } from 'react';
 import dayjs from 'dayjs';
 import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, RowSelection, SortingState, useReactTable } from '@tanstack/react-table'
 import * as DB from 'components/apiMethods';
-import Select from 'react-select';
-import { Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Dropdown, DropdownItem, DropdownTrigger, Button, DropdownMenu } from '@nextui-org/react';
+import Select, { CSSObjectWithLabel } from 'react-select';
+import { Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Dropdown, DropdownItem, DropdownTrigger, Button, DropdownMenu, Input, Tooltip } from '@nextui-org/react';
 import { VerticalDotsIcon } from 'components/icons/vertical-dots-icon';
+import { EyeIcon } from 'components/icons/eye-icon';
+import { EditIcon } from 'components/icons/edit-icon';
+import { DeleteIcon } from 'components/icons/delete-icon';
+import { useRouter } from 'next/navigation';
+import { useTheme } from 'next-themes';
 
 
 const raceOptions = [{ value: "Pursuit", label: "Pursuit" }, { value: "Handicap", label: "Handicap" }]
@@ -31,7 +36,8 @@ const Time = ({ ...props }: any) => {
     }, [initialValue])
     return (
         <>
-            <input type="datetime-local"
+            <Input
+                type="datetime-local"
                 id='Time'
                 className="w-full"
                 value={dayjs(value).format('YYYY-MM-DDTHH:mm')}
@@ -43,6 +49,7 @@ const Time = ({ ...props }: any) => {
 };
 
 const Type = ({ ...props }: any) => {
+    const { theme, setTheme } = useTheme()
     const initialValue = props.getValue()
     const [value, setValue] = React.useState(initialValue)
 
@@ -64,83 +71,75 @@ const Type = ({ ...props }: any) => {
                 key={value}
                 onChange={(e) => { setValue(e?.value); onBlur(e?.value) }}
                 className='w-full'
-                options={raceOptions} />
-        </>
-    );
-};
+                options={raceOptions}
 
-const Text = ({ ...props }: any) => {
-    const initialValue = props.getValue()
-    const [value, setValue] = React.useState(initialValue)
-
-    const onBlur = (e: ChangeEvent<HTMLInputElement>) => {
-        var raceData: RaceDataType = props.row.original
-        // use props.column.id to update the correct field
-        switch (props.column.id) {
-            case "OOD":
-                raceData.OOD = e.target.value
-                break;
-            case "AOD":
-                raceData.AOD = e.target.value
-                break;
-            case "SO":
-                raceData.SO = e.target.value
-                break;
-            case "ASO":
-                raceData.ASO = e.target.value
-                break;
-            case "Time":
-                raceData.Time = e.target.value
-                break;
-            case "Type":
-                raceData.Type = e.target.value
-                break;
-        }
-
-        DB.updateRaceById(raceData)
-    }
-
-    React.useEffect(() => {
-        setValue(initialValue)
-    }, [initialValue])
-    return (
-        <>
-            <input type="text"
-                id=''
-                className="w-32 p-2 "
-                defaultValue={value}
-                key={value}
-                onBlur={(e) => onBlur(e)}
+                styles={{
+                    control: (provided, state) => ({
+                        ...provided,
+                        border: 'none',
+                        padding: '0.5rem',
+                        fontSize: '1rem',
+                        borderRadius: '0.5rem',
+                        color: 'white',
+                        backgroundColor: theme == 'dark' ? '#27272a' : '#f4f4f5',
+                        '&:hover': {
+                            backgroundColor: theme == 'dark' ? '#3f3f46' : '#e4e4e7',
+                        },
+                    } as CSSObjectWithLabel),
+                    option: (provided, state) => ({
+                        ...provided,
+                        color: theme == 'dark' ? 'white' : 'black',
+                        backgroundColor: theme == 'dark' ? state.isSelected ? '#27272a' : '#18181b' : state.isSelected ? '#f4f4f5' : 'white',
+                        '&:hover': {
+                            backgroundColor: theme == 'dark' ? '#3f3f46' : '#d4d4d8',
+                        },
+                    } as CSSObjectWithLabel),
+                    menu: (provided, state) => ({
+                        ...provided,
+                        backgroundColor: theme == 'dark' ? '#18181b' : 'white',
+                        border: theme == 'dark' ? '2px solid #3f3f46' : '2px solid #d4d4d8',
+                    } as CSSObjectWithLabel),
+                    singleValue: (provided, state) => ({
+                        ...provided,
+                        color: theme == 'dark' ? 'white' : 'black',
+                    } as CSSObjectWithLabel),
+                }}
             />
         </>
     );
 };
 
-const Remove = ({ ...props }: any) => {
-    const onClick = () => {
-        props.removeRace(props.id)
+
+
+const Action = ({ ...props }: any) => {
+    const Router = useRouter()
+
+    const onDeleteClick = () => {
+        if (confirm("are you sure you want to do this?")) {
+            props.removeRace(props.id)
+        }
     }
     return (
-        <p className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0"
-            onClick={onClick} >
-            Remove
-        </p>
+        <div className="relative flex items-center gap-2">
+            <Tooltip content="View" >
+                <span className="text-lg text-default-400 cursor-pointer active:opacity-50">
+                    <EyeIcon onClick={() => Router.push('/Race/' + props.row.original.id)} />
+                </span>
+            </Tooltip>
+            <Tooltip content="Edit">
+                <span className="text-lg text-default-400 cursor-pointer active:opacity-50">
+                    <EditIcon />
+                </span>
+            </Tooltip>
+            <Tooltip color="danger" content="Delete" >
+                <span className="text-lg text-danger cursor-pointer active:opacity-50">
+                    <DeleteIcon onClick={onDeleteClick} />
+                </span>
+            </Tooltip>
+        </div>
     );
-
 };
 
-const GoTo = ({ ...props }: any) => {
-    const onClick = () => {
-        props.goToRace(props.id)
-    }
-    return (
-        <p className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0"
-            onClick={onClick} >
-            GoTo
-        </p>
-    );
-
-};
 
 const columnHelper = createColumnHelper<RaceDataType>()
 
@@ -177,14 +176,9 @@ const SeriesTable = (props: any) => {
                 cell: props => <Type {...props} />
             }),
             columnHelper.accessor('id', {
-                id: "Remove",
-                header: "Remove",
-                cell: props => <Remove {...props} id={props.row.original.id} removeRace={updateData} />
-            }),
-            columnHelper.accessor('id', {
-                id: "GoTo",
-                header: "GoTo",
-                cell: props => <GoTo {...props} id={props.row.original.id} goToRace={goToRace} />
+                id: "action",
+                header: "Actions",
+                cell: props => <Action {...props} id={props.row.original.id} removeRace={updateData} />
             }),
         ],
         state: {
@@ -196,7 +190,7 @@ const SeriesTable = (props: any) => {
     })
     return (
         <div key={props.data}>
-            <Table isStriped id={"seriesTable"}>
+            <Table id={"seriesTable"}>
                 <TableHeader>
                     {table.getHeaderGroups().flatMap(headerGroup => headerGroup.headers).map(header => {
                         return (

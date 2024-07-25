@@ -10,16 +10,16 @@ import { DeleteIcon } from 'components/icons/delete-icon';
 
 
 const Action = ({ ...props }: any) => {
-    const onClick = () => {
+    const onDeleteClick = () => {
         if (confirm("are you sure you want to do this?")) {
             props.deleteSeries(props.row.original)
         }
     }
     return (
         <div className="relative flex items-center gap-2">
-            <Tooltip content="View" onClick={() => props.viewSeries(props.row.original.id)}>
+            <Tooltip content="View" >
                 <span className="text-lg text-default-400 cursor-pointer active:opacity-50">
-                    <EyeIcon />
+                    <EyeIcon onClick={() => props.viewSeries(props.row.original.id)} />
                 </span>
             </Tooltip>
             <Tooltip content="Edit">
@@ -27,9 +27,9 @@ const Action = ({ ...props }: any) => {
                     <EditIcon />
                 </span>
             </Tooltip>
-            <Tooltip color="danger" content="Delete">
+            <Tooltip color="danger" content="Delete" >
                 <span className="text-lg text-danger cursor-pointer active:opacity-50">
-                    <DeleteIcon />
+                    <DeleteIcon onClick={onDeleteClick} />
                 </span>
             </Tooltip>
         </div>

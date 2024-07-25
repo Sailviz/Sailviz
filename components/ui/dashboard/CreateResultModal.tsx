@@ -1,5 +1,8 @@
-import { Autocomplete, AutocompleteItem, Button, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Radio, RadioGroup } from '@nextui-org/react';
+import { Button, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Radio, RadioGroup } from '@nextui-org/react';
+import { use } from 'chai';
+import { useTheme } from 'next-themes';
 import { ChangeEvent, useState } from 'react';
+import Select, { CSSObjectWithLabel } from 'react-select';
 
 export default function CreateResultModal({ isOpen, race, boats, onSubmit, onClose }: { isOpen: boolean, race: RaceDataType, boats: BoatDataType[], onSubmit: (helmValue: string, crewValue: string, boat: any, sailNum: string, fleetId: string) => void, onClose: () => void }) {
 
@@ -7,12 +10,14 @@ export default function CreateResultModal({ isOpen, race, boats, onSubmit, onClo
     const [crewValue, setCrewValue] = useState('')
     const [sailNumber, setSailNumber] = useState('')
 
-    const [selectedRaces, setSelectedRaces] = useState<boolean[]>([])
-    const [selectedOption, setSelectedOption] = useState<BoatDataType>({} as BoatDataType)
+    const { theme, setTheme } = useTheme()
 
-    let options: { label: string; value: string }[] = []
+    const [selectedRaces, setSelectedRaces] = useState<boolean[]>([])
+    const [selectedOption, setSelectedOption] = useState({ label: "", value: {} as BoatDataType })
+
+    let options: { label: string; value: BoatDataType }[] = []
     boats.forEach((boat: BoatDataType) => {
-        options.push({ value: boat.id, label: boat.name })
+        options.push({ value: boat as BoatDataType, label: boat.name })
     })
 
     const CapitaliseInput = (e: ChangeEvent<HTMLInputElement>) => {
@@ -75,16 +80,50 @@ export default function CreateResultModal({ isOpen, race, boats, onSubmit, onClo
                                         <p className='text-2xl font-bold'>
                                             Class
                                         </p>
-                                        <Autocomplete
-                                            defaultItems={options}
-                                            className="max-w-xs"
-                                        >
-                                            {options.map((option) => (
-                                                <AutocompleteItem key={option.value} value={option.value}>
-                                                    {option.label}
-                                                </AutocompleteItem>
-                                            ))}
-                                        </Autocomplete>
+                                        <Select
+                                            id="Class"
+                                            className=' w-56 h-full text-3xl'
+                                            options={options}
+                                            value={selectedOption}
+                                            onChange={(choice) => setSelectedOption(choice!)}
+                                            styles={{
+                                                control: (provided, state) => ({
+                                                    ...provided,
+                                                    border: 'none',
+                                                    padding: '0.5rem',
+                                                    fontSize: '1rem',
+                                                    borderRadius: '0.5rem',
+                                                    color: 'white',
+                                                    backgroundColor: theme == 'dark' ? '#27272a' : '#f4f4f5',
+                                                    '&:hover': {
+                                                        backgroundColor: theme == 'dark' ? '#3f3f46' : '#e4e4e7',
+                                                    },
+                                                } as CSSObjectWithLabel),
+                                                option: (provided, state) => ({
+                                                    ...provided,
+                                                    color: theme == 'dark' ? 'white' : 'black',
+                                                    backgroundColor: theme == 'dark' ? state.isSelected ? '#27272a' : '#18181b' : state.isSelected ? '#f4f4f5' : 'white',
+                                                    '&:hover': {
+                                                        backgroundColor: theme == 'dark' ? '#3f3f46' : '#d4d4d8',
+                                                    },
+                                                } as CSSObjectWithLabel),
+                                                menu: (provided, state) => ({
+                                                    ...provided,
+                                                    backgroundColor: theme == 'dark' ? '#18181b' : 'white',
+                                                    border: theme == 'dark' ? '2px solid #3f3f46' : '2px solid #d4d4d8',
+                                                    fontSize: '1rem',
+
+                                                } as CSSObjectWithLabel),
+                                                input: (provided, state) => ({
+                                                    ...provided,
+                                                    color: theme == 'dark' ? 'white' : 'black',
+                                                } as CSSObjectWithLabel),
+                                                singleValue: (provided, state) => ({
+                                                    ...provided,
+                                                    color: theme == 'dark' ? 'white' : 'black',
+                                                } as CSSObjectWithLabel),
+                                            }}
+                                        />
                                     </div>
                                     <div className='flex flex-col px-6 w-full'>
                                         <p className='text-2xl font-bold'>
