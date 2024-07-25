@@ -8,7 +8,7 @@ const Text = ({ ...props }) => {
     const value = props.getValue()
 
     return (
-        <div className=' text-center'>
+        <div >
             {value}
         </div>
     );
@@ -20,36 +20,10 @@ const Laps = ({ ...props }: any) => {
     // value is the array of laps
 
     return (
-        <div className=' text-center'>
+        <div >
             {value.length}
         </div>
     );
-};
-
-const Time = ({ ...props }: any) => {
-    const initialValue = props.getValue()
-    const [value, setValue] = React.useState(new Date((initialValue - props.startTime) * 1000).toISOString().substring(11, 19))
-
-    if (initialValue == -1) {
-        return (
-            <p className="p-2 m-2 text-center w-full">
-                Retired
-            </p>
-        )
-    } else {
-        return (
-            <>
-                <input type="time"
-                    id=''
-                    className="p-2 m-2 text-center w-full"
-                    value={value}
-                    key={value}
-                    step={"1"}
-                    disabled
-                />
-            </>
-        )
-    }
 };
 
 const Class = ({ ...props }: any) => {
@@ -61,7 +35,7 @@ const Class = ({ ...props }: any) => {
     }
 
     return (
-        <div className=' text-center'>
+        <div>
             {value}
         </div>
     );
