@@ -39,7 +39,7 @@ const SignOnTable = (props: any) => {
 
         return (
             <>
-                <div className='p-2 m-2 text-center w-full text-2xl'>
+                <div>
                     {value}
                 </div>
 
@@ -53,7 +53,7 @@ const SignOnTable = (props: any) => {
 
         return (
             <>
-                <div className='p-2 m-2 text-center w-full text-2xl'>
+                <div>
                     {value}
                 </div>
             </>
@@ -71,7 +71,7 @@ const SignOnTable = (props: any) => {
 
         return (
             <>
-                <div className='p-2 m-2 text-center w-full text-2xl'>
+                <div>
                     {value.name}
                 </div>
             </>
