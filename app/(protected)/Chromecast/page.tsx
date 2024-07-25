@@ -1,7 +1,8 @@
+'use client'
 import React, { useEffect, useState } from 'react'
 import Script from 'next/script';
 import Cookies from 'js-cookie';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 import * as DB from 'components/apiMethods'
 import { io, Socket } from "socket.io-client";
 import * as Fetcher from 'components/Fetchers';
@@ -10,7 +11,7 @@ const applicationID = '0AA4CA7E';
 const namespace = 'urn:x-cast:com.sailviz';
 
 export default function Page() {
-    const router = useRouter()
+    const Router = useRouter()
 
     const [chromecasts, setChromecasts] = useState<ChromecastDataType[]>([])
     const [activeHost, setActiveHost] = useState<string>("")
@@ -246,7 +247,7 @@ export default function Page() {
 
         } else {
             console.log("user not signed in")
-            router.push("/")
+            Router.push("/")
         }
     }, [club])
 

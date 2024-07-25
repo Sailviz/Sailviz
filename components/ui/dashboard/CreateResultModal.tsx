@@ -1,19 +1,18 @@
-'use client'
-import { Autocomplete, AutocompleteItem, Button, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Radio, RadioGroup, Select, SelectItem, Switch, useDisclosure, useModalContext } from '@nextui-org/react';
+import { Autocomplete, AutocompleteItem, Button, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Radio, RadioGroup } from '@nextui-org/react';
 import { ChangeEvent, useState } from 'react';
 
-export default function CreateResultModal({ isOpen, race, boats, onSubmit, onClose }: { isOpen: boolean, race: RaceDataType, boats: BoatDataType[], onSubmit: (helmValue: string, crewValue: string, boat: any, sailNum: string, fleetId: string[]) => void, onClose: () => void }) {
+export default function CreateResultModal({ isOpen, race, boats, onSubmit, onClose }: { isOpen: boolean, race: RaceDataType, boats: BoatDataType[], onSubmit: (helmValue: string, crewValue: string, boat: any, sailNum: string, fleetId: string) => void, onClose: () => void }) {
 
     const [helmValue, setHelmValue] = useState('')
     const [crewValue, setCrewValue] = useState('')
     const [sailNumber, setSailNumber] = useState('')
 
     const [selectedRaces, setSelectedRaces] = useState<boolean[]>([])
-    const [selectedOption, setSelectedOption] = useState<{ label: string, key: BoatDataType }>({ label: "", key: {} as BoatDataType })
+    const [selectedOption, setSelectedOption] = useState<BoatDataType>({} as BoatDataType)
 
-    let options: { label: string; key: BoatDataType }[] = []
-    boats.forEach(boat => {
-        options.push({ key: boat as BoatDataType, label: boat.name })
+    let options: { label: string; value: string }[] = []
+    boats.forEach((boat: BoatDataType) => {
+        options.push({ value: boat.id, label: boat.name })
     })
 
     const CapitaliseInput = (e: ChangeEvent<HTMLInputElement>) => {
@@ -79,9 +78,12 @@ export default function CreateResultModal({ isOpen, race, boats, onSubmit, onClo
                                         <Autocomplete
                                             defaultItems={options}
                                             className="max-w-xs"
-                                        // onSelectionChange={(choice) => setSelectedOption(choice)}
                                         >
-                                            {(option) => <AutocompleteItem key={option.key.name}>{option.label}</AutocompleteItem>}
+                                            {options.map((option) => (
+                                                <AutocompleteItem key={option.value} value={option.value}>
+                                                    {option.label}
+                                                </AutocompleteItem>
+                                            ))}
                                         </Autocomplete>
                                     </div>
                                     <div className='flex flex-col px-6 w-full'>
@@ -109,7 +111,7 @@ export default function CreateResultModal({ isOpen, race, boats, onSubmit, onClo
                                             {
                                                 race.fleets.map((fleet: FleetDataType, index) => {
                                                     return (
-                                                        <Radio value={fleet.id} >
+                                                        <Radio value={fleet.id} key={"fleetoptions" + fleet.id}>
                                                             {fleet.fleetSettings.name}
                                                         </Radio>
                                                     )
@@ -125,7 +127,7 @@ export default function CreateResultModal({ isOpen, race, boats, onSubmit, onClo
                                 <Button color="danger" variant="light" onPress={onClose}>
                                     Close
                                 </Button>
-                                <Button color="primary" onPress={() => onSubmit(helmValue, crewValue, selectedOption, sailNumber, [])}>
+                                <Button color="primary" onPress={() => onSubmit(helmValue, crewValue, selectedOption, sailNumber, race.fleets[0]!.id)}>
                                     Add
                                 </Button>
                             </ModalFooter>

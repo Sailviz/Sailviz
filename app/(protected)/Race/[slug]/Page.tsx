@@ -107,7 +107,7 @@ export default function Page({ params }: { params: { slug: string } }) {
         series: {} as SeriesDataType
     })
 
-    const createResult = async (helm: string, crew: string, boat: BoatDataType, sailNum: string, fleetId: string[]) => {
+    const createResult = async (helm: string, crew: string, boat: BoatDataType, sailNum: string, fleetId: string) => {
         console.log(helm, crew, boat, sailNum, fleetId)
         createModal.onClose() //close modal
         await DB.createResult(fleetId[0]!)
