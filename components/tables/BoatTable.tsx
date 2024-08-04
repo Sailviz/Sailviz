@@ -1,7 +1,11 @@
 import React, { ChangeEvent, useState } from 'react';
 import { createColumnHelper, flexRender, getCoreRowModel, useReactTable, getFilteredRowModel } from '@tanstack/react-table'
-import { Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Dropdown, DropdownItem, DropdownTrigger, Button, DropdownMenu } from '@nextui-org/react';
+import { Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Dropdown, DropdownItem, DropdownTrigger, Button, DropdownMenu, Input, Tooltip } from '@nextui-org/react';
 import { VerticalDotsIcon } from 'components/icons/vertical-dots-icon';
+import { EyeIcon } from 'components/icons/eye-icon';
+import { EditIcon } from 'components/icons/edit-icon';
+import { DeleteIcon } from 'components/icons/delete-icon';
+import { SearchIcon } from 'components/icons/search-icon';
 
 const columnHelper = createColumnHelper<BoatDataType>()
 
@@ -9,25 +13,10 @@ const Number = ({ ...props }: any) => {
     const initialValue = props.getValue()
     const [value, setValue] = React.useState(initialValue)
 
-    const onBlur = (e: ChangeEvent<HTMLInputElement>) => {
-        let boat = props.row.original
-        boat[props.column.id] = parseInt(e.target.value)
-        props.updateBoat(boat)
-    }
-
-    React.useEffect(() => {
-        setValue(initialValue)
-    }, [initialValue])
     return (
-        <>
-            <input type="number"
-                id=''
-                className="p-2 text-center w-full"
-                defaultValue={Math.round(value)}
-                key={value}
-                onBlur={(e) => onBlur(e)}
-            />
-        </>
+        <div className=''>
+            {value}
+        </div>
     );
 };
 
@@ -35,106 +24,78 @@ const Text = ({ ...props }) => {
     const initialValue = props.getValue()
     const [value, setValue] = React.useState(initialValue)
 
-    const onBlur = (e: ChangeEvent<HTMLInputElement>) => {
-        const original = props.row.original
-        original[props.column.id] = e.target.value
-        props.updateBoat(original)
-    }
-
     return (
-        <>
-            <input type="text"
-                id=''
-                className=" text-center"
-                defaultValue={value}
-                key={value}
-                onBlur={(e) => onBlur(e)}
-            />
-        </>
+        <div className=''>
+            {value}
+        </div>
     );
 };
 
-const Add = ({ ...props }) => {
+const StartTime = ({ ...props }: any) => {
+    const initialValue = props.getValue()
+    //change to minutes:seconds
+    const time = new Date(initialValue * 1000).toISOString().substr(14, 5)
+    const [value, setValue] = React.useState(time)
 
     return (
-        <>
-            <div className="px-3 py-1 w-full">
-                <p onClick={(e) => props.createBoat()} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
-                    Add
-                </p>
-            </div>
-        </>
-    );
-};
-
-const Remove = ({ ...props }: any) => {
-    const onClick = () => {
-        console.log(props.row.original)
-        props.deleteBoat(props.row.original)
-    }
-    return (
-        <>
-            <p className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0"
-                onClick={onClick} >
-                Remove
-            </p>
-        </>
+        <div className=''>
+            {value}
+        </div>
     );
 };
 
 function Filter({ column, table }: { column: any, table: any }) {
-    const firstValue = table
-        .getPreFilteredRowModel()
-        .flatRows[0]?.getValue(column.id);
-
     const columnFilterValue = column.getFilterValue();
 
-    return typeof firstValue === "number" ? (
-        <div>
-            <input
-                type="number"
-                value={columnFilterValue?.[0] ?? ""}
-                onChange={(e) =>
-                    column.setFilterValue((old: string) => [e.target.value, old?.[1]])
-                }
-                placeholder={`Min`}
-                className="table-min-max-filter-bar"
-            />
-            <input
-                type="number"
-                value={columnFilterValue?.[1] ?? ""}
-                onChange={(e) =>
-                    column.setFilterValue((old: string) => [old?.[0], e.target.value])
-                }
-                placeholder={`Max`}
-                className="table-min-max-filter-bar"
-            />
-        </div>
-    ) : (
-        <input
-            type="text"
-            value={columnFilterValue ?? ""}
-            onChange={(e) => column.setFilterValue(e.target.value)}
-            placeholder={"Search..."}
-            className="table-filter-bar border"
+
+    return (
+        <Input
+            isClearable
+            className="w-full"
+            placeholder="Search by name..."
+            startContent={<SearchIcon />}
+            value={column.getFilterValue()}
+            onClear={() => column.setFilterValue("")}
+            onValueChange={(value) => column.setFilterValue(value)}
+            //so that you can type a space, otherwise it will be blocked
+            onKeyDown={(e: any) => { if (e.key === " ") { e.stopPropagation() } }}
         />
     );
 }
 
+const Action = ({ ...props }: any) => {
+    const onDeleteClick = () => {
+        if (confirm("are you sure you want to do this?")) {
+            props.deleteBoat(props.row.original)
+        }
+    }
 
+    const onEditClick = () => {
+        props.editBoat(props.row.original)
+    }
+
+    return (
+        <div className="relative flex items-center gap-2">
+            <Tooltip content="Edit">
+                <span className="text-lg text-default-400 cursor-pointer active:opacity-50">
+                    <EditIcon onClick={onEditClick} />
+                </span>
+            </Tooltip>
+            <Tooltip color="danger" content="Delete" >
+                <span className="text-lg text-danger cursor-pointer active:opacity-50">
+                    <DeleteIcon onClick={onDeleteClick} />
+                </span>
+            </Tooltip>
+        </div>
+    );
+};
 
 
 const BoatTable = (props: any) => {
     var [data, setData] = useState(props.data)
 
-    const updateBoat = (boat: ResultsDataType) => {
-        //update local copy
-        const tempdata = data
-        tempdata[tempdata.findIndex((x: ResultsDataType) => x.id === boat.id)] = boat
-        setData([...tempdata])
-
-        //update main record and database
-        props.updateBoat(boat)
+    const editBoat = (boat: BoatDataType) => {
+        props.editBoat(boat)
     }
 
     const deleteBoat = (id: any) => {
@@ -154,28 +115,30 @@ const BoatTable = (props: any) => {
         columns: [
             columnHelper.accessor('name', {
                 header: "name",
-                cell: props => <Text {...props} updateBoat={updateBoat} />,
+                cell: props => <Text {...props} />,
+                enableColumnFilter: true
             }),
             columnHelper.accessor('crew', {
                 header: "crew",
-                cell: props => <Number {...props} updateBoat={updateBoat} />,
+                cell: props => <Number {...props} />,
                 enableColumnFilter: false
             }),
             columnHelper.accessor('py', {
                 id: "py",
-                cell: props => <Number {...props} updateBoat={updateBoat} />,
+                cell: props => <Number {...props} />,
                 enableColumnFilter: false
             }),
             columnHelper.accessor('pursuitStartTime', {
                 id: "pursuitStartTime",
                 header: () => <span>Pursuit Start Time</span>,
-                cell: props => <Number {...props} updateBoat={updateBoat} />,
+                cell: props => <StartTime {...props} />,
                 enableColumnFilter: false
             }),
-            columnHelper.display({
-                id: "Remove",
-                header: _ => <Add {...props} createBoat={createBoat} />,
-                cell: props => <Remove {...props} deleteBoat={deleteBoat} />
+            columnHelper.accessor('id', {
+                id: "action",
+                enableColumnFilter: false,
+                header: "Action",
+                cell: props => <Action {...props} id={props.row.original.id} deleteBoat={deleteBoat} editBoat={editBoat} />
             }),
         ],
         getCoreRowModel: getCoreRowModel(),
@@ -189,10 +152,19 @@ const BoatTable = (props: any) => {
                     {table.getHeaderGroups().flatMap(headerGroup => headerGroup.headers).map(header => {
                         return (
                             <TableColumn key={header.id}>
-                                {flexRender(
-                                    header.column.columnDef.header,
-                                    header.getContext()
-                                )}
+                                <div className='flex justify-between flex-row'>
+                                    <div className='py-3'>
+                                        {flexRender(
+                                            header.column.columnDef.header,
+                                            header.getContext()
+                                        )}
+                                    </div>
+                                    {header.column.getCanFilter() ? (
+                                        <div className='w-full'>
+                                            <Filter column={header.column} table={table} />
+                                        </div>
+                                    ) : null}
+                                </div>
                             </TableColumn>
                         );
                     })}

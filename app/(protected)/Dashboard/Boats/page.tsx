@@ -7,14 +7,20 @@ import * as Fetcher from 'components/Fetchers';
 import { PageSkeleton } from 'components/ui/PageSkeleton';
 import Papa from "papaparse";
 import BoatTable from "components/tables/BoatTable";
+import { Button, useDisclosure } from "@nextui-org/react";
+import EditBoatModal from "components/ui/dashboard/EditBoatModal";
 
 
 export default function Page() {
     const Router = useRouter();
 
+    const editModal = useDisclosure();
+
     const { user, userIsError, userIsValidating } = Fetcher.UseUser()
     const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
     const { boats, boatsIsError, boatsIsValidating } = Fetcher.Boats(club)
+
+    const [editingBoat, setEditingBoat] = useState<BoatDataType>()
 
     const boatFileUploadHandler = async (e: ChangeEvent<HTMLInputElement>) => {
         Papa.parse(e.target.files![0]!, {
@@ -82,10 +88,16 @@ export default function Page() {
     }
 
     const updateBoat = async (boat: BoatDataType) => {
-        const tempdata = boats
-        tempdata[tempdata.findIndex((x: BoatDataType) => x.id === boat.id)] = boat
-        //mutate boats
+        console.log(boat)
         await DB.updateBoatById(boat)
+        //mutate boats
+        editModal.onClose()
+    }
+
+    const editBoat = (boat: BoatDataType) => {
+        console.log(boat)
+        setEditingBoat(boat)
+        editModal.onOpen()
     }
 
     const deleteBoat = async (boat: BoatDataType) => {
@@ -111,12 +123,13 @@ export default function Page() {
     }
     return (
         <>
+            <EditBoatModal isOpen={editModal.isOpen} boat={editingBoat} onSubmit={updateBoat} onClose={() => { editModal.onClose(); setEditingBoat(undefined) }} />
             <p className='text-2xl font-bold text-gray-700 p-6'>
                 Boats
             </p>
             <div className='p-6'>
                 <div className='flex flex-row p-6 justify-around'>
-                    <div className="w-1/2 flex px-4">
+                    <div className="w-full flex px-4">
                         <label className="w-full">
                             <p className=" w-full cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0 ">
                                 Import Boats
@@ -132,8 +145,11 @@ export default function Page() {
                     <p onClick={downloadBoats} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0 w-1/2">
                         Download Boats
                     </p>
+                    <Button onClick={() => { }} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0 w-1/2">
+                        Add Boat
+                    </Button>
                 </div>
-                <BoatTable data={boats} key={JSON.stringify(boats)} updateBoat={updateBoat} deleteBoat={deleteBoat} createBoat={createBoat} />
+                <BoatTable data={boats} key={JSON.stringify(boats)} editBoat={editBoat} deleteBoat={deleteBoat} createBoat={createBoat} />
             </div>
         </>
     )
