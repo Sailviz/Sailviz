@@ -5,6 +5,13 @@ import { PageSkeleton } from '../PageSkeleton';
 
 export default function EditBoatModal({ isOpen, boat, onSubmit, onClose }: { isOpen: boolean, boat: BoatDataType | undefined, onSubmit: (boat: BoatDataType) => void, onClose: () => void }) {
 
+
+    const [boatName, setBoatName] = useState("")
+    const [PY, setPY] = useState(0)
+    const [Crew, setCrew] = useState(0)
+    const [pursuitStartTime, setPursuitStartTime] = useState(0)
+
+    const { theme, setTheme } = useTheme()
     if (boat == undefined) {
         return (
             <Modal
@@ -18,12 +25,10 @@ export default function EditBoatModal({ isOpen, boat, onSubmit, onClose }: { isO
             </Modal>)
     }
 
-    const [boatName, setBoatName] = useState(boat.name)
-    const [PY, setPY] = useState(boat.py)
-    const [Crew, setCrew] = useState(boat.crew)
-    const [pursuitStartTime, setPursuitStartTime] = useState(boat.pursuitStartTime)
-
-    const { theme, setTheme } = useTheme()
+    setBoatName(boat.name)
+    setPY(boat.py)
+    setCrew(boat.crew)
+    setPursuitStartTime(boat.pursuitStartTime)
 
     return (
         <>
