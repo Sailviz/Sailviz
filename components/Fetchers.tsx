@@ -1,4 +1,5 @@
 'use client'
+import { count } from "console"
 import { url } from "inspector"
 import useSWR from "swr"
 
@@ -11,12 +12,12 @@ const fetcher = async (url: string) => {
     return res.json()
 }
 
-const advancedFetcher = async (url: string, data: object) => {
+export async function advancedFetcher(url: string, data: object) {
     console.log(data)
     const res = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
+        body: JSON.stringify(data),
     })
     if (!res.ok) {
         throw new Error('An error occurred while fetching the data.')

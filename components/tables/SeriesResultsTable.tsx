@@ -215,6 +215,7 @@ const SeriesResultsTable = (props: any) => {
     //add column for each race in series
     seriesData.races.forEach((race: RaceDataType, index: number) => {
         const newColumn = columnHelper.accessor((data) => data.racePositions[index], {
+            id: "R" + race.number.toString(),
             header: "R" + race.number.toString(),
             cell: props => <Number {...props} disabled={true} />,
             enableSorting: false
