@@ -4,13 +4,15 @@ import dayjs from 'dayjs';
 import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, RowSelection, SortingState, useReactTable } from '@tanstack/react-table'
 import * as DB from 'components/apiMethods';
 import Select, { CSSObjectWithLabel } from 'react-select';
-import { Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Dropdown, DropdownItem, DropdownTrigger, Button, DropdownMenu, Input, Tooltip } from '@nextui-org/react';
+import { Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Dropdown, DropdownItem, DropdownTrigger, Button, DropdownMenu, Input, Tooltip, Spinner } from '@nextui-org/react';
 import { VerticalDotsIcon } from 'components/icons/vertical-dots-icon';
 import { EyeIcon } from 'components/icons/eye-icon';
 import { EditIcon } from 'components/icons/edit-icon';
 import { DeleteIcon } from 'components/icons/delete-icon';
 import { useRouter } from 'next/navigation';
 import { useTheme } from 'next-themes';
+import useSWR from 'swr';
+import * as Fetcher from 'components/Fetchers';
 
 
 const raceOptions = [{ value: "Pursuit", label: "Pursuit" }, { value: "Handicap", label: "Handicap" }]
@@ -143,8 +145,17 @@ const Action = ({ ...props }: any) => {
 
 const columnHelper = createColumnHelper<RaceDataType>()
 
-const SeriesTable = (props: any) => {
-    var [data, setData] = useState(props.data)
+const SeriesRaceTable = (props: any) => {
+    const [seriesId, setSeriesId] = useState(props.id)
+    const { data: series, error: seriesIsError, isValidating: seriesIsValidating } = useSWR(`/api/GetSeriesById?id=${seriesId}`, Fetcher.fetcher, { keepPreviousData: true, suspense: true })
+
+
+    let data = series.races
+    if (data == undefined) {
+        data = []
+    }
+
+    const loadingState = seriesIsValidating || data?.length === 0 ? "loading" : "idle";
 
     const [sorting, setSorting] = useState<SortingState>([{
         id: "number",
@@ -203,7 +214,10 @@ const SeriesTable = (props: any) => {
                         );
                     })}
                 </TableHeader>
-                <TableBody>
+                <TableBody
+                    emptyContent={"No races yet."}
+                    loadingContent={<Spinner />}
+                    loadingState={loadingState}>
                     {table.getRowModel().rows.map(row => (
                         <TableRow key={row.id}>
                             {row.getVisibleCells().map(cell => (
@@ -220,4 +234,4 @@ const SeriesTable = (props: any) => {
     )
 }
 
-export default SeriesTable
+export default SeriesRaceTable

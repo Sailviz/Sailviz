@@ -261,6 +261,7 @@ const SeriesResultsTable = (props: any) => {
                     base: "max-h-[520px] overflow-scroll",
                     table: "min-h-[400px]",
                 }}
+
             >
                 <TableHeader>
                     {table.getHeaderGroups().flatMap(headerGroup => headerGroup.headers).map(header => {
@@ -274,7 +275,7 @@ const SeriesResultsTable = (props: any) => {
                         );
                     })}
                 </TableHeader>
-                <TableBody>
+                <TableBody emptyContent={"No results yet."}>
                     {table.getRowModel().rows.map(row => (
                         <TableRow key={row.id}>
                             {row.getVisibleCells().map(cell => (

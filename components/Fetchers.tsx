@@ -46,11 +46,10 @@ export function UseClub() {
 }
 
 export function Series(seriesId: string) {
-    let body = { seriesId: seriesId }
-    const { data, error, isValidating } = useSWR(seriesId != "" ? '/api/GetSeriesById' : null, (url) => advancedFetcher(url!, body))
+    const { data, error, isValidating } = useSWR(seriesId != "" ? `/api/GetSeriesById?id=${seriesId}` : null, fetcher)
     console.log(data)
     return {
-        series: data?.series as SeriesDataType,
+        series: data as SeriesDataType,
         seriesIsValidating: isValidating,
         seriesIsError: error
     }

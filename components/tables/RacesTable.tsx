@@ -129,7 +129,8 @@ const RacesTable = (props: any) => {
                     );
                 })}
             </TableHeader>
-            <TableBody emptyContent={"No races Found."} loadingContent={<Spinner />}
+            <TableBody emptyContent={"No races Found."}
+                loadingContent={<Spinner />}
                 loadingState={loadingState}>
                 {table.getRowModel().rows.map(row => (
                     <TableRow key={row.id}>
