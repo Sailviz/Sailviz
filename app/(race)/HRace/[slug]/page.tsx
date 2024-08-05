@@ -5,6 +5,7 @@ import * as DB from 'components/apiMethods';
 import RaceTimer from "components/HRaceTimer"
 import Cookies from "js-cookie";
 import * as Fetcher from 'components/Fetchers';
+import { Button } from "@nextui-org/react";
 
 enum raceStateType {
     running,
@@ -524,39 +525,6 @@ export default function Page({ params }: { params: { slug: string } }) {
         })
     }, [race, dynamicSorting, mode])
 
-    useEffect(() => {
-        let RetireModeButton = document.getElementById("RetireModeButton")!.firstChild as HTMLElement
-        let LapModeButton = document.getElementById("LapModeButton")!.firstChild as HTMLElement
-        let FinishModeButton = document.getElementById("FinishModeButton")!.firstChild as HTMLElement
-
-        switch (mode) {
-            case modeType.Retire:
-                RetireModeButton.classList.add("bg-green-600")
-                LapModeButton.classList.remove("bg-green-600")
-                FinishModeButton.classList.remove("bg-green-600")
-                break
-            case modeType.Lap:
-                RetireModeButton.classList.remove("bg-green-600")
-                LapModeButton.classList.add("bg-green-600")
-                FinishModeButton.classList.remove("bg-green-600")
-                break
-            case modeType.Finish:
-                RetireModeButton.classList.remove("bg-green-600")
-                LapModeButton.classList.remove("bg-green-600")
-                FinishModeButton.classList.add("bg-green-600")
-                break
-        }
-    }, [mode])
-
-    // const [time, setTime] = useState("");
-
-    // useEffect(() => {
-    //     const interval = setInterval(() => setTime(new Date().toTimeString().split(' ')[0]!), 1000);
-    //     return () => {
-    //         clearInterval(interval);
-    //     };
-    // }, []);
-
     const showRetireModal = (resultId: String) => {
         const modal = document.getElementById("retireModal")
         let result: ResultsDataType | undefined;
@@ -586,40 +554,35 @@ export default function Page({ params }: { params: { slug: string } }) {
             <audio id="Countdown" src=".\Countdown.mp3" ></audio>
             <div className="w-full flex flex-col items-center justify-start panel-height">
                 <div className="flex w-full flex-col justify-around" key={JSON.stringify(raceState)}>
-                    {/* <div className="flex flex-row">
-                        <div className="w-1/4 p-2 m-2 border-4 rounded-lg bg-white text-lg font-medium">
-                            Actual Time:  {time}
-                        </div>
 
-                    </div> */}
                     {race.fleets.map((fleet, index) => {
                         return (
                             <div className="flex flex-row" key={"fleetBar" + index}>
-                                <div className="w-1/4 p-2 m-2 border-4 rounded-lg bg-white text-lg font-medium">
+                                <div className="w-1/4 p-2 m-2 border-4 rounded-lg  text-lg font-medium">
                                     Event: {seriesName} - {race.number} - {fleet.fleetSettings.name}
                                 </div>
-                                <div className="w-1/4 p-2 m-2 border-4 rounded-lg bg-white text-lg font-medium">
+                                <div className="w-1/4 p-2 m-2 border-4 rounded-lg text-lg font-medium">
                                     Race Time: <RaceTimer key={"fleetTimer" + index} startTime={fleet.startTime} timerActive={raceState[index] == raceStateType.running} onFiveMinutes={handleFiveMinutes} onFourMinutes={handleFourMinutes} onOneMinute={handleOneMinute} onGo={handleGo} onWarning={handleWarning} reset={raceState[index] == raceStateType.reset} />
                                 </div>
                                 <div className="p-2 w-1/4" id="RaceStateButton">
                                     {(() => {
                                         switch (raceState[index]) {
                                             case raceStateType.reset:
-                                                return (<p onClick={() => startRaceButton(fleet.id)} className="cursor-pointer text-white bg-green-600 font-medium rounded-lg text-xl px-5 py-2.5 text-center">
+                                                return (<Button onClick={() => startRaceButton(fleet.id)} size="lg" color="success" fullWidth>
                                                     Start
-                                                </p>)
+                                                </Button>)
                                             case raceStateType.running:
-                                                return (<p onClick={(e) => { confirm("are you sure you want to stop the race?") ? stopRace(fleet.id) : null; }} className="cursor-pointer text-white bg-red-600 font-medium rounded-lg text-xl px-5 py-2.5 text-center">
+                                                return (<Button onClick={(e) => { confirm("are you sure you want to stop the race?") ? stopRace(fleet.id) : null; }} size="lg" color="danger" fullWidth>
                                                     Stop
-                                                </p>)
+                                                </Button>)
                                             case raceStateType.stopped:
-                                                return (<p onClick={() => resetRace(fleet.id)} className="cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-xl px-5 py-2.5 text-center">
+                                                return (<Button onClick={() => resetRace(fleet.id)} size="lg" color="primary" fullWidth>
                                                     Reset
-                                                </p>)
+                                                </Button>)
                                             case raceStateType.calculate:
-                                                return (<p id="CalcResultsButton" onClick={calculateResults} className="cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-xl px-5 py-2.5 text-center">
+                                                return (<Button id="CalcResultsButton" onClick={calculateResults} size="lg" color="primary" fullWidth>
                                                     Calculate Results
-                                                </p>)
+                                                </Button>)
                                             default:
                                                 return (<p> unknown race state</p>)
                                         }
@@ -633,34 +596,34 @@ export default function Page({ params }: { params: { slug: string } }) {
                 <div className="flex w-full shrink flex-row justify-around">
                     <div className="w-1/5 p-2">
                         {dynamicSorting ?
-                            <p onClick={() => setDynamicSorting(false)} className="cursor-pointer text-white bg-green-600 font-medium rounded-lg text-xl px-5 py-2.5 text-center">
+                            <Button onClick={() => setDynamicSorting(false)} size="lg" color="success" fullWidth>
                                 Dynamic Sorting: On
-                            </p>
+                            </Button>
                             :
-                            <p onClick={() => setDynamicSorting(true)} className="cursor-pointer text-white bg-red-600 font-medium rounded-lg text-xl px-5 py-2.5 text-center">
+                            <Button onClick={() => setDynamicSorting(true)} size="lg" color="warning" fullWidth>
                                 Dynamic Sorting: Off
-                            </p>
+                            </Button>
                         }
                     </div>
                     <div className="w-1/5 p-2">
-                        <p onClick={() => undo()} className="cursor-pointer text-white bg-red-600 font-medium rounded-lg text-xl px-5 py-2.5 text-center">
+                        <Button onClick={() => undo()} size="lg" color="danger" fullWidth>
                             Undo
-                        </p>
+                        </Button>
                     </div>
                     <div className="w-1/5 p-2" id="RetireModeButton">
-                        <p onClick={() => setMode(modeType.Retire)} className="cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-xl px-5 py-2.5 text-center">
+                        <Button onClick={() => setMode(modeType.Retire)} size="lg" color={mode == modeType.Retire ? "success" : "primary"} fullWidth>
                             Retire Mode
-                        </p>
+                        </Button>
                     </div>
                     <div className="w-1/5 p-2" id="LapModeButton">
-                        <p onClick={() => setMode(modeType.Lap)} className="cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-xl px-5 py-2.5 text-center">
+                        <Button onClick={() => setMode(modeType.Lap)} size="lg" color={mode == modeType.Lap ? "success" : "primary"} fullWidth>
                             Lap Mode
-                        </p>
+                        </Button>
                     </div>
                     <div className="w-1/5 p-2" id="FinishModeButton">
-                        <p onClick={() => setMode(modeType.Finish)} className="cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-xl px-5 py-2.5 text-center">
+                        <Button onClick={() => setMode(modeType.Finish)} size="lg" color={mode == modeType.Finish ? "success" : "primary"} fullWidth>
                             Finish Mode
-                        </p>
+                        </Button>
                     </div>
                 </div>
                 <div className="overflow-auto">
