@@ -155,7 +155,7 @@ const SeriesRaceTable = (props: any) => {
         data = []
     }
 
-    const loadingState = seriesIsValidating || data?.length === 0 ? "loading" : "idle";
+    const loadingState = seriesIsValidating ? "loading" : "idle";
 
     const [sorting, setSorting] = useState<SortingState>([{
         id: "number",

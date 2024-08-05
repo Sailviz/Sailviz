@@ -59,20 +59,16 @@ export async function GetSeriesByClubId(clubId: string): Promise<SeriesDataType[
 };
 
 export async function GetSeriesById(seriesId: string): Promise<SeriesDataType> {
-    const body = {
-        "seriesId": seriesId,
-    }
-    return await fetch(`${server}/api/GetSeriesById`, {
-        method: 'POST',
+    return await fetch(`${server}/api/GetSeriesById?id=${seriesId}`, {
+        method: 'GET',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
     })
         .then((res) => res.json())
         .then((data) => {
             if (data && data.error) {
                 console.log(data.message)
             } else {
-                return (data.series)
+                return (data)
             }
         });
 };

@@ -13,7 +13,7 @@ import { AVAILABLE_PERMISSIONS, userHasPermission } from "components/helpers/use
 import { PageSkeleton } from "components/ui/PageSkeleton";
 import { BreadcrumbItem, Breadcrumbs, Button, Input, useDisclosure } from "@nextui-org/react";
 import CreateResultModal from "components/ui/dashboard/CreateResultModal";
-import { set } from "cypress/types/lodash";
+import ProgressModal from "components/ui/dashboard/ProgressModal";
 
 const raceOptions = [{ value: "Pursuit", label: "Pursuit" }, { value: "Handicap", label: "Handicap" }]
 
@@ -36,6 +36,11 @@ export default function Page({ params }: { params: { slug: string } }) {
     const [seriesName, setSeriesName] = useState("")
 
     const createModal = useDisclosure();
+    const progressModal = useDisclosure();
+
+    const [progressValue, setProgressValue] = useState(0)
+    const [progressMax, setProgressMax] = useState(0)
+    const [progressIndeterminate, setProgressIndeterminate] = useState(false)
 
     var [activeResult, setActiveResult] = useState<ResultsDataType>({
         id: "",
@@ -372,12 +377,18 @@ export default function Page({ params }: { params: { slug: string } }) {
     }
 
     const entryFileUploadHandler = async (e: ChangeEvent<HTMLInputElement>) => {
+        progressModal.onOpen()
+        setProgressIndeterminate(true)
+        setProgressValue(0)
         Papa.parse(e.target.files![0]!, {
             header: true,
             skipEmptyLines: true,
             complete: async function (results: any) {
-                console.log(results.data)
+                setProgressIndeterminate(false)
+                setProgressMax(results.data.length)
+                let index = 0
                 for (const line of results.data) {
+                    setProgressValue(++index)
                     //check if all fields are present
                     if (line.Helm == undefined || line.Crew == undefined || line.Boat == undefined || line.SailNumber == undefined) {
                         alert("missing fields")
@@ -411,6 +422,7 @@ export default function Page({ params }: { params: { slug: string } }) {
 
                 }
                 setRace(await DB.getRaceById(race.id))
+                progressModal.onClose()
             },
         });
     }
@@ -493,6 +505,7 @@ export default function Page({ params }: { params: { slug: string } }) {
     return (
         <div id="race" className='h-full w-full overflow-y-auto'>
             <CreateResultModal isOpen={createModal.isOpen} race={race} boats={boats} onSubmit={createResult} onClose={createModal.onClose} />
+            <ProgressModal key={progressValue} isOpen={progressModal.isOpen} Value={progressValue} Max={progressMax} Indeterminate={progressIndeterminate} onClose={progressModal.onClose} />
             <div id="editModal" className={"fixed z-10 left-0 top-0 w-full h-full overflow-auto bg-gray-400 backdrop-blur-sm bg-opacity-20 hidden"} key={activeResult.id}>
                 <div className="mx-40 my-20 px-10 py-5 border w-4/5 bg-gray-300 rounded-sm">
                     <div className="text-6xl font-extrabold text-gray-700 p-6 float-right cursor-pointer" onClick={() => { document.getElementById("editModal")!.classList.add("hidden") }}>&times;</div>
