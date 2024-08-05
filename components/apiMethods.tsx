@@ -378,11 +378,11 @@ export async function createSeries(clubId: string, seriesName: string): Promise<
         });
 };
 
-export async function deleteSeries(series: SeriesDataType): Promise<SeriesDataType> {
+export async function deleteSeriesById(seriesId: string): Promise<SeriesDataType> {
     const body = {
-        "series": series
+        "seriesId": seriesId
     }
-    return await fetch(`${server}/api/DeleteSeries`, {
+    return await fetch(`${server}/api/DeleteSeriesById`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
@@ -397,7 +397,7 @@ export async function deleteSeries(series: SeriesDataType): Promise<SeriesDataTy
         });
 };
 
-export async function deleteRace(id: string): Promise<RaceDataType> {
+export async function deleteRaceById(id: string): Promise<RaceDataType> {
     const body = {
         "raceId": id,
     }

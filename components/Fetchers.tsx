@@ -91,7 +91,7 @@ export function Roles(club: ClubDataType) {
 
 export function GetSeriesByClubId(club: ClubDataType) {
     let body = { clubId: club?.id }
-    const { data, error, isValidating } = useSWR(club && club.id ? '/api/GetSeriesByClubId' : null, (url) => advancedFetcher(url!, body))
+    const { data, error, isValidating } = useSWR(club && club.id ? '/api/GetSeriesByClubId' : null, (url) => advancedFetcher(url!, body), { suspense: true })
 
     return {
         series: data?.series as SeriesDataType[],

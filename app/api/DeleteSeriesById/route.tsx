@@ -5,7 +5,7 @@ import { NextRequest, NextResponse } from "next/server";
 import assert from 'assert';
 
 async function findSeries(seriesId: any) {
-    var result = await prisma.series.findFirst({
+    var result = await prisma.series.findUnique({
         where: {
             id: seriesId
         },
@@ -34,13 +34,13 @@ async function deleteSeries(seriesId: any) {
 export async function POST(request: NextRequest) {
     const req = await request.json()
     try {
-        assert.notStrictEqual(undefined, req.series, 'seriesId required');
+        assert.notStrictEqual(undefined, req.seriesId, 'seriesId required');
 
     } catch (bodyError) {
         return NextResponse.json({ error: true, message: "information missing" });
     }
 
-    var seriesId = req.series.id
+    var seriesId = req.seriesId
     console.log(seriesId)
 
     var series = await findSeries(seriesId)

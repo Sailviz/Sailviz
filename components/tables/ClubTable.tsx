@@ -12,7 +12,7 @@ import { DeleteIcon } from 'components/icons/delete-icon';
 const Action = ({ ...props }: any) => {
     const onDeleteClick = () => {
         if (confirm("are you sure you want to do this?")) {
-            props.deleteSeries(props.row.original)
+            props.deleteSeries(props.row.original.id)
         }
     }
     return (
@@ -51,20 +51,12 @@ const ClubTable = (props: any) => {
         props.updateSeries(boat)
     }
 
-    const createSeries = () => {
-        props.createSeries()
-    }
-
     const viewSeries = (seriesId: string) => {
         props.viewSeries(seriesId)
     }
 
-    const deleteSeries = (series: SeriesDataType) => {
-        console.log(series)
-        props.deleteSeries(series)
-        const tempdata: SeriesDataType[] = [...data]
-        tempdata.splice(tempdata.findIndex((x: SeriesDataType) => x.id === series.id), 1)
-        setData(tempdata)
+    const deleteSeries = (seriesId: string) => {
+        props.deleteSeries(seriesId)
     }
 
     var table = useReactTable({

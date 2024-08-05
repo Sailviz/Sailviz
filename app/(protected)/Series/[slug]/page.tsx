@@ -34,7 +34,7 @@ export default function Page({ params }: { params: { slug: string } }) {
 
     const removeRace = async (raceId: string) => {
         if (confirm("Are you sure you want to delete the race?") == false) return
-        let result = await DB.deleteRace(raceId)
+        let result = await DB.deleteRaceById(raceId)
         if (!result) { return } // failed to delete race
         let newSeriesData: SeriesDataType = window.structuredClone(series)
         let raceIndex = newSeriesData.races.findIndex(x => x.id === raceId)
