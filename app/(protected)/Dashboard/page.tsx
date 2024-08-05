@@ -3,6 +3,8 @@ import { ChangeEvent, MouseEventHandler, useEffect, useState } from "react"
 import { useRouter } from "next/navigation";
 import * as DB from 'components/apiMethods';
 import * as Fetcher from 'components/Fetchers';
+import UpcomingRacesTable from "components/tables/UpcomingRacesTable";
+import { PageSkeleton } from "components/ui/PageSkeleton";
 
 enum raceStateType {
     running,
@@ -16,9 +18,6 @@ export default function Page() {
 
     const { user, userIsError, userIsValidating } = Fetcher.UseUser()
     const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
-
-
-    var [todaysRaces, setTodaysRaces] = useState<NextRaceDataType[]>([])
 
     const createEvent = async () => {
         //create a series
@@ -50,19 +49,9 @@ export default function Page() {
 
 
 
-    useEffect(() => {
-        let timer1 = setTimeout(async () => {
-            var data = await DB.getTodaysRaceByClubId(club.id)
-            if (data) {
-                setTodaysRaces(data)
-            } else {
-                console.log("could not find todays race")
-            }
-        }, 5000);
-        return () => {
-            clearTimeout(timer1);
-        }
-    }, [todaysRaces]);
+    if (clubIsError || clubIsValidating || club == undefined) {
+        return <PageSkeleton />
+    }
 
     return (
         <>
@@ -101,28 +90,7 @@ export default function Page() {
             </div>
             <div className="h-full gap-6 flex flex-col">
                 {/* show all races that are happening today */}
-                {todaysRaces.length > 0 ?
-                    <div>
-                        <p className="text-6xl font-extrabold text-gray-700 p-6 mx-36">
-                            Races Happening Today:
-                        </p>
-                        <div className="flex flex-row flex-wrap p-6 mx-36">
-                            {todaysRaces.map((race, index) => {
-                                return (
-                                    <div className="m-6" key={race.id}>
-                                        <div onClick={() => { Router.push('/Race/' + race.id) }} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-xl px-12 py-4 text-center mr-3 md:mr-0">
-                                            {race.series.name}: {race.number} at {race.Time.slice(11, 16)}
-                                        </div>
-                                    </div>
-                                )
-                            })}
-                        </div>
-                    </div>
-                    :
-                    <div>
-                        <p className="text-6xl font-extrabold text-gray-700 p-6 mx-36"> No Races Today</p>
-                    </div>
-                }
+                <UpcomingRacesTable club={club} />
                 <div className="m-6">
                     <div onClick={showCreateModal} className="mx-36 cursor-pointer text-white bg-green-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-xl px-12 py-4 text-center w-2/12">
                         Create New Event
