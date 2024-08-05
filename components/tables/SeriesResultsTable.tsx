@@ -130,7 +130,6 @@ const SeriesResultsTable = (props: any) => {
             } else if (a.Net > b.Net) {
                 return 1
             } else {
-                console.log("same net score")
                 //two results with same Net Score.
                 //loop through positions.
                 let result = 0
@@ -138,7 +137,6 @@ const SeriesResultsTable = (props: any) => {
                     //calculate number of positions.
                     let aNumber = a.racePositions.reduce((partialSum: number, position: number) => {
                         if (position == i) {
-                            console.log("found position", i)
                             return partialSum + 1
                         } else {
                             return partialSum
@@ -160,7 +158,6 @@ const SeriesResultsTable = (props: any) => {
                         break
                     }
                 }
-                console.log(result)
                 return result
             }
         })
