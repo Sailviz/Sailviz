@@ -63,8 +63,7 @@ const columnHelper = createColumnHelper<NextRaceDataType>()
 const RacesTable = (props: any) => {
     const [club, setClub] = useState(props.club)
     const [page, setPage] = useState(1);
-    const body = { clubId: club.id, page: page }
-    const { data: races, error: racesIsError, isValidating: racesIsValidating } = useSWR(`/api/GetRacesByClubId?page=${page}`, (url) => Fetcher.advancedFetcher(url!, body), { keepPreviousData: true, suspense: true })
+    const { data: races, error: racesIsError, isValidating: racesIsValidating } = useSWR(`/api/GetRacesByClubId?page=${page}`, Fetcher.fetcher, { keepPreviousData: true, suspense: true })
 
     const data = races.races
     const count = races?.count

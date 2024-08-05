@@ -2,6 +2,7 @@ import prisma from 'components/prisma'
 import { NextRequest, NextResponse } from "next/server";
 
 import assert from 'assert';
+import { cookies } from 'next/headers';
 
 async function findSeries(id: string) {
     var result = await prisma.series.findMany({
@@ -44,21 +45,20 @@ async function countRaces(seriesId: string[]) {
 }
 
 
-export async function POST(request: NextRequest) {
-    const req = await request.json()
-    try {
-        assert.notStrictEqual(undefined, req.clubId);
+export async function GET(request: NextRequest) {
+    const cookieStore = cookies()
+    const searchParams = request.nextUrl.searchParams
 
-    } catch (bodyError) {
+    var id = cookieStore.get('clubId')
+    var page = searchParams.get('page')
+
+    if (id == undefined || page == undefined) {
         return NextResponse.json({ error: true, message: "information missing" });
     }
 
-    var id = req.clubId
-    var page = req.page
-
-    var series = await findSeries(id)
+    var series = await findSeries(id.value)
     if (series) {
-        var races = await findRaces(series.map(s => s.id), (page - 1) * 10, 10)
+        var races = await findRaces(series.map(s => s.id), (parseInt(page) - 1) * 10, 10)
         var count = await countRaces(series.map(s => s.id))
         return NextResponse.json({ error: false, races: races, count: count });
     } else {
