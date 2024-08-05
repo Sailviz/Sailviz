@@ -11,7 +11,7 @@ import Switch from "components/ui/Switch";
 import * as Fetcher from 'components/Fetchers';
 import { AVAILABLE_PERMISSIONS, userHasPermission } from "components/helpers/users";
 import { PageSkeleton } from "components/ui/PageSkeleton";
-import { Button, Input, useDisclosure } from "@nextui-org/react";
+import { BreadcrumbItem, Breadcrumbs, Button, Input, useDisclosure } from "@nextui-org/react";
 import CreateResultModal from "components/ui/dashboard/CreateResultModal";
 import { set } from "cypress/types/lodash";
 
@@ -640,8 +640,10 @@ export default function Page({ params }: { params: { slug: string } }) {
             <div className="flex flex-wrap justify-center gap-4 w-full">
                 <div className="flex flex-wrap px-4 divide-y divide-solid w-full justify-center">
                     <div className="py-4 w-3/5">
-                        <button className="btn-darkblue float-right">View Series</button>
-                        <p className="text-4xl">{seriesName} - Race {race.number}</p>
+                        <Breadcrumbs>
+                            <BreadcrumbItem onClick={() => Router.push('/Series/' + race.seriesId)}>{seriesName}</BreadcrumbItem>
+                            <BreadcrumbItem>Race {race.number} </BreadcrumbItem>
+                        </Breadcrumbs>
                         <p className="text-2xl">{race.Type} Race</p>
                         <p className="text-2xl">{dayjs(race.Time).format('DD/MM/YYYY HH:mm')}</p>
                     </div>

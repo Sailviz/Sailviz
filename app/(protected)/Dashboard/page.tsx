@@ -100,9 +100,6 @@ export default function Page() {
                 </div>
             </div>
             <div className="h-full gap-6 flex flex-col">
-                <p className="text-xl font-semibold">
-                    This is still new software! Please write down finish Times!
-                </p>
                 {/* show all races that are happening today */}
                 {todaysRaces.length > 0 ?
                     <div>
