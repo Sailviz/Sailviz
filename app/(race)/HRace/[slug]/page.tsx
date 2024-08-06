@@ -288,6 +288,7 @@ export default function Page({ params }: { params: { slug: string } }) {
     }
 
     const retireBoat = async (resultCode: string) => {
+        retireModal.onClose()
         let tempdata = activeResult
         tempdata.resultCode = resultCode
         await DB.updateResult(tempdata)
@@ -295,7 +296,6 @@ export default function Page({ params }: { params: { slug: string } }) {
         let data = await DB.getRaceById(race.id)
         setRace(data)
 
-        retireModal.onClose()
 
     }
 
@@ -522,6 +522,7 @@ export default function Page({ params }: { params: { slug: string } }) {
     }, [race, dynamicSorting, mode])
 
     const showRetireModal = (resultId: String) => {
+        retireModal.onOpen()
         let result: ResultsDataType | undefined;
         race.fleets.some(fleet => {
             result = fleet.results.find(result => result.id === resultId);
@@ -532,7 +533,6 @@ export default function Page({ params }: { params: { slug: string } }) {
             return
         }
         setActiveResult(result)
-        retireModal.onOpen()
 
     }
 
@@ -657,22 +657,22 @@ export default function Page({ params }: { params: { slug: string } }) {
                                                         switch (mode) {
                                                             case modeType.Finish:
                                                                 return (
-                                                                    <p onClick={(e) => { finishBoat(result.id) }} className="cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-md p-5 text-center mt-5">
+                                                                    <Button onClick={(e) => { finishBoat(result.id) }} className="cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-md p-5 text-center mt-5">
                                                                         Finish
-                                                                    </p>
+                                                                    </Button>
 
                                                                 )
                                                             case modeType.Retire:
                                                                 return (
-                                                                    <p onClick={(e) => { showRetireModal(result.id) }} className="cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-md p-5 text-center mt-5">
+                                                                    <Button onClick={(e) => { showRetireModal(result.id) }} className="cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-md p-5 text-center mt-5">
                                                                         Retire
-                                                                    </p>
+                                                                    </Button>
                                                                 )
                                                             case modeType.Lap:
                                                                 return (
-                                                                    <p onClick={(e) => { lapBoat(result.id) }} className="cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-md p-5 text-center mt-5">
+                                                                    <Button onClick={(e) => { lapBoat(result.id) }} className="cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-md p-5 text-center mt-5">
                                                                         Lap
-                                                                    </p>
+                                                                    </Button>
                                                                 )
                                                         }
                                                     })()}
