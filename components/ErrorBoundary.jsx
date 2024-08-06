@@ -25,7 +25,7 @@ class ErrorBoundary extends React.Component {
       // You can render any custom fallback UI
       return (
         <div>
-          <div className='text-xl font-extrabold text-gray-700 p-6'>Oops, there is an error!</div>
+          <div className='text-xl font-extrabold p-6'>Oops, there is an error!</div>
           <button
             type="button"
             className='p-4'
