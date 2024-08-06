@@ -128,23 +128,21 @@ export default function Page() {
             </p>
             <div className='p-6'>
                 <div className='flex flex-row p-6 justify-around'>
-                    <div className="w-full flex px-4">
-                        <Button className="mx-1" color="primary" onClick={() => document.getElementById("entryFileUpload")!.click()}>
-                            Upload Entries
+                    <Button className="mx-1" color="primary" fullWidth onClick={() => document.getElementById("entryFileUpload")!.click()}>
+                        Upload Boat Data
 
-                        </Button>
-                        <Input
-                            id="entryFileUpload"
-                            type="file"
-                            accept=".csv"
-                            onChange={boatFileUploadHandler}
-                            className="hidden"
-                        />
-                    </div>
-                    <Button onClick={downloadBoats} color='primary' fullWidth>
-                        Download Boats
                     </Button>
-                    <Button onClick={() => createBoat()} color='primary' fullWidth>
+                    <Input
+                        id="entryFileUpload"
+                        type="file"
+                        accept=".csv"
+                        onChange={boatFileUploadHandler}
+                        className="hidden"
+                    />
+                    <Button className="mx-1" onClick={downloadBoats} color='primary' fullWidth>
+                        Download Boat Data
+                    </Button>
+                    <Button className="mx-1" onClick={() => createBoat()} color='primary' fullWidth>
                         Add Boat
                     </Button>
                 </div>
