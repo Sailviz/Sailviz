@@ -204,7 +204,7 @@ const SeriesResultsTable = (props: any) => {
         }),
         columnHelper.accessor((data) => data.SailNumber, {
             header: "Sail Number",
-            cell: props => <Number {...props} />,
+            cell: props => <Text {...props} />,
             enableSorting: false
         }),
 
