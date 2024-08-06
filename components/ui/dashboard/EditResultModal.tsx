@@ -1,6 +1,6 @@
 import { Button, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Radio, RadioGroup, Switch } from '@nextui-org/react';
 import { useTheme } from 'next-themes';
-import { ChangeEvent, useState } from 'react';
+import { ChangeEvent, useEffect, useState } from 'react';
 import { PageSkeleton } from '../PageSkeleton';
 import * as DB from 'components/apiMethods'
 import Select, { CSSObjectWithLabel } from 'react-select';
@@ -14,7 +14,7 @@ const resultCodeOptions = [
     { label: 'On Course Side', value: 'OCS' },
     { label: 'Not Sailed Course', value: 'NSC' }]
 
-export default function EditResultModal({ isOpen, result, onSubmit, onClose, onDelete }: { isOpen: boolean, result: ResultsDataType, onSubmit: (resut: ResultsDataType) => void, onDelete: (result: ResultsDataType) => void, onClose: () => void }) {
+export default function EditResultModal({ isOpen, result, onSubmit, onClose, onDelete }: { isOpen: boolean, result: ResultsDataType | undefined, onSubmit: (resut: ResultsDataType) => void, onDelete: (result: ResultsDataType) => void, onClose: () => void }) {
     const { theme, setTheme } = useTheme()
 
     const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
@@ -22,12 +22,12 @@ export default function EditResultModal({ isOpen, result, onSubmit, onClose, onD
 
     const [lapsAdvancedMode, setLapsAdvancedMode] = useState(false)
     const [resultCodeOption, setResultCodeOption] = useState({ label: "", value: "" })
-    const [selectedOption, setSelectedOption] = useState({ label: "", value: {} as BoatDataType })
+    const [boatOption, setBoatOption] = useState({ label: "", value: {} as BoatDataType })
 
-    const [helm, setHelm] = useState(result.Helm)
-    const [crew, setCrew] = useState(result.Crew)
-    const [boat, setBoat] = useState<BoatDataType>(result.boat)
-    const [sailNumber, setSailNumber] = useState(result.SailNumber)
+    const [helm, setHelm] = useState("")
+    const [crew, setCrew] = useState("")
+    const [boat, setBoat] = useState<BoatDataType>({} as BoatDataType)
+    const [sailNumber, setSailNumber] = useState("")
 
 
     let options: { label: string; value: BoatDataType }[] = []
@@ -35,7 +35,23 @@ export default function EditResultModal({ isOpen, result, onSubmit, onClose, onD
         options.push({ value: boat as BoatDataType, label: boat.name })
     })
 
+    console.log(result)
+
+
+    useEffect(() => {
+        if (result == undefined) {
+            return
+        }
+        setHelm(result.Helm)
+        setCrew(result.Crew)
+        setBoat(result.boat)
+        setSailNumber(result.SailNumber)
+        setBoatOption({ label: result.boat.name, value: result.boat })
+        setResultCodeOption(result.resultCode == '' ? { label: 'None', value: '' } : { label: result.resultCode, value: result.resultCode })
+    }, [result])
+
     const addLap = async () => {
+        if (result == undefined) return
         await DB.CreateLap(result.id, 0)
         let res = await DB.GetResultById(result.id)
 
@@ -50,6 +66,7 @@ export default function EditResultModal({ isOpen, result, onSubmit, onClose, onD
     }
 
     const removeLap = async (index: number) => {
+        if (result == undefined) return
         await DB.DeleteLapById(result.laps[index]!.id)
         let res = await DB.GetResultById(result.id)
 
@@ -111,8 +128,8 @@ export default function EditResultModal({ isOpen, result, onSubmit, onClose, onD
                                                     id="Class"
                                                     className=' w-56 h-full text-3xl'
                                                     options={options}
-                                                    value={selectedOption}
-                                                    onChange={(choice) => setSelectedOption(choice!)}
+                                                    value={boatOption}
+                                                    onChange={(choice) => setBoatOption(choice!)}
                                                     styles={{
                                                         control: (provided, state) => ({
                                                             ...provided,
@@ -159,7 +176,7 @@ export default function EditResultModal({ isOpen, result, onSubmit, onClose, onD
                                                 value={sailNumber}
                                                 onValueChange={setSailNumber}
                                                 fullWidth
-                                                label="Crew"
+                                                label="Sail Number"
                                                 placeholder=' '
                                                 labelPlacement='outside'
                                             />
@@ -245,7 +262,7 @@ export default function EditResultModal({ isOpen, result, onSubmit, onClose, onD
                                         {lapsAdvancedMode ?
                                             <div className='flex flex-row w-full flex-wrap' id='LapData'>
                                                 {/* this map loops through laps in results, unless it can't find any*/}
-                                                {result.laps.map((lap: LapDataType, index: number) => {
+                                                {result?.laps.map((lap: LapDataType, index: number) => {
                                                     return (
                                                         <div className='flex flex-col px-6 w-min' key={lap.time + index}>
                                                             <p className='text-2xl font-bold p-2'>
@@ -272,7 +289,7 @@ export default function EditResultModal({ isOpen, result, onSubmit, onClose, onD
                                                         Laps
                                                     </p>
 
-                                                    <input type="number" id="NumberofLaps" className="h-full text-2xl p-4" defaultValue={result.laps.length} />
+                                                    <input type="number" id="NumberofLaps" className="h-full text-2xl p-4" defaultValue={result?.laps.length} />
                                                 </div>
                                                 <div className='flex flex-col px-6 w-1/4'>
                                                     <p className='text-2xl font-bold'>
@@ -290,13 +307,13 @@ export default function EditResultModal({ isOpen, result, onSubmit, onClose, onD
 
                             </ModalBody>
                             <ModalFooter>
-                                <Button color="danger" onPress={() => onDelete(result)}>
+                                <Button color="danger" onPress={() => onDelete(result!)}>
                                     Remove
                                 </Button>
                                 <Button color="danger" variant="light" onPress={onClose}>
                                     Close
                                 </Button>
-                                <Button color="primary" onPress={() => onSubmit({ ...result, Helm: helm, Crew: crew, boat: boat, SailNumber: sailNumber })}>
+                                <Button color="primary" onPress={() => onSubmit({ ...result!, Helm: helm, Crew: crew, boat: boat, SailNumber: sailNumber })}>
                                     Save
                                 </Button>
                             </ModalFooter>

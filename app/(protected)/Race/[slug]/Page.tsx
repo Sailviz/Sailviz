@@ -32,7 +32,7 @@ export default function Page({ params }: { params: { slug: string } }) {
     const [progressMax, setProgressMax] = useState(0)
     const [progressIndeterminate, setProgressIndeterminate] = useState(false)
 
-    var [activeResult, setActiveResult] = useState<ResultsDataType>({} as ResultsDataType)
+    var [activeResult, setActiveResult] = useState<ResultsDataType>()
 
     const [boatOption, setBoatOption] = useState({ label: "", value: {} as BoatDataType })
     const [resultCodeOption, setResultCodeOption] = useState({ label: "", value: "" })
