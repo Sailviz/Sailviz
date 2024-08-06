@@ -33,11 +33,7 @@ export default function Page({ params }: { params: { slug: string } }) {
     const [progressIndeterminate, setProgressIndeterminate] = useState(false)
 
     var [activeResult, setActiveResult] = useState<ResultsDataType>()
-
-    const [boatOption, setBoatOption] = useState({ label: "", value: {} as BoatDataType })
-    const [resultCodeOption, setResultCodeOption] = useState({ label: "", value: "" })
-    const [lapsAdvancedMode, setLapsAdvancedMode] = useState(false)
-    const [options, setOptions] = useState([{ label: "", value: {} as BoatDataType }])
+    var [activeFleet, setActiveFleet] = useState<FleetDataType>()
 
     var [race, setRace] = useState<RaceDataType>({
         id: "",
@@ -248,18 +244,6 @@ export default function Page({ params }: { params: { slug: string } }) {
         inputElement.selectionStart = cursorPos
     }
 
-    const saveRaceDate = async (e: ChangeEvent<HTMLInputElement>) => {
-        var time = e.target.value
-        time = time.replace('T', ' ')
-        var day = dayjs(time)
-        if (day.isValid()) {
-            console.log(time)
-            await DB.updateRaceById({ ...race, Time: time })
-        } else {
-            console.log("date is not valid input")
-        }
-    }
-
     const openRacePanel = async () => {
         if (race.Type == "Handicap") {
             Router.push('/HRace/' + race.id)
@@ -281,6 +265,8 @@ export default function Page({ params }: { params: { slug: string } }) {
         console.log(result)
         result.laps.sort((a, b) => a.time - b.time)
         setActiveResult({ ...result })
+
+        setActiveFleet(race.fleets.filter(fleet => fleet.id == result!.fleetId)[0]!)
 
         editModal.onOpen()
     }
@@ -421,7 +407,7 @@ export default function Page({ params }: { params: { slug: string } }) {
         <div id="race" className='h-full w-full overflow-y-auto'>
             <CreateResultModal isOpen={createModal.isOpen} race={race} boats={boats} onSubmit={createResult} onClose={createModal.onClose} />
             <ProgressModal key={progressValue} isOpen={progressModal.isOpen} Value={progressValue} Max={progressMax} Indeterminate={progressIndeterminate} onClose={progressModal.onClose} />
-            <EditResultModal isOpen={editModal.isOpen} result={activeResult} onSubmit={updateResult} onDelete={deleteResult} onClose={editModal.onClose} />
+            <EditResultModal isOpen={editModal.isOpen} result={activeResult} fleet={activeFleet} onSubmit={updateResult} onDelete={deleteResult} onClose={editModal.onClose} />
             <div className="flex flex-wrap justify-center gap-4 w-full">
                 <div className="flex flex-wrap px-4 divide-y divide-solid w-full justify-center">
                     <div className="py-4 w-3/5">
@@ -471,7 +457,9 @@ export default function Page({ params }: { params: { slug: string } }) {
                                         placeholder="Duty Officer" />
                                 </div>
                                 <div className="flex items-center justify-center">
-                                    <button className="btn-darkblue">Copy from previous race</button>
+                                    <Button color="warning">
+                                        Copy from previous race
+                                    </Button>
                                 </div>
                             </div>
                         </form>

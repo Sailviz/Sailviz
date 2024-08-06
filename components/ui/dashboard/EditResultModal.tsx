@@ -5,6 +5,7 @@ import { PageSkeleton } from '../PageSkeleton';
 import * as DB from 'components/apiMethods'
 import Select, { CSSObjectWithLabel } from 'react-select';
 import * as Fetcher from 'components/Fetchers';
+import { mutate } from 'swr';
 
 const resultCodeOptions = [
     { label: 'None', value: '' },
@@ -17,16 +18,8 @@ const resultCodeOptions = [
 const addLap = async (result: ResultsDataType) => {
     if (result == undefined) return
     await DB.CreateLap(result.id, 0)
-    let res = await DB.GetResultById(result.id)
 
-    //order by time, but force 0 times to end
-    res.laps.sort((a, b) => {
-        if (a.time == 0) return 1
-        if (b.time == 0) return -1
-        return a.time - b.time
-    })
-
-    // setResult(result)
+    mutate('/api/GetRaceById')
 }
 
 const removeLap = async (result: ResultsDataType, index: number) => {
@@ -44,7 +37,7 @@ const removeLap = async (result: ResultsDataType, index: number) => {
     // setResult(result)
 }
 
-export default function EditResultModal({ isOpen, result, onSubmit, onClose, onDelete }: { isOpen: boolean, result: ResultsDataType | undefined, onSubmit: (resut: ResultsDataType) => void, onDelete: (result: ResultsDataType) => void, onClose: () => void }) {
+export default function EditResultModal({ isOpen, result, fleet, onSubmit, onClose, onDelete }: { isOpen: boolean, result: ResultsDataType | undefined, fleet: FleetDataType | undefined, onSubmit: (resut: ResultsDataType) => void, onDelete: (result: ResultsDataType) => void, onClose: () => void }) {
     const { theme, setTheme } = useTheme()
     const { boats, boatsIsError, boatsIsValidating } = Fetcher.Boats()
 
@@ -258,7 +251,7 @@ export default function EditResultModal({ isOpen, result, onSubmit, onClose, onD
                                             </div>
                                         </div>
                                         {lapsAdvancedMode ?
-                                            <div className='flex flex-row w-full flex-wrap' id='LapData'>
+                                            <div className='flex flex-row w-full flex-wrap' id='LapData' key={result?.laps.length}>
                                                 {/* this map loops through laps in results, unless it can't find any*/}
                                                 {result?.laps.map((lap: LapDataType, index: number) => {
                                                     return (
@@ -267,17 +260,21 @@ export default function EditResultModal({ isOpen, result, onSubmit, onClose, onD
                                                                 Lap {index + 1}
                                                             </p>
                                                             <div className='flex flex-row'>
-                                                                {/* <input type="time" className="h-full text-xl p-4" step={"1"} defaultValue={new Date(Math.max(0, (lap.time - (race.fleets.find(fleet => fleet.id == result.fleetId) || { startTime: 0 } as FleetDataType).startTime) * 1000)).toISOString().substring(11, 19)} /> */}
-                                                                <div className="text-6xl font-extrabold text-red-600 p-6 float-right cursor-pointer" onClick={() => removeLap(result, index)}>&times;</div>
+                                                                <Input
+                                                                    type="time"
+                                                                    step={"1"}
+                                                                    defaultValue={new Date(Math.max(0, (lap.time - fleet!.startTime) * 1000)).toISOString().substring(11, 19)}
+                                                                />
+                                                                <div className="text-4xl font-extrabold text-red-600 px-2 float-right cursor-pointer" onClick={() => result.laps.splice(index, 1)}>&times;</div>
                                                             </div>
 
                                                         </div>
                                                     )
                                                 })}
                                                 <div className="p-4 mr-2 w-96 flex justify-end">
-                                                    <p onClick={() => addLap(result!)} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-xl px-12 py-4 text-center mr-3 md:mr-0">
+                                                    <Button onClick={() => result?.laps.push({ id: "", time: 0, resultId: result.id })} >
                                                         Add Lap
-                                                    </p>
+                                                    </Button>
                                                 </div>
                                             </div>
                                             :
@@ -293,8 +290,11 @@ export default function EditResultModal({ isOpen, result, onSubmit, onClose, onD
                                                     <p className='text-2xl font-bold'>
                                                         Finish Time
                                                     </p>
-
-                                                    {/* <input type="time" id="FinishTime" className="h-full text-xl p-4" step={"1"} defaultValue={new Date(Math.max(0, (result.finishTime - (race.fleets.find(fleet => fleet.id == result.fleetId) || { startTime: 0 } as FleetDataType).startTime) * 1000)).toISOString().substring(11, 19)} /> */}
+                                                    <Input
+                                                        type="time"
+                                                        step={"1"}
+                                                        defaultValue={new Date(Math.max(0, (result!.finishTime - fleet!.startTime) * 1000)).toISOString().substring(11, 19)}
+                                                    />
 
                                                 </div>
                                             </div>
