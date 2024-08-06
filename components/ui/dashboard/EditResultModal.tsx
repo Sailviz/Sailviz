@@ -14,6 +14,36 @@ const resultCodeOptions = [
     { label: 'On Course Side', value: 'OCS' },
     { label: 'Not Sailed Course', value: 'NSC' }]
 
+const addLap = async (result: ResultsDataType) => {
+    if (result == undefined) return
+    await DB.CreateLap(result.id, 0)
+    let res = await DB.GetResultById(result.id)
+
+    //order by time, but force 0 times to end
+    res.laps.sort((a, b) => {
+        if (a.time == 0) return 1
+        if (b.time == 0) return -1
+        return a.time - b.time
+    })
+
+    // setResult(result)
+}
+
+const removeLap = async (result: ResultsDataType, index: number) => {
+    if (result == undefined) return
+    await DB.DeleteLapById(result.laps[index]!.id)
+    let res = await DB.GetResultById(result.id)
+
+    //order by time, but force 0 times to end
+    res.laps.sort((a, b) => {
+        if (a.time == 0) return 1
+        if (b.time == 0) return -1
+        return a.time - b.time
+    })
+
+    // setResult(result)
+}
+
 export default function EditResultModal({ isOpen, result, onSubmit, onClose, onDelete }: { isOpen: boolean, result: ResultsDataType | undefined, onSubmit: (resut: ResultsDataType) => void, onDelete: (result: ResultsDataType) => void, onClose: () => void }) {
     const { theme, setTheme } = useTheme()
 
@@ -49,36 +79,6 @@ export default function EditResultModal({ isOpen, result, onSubmit, onClose, onD
         setBoatOption({ label: result.boat.name, value: result.boat })
         setResultCodeOption(result.resultCode == '' ? { label: 'None', value: '' } : { label: result.resultCode, value: result.resultCode })
     }, [result])
-
-    const addLap = async () => {
-        if (result == undefined) return
-        await DB.CreateLap(result.id, 0)
-        let res = await DB.GetResultById(result.id)
-
-        //order by time, but force 0 times to end
-        res.laps.sort((a, b) => {
-            if (a.time == 0) return 1
-            if (b.time == 0) return -1
-            return a.time - b.time
-        })
-
-        // setResult(result)
-    }
-
-    const removeLap = async (index: number) => {
-        if (result == undefined) return
-        await DB.DeleteLapById(result.laps[index]!.id)
-        let res = await DB.GetResultById(result.id)
-
-        //order by time, but force 0 times to end
-        res.laps.sort((a, b) => {
-            if (a.time == 0) return 1
-            if (b.time == 0) return -1
-            return a.time - b.time
-        })
-
-        // setResult(result)
-    }
 
     return (
         <>
@@ -270,14 +270,14 @@ export default function EditResultModal({ isOpen, result, onSubmit, onClose, onD
                                                             </p>
                                                             <div className='flex flex-row'>
                                                                 {/* <input type="time" className="h-full text-xl p-4" step={"1"} defaultValue={new Date(Math.max(0, (lap.time - (race.fleets.find(fleet => fleet.id == result.fleetId) || { startTime: 0 } as FleetDataType).startTime) * 1000)).toISOString().substring(11, 19)} /> */}
-                                                                <div className="text-6xl font-extrabold text-red-600 p-6 float-right cursor-pointer" onClick={() => removeLap(index)}>&times;</div>
+                                                                <div className="text-6xl font-extrabold text-red-600 p-6 float-right cursor-pointer" onClick={() => removeLap(result, index)}>&times;</div>
                                                             </div>
 
                                                         </div>
                                                     )
                                                 })}
                                                 <div className="p-4 mr-2 w-96 flex justify-end">
-                                                    <p onClick={addLap} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-xl px-12 py-4 text-center mr-3 md:mr-0">
+                                                    <p onClick={() => addLap(result!)} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-xl px-12 py-4 text-center mr-3 md:mr-0">
                                                         Add Lap
                                                     </p>
                                                 </div>
