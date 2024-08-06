@@ -20,7 +20,7 @@ export default function Page({ params }: { params: { slug: string } }) {
 
     const { user, userIsError, userIsValidating } = Fetcher.UseUser()
     const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
-    const { boats, boatsIsError, boatsIsValidating } = Fetcher.Boats(club)
+    const { boats, boatsIsError, boatsIsValidating } = Fetcher.Boats()
 
     const [seriesName, setSeriesName] = useState("")
 

@@ -1,6 +1,6 @@
 import { Button, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Radio, RadioGroup } from '@nextui-org/react';
 import { useTheme } from 'next-themes';
-import { ChangeEvent, useState } from 'react';
+import { ChangeEvent, useEffect, useState } from 'react';
 import { PageSkeleton } from '../PageSkeleton';
 
 export default function EditBoatModal({ isOpen, boat, onSubmit, onClose }: { isOpen: boolean, boat: BoatDataType | undefined, onSubmit: (boat: BoatDataType) => void, onClose: () => void }) {
@@ -12,23 +12,14 @@ export default function EditBoatModal({ isOpen, boat, onSubmit, onClose }: { isO
     const [pursuitStartTime, setPursuitStartTime] = useState(0)
 
     const { theme, setTheme } = useTheme()
-    if (boat == undefined) {
-        return (
-            <Modal
-                isOpen={isOpen}
-                onClose={onClose}
-                scrollBehavior={'outside'}
-                size='5xl'
-                backdrop='blur'
-            >
-                <PageSkeleton />
-            </Modal>)
-    }
 
-    setBoatName(boat.name)
-    setPY(boat.py)
-    setCrew(boat.crew)
-    setPursuitStartTime(boat.pursuitStartTime)
+    useEffect(() => {
+        if (boat === undefined) return
+        setBoatName(boat.name)
+        setPY(boat.py)
+        setCrew(boat.crew)
+        setPursuitStartTime(boat.pursuitStartTime)
+    }, [boat])
 
     return (
         <>
@@ -109,7 +100,7 @@ export default function EditBoatModal({ isOpen, boat, onSubmit, onClose }: { isO
                                 <Button color="danger" variant="light" onPress={onClose}>
                                     Close
                                 </Button>
-                                <Button color="primary" onPress={() => onSubmit({ ...boat, name: boatName, py: PY, crew: Crew, pursuitStartTime: pursuitStartTime })}>
+                                <Button color="primary" onPress={() => onSubmit({ ...boat!, name: boatName, py: PY, crew: Crew, pursuitStartTime: pursuitStartTime })}>
                                     Save
                                 </Button>
                             </ModalFooter>

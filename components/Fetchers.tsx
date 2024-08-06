@@ -55,9 +55,8 @@ export function Series(seriesId: string) {
     }
 }
 
-export function Boats(club: ClubDataType) {
-    let body = { clubId: club?.id }
-    const { data, error, isValidating } = useSWR(club && club.id != "" ? '/api/GetBoatsByClubId' : null, (url) => advancedFetcher(url!, body))
+export function Boats() {
+    const { data, error, isValidating } = useSWR('/api/GetBoats', fetcher)
 
     return {
         boats: data?.boats as BoatDataType[],

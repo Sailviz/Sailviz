@@ -7,8 +7,9 @@ import * as Fetcher from 'components/Fetchers';
 import { PageSkeleton } from 'components/ui/PageSkeleton';
 import Papa from "papaparse";
 import BoatTable from "components/tables/BoatTable";
-import { Button, useDisclosure } from "@nextui-org/react";
+import { Button, Input, useDisclosure } from "@nextui-org/react";
 import EditBoatModal from "components/ui/dashboard/EditBoatModal";
+import { mutate } from "swr";
 
 
 export default function Page() {
@@ -16,9 +17,8 @@ export default function Page() {
 
     const editModal = useDisclosure();
 
-    const { user, userIsError, userIsValidating } = Fetcher.UseUser()
     const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
-    const { boats, boatsIsError, boatsIsValidating } = Fetcher.Boats(club)
+    const { boats, boatsIsError, boatsIsValidating } = Fetcher.Boats()
 
     const [editingBoat, setEditingBoat] = useState<BoatDataType>()
 
@@ -88,16 +88,18 @@ export default function Page() {
     }
 
     const updateBoat = async (boat: BoatDataType) => {
+        editModal.onClose()
         console.log(boat)
         await DB.updateBoatById(boat)
         //mutate boats
-        editModal.onClose()
+        mutate('/api/GetBoatsByClubId')
     }
 
     const editBoat = (boat: BoatDataType) => {
         console.log(boat)
         setEditingBoat(boat)
         editModal.onOpen()
+        mutate('/api/GetBoatsByClubId')
     }
 
     const deleteBoat = async (boat: BoatDataType) => {
@@ -118,38 +120,35 @@ export default function Page() {
         }
     }
 
-    if (boatsIsError || boatsIsValidating || boats == undefined) {
-        return <PageSkeleton />
-    }
     return (
         <>
             <EditBoatModal isOpen={editModal.isOpen} boat={editingBoat} onSubmit={updateBoat} onClose={() => { editModal.onClose(); setEditingBoat(undefined) }} />
-            <p className='text-2xl font-bold text-gray-700 p-6'>
+            <p className='text-2xl font-bold p-6'>
                 Boats
             </p>
             <div className='p-6'>
                 <div className='flex flex-row p-6 justify-around'>
                     <div className="w-full flex px-4">
-                        <label className="w-full">
-                            <p className=" w-full cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0 ">
-                                Import Boats
-                            </p>
-                            <input
-                                type="file"
-                                accept=".csv"
-                                onChange={boatFileUploadHandler}
-                                className="display-none"
-                            />
-                        </label>
+                        <Button className="mx-1" color="primary" onClick={() => document.getElementById("entryFileUpload")!.click()}>
+                            Upload Entries
+
+                        </Button>
+                        <Input
+                            id="entryFileUpload"
+                            type="file"
+                            accept=".csv"
+                            onChange={boatFileUploadHandler}
+                            className="hidden"
+                        />
                     </div>
-                    <p onClick={downloadBoats} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0 w-1/2">
+                    <Button onClick={downloadBoats} color='primary' fullWidth>
                         Download Boats
-                    </p>
-                    <Button onClick={() => { }} className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0 w-1/2">
+                    </Button>
+                    <Button onClick={() => createBoat()} color='primary' fullWidth>
                         Add Boat
                     </Button>
                 </div>
-                <BoatTable data={boats} key={JSON.stringify(boats)} editBoat={editBoat} deleteBoat={deleteBoat} createBoat={createBoat} />
+                <BoatTable editBoat={editBoat} deleteBoat={deleteBoat} createBoat={createBoat} />
             </div>
         </>
     )

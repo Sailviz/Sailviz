@@ -18,9 +18,8 @@ const SignOnPage = () => {
 
     const createModal = useDisclosure();
 
-    const { user, userIsError, userIsValidating } = Fetcher.UseUser()
     const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
-    const { boats, boatsIsError, boatsIsValidating } = Fetcher.Boats(club)
+    const { boats, boatsIsError, boatsIsValidating } = Fetcher.Boats()
     const { todaysRaces, todaysRacesIsError, todaysRacesIsValidating } = Fetcher.GetTodaysRaceByClubId(club)
 
     const [races, setRaces] = useState<RaceDataType[]>()
@@ -245,7 +244,7 @@ const SignOnPage = () => {
     }, [todaysRaces])
 
 
-    if (clubIsValidating || userIsValidating || boatsIsValidating || races == undefined) {
+    if (clubIsValidating || boatsIsValidating || races == undefined) {
         return <PageSkeleton />
     }
 

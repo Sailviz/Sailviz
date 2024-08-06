@@ -46,9 +46,7 @@ const removeLap = async (result: ResultsDataType, index: number) => {
 
 export default function EditResultModal({ isOpen, result, onSubmit, onClose, onDelete }: { isOpen: boolean, result: ResultsDataType | undefined, onSubmit: (resut: ResultsDataType) => void, onDelete: (result: ResultsDataType) => void, onClose: () => void }) {
     const { theme, setTheme } = useTheme()
-
-    const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
-    const { boats, boatsIsError, boatsIsValidating } = Fetcher.Boats(club)
+    const { boats, boatsIsError, boatsIsValidating } = Fetcher.Boats()
 
     const [lapsAdvancedMode, setLapsAdvancedMode] = useState(false)
     const [resultCodeOption, setResultCodeOption] = useState({ label: "", value: "" })

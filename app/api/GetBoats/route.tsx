@@ -1,12 +1,11 @@
 import prisma from 'components/prisma'
 import { NextRequest, NextResponse } from "next/server";
+import { cookies } from 'next/headers';
 
-import assert from 'assert';
-
-async function findBoats(boatId: any) {
+async function findBoats(clubId: string) {
     var result = await prisma.boat.findMany({
         where: {
-            clubId: boatId
+            clubId: clubId
         }
     })
     return result;
@@ -14,18 +13,17 @@ async function findBoats(boatId: any) {
 
 
 
-export async function POST(request: NextRequest) {
-    const req = await request.json()
-    // check if we have all data.
-    // The website stops this, but just in case
-    try {
-        assert.notStrictEqual(undefined, req.clubId)
-    } catch (e) {
+export async function GET(request: NextRequest) {
+    const cookieStore = cookies()
+    const searchParams = request.nextUrl.searchParams
+
+    var clubId = cookieStore.get('clubId')
+
+    if (clubId == undefined) {
         return NextResponse.json({ error: true, message: "information missing" });
     }
 
-    var clubId = req.clubId
-    var boat = await findBoats(clubId)
+    var boat = await findBoats(clubId.value)
     if (boat) {
         return NextResponse.json({ error: false, boats: boat });
     }

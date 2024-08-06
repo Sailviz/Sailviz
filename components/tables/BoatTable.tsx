@@ -1,11 +1,12 @@
 import React, { ChangeEvent, useState } from 'react';
 import { createColumnHelper, flexRender, getCoreRowModel, useReactTable, getFilteredRowModel } from '@tanstack/react-table'
-import { Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Dropdown, DropdownItem, DropdownTrigger, Button, DropdownMenu, Input, Tooltip } from '@nextui-org/react';
+import { Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Dropdown, DropdownItem, DropdownTrigger, Button, DropdownMenu, Input, Tooltip, Spinner } from '@nextui-org/react';
 import { VerticalDotsIcon } from 'components/icons/vertical-dots-icon';
 import { EyeIcon } from 'components/icons/eye-icon';
 import { EditIcon } from 'components/icons/edit-icon';
 import { DeleteIcon } from 'components/icons/delete-icon';
 import { SearchIcon } from 'components/icons/search-icon';
+import * as Fetcher from 'components/Fetchers';
 
 const columnHelper = createColumnHelper<BoatDataType>()
 
@@ -92,7 +93,9 @@ const Action = ({ ...props }: any) => {
 
 
 const BoatTable = (props: any) => {
-    var [data, setData] = useState(props.data)
+    const { boats, boatsIsError, boatsIsValidating } = Fetcher.Boats()
+
+    const data = boats || []
 
     const editBoat = (boat: BoatDataType) => {
         props.editBoat(boat)
@@ -100,15 +103,13 @@ const BoatTable = (props: any) => {
 
     const deleteBoat = (id: any) => {
         props.deleteBoat(id)
-        const tempdata: ResultsDataType[] = [...data]
-        tempdata.splice(tempdata.findIndex((x: ResultsDataType) => x.id === id), 1)
-        setData(tempdata)
     }
 
     const createBoat = () => {
         props.createBoat()
     }
 
+    const loadingState = boatsIsValidating || data?.length === 0 ? "loading" : "idle";
 
     var table = useReactTable({
         data,
@@ -147,7 +148,12 @@ const BoatTable = (props: any) => {
 
     return (
         <div key={props.data}>
-            <Table isStriped id={"clubTable"}>
+            <Table
+                isStriped
+                classNames={{
+                    base: "max-h-[520px] overflow-scroll",
+                    table: "min-h-[420px]",
+                }}>
                 <TableHeader>
                     {table.getHeaderGroups().flatMap(headerGroup => headerGroup.headers).map(header => {
                         return (
@@ -169,7 +175,9 @@ const BoatTable = (props: any) => {
                         );
                     })}
                 </TableHeader>
-                <TableBody>
+                <TableBody
+                    loadingContent={<Spinner />}
+                    loadingState={loadingState}>
                     {table.getRowModel().rows.map(row => (
                         <TableRow key={row.id}>
                             {row.getVisibleCells().map(cell => (
