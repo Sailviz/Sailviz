@@ -7,6 +7,7 @@ import Cookies from "js-cookie";
 import * as Fetcher from 'components/Fetchers';
 import { Button, useDisclosure } from "@nextui-org/react";
 import RetireModal from "components/ui/dashboard/RetireModal";
+import BoatCard from "components/ui/race/BoatCard";
 
 enum raceStateType {
     running,
@@ -464,12 +465,6 @@ export default function Page({ params }: { params: { slug: string } }) {
 
     }
 
-    const secondsToTimeString = (seconds: number) => {
-        let minutes = Math.floor(seconds / 60)
-        let remainder = seconds % 60
-        return minutes.toString().padStart(2, '0') + ":" + remainder.toString().padStart(2, '0')
-    }
-
     const controller = new AbortController()
 
 
@@ -618,92 +613,9 @@ export default function Page({ params }: { params: { slug: string } }) {
                 <div className="overflow-auto">
                     <div className="flex flex-row justify-around flex-wrap" id="EntrantCards">
                         {race.fleets.flatMap(fleets => fleets.results).map((result: ResultsDataType, index) => {
-                            if (result.resultCode != "") {
-                                //result has a result code so we display it
-                                let text = result.resultCode
-                                return (
-                                    <div key={index} id={result.id} className='flex bg-red-300 flex-row justify-between p-6 m-4 border-2 border-pink-500 rounded-lg shadow-xl w-96 shrink-0'>
-                                        <div className="flex flex-col">
-                                            <h2 className="text-2xl text-gray-700">{result.SailNumber}</h2>
-                                            <h2 className="text-2xl text-gray-700">{result.boat?.name}</h2>
-                                            <p className="text-base text-gray-600">{result.Helm} - {result.Crew}</p>
-                                        </div>
-                                        <div className="px-5 py-1">
-                                            <p className="text-2xl text-gray-700 px-5 py-2.5 text-center mr-3 md:mr-0">
-                                                {text}
-                                            </p>
-                                        </div>
-                                    </div>
-                                )
-                            }
-                            if (result.finishTime == 0) {
-                                //result has not finished
-                                return (
-                                    <div key={index} id={result.id} className='flex bg-green-300 flex-row justify-between m-4 border-2 border-pink-500 rounded-lg shadow-xl w-96 shrink-0'>
-                                        <div className="flex flex-col ml-4 my-6">
-                                            <h2 className="text-2xl text-gray-700">{result.SailNumber}</h2>
-                                            <h2 className="text-2xl text-gray-700">{result.boat?.name}</h2>
-                                            <p className="text-base text-gray-600">{result.Helm} - {result.Crew}</p>
-                                            {result.laps.length >= 1 ?
-                                                <p className="text-base text-gray-600">Laps: {result.laps.length} Last: {secondsToTimeString(result.laps[result.laps.length - 1]?.time! - race.fleets.find((fleet) => fleet.id == result.fleetId)!.startTime)}</p>
-                                                :
-                                                <p className="text-base text-gray-600">Laps: {result.laps.length} </p>
-                                            }
-                                        </div>
-                                        <div className="px-5 py-2 w-2/4">
-                                            {raceState.some((state) => state == raceStateType.running) ?
-                                                <div>
-                                                    {(() => {
-                                                        switch (mode) {
-                                                            case modeType.Finish:
-                                                                return (
-                                                                    <Button onClick={(e) => { finishBoat(result.id) }} className="cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-md p-5 text-center mt-5">
-                                                                        Finish
-                                                                    </Button>
+                            let fleetIndex = race.fleets.findIndex(fleet => fleet.id == result.fleetId)
+                            return <BoatCard key={result.id} result={result} fleet={race.fleets.find((fleet) => fleet.id == result.fleetId)!} raceState={raceState[fleetIndex]!} mode={mode} lapBoat={lapBoat} finishBoat={finishBoat} showRetireModal={showRetireModal} />
 
-                                                                )
-                                                            case modeType.Retire:
-                                                                return (
-                                                                    <Button onClick={(e) => { showRetireModal(result.id) }} className="cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-md p-5 text-center mt-5">
-                                                                        Retire
-                                                                    </Button>
-                                                                )
-                                                            case modeType.Lap:
-                                                                return (
-                                                                    <Button onClick={(e) => { lapBoat(result.id) }} className="cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-md p-5 text-center mt-5">
-                                                                        Lap
-                                                                    </Button>
-                                                                )
-                                                        }
-                                                    })()}
-                                                </div>
-                                                :
-                                                <></>
-                                            }
-
-                                        </div>
-                                    </div>
-                                )
-                            } else {
-                                //result has finished
-                                let text = "Finished"
-                                return (
-                                    <div key={index} id={result.id} className='flex bg-red-300 flex-row justify-between p-6 m-4 border-2 border-pink-500 rounded-lg shadow-xl w-96 shrink-0'>
-                                        <div className="flex flex-col">
-                                            <h2 className="text-2xl text-gray-700">{result.SailNumber}</h2>
-                                            <h2 className="text-2xl text-gray-700">{result.boat?.name}</h2>
-                                            <p className="text-base text-gray-600">{result.Helm} - {result.Crew}</p>
-                                            <p className="text-base text-gray-600">Laps: {result.laps.length} Finish: {secondsToTimeString(result.finishTime - race.fleets.find((fleet) => fleet.id == result.fleetId)!.startTime)}</p>
-                                        </div>
-                                        <div className="px-5 py-1">
-                                            <p className="text-white bg-blue-600 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
-                                                {text}
-                                            </p>
-
-                                        </div>
-                                    </div>
-                                )
-                            }
                         })}
                     </div>
                 </div>
