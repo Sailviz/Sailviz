@@ -1,26 +1,43 @@
 import React, { ChangeEvent, useState } from 'react';
 import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, RowSelection, SortingState, useReactTable } from '@tanstack/react-table'
-import { Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Dropdown, DropdownItem, DropdownTrigger, Button, DropdownMenu } from '@nextui-org/react';
-import { VerticalDotsIcon } from 'components/icons/vertical-dots-icon';
+import { Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Dropdown, DropdownItem, DropdownTrigger, Button, DropdownMenu, Tooltip, Spinner } from '@nextui-org/react';
+import { EditIcon } from 'components/icons/edit-icon';
+import { DeleteIcon } from 'components/icons/delete-icon';
+import * as Fetcher from 'components/Fetchers';
 
 
-const Edit = ({ ...props }: any) => {
-    const onClick = () => {
-        props.edit(props.id)
+const Action = ({ ...props }: any) => {
+    const onEditClick = () => {
+        props.edit(props.row.original)
+    }
+
+    const onDeleteClick = () => {
+        if (confirm("are you sure you want to do this?")) {
+            props.deleteUser(props.row.original)
+        }
     }
     return (
-        <p className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0"
-            onClick={onClick} >
-            Edit
-        </p>
+        <div className="relative flex items-center gap-2">
+            <Tooltip content="Edit">
+                <span className="text-lg text-default-400 cursor-pointer active:opacity-50">
+                    <EditIcon onClick={onEditClick} />
+                </span>
+            </Tooltip>
+            <Tooltip color="danger" content="Delete" >
+                <span className="text-lg text-danger cursor-pointer active:opacity-50">
+                    <DeleteIcon onClick={onDeleteClick} />
+                </span>
+            </Tooltip>
+        </div>
     );
-
 };
 
 const columnHelper = createColumnHelper<UserDataType>()
 
 const UsersTable = (props: any) => {
-    var [data, setData] = useState(props.data)
+
+    const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
+    const { users, usersIsError, usersIsValidating } = Fetcher.Users(club)
 
     const [sorting, setSorting] = useState<SortingState>([{
         id: "number",
@@ -30,6 +47,17 @@ const UsersTable = (props: any) => {
     const edit = (data: any) => {
         props.edit(data)
     }
+
+    const deleteUser = (data: any) => {
+        props.deleteUser(data)
+    }
+
+    var data = users
+    if (data == undefined) {
+        data = []
+    }
+
+    const loadingState = usersIsValidating ? "loading" : "idle";
 
     var table = useReactTable({
         data,
@@ -41,8 +69,8 @@ const UsersTable = (props: any) => {
             }),
             columnHelper.accessor('id', {
                 id: "Edit",
-                header: "Edit",
-                cell: props => <Edit {...props} id={props.row.original.id} edit={edit} />
+                header: "Action",
+                cell: props => <Action {...props} id={props.row.original.id} edit={edit} deleteUser={deleteUser} />
             }),
         ],
         state: {
@@ -67,7 +95,9 @@ const UsersTable = (props: any) => {
                         );
                     })}
                 </TableHeader>
-                <TableBody>
+                <TableBody
+                    loadingContent={<Spinner />}
+                    loadingState={loadingState}>
                     {table.getRowModel().rows.map(row => (
                         <TableRow key={row.id}>
                             {row.getVisibleCells().map(cell => (

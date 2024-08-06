@@ -1,5 +1,4 @@
 import { Button } from "@nextui-org/react"
-import { use } from "chai"
 import { useEffect, useState } from "react"
 
 enum raceStateType {

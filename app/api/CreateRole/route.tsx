@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: true, message: 'Club does not exist' });
     }
 
-    var role = createRole(club.id)
+    var role = await createRole(club.id)
     if (role) {
         return NextResponse.json({ error: false, role: role });
     }
