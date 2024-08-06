@@ -5,7 +5,8 @@ import * as DB from 'components/apiMethods';
 import RaceTimer from "components/HRaceTimer"
 import Cookies from "js-cookie";
 import * as Fetcher from 'components/Fetchers';
-import { Button } from "@nextui-org/react";
+import { Button, useDisclosure } from "@nextui-org/react";
+import RetireModal from "components/ui/dashboard/RetireModal";
 
 enum raceStateType {
     running,
@@ -20,13 +21,6 @@ enum modeType {
     Finish
 }
 
-const resultCodes = [
-    { 'desc': 'Did Not Finish', 'code': 'DNF' },
-    { 'desc': 'Did Not Start', 'code': 'DNS' },
-    { 'desc': 'Disqualified', 'code': 'DSQ' },
-    { 'desc': 'On Course Side', 'code': 'OCS' },
-    { 'desc': 'Not Sailed Course', 'code': 'NSC' }]
-
 export default function Page({ params }: { params: { slug: string } }) {
 
     const Router = useRouter()
@@ -37,6 +31,8 @@ export default function Page({ params }: { params: { slug: string } }) {
     const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
 
     var [seriesName, setSeriesName] = useState("")
+
+    const retireModal = useDisclosure();
 
     var [race, setRace] = useState<RaceDataType>(({
         id: "",
@@ -299,7 +295,7 @@ export default function Page({ params }: { params: { slug: string } }) {
         let data = await DB.getRaceById(race.id)
         setRace(data)
 
-        await hideRetireModal()
+        retireModal.onClose()
 
     }
 
@@ -526,7 +522,6 @@ export default function Page({ params }: { params: { slug: string } }) {
     }, [race, dynamicSorting, mode])
 
     const showRetireModal = (resultId: String) => {
-        const modal = document.getElementById("retireModal")
         let result: ResultsDataType | undefined;
         race.fleets.some(fleet => {
             result = fleet.results.find(result => result.id === resultId);
@@ -537,21 +532,15 @@ export default function Page({ params }: { params: { slug: string } }) {
             return
         }
         setActiveResult(result)
-        modal?.classList.remove("hidden")
-
-
-    }
-
-    const hideRetireModal = () => {
-        const modal = document.getElementById("retireModal")
-        modal?.classList.add("hidden")
+        retireModal.onOpen()
 
     }
 
     return (
         <>
-            <audio id="Beep" src=".\beep-6.mp3" ></audio>
-            <audio id="Countdown" src=".\Countdown.mp3" ></audio>
+            <RetireModal isOpen={retireModal.isOpen} onSubmit={retireBoat} onClose={retireModal.onClose} result={activeResult} />
+            <audio id="Beep" src="/Beep-6.mp3" ></audio>
+            <audio id="Countdown" src="/Countdown.mp3" ></audio>
             <div className="w-full flex flex-col items-center justify-start panel-height">
                 <div className="flex w-full flex-col justify-around" key={JSON.stringify(raceState)}>
 
@@ -716,30 +705,6 @@ export default function Page({ params }: { params: { slug: string } }) {
                                 )
                             }
                         })}
-                    </div>
-                </div>
-            </div>
-            <div id="retireModal" className="hidden fixed z-10 left-0 top-0 w-full h-full overflow-auto bg-gray-400 backdrop-blur-sm bg-opacity-20">
-                <div className="mx-auto my-20 px-a py-5 border w-1/4 bg-gray-300 rounded-sm">
-                    <div className="text-6xl font-extrabold text-gray-700 flex justify-center">Retire Boat</div>
-                    <span className="text-4xl font-extrabold text-gray-700 flex justify-center mb-8 text-center">{activeResult.boat.name} : {activeResult.SailNumber} <br /> {activeResult.Helm} </span>
-                    {resultCodes.map((resultCode) => {
-                        return (
-                            <div key={resultCode.code} className="flex mb-2 justify-center">
-                                <div
-                                    onClick={() => retireBoat(resultCode.code)}
-                                    className="w-1/2 cursor-pointer text-white bg-blue-600 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0"
-                                >
-                                    {resultCode.desc} ({resultCode.code})
-                                </div>
-                            </div>
-                        )
-                    })
-                    }
-                    <div className="flex mt-8 justify-center">
-                        <p id="retireCancel" onClick={hideRetireModal} className="w-1/2 cursor-pointer text-white bg-red-600 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
-                            Cancel
-                        </p>
                     </div>
                 </div>
             </div>
