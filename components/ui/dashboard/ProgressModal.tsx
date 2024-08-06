@@ -15,18 +15,15 @@ export default function ProgressModal({ isOpen, onClose, Value, Max, Indetermina
                 isOpen={isOpen}
                 onClose={onClose}
                 scrollBehavior={'outside'}
-                size='5xl'
+                size='xl'
                 backdrop='blur'
                 disableAnimation
             >
                 <ModalContent>
                     {(onClose) => (
                         <>
-                            <ModalHeader className="flex flex-col gap-1">
-                                Create Series
-                            </ModalHeader>
                             <ModalBody>
-                                <div className="flex w-full">
+                                <div className="flex w-full content-center">
                                     <Progress
                                         disableAnimation
                                         aria-label="Downloading..."
