@@ -1,8 +1,12 @@
+'use client'
 // Import your Client Component
-import Card from 'components/ui/Card'
+import Card from 'components/ui/home/Card'
+import LapsCounter from 'components/ui/home/LapsCounter'
+
 
 export default async function Page() {
-    // Forward fetched data to your Client Component
+
+
     return (
         <div className="container mx-auto flex flex-col items-center justify-center h-full p-4">
             <h1 className="text-5xl md:text-[5rem] leading-normal font-extrabold text-gray-700">
@@ -14,6 +18,7 @@ export default async function Page() {
                     description=""
                     link="/"
                 />
+                <LapsCounter />
             </div>
         </div>
     )
