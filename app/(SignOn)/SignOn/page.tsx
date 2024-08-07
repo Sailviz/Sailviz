@@ -24,20 +24,6 @@ const SignOnPage = () => {
 
     const [races, setRaces] = useState<RaceDataType[]>()
 
-    var [activeRaceData, setActiveRaceData] = useState<RaceDataType>({
-        id: "",
-        number: 0,
-        Time: "",
-        OOD: "",
-        AOD: "",
-        SO: "",
-        ASO: "",
-        fleets: [],
-        Type: "",
-        seriesId: "",
-        series: {} as SeriesDataType
-    })
-
     const [activeResult, setActiveResult] = useState<ResultsDataType>({} as ResultsDataType)
 
     const [options, setOptions] = useState([{ label: "", value: {} as BoatDataType }])
@@ -46,18 +32,6 @@ const SignOnPage = () => {
 
     const [selectedRaces, setSelectedRaces] = useState<boolean[]>([]);
 
-    const showPage = (id: string) => {
-        //hide all pages.
-        var Signon = document.getElementById('Signon')
-        Signon?.classList.add('hidden')
-        var results = document.getElementById('Results')
-        results?.classList.add('hidden')
-        var guide = document.getElementById('Guide')
-        guide?.classList.add('hidden')
-
-        let selected = document.getElementById(id)
-        selected?.classList.remove('hidden')
-    }
 
 
     const createResult = async (fleetId: string, helm: string, crew: string, boat: BoatDataType, sailNum: string) => {
@@ -191,35 +165,6 @@ const SignOnPage = () => {
         }
     }
 
-    const showAddBoatModal = async () => {
-        const Helm = document.getElementById('Helm') as HTMLInputElement;
-        Helm.value = ""
-
-        const Crew = document.getElementById("Crew") as HTMLInputElement
-        Crew.value = ""
-
-        const sailNum = document.getElementById("SailNum") as HTMLInputElement
-        sailNum.value = ""
-
-        const raceSelects = document.getElementsByName("raceSelect")
-        raceSelects.forEach((select) => {
-            const inputSelect = select as HTMLInputElement
-            inputSelect.checked = false
-        })
-
-        setSelectedOption({ label: "", value: {} as BoatDataType })
-
-
-        const modal = document.getElementById("addModal")
-        modal?.classList.remove("hidden")
-
-    }
-
-    const hideAddBoatModal = async () => {
-        const modal = document.getElementById("addModal")
-        modal?.classList.add("hidden")
-    }
-
     useEffect(() => {
         if (boats == undefined) return
         let tempoptions: { label: string; value: BoatDataType }[] = []
@@ -232,14 +177,17 @@ const SignOnPage = () => {
     }, [boats])
 
     useEffect(() => {
+        const fetch = async () => {
+            setSelectedRaces(new Array(todaysRaces.length).fill(true))
+            let tempRaces: RaceDataType[] = []
+            for (let i = 0; i < todaysRaces.length; i++) {
+                tempRaces[i] = await DB.getRaceById(todaysRaces[i]!.id)
+            }
+            console.log(tempRaces)
+            setRaces([...tempRaces])
+        }
         if (todaysRaces == undefined) return
-
-        setSelectedRaces(new Array(todaysRaces.length).fill(true))
-        let tempRaces: RaceDataType[] = []
-        todaysRaces.forEach(async (r) => {
-            tempRaces.push(await DB.getRaceById(r.id))
-        })
-        setRaces(tempRaces)
+        fetch()
 
     }, [todaysRaces])
 
@@ -247,20 +195,17 @@ const SignOnPage = () => {
     if (clubIsValidating || boatsIsValidating || races == undefined) {
         return <PageSkeleton />
     }
-
+    console.log(races)
     return (
         <div >
             <CreateResultModal isOpen={createModal.isOpen} races={races} boats={boats} onSubmit={createResults} onClose={createModal.onClose} />
-            <div id="Signon" className="signon-height overflow-y-auto">
+            <div id="Signon" className="overflow-y-auto">
                 <div id="editModal" className="hidden fixed z-10 left-0 top-0 w-full h-full overflow-auto bg-gray-400 backdrop-blur-sm bg-opacity-20">
                     <div className="mx-40 my-20 px-10 py-5 border w-4/5 bg-gray-300 rounded-sm">
                         <div className="text-6xl font-extrabol p-6 float-right cursor-pointer" onClick={hideEditBoatModal}>&times;</div>
                         <div className="text-6xl font-extrabol p-6">Edit Entry</div>
                         <div className="flex w-3/4">
                             <div className='flex flex-col px-6 w-full'>
-                                <p className='hidden' id="EditResultId">
-
-                                </p>
                                 <p className='text-2xl font-bol'>
                                     Helm
                                 </p>
@@ -314,9 +259,9 @@ const SignOnPage = () => {
                     </div>
                 </div>
                 {races.length > 0 ?
-                    <div key={races.length}>
+                    <div>
                         <div className="text-6xl font-extrabol p-6">
-                            {"Today's Races"}
+                            Today's Races
                         </div>
                         <div className='w-full my-0 mx-auto'>
                             <div className="p-6 w-3/4 m-auto">
@@ -326,7 +271,7 @@ const SignOnPage = () => {
                             </div>
                         </div>
                         {races.map((race, index) => {
-                            console.log(race.series.name, race.number)
+                            console.log(race)
                             return (
                                 <div className="m-6" key={JSON.stringify(races) + index}>
                                     <div className="text-4xl font-extrabol p-6">
