@@ -99,6 +99,8 @@ const SignOnPage = () => {
 
 
     const deleteResult = async (result: ResultsDataType) => {
+        if (!confirm("Are you sure you want to delete this entry")) return
+        editModal.onClose()
         await DB.DeleteResultById(result)
 
         let racesCopy = window.structuredClone(races)

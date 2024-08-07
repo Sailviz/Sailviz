@@ -64,14 +64,15 @@ export const SidebarWrapper = () => {
                                 icon={<SettingsIcon />}
                                 items={todaysRaces?.map(race => race.series.name + ": " + race.number)}
                                 title="Today's Races"
-                                hrefs={todaysRaces?.map(race => 'SignOn/Race/' + race.id)}
+                                hrefs={todaysRaces?.map(race => '/SignOn/Race/' + race.id)}
                             />
                             <CollapseItems
                                 isActive={pathname === "/SignOn/Series"}
                                 icon={<SettingsIcon />}
-                                items={todaysRaces?.map(race => race.series.name)}
+                                items={[...new Set(todaysRaces?.map(race => race.series.name))]
+                                }
                                 title="Today's Series"
-                                hrefs={todaysRaces?.map(race => 'SignOn/Series/' + race.series.id)}
+                                hrefs={todaysRaces?.map(race => '/SignOn/Series/' + race.series.id)}
                             />
                             <SidebarItem
                                 isActive={pathname === "/Documentation"}
