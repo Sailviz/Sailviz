@@ -150,12 +150,19 @@ const SignOnTable = (props: any) => {
     })
     return (
         <div key={props.data}>
-            <Table isStriped
+            <Table
+                isStriped
+                isHeaderSticky
+                removeWrapper
+                classNames={{
+                    base: "max-h-[75vh] overflow-scroll",
+                    table: "",
+                }}
             >
                 <TableHeader>
                     {table.getHeaderGroups().flatMap(headerGroup => headerGroup.headers).map(header => {
                         return (
-                            <TableColumn key={header.id}>
+                            <TableColumn key={header.id} className={'max-h-'}>
                                 {flexRender(
                                     header.column.columnDef.header,
                                     header.getContext()
