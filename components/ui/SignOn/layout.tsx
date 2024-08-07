@@ -25,7 +25,7 @@ export const Layout = ({ children }: Props) => {
             }}>
             <section className='flex'>
                 <SidebarWrapper />
-                <div>
+                <div className="overflow-hidden">
                     {children}
                 </div>
             </section>

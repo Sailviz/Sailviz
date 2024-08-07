@@ -5,17 +5,17 @@ import { useTheme } from 'next-themes';
 import { ChangeEvent, useEffect, useState } from 'react';
 import Select, { CSSObjectWithLabel } from 'react-select';
 
-export default function CreateResultModal({ isOpen, races, boats, onSubmit, onClose }: { isOpen: boolean, races: RaceDataType[], boats: BoatDataType[], onSubmit: (helmValue: string, crewValue: string, boat: any, sailNum: string, fleetId: string[]) => void, onClose: () => void }) {
+export default function EditResultModal({ isOpen, result, boats, onSubmit, onClose, onDelete }: { isOpen: boolean, result: ResultsDataType | undefined, boats: BoatDataType[], onSubmit: (result: ResultsDataType) => void, onClose: () => void, onDelete: (result: ResultsDataType) => void }) {
 
-    const [helmValue, setHelmValue] = useState('')
-    const [crewValue, setCrewValue] = useState('')
+    const [helm, setHelm] = useState('')
+    const [crew, setCrew] = useState('')
     const [sailNumber, setSailNumber] = useState('')
 
     const { theme, setTheme } = useTheme()
 
     const [selectedRaces, setSelectedRaces] = useState<string[]>([])
     const [selectedFleets, setSelectedFleets] = useState<string[]>([])
-    const [selectedOption, setSelectedOption] = useState({ label: "", value: {} as BoatDataType })
+    const [selectedBoat, setSelectedBoat] = useState({ label: "", value: {} as BoatDataType })
 
     let options: { label: string; value: BoatDataType }[] = []
     boats.forEach((boat: BoatDataType) => {
@@ -29,21 +29,27 @@ export default function CreateResultModal({ isOpen, races, boats, onSubmit, onCl
         const capitalizedWords = sentence.map(word => word.charAt(0).toUpperCase() + word.slice(1));
         const capitalisedSentence = capitalizedWords.join(' ')
         console.log(capitalisedSentence)
-        if (e.target.id == 'helm') setHelmValue(capitalisedSentence)
-        if (e.target.id == 'crew') setCrewValue(capitalisedSentence)
+        if (e.target.id == 'helm') setHelm(capitalisedSentence)
+        if (e.target.id == 'crew') setCrew(capitalisedSentence)
     }
 
-    const updateRaceSelection = (race: RaceDataType, value: boolean) => {
-        if (value) {
-            setSelectedRaces([...selectedRaces, race.id])
-            setSelectedFleets([...selectedFleets, race.fleets[0]!.id])
-        } else {
-            setSelectedRaces(selectedRaces.filter((value) => value != race.id))
-            //remove all fleets from the selected fleets that are in this race
-            setSelectedFleets(selectedFleets.filter((value) => !race.fleets.flatMap(fleet => fleet.id).includes(value)))
+    function updateFleetSelection(race: RaceDataType, key: Key) {
+        var tempSelected = window.structuredClone(selectedFleets)
+        var filteredArray = tempSelected.filter((value: string) => !race.fleets.flatMap(fleet => fleet.id).includes(value));
+        filteredArray = [...filteredArray, key]
+        setSelectedFleets(filteredArray)
+    }
+
+    useEffect(() => {
+        if (result == undefined) {
+            return
         }
-
-    }
+        console.log(result)
+        setHelm(result.Helm)
+        setCrew(result.Crew)
+        setSailNumber(result.SailNumber)
+        setSelectedBoat({ label: result.boat.name, value: result.boat })
+    }, [result])
 
     return (
         <>
@@ -58,7 +64,7 @@ export default function CreateResultModal({ isOpen, races, boats, onSubmit, onCl
                     {(onClose) => (
                         <>
                             <ModalHeader className="flex flex-col gap-1">
-                                Create New Entry
+                                Edit Entry
                             </ModalHeader>
                             <ModalBody>
                                 <div className="flex w-full">
@@ -70,7 +76,7 @@ export default function CreateResultModal({ isOpen, races, boats, onSubmit, onCl
                                         <Input
                                             id='helm'
                                             type="text"
-                                            value={helmValue}
+                                            value={helm}
                                             onChange={CapitaliseInput}
                                             placeholder="J Bloggs"
                                             variant='bordered'
@@ -84,7 +90,7 @@ export default function CreateResultModal({ isOpen, races, boats, onSubmit, onCl
                                         <Input
                                             id='crew'
                                             type="text"
-                                            value={crewValue}
+                                            value={crew}
                                             onChange={CapitaliseInput}
                                             autoComplete='off'
                                             variant='bordered'
@@ -98,8 +104,8 @@ export default function CreateResultModal({ isOpen, races, boats, onSubmit, onCl
                                             id="Class"
                                             className=' w-56 h-full text-3xl'
                                             options={options}
-                                            value={selectedOption}
-                                            onChange={(choice) => setSelectedOption(choice!)}
+                                            value={selectedBoat}
+                                            onChange={(choice) => setSelectedBoat(choice!)}
                                             styles={{
                                                 control: (provided, state) => ({
                                                     ...provided,
@@ -148,13 +154,14 @@ export default function CreateResultModal({ isOpen, races, boats, onSubmit, onCl
                                             id="SailNum"
                                             variant='bordered'
                                             autoComplete='off'
-                                            onChange={(e) => setSailNumber(e.target.value)}
+                                            value={sailNumber}
+                                            onValueChange={setSailNumber}
                                         />
                                     </div>
                                 </div>
 
-                                <div className="text-4xl font-extrabold p-6">Select Races</div>
-                                {races.map((race, index) => {
+                                <div className="text-4xl font-extrabold p-6">Select Fleet</div>
+                                {/* {races.map((race, index) => {
                                     if (race.fleets.some(fleet => fleet.startTime != 0)) {
                                         //a fleet in the race has started so don't allow entry
                                         return <></>
@@ -165,32 +172,30 @@ export default function CreateResultModal({ isOpen, races, boats, onSubmit, onCl
                                             <div className="flex flex-row">
                                                 <Switch
                                                     id={race.id + "Switch"}
-                                                    onValueChange={(value) => { updateRaceSelection(race, value) }}
+                                                    onValueChange={(value) => { value ? setSelectedRaces([...selectedRaces, race.id]) : setSelectedRaces(selectedRaces.filter((value) => value != race.id)) }}
                                                     color="success"
                                                     size='lg'
                                                 >
                                                     {race.series.name} {race.number}
+                                                    <Tabs
+                                                        aria-label="Options"
+                                                        selectedKey={race.fleets[0]!.id}
+                                                        color="primary"
+                                                        isDisabled={selectedRaces.findIndex((r) => r == race.id) ? true : false}
+                                                        onSelectionChange={(key) => { updateFleetSelection(race, key) }}
+                                                    >
+                                                        {race.fleets.map((fleet: FleetDataType) => {
+                                                            return (
+                                                                <Tab key={fleet.id} title={fleet.fleetSettings.name}>
+                                                                </Tab>
+                                                            )
+                                                        })}
+                                                    </Tabs>
                                                 </Switch>
-                                                <Tabs
-                                                    aria-label="Options"
-                                                    className='px-3'
-                                                    selectedKey={race.fleets[0]!.id}
-                                                    color="primary"
-                                                    isDisabled={selectedRaces.findIndex((r) => r == race.id) == -1 ? true : false}
-                                                    onSelectionChange={(key) => { console.log(key); key ? setSelectedFleets([...selectedFleets, key.toString()]) : setSelectedFleets(selectedFleets.filter((value) => value != key)) }}
-                                                >
-                                                    {/* show buttons for each fleet in a series */}
-                                                    {race.fleets.map((fleet: FleetDataType, index) => {
-                                                        return (
-                                                            <Tab key={fleet.id} title={fleet.fleetSettings.name}>
-                                                            </Tab>
-                                                        )
-                                                    })}
-                                                </Tabs>
 
                                                 {race.Type == "Pursuit" ?
                                                     <div className="pl-6 py-auto text-2xl font-bold text-gray-700">
-                                                        Start Time: {String(Math.floor((selectedOption.value.pursuitStartTime || 0) / 60)).padStart(2, '0')}:{String((selectedOption.value.pursuitStartTime || 0) % 60).padStart(2, '0')}
+                                                        Start Time: {String(Math.floor((selectedBoat.value.pursuitStartTime || 0) / 60)).padStart(2, '0')}:{String((selectedBoat.value.pursuitStartTime || 0) % 60).padStart(2, '0')}
                                                     </div>
                                                     :
                                                     <></>
@@ -199,13 +204,19 @@ export default function CreateResultModal({ isOpen, races, boats, onSubmit, onCl
                                             </div>
                                         </div>
                                     )
-                                })}
+                                })} */}
 
 
                             </ModalBody>
                             <ModalFooter>
-                                <Button color="primary" onPress={() => onSubmit(helmValue, crewValue, selectedOption.value, sailNumber, selectedFleets)}>
-                                    Submit
+                                <Button color="danger" onPress={() => onDelete(result!)}>
+                                    Remove
+                                </Button>
+                                <Button color="danger" variant="light" onPress={onClose}>
+                                    Close
+                                </Button>
+                                <Button color="primary" onPress={() => onSubmit({ ...result!, Helm: helm, Crew: crew, boat: selectedBoat.value, SailNumber: sailNumber })}>
+                                    Save
                                 </Button>
                             </ModalFooter>
                         </>

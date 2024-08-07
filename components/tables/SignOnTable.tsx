@@ -1,7 +1,8 @@
 import React, { ChangeEvent, useState, useRef } from 'react';
 import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, useReactTable, SortingState } from '@tanstack/react-table'
-import { Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Dropdown, DropdownItem, DropdownTrigger, Button, DropdownMenu } from '@nextui-org/react';
+import { Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Dropdown, DropdownItem, DropdownTrigger, Button, DropdownMenu, Tooltip } from '@nextui-org/react';
 import { VerticalDotsIcon } from 'components/icons/vertical-dots-icon';
+import { EditIcon } from 'components/icons/edit-icon';
 
 
 function Sort({ column, table }: { column: any, table: any }) {
@@ -78,21 +79,22 @@ const SignOnTable = (props: any) => {
         );
     };
 
-    const Edit = ({ ...props }: any) => {
-        const onClick = () => {
-            //show edit modal
-            props.showEditModal(props.row.original.id)
+    const Action = ({ ...props }: any) => {
+        const onEditClick = () => {
+            props.showEditModal(props.row.original)
         }
+
         return (
-            <>
-                <p className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0"
-                    onClick={onClick} >
-                    Edit
-                </p>
-            </>
+            <div className="relative flex items-center gap-2">
+                <Tooltip content="Edit">
+                    <span className="text-lg text-default-400 cursor-pointer active:opacity-50">
+                        <EditIcon onClick={onEditClick} />
+                    </span>
+                </Tooltip>
+
+            </div>
         );
     };
-
 
 
     const deleteResult = (id: any) => {
@@ -135,7 +137,8 @@ const SignOnTable = (props: any) => {
             }),
             columnHelper.display({
                 id: "Edit",
-                cell: props => <Edit {...props} deleteResult={deleteResult} showEditModal={showEditModal} />
+                header: "Edit",
+                cell: props => <Action {...props} deleteResult={deleteResult} showEditModal={showEditModal} />
             }),
         ],
         state: {
@@ -147,7 +150,8 @@ const SignOnTable = (props: any) => {
     })
     return (
         <div key={props.data}>
-            <Table isStriped id={"clubTable"}>
+            <Table isStriped
+            >
                 <TableHeader>
                     {table.getHeaderGroups().flatMap(headerGroup => headerGroup.headers).map(header => {
                         return (

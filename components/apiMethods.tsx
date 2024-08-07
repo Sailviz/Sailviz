@@ -472,9 +472,9 @@ export async function createResult(fleetId: string): Promise<ResultsDataType> {
         });
 };
 
-export async function DeleteResultById(resultId: string): Promise<ResultsDataType> {
+export async function DeleteResultById(result: ResultsDataType): Promise<ResultsDataType> {
     const body = {
-        "resultId": resultId,
+        "resultId": result.id,
     }
     return await fetch(`${server}/api/DeleteResultById`, {
         method: 'POST',

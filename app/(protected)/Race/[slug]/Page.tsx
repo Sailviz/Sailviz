@@ -198,7 +198,7 @@ export default function Page({ params }: { params: { slug: string } }) {
     // }
 
     const deleteResult = async (result: ResultsDataType) => {
-        await DB.DeleteResultById(result.id)
+        await DB.DeleteResultById(result)
         setRace(await DB.getRaceById(race.id))
     }
 
