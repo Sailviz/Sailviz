@@ -1,8 +1,10 @@
 import React, { ChangeEvent, MouseEventHandler, useEffect, useState } from 'react';
 import { createColumnHelper, flexRender, getCoreRowModel, RowSelection, useReactTable } from '@tanstack/react-table'
 import Select from 'react-select';
-import { Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Dropdown, DropdownItem, DropdownTrigger, Button, DropdownMenu } from '@nextui-org/react';
-import { VerticalDotsIcon } from 'components/icons/vertical-dots-icon';
+import { Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Dropdown, DropdownItem, DropdownTrigger, Button, DropdownMenu, Spinner, Tooltip } from '@nextui-org/react';
+import * as Fetcher from 'components/Fetchers';
+import { EditIcon } from 'components/icons/edit-icon';
+import { DeleteIcon } from 'components/icons/delete-icon';
 
 const Boats = ({ ...props }: any) => {
     const initialValue = props.getValue()
@@ -30,17 +32,30 @@ const Boats = ({ ...props }: any) => {
     );
 };
 
-const Edit = ({ ...props }: any) => {
-    const onClick = () => {
-        props.showFleetModal(props.id)
+const Action = ({ ...props }: any) => {
+    const onEditClick = () => {
+        props.edit(props.row.original)
+    }
+
+    const onDeleteClick = () => {
+        if (confirm("are you sure you want to do this?")) {
+            props.remove(props.row.original)
+        }
     }
     return (
-        <p className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0"
-            onClick={onClick} >
-            Edit
-        </p>
+        <div className="relative flex items-center gap-2">
+            <Tooltip content="Edit">
+                <span className="text-lg text-default-400 cursor-pointer active:opacity-50">
+                    <EditIcon onClick={onEditClick} />
+                </span>
+            </Tooltip>
+            <Tooltip color="danger" content="Delete" >
+                <span className="text-lg text-danger cursor-pointer active:opacity-50">
+                    <DeleteIcon onClick={onDeleteClick} />
+                </span>
+            </Tooltip>
+        </div>
     );
-
 };
 
 const customStyles = { multiValueRemove: (base: any) => ({ ...base, display: 'none' }) }
@@ -49,12 +64,23 @@ const columnHelper = createColumnHelper<FleetSettingsType>()
 
 
 const FleetTable = (props: any) => {
-    var [data, setData] = useState(props.data)
+    const { fleetSettings, fleetSettingsIsError, fleetSettingsIsValidating } = Fetcher.GetFleetSettingsBySeriesId(props.seriesId)
     console.log(props.data)
 
-    const showFleetModal = (data: any) => {
-        props.showFleetModal(data)
+    const edit = (data: any) => {
+        props.edit(data)
     }
+
+    const remove = (data: any) => {
+        props.remove(data)
+    }
+
+    var data = fleetSettings
+    if (data == undefined) {
+        data = []
+    }
+
+    const loadingState = fleetSettingsIsValidating ? "loading" : "idle";
 
     var table = useReactTable({
         data,
@@ -73,7 +99,7 @@ const FleetTable = (props: any) => {
             }),
             columnHelper.accessor('id', {
                 id: "Edit",
-                cell: props => <Edit {...props} id={props.row.original.id} showFleetModal={showFleetModal} />
+                cell: props => <Action {...props} id={props.row.original.id} edit={edit} remove={remove} />
             }),
         ],
         getCoreRowModel: getCoreRowModel(),
@@ -93,7 +119,9 @@ const FleetTable = (props: any) => {
                         );
                     })}
                 </TableHeader>
-                <TableBody>
+                <TableBody
+                    loadingContent={<Spinner />}
+                    loadingState={loadingState}>
                     {table.getRowModel().rows.map(row => (
                         <TableRow key={row.id}>
                             {row.getVisibleCells().map(cell => (
