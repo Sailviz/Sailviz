@@ -1,13 +1,11 @@
+export const dynamic = 'force-dynamic'
+
 import prisma from 'components/prisma'
 import { NextRequest, NextResponse } from "next/server";
 
 async function getLaps() {
-    var result = await prisma.lap.findMany({
-        where: {
-            time: {
-                gte: 0
-            }
-        },
+    var result = await prisma.lap.count({
+
     })
     if (result == null) {
         return
