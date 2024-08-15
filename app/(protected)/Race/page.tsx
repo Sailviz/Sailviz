@@ -18,11 +18,19 @@ export default function Page() {
         return <PageSkeleton />
     }
     return (
-        <div>
-            <p className='text-2xl font-bold p-6'>
-                Races
-            </p>
-            <RacesTable club={club} />
+        <div className="flex flex-row">
+            <div className="px-3">
+                <p className='text-2xl font-bold p-6'>
+                    Upcoming Races
+                </p>
+                <RacesTable club={club} date={new Date()} historical={false} />
+            </div>
+            <div className="px-3">
+                <p className='text-2xl font-bold p-6'>
+                    Recent Races
+                </p>
+                <RacesTable club={club} date={new Date()} historical={true} />
+            </div>
         </div>
     )
 }

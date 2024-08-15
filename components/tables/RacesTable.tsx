@@ -63,7 +63,7 @@ const columnHelper = createColumnHelper<NextRaceDataType>()
 const RacesTable = (props: any) => {
     const [club, setClub] = useState(props.club)
     const [page, setPage] = useState(1);
-    const { data: races, error: racesIsError, isValidating: racesIsValidating } = useSWR(`/api/GetRacesByClubId?page=${page}`, Fetcher.fetcher, { keepPreviousData: true, suspense: true })
+    const { data: races, error: racesIsError, isValidating: racesIsValidating } = useSWR(`/api/GetRacesByClubId?page=${page}&date=${props.date}&historical=${props.historical}`, Fetcher.fetcher, { keepPreviousData: true, suspense: true })
 
     const data = races.races
     const count = races?.count
@@ -73,7 +73,7 @@ const RacesTable = (props: any) => {
         return count ? Math.ceil(count / rowsPerPage) : 0;
     }, [count, rowsPerPage]);
 
-    const loadingState = racesIsValidating || data?.length === 0 ? "loading" : "idle";
+    const loadingState = racesIsValidating ? "loading" : "idle";
 
     console.log(data)
     var table = useReactTable({
