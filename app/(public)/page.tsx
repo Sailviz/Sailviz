@@ -16,7 +16,7 @@ export default async function Page() {
                     description=""
                     link="/"
                 />
-                <LapsCounter />
+                {/* <LapsCounter /> */}
             </div>
         </div>
     )

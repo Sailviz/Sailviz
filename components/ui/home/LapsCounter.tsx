@@ -9,8 +9,6 @@ type CardProps = {
     link: string;
 };
 
-export const dynamic = 'force-dynamic'
-
 export default function LapsCounter() {
     const [lastData, setLastData] = useState(0)
 
