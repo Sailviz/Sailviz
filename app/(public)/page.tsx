@@ -2,7 +2,6 @@
 import Card from 'components/ui/home/Card'
 import LapsCounter from 'components/ui/home/LapsCounter'
 
-export const dynamic = 'force-dynamic'
 export default async function Page() {
 
 

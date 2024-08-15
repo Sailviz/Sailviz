@@ -1,5 +1,4 @@
 'use client'
-import Link from 'next/link'
 import useSWR from 'swr';
 import * as Fetcher from 'components/Fetchers'
 import { useEffect, useState } from 'react';
@@ -9,6 +8,8 @@ type CardProps = {
     description: string;
     link: string;
 };
+
+export const dynamic = 'force-dynamic'
 
 export default function LapsCounter() {
     const [lastData, setLastData] = useState(0)
