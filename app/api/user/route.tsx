@@ -1,4 +1,4 @@
-import prisma from '../../../components/prisma'
+import prisma from 'components/prisma'
 import { NextRequest, NextResponse } from "next/server";
 
 async function getUser(id: string) {
