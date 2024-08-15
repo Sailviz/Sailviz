@@ -59,6 +59,7 @@ const UpcomingRacesTable = (props: any) => {
         desc: false,
     }]);
     var data = todaysRaces
+    console.log(data)
     if (todaysRacesIsValidating) {
         data = []
     }
@@ -66,6 +67,11 @@ const UpcomingRacesTable = (props: any) => {
     var table = useReactTable({
         data,
         columns: [
+            columnHelper.accessor((data) => data.series.name, {
+                header: "Series",
+                cell: info => info.getValue().toString(),
+                enableSorting: true
+            }),
             columnHelper.accessor('number', {
                 cell: info => info.getValue().toString(),
                 enableSorting: true
