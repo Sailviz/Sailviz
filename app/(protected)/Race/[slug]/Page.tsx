@@ -501,9 +501,9 @@ export default function Page({ params }: { params: { slug: string } }) {
                                         {fleet.fleetSettings.name} - Boats Entered: {fleet.results.length}
                                     </p>
                                     {race.Type == "Handicap" ?
-                                        <FleetHandicapResultsTable showTime={true} editable={true} data={fleet.results} startTime={fleet.startTime} key={JSON.stringify(race)} deleteResult={deleteResult} updateResult={updateResult} raceId={race.id} showEditModal={showEditModal} />
+                                        <FleetHandicapResultsTable showTime={true} editable={userHasPermission(user, AVAILABLE_PERMISSIONS.editResults)} data={fleet.results} startTime={fleet.startTime} key={JSON.stringify(race)} deleteResult={deleteResult} updateResult={updateResult} raceId={race.id} showEditModal={showEditModal} />
                                         :
-                                        <FleetPursuitResultsTable showTime={true} editable={true} data={fleet.results} startTime={fleet.startTime} key={JSON.stringify(race)} deleteResult={deleteResult} updateResult={updateResult} raceId={race.id} showEditModal={showEditModal} />
+                                        <FleetPursuitResultsTable showTime={true} editable={userHasPermission(user, AVAILABLE_PERMISSIONS.editResults)} data={fleet.results} startTime={fleet.startTime} key={JSON.stringify(race)} deleteResult={deleteResult} updateResult={updateResult} raceId={race.id} showEditModal={showEditModal} />
                                     }
 
                                 </div>

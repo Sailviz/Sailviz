@@ -3,7 +3,8 @@ import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, use
 import { Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Dropdown, DropdownItem, DropdownTrigger, Button, DropdownMenu, Tooltip } from '@nextui-org/react';
 import { VerticalDotsIcon } from 'components/icons/vertical-dots-icon';
 import { EditIcon } from 'components/icons/edit-icon';
-
+import * as Fetcher from 'components/Fetchers';
+import { AVAILABLE_PERMISSIONS, userHasPermission } from 'components/helpers/users';
 
 function Sort({ column, table }: { column: any, table: any }) {
     const firstValue = table
@@ -29,6 +30,7 @@ const columnHelper = createColumnHelper<ResultsDataType>()
 
 
 const SignOnTable = (props: any) => {
+    const { user, userIsError, userIsValidating } = Fetcher.UseUser()
     let [data, setData] = useState<ResultsDataType[]>(props.data)
     let clubId = props.clubId
     let raceId = props.raceId
@@ -83,20 +85,21 @@ const SignOnTable = (props: any) => {
         const onEditClick = () => {
             props.showEditModal(props.row.original)
         }
+        if (userHasPermission(props.user, AVAILABLE_PERMISSIONS.editResults)) {
+            return (
+                <div className="relative flex items-center gap-2">
+                    <Tooltip content="Edit">
+                        <span className="text-lg text-default-400 cursor-pointer active:opacity-50">
+                            <EditIcon onClick={onEditClick} />
+                        </span>
+                    </Tooltip>
 
-        return (
-            <div className="relative flex items-center gap-2">
-                <Tooltip content="Edit">
-                    <span className="text-lg text-default-400 cursor-pointer active:opacity-50">
-                        <EditIcon onClick={onEditClick} />
-                    </span>
-                </Tooltip>
-
-            </div>
-        );
-    };
-
-
+                </div>
+            );
+        } else {
+            return (<>  </>)
+        }
+    }
     const deleteResult = (id: any) => {
         props.deleteResult(id)
     }
@@ -138,7 +141,7 @@ const SignOnTable = (props: any) => {
             columnHelper.display({
                 id: "Edit",
                 header: "Edit",
-                cell: props => <Action {...props} deleteResult={deleteResult} showEditModal={showEditModal} />
+                cell: props => <Action {...props} deleteResult={deleteResult} showEditModal={showEditModal} user={user} />
             }),
         ],
         state: {
