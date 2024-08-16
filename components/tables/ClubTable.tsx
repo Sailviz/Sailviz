@@ -1,12 +1,13 @@
 "use client"
 import React, { ChangeEvent, useState } from 'react';
 import { createColumnHelper, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table'
-import { Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Dropdown, DropdownItem, DropdownTrigger, Button, DropdownMenu, Tooltip } from '@nextui-org/react';
+import { Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Dropdown, DropdownItem, DropdownTrigger, Button, DropdownMenu, Tooltip, user } from '@nextui-org/react';
 import { VerticalDotsIcon } from 'components/icons/vertical-dots-icon';
 import { EyeIcon } from 'components/icons/eye-icon';
 import { EditIcon } from 'components/icons/edit-icon';
 import { DeleteIcon } from 'components/icons/delete-icon';
-
+import * as Fetcher from 'components/Fetchers';
+import { AVAILABLE_PERMISSIONS, userHasPermission } from 'components/helpers/users';
 
 
 const Action = ({ ...props }: any) => {
@@ -22,16 +23,22 @@ const Action = ({ ...props }: any) => {
                     <EyeIcon onClick={() => props.viewSeries(props.row.original.id)} />
                 </span>
             </Tooltip>
-            <Tooltip content="Edit">
-                <span className="text-lg text-default-400 cursor-pointer active:opacity-50">
-                    <EditIcon />
-                </span>
-            </Tooltip>
-            <Tooltip color="danger" content="Delete" >
-                <span className="text-lg text-danger cursor-pointer active:opacity-50">
-                    <DeleteIcon onClick={onDeleteClick} />
-                </span>
-            </Tooltip>
+            {userHasPermission(props.user, AVAILABLE_PERMISSIONS.editSeries) ?
+                <>
+                    <Tooltip content="Edit">
+                        <span className="text-lg text-default-400 cursor-pointer active:opacity-50">
+                            <EditIcon />
+                        </span>
+                    </Tooltip>
+                    <Tooltip color="danger" content="Delete" >
+                        <span className="text-lg text-danger cursor-pointer active:opacity-50">
+                            <DeleteIcon onClick={onDeleteClick} />
+                        </span>
+                    </Tooltip>
+                </>
+                :
+                <></>
+            }
         </div>
     );
 };
@@ -40,6 +47,7 @@ const columnHelper = createColumnHelper<SeriesDataType>()
 
 const ClubTable = (props: any) => {
     var [data, setData] = useState(props.data)
+    const { user, userIsError, userIsValidating } = Fetcher.UseUser()
 
     const updateSeries = (boat: SeriesDataType) => {
         //update local copy
@@ -77,7 +85,7 @@ const ClubTable = (props: any) => {
             columnHelper.accessor('id', {
                 id: "Remove",
                 header: "Action",
-                cell: props => <Action {...props} id={props.row.original.id} deleteSeries={deleteSeries} viewSeries={viewSeries} />
+                cell: props => <Action {...props} id={props.row.original.id} deleteSeries={deleteSeries} viewSeries={viewSeries} user={user} />
             }),
         ],
         getCoreRowModel: getCoreRowModel(),

@@ -5,6 +5,7 @@ import { Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Dropdo
 import * as Fetcher from 'components/Fetchers';
 import { EditIcon } from 'components/icons/edit-icon';
 import { DeleteIcon } from 'components/icons/delete-icon';
+import { AVAILABLE_PERMISSIONS, userHasPermission } from 'components/helpers/users';
 
 const Boats = ({ ...props }: any) => {
     const initialValue = props.getValue()
@@ -44,16 +45,23 @@ const Action = ({ ...props }: any) => {
     }
     return (
         <div className="relative flex items-center gap-2">
-            <Tooltip content="Edit">
-                <span className="text-lg text-default-400 cursor-pointer active:opacity-50">
-                    <EditIcon onClick={onEditClick} />
-                </span>
-            </Tooltip>
-            <Tooltip color="danger" content="Delete" >
-                <span className="text-lg text-danger cursor-pointer active:opacity-50">
-                    <DeleteIcon onClick={onDeleteClick} />
-                </span>
-            </Tooltip>
+            {userHasPermission(props.user, AVAILABLE_PERMISSIONS.editFleets) ?
+                <>
+                    <Tooltip content="Edit">
+                        <span className="text-lg text-default-400 cursor-pointer active:opacity-50">
+                            <EditIcon onClick={onEditClick} />
+                        </span>
+                    </Tooltip>
+
+                    <Tooltip color="danger" content="Delete" >
+                        <span className="text-lg text-danger cursor-pointer active:opacity-50">
+                            <DeleteIcon onClick={onDeleteClick} />
+                        </span>
+                    </Tooltip>
+                </>
+                :
+                <></>
+            }
         </div>
     );
 };
@@ -65,6 +73,7 @@ const columnHelper = createColumnHelper<FleetSettingsType>()
 
 const FleetTable = (props: any) => {
     const { fleetSettings, fleetSettingsIsError, fleetSettingsIsValidating } = Fetcher.GetFleetSettingsBySeriesId(props.seriesId)
+    const { user, userIsError, userIsValidating } = Fetcher.UseUser()
     console.log(props.data)
 
     const edit = (data: any) => {
@@ -80,7 +89,7 @@ const FleetTable = (props: any) => {
         data = []
     }
 
-    const loadingState = fleetSettingsIsValidating ? "loading" : "idle";
+    const loadingState = (fleetSettingsIsValidating || userIsValidating) ? "loading" : "idle";
 
     var table = useReactTable({
         data,
@@ -99,7 +108,7 @@ const FleetTable = (props: any) => {
             }),
             columnHelper.accessor('id', {
                 id: "Edit",
-                cell: props => <Action {...props} id={props.row.original.id} edit={edit} remove={remove} />
+                cell: props => <Action {...props} id={props.row.original.id} edit={edit} remove={remove} user={user} />
             }),
         ],
         getCoreRowModel: getCoreRowModel(),

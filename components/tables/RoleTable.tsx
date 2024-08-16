@@ -5,6 +5,7 @@ import { Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Dropdo
 import { EditIcon } from 'components/icons/edit-icon';
 import { DeleteIcon } from 'components/icons/delete-icon';
 import * as Fetcher from 'components/Fetchers';
+import { AVAILABLE_PERMISSIONS, userHasPermission } from 'components/helpers/users';
 
 const Action = ({ ...props }: any) => {
     const onEditClick = () => {
@@ -16,20 +17,24 @@ const Action = ({ ...props }: any) => {
             props.deleteRole(props.row.original)
         }
     }
-    return (
-        <div className="relative flex items-center gap-2">
-            <Tooltip content="Edit">
-                <span className="text-lg text-default-400 cursor-pointer active:opacity-50">
-                    <EditIcon onClick={onEditClick} />
-                </span>
-            </Tooltip>
-            <Tooltip color="danger" content="Delete" >
-                <span className="text-lg text-danger cursor-pointer active:opacity-50">
-                    <DeleteIcon onClick={onDeleteClick} />
-                </span>
-            </Tooltip>
-        </div>
-    );
+    if (userHasPermission(props.user, AVAILABLE_PERMISSIONS.editRoles)) {
+        return (
+            <div className="relative flex items-center gap-2">
+                <Tooltip content="Edit">
+                    <span className="text-lg text-default-400 cursor-pointer active:opacity-50">
+                        <EditIcon onClick={onEditClick} />
+                    </span>
+                </Tooltip>
+                <Tooltip color="danger" content="Delete" >
+                    <span className="text-lg text-danger cursor-pointer active:opacity-50">
+                        <DeleteIcon onClick={onDeleteClick} />
+                    </span>
+                </Tooltip>
+            </div>
+        )
+    } else {
+        return (<>  </>)
+    }
 };
 
 const columnHelper = createColumnHelper<RoleDataType>()
@@ -37,6 +42,7 @@ const columnHelper = createColumnHelper<RoleDataType>()
 const UsersTable = (props: any) => {
     const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
     const { roles, rolesIsError, rolesIsValidating } = Fetcher.Roles(club)
+    const { user, userIsError, userIsValidating } = Fetcher.UseUser()
 
     const [sorting, setSorting] = useState<SortingState>([{
         id: "number",
@@ -69,7 +75,7 @@ const UsersTable = (props: any) => {
             columnHelper.accessor('id', {
                 id: "edit",
                 header: "Action",
-                cell: props => <Action {...props} id={props.row.original.id} edit={edit} deleteRole={deleteRole} />
+                cell: props => <Action {...props} id={props.row.original.id} edit={edit} deleteRole={deleteRole} user={user} />
             }),
         ],
         state: {

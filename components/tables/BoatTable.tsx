@@ -7,6 +7,7 @@ import { EditIcon } from 'components/icons/edit-icon';
 import { DeleteIcon } from 'components/icons/delete-icon';
 import { SearchIcon } from 'components/icons/search-icon';
 import * as Fetcher from 'components/Fetchers';
+import { AVAILABLE_PERMISSIONS, userHasPermission } from 'components/helpers/users';
 
 const columnHelper = createColumnHelper<BoatDataType>()
 
@@ -74,26 +75,30 @@ const Action = ({ ...props }: any) => {
     const onEditClick = () => {
         props.editBoat(props.row.original)
     }
-
-    return (
-        <div className="relative flex items-center gap-2">
-            <Tooltip content="Edit">
-                <span className="text-lg text-default-400 cursor-pointer active:opacity-50">
-                    <EditIcon onClick={onEditClick} />
-                </span>
-            </Tooltip>
-            <Tooltip color="danger" content="Delete" >
-                <span className="text-lg text-danger cursor-pointer active:opacity-50">
-                    <DeleteIcon onClick={onDeleteClick} />
-                </span>
-            </Tooltip>
-        </div>
-    );
+    if (userHasPermission(props.user, AVAILABLE_PERMISSIONS.editBoats)) {
+        return (
+            <div className="relative flex items-center gap-2">
+                <Tooltip content="Edit">
+                    <span className="text-lg text-default-400 cursor-pointer active:opacity-50">
+                        <EditIcon onClick={onEditClick} />
+                    </span>
+                </Tooltip>
+                <Tooltip color="danger" content="Delete" >
+                    <span className="text-lg text-danger cursor-pointer active:opacity-50">
+                        <DeleteIcon onClick={onDeleteClick} />
+                    </span>
+                </Tooltip>
+            </div>
+        );
+    } else {
+        return (<>  </>)
+    }
 };
 
 
 const BoatTable = (props: any) => {
     const { boats, boatsIsError, boatsIsValidating } = Fetcher.Boats()
+    const { user, userIsError, userIsValidating } = Fetcher.UseUser()
 
     const data = boats || []
 
@@ -139,7 +144,7 @@ const BoatTable = (props: any) => {
                 id: "action",
                 enableColumnFilter: false,
                 header: "Action",
-                cell: props => <Action {...props} id={props.row.original.id} deleteBoat={deleteBoat} editBoat={editBoat} />
+                cell: props => <Action {...props} id={props.row.original.id} deleteBoat={deleteBoat} editBoat={editBoat} user={user} />
             }),
         ],
         getCoreRowModel: getCoreRowModel(),

@@ -7,9 +7,10 @@ import * as Fetcher from 'components/Fetchers';
 import { PageSkeleton } from 'components/ui/PageSkeleton';
 import Papa from "papaparse";
 import BoatTable from "components/tables/BoatTable";
-import { Button, Input, useDisclosure } from "@nextui-org/react";
+import { Button, Input, useDisclosure, user } from "@nextui-org/react";
 import EditBoatModal from "components/ui/dashboard/EditBoatModal";
 import { mutate } from "swr";
+import { userHasPermission, AVAILABLE_PERMISSIONS } from "components/helpers/users";
 
 
 export default function Page() {
@@ -19,6 +20,7 @@ export default function Page() {
 
     const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
     const { boats, boatsIsError, boatsIsValidating } = Fetcher.Boats()
+    const { user, userIsError, userIsValidating } = Fetcher.UseUser()
 
     const [editingBoat, setEditingBoat] = useState<BoatDataType>()
 
@@ -120,6 +122,10 @@ export default function Page() {
         }
     }
 
+    if (userIsValidating || clubIsValidating || boatsIsValidating || boats == undefined || club == undefined || user == undefined) {
+        return <PageSkeleton />
+    }
+
     return (
         <>
             <EditBoatModal isOpen={editModal.isOpen} boat={editingBoat} onSubmit={updateBoat} onClose={() => { editModal.onClose(); setEditingBoat(undefined) }} />
@@ -127,25 +133,29 @@ export default function Page() {
                 Boats
             </p>
             <div className='p-6'>
-                <div className='flex flex-row p-6 justify-around'>
-                    <Button className="mx-1" color="primary" fullWidth onClick={() => document.getElementById("entryFileUpload")!.click()}>
-                        Upload Boat Data
+                {userHasPermission(user, AVAILABLE_PERMISSIONS.editBoats) ?
+                    <div className='flex flex-row p-6 justify-around'>
+                        <Button className="mx-1" color="primary" fullWidth onClick={() => document.getElementById("entryFileUpload")!.click()}>
+                            Upload Boat Data
 
-                    </Button>
-                    <Input
-                        id="entryFileUpload"
-                        type="file"
-                        accept=".csv"
-                        onChange={boatFileUploadHandler}
-                        className="hidden"
-                    />
-                    <Button className="mx-1" onClick={downloadBoats} color='primary' fullWidth>
-                        Download Boat Data
-                    </Button>
-                    <Button className="mx-1" onClick={() => createBoat()} color='primary' fullWidth>
-                        Add Boat
-                    </Button>
-                </div>
+                        </Button>
+                        <Input
+                            id="entryFileUpload"
+                            type="file"
+                            accept=".csv"
+                            onChange={boatFileUploadHandler}
+                            className="hidden"
+                        />
+                        <Button className="mx-1" onClick={downloadBoats} color='primary' fullWidth>
+                            Download Boat Data
+                        </Button>
+                        <Button className="mx-1" onClick={() => createBoat()} color='primary' fullWidth>
+                            Add Boat
+                        </Button>
+                    </div>
+                    :
+                    <></>
+                }
                 <BoatTable editBoat={editBoat} deleteBoat={deleteBoat} createBoat={createBoat} />
             </div>
         </>

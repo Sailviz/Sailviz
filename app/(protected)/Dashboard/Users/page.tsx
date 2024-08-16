@@ -10,6 +10,7 @@ import EditUserModal from "components/ui/dashboard/EditUserModal";
 import { Button, useDisclosure } from "@nextui-org/react";
 import { mutate } from "swr";
 import EditRoleModal from "components/ui/dashboard/EditRoleModal";
+import { AVAILABLE_PERMISSIONS, userHasPermission } from "components/helpers/users";
 
 
 export default function Page() {
@@ -19,6 +20,7 @@ export default function Page() {
     const editRoleModal = useDisclosure();
 
     const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
+    const { user, userIsError, userIsValidating } = Fetcher.UseUser()
 
     const [activeUser, setActiveUser] = useState<UserDataType>({} as UserDataType)
     const [activeRole, setActiveRole] = useState<RoleDataType>({} as RoleDataType)
@@ -79,25 +81,29 @@ export default function Page() {
         editRoleModal.onOpen()
     }
 
+    if (userIsValidating || clubIsValidating || club == undefined || user == undefined) {
+        return <PageSkeleton />
+    }
+
     return (
         <>
             <EditUserModal isOpen={editUserModal.isOpen} user={activeUser} onSubmit={updateUser} onClose={() => { editUserModal.onClose() }} />
             <EditRoleModal isOpen={editRoleModal.isOpen} role={activeRole} onSubmit={updateRole} onClose={() => { editRoleModal.onClose() }} />
             <div className='p-6'>
                 <UsersTable edit={showUserEditModal} deleteUser={deleteUser} />
-                <Button
-                    onClick={createUser}
-                >
-                    Create User
-                </Button>
+                {userHasPermission(user, AVAILABLE_PERMISSIONS.editUsers) ?
+                    <Button onClick={createUser} >
+                        Create User
+                    </Button>
+                    : <></>}
             </div>
             <div className='p-6'>
                 <RoleTable edit={showRoleEditModal} deleteRole={deleteRole} />
-                <Button
-                    onClick={createRole}
-                >
-                    Create Role
-                </Button>
+                {userHasPermission(user, AVAILABLE_PERMISSIONS.editRoles) ?
+                    <Button onClick={createRole} >
+                        Create Role
+                    </Button>
+                    : <></>}
             </div>
         </>
     )

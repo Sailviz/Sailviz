@@ -6,7 +6,6 @@ import assert from 'assert';
 //this only updates the settings part of the club record
 
 async function updateRole(role: RoleDataType) {
-    console.log(role)
     var result = await prisma.role.update({
         where: {
             id: role.id
