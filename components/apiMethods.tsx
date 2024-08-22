@@ -765,9 +765,10 @@ export async function createUser(clubId: string): Promise<UserDataType[]> {
         });
 };
 
-export async function updateUser(user: UserDataType): Promise<UserDataType[]> {
+export async function updateUser(user: UserDataType, password: string): Promise<UserDataType[]> {
     const body = {
         user: user,
+        password: password
     }
     return await fetch(`${server}/api/UpdateUserById`, {
         method: 'POST',

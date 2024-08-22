@@ -166,7 +166,6 @@ const SignOnPage = () => {
 
                     <div className="overflow-x-scroll whitespace-nowrap relative">
                         {races.map((race, index) => {
-                            console.log(race)
                             return (
                                 <div className="m-6 inline-block" key={JSON.stringify(races) + index}>
                                     <div className="text-4xl font-extrabol p-6">

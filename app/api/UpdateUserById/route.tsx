@@ -5,7 +5,7 @@ import assert from 'assert';
 
 //this only updates the settings part of the club record
 
-async function updateUser(user: UserDataType) {
+async function updateUser(user: UserDataType, password: string) {
     console.log(user)
     var result = await prisma.user.update({
         where: {
@@ -32,9 +32,9 @@ export async function POST(request: NextRequest) {
     }
 
     var user: UserDataType = req.user
+    var password: string = req.password
 
-
-    var updatedUser = await updateUser(user)
+    var updatedUser = await updateUser(user, password)
     if (updatedUser) {
         return NextResponse.json({ error: false, user: updatedUser });
     } else {
