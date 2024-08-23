@@ -9,6 +9,9 @@ export class AVAILABLE_PERMISSIONS {
     static readonly editRoles: PermissionType = { value: "editRoles", label: "Edit Roles" } //implemented
     static readonly DownloadResults: PermissionType = { value: 'DownloadResults', label: 'Download Results' } //implemented
     static readonly UploadEntires: PermissionType = { value: 'UploadEntires', label: 'Upload Entries' } //implemented
+    static readonly viewIntegrations: PermissionType = { value: 'viewIntegrations', label: 'View Integrations' } //implemented
+    static readonly viewDeveloper: PermissionType = { value: 'viewDeveloper', label: 'View Developer' } //implemented
+    static readonly viewUsers: PermissionType = { value: 'viewUsers', label: 'View Users' } //implemented
 };
 
 

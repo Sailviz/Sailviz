@@ -94,17 +94,19 @@ export const SidebarWrapper = () => {
                                 href="/Dashboard/Users"
                             />
                             <SidebarItem
-                                isActive={pathname === "/developers"}
+                                isActive={pathname === "/Dashboard/Developers"}
                                 title="Developers"
                                 icon={<DevIcon />}
+                                href="/Dashboard/Developers"
                             />
                         </SidebarMenu>
 
                         <SidebarMenu title="Updates">
                             <SidebarItem
-                                isActive={pathname === "/changelog"}
+                                isActive={pathname === "/Dashboard/Changelog"}
                                 title="Changelog"
                                 icon={<ChangeLogIcon />}
+                                href="/Dashboard/Changelog"
                             />
                         </SidebarMenu>
                     </div>
