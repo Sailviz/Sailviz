@@ -83,7 +83,8 @@ export default function Page({ params }: { params: { slug: string } }) {
     const createResult = async (helm: string, crew: string, boat: BoatDataType, sailNum: string, fleetId: string) => {
         console.log(helm, crew, boat, sailNum, fleetId)
         createModal.onClose() //close modal
-        await DB.createResult(fleetId[0]!)
+        let result = await DB.createResult(fleetId)
+        await DB.updateResult({ ...result, Helm: helm, Crew: crew, boat: boat, SailNumber: sailNum })
         setRace(await DB.getRaceById(race.id))
     }
 
@@ -92,6 +93,13 @@ export default function Page({ params }: { params: { slug: string } }) {
         await DB.updateResult(result)
         var data = await DB.getRaceById(race.id)
         setRace(data)
+    }
+
+    const deleteResult = async (result: ResultsDataType) => {
+        await DB.DeleteResultById(result)
+        setRace(await DB.getRaceById(race.id))
+        console.log("deleted")
+        editModal.onClose()
     }
 
     // const editUpdateResult = async () => {
@@ -196,11 +204,6 @@ export default function Page({ params }: { params: { slug: string } }) {
     //     const modal = document.getElementById("editModal")
     //     modal?.classList.add("hidden")
     // }
-
-    const deleteResult = async (result: ResultsDataType) => {
-        await DB.DeleteResultById(result)
-        setRace(await DB.getRaceById(race.id))
-    }
 
     const printRaceSheet = async () => {
         Router.push('/PrintPaperResults/' + race.id)
