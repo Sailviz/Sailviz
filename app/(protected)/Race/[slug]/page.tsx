@@ -24,7 +24,7 @@ export default function Page({ params }: { params: { slug: string } }) {
     const { boats, boatsIsError, boatsIsValidating } = Fetcher.Boats()
 
     //TODO implement timer on fetch
-    const { race, raceIsError, raceIsValidating } = Fetcher.Race(params.slug, false)
+    const { race, raceIsError, raceIsValidating } = Fetcher.Race(params.slug, true)
 
     const [seriesName, setSeriesName] = useState("")
 
@@ -292,42 +292,22 @@ export default function Page({ params }: { params: { slug: string } }) {
     }
 
     const downloadResults = async () => {
-        var csvRows: string[] = []
-        const headers = ['HelmName', 'CrewName', 'Class', 'SailNo', 'Laps', 'Elapsed', 'Code']
-
-        csvRows.push(headers.join(','));
-
-        race.fleets.forEach(fleet => {
-            fleet.results.forEach(result => {
-                var time = new Date((result.finishTime - fleet.startTime) * 1000).toISOString().substring(11, 19)
-                var values = [result.Helm, result.Crew, result.boat.name, result.SailNumber, result.laps.length, (result.finishTime == -1 ? '' : time), result.resultCode]
-                //join values with comma
-                csvRows.push(values.join(','))
-            })
-            //join results with new line
-            let data = csvRows.join('\n')
-
-            // Creating a Blob for having a csv file format  
-            // and passing the data with type 
-            const blob = new Blob([data], { type: 'text/csv' });
-
-            // Creating an object for downloading url 
-            const url = window.URL.createObjectURL(blob)
-
-            // Creating an anchor(a) tag of HTML 
-            const a = document.createElement('a')
-
-            // Passing the blob downloading url  
-            a.setAttribute('href', url)
-
-            // Setting the anchor tag attribute for downloading 
-            // and passing the download file name 
-            a.setAttribute('download', seriesName + ' ' + race.number + ': ' + fleet.fleetSettings.name + ' ' + 'results.csv');
-
-            // Performing a download with click 
-            a.click()
+        race.fleets.forEach(async fleet => {
+            // by pointing the browser to the api endpoint, the browser will download the file
+            window.location.assign(`/api/ExportFleetResults?id=${fleet.id}`)
         })
+
+
     }
+
+    useEffect(() => {
+        const fetchName = async () => {
+            setSeriesName(await DB.GetSeriesById(race.seriesId).then(series => series.name))
+        }
+        if (race != undefined) {
+            fetchName()
+        }
+    }, [race])
 
     if (userIsValidating || clubIsValidating || user == undefined || club == undefined || boats == undefined || raceIsValidating || race == undefined) {
         return (

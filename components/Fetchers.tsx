@@ -12,6 +12,14 @@ export async function fetcher(url: string) {
     return res.json()
 }
 
+export async function fileFetcher(url: string) {
+    const res = await fetch(url)
+    if (!res.ok) {
+        throw new Error('An error occurred while fetching the data.')
+    }
+    return res.blob()
+}
+
 export async function advancedFetcher(url: string, data: object) {
     console.log(data)
     const res = await fetch(url, {
@@ -88,6 +96,20 @@ export function Boats() {
         boats: data?.boats as BoatDataType[],
         boatsIsValidating: isValidating,
         boatsIsError: error
+    }
+}
+/**
+ * 
+ * @param fleetId 
+ * @returns 
+ */
+export function ExportResults(fleetId: string) {
+    const { data, error, isValidating } = useSWR(fleetId != "" ? `/api/ExportResults?id=${fleetId}` : null, fetcher)
+    console.log(data)
+    return {
+        file: data,
+        fileIsValidating: isValidating,
+        fileIsError: error
     }
 }
 

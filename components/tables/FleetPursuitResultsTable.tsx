@@ -155,7 +155,7 @@ const FleetPursuitResultsTable = (props: any) => {
     return (
         <div key={props.data}>
             <p className='text-2xl font-bol'>
-                {fleet.fleetSettings.name} - Boats Entered: {fleet.results.length}
+                {fleet?.fleetSettings.name} - Boats Entered: {fleet?.results.length}
             </p>
             <Table isStriped id={"clubTable"}>
                 <TableHeader>
