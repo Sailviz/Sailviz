@@ -15,9 +15,11 @@ export default function Page() {
 
     async function SignIn() {
         let res = await DB.AuthenticateUser(username, password)
-
+        if (res == undefined) {
+            setError("Wrong username or password")
+            return
+        }
         if (res.token) {
-            console.log(res)
             const user: UserDataType = res.user;
             //set cookie
             cookie.set('token', res.token, { expires: 2 });
