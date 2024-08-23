@@ -13,6 +13,7 @@ import { BreadcrumbItem, Breadcrumbs, Button, Input, useDisclosure } from "@next
 import CreateResultModal from "components/ui/dashboard/CreateResultModal";
 import ProgressModal from "components/ui/dashboard/ProgressModal";
 import EditResultModal from "components/ui/dashboard/EditResultModal";
+import { mutate } from "swr";
 
 export default function Page({ params }: { params: { slug: string } }) {
 
@@ -21,6 +22,9 @@ export default function Page({ params }: { params: { slug: string } }) {
     const { user, userIsError, userIsValidating } = Fetcher.UseUser()
     const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
     const { boats, boatsIsError, boatsIsValidating } = Fetcher.Boats()
+
+    //TODO implement timer on fetch
+    const { race, raceIsError, raceIsValidating } = Fetcher.Race(params.slug, false)
 
     const [seriesName, setSeriesName] = useState("")
 
@@ -35,69 +39,24 @@ export default function Page({ params }: { params: { slug: string } }) {
     var [activeResult, setActiveResult] = useState<ResultsDataType>()
     var [activeFleet, setActiveFleet] = useState<FleetDataType>()
 
-    var [race, setRace] = useState<RaceDataType>({
-        id: "",
-        number: 0,
-        Time: "",
-        OOD: "",
-        AOD: "",
-        SO: "",
-        ASO: "",
-        fleets: [{
-            id: "",
-            startTime: 0,
-            raceId: "",
-            fleetSettings: {
-                id: "",
-                name: "",
-                boats: [],
-                startDelay: 0,
-                fleets: []
-            } as FleetSettingsType,
-            results: [{
-                id: "",
-                raceId: "",
-                Helm: "",
-                Crew: "",
-                boat: {} as BoatDataType,
-                SailNumber: "",
-                finishTime: 0,
-                CorrectedTime: 0,
-                laps: [{
-                    time: 0,
-                    id: "",
-                    resultId: ""
-                }],
-                PursuitPosition: 0,
-                HandicapPosition: 0,
-                resultCode: "",
-                fleetId: ""
-            } as ResultsDataType]
-
-        }],
-        Type: "",
-        seriesId: "",
-        series: {} as SeriesDataType
-    })
 
     const createResult = async (helm: string, crew: string, boat: BoatDataType, sailNum: string, fleetId: string) => {
         console.log(helm, crew, boat, sailNum, fleetId)
         createModal.onClose() //close modal
         let result = await DB.createResult(fleetId)
         await DB.updateResult({ ...result, Helm: helm, Crew: crew, boat: boat, SailNumber: sailNum })
-        setRace(await DB.getRaceById(race.id))
+        mutate('/api/GetRaceById?id=' + race.id)
     }
 
     const updateResult = async (result: ResultsDataType) => {
         editModal.onClose()
         await DB.updateResult(result)
-        var data = await DB.getRaceById(race.id)
-        setRace(data)
+        mutate('/api/GetRaceById?id=' + race.id)
     }
 
     const deleteResult = async (result: ResultsDataType) => {
         await DB.DeleteResultById(result)
-        setRace(await DB.getRaceById(race.id))
+        mutate('/api/GetRaceById?id=' + race.id)
         console.log("deleted")
         editModal.onClose()
     }
@@ -240,7 +199,7 @@ export default function Page({ params }: { params: { slug: string } }) {
             default:
                 break;
         }
-        setRace(newRaceData)
+        mutate('/api/GetRaceById?id=' + race.id)
 
         let inputElement = document.getElementById(e.target.id) as HTMLInputElement
         inputElement.value = calitalisedSentence
@@ -276,8 +235,9 @@ export default function Page({ params }: { params: { slug: string } }) {
 
     const saveRaceType = async (newValue: any) => {
         console.log(newValue)
-        setRace({ ...race, Type: newValue.value })
+
         await DB.updateRaceById({ ...race, Type: newValue.value })
+        mutate('/api/GetRaceById?id=' + race.id)
     }
 
     const entryFileUploadHandler = async (e: ChangeEvent<HTMLInputElement>) => {
@@ -325,7 +285,7 @@ export default function Page({ params }: { params: { slug: string } }) {
                     await DB.updateResult(result)
 
                 }
-                setRace(await DB.getRaceById(race.id))
+                mutate('/api/GetRaceById?id=' + race.id)
                 progressModal.onClose()
             },
         });
@@ -369,39 +329,7 @@ export default function Page({ params }: { params: { slug: string } }) {
         })
     }
 
-    useEffect(() => {
-        let raceId = params.slug
-        const getRace = async () => {
-            const racedata = await DB.getRaceById(raceId)
-            setRace(racedata)
-            DB.GetSeriesById(racedata.seriesId).then((series: SeriesDataType) => {
-                setSeriesName(series.name)
-            })
-        }
-
-        if (raceId != undefined) {
-            getRace()
-        }
-
-    }, [Router])
-
-
-
-    useEffect(() => {
-        let timer1 = setTimeout(async () => {
-            console.log(document.activeElement?.tagName)
-            if (document.activeElement?.tagName == "INPUT") {
-                return
-            }
-            if (race.id == "") return
-            var data = await DB.getRaceById(race.id)
-            setRace({ ...data })
-        }, 5000);
-        return () => {
-            clearTimeout(timer1);
-        }
-    }, [race]);
-    if (userIsValidating || clubIsValidating || user == undefined || club == undefined || boats == undefined) {
+    if (userIsValidating || clubIsValidating || user == undefined || club == undefined || boats == undefined || raceIsValidating || race == undefined) {
         return (
             <PageSkeleton />
         )
@@ -500,13 +428,10 @@ export default function Page({ params }: { params: { slug: string } }) {
                         {race.fleets.map((fleet, index) => {
                             return (
                                 <div key={"fleetResults" + index}>
-                                    <p className='text-2xl font-bol'>
-                                        {fleet.fleetSettings.name} - Boats Entered: {fleet.results.length}
-                                    </p>
                                     {race.Type == "Handicap" ?
-                                        <FleetHandicapResultsTable showTime={true} editable={userHasPermission(user, AVAILABLE_PERMISSIONS.editResults)} data={fleet.results} startTime={fleet.startTime} key={JSON.stringify(race)} deleteResult={deleteResult} updateResult={updateResult} raceId={race.id} showEditModal={showEditModal} />
+                                        <FleetHandicapResultsTable showTime={true} editable={userHasPermission(user, AVAILABLE_PERMISSIONS.editResults)} fleetId={fleet.id} key={JSON.stringify(race)} deleteResult={deleteResult} updateResult={updateResult} raceId={race.id} showEditModal={showEditModal} />
                                         :
-                                        <FleetPursuitResultsTable showTime={true} editable={userHasPermission(user, AVAILABLE_PERMISSIONS.editResults)} data={fleet.results} startTime={fleet.startTime} key={JSON.stringify(race)} deleteResult={deleteResult} updateResult={updateResult} raceId={race.id} showEditModal={showEditModal} />
+                                        <FleetPursuitResultsTable showTime={true} editable={userHasPermission(user, AVAILABLE_PERMISSIONS.editResults)} fleetId={fleet.id} key={JSON.stringify(race)} deleteResult={deleteResult} updateResult={updateResult} raceId={race.id} showEditModal={showEditModal} />
                                     }
 
                                 </div>

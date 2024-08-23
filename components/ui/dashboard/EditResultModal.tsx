@@ -56,9 +56,6 @@ export default function EditResultModal({ isOpen, result, fleet, onSubmit, onClo
         options.push({ value: boat as BoatDataType, label: boat.name })
     })
 
-    console.log(result)
-
-
     useEffect(() => {
         if (result == undefined) {
             return

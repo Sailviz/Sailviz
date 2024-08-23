@@ -55,6 +55,32 @@ export function Series(seriesId: string) {
     }
 }
 
+/**
+ * This is a fetcher for a race
+ * @param raceId id of race to be fetched
+ * @param results whether to include results
+ * @returns 
+ */
+export function Race(raceId: string, results: boolean) {
+    const { data, error, isValidating } = useSWR(raceId != "" ? `/api/GetRaceById?id=${raceId}&results=${results}` : null, fetcher)
+
+    return {
+        race: data as RaceDataType,
+        raceIsValidating: isValidating,
+        raceIsError: error
+    }
+}
+
+export function Fleet(fleetId: string) {
+    const { data, error, isValidating } = useSWR(fleetId != undefined ? `/api/GetFleetById?id=${fleetId}` : null, fetcher)
+
+    return {
+        fleet: data as FleetDataType,
+        fleetIsValidating: isValidating,
+        fleetIsError: error
+    }
+}
+
 export function Boats() {
     const { data, error, isValidating } = useSWR('/api/GetBoats', fetcher)
 

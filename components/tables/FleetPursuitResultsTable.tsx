@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, useReactTable, SortingState } from '@tanstack/react-table'
-import { Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Dropdown, DropdownItem, DropdownTrigger, Button, DropdownMenu } from '@nextui-org/react';
+import { Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Dropdown, DropdownItem, DropdownTrigger, Button, DropdownMenu, Spinner } from '@nextui-org/react';
 import { VerticalDotsIcon } from 'components/icons/vertical-dots-icon';
-
+import * as Fetcher from 'components/Fetchers';
 
 const Text = ({ ...props }) => {
     const value = props.getValue()
@@ -80,8 +80,11 @@ const columnHelper = createColumnHelper<ResultsDataType>()
 
 
 const FleetPursuitResultsTable = (props: any) => {
-    let [data, setData] = useState<ResultsDataType[]>(props.data)
-    console.log(props.data)
+    const { fleet, fleetIsValidating, fleetIsError } = Fetcher.Fleet(props.fleetId)
+    let data = fleet?.results
+    if (data == undefined) {
+        data = []
+    }
     let [editable, setEditable] = useState(props.editable)
 
     const showEditModal = (id: any) => {
@@ -136,6 +139,9 @@ const FleetPursuitResultsTable = (props: any) => {
     if (editable) {
         columns.push(editColumn)
     }
+
+    const loadingState = fleetIsValidating || data?.length === 0 ? "loading" : "idle";
+
     let table = useReactTable({
         data,
         columns: columns,
@@ -148,6 +154,9 @@ const FleetPursuitResultsTable = (props: any) => {
     })
     return (
         <div key={props.data}>
+            <p className='text-2xl font-bol'>
+                {fleet.fleetSettings.name} - Boats Entered: {fleet.results.length}
+            </p>
             <Table isStriped id={"clubTable"}>
                 <TableHeader>
                     {table.getHeaderGroups().flatMap(headerGroup => headerGroup.headers).map(header => {
@@ -161,7 +170,10 @@ const FleetPursuitResultsTable = (props: any) => {
                         );
                     })}
                 </TableHeader>
-                <TableBody>
+                <TableBody
+                    loadingContent={<Spinner />}
+                    loadingState={loadingState}
+                >
                     {table.getRowModel().rows.map(row => (
                         <TableRow key={row.id}>
                             {row.getVisibleCells().map(cell => (

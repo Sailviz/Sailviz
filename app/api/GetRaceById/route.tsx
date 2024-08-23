@@ -1,9 +1,8 @@
 import prisma from 'components/prisma'
 import { NextRequest, NextResponse } from "next/server";
+import { cookies } from 'next/headers';
 
-import assert from 'assert';
-
-async function findRace(id: any) {
+async function findRace(id: any, results: boolean) {
     var result = await prisma.race.findFirst({
         where: {
             id: id
@@ -11,22 +10,25 @@ async function findRace(id: any) {
         include: {
             fleets: {
                 include: {
-                    results: {
-                        where: {
-                            isDeleted: false
-                        },
-                        include: {
-                            boat: true,
-                            laps: {
+                    ...results ?
+                        {
+                            results: {
                                 where: {
                                     isDeleted: false
                                 },
-                                orderBy: {
-                                    time: 'asc'
+                                include: {
+                                    boat: true,
+                                    laps: {
+                                        where: {
+                                            isDeleted: false
+                                        },
+                                        orderBy: {
+                                            time: 'asc'
+                                        }
+                                    }
                                 }
-                            }
-                        }
-                    },
+                            },
+                        } : {},
                     fleetSettings: true
                 }
 
@@ -37,22 +39,21 @@ async function findRace(id: any) {
     return result;
 }
 
-export async function POST(request: NextRequest) {
-    const req = await request.json()
-    try {
-        assert.notStrictEqual(undefined, req.id);
+export async function GET(request: NextRequest) {
+    const cookieStore = cookies()
+    const searchParams = request.nextUrl.searchParams
 
-    } catch (bodyError) {
-        return NextResponse.json({ error: true, message: "information missing" });
+    var id = searchParams.get('id')
+    var results = (searchParams.get('results') === 'true')
+
+    if (id == undefined || results == undefined) {
+        return NextResponse.json({ error: "can't find fleet" }, { status: 400 });
     }
-
-    var id = req.id
-
-    var race = await findRace(id)
-    if (race) {
-        return NextResponse.json({ error: false, race: race });
-    } else {
-        // User exists
-        return NextResponse.json({ error: true, message: 'race not found' });
+    var fleet = await findRace(id, results)
+    if (fleet) {
+        return NextResponse.json(fleet);
+    }
+    else {
+        return NextResponse.json({ error: "can't find fleet" }, { status: 406 });
     }
 }
