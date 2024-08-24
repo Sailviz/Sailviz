@@ -51,7 +51,7 @@ export default function Page({ params }: { params: { slug: string } }) {
     const updateResult = async (result: ResultsDataType) => {
         editModal.onClose()
         await DB.updateResult(result)
-        mutate('/api/GetRaceById?id=' + race.id)
+        mutate('/api/GetFleetById?id=' + result.fleetId)
     }
 
     const deleteResult = async (result: ResultsDataType) => {
@@ -217,18 +217,16 @@ export default function Page({ params }: { params: { slug: string } }) {
 
     const showEditModal = async (resultId: string) => {
         console.log("this is running!")
-        let result: ResultsDataType | undefined;
-        let results = race.fleets.flatMap(fleet => fleet.results)
-        result = results.find(result => result.id == resultId)
+        let result = race.fleets.flatMap(fleet => fleet.results).find(result => result.id == resultId)
         if (result == undefined) {
             console.error("Could not find result with id: " + resultId);
             return
         }
         console.log(result)
         result.laps.sort((a, b) => a.time - b.time)
-        setActiveResult({ ...result })
+        setActiveResult(result)
 
-        setActiveFleet(race.fleets.filter(fleet => fleet.id == result!.fleetId)[0]!)
+        setActiveFleet(race.fleets.filter(fleet => fleet.id == result?.fleetId)[0]!)
 
         editModal.onOpen()
     }
