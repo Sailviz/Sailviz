@@ -263,7 +263,7 @@ export default function Page({ params }: { params: { slug: string } }) {
                                         placeholder="Duty Officer" />
                                 </div>
                                 <div className="flex items-center justify-center">
-                                    <Button color="warning">
+                                    <Button isDisabled color="warning">
                                         Copy from previous race
                                     </Button>
                                 </div>
@@ -274,7 +274,7 @@ export default function Page({ params }: { params: { slug: string } }) {
                         <div className="flex flex-wrap justify-center">
                             <Button className="mx-1" onClick={() => openRacePanel()}>Race</Button>
                             <Button className="mx-1" onClick={createModal.onOpen}>Add Entry</Button>
-                            <Button className="mx-1">Calculate</Button>
+                            <Button isDisabled className="mx-1">Calculate</Button>
                             <Button className="mx-1" onClick={() => printRaceSheet()}>Print Race Sheet</Button>
                             {userHasPermission(user, AVAILABLE_PERMISSIONS.UploadEntires) ?
                                 <>
