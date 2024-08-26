@@ -1,10 +1,12 @@
 import React, { ChangeEvent, useState, useRef } from 'react';
 import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, useReactTable, SortingState } from '@tanstack/react-table'
-import { Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Dropdown, DropdownItem, DropdownTrigger, Button, DropdownMenu, Tooltip } from '@nextui-org/react';
+import { Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Dropdown, DropdownItem, DropdownTrigger, Button, DropdownMenu, Tooltip, Spinner } from '@nextui-org/react';
 import { VerticalDotsIcon } from 'components/icons/vertical-dots-icon';
 import { EditIcon } from 'components/icons/edit-icon';
 import * as Fetcher from 'components/Fetchers';
 import { AVAILABLE_PERMISSIONS, userHasPermission } from 'components/helpers/users';
+import Page from 'app/(public)/page';
+import { PageSkeleton } from 'components/ui/PageSkeleton';
 
 function Sort({ column, table }: { column: any, table: any }) {
     const firstValue = table
@@ -85,6 +87,7 @@ const SignOnTable = (props: any) => {
         const onEditClick = () => {
             props.showEditModal(props.row.original)
         }
+        console.log(props.user)
         if (userHasPermission(props.user, AVAILABLE_PERMISSIONS.editResults)) {
             return (
                 <div className="relative flex items-center gap-2">
@@ -110,8 +113,7 @@ const SignOnTable = (props: any) => {
 
 
     const [sorting, setSorting] = useState<SortingState>([]);
-
-    let editableKeyToFocus = useRef("0")
+    console.log(user)
 
     let table = useReactTable({
         data,
@@ -151,6 +153,9 @@ const SignOnTable = (props: any) => {
         getCoreRowModel: getCoreRowModel(),
         getSortedRowModel: getSortedRowModel(),
     })
+    if (userIsValidating || userIsError || user == undefined) {
+        return (<PageSkeleton />)
+    }
     return (
         <div key={props.data}>
             <Table

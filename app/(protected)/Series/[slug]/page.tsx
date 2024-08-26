@@ -43,7 +43,6 @@ export default function Page({ params }: { params: { slug: string } }) {
         mutate('/api/GetSeriesById?id=' + series.id)
         let result = await DB.deleteRaceById(raceId)
         if (!result) { return } // failed to delete race
-        // //mutate series
         mutate('/api/GetSeriesById?id=' + series.id)
     }
 
@@ -55,7 +54,7 @@ export default function Page({ params }: { params: { slug: string } }) {
         let newSeriesData: SeriesDataType = window.structuredClone(series)
         console.log(newSeriesData)
         newSeriesData.settings['numberToCount'] = value
-        //mutate series
+        mutate('/api/GetSeriesById?id=' + series.id)
 
 
         await DB.updateSeries(newSeriesData)
@@ -63,13 +62,13 @@ export default function Page({ params }: { params: { slug: string } }) {
 
     const createFleetSettings = async () => {
         await DB.createFleetSettings(series.id)
-        //mutate series
+        mutate('/api/GetSeriesById?id=' + series.id)
     }
 
     const deleteFleetSettings = async (fleetId: string) => {
         await DB.DeleteFleetSettingsById(fleetId)
 
-        //mutate series
+        mutate('/api/GetSeriesById?id=' + series.id)
     }
 
     const editFleetSettings = async (fleetSettings: FleetSettingsType) => {
@@ -78,7 +77,7 @@ export default function Page({ params }: { params: { slug: string } }) {
         await DB.updateFleetSettingsById(fleetSettings)
         mutate(`/api/GetFleetSettingsBySeriesId?id=${seriesId}`)
 
-        //mutate series
+        mutate('/api/GetSeriesById?id=' + series.id)
     }
 
     const showFleetSettingsModal = async (fleetSettings: FleetSettingsType) => {

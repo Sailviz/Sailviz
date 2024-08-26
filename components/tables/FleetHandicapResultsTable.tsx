@@ -1,8 +1,10 @@
+'use client'
 import React, { useState, useEffect } from 'react';
 import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, useReactTable, SortingState } from '@tanstack/react-table'
-import { Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Dropdown, DropdownItem, DropdownTrigger, Button, DropdownMenu, Input } from '@nextui-org/react';
-import { VerticalDotsIcon } from 'components/icons/vertical-dots-icon';
-import dayjs from 'dayjs';
+import { Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Dropdown, DropdownItem, DropdownTrigger, Button, DropdownMenu, Input, Spinner } from '@nextui-org/react';
+import * as Fetcher from 'components/Fetchers';
+import useSWR from 'swr';
+
 
 
 const Text = ({ ...props }) => {
@@ -116,11 +118,15 @@ const columnHelper = createColumnHelper<ResultsDataType>()
 
 
 const FleetHandicapResultsTable = (props: any) => {
-    let [data, setData] = useState<ResultsDataType[]>(props.data)
-    console.log(props.data)
+    const { fleet, fleetIsValidating, fleetIsError } = Fetcher.Fleet(props.fleetId)
+    let data = fleet?.results
+    if (data == undefined) {
+        data = []
+    }
+    console.log(data)
     let [editable, setEditable] = useState(props.editable)
     let [showTime, setShowTime] = useState(props.showTime)
-    let [startTime, setStartTime] = useState(props.startTime)
+    let [startTime, setStartTime] = useState(fleet?.startTime || 0)
 
     const showEditModal = (id: any) => {
         props.showEditModal(id)
@@ -174,7 +180,7 @@ const FleetHandicapResultsTable = (props: any) => {
 
     const correctedTimeColumn = columnHelper.accessor('CorrectedTime', {
         header: "Corrected Time",
-        cell: props => <CorrectedTime {...props} result={data.find((result) => result.id == props.row.original.id)} />,
+        cell: props => <CorrectedTime {...props} result={data?.find((result) => result.id == props.row.original.id)} />,
         enableSorting: false
     })
 
@@ -191,6 +197,9 @@ const FleetHandicapResultsTable = (props: any) => {
     if (editable) {
         columns.push(editColumn)
     }
+
+    const loadingState = fleetIsValidating || data?.length === 0 ? "loading" : "idle";
+
     let table = useReactTable({
         data,
         columns: columns,
@@ -203,6 +212,9 @@ const FleetHandicapResultsTable = (props: any) => {
     })
     return (
         <div key={props.data}>
+            <p className='text-2xl font-bol'>
+                {fleet?.fleetSettings.name} - Boats Entered: {fleet?.results.length}
+            </p>
             <Table isStriped id={"clubTable"}>
                 <TableHeader>
                     {table.getHeaderGroups().flatMap(headerGroup => headerGroup.headers).map(header => {
@@ -216,7 +228,10 @@ const FleetHandicapResultsTable = (props: any) => {
                         );
                     })}
                 </TableHeader>
-                <TableBody>
+                <TableBody
+                    loadingContent={<Spinner />}
+                    loadingState={loadingState}
+                >
                     {table.getRowModel().rows.map(row => (
                         <TableRow key={row.id}>
                             {row.getVisibleCells().map(cell => (

@@ -1,10 +1,11 @@
 import { Button, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Radio, RadioGroup } from '@nextui-org/react';
 import { use } from 'chai';
+import { set } from 'cypress/types/lodash';
 import { useTheme } from 'next-themes';
 import { ChangeEvent, useState } from 'react';
 import Select, { CSSObjectWithLabel } from 'react-select';
 
-export default function CreateResultModal({ isOpen, race, boats, onSubmit, onClose }: { isOpen: boolean, race: RaceDataType, boats: BoatDataType[], onSubmit: (helmValue: string, crewValue: string, boat: any, sailNum: string, fleetId: string) => void, onClose: () => void }) {
+export default function CreateResultModal({ isOpen, race, boats, onSubmit, onClose }: { isOpen: boolean, race: RaceDataType, boats: BoatDataType[], onSubmit: (helmValue: string, crewValue: string, boat: BoatDataType, sailNum: string, fleetId: string) => void, onClose: () => void }) {
 
     const [helmValue, setHelmValue] = useState('')
     const [crewValue, setCrewValue] = useState('')
@@ -12,7 +13,7 @@ export default function CreateResultModal({ isOpen, race, boats, onSubmit, onClo
 
     const { theme, setTheme } = useTheme()
 
-    const [selectedRaces, setSelectedRaces] = useState<boolean[]>([])
+    const [selectedFleet, setSelectedFleet] = useState(race.fleets[0]!.id)
     const [selectedOption, setSelectedOption] = useState({ label: "", value: {} as BoatDataType })
 
     let options: { label: string; value: BoatDataType }[] = []
@@ -31,6 +32,15 @@ export default function CreateResultModal({ isOpen, race, boats, onSubmit, onClo
         if (e.target.id == 'crew') setCrewValue(capitalisedSentence)
     }
 
+    const openUpdate = (open: boolean) => {
+        if (!open) {
+            setHelmValue('')
+            setCrewValue('')
+            setSailNumber('')
+            setSelectedOption({ label: "", value: {} as BoatDataType })
+        }
+    }
+
     return (
         <>
             <Modal
@@ -39,6 +49,7 @@ export default function CreateResultModal({ isOpen, race, boats, onSubmit, onClo
                 scrollBehavior={'outside'}
                 size='5xl'
                 backdrop='blur'
+                onOpenChange={(open) => openUpdate(open)}
             >
                 <ModalContent>
                     {(onClose) => (
@@ -146,6 +157,7 @@ export default function CreateResultModal({ isOpen, race, boats, onSubmit, onClo
                                         {/* show buttons for each fleet in a series */}
                                         <RadioGroup
                                             defaultValue={race.fleets[0]!.id}
+                                            onValueChange={(value) => setSelectedFleet(value)}
                                         >
                                             {
                                                 race.fleets.map((fleet: FleetDataType, index) => {
@@ -166,7 +178,7 @@ export default function CreateResultModal({ isOpen, race, boats, onSubmit, onClo
                                 <Button color="danger" variant="light" onPress={onClose}>
                                     Close
                                 </Button>
-                                <Button color="primary" onPress={() => onSubmit(helmValue, crewValue, selectedOption, sailNumber, race.fleets[0]!.id)}>
+                                <Button color="primary" onPress={() => onSubmit(helmValue, crewValue, selectedOption.value, sailNumber, race.fleets[0]!.id)}>
                                     Add
                                 </Button>
                             </ModalFooter>

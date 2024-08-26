@@ -18,18 +18,6 @@ const Empty = ({ ...props }) => {
     );
 };
 
-function Sort({ column, table }: { column: any, table: any }) {
-    const firstValue = table
-        .getPreFilteredRowModel()
-        .flatRows[0]?.getValue(column.id);
-
-    const columnFilterValue = column.getFilterValue();
-
-    return (
-        <></>
-    )
-}
-
 
 const columnHelper = createColumnHelper<ResultsDataType>()
 
@@ -37,11 +25,15 @@ const columnHelper = createColumnHelper<ResultsDataType>()
 const HandicapPaperResultsTable = forwardRef((props: { results: ResultsDataType[] }, ref: any) => {
     let [results, setResults] = useState<ResultsDataType[]>(props.results)
 
+    //create 3 empty lines on sheet
+    results.push({} as ResultsDataType)
+    results.push({} as ResultsDataType)
+    results.push({} as ResultsDataType)
 
     //sets sorting to position by default
     const [sorting, setSorting] = useState<SortingState>([{
         id: "PY",
-        desc: false,
+        desc: true,
     }]);
 
     let columns = [
@@ -95,6 +87,7 @@ const HandicapPaperResultsTable = forwardRef((props: { results: ResultsDataType[
 
     const PY = columnHelper.accessor((data) => (data.boat?.py.toString() || "-"), {
         header: "PY",
+        id: "PY",
         cell: props => <Text {...props} />,
         enableSorting: true
     })
@@ -139,11 +132,6 @@ const HandicapPaperResultsTable = forwardRef((props: { results: ResultsDataType[
                                             header.column.columnDef.header,
                                             header.getContext()
                                         )}
-                                    {header.column.getCanSort() ? (
-                                        <div>
-                                            <Sort column={header.column} table={table} />
-                                        </div>
-                                    ) : null}
                                 </th>
                             ))}
                         </tr>

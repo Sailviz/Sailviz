@@ -14,6 +14,12 @@ const Text = ({ ...props }) => {
 
 const Time = ({ ...props }) => {
     const value = props.getValue()
+
+    if (value == 999999) {
+        return <div>
+            &nbsp;
+        </div>
+    }
     const minutes = Math.floor(value / 60)
     const seconds = value % 60
 
@@ -30,18 +36,6 @@ const Empty = ({ ...props }) => {
     );
 };
 
-function Sort({ column, table }: { column: any, table: any }) {
-    const firstValue = table
-        .getPreFilteredRowModel()
-        .flatRows[0]?.getValue(column.id);
-
-    const columnFilterValue = column.getFilterValue();
-
-    return (
-        <></>
-    )
-}
-
 
 const columnHelper = createColumnHelper<ResultsDataType>()
 
@@ -49,6 +43,10 @@ const columnHelper = createColumnHelper<ResultsDataType>()
 const PursuitPaperResultsTable = forwardRef((props: { results: ResultsDataType[] }, ref: any) => {
     let [results, setResults] = useState<ResultsDataType[]>(props.results)
 
+    //create 3 empty lines on sheet
+    results.push({} as ResultsDataType)
+    results.push({} as ResultsDataType)
+    results.push({} as ResultsDataType)
 
     //sets sorting to position by default
     const [sorting, setSorting] = useState<SortingState>([{
@@ -81,7 +79,7 @@ const PursuitPaperResultsTable = forwardRef((props: { results: ResultsDataType[]
     ];
 
 
-    const startTime = columnHelper.accessor((data) => (data.boat?.pursuitStartTime || 0), {
+    const startTime = columnHelper.accessor((data) => (data.boat?.pursuitStartTime || 999999), {
         header: "Start Time",
         id: "startTime",
         cell: props => <Time {...props} />,
@@ -133,11 +131,6 @@ const PursuitPaperResultsTable = forwardRef((props: { results: ResultsDataType[]
                                             header.column.columnDef.header,
                                             header.getContext()
                                         )}
-                                    {header.column.getCanSort() ? (
-                                        <div>
-                                            <Sort column={header.column} table={table} />
-                                        </div>
-                                    ) : null}
                                 </th>
                             ))}
                         </tr>

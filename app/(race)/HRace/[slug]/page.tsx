@@ -8,6 +8,7 @@ import * as Fetcher from 'components/Fetchers';
 import { Button, useDisclosure } from "@nextui-org/react";
 import RetireModal from "components/ui/dashboard/RetireModal";
 import BoatCard from "components/ui/race/BoatCard";
+import { PageSkeleton } from "components/ui/PageSkeleton";
 
 enum raceStateType {
     running,
@@ -31,23 +32,11 @@ export default function Page({ params }: { params: { slug: string } }) {
     const { user, userIsError, userIsValidating } = Fetcher.UseUser()
     const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
 
+    const { race, raceIsError, raceIsValidating } = Fetcher.Race(params.slug, true)
+
     var [seriesName, setSeriesName] = useState("")
 
     const retireModal = useDisclosure();
-
-    var [race, setRace] = useState<RaceDataType>(({
-        id: "",
-        number: 0,
-        Time: "",
-        OOD: "",
-        AOD: "",
-        SO: "",
-        ASO: "",
-        fleets: [],
-        Type: "",
-        seriesId: "",
-        series: {} as SeriesDataType
-    }))
 
     var [lastAction, setLastAction] = useState<{ type: string, resultId: string }>({ type: "", resultId: "" })
 
@@ -288,6 +277,20 @@ export default function Page({ params }: { params: { slug: string } }) {
         await DB.updateFleetById(fleet)
     }
 
+    const showRetireModal = (resultId: String) => {
+        retireModal.onOpen()
+        let result: ResultsDataType | undefined;
+        race.fleets.some(fleet => {
+            result = fleet.results.find(result => result.id === resultId);
+            return result !== undefined;
+        });
+        if (result == undefined) {
+            console.error("Could not find result with id: " + resultId);
+            return
+        }
+        setActiveResult(result)
+    }
+
     const retireBoat = async (resultCode: string) => {
         retireModal.onClose()
         let tempdata = activeResult
@@ -295,7 +298,7 @@ export default function Page({ params }: { params: { slug: string } }) {
         await DB.updateResult(tempdata)
 
         let data = await DB.getRaceById(race.id)
-        setRace(data)
+        //mutate race
 
 
     }
@@ -316,7 +319,7 @@ export default function Page({ params }: { params: { slug: string } }) {
         await DB.CreateLap(resultId, Math.floor(new Date().getTime() / 1000))
         //load back race data
 
-        setRace(await DB.getRaceById(race.id))
+        //mutate race
 
         let sound = document.getElementById("Beep") as HTMLAudioElement
         sound!.currentTime = 0
@@ -408,7 +411,7 @@ export default function Page({ params }: { params: { slug: string } }) {
         //send to DB
         await DB.updateResult({ ...result, finishTime: time })
 
-        setRace(await DB.getRaceById(race.id))
+        //mutate race
 
         let sound = document.getElementById("Beep") as HTMLAudioElement
         sound!.currentTime = 0
@@ -461,21 +464,16 @@ export default function Page({ params }: { params: { slug: string } }) {
         }
 
 
-        setRace(await DB.getRaceById(race.id))
+        //mutate race
 
     }
 
     const controller = new AbortController()
 
-
     useEffect(() => {
-        let raceId = params.slug
         const fetchRace = async () => {
-            let data = await DB.getRaceById(raceId)
-            setRace(data)
-
-            setSeriesName(await DB.GetSeriesById(data.seriesId).then((res) => { return (res.name) }))
-            setRaceState(data.fleets.map((fleet) => {
+            setSeriesName(await DB.GetSeriesById(race.seriesId).then((res) => { return (res.name) }))
+            setRaceState(race.fleets.map((fleet) => {
                 if (checkAllFinished(fleet)) {
                     return raceStateType.calculate
                 } else if (fleet.startTime != 0) {
@@ -486,13 +484,14 @@ export default function Page({ params }: { params: { slug: string } }) {
             }))
         }
 
-        if (raceId != undefined) {
+        if (race != undefined) {
             fetchRace()
         }
 
-    }, [params])
+    }, [race])
 
     useEffect(() => {
+        if (race == undefined) return
         //sort results
         if (dynamicSorting) {
             if (mode == modeType.Finish) {
@@ -516,19 +515,8 @@ export default function Page({ params }: { params: { slug: string } }) {
         })
     }, [race, dynamicSorting, mode])
 
-    const showRetireModal = (resultId: String) => {
-        retireModal.onOpen()
-        let result: ResultsDataType | undefined;
-        race.fleets.some(fleet => {
-            result = fleet.results.find(result => result.id === resultId);
-            return result !== undefined;
-        });
-        if (result == undefined) {
-            console.error("Could not find result with id: " + resultId);
-            return
-        }
-        setActiveResult(result)
-
+    if (raceIsError || race == undefined || clubIsError || club == undefined || userIsError || user == undefined) {
+        return <PageSkeleton />
     }
 
     return (

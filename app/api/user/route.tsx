@@ -1,4 +1,5 @@
 import prisma from 'components/prisma'
+import { omit } from 'cypress/types/lodash';
 import { NextRequest, NextResponse } from "next/server";
 
 async function getUser(id: string) {
@@ -8,6 +9,9 @@ async function getUser(id: string) {
         },
         include: {
             roles: true
+        },
+        omit: {
+            password: true
         }
     })
     if (result == null) {

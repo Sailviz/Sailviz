@@ -13,6 +13,7 @@ import { BreadcrumbItem, Breadcrumbs, Button, Input, useDisclosure } from "@next
 import CreateResultModal from "components/ui/dashboard/CreateResultModal";
 import ProgressModal from "components/ui/dashboard/ProgressModal";
 import EditResultModal from "components/ui/dashboard/EditResultModal";
+import { mutate } from "swr";
 
 export default function Page({ params }: { params: { slug: string } }) {
 
@@ -21,6 +22,9 @@ export default function Page({ params }: { params: { slug: string } }) {
     const { user, userIsError, userIsValidating } = Fetcher.UseUser()
     const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
     const { boats, boatsIsError, boatsIsValidating } = Fetcher.Boats()
+
+    //TODO implement timer on fetch
+    const { race, raceIsError, raceIsValidating } = Fetcher.Race(params.slug, true)
 
     const [seriesName, setSeriesName] = useState("")
 
@@ -35,171 +39,26 @@ export default function Page({ params }: { params: { slug: string } }) {
     var [activeResult, setActiveResult] = useState<ResultsDataType>()
     var [activeFleet, setActiveFleet] = useState<FleetDataType>()
 
-    var [race, setRace] = useState<RaceDataType>({
-        id: "",
-        number: 0,
-        Time: "",
-        OOD: "",
-        AOD: "",
-        SO: "",
-        ASO: "",
-        fleets: [{
-            id: "",
-            startTime: 0,
-            raceId: "",
-            fleetSettings: {
-                id: "",
-                name: "",
-                boats: [],
-                startDelay: 0,
-                fleets: []
-            } as FleetSettingsType,
-            results: [{
-                id: "",
-                raceId: "",
-                Helm: "",
-                Crew: "",
-                boat: {} as BoatDataType,
-                SailNumber: "",
-                finishTime: 0,
-                CorrectedTime: 0,
-                laps: [{
-                    time: 0,
-                    id: "",
-                    resultId: ""
-                }],
-                PursuitPosition: 0,
-                HandicapPosition: 0,
-                resultCode: "",
-                fleetId: ""
-            } as ResultsDataType]
-
-        }],
-        Type: "",
-        seriesId: "",
-        series: {} as SeriesDataType
-    })
 
     const createResult = async (helm: string, crew: string, boat: BoatDataType, sailNum: string, fleetId: string) => {
         console.log(helm, crew, boat, sailNum, fleetId)
         createModal.onClose() //close modal
-        await DB.createResult(fleetId[0]!)
-        setRace(await DB.getRaceById(race.id))
+        let result = await DB.createResult(fleetId)
+        await DB.updateResult({ ...result, Helm: helm, Crew: crew, boat: boat, SailNumber: sailNum })
+        mutate('/api/GetRaceById?id=' + race.id)
     }
 
     const updateResult = async (result: ResultsDataType) => {
         editModal.onClose()
         await DB.updateResult(result)
-        var data = await DB.getRaceById(race.id)
-        setRace(data)
+        mutate('/api/GetFleetById?id=' + result.fleetId)
     }
-
-    // const editUpdateResult = async () => {
-    //     let result = activeResult
-    //     const Helm = document.getElementById('editHelm') as HTMLInputElement;
-    //     result.Helm = Helm.value
-
-    //     const Crew = document.getElementById("editCrew") as HTMLInputElement
-    //     result.Crew = Crew.value
-
-    //     result.boat = boatOption.value
-    //     console.log(result.boat)
-
-    //     result.resultCode = resultCodeOption.value
-
-    //     const sailNum = document.getElementById("editSailNum") as HTMLInputElement
-    //     result.SailNumber = sailNum.value
-
-    //     const Position = document.getElementById("editPosition") as HTMLInputElement
-    //     result.HandicapPosition = parseInt(Position.value)
-
-    //     if (lapsAdvancedMode) {
-
-    //         const LapData = document.getElementById("LapData") as HTMLElement
-    //         let laps = Array.from(LapData.childNodes)
-    //         console.log(laps)
-    //         laps.pop()
-
-    //         laps.forEach((element, index) => {
-    //             let inputElement = element.childNodes[1]?.childNodes[0] as HTMLInputElement
-
-    //             var parts = inputElement.value.split(':'); // split it at the colons
-
-    //             // minutes are 60 seconds. Hours are 60 minutes * 60 seconds.
-    //             var seconds = (+parts[0]!) * 60 * 60 + (+parts[1]!) * 60 + (+parts[2]!);
-    //             //add lap time to fleet start time
-    //             var unixTime = seconds + race.fleets.filter(fleet => fleet.id == result.fleetId)[0]!.startTime
-    //             result.laps[index]!.time = unixTime
-
-    //             if (index == laps.length - 1) {
-    //                 result.finishTime = unixTime
-    //             }
-    //         });
-    //     } else {
-    //         const Laps = document.getElementById("NumberofLaps") as HTMLInputElement
-    //         const numberofLaps = parseInt(Laps.value)
-    //         const Finish = document.getElementById("FinishTime") as HTMLInputElement
-    //         var parts = Finish.value.split(':'); // split it at the colons
-
-    //         // minutes are 60 seconds. Hours are 60 minutes * 60 seconds.
-    //         var seconds = (+parts[0]!) * 60 * 60 + (+parts[1]!) * 60 + (+parts[2]!);
-    //         //add lap time to fleet start time
-    //         var finishTime = seconds + race.fleets.filter(fleet => fleet.id == result.fleetId)[0]!.startTime
-
-    //         console.log(finishTime)
-    //         let entryLaps = activeResult.laps.length
-    //         if (entryLaps == numberofLaps) {
-    //             //don't do anything if there aren't any laps
-    //             if (numberofLaps != 0) {
-    //                 //don't have an update for the last lap
-    //                 await DB.DeleteLapById(activeResult.laps[entryLaps - 1]!.id)
-    //                 await DB.CreateLap(result.id, finishTime)
-    //             }
-    //         } else if (entryLaps < numberofLaps) {
-    //             let difference = numberofLaps - entryLaps
-    //             for (let i = 0; i < difference - 1; i++) {
-    //                 await DB.CreateLap(result.id, 0)
-    //             }
-    //             await DB.CreateLap(result.id, finishTime)
-    //         } else {
-    //             if (numberofLaps == 0) {
-    //                 //delete all laps
-    //                 for (let i = 0; i < entryLaps; i++) {
-    //                     await DB.DeleteLapById(activeResult.laps[i]!.id)
-    //                 }
-    //             } else {
-    //                 //delete the extra laps
-    //                 let difference = entryLaps - numberofLaps
-    //                 console.log(difference)
-    //                 console.log(result.laps)
-    //                 for (let i = 0; i <= difference; i++) {
-    //                     console.log(activeResult.laps[entryLaps - 1 - i]!.id)
-    //                     await DB.DeleteLapById(activeResult.laps[entryLaps - 1 - i]!.id)
-    //                 }
-    //                 await DB.CreateLap(result.id, finishTime)
-    //             }
-
-    //         }
-    //         result.finishTime = finishTime
-    //     }
-    //     //check that all data is present
-    //     if (result.Helm == "" || result.boat.id == undefined || result.SailNumber == "") {
-    //         alert("missing Helm or Sail Number or Lap Time")
-    //         return
-    //     }
-
-    //     console.log(result)
-    //     await DB.updateResult(result)
-
-    //     setRace(await DB.getRaceById(race.id)) //force update as content has changed
-
-    //     const modal = document.getElementById("editModal")
-    //     modal?.classList.add("hidden")
-    // }
 
     const deleteResult = async (result: ResultsDataType) => {
         await DB.DeleteResultById(result)
-        setRace(await DB.getRaceById(race.id))
+        mutate('/api/GetFleetById?id=' + result.fleetId)
+        console.log("deleted")
+        editModal.onClose()
     }
 
     const printRaceSheet = async () => {
@@ -237,7 +96,7 @@ export default function Page({ params }: { params: { slug: string } }) {
             default:
                 break;
         }
-        setRace(newRaceData)
+        mutate('/api/GetRaceById?id=' + race.id)
 
         let inputElement = document.getElementById(e.target.id) as HTMLInputElement
         inputElement.value = calitalisedSentence
@@ -255,26 +114,25 @@ export default function Page({ params }: { params: { slug: string } }) {
 
     const showEditModal = async (resultId: string) => {
         console.log("this is running!")
-        let result: ResultsDataType | undefined;
-        let results = race.fleets.flatMap(fleet => fleet.results)
-        result = results.find(result => result.id == resultId)
+        let result = race.fleets.flatMap(fleet => fleet.results).find(result => result.id == resultId)
         if (result == undefined) {
             console.error("Could not find result with id: " + resultId);
             return
         }
         console.log(result)
         result.laps.sort((a, b) => a.time - b.time)
-        setActiveResult({ ...result })
+        setActiveResult(result)
 
-        setActiveFleet(race.fleets.filter(fleet => fleet.id == result!.fleetId)[0]!)
+        setActiveFleet(race.fleets.filter(fleet => fleet.id == result?.fleetId)[0]!)
 
         editModal.onOpen()
     }
 
     const saveRaceType = async (newValue: any) => {
         console.log(newValue)
-        setRace({ ...race, Type: newValue.value })
+
         await DB.updateRaceById({ ...race, Type: newValue.value })
+        mutate('/api/GetRaceById?id=' + race.id)
     }
 
     const entryFileUploadHandler = async (e: ChangeEvent<HTMLInputElement>) => {
@@ -322,83 +180,31 @@ export default function Page({ params }: { params: { slug: string } }) {
                     await DB.updateResult(result)
 
                 }
-                setRace(await DB.getRaceById(race.id))
+                mutate('/api/GetRaceById?id=' + race.id)
                 progressModal.onClose()
             },
         });
     }
 
     const downloadResults = async () => {
-        var csvRows: string[] = []
-        const headers = ['HelmName', 'CrewName', 'Class', 'SailNo', 'Laps', 'Elapsed', 'Code']
-
-        csvRows.push(headers.join(','));
-
-        race.fleets.forEach(fleet => {
-            fleet.results.forEach(result => {
-                var time = new Date((result.finishTime - fleet.startTime) * 1000).toISOString().substring(11, 19)
-                var values = [result.Helm, result.Crew, result.boat.name, result.SailNumber, result.laps.length, (result.finishTime == -1 ? '' : time), result.resultCode]
-                //join values with comma
-                csvRows.push(values.join(','))
-            })
-            //join results with new line
-            let data = csvRows.join('\n')
-
-            // Creating a Blob for having a csv file format  
-            // and passing the data with type 
-            const blob = new Blob([data], { type: 'text/csv' });
-
-            // Creating an object for downloading url 
-            const url = window.URL.createObjectURL(blob)
-
-            // Creating an anchor(a) tag of HTML 
-            const a = document.createElement('a')
-
-            // Passing the blob downloading url  
-            a.setAttribute('href', url)
-
-            // Setting the anchor tag attribute for downloading 
-            // and passing the download file name 
-            a.setAttribute('download', seriesName + ' ' + race.number + ': ' + fleet.fleetSettings.name + ' ' + 'results.csv');
-
-            // Performing a download with click 
-            a.click()
+        race.fleets.forEach(async fleet => {
+            // by pointing the browser to the api endpoint, the browser will download the file
+            window.location.assign(`/api/ExportFleetResults?id=${fleet.id}`)
         })
+
+
     }
 
     useEffect(() => {
-        let raceId = params.slug
-        const getRace = async () => {
-            const racedata = await DB.getRaceById(raceId)
-            setRace(racedata)
-            DB.GetSeriesById(racedata.seriesId).then((series: SeriesDataType) => {
-                setSeriesName(series.name)
-            })
+        const fetchName = async () => {
+            setSeriesName(await DB.GetSeriesById(race.seriesId).then(series => series.name))
         }
-
-        if (raceId != undefined) {
-            getRace()
+        if (race != undefined) {
+            fetchName()
         }
+    }, [race])
 
-    }, [Router])
-
-
-
-    useEffect(() => {
-        let timer1 = setTimeout(async () => {
-            console.log(document.activeElement?.tagName)
-            if (document.activeElement?.tagName == "INPUT") {
-                return
-            }
-            if (race.id == "") return
-            var data = await DB.getRaceById(race.id)
-            setRace({ ...data })
-        }, 5000);
-        return () => {
-            clearTimeout(timer1);
-        }
-    }, [race]);
-    if (userIsValidating || clubIsValidating || user == undefined || club == undefined || boats == undefined) {
+    if (userIsValidating || clubIsValidating || user == undefined || club == undefined || boats == undefined || raceIsValidating || race == undefined) {
         return (
             <PageSkeleton />
         )
@@ -457,7 +263,7 @@ export default function Page({ params }: { params: { slug: string } }) {
                                         placeholder="Duty Officer" />
                                 </div>
                                 <div className="flex items-center justify-center">
-                                    <Button color="warning">
+                                    <Button isDisabled color="warning">
                                         Copy from previous race
                                     </Button>
                                 </div>
@@ -468,7 +274,7 @@ export default function Page({ params }: { params: { slug: string } }) {
                         <div className="flex flex-wrap justify-center">
                             <Button className="mx-1" onClick={() => openRacePanel()}>Race</Button>
                             <Button className="mx-1" onClick={createModal.onOpen}>Add Entry</Button>
-                            <Button className="mx-1">Calculate</Button>
+                            <Button isDisabled className="mx-1">Calculate</Button>
                             <Button className="mx-1" onClick={() => printRaceSheet()}>Print Race Sheet</Button>
                             {userHasPermission(user, AVAILABLE_PERMISSIONS.UploadEntires) ?
                                 <>
@@ -497,13 +303,10 @@ export default function Page({ params }: { params: { slug: string } }) {
                         {race.fleets.map((fleet, index) => {
                             return (
                                 <div key={"fleetResults" + index}>
-                                    <p className='text-2xl font-bol'>
-                                        {fleet.fleetSettings.name} - Boats Entered: {fleet.results.length}
-                                    </p>
                                     {race.Type == "Handicap" ?
-                                        <FleetHandicapResultsTable showTime={true} editable={userHasPermission(user, AVAILABLE_PERMISSIONS.editResults)} data={fleet.results} startTime={fleet.startTime} key={JSON.stringify(race)} deleteResult={deleteResult} updateResult={updateResult} raceId={race.id} showEditModal={showEditModal} />
+                                        <FleetHandicapResultsTable showTime={true} editable={userHasPermission(user, AVAILABLE_PERMISSIONS.editResults)} fleetId={fleet.id} key={JSON.stringify(race)} deleteResult={deleteResult} updateResult={updateResult} raceId={race.id} showEditModal={showEditModal} />
                                         :
-                                        <FleetPursuitResultsTable showTime={true} editable={userHasPermission(user, AVAILABLE_PERMISSIONS.editResults)} data={fleet.results} startTime={fleet.startTime} key={JSON.stringify(race)} deleteResult={deleteResult} updateResult={updateResult} raceId={race.id} showEditModal={showEditModal} />
+                                        <FleetPursuitResultsTable showTime={true} editable={userHasPermission(user, AVAILABLE_PERMISSIONS.editResults)} fleetId={fleet.id} key={JSON.stringify(race)} deleteResult={deleteResult} updateResult={updateResult} raceId={race.id} showEditModal={showEditModal} />
                                     }
 
                                 </div>

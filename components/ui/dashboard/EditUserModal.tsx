@@ -4,7 +4,7 @@ import { ChangeEvent, useEffect, useState } from 'react';
 import Select from 'react-select';
 import * as Fetcher from 'components/Fetchers';
 
-export default function EditUserModal({ isOpen, user, onSubmit, onClose }: { isOpen: boolean, user: UserDataType | undefined, onSubmit: (user: UserDataType) => void, onClose: () => void }) {
+export default function EditUserModal({ isOpen, user, onSubmit, onClose }: { isOpen: boolean, user: UserDataType | undefined, onSubmit: (user: UserDataType, password: string) => void, onClose: () => void }) {
 
     const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
     const { roles: roleOptions, rolesIsError, rolesIsValidating } = Fetcher.Roles(club)
@@ -13,6 +13,7 @@ export default function EditUserModal({ isOpen, user, onSubmit, onClose }: { isO
     const [username, setUsername] = useState("")
     const [roles, setRoles] = useState<RoleDataType[]>([])
     const [startPage, setStartPage] = useState("")
+    const [password, setPassword] = useState("")
 
     const { theme, setTheme } = useTheme()
 
@@ -89,6 +90,19 @@ export default function EditUserModal({ isOpen, user, onSubmit, onClose }: { isO
 
                                     </div>
                                 </div>
+                                <div>
+                                    <div className='flex flex-col px-6 w-1/4'>
+                                        <p className='text-2xl font-bold text-gray-700'>
+                                            Update Password
+                                        </p>
+
+                                        <Input
+                                            type="password"
+                                            onValueChange={setPassword}
+                                        />
+
+                                    </div>
+                                </div>
 
 
                             </ModalBody>
@@ -96,7 +110,7 @@ export default function EditUserModal({ isOpen, user, onSubmit, onClose }: { isO
                                 <Button color="danger" variant="light" onPress={onClose}>
                                     Close
                                 </Button>
-                                <Button color="primary" onPress={() => onSubmit({ ...user!, displayName: displayName, username: username, roles: roles, startPage: startPage })}>
+                                <Button color="primary" onPress={() => onSubmit({ ...user!, displayName: displayName, username: username, roles: roles, startPage: startPage }, password)}>
                                     Save
                                 </Button>
                             </ModalFooter>

@@ -12,6 +12,14 @@ export async function fetcher(url: string) {
     return res.json()
 }
 
+export async function fileFetcher(url: string) {
+    const res = await fetch(url)
+    if (!res.ok) {
+        throw new Error('An error occurred while fetching the data.')
+    }
+    return res.blob()
+}
+
 export async function advancedFetcher(url: string, data: object) {
     console.log(data)
     const res = await fetch(url, {
@@ -55,6 +63,32 @@ export function Series(seriesId: string) {
     }
 }
 
+/**
+ * This is a fetcher for a race
+ * @param raceId id of race to be fetched
+ * @param results whether to include results
+ * @returns 
+ */
+export function Race(raceId: string, results: boolean) {
+    const { data, error, isValidating } = useSWR(raceId != "" ? `/api/GetRaceById?id=${raceId}&results=${results}` : null, fetcher)
+
+    return {
+        race: data as RaceDataType,
+        raceIsValidating: isValidating,
+        raceIsError: error
+    }
+}
+
+export function Fleet(fleetId: string) {
+    const { data, error, isValidating } = useSWR(fleetId != undefined ? `/api/GetFleetById?id=${fleetId}` : null, fetcher)
+
+    return {
+        fleet: data as FleetDataType,
+        fleetIsValidating: isValidating,
+        fleetIsError: error
+    }
+}
+
 export function Boats() {
     const { data, error, isValidating } = useSWR('/api/GetBoats', fetcher)
 
@@ -62,6 +96,20 @@ export function Boats() {
         boats: data?.boats as BoatDataType[],
         boatsIsValidating: isValidating,
         boatsIsError: error
+    }
+}
+/**
+ * 
+ * @param fleetId 
+ * @returns 
+ */
+export function ExportResults(fleetId: string) {
+    const { data, error, isValidating } = useSWR(fleetId != "" ? `/api/ExportResults?id=${fleetId}` : null, fetcher)
+    console.log(data)
+    return {
+        file: data,
+        fileIsValidating: isValidating,
+        fileIsError: error
     }
 }
 

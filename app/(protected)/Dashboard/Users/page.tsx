@@ -35,10 +35,10 @@ export default function Page() {
         }
     }
 
-    const updateUser = async (user: UserDataType) => {
+    const updateUser = async (user: UserDataType, password: string) => {
         mutate('/api/GetUsersByClubId')
         editUserModal.onClose()
-        await DB.updateUser(user)
+        await DB.updateUser(user, password)
         mutate('/api/GetUsersByClubId')
     }
 
@@ -85,26 +85,35 @@ export default function Page() {
         return <PageSkeleton />
     }
 
-    return (
-        <>
-            <EditUserModal isOpen={editUserModal.isOpen} user={activeUser} onSubmit={updateUser} onClose={() => { editUserModal.onClose() }} />
-            <EditRoleModal isOpen={editRoleModal.isOpen} role={activeRole} onSubmit={updateRole} onClose={() => { editRoleModal.onClose() }} />
-            <div className='p-6'>
-                <UsersTable edit={showUserEditModal} deleteUser={deleteUser} />
-                {userHasPermission(user, AVAILABLE_PERMISSIONS.editUsers) ?
-                    <Button onClick={createUser} >
-                        Create User
-                    </Button>
-                    : <></>}
+    if (userHasPermission(user, AVAILABLE_PERMISSIONS.viewUsers)) {
+
+        return (
+            <>
+                <EditUserModal isOpen={editUserModal.isOpen} user={activeUser} onSubmit={updateUser} onClose={() => { editUserModal.onClose() }} />
+                <EditRoleModal isOpen={editRoleModal.isOpen} role={activeRole} onSubmit={updateRole} onClose={() => { editRoleModal.onClose() }} />
+                <div className='p-6'>
+                    <UsersTable edit={showUserEditModal} deleteUser={deleteUser} />
+                    {userHasPermission(user, AVAILABLE_PERMISSIONS.editUsers) ?
+                        <Button onClick={createUser} >
+                            Create User
+                        </Button>
+                        : <></>}
+                </div>
+                <div className='p-6'>
+                    <RoleTable edit={showRoleEditModal} deleteRole={deleteRole} />
+                    {userHasPermission(user, AVAILABLE_PERMISSIONS.editRoles) ?
+                        <Button onClick={createRole} >
+                            Create Role
+                        </Button>
+                        : <></>}
+                </div>
+            </>
+        )
+    } else {
+        return (
+            <div>
+                <p> These Settings are unavailable to you.</p>
             </div>
-            <div className='p-6'>
-                <RoleTable edit={showRoleEditModal} deleteRole={deleteRole} />
-                {userHasPermission(user, AVAILABLE_PERMISSIONS.editRoles) ?
-                    <Button onClick={createRole} >
-                        Create Role
-                    </Button>
-                    : <></>}
-            </div>
-        </>
-    )
+        )
+    }
 }
