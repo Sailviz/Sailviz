@@ -35,7 +35,7 @@
     "components/ErrorBoundary.jsx",
     "components/app.d.ts",
     ".next/types/**/*.ts"
-  ],
+, "next.config.mjs"  ],
   "exclude": [
     "node_modules",
     "cypress"
