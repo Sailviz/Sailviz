@@ -75,10 +75,10 @@ export const SidebarWrapper = () => {
                                 hrefs={todaysRaces?.map(race => '/SignOn/Series/' + race.series.id)}
                             />
                             <SidebarItem
-                                isActive={pathname === "/Documentation"}
+                                isActive={pathname === "/SignOn/Guide"}
                                 title="User Guide"
                                 icon={<HomeIcon />}
-                                href="/Documentation"
+                                href="/SignOn/Guide"
 
                             />
                         </SidebarMenu>

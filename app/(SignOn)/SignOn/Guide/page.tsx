@@ -1,4 +1,4 @@
-import Docs from 'documentation/guides/RaceManagement.mdx'
+import Docs from 'documentation/guides/SignOn.mdx'
 
 export default function Page() {
     return (

@@ -10,10 +10,14 @@
     "postinstall": "prisma generate"
   },
   "dependencies": {
+    "@mdx-js/loader": "^3.0.1",
+    "@mdx-js/react": "^3.0.1",
+    "@next/mdx": "^14.2.6",
     "@nextui-org/react": "^2.4.6",
     "@prisma/client": "^5.11.0",
     "@sentry/nextjs": "^7.105.0",
     "@tanstack/react-table": "^8.7.6",
+    "@types/mdx": "^2.0.13",
     "@types/react": "^18.3.3",
     "bcrypt": "^5.0.1",
     "csvtojson": "^2.0.10",
