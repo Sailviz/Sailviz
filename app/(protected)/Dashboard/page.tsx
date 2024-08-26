@@ -40,6 +40,9 @@ export default function Page() {
 
 
 
+    if (userIsError) {
+        Router.push('/Login')
+    }
     if (clubIsError || clubIsValidating || club == undefined) {
         return <PageSkeleton />
     }
