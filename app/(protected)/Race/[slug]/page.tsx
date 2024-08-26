@@ -181,6 +181,9 @@ export default function Page({ params }: { params: { slug: string } }) {
 
                 }
                 mutate('/api/GetRaceById?id=' + race.id)
+                race.fleets.forEach(fleet => {
+                    mutate('/api/GetFleetById?id=' + fleet.id)
+                })
                 progressModal.onClose()
             },
         });
