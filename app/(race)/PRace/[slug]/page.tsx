@@ -4,7 +4,6 @@ import { useRouter } from "next/navigation"
 import * as DB from 'components/apiMethods';
 import PursuitTimer from "components/PRaceTimer"
 import Cookies from "js-cookie";
-import { ReactSortable } from "react-sortablejs";
 import * as Fetcher from 'components/Fetchers';
 import { mutate } from "swr";
 import { PageSkeleton } from "components/ui/PageSkeleton";
@@ -52,10 +51,7 @@ export default function Page({ params }: { params: { slug: string } }) {
         })
 
         //Update database
-        console.log("here")
-
-        race.fleets.forEach(fleet => async () => {
-            console.log("here")
+        race.fleets.forEach(async fleet => {
             fleet.startTime = localTime
             await DB.updateFleetById(fleet)
         })
@@ -310,7 +306,7 @@ export default function Page({ params }: { params: { slug: string } }) {
         };
     }, []);
 
-    if (race == undefined || raceIsValidating) {
+    if (race == undefined) {
         return <PageSkeleton />
     }
 
@@ -360,58 +356,56 @@ export default function Page({ params }: { params: { slug: string } }) {
                 </div>
 
                 <div className="">
-                    <ReactSortable handle=".handle" list={race.fleets.flatMap(fleet => fleet.results)} setList={(newState) => setOrder(newState)}>
-                        {race.fleets.flatMap(fleet => fleet.results)
-                            .sort((a: ResultsDataType, b: ResultsDataType) => {
-                                if (race.fleets[0]!.startTime != 0) {
-                                    return a.PursuitPosition - b.PursuitPosition
-                                } else {
-                                    return b.boat?.py - a.boat?.py
-                                }
-                            })
-                            .map((result: ResultsDataType, index) => {
-                                return (
-                                    <div key={index}>
-                                        {(result.resultCode != "") ?
-                                            <div key={index} id={result.id} className={'bg-red-300 border-2 border-pink-500'}>
-                                                <div className="flex flex-row m-4 justify-between">
-                                                    <h2 className="text-2xl text-gray-700 flex my-auto mr-5"> <span className="handle cursor-row-resize px-3">☰</span>{result.SailNumber} - {result.boat?.name} : {result.Helm} - {result.Crew} -</h2>
+                    {race.fleets.flatMap(fleet => fleet.results)
+                        .sort((a: ResultsDataType, b: ResultsDataType) => {
+                            if (race.fleets[0]!.startTime != 0) {
+                                return a.PursuitPosition - b.PursuitPosition
+                            } else {
+                                return b.boat?.py - a.boat?.py
+                            }
+                        })
+                        .map((result: ResultsDataType, index) => {
+                            return (
+                                <div key={index}>
+                                    {(result.resultCode != "") ?
+                                        <div key={index} id={result.id} className={'bg-red-300 border-2 border-pink-500'}>
+                                            <div className="flex flex-row m-4 justify-between">
+                                                <h2 className="text-2xl text-gray-700 flex my-auto mr-5"> <span className="handle cursor-row-resize px-3">☰</span>{result.SailNumber} - {result.boat?.name} : {result.Helm} - {result.Crew} -</h2>
+                                                <div className="flex">
+                                                    <h2 className="text-2xl text-gray-700 flex my-auto mr-5">{result.resultCode} </h2>
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                        :
+                                        <div id={result.id} className={'bg-green-300 border-2 border-pink-500'}>
+                                            <div className="flex flex-row m-4 justify-between">
+                                                <h2 className="text-2xl text-gray-700 flex my-auto mr-5"> <span className="handle cursor-row-resize px-3">☰</span>{result.SailNumber} - {result.boat?.name} : {result.Helm} - {result.Crew} -</h2>
+                                                {(raceState == raceStateType.running) ?
                                                     <div className="flex">
-                                                        <h2 className="text-2xl text-gray-700 flex my-auto mr-5">{result.resultCode} </h2>
-
+                                                        <p onClick={(e) => { confirm("are you sure you want to retire " + result.SailNumber) ? retireBoat(result.id) : null; }} className="cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-sm p-5 mx-2 ml-auto text-center flex">
+                                                            Retire
+                                                        </p>
+                                                        <h2 className="text-2xl text-gray-700 flex my-auto mr-5">Laps: {result.laps.length} Position: {result.PursuitPosition} </h2>
+                                                        <h2 className="text-2xl text-gray-700 flex my-auto mr-5"> Start Time: {String(Math.floor((result.boat?.pursuitStartTime || 0) / 60)).padStart(2, '0')}:{String((result.boat?.pursuitStartTime || 0) % 60).padStart(2, '0')}</h2>
+                                                        <p onClick={() => lapBoat(result.id)} className="cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-sm p-5 mx-2 text-center flex">
+                                                            lap
+                                                        </p>
                                                     </div>
-                                                </div>
-                                            </div>
-                                            :
-                                            <div id={result.id} className={'bg-green-300 border-2 border-pink-500'}>
-                                                <div className="flex flex-row m-4 justify-between">
-                                                    <h2 className="text-2xl text-gray-700 flex my-auto mr-5"> <span className="handle cursor-row-resize px-3">☰</span>{result.SailNumber} - {result.boat?.name} : {result.Helm} - {result.Crew} -</h2>
-                                                    {(raceState == raceStateType.running) ?
-                                                        <div className="flex">
-                                                            <p onClick={(e) => { confirm("are you sure you want to retire " + result.SailNumber) ? retireBoat(result.id) : null; }} className="cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-sm p-5 mx-2 ml-auto text-center flex">
-                                                                Retire
-                                                            </p>
-                                                            <h2 className="text-2xl text-gray-700 flex my-auto mr-5">Laps: {result.laps.length} Position: {result.PursuitPosition} </h2>
-                                                            <h2 className="text-2xl text-gray-700 flex my-auto mr-5"> Start Time: {String(Math.floor((result.boat?.pursuitStartTime || 0) / 60)).padStart(2, '0')}:{String((result.boat?.pursuitStartTime || 0) % 60).padStart(2, '0')}</h2>
-                                                            <p onClick={() => lapBoat(result.id)} className="cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-sm p-5 mx-2 text-center flex">
-                                                                lap
-                                                            </p>
-                                                        </div>
-                                                        :
-                                                        <>
-                                                            <h2 className="text-2xl text-gray-700 flex my-auto mr-5">Laps: {result.laps.length} Position: {result.PursuitPosition} </h2>
-                                                            <h2 className="text-2xl text-gray-700 flex my-auto mr-5"> Start Time: {String(Math.floor((result.boat?.pursuitStartTime || 0) / 60)).padStart(2, '0')}:{String((result.boat?.pursuitStartTime || 0) % 60).padStart(2, '0')}</h2>
+                                                    :
+                                                    <>
+                                                        <h2 className="text-2xl text-gray-700 flex my-auto mr-5">Laps: {result.laps.length} Position: {result.PursuitPosition} </h2>
+                                                        <h2 className="text-2xl text-gray-700 flex my-auto mr-5"> Start Time: {String(Math.floor((result.boat?.pursuitStartTime || 0) / 60)).padStart(2, '0')}:{String((result.boat?.pursuitStartTime || 0) % 60).padStart(2, '0')}</h2>
 
-                                                        </>
-                                                    }
-                                                </div>
+                                                    </>
+                                                }
                                             </div>
-                                        }
-                                    </div>
-                                )
-                            })
-                        }
-                    </ReactSortable>
+                                        </div>
+                                    }
+                                </div>
+                            )
+                        })
+                    }
                 </div>
             </div>
         </>
