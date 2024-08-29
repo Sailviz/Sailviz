@@ -23,13 +23,12 @@ export async function POST(request: NextRequest) {
     }
     var name: string = req.name
     console.log(name)
-    if (req.method === 'POST') {
-        var club = await getClub(name)
-        if (club) {
-            return NextResponse.json({ error: false, club: club });
-        }
-        else {
-            return NextResponse.json({ error: true, message: 'Could not find club' });
-        }
+    var club = await getClub(name)
+    if (club) {
+        return NextResponse.json({ error: false, club: club });
     }
+    else {
+        return NextResponse.json({ error: true, message: 'Could not find club' });
+    }
+
 };

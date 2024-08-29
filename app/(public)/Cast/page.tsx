@@ -1,12 +1,12 @@
+'use client'
 import React, { useEffect, useState } from 'react';
 import Script from 'next/script';
-import * as DB from '../../components/apiMethods'
-import FleetResultsTable from '../../components/tables/FleetHandicapResultsTable';
-import SeriesResultsTable from '../../components/tables/SeriesResultsTable';
-import RaceTimer from "../../components/HRaceTimer"
-import LiveFleetResultsTable from '../../components/tables/LiveFleetResultsTable';
+import * as DB from 'components/apiMethods'
+import FleetResultsTable from 'components/tables/FleetHandicapResultsTable';
+import SeriesResultsTable from 'components/tables/SeriesResultsTable';
+import RaceTimer from "components/HRaceTimer"
+import LiveFleetResultsTable from 'components/tables/LiveFleetResultsTable';
 import { animateScroll, Events } from 'react-scroll';
-import { delay } from 'cypress/types/bluebird';
 
 const namespace = 'urn:x-cast:com.sailviz';
 
