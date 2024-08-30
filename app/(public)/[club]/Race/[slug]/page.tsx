@@ -7,6 +7,10 @@ import * as DB from 'components/apiMethods';
 import LiveFleetResultsTable from "components/tables/LiveFleetResultsTable";
 import RaceTimer from "components/HRaceTimer"
 import FleetResultsTable from "components/tables/FleetHandicapResultsTable";
+import FleetHandicapResultsTable from "components/tables/FleetHandicapResultsTable";
+import FleetPursuitResultsTable from "components/tables/FleetPursuitResultsTable";
+import { title, subtitle } from 'components/ui/home/primitaves'
+
 
 export default function Page({ params }: { params: { slug: string } }) {
     const Router = useRouter()
@@ -37,6 +41,7 @@ export default function Page({ params }: { params: { slug: string } }) {
 
 
     useEffect(() => {
+        //store club id into cookies so that it can be used for api calls
         let raceId = params.slug
         const getRace = async () => {
             const racedata = await DB.getRaceById(raceId)
@@ -55,15 +60,27 @@ export default function Page({ params }: { params: { slug: string } }) {
     //list of 
 
     return (
-        <Layout>
-            <div className="m-6 panel-height w-full overflow-y-auto" key={race.id}>
-                <div className="text-4xl font-extrabold text-gray-700 p-6">
-                    {race.series.name}: {race.number}
+        <div className="m-6 panel-height w-full overflow-y-auto">
+            <div className="py-4 w-full">
+                <div className="py-4">
+                    <div className={title({ color: "blue" })}>
+                        {seriesName}
+                    </div>
                 </div>
-                <FleetResultsTable data={race.fleets.flatMap(fleet => fleet.results)} startTime={race.fleets[0]?.startTime} editable={false} showTime={false} />
+                {race.fleets.map((fleet, index) => {
+                    return (
+                        <div key={"fleetResults" + index}>
+                            {race.Type == "Handicap" ?
+                                <FleetHandicapResultsTable showTime={true} editable={false} fleetId={fleet.id} key={JSON.stringify(race)} deleteResult={null} updateResult={null} raceId={race.id} showEditModal={null} />
+                                :
+                                <FleetPursuitResultsTable showTime={true} editable={false} fleetId={fleet.id} key={JSON.stringify(race)} deleteResult={null} updateResult={null} raceId={race.id} showEditModal={null} />
+                            }
+
+                        </div>
+                    )
+                })}
             </div>
+        </div>
 
-
-        </Layout>
     );
 }

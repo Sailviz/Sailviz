@@ -8,6 +8,7 @@ import RacesTable from "components/tables/RacesTable";
 import ClubTable from "components/tables/ClubTable";
 import { PageSkeleton } from "components/ui/PageSkeleton";
 import { title, subtitle } from 'components/ui/home/primitaves'
+import cookie from 'js-cookie'
 
 
 //club page should contain:
@@ -22,15 +23,20 @@ export default function Page({ params }: { params: { club: string } }) {
     var [series, setSeries] = useState<SeriesDataType[]>([])
 
 
-    useEffect(() => {
+    const viewSeries = (seriesId: string) => {
+        router.push(params.club + '/Series/' + seriesId)
+    }
 
-    }, [router])
+    const viewRace = (raceId: string) => {
+        router.push(params.club + '/Race/' + raceId)
+    }
 
     useEffect(() => {
         let clubName = params.club
         DB.getClubByName(clubName).then((data) => {
             if (data) {
                 setClub(data)
+                cookie.set('clubId', data.id, { expires: 2 });
                 DB.GetSeriesByClubId(data.id).then((seriesData) => {
                     if (seriesData) {
                         setSeries(seriesData)
@@ -65,13 +71,13 @@ export default function Page({ params }: { params: { club: string } }) {
                     Recent Races:
                 </div>
             </div>
-            <RacesTable club={club} date={new Date()} historical={true} />
+            <RacesTable club={club} date={new Date()} historical={true} viewRace={(raceId: string) => viewRace(raceId)} />
             <div className="py-4">
                 <div className={title({ color: "violet" })}>
                     Series:
                 </div>
             </div>
-            <ClubTable data={series} key={JSON.stringify(series)} deleteSeries={null} editSeries={null} viewSeries={(seriesId: string) => null} />
+            <ClubTable data={series} key={JSON.stringify(series)} deleteSeries={null} editSeries={null} viewSeries={(seriesId: string) => viewSeries(seriesId)} />
         </div>
     );
 }

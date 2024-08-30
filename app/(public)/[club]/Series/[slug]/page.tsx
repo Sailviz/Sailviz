@@ -2,17 +2,14 @@
 import { useEffect, useState } from "react";
 import Layout from "components/ui/Layout";
 import Cookies from "js-cookie";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import * as DB from 'components/apiMethods';
-import LiveFleetResultsTable from "components/tables/LiveFleetResultsTable";
-import RaceTimer from "components/HRaceTimer"
-import FleetResultsTable from "components/tables/FleetHandicapResultsTable";
 import SeriesResultsTable from "components/tables/SeriesResultsTable";
+import { title, subtitle } from 'components/ui/home/primitaves'
 
-export default function Page({ params }: { params: { slug: string } }) {
+
+export default function Page({ params }: { params: { slug: string, club: string } }) {
     const router = useRouter()
-
-    const query = router.query
 
     var [clubId, setClubId] = useState<string>("invalid")
     var [series, setSeries] = useState<SeriesDataType>({
@@ -34,8 +31,8 @@ export default function Page({ params }: { params: { slug: string } }) {
 
 
     useEffect(() => {
-        let seriesId = query.id as string
-        setClubId(Cookies.get('clubId') || "")
+        let seriesId = params.slug
+        setClubId(Cookies.get('clubId') || params.club)
         const getSeries = async () => {
             const seriesData = await DB.GetSeriesById(seriesId)
             setSeries(seriesData)
@@ -50,15 +47,13 @@ export default function Page({ params }: { params: { slug: string } }) {
     //list of 
 
     return (
-        <Layout>
-            <div className="m-6 panel-height w-full overflow-y-auto">
-                <div className="text-4xl font-extrabold text-gray-700 p-6">
+        <div className="p-6 panel-height w-full overflow-y-auto">
+            <div className="py-4">
+                <div className={title({ color: "blue" })}>
                     {series.name}
                 </div>
-                <SeriesResultsTable data={series} editable={false} showTime={false} key={JSON.stringify(series)} />
             </div>
-
-
-        </Layout>
+            <SeriesResultsTable data={series} editable={false} showTime={false} key={JSON.stringify(series)} />
+        </div>
     );
 }
