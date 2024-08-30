@@ -414,6 +414,7 @@ export default function Page({ params }: { params: { slug: string } }) {
         await DB.updateResult({ ...result, finishTime: time })
 
         //mutate race
+        mutate(`/api/GetRaceById?id=${race.id}&results=true`)
 
         let sound = document.getElementById("Beep") as HTMLAudioElement
         sound!.currentTime = 0
