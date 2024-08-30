@@ -110,7 +110,7 @@ const calculateHandicapResults = (fleet: FleetDataType) => {
             return 1
         }
         if (b.CorrectedTime == 0) {
-            return 1
+            return -1
         }
         if (a.CorrectedTime > b.CorrectedTime) {
             return 1
@@ -188,7 +188,7 @@ const LiveResultsTable = (props: any) => {
     ];
 
     // add column for each lap
-    for (let i = 0; i < maxLaps; i++) {
+    for (let i = maxLaps - 3; i < maxLaps; i++) {
         const newColumn = columnHelper.accessor((data) => data.laps[i]?.time, {
             header: "LAP " + (i + 1).toString(),
             cell: props => <Time {...props} disabled={true} startTime={startTime} />,

@@ -7,6 +7,7 @@ import SeriesResultsTable from 'components/tables/SeriesResultsTable';
 import RaceTimer from "components/HRaceTimer"
 import LiveFleetResultsTable from 'components/tables/LiveFleetResultsTable';
 import { animateScroll, Events } from 'react-scroll';
+import Cookies from 'js-cookie';
 
 const namespace = 'urn:x-cast:com.sailviz';
 
@@ -26,13 +27,21 @@ enum pageStateType {
 const scrollOptions = {
     delay: 10000,
     duration: 15000,
-    smooth: true,
+    smooth: false,
 };
+
+
+//This is the page that a chromecast is directed to.
+//it receives messages from the chromecast and displays the appropriate data.
+// club id is stored in a cookie and is used to get the relavent data / page to display.
 
 const CastPage = () => {
     var interval: NodeJS.Timer | null = null
 
-    const [clubId, setClubId] = useState<string>("ac1869e8-aa2b-46e5-b649-234410459a07")
+    //force home page to light theme
+    // setTheme('light')
+
+    const [clubId, setClubId] = useState<string>("")
     const [pagestate, setPageState] = useState<pageStateType>(pageStateType.info)
     var [club, setClub] = useState<ClubDataType>({
         id: "",
@@ -110,8 +119,6 @@ const CastPage = () => {
     })
 
     const initializeCastApi = () => {
-        // Initialize the CastReceiverManager with an application status message.
-        // cast.receiver.logger.setLevelValue(0);
         window.castReceiverManager = cast.receiver.CastReceiverManager.getInstance();
         console.log('Starting Receiver Manager');
 
@@ -138,8 +145,9 @@ const CastPage = () => {
             console.log('Message [' + event.senderId + ']: ' + event.data);
 
             if (event.data['type'] == 'clubId') {
-                window.messageBus.send(event.senderId, "test");
+                window.messageBus.send(event.senderId, event.data['clubId']);
                 setClubId(event.data['clubId'])
+                Cookies.set('clubId', event.data['clubId'])
             } else if (event.data['type'] == 'showPage') {
                 setClubId(event.data['clubId'])
                 showPage(event.data['id'], event.data['pageType'])
@@ -147,6 +155,8 @@ const CastPage = () => {
             } else if (event.data['type'] == 'slideShow') {
                 setClubId(event.data['clubId'])
                 slideShow(event.data['ids'], event.data['pageType'])
+                window.messageBus.send(event.senderId, new Date().toISOString());
+            } else {
                 window.messageBus.send(event.senderId, new Date().toISOString());
             }
         }
@@ -211,7 +221,7 @@ const CastPage = () => {
             console.log("scrolling up")
             scrollFlag = false
             animateScroll.scrollToTop({
-                duration: 0,
+                duration: 100,
                 smooth: false
             });
         } else {
@@ -223,47 +233,66 @@ const CastPage = () => {
 
     useEffect(() => {
         animateScroll.scrollToBottom(scrollOptions)
+        const fetch = async () => {
+            setClub(await DB.GetClubById(clubId))
+        }
         if (clubId != "") {
-            //catch if not fully updated
-            if (clubId == "invalid") {
-                return
-            }
-            DB.GetClubById(clubId).then((data) => {
-                setClub(data)
-                showPage("2766fcf5-f538-4898-b6b6-abcdb1d98454", "series")
-            })
+            fetch()
         }
     }, [clubId])
 
-    // useEffect(() => {
-    //     const timer1 = setInterval(async () => {
-    //         console.log("refreshing results")
-    //         let activeFlag = false
-    //         var data = await DB.getTodaysRaceByClubId(club.id)
-    //         if (data.length > 0) {
-    //             let racesCopy: RaceDataType[] = []
-    //             for (let i = 0; i < data.length; i++) {
-    //                 const res = await DB.getRaceById(data[i]!.id)
-    //                 racesCopy[i] = res
-    //                 if (checkActive(racesCopy[i]!)) {
-    //                     setActiveRaceData(racesCopy[i]!)
-    //                     showPage("", "live")
-    //                     activeFlag = true
-    //                 }
-    //             }
-    //         }
-    //         if (!activeFlag) {
-    //             showPage("2766fcf5-f538-4898-b6b6-abcdb1d98454", "series")
-    //         }
-    //     }, 5000);
-    //     return () => {
-    //         clearTimeout(timer1);
-    //     }
-    // }, [club]);
+    useEffect(() => {
+        const timer1 = setInterval(async () => {
+            console.log("refreshing results")
+            let activeFlag = false
+            var races = await DB.getTodaysRaceByClubId(club.id)
+            if (races.length > 0) {
+                for (let i = 0; i < races.length; i++) {
+                    const res = await DB.getRaceById(races[i]!.id)
+                    if (checkActive(res)) {
+                        setActiveRaceData(res)
+                        activeFlag = true
+                        break
+                    }
+                }
+            } else {
+                //there aren't any races today so show info page
+                showPage("", "info")
+            }
+            if (activeFlag) {
+                showPage("", "live")
+            }
+            //if no active races decide if series results or race results are more important.
+            //if it is a trophy day show series results
+            //if it is a normal day show last race results.
+            if (!activeFlag && races.length > 0) {
+                //check if all races have the same series ID
+                let sameSeries = races.flatMap((race) => race.series.id).every((val, i, arr) => val === arr[0])
+                if (sameSeries) {
+                    setActiveSeriesData(await DB.GetSeriesById(races[0]!.series.id))
+                    setPageState(pageStateType.series)
+                } else {
+                    //show the most recent results
+                    races.sort((a, b) => { return a.Time < b.Time ? 1 : -1 })
+                    showPage(races[0]!.id, "race")
+                }
+            }
+        }, 10000);
+        return () => {
+            clearTimeout(timer1);
+        }
+    }, [club]);
 
+
+    useEffect(() => {
+        let cookie = Cookies.get('clubId')
+        if (cookie != undefined) {
+            setClubId(cookie)
+        }
+    }, [])
 
     return (
-        <div className='bg-white h-full'>
+        <div>
             <Script type="text/javascript" src="//www.gstatic.com/cast/sdk/libs/receiver/2.0.0/cast_receiver.js" onReady={() => {
                 initializeCastApi()
             }}></Script>
@@ -276,18 +305,18 @@ const CastPage = () => {
                                     //change this to select the active race.
                                     return (
                                         <>
-                                            <div className="text-xl font-extrabold text-gray-700 p-6">
-                                                Full results available at sailviz.com/{club.name}
-                                            </div>
-                                            <div className="w-1/4 p-2 m-2 border-4 rounded-lg bg-white text-lg font-medium">
-                                                <div key={fleet.id}>
-                                                    Race Time: <RaceTimer startTime={fleet.startTime} timerActive={true} onFiveMinutes={null} onFourMinutes={null} onOneMinute={null} onGo={null} onWarning={null} reset={false} />
+                                            <div className='flex flex-row'>
+                                                <div className="w-1/4 p-2 m-2 border-4 rounded-lg bg-white text-lg font-medium">
+                                                    <div key={fleet.id}>
+                                                        Race Time: <RaceTimer startTime={fleet.startTime} timerActive={true} onFiveMinutes={null} onFourMinutes={null} onOneMinute={null} onGo={null} onWarning={null} reset={false} />
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            <div className="m-6" key={activeRaceData.id}>
-                                                <div className="text-4xl font-extrabold text-gray-700 p-6">
+                                                <div className="text-4xl font-extrabold text-gray-700 px-6 py-3">
                                                     {activeRaceData.series.name}: {activeRaceData.number} - {fleet.fleetSettings.name}
                                                 </div>
+                                            </div>
+
+                                            <div className="m-6" key={activeRaceData.id}>
                                                 <LiveFleetResultsTable fleet={fleet} startTime={fleet.startTime} handicap={activeRaceData.Type} />
                                             </div>
                                         </>
@@ -302,7 +331,6 @@ const CastPage = () => {
                                     {activeSeriesData.name}
                                 </div>
                                 <SeriesResultsTable data={activeSeriesData} editable={false} showTime={false} key={activeRaceData.id} />
-                                {/* {JSON.stringify(activeSeriesData)} */}
                             </div>
                         );
                     case pageStateType.race:
@@ -325,11 +353,6 @@ const CastPage = () => {
                         return null;
                 }
             })()}
-            <div className="px-4">
-                <div className="text-xl font-extrabold text-gray-700 p-6">
-                    Full results available at sailviz.com/{club.name}
-                </div>
-            </div>
         </div>
     )
 }

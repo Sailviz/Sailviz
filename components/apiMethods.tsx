@@ -242,7 +242,7 @@ export async function getTodaysRaceByClubId(clubId: string): Promise<NextRaceDat
     })
         .then((res) => res.json())
         .then(async (data) => {
-            return data.race
+            return data.races
 
         });
 };

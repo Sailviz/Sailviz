@@ -9,6 +9,7 @@ import { Button, useDisclosure } from "@nextui-org/react";
 import RetireModal from "components/ui/dashboard/RetireModal";
 import BoatCard from "components/ui/race/BoatCard";
 import { PageSkeleton } from "components/ui/PageSkeleton";
+import { mutate } from "swr";
 
 enum raceStateType {
     running,
@@ -320,6 +321,7 @@ export default function Page({ params }: { params: { slug: string } }) {
         //load back race data
 
         //mutate race
+        mutate(`/api/GetRaceById?id=${race.id}&results=true`)
 
         let sound = document.getElementById("Beep") as HTMLAudioElement
         sound!.currentTime = 0
