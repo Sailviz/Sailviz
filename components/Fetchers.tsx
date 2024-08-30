@@ -70,12 +70,13 @@ export function Series(seriesId: string) {
  * @returns 
  */
 export function Race(raceId: string, results: boolean) {
-    const { data, error, isValidating } = useSWR(raceId != "" ? `/api/GetRaceById?id=${raceId}&results=${results}` : null, fetcher)
+    const { data, error, isValidating, mutate } = useSWR(raceId != "" ? `/api/GetRaceById?id=${raceId}&results=${results}` : null, fetcher)
 
     return {
         race: data as RaceDataType,
         raceIsValidating: isValidating,
-        raceIsError: error
+        raceIsError: error,
+        mutateRace: mutate
     }
 }
 

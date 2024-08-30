@@ -1,160 +1,83 @@
 'use client'
 import { useEffect, useState } from "react";
 import Layout from "../../../components/ui/Layout";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import * as DB from '../../../components/apiMethods';
-import { use } from "chai";
-import { set } from "cypress/types/lodash";
+import * as Fetcher from '../../../components/Fetchers';
+import RacesTable from "components/tables/RacesTable";
+import ClubTable from "components/tables/ClubTable";
+import { PageSkeleton } from "components/ui/PageSkeleton";
+import { title, subtitle } from 'components/ui/home/primitaves'
+import cookie from 'js-cookie'
 
-const ClubPage = () => {
+
+//club page should contain:
+//list of current series
+//list of recent races
+//list of upcoming races
+
+export default function Page({ params }: { params: { club: string } }) {
     const router = useRouter()
 
-    var [clubId, setClubId] = useState<string>("invalid")
-    var [races, setRaces] = useState<RaceDataType[]>([{
-        id: "",
-        number: 0,
-        Time: "",
-        OOD: "",
-        AOD: "",
-        SO: "",
-        ASO: "",
-        fleets: [{
-            raceId: "",
-            id: "",
-            name: "",
-            boats: [],
-            startDelay: 0,
-            results: [],
-            startTime: 0,
-            fleetSettings: {} as FleetSettingsType
-        } as FleetDataType],
-        Type: "",
-        seriesId: "",
-        series: {} as SeriesDataType
-    }])
-    var [series, setSeries] = useState<SeriesDataType[]>([{
-        id: "",
-        name: "",
-        clubId: "",
-        settings: {
-            numberToCount: 0
-        },
-        races: [],
-        fleetSettings: [{
-            id: "",
-            name: "",
-            boats: [],
-            startDelay: 0,
-            fleets: []
-        } as FleetSettingsType]
-    }])
+    var [club, setClub] = useState<ClubDataType>()
+    var [series, setSeries] = useState<SeriesDataType[]>([])
 
+
+    const viewSeries = (seriesId: string) => {
+        router.push(params.club + '/Series/' + seriesId)
+    }
+
+    const viewRace = (raceId: string) => {
+        router.push(params.club + '/Race/' + raceId)
+    }
 
     useEffect(() => {
-        let clubName = router.query.club
-        if (clubName) {
-            DB.getClubByName(clubName.toString()).then((data) => {
-                if (data) {
-                    setClubId(data.id)
-                } else {
-                    console.log("could not find club")
-                }
-            })
-        }
-    }, [router])
-
-    useEffect(() => {
-        if (clubId != "") {
-            //catch if not fully updated
-            if (clubId == "invalid") {
-                return
-            }
-
-            DB.GetSeriesByClubId(clubId).then((data) => {
-                setSeries(data)
-            })
-
-
-            const fetchTodaysRaces = async () => {
-                var data = await DB.getTodaysRaceByClubId(clubId)
-                if (data) {
-                    let racesCopy: RaceDataType[] = []
-                    for (let i = 0; i < data.length; i++) {
-                        const res = await DB.getRaceById(data[i]!.id)
-                        racesCopy[i] = res
+        let clubName = params.club
+        DB.getClubByName(clubName).then((data) => {
+            if (data) {
+                setClub(data)
+                cookie.set('clubId', data.id, { expires: 2 });
+                DB.GetSeriesByClubId(data.id).then((seriesData) => {
+                    if (seriesData) {
+                        setSeries(seriesData)
                     }
-                    console.log(racesCopy)
-                    setRaces(racesCopy)
-                    // let SeriesIds = racesCopy.flatMap(race => race.seriesId)
-                    // let uniqueSeriesIds = [...new Set(SeriesIds)]
-                    // let seriesCopy: SeriesDataType[] = []
-                    // uniqueSeriesIds.forEach((id, i) => {
-                    //     DB.GetSeriesById(id).then((data) => {
-                    //         seriesCopy.push(data)
-                    //     }
-                    //     )
-                    // }
-                    // )
-                    // console.log(seriesCopy)
-                    // setSeries(seriesCopy)
-                } else {
-                    console.log("could not find todays race")
-                }
+                })
+            } else {
+                console.log("could not find club")
+                //need to show a club not found page
             }
-            fetchTodaysRaces()
-        } else {
-            console.log("user not signed in")
-            router.push("/")
-        }
-    }, [clubId])
+        })
 
 
+
+    }, [])
+
+    console.log(club)
     // list of current series
     //list of current races
+    if (club == undefined) {
+        return <PageSkeleton />
+    }
 
     return (
-        <Layout>
-            <div className="flex flex-row mb-2 justify-center panel-height w-full overflow-y-auto">
-                <div className='flex flex-col'>
-                    <div className="mx-4">
-                        <div className="text-xl font-extrabold text-gray-700 p-6">
-                            Races:
-                        </div>
-                    </div>
-                    {races.map((race, index) => {
-                        return (
-                            <div className="m-4" key={"race" + index}>
-                                <p onClick={() => { router.push({ pathname: router.query.club + '/RaceResults', query: { id: race.id } }) }} className="p-2 m-2 cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-xl px-5 py-2.5 text-center">
-                                    {race.series.name}: {race.number}
-                                </p>
-
-                            </div>
-                        )
-                    })}
-                </div>
-                <div className='flex flex-col'>
-                    <div className="mx-4">
-                        <div className="text-xl font-extrabold text-gray-700 p-6">
-                            Series:
-                        </div>
-                    </div>
-                    {series.map((series, index) => {
-                        return (
-                            <div className="m-4" key={"series" + index}>
-                                <p onClick={() => { router.push({ pathname: router.query.club + '/SeriesResults', query: { id: series.id } }) }} className="p-2 m-2 cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-xl px-5 py-2.5 text-center">
-                                    {series.name}
-                                </p>
-
-                            </div>
-                        )
-                    })}
+        <div className="flex flex-col px-6">
+            <div className="py-4">
+                <div className={title({ color: "green" })}>
+                    {club.name}
                 </div>
             </div>
-
-
-
-        </Layout >
+            <div className="py-4">
+                <div className={title({ color: "blue" })}>
+                    Recent Races:
+                </div>
+            </div>
+            <RacesTable club={club} date={new Date()} historical={true} viewRace={(raceId: string) => viewRace(raceId)} />
+            <div className="py-4">
+                <div className={title({ color: "violet" })}>
+                    Series:
+                </div>
+            </div>
+            <ClubTable data={series} key={JSON.stringify(series)} deleteSeries={null} editSeries={null} viewSeries={(seriesId: string) => viewSeries(seriesId)} />
+        </div>
     );
 }
-
-export default ClubPage;

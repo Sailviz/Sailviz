@@ -126,6 +126,21 @@ export default function Page() {
         })
     }
 
+    const sendClubId = () => {
+        if (!connection) {
+            console.warn("no connection")
+            return
+        }
+        connection.emit("messageCast", activeHost, { type: "clubId", clubId: club.id }, (response: any) => {
+            console.log(response)
+            if (response.status == false) {
+                console.log("could not message cast")
+                return
+            }
+
+        })
+    }
+
     const showAddCastModal = () => {
         if (!connection) {
             console.warn("no connection")
@@ -175,9 +190,7 @@ export default function Page() {
 
 
     useEffect(() => {
-        if (club.id != undefined) {
-
-
+        if (club != undefined) {
             const fetchChromecasts = async () => {
                 var data = await DB.GetChromecastByClubId(club.id)
                 if (data) {
@@ -190,8 +203,8 @@ export default function Page() {
             }
             fetchChromecasts()
 
-            var _socket = io("https://sailviz-castcontroller.local:3030/")
-            // var _socket = io("https://localhost:3001/")
+            // var _socket = io("https://sailviz-castcontroller.local:3030/")
+            var _socket = io("https://localhost:3001/")
             if (!_socket) return
             setConnection(_socket)
             _socket.on('connect', () => {
@@ -227,7 +240,7 @@ export default function Page() {
                     )
                     setSeries(seriesCopy)
                 } else {
-                    console.log("could not find todays race")
+                    console.log("no races today.")
                 }
             }
             fetchTodaysRaces()
@@ -245,9 +258,6 @@ export default function Page() {
                 }
             })
 
-        } else {
-            console.log("user not signed in")
-            Router.push("/")
         }
     }, [club])
 
@@ -272,13 +282,13 @@ export default function Page() {
             <div id="addCastModal" className="hidden fixed z-10 left-0 top-0 w-full h-full overflow-auto bg-gray-400 backdrop-blur-sm bg-opacity-20">
                 <div className="mx-auto my-20 px-a py-5 border w-1/4 bg-gray-300 rounded-sm">
                     <div className="text-6xl font-extrabold text-gray-700 flex justify-center">Add Cast</div>
-                    {availiableCasts.map((cast) => {
+                    {availiableCasts.map((cast, index) => {
                         //if cast is connected, dont show
                         if (cast.connected || chromecasts.some((connectedCast: ChromecastDataType) => { return connectedCast.host == cast.host })) {
                             return <></>
                         } else {
                             return (
-                                <div key={"addcast" + cast.host} className="flex mb-2 justify-center">
+                                <div key={"addcast" + cast.host + index} className="flex mb-2 justify-center">
                                     <div onClick={() => addCast(cast.host)} className="w-1/2 cursor-pointer text-white bg-blue-600 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
                                         {cast.name}
                                     </div>
@@ -297,6 +307,11 @@ export default function Page() {
             <div id="controlModal" className="hidden fixed z-10 left-0 top-0 w-full h-full overflow-auto bg-gray-400 backdrop-blur-sm bg-opacity-20">
                 <div className="mx-auto my-20 px-a py-5 border w-7/12 bg-gray-300 rounded-sm">
                     <div className="text-6xl font-extrabold text-gray-700 flex justify-center">Control Cast</div>
+                    <div className="m-6">
+                        <div onClick={() => sendClubId()} className="w-full cursor-pointer text-white bg-blue-600 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-md px-5 py-2.5 text-center mr-3 md:mr-0">
+                            send club id
+                        </div>
+                    </div>
                     <div className="flex flex-row mb-2 justify-center">
                         <div className='flex flex-col'>
                             <div className="m-6">
@@ -341,10 +356,10 @@ export default function Page() {
                 </div>
             </div>
             <div className="flex flex-col w-full">
-                <div onClick={showAddCastModal} className="w-1/4 p-2 m-2 cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-xl px-5 py-2.5 text-center">
+                <div onClick={showAddCastModal} className=" p-2 m-2 cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-xl px-5 py-2.5 text-center">
                     Add new Device
                 </div>
-                <div className='flex flex-row w-full justify-around flex-wrap' id='chromecastContainer' key={chromecasts.length}>
+                <div className='flex flex-row w-full justify-around flex-wrap' id='chromecastContainer'>
                     {/* loop though chromecasts. */}
                     {chromecasts.map((cast, i) => {
                         return (

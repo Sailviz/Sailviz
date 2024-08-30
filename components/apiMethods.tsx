@@ -189,18 +189,15 @@ export async function updateRaceById(raceData: RaceDataType) {
         });
 };
 
-export async function getRaceById(raceId: string): Promise<RaceDataType> {
-    const body = {
-        "id": raceId
-    }
-    return await fetch(`${server}/api/GetRaceById`, {
-        method: 'POST',
+export async function getRaceById(raceId: string, results: boolean = true): Promise<RaceDataType> {
+
+    return await fetch(`${server}/api/GetRaceById?id=${raceId}&results=${results}`, {
+        method: 'GET',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
     })
         .then((res) => res.json())
         .then(async (data) => {
-            return data.race
+            return data
         });
 };
 
@@ -245,7 +242,7 @@ export async function getTodaysRaceByClubId(clubId: string): Promise<NextRaceDat
     })
         .then((res) => res.json())
         .then(async (data) => {
-            return data.race
+            return data.races
 
         });
 };

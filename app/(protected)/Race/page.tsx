@@ -13,6 +13,9 @@ export default function Page() {
     const { user, userIsError, userIsValidating } = Fetcher.UseUser()
     const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
 
+    const viewRace = (raceId: string) => {
+        Router.push('/Race/' + raceId)
+    }
 
     if (clubIsValidating || clubIsError || club == undefined) {
         return <PageSkeleton />
@@ -23,13 +26,13 @@ export default function Page() {
                 <p className='text-2xl font-bold p-6'>
                     Upcoming Races
                 </p>
-                <RacesTable club={club} date={new Date()} historical={false} />
+                <RacesTable club={club} date={new Date()} historical={false} viewRace={viewRace} />
             </div>
             <div className="px-3">
                 <p className='text-2xl font-bold p-6'>
                     Recent Races
                 </p>
-                <RacesTable club={club} date={new Date()} historical={true} />
+                <RacesTable club={club} date={new Date()} historical={true} viewRace={viewRace} />
             </div>
         </div>
     )

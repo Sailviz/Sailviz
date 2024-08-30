@@ -4,8 +4,9 @@ import { useRouter } from "next/navigation"
 import * as DB from 'components/apiMethods';
 import PursuitTimer from "components/PRaceTimer"
 import Cookies from "js-cookie";
-import { ReactSortable } from "react-sortablejs";
 import * as Fetcher from 'components/Fetchers';
+import { mutate } from "swr";
+import { PageSkeleton } from "components/ui/PageSkeleton";
 
 enum raceStateType {
     running,
@@ -15,7 +16,7 @@ enum raceStateType {
 }
 
 //pursuit races don't work with fleets, why would you?
-//all fleets have same status.
+//race organisation if based off of the first fleet, all boats from any fleets are used.
 
 export default function Page({ params }: { params: { slug: string } }) {
 
@@ -25,41 +26,9 @@ export default function Page({ params }: { params: { slug: string } }) {
 
     var [seriesName, setSeriesName] = useState("")
 
-    var [race, setRace] = useState<RaceDataType>(({
-        id: "",
-        number: 0,
-        Time: "",
-        OOD: "",
-        AOD: "",
-        SO: "",
-        ASO: "",
-        fleets: [{
-            startTime: 0,
-            id: "",
-            results: [{
-                id: "",
-                fleetId: "",
-                raceId: "",
-                Helm: "",
-                Crew: "",
-                boat: {} as BoatDataType,
-                SailNumber: "",
-                finishTime: 0,
-                laps: [],
-                CorrectedTime: 0,
-                PursuitPosition: 0,
-                HandicapPosition: 0,
-                resultCode: ""
-            } as ResultsDataType],
-        } as FleetDataType
-        ],
-        Type: "",
-        seriesId: "",
-        series: {} as SeriesDataType
-    }))
-
     const { user, userIsError, userIsValidating } = Fetcher.UseUser()
     const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
+    const { race, raceIsError, raceIsValidating, mutateRace } = Fetcher.Race(params.slug, true)
 
     var [raceState, setRaceState] = useState<raceStateType>(raceStateType.reset)
 
@@ -82,13 +51,11 @@ export default function Page({ params }: { params: { slug: string } }) {
         })
 
         //Update database
-        console.log("here")
-
-        race.fleets.forEach(fleet => async () => {
-            console.log("here")
+        race.fleets.forEach(async fleet => {
             fleet.startTime = localTime
             await DB.updateFleetById(fleet)
         })
+        mutateRace()
         startRace()
     }
 
@@ -171,7 +138,6 @@ export default function Page({ params }: { params: { slug: string } }) {
     };
 
     const stopRace = async () => {
-        //add are you sure here
         setRaceState(raceStateType.stopped)
         const timeoutId = setTimeout(() => controller.abort(), 2000)
         fetch("http://" + club.settings.clockIP + "/reset", { signal: controller.signal, mode: 'no-cors' }).then(response => {
@@ -182,7 +148,6 @@ export default function Page({ params }: { params: { slug: string } }) {
     }
 
     const resetRace = async () => {
-        //add are you sure here
         const timeoutId = setTimeout(() => controller.abort(), 2000)
         fetch("http://" + club.settings.clockIP + "/reset", { signal: controller.signal, mode: 'no-cors' }).then(response => {
             clearTimeout(timeoutId)
@@ -211,8 +176,7 @@ export default function Page({ params }: { params: { slug: string } }) {
         }
         result.resultCode = "RET"
         await DB.updateResult(result)
-        setRace(await DB.getRaceById(race.id))
-        //send to DB
+        mutateRace()
     }
 
     const lapBoat = async (id: string) => {
@@ -237,12 +201,14 @@ export default function Page({ params }: { params: { slug: string } }) {
             return lapsB - lapsA || lastA - lastB;
         });
 
-        updatedData.fleets.flatMap(fleet => fleet.results).forEach((_, index) => {
+        updatedData.fleets.flatMap(fleet => fleet.results).forEach(async (result, index) => {
             //there is only one fleet
-            updatedData.fleets[0]!.results[index]!.PursuitPosition = index + 1
+            // updatedData.fleets[0]!.results[index]!.PursuitPosition = index + 1
+            result.PursuitPosition = index + 1
+            await DB.updateResult(result)
         })
 
-        setRace({ ...updatedData })
+        mutateRace()
 
         let sound = document.getElementById("Beep") as HTMLAudioElement
         sound!.currentTime = 0
@@ -275,14 +241,16 @@ export default function Page({ params }: { params: { slug: string } }) {
         if (updatedResults.length < 2) return
         console.log(updatedResults)
 
-        for (let i = 0; i < updatedResults.length; i++) {
-            updatedResults[i]!.PursuitPosition = i + 1
-        }
-        let tempResults = { ...race, results: updatedResults }
-        setRace(tempResults)
+        // for (let i = 0; i < updatedResults.length; i++) {
+        //     updatedResults[i]!.PursuitPosition = i + 1
+        // }
+        // let tempResults = { ...race, results: updatedResults }
+        // setRace(tempResults)
         updatedResults.forEach(result => {
+            result.PursuitPosition = updatedResults.indexOf(result) + 1
             DB.updateResult(result)
         })
+        mutateRace()
     }
 
     const ontimeupdate = async (time: { minutes: number, seconds: number, countingUp: boolean }) => {
@@ -311,33 +279,23 @@ export default function Page({ params }: { params: { slug: string } }) {
     const controller = new AbortController()
 
     useEffect(() => {
-        let raceId = params.slug
-        const fetchRace = async () => {
-            let data = await DB.getRaceById(raceId)
-            //sort race results by pursuit position
-            console.log(data.fleets[0]?.startTime)
-            if (data.fleets[0]?.startTime != 0) {
-                const sortedResults = data.fleets[0]!.results.sort((a: ResultsDataType, b: ResultsDataType) => a.PursuitPosition - b.PursuitPosition);
-                setRace({ ...data, fleets: [{ ...data.fleets[0] as FleetDataType, results: sortedResults }] })
+        const loadRace = async () => {
+            if (race.fleets[0]?.startTime != 0) {
                 setRaceState(raceStateType.running)
                 //check if race has already finished
-                if (Math.floor((new Date().getTime() / 1000) - data.fleets[0]!.startTime) > (club.settings.pursuitLength * 60)) {
-                    console.log(data.fleets[0]!.startTime)
+                if (Math.floor((new Date().getTime() / 1000) - race.fleets[0]!.startTime) > (club.settings.pursuitLength * 60)) {
+                    console.log(race.fleets[0]!.startTime)
                     setRaceState(raceStateType.calculate)
                 }
-            } else {
-                const sortedResults = data.fleets[0]!.results.sort((a: ResultsDataType, b: ResultsDataType) => b.boat.py - a.boat.py);
-                setRace({ ...data, fleets: [{ ...data.fleets[0] as FleetDataType, results: sortedResults }] })
             }
-
-            setSeriesName(await DB.GetSeriesById(data.seriesId).then((res) => { return (res.name) }))
+            setSeriesName(await DB.GetSeriesById(race.seriesId).then((res) => { return (res.name) }))
         }
 
-        if (raceId != undefined) {
-            fetchRace()
+        if (race != undefined) {
+            loadRace()
         }
 
-    }, [Router, club])
+    }, [race])
 
     const [time, setTime] = useState("");
 
@@ -347,6 +305,10 @@ export default function Page({ params }: { params: { slug: string } }) {
             clearInterval(interval);
         };
     }, []);
+
+    if (race == undefined) {
+        return <PageSkeleton />
+    }
 
     return (
         <>
@@ -394,8 +356,15 @@ export default function Page({ params }: { params: { slug: string } }) {
                 </div>
 
                 <div className="">
-                    <ReactSortable handle=".handle" list={race.fleets.flatMap(fleet => fleet.results)} setList={(newState) => setOrder(newState)}>
-                        {race.fleets.flatMap(fleet => fleet.results).map((result: ResultsDataType, index) => {
+                    {race.fleets.flatMap(fleet => fleet.results)
+                        .sort((a: ResultsDataType, b: ResultsDataType) => {
+                            if (race.fleets[0]!.startTime != 0) {
+                                return a.PursuitPosition - b.PursuitPosition
+                            } else {
+                                return b.boat?.py - a.boat?.py
+                            }
+                        })
+                        .map((result: ResultsDataType, index) => {
                             return (
                                 <div key={index}>
                                     {(result.resultCode != "") ?
@@ -436,8 +405,7 @@ export default function Page({ params }: { params: { slug: string } }) {
                                 </div>
                             )
                         })
-                        }
-                    </ReactSortable>
+                    }
                 </div>
             </div>
         </>
