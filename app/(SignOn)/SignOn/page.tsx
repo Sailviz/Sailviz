@@ -1,13 +1,10 @@
 'use client'
 import { ChangeEvent, MouseEventHandler, useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import * as DB from '../../../components/apiMethods';
+import * as DB from 'components/apiMethods';
 import Cookies from "js-cookie";
-import SignOnTable from "../../../components/tables/SignOnTable";
-import Select from 'react-select';
-import FleetResultsTable from "../../../components/tables/FleetHandicapResultsTable";
-import Switch from "../../../components/ui/Switch";
-import * as Fetcher from '../../../components/Fetchers';
+import SignOnTable from "components/tables/SignOnTable";
+import * as Fetcher from 'components/Fetchers';
 import { PageSkeleton } from "components/ui/PageSkeleton";
 import { Button, useDisclosure } from "@nextui-org/react";
 import CreateResultModal from "components/ui/SignOn/CreateResultModal";
@@ -57,6 +54,7 @@ const SignOnPage = () => {
             racesCopy[i] = await DB.getRaceById(racesCopy[i]!.id)
         }
         // mutate races
+        setRaces([...racesCopy])
         return true
 
     }
@@ -84,45 +82,34 @@ const SignOnPage = () => {
     const updateResult = async (result: ResultsDataType) => {
         await DB.updateResult(result)
         editModal.onClose()
+
+
+        //local mutation of data
+        let racesCopy = window.structuredClone(races)
+        for (let i = 0; i < racesCopy.length; i++) {
+            console.log(racesCopy[i]!.id)
+            racesCopy[i] = await DB.getRaceById(racesCopy[i]!.id)
+        }
+        setRaces([...racesCopy])
     }
-
-    const CapitaliseInput = (e: ChangeEvent<HTMLInputElement>) => {
-        const sentence = e.target.value.split(' ');
-        const cursorPos = e.target.selectionStart
-        const capitalizedWords = sentence.map(word => word.charAt(0).toUpperCase() + word.slice(1));
-        const calitalisedSentence = capitalizedWords.join(' ')
-
-        let inputElement = document.getElementById(e.target.id) as HTMLInputElement
-        inputElement.value = calitalisedSentence
-        inputElement.selectionStart = cursorPos
-    }
-
 
     const deleteResult = async (result: ResultsDataType) => {
         if (!confirm("Are you sure you want to delete this entry")) return
         editModal.onClose()
         await DB.DeleteResultById(result)
 
+        //local mutation of data
         let racesCopy = window.structuredClone(races)
-        console.log(racesCopy)
         for (let i = 0; i < racesCopy.length; i++) {
             console.log(racesCopy[i]!.id)
             racesCopy[i] = await DB.getRaceById(racesCopy[i]!.id)
         }
-        //mutate races
+        setRaces([...racesCopy])
     }
 
     const showEditModal = async (result: ResultsDataType) => {
         setActiveResult(result)
         editModal.onOpen()
-    }
-
-    const logout = async () => {
-        if (confirm("Are you sure you want to log out") == true) {
-            Cookies.remove('token')
-            Cookies.remove('clubId')
-            Router.push('/')
-        }
     }
 
     useEffect(() => {

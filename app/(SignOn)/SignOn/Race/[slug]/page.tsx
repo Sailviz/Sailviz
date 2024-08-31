@@ -127,9 +127,9 @@ export default function Page({ params }: { params: { slug: string } }) {
                             {fleet.fleetSettings.name} - Boats Entered: {fleet.results.length}
                         </p>
                         {race.Type == "Handicap" ?
-                            <FleetHandicapResultsTable showTime={true} editable={false} data={fleet.results} startTime={fleet.startTime} key={JSON.stringify(race)} deleteResult={null} updateResult={null} raceId={race.id} showEditModal={null} />
+                            <FleetHandicapResultsTable showTime={true} editable={false} fleetId={fleet.id} startTime={fleet.startTime} key={JSON.stringify(race)} deleteResult={null} updateResult={null} raceId={race.id} showEditModal={null} />
                             :
-                            <FleetPursuitResultsTable showTime={true} editable={false} data={fleet.results} startTime={fleet.startTime} key={JSON.stringify(race)} deleteResult={null} updateResult={null} raceId={race.id} showEditModal={null} />
+                            <FleetPursuitResultsTable showTime={true} editable={false} fleetId={fleet.id} startTime={fleet.startTime} key={JSON.stringify(race)} deleteResult={null} updateResult={null} raceId={race.id} showEditModal={null} />
                         }
 
                     </div>
