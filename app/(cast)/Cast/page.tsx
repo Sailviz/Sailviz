@@ -8,6 +8,7 @@ import RaceTimer from "components/HRaceTimer"
 import LiveFleetResultsTable from 'components/tables/LiveFleetResultsTable';
 import { animateScroll, Events } from 'react-scroll';
 import Cookies from 'js-cookie';
+import { useTheme } from 'next-themes';
 
 const namespace = 'urn:x-cast:com.sailviz';
 
@@ -38,8 +39,11 @@ const scrollOptions = {
 const CastPage = () => {
     var interval: NodeJS.Timer | null = null
 
+    const { theme, setTheme } = useTheme()
+
     //force home page to light theme
     // setTheme('light')
+
 
     const [clubId, setClubId] = useState<string>("")
     const [pagestate, setPageState] = useState<pageStateType>(pageStateType.info)
@@ -155,6 +159,10 @@ const CastPage = () => {
             } else if (event.data['type'] == 'slideShow') {
                 setClubId(event.data['clubId'])
                 slideShow(event.data['ids'], event.data['pageType'])
+                window.messageBus.send(event.senderId, new Date().toISOString());
+            } else if (event.data['type'] == 'theme') {
+                setClubId(event.data['clubId'])
+                setTheme(event.data['theme'])
                 window.messageBus.send(event.senderId, new Date().toISOString());
             } else {
                 window.messageBus.send(event.senderId, new Date().toISOString());
@@ -306,12 +314,10 @@ const CastPage = () => {
                                     return (
                                         <>
                                             <div className='flex flex-row'>
-                                                <div className="w-1/4 p-2 m-2 border-4 rounded-lg bg-white text-lg font-medium">
-                                                    <div key={fleet.id}>
-                                                        Race Time: <RaceTimer startTime={fleet.startTime} timerActive={true} onFiveMinutes={null} onFourMinutes={null} onOneMinute={null} onGo={null} onWarning={null} reset={false} />
-                                                    </div>
+                                                <div className="w-1/4 p-2 m-2 border-4 rounded-lg text-lg font-medium">
+                                                    Race Time: <RaceTimer key={"fleetTimer" + index} startTime={fleet.startTime} timerActive={true} onFiveMinutes={null} onFourMinutes={null} onOneMinute={null} onGo={null} onWarning={null} reset={false} />
                                                 </div>
-                                                <div className="text-4xl font-extrabold text-gray-700 px-6 py-3">
+                                                <div className="text-4xl font-extrabold px-6 py-3">
                                                     {activeRaceData.series.name}: {activeRaceData.number} - {fleet.fleetSettings.name}
                                                 </div>
                                             </div>
@@ -327,7 +333,7 @@ const CastPage = () => {
                     case pageStateType.series:
                         return (
                             <div className="p-4">
-                                <div className="text-xl font-extrabold text-gray-700 px-6 pt-2">
+                                <div className="text-xl font-extrabold px-6 pt-2">
                                     {activeSeriesData.name}
                                 </div>
                                 <SeriesResultsTable data={activeSeriesData} editable={false} showTime={false} key={activeRaceData.id} />
@@ -336,7 +342,7 @@ const CastPage = () => {
                     case pageStateType.race:
                         return (
                             <div className="p-4">
-                                <div className="text-xl font-extrabold text-gray-700 p-6">
+                                <div className="text-xl font-extrabold p-6">
                                     {activeRaceData.series.name}: {activeRaceData.number}
                                 </div>
                                 <FleetResultsTable data={activeRaceData.fleets.flatMap(fleet => fleet.results)} startTime={activeRaceData.fleets[0]?.startTime} key={activeRaceData.id} editable={false} showTime={false} />
@@ -345,7 +351,7 @@ const CastPage = () => {
                         );
                     case pageStateType.info:
                         return (
-                            <div className="text-6xl font-extrabold text-gray-700 p-6">
+                            <div className="text-6xl font-extrabold p-6">
                                 SailViz - Cast
                             </div>
                         );
