@@ -13,6 +13,8 @@ import { ChangeLogIcon } from "components/icons/changelog-icon";
 import { usePathname } from "next/navigation";
 import { ThemeSwitcher } from "components/ui/ThemeSwitcher";
 import { SailVizIcon } from "components/icons/sailviz-icon";
+import { SignOutIcon } from "components/icons/sign-out";
+import Cookies from "js-cookie";
 
 export const SidebarWrapper = () => {
     const pathname = usePathname();
@@ -107,6 +109,13 @@ export const SidebarWrapper = () => {
                                 title="Changelog"
                                 icon={<ChangeLogIcon />}
                                 href="/Dashboard/Changelog"
+                            />
+                        </SidebarMenu>
+                        <SidebarMenu title="Log Out" onClick={() => { Cookies.remove('token'); Cookies.remove('clubId'); Cookies.remove('userId') }}>
+                            <SidebarItem
+                                title="Log Out"
+                                icon={<SignOutIcon />}
+                                href="/"
                             />
                         </SidebarMenu>
                     </div>

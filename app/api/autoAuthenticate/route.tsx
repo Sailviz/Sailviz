@@ -43,6 +43,6 @@ export async function POST(request: NextRequest) {
             jwtSecret,
             { expiresIn: '364d' }
         );
-        return NextResponse.json({ error: false, token: token, club: user.clubId, user: user.id });
+        return NextResponse.json({ error: false, token: token, user: user });
     }
 }

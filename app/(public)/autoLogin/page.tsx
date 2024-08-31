@@ -1,12 +1,12 @@
+'use client'
 import cookie from 'js-cookie'
 import React, { useState, useEffect } from 'react'
-import Router, { useRouter } from "next/router"
+import { useRouter, useSearchParams } from "next/navigation"
 
-const AutoLogin = () => {
+export default function Page() {
 
+    const searchParams = useSearchParams();
     const router = useRouter()
-
-    const query = router.query
 
 
     const sendLoginRequest = async (uuid: string) => {
@@ -20,14 +20,14 @@ const AutoLogin = () => {
             .then((data) => {
                 console.log(data)
                 if (data && data.error) {
-                    //alert(data.message)
+                    console.log(data.error)
                 }
                 if (data && data.token) {
                     //set cookie
                     cookie.set('token', data.token, { expires: 2 });
-                    cookie.set('clubId', data.club, { expires: 2 });
-                    cookie.set('userId', data.user, { expires: 2 })
-                    Router.push("/Dashboard");
+                    cookie.set('clubId', data.user.clubId, { expires: 2 });
+                    cookie.set('userId', data.user.id, { expires: 2 })
+                    router.push(data.user.startPage);
                 }
                 else {
                     console.error("no token with login request")
@@ -37,7 +37,7 @@ const AutoLogin = () => {
     };
 
     useEffect(() => {
-        let uuid = query.uuid as string
+        const uuid = searchParams.get('uuid');
         console.log(uuid)
         if (uuid != undefined) {
             sendLoginRequest(uuid)
@@ -45,18 +45,13 @@ const AutoLogin = () => {
     }, [router])
 
     return (
-        <>
-            <div className="container mx-auto flex flex-col items-center justify-center h-screen p-4">
-                <h1 className="text-5xl md:text-[5rem] leading-normal font-extrabold text-gray-700">
-                    Logging in
-                </h1>
-                <a className="ml-4" href="#" onClick={() => Router.push('/')}>
-                    or Cancel
-                </a>
-            </div>
-        </>
+        <div className="container mx-auto flex flex-col items-center justify-center h-screen p-4">
+            <h1 className="text-5xl md:text-[5rem] leading-normal font-extrabold text-gray-700">
+                Logging in
+            </h1>
+            <a className="ml-4" href="#" onClick={() => router.push('/')}>
+                or Cancel
+            </a>
+        </div>
     );
 };
-
-
-export default AutoLogin;

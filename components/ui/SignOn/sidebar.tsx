@@ -16,6 +16,8 @@ import { SailVizIcon } from "components/icons/sailviz-icon";
 
 import * as Fetcher from 'components/Fetchers';
 import { PageSkeleton } from "../PageSkeleton";
+import { SignOutIcon } from "components/icons/sign-out";
+import Cookies from "js-cookie";
 
 export const SidebarWrapper = () => {
     const pathname = usePathname();
@@ -89,6 +91,13 @@ export const SidebarWrapper = () => {
                                 isActive={pathname === "/changelog"}
                                 title="Changelog"
                                 icon={<ChangeLogIcon />}
+                            />
+                        </SidebarMenu>
+                        <SidebarMenu title="Log Out" onClick={() => { Cookies.remove('token'); Cookies.remove('clubId'); Cookies.remove('userId') }}>
+                            <SidebarItem
+                                title="Log Out"
+                                icon={<SignOutIcon />}
+                                href="/"
                             />
                         </SidebarMenu>
                     </div>
