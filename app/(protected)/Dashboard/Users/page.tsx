@@ -26,7 +26,6 @@ export default function Page() {
     const [activeRole, setActiveRole] = useState<RoleDataType>({} as RoleDataType)
 
     const createUser = async () => {
-        mutate('/api/GetUsersByClubId')
         const user = await DB.createUser(club.id)
         if (user) {
             mutate('/api/GetUsersByClubId')
@@ -36,20 +35,17 @@ export default function Page() {
     }
 
     const updateUser = async (user: UserDataType, password: string) => {
-        mutate('/api/GetUsersByClubId')
         editUserModal.onClose()
         await DB.updateUser(user, password)
         mutate('/api/GetUsersByClubId')
     }
 
     const deleteUser = async (user: UserDataType) => {
-        mutate('/api/GetUsersByClubId')
         await DB.deleteUser(user)
         mutate('/api/GetUsersByClubId')
 
     }
     const createRole = async () => {
-        mutate('/api/GetRolesByClubId')
         const role = await DB.createRole(club.id)
         console.log(role)
         if (role) {
@@ -59,14 +55,12 @@ export default function Page() {
         }
     }
     const updateRole = async (role: RoleDataType) => {
-        mutate('/api/GetRolesByClubId')
         editRoleModal.onClose()
         await DB.updateRole(role)
         mutate('/api/GetRolesByClubId')
     }
 
     const deleteRole = async (role: RoleDataType) => {
-        mutate('/api/GetRolesByClubId')
         await DB.deleteRole(role)
         mutate('/api/GetRolesByClubId')
     }

@@ -1,12 +1,14 @@
 import prisma from 'components/prisma'
 import { NextRequest, NextResponse } from "next/server";
-
+const bcrypt = require('bcrypt');
 import assert from 'assert';
+const saltRounds = 10;
+const jwtSecret = process.env.jwtSecret;
 
 //this only updates the settings part of the club record
 
 async function updateUser(user: UserDataType, password: string) {
-    console.log(user)
+    var hash = await bcrypt.hash(password, saltRounds)
     var result = await prisma.user.update({
         where: {
             id: user.id
@@ -16,7 +18,8 @@ async function updateUser(user: UserDataType, password: string) {
             roles: {
                 set: user.roles.map(role => ({ id: role.id }))
 
-            }
+            },
+            ...password != "" ? { password: hash } : {}
         }
     })
     return result;
