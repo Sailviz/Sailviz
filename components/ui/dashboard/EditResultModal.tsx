@@ -120,11 +120,6 @@ export default function EditResultModal({ isOpen, result, fleet, onSubmit, onClo
         onSubmit({ ...result!, Helm: helm, Crew: crew, boat: boat, SailNumber: sailNumber, finishTime: finishTime })
     }
 
-    //log laps when updates
-    useEffect(() => {
-        console.log(laps)
-    }, [laps])
-
     useEffect(() => {
         if (result == undefined) {
             return
@@ -356,7 +351,7 @@ export default function EditResultModal({ isOpen, result, fleet, onSubmit, onClo
                                                 </div>
                                             </div>
                                             :
-                                            <div className="flex flex-row mt-2">
+                                            <div className="flex flex-row mt-2" key={basicNumLaps}>
                                                 <div className='flex flex-col px-6 w-1/4'>
                                                     <p className='text-2xl font-bold'>
                                                         Laps
@@ -369,7 +364,7 @@ export default function EditResultModal({ isOpen, result, fleet, onSubmit, onClo
                                                         onValueChange={(value) => { setBasicNumLaps(parseInt(value)) }}
                                                     />
                                                 </div>
-                                                <div className='flex flex-col px-6 w-1/4'>
+                                                <div className='flex flex-col px-6 w-1/4' key={basicElapsed}>
                                                     <p className='text-2xl font-bold'>
                                                         Finish Time
                                                     </p>
