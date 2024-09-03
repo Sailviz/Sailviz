@@ -81,7 +81,7 @@ export function Race(raceId: string, results: boolean) {
 }
 
 export function Fleet(fleetId: string) {
-    const { data, error, isValidating } = useSWR(fleetId != undefined ? `/api/GetFleetById?id=${fleetId}` : null, fetcher)
+    const { data, error, isValidating } = useSWR(fleetId != undefined ? `/api/GetFleetById?id=${fleetId}` : null, fetcher, { refreshInterval: 10000 })
 
     return {
         fleet: data as FleetDataType,

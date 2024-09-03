@@ -26,7 +26,7 @@ export default function EditResultModal({ isOpen, result, fleet, onSubmit, onClo
     const [laps, setLaps] = useState([] as LapDataType[])
     let finishTime = 0
 
-    const [advancedFinished, setAdvancedFinished] = useState(false)
+    const [finished, setFinished] = useState(false)
 
     const [basicNumLaps, setBasicNumLaps] = useState(0)
     const [basicElapsed, setBasicElapsed] = useState("00:00:00")
@@ -66,7 +66,7 @@ export default function EditResultModal({ isOpen, result, fleet, onSubmit, onClo
         //add lap time to fleet start time
         var unixTime = seconds + fleet!.startTime
         console.log(unixTime)
-        finishTime = unixTime
+        finishTime = finished ? unixTime : 0
 
         let entryLaps = laps.length
         console.log(entryLaps, basicNumLaps)
@@ -106,24 +106,42 @@ export default function EditResultModal({ isOpen, result, fleet, onSubmit, onClo
 
     const submit = async () => {
         if (lapsAdvancedMode) {
-            for (let i = 0; i < laps.length; i++) {
-                if (laps[i]!.time != result?.laps[i]!.time) {
-                    await DB.DeleteLapById(laps[i]!.id)
-                    await DB.CreateLap(result!.id, laps[i]!.time)
+            if (result == undefined) {
+                console.log('result is undefined')
+                return
+            }
+
+            let lapscopy = window.structuredClone(laps)
+
+            if (result.laps.length < laps.length) {
+                //add the extra laps
+                for (let i = lapscopy.length - 1; i >= result.laps.length; i--) {
+                    let lap = await DB.CreateLap(result.id, lapscopy[i]!.time)
+                    //modify local laps to include the lap id
+                    lapscopy = [...lapscopy.slice(0, i), lap, ...lapscopy.slice(i + 1)]
+                }
+            } else {
+                //delete the extra laps
+                for (let i = result.laps.length - 1; i >= lapscopy.length; i--) {
+                    await DB.DeleteLapById(result.laps[i]!.id)
                 }
             }
-            finishTime = advancedFinished ? laps[laps.length - 1]!.time : 0
+
+            //update the times
+            for (let i = 0; i < lapscopy.length; i++) {
+                if (laps[i]!.time != result?.laps[i]!.time) {
+                    await DB.DeleteLapById(lapscopy[i]!.id)
+                    await DB.CreateLap(result!.id, lapscopy[i]!.time)
+                }
+            }
+
+            finishTime = finished ? lapscopy[lapscopy.length - 1]!.time : 0
         } else {
             await updateLapDataBasic()
         }
 
         onSubmit({ ...result!, Helm: helm, Crew: crew, boat: boat, SailNumber: sailNumber, finishTime: finishTime })
     }
-
-    //log laps when updates
-    useEffect(() => {
-        console.log(laps)
-    }, [laps])
 
     useEffect(() => {
         if (result == undefined) {
@@ -136,7 +154,7 @@ export default function EditResultModal({ isOpen, result, fleet, onSubmit, onClo
         setLaps(result.laps)
         setBasicNumLaps(result.laps.length)
         setBasicElapsed(new Date(Math.max(0, (result.finishTime - fleet!.startTime) * 1000)).toISOString().substring(11, 19))
-        setAdvancedFinished(result.finishTime != 0)
+        setFinished(result.finishTime != 0)
         setBoatOption({ label: result.boat.name, value: result.boat })
         setResultCodeOption(result.resultCode == '' ? { label: 'None', value: '' } : { label: result.resultCode, value: result.resultCode })
     }, [result])
@@ -320,6 +338,14 @@ export default function EditResultModal({ isOpen, result, fleet, onSubmit, onClo
                                                 <label className=" pl-6 py-12 text-2xl font-bold" htmlFor={"AdvancedModeSwitch"}>Advanced Mode</label>
                                             </div>
                                         </div>
+                                        <div className="px-6 flex flex-row w-24">
+                                            <Checkbox
+                                                onValueChange={(value) => setFinished(value)}
+                                                isSelected={finished}
+                                            >
+                                                Finished
+                                            </Checkbox>
+                                        </div>
                                         {lapsAdvancedMode ?
                                             <div className='flex flex-row w-full flex-wrap' id='LapData' key={JSON.stringify(laps)}>
                                                 {laps.map((lap: LapDataType, index: number) => {
@@ -346,17 +372,9 @@ export default function EditResultModal({ isOpen, result, fleet, onSubmit, onClo
                                                         Add Lap
                                                     </Button>
                                                 </div>
-                                                <div className="flex flex-row w-24">
-                                                    <Checkbox
-                                                        onValueChange={(value) => setAdvancedFinished(value)}
-                                                        isSelected={advancedFinished}
-                                                    >
-                                                        Finished
-                                                    </Checkbox>
-                                                </div>
                                             </div>
                                             :
-                                            <div className="flex flex-row mt-2">
+                                            <div className="flex flex-row mt-2" key={basicNumLaps}>
                                                 <div className='flex flex-col px-6 w-1/4'>
                                                     <p className='text-2xl font-bold'>
                                                         Laps
@@ -369,7 +387,7 @@ export default function EditResultModal({ isOpen, result, fleet, onSubmit, onClo
                                                         onValueChange={(value) => { setBasicNumLaps(parseInt(value)) }}
                                                     />
                                                 </div>
-                                                <div className='flex flex-col px-6 w-1/4'>
+                                                <div className='flex flex-col px-6 w-1/4' key={basicElapsed}>
                                                     <p className='text-2xl font-bold'>
                                                         Finish Time
                                                     </p>

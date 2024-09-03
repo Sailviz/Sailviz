@@ -45,6 +45,16 @@ export default function CreateResultModal({ isOpen, races, boats, onSubmit, onCl
 
     }
 
+    const clearFields = () => {
+        setHelmValue('')
+        setCrewValue('')
+        setSailNumber('')
+        setSelectedRaces([])
+        setSelectedFleets([])
+        setSelectedOption({ label: "", value: {} as BoatDataType })
+
+    }
+
     return (
         <>
             <Modal
@@ -53,6 +63,7 @@ export default function CreateResultModal({ isOpen, races, boats, onSubmit, onCl
                 scrollBehavior={'outside'}
                 size='5xl'
                 backdrop='blur'
+                onOpenChange={(open) => { if (!open) clearFields() }}
             >
                 <ModalContent>
                     {(onClose) => (

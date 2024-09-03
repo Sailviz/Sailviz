@@ -45,7 +45,7 @@ export default function Page({ params }: { params: { slug: string } }) {
         createModal.onClose() //close modal
         let result = await DB.createResult(fleetId)
         await DB.updateResult({ ...result, Helm: helm, Crew: crew, boat: boat, SailNumber: sailNum })
-        mutate('/api/GetRaceById?id=' + race.id)
+        mutate('/api/GetFleetById?id=' + result.fleetId)
     }
 
     const updateResult = async (result: ResultsDataType) => {
