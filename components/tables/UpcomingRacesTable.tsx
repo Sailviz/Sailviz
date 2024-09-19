@@ -36,13 +36,9 @@ const Action = ({ ...props }: any) => {
     const Router = useRouter()
 
     return (
-        <div className="relative flex items-center gap-2">
-            <Tooltip content="View" >
-                <span className="text-lg text-default-400 cursor-pointer active:opacity-50">
-                    <EyeIcon onClick={() => Router.push('/Race/' + props.row.original.id)} />
-                </span>
-            </Tooltip>
-        </div>
+        <Button color="primary" size="md" onClick={() => Router.push('/Race/' + props.row.original.id)}>
+            View
+        </Button>
     );
 };
 

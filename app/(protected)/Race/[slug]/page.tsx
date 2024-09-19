@@ -14,6 +14,7 @@ import CreateResultModal from "components/ui/dashboard/CreateResultModal";
 import ProgressModal from "components/ui/dashboard/ProgressModal";
 import EditResultModal from "components/ui/dashboard/EditResultModal";
 import { mutate } from "swr";
+import ViewResultModal from "components/ui/dashboard/viewResultModal";
 
 export default function Page({ params }: { params: { slug: string } }) {
 
@@ -31,6 +32,7 @@ export default function Page({ params }: { params: { slug: string } }) {
     const createModal = useDisclosure();
     const progressModal = useDisclosure();
     const editModal = useDisclosure();
+    const viewModal = useDisclosure();
 
     const [progressValue, setProgressValue] = useState(0)
     const [progressMax, setProgressMax] = useState(0)
@@ -128,6 +130,22 @@ export default function Page({ params }: { params: { slug: string } }) {
         editModal.onOpen()
     }
 
+    const showViewModal = async (resultId: string) => {
+        console.log("this is running!")
+        let result = race.fleets.flatMap(fleet => fleet.results).find(result => result.id == resultId)
+        if (result == undefined) {
+            console.error("Could not find result with id: " + resultId);
+            return
+        }
+        console.log(result)
+        result.laps.sort((a, b) => a.time - b.time)
+        setActiveResult(result)
+
+        setActiveFleet(race.fleets.filter(fleet => fleet.id == result?.fleetId)[0]!)
+
+        viewModal.onOpen()
+    }
+
     const saveRaceType = async (newValue: any) => {
         console.log(newValue)
 
@@ -217,6 +235,7 @@ export default function Page({ params }: { params: { slug: string } }) {
             <CreateResultModal isOpen={createModal.isOpen} race={race} boats={boats} onSubmit={createResult} onClose={createModal.onClose} />
             <ProgressModal key={progressValue} isOpen={progressModal.isOpen} Value={progressValue} Max={progressMax} Indeterminate={progressIndeterminate} onClose={progressModal.onClose} />
             <EditResultModal isOpen={editModal.isOpen} result={activeResult} fleet={activeFleet} onSubmit={updateResult} onDelete={deleteResult} onClose={editModal.onClose} />
+            <ViewResultModal isOpen={viewModal.isOpen} result={activeResult} fleet={activeFleet} onClose={viewModal.onClose} />
             <div className="flex flex-wrap justify-center gap-4 w-full">
                 <div className="flex flex-wrap px-4 divide-y divide-solid w-full justify-center">
                     <div className="py-4 w-3/5">
@@ -307,9 +326,9 @@ export default function Page({ params }: { params: { slug: string } }) {
                             return (
                                 <div key={"fleetResults" + index}>
                                     {race.Type == "Handicap" ?
-                                        <FleetHandicapResultsTable showTime={true} editable={userHasPermission(user, AVAILABLE_PERMISSIONS.editResults)} fleetId={fleet.id} key={JSON.stringify(race)} deleteResult={deleteResult} updateResult={updateResult} raceId={race.id} showEditModal={showEditModal} />
+                                        <FleetHandicapResultsTable showTime={true} editable={userHasPermission(user, AVAILABLE_PERMISSIONS.editResults)} fleetId={fleet.id} key={JSON.stringify(race)} deleteResult={deleteResult} updateResult={updateResult} raceId={race.id} showEditModal={showEditModal} showViewModal={showViewModal} />
                                         :
-                                        <FleetPursuitResultsTable showTime={true} editable={userHasPermission(user, AVAILABLE_PERMISSIONS.editResults)} fleetId={fleet.id} key={JSON.stringify(race)} deleteResult={deleteResult} updateResult={updateResult} raceId={race.id} showEditModal={showEditModal} />
+                                        <FleetPursuitResultsTable showTime={true} editable={userHasPermission(user, AVAILABLE_PERMISSIONS.editResults)} fleetId={fleet.id} key={JSON.stringify(race)} deleteResult={deleteResult} updateResult={updateResult} raceId={race.id} showEditModal={showEditModal} showViewModal={showViewModal} />
                                     }
 
                                 </div>

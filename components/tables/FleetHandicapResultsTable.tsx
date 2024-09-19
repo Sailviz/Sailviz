@@ -93,6 +93,21 @@ const Edit = ({ ...props }: any) => {
     );
 };
 
+const View = ({ ...props }: any) => {
+    const onClick = () => {
+        //show edit modal
+        props.showViewModal(props.row.original.id)
+    }
+    return (
+        <>
+            <p className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0"
+                onClick={onClick} >
+                View
+            </p>
+        </>
+    );
+};
+
 function Sort({ column, table }: { column: any, table: any }) {
     const firstValue = table
         .getPreFilteredRowModel()
@@ -129,6 +144,10 @@ const FleetHandicapResultsTable = (props: any) => {
 
     const showEditModal = (id: any) => {
         props.showEditModal(id)
+    }
+
+    const showViewModal = (id: any) => {
+        props.showViewModal(id)
     }
 
     const [sorting, setSorting] = useState<SortingState>([{
@@ -193,8 +212,15 @@ const FleetHandicapResultsTable = (props: any) => {
         cell: props => <Edit {...props} showEditModal={(id: string) => { showEditModal(id) }} />
     })
 
+    const viewColumn = columnHelper.display({
+        id: "Edit",
+        cell: props => <View {...props} showViewModal={(id: string) => { showViewModal(id) }} />
+    })
+
     if (editable) {
         columns.push(editColumn)
+    } else {
+        columns.push(viewColumn)
     }
 
     const loadingState = fleetIsValidating ? "loading" : "idle";
