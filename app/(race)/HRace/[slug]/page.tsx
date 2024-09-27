@@ -90,7 +90,14 @@ export default function Page({ params }: { params: { slug: string } }) {
             return
         }
         fleet.startTime = localTime
-        DB.updateFleetById(fleet)
+        try {
+            await DB.updateFleetById(fleet)
+        }
+        catch (err) {
+            console.error(err)
+            console.error("error updating fleet")
+            console.error("start time was: " + localTime)
+        }
         //send to DB
         startRace(fleetId)
     }
