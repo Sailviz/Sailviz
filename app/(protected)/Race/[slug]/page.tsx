@@ -115,7 +115,6 @@ export default function Page({ params }: { params: { slug: string } }) {
     }
 
     const showEditModal = async (resultId: string) => {
-        console.log("this is running!")
         let result = race.fleets.flatMap(fleet => fleet.results).find(result => result.id == resultId)
         if (result == undefined) {
             console.error("Could not find result with id: " + resultId);
@@ -131,7 +130,6 @@ export default function Page({ params }: { params: { slug: string } }) {
     }
 
     const showViewModal = async (resultId: string) => {
-        console.log("this is running!")
         let result = race.fleets.flatMap(fleet => fleet.results).find(result => result.id == resultId)
         if (result == undefined) {
             console.error("Could not find result with id: " + resultId);

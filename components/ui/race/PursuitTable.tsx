@@ -27,6 +27,15 @@ const Text = ({ text }: { text: string }) => {
     );
 };
 
+const StartTime = ({ seconds }: { seconds: number }) => {
+    //display the start time in mm:ss format
+    return (
+        <div >
+            {new Date(seconds * 1000).toISOString().substr(14, 5)}
+        </div>
+    );
+};
+
 const Position = ({ text, result }: { text: string, result: ResultsDataType }) => {
     if (result.resultCode != "") {
         text = result.resultCode
@@ -120,8 +129,8 @@ const Action = ({ raceMode, resultId, lapBoat, showRetireModal }: { raceMode: mo
 
 const columnHelper = createColumnHelper<ResultsDataType>()
 
-const PursuitTable = ({ fleetId, raceState, raceMode, dynamicSorting, lapBoat, showRetireModal, moveUp, moveDown }:
-    { fleetId: string, raceState: raceStateType, raceMode: modeType, dynamicSorting: boolean, lapBoat: (id: string) => void, showRetireModal: (id: string) => void, moveUp: (id: string) => void, moveDown: (id: string) => void }) => {
+const PursuitTable = ({ fleetId, raceState, raceMode, dynamicSorting, showStartTime, lapBoat, showRetireModal, moveUp, moveDown }:
+    { fleetId: string, raceState: raceStateType, raceMode: modeType, dynamicSorting: boolean, showStartTime: boolean, lapBoat: (id: string) => void, showRetireModal: (id: string) => void, moveUp: (id: string) => void, moveDown: (id: string) => void }) => {
     const { fleet, fleetIsValidating, fleetIsError } = Fetcher.Fleet(fleetId)
     let data = fleet?.results
     if (data == undefined) {
@@ -131,6 +140,7 @@ const PursuitTable = ({ fleetId, raceState, raceMode, dynamicSorting, lapBoat, s
     let columnVisibility = {
         //only visible when race is running and dynamic sorting is disabled. or when finished.
         Sort: (!dynamicSorting && raceMode != modeType.NotStarted) || raceState == raceStateType.calculate,
+        StartTime: showStartTime
     };
 
     const [sorting, setSorting] = useState<SortingState>([{
@@ -160,34 +170,33 @@ const PursuitTable = ({ fleetId, raceState, raceMode, dynamicSorting, lapBoat, s
         columnHelper.accessor('Helm', {
             header: "Helm",
             cell: props => <Text text={props.getValue()} />,
-            enableSorting: false
         }),
         columnHelper.accessor('Crew', {
             header: "Crew",
             cell: props => <Text text={props.getValue()} />,
-            enableSorting: false
         }),
         columnHelper.accessor('boat', {
             header: "Class",
             id: "Class",
             size: 300,
             cell: result => <Class boat={result.getValue()} />,
-            enableSorting: false
         }),
         columnHelper.accessor('SailNumber', {
             header: "Sail Number",
             cell: props => <Text text={props.getValue()} />,
-            enableSorting: false
+        }),
+        columnHelper.accessor((result) => result.boat.pursuitStartTime, {
+            header: "Start Time",
+            id: "StartTime",
+            cell: props => <StartTime seconds={props.getValue()} />,
         }),
         columnHelper.accessor('laps', {
             header: "Laps",
             cell: props => <Laps laps={props.getValue()} />,
-            enableSorting: false
         }),
         columnHelper.accessor('id', {
             header: "Action",
             cell: props => <Action raceMode={raceMode} lapBoat={lapBoat} showRetireModal={showRetireModal} resultId={props.getValue()} />,
-            enableSorting: false
         })
     ]
     const loadingState = fleetIsValidating || data?.length === 0 ? "loading" : "idle";

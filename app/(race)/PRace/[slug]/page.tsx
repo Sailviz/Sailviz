@@ -46,6 +46,7 @@ export default function Page({ params }: { params: { slug: string } }) {
     const [mode, setMode] = useState(modeType.NotStarted)
 
     const [dynamicSorting, setDynamicSorting] = useState(true)
+    const [showStartTime, setShowStartTime] = useState(true)
     var [lastAction, setLastAction] = useState<{ type: string, resultId: string }>({ type: "", resultId: "" })
 
     const [activeResult, setActiveResult] = useState<ResultsDataType>({} as ResultsDataType)
@@ -483,6 +484,17 @@ export default function Page({ params }: { params: { slug: string } }) {
                             Undo
                         </Button>
                     </div>
+                    <div className="w-1/5 p-2">
+                        {showStartTime ?
+                            <Button onClick={() => setShowStartTime(false)} size="lg" color="success" fullWidth>
+                                Show Start Times: On
+                            </Button>
+                            :
+                            <Button onClick={() => setShowStartTime(true)} size="lg" color="warning" fullWidth>
+                                Show Start Times: Off
+                            </Button>
+                        }
+                    </div>
                     <div className="w-1/5 p-2" id="RetireModeButton">
                         <Button onClick={() => setMode(modeType.Retire)} size="lg" color={mode == modeType.Retire ? "success" : "primary"} fullWidth>
                             Retire Mode
@@ -495,7 +507,7 @@ export default function Page({ params }: { params: { slug: string } }) {
                     </div>
                 </div>
                 <div className="">
-                    <PursuitTable fleetId={race.fleets[0]!.id} raceState={raceState} raceMode={mode} dynamicSorting={dynamicSorting} moveUp={moveUp} moveDown={moveDown} lapBoat={lapBoat} showRetireModal={showRetireModal} />
+                    <PursuitTable fleetId={race.fleets[0]!.id} raceState={raceState} raceMode={mode} dynamicSorting={dynamicSorting} showStartTime={showStartTime} moveUp={moveUp} moveDown={moveDown} lapBoat={lapBoat} showRetireModal={showRetireModal} />
                 </div>
             </div>
         </>
