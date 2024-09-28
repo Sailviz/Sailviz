@@ -140,7 +140,7 @@ const FleetPursuitResultsTable = (props: any) => {
         columns.push(editColumn)
     }
 
-    const loadingState = fleetIsValidating || data?.length === 0 ? "loading" : "idle";
+    const loadingState = fleetIsValidating ? "loading" : "idle";
 
     let table = useReactTable({
         data,
@@ -173,6 +173,7 @@ const FleetPursuitResultsTable = (props: any) => {
                 <TableBody
                     loadingContent={<Spinner />}
                     loadingState={loadingState}
+                    emptyContent={"No Entries Yet."}
                 >
                     {table.getRowModel().rows.map(row => (
                         <TableRow key={row.id}>

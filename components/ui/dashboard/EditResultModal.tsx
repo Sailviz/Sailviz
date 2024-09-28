@@ -139,8 +139,7 @@ export default function EditResultModal({ isOpen, result, fleet, onSubmit, onClo
         } else {
             await updateLapDataBasic()
         }
-
-        onSubmit({ ...result!, Helm: helm, Crew: crew, boat: boat, SailNumber: sailNumber, finishTime: finishTime })
+        onSubmit({ ...result!, Helm: helm, Crew: crew, boat: boat, SailNumber: sailNumber, finishTime: finishTime, resultCode: resultCodeOption.value })
     }
 
     useEffect(() => {
