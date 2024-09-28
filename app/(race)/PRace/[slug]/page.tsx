@@ -296,6 +296,8 @@ export default function Page({ params }: { params: { slug: string } }) {
         sound!.currentTime = 0
         sound!.play();
 
+        setLastAction({ type: "lap", resultId: id })
+
     }
 
     const endRace = async () => {
@@ -361,19 +363,12 @@ export default function Page({ params }: { params: { slug: string } }) {
                 return
             }
             await DB.DeleteLapById(lapId)
-        }
-        else if (lastAction.type == "finish") {
-            let lapId = actionResult.laps.slice(-1)[0]?.id
-            if (lapId == undefined) {
-                console.error("no finish lap to delete")
-                return
-            }
-            await DB.DeleteLapById(lapId)
-            await DB.updateResult({ ...actionResult, finishTime: 0 })
+        } else if (lastAction.type == "retire") {
+            actionResult.resultCode = ""
+            await DB.updateResult(actionResult)
         }
 
-
-        //mutate race
+        mutateRace()
 
     }
 
