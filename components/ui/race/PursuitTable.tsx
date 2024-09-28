@@ -63,7 +63,7 @@ const Class = ({ boat }: { boat: BoatDataType }) => {
     );
 };
 
-const Sort = ({ result, max, moveUp, moveDown }: { result: ResultsDataType, max: number, moveUp: (id: string) => void, moveDown: (id: string) => void }) => {
+const Sort = ({ result, max, moveUp, moveDown }: { result: ResultsDataType, max: number, moveUp: (id: string) => Promise<void>, moveDown: (id: string) => Promise<void> }) => {
     const [upLoading, setUpLoading] = useState(false)
     const [downLoading, setDownLoading] = useState(false)
     return (
@@ -72,7 +72,7 @@ const Sort = ({ result, max, moveUp, moveDown }: { result: ResultsDataType, max:
                 variant='bordered'
                 size="sm"
                 className='mx-1'
-                onClick={() => { setUpLoading(true); moveUp(result.id) }}
+                onClick={async () => { setUpLoading(true); await moveUp(result.id) }}
                 isDisabled={result.PursuitPosition == 1}
             >
                 {upLoading ?
@@ -85,7 +85,7 @@ const Sort = ({ result, max, moveUp, moveDown }: { result: ResultsDataType, max:
                 variant='bordered'
                 size="sm"
                 className='mx-1'
-                onClick={() => { setDownLoading(true); moveDown(result.id) }}
+                onClick={async () => { setDownLoading(true); await moveDown(result.id) }}
                 isDisabled={result.PursuitPosition == max}
             >
                 {downLoading ?
@@ -130,7 +130,7 @@ const Action = ({ raceMode, resultId, lapBoat, showRetireModal }: { raceMode: mo
 const columnHelper = createColumnHelper<ResultsDataType>()
 
 const PursuitTable = ({ fleetId, raceState, raceMode, dynamicSorting, showStartTime, lapBoat, showRetireModal, moveUp, moveDown }:
-    { fleetId: string, raceState: raceStateType, raceMode: modeType, dynamicSorting: boolean, showStartTime: boolean, lapBoat: (id: string) => void, showRetireModal: (id: string) => void, moveUp: (id: string) => void, moveDown: (id: string) => void }) => {
+    { fleetId: string, raceState: raceStateType, raceMode: modeType, dynamicSorting: boolean, showStartTime: boolean, lapBoat: (id: string) => void, showRetireModal: (id: string) => void, moveUp: (id: string) => Promise<void>, moveDown: (id: string) => Promise<void> }) => {
     const { fleet, fleetIsValidating, fleetIsError } = Fetcher.Fleet(fleetId)
     let data = fleet?.results
     if (data == undefined) {

@@ -8,7 +8,6 @@ import * as Fetcher from 'components/Fetchers';
 import { mutate } from "swr";
 import { PageSkeleton } from "components/ui/PageSkeleton";
 import { Button, useDisclosure } from "@nextui-org/react";
-import PursuitCard from "components/ui/race/PursuitCard";
 import PursuitTable from "components/ui/race/PursuitTable";
 import RetireModal from "components/ui/dashboard/RetireModal";
 
@@ -156,6 +155,7 @@ export default function Page({ params }: { params: { slug: string } }) {
         sound!.currentTime = 0
         sound!.play();
 
+        setMode(modeType.Lap)
     };
 
     const stopRace = async () => {
@@ -187,13 +187,14 @@ export default function Page({ params }: { params: { slug: string } }) {
 
     const dynamicSort = async () => {
         //recalculate position
-        let racesCopy: RaceDataType = window.structuredClone(race)
+        let racesCopy: RaceDataType = await DB.getRaceById(race.id)
         // there is just one fleet so grab the first one
         racesCopy.fleets[0]!.results.sort((a: ResultsDataType, b: ResultsDataType) => {
             // get the number of laps for each boat
             if (a.resultCode != "") return 1
             if (b.resultCode != "") return -1
-            console.log(b.laps.at(-1))
+            if (a.laps.length == 0) return 1
+            if (b.laps.length == 0) return -1
             let lapsA = a.laps.length;
             let lapsB = b.laps.length;
             // get the last lap time for each boat
@@ -233,12 +234,11 @@ export default function Page({ params }: { params: { slug: string } }) {
         }
 
 
-        mutateRace()
+        await mutateRace()
         retireModal.onClose()
     }
 
     const moveUp = async (id: string) => {
-        console.log("move up")
         //move selected boat up and boat above it down
         let toMoveUp = race.fleets.flatMap(fleet => fleet.results).find(result => result.id === id)
         let toMoveDown = race.fleets.flatMap(fleet => fleet.results).find(result => result.PursuitPosition == toMoveUp!.PursuitPosition - 1)
@@ -253,10 +253,11 @@ export default function Page({ params }: { params: { slug: string } }) {
 
         toMoveUp.PursuitPosition = toMoveUp.PursuitPosition - 1
         toMoveDown.PursuitPosition = toMoveDown.PursuitPosition + 1
-        await DB.updateResult(toMoveUp)
-        await DB.updateResult(toMoveDown)
 
-        mutateRace()
+        //wait for both to be updated
+        await Promise.all([DB.updateResult(toMoveUp), DB.updateResult(toMoveDown)])
+
+        await mutateRace()
     }
 
     const moveDown = async (id: string) => {
@@ -274,22 +275,23 @@ export default function Page({ params }: { params: { slug: string } }) {
 
         toMoveUp.PursuitPosition = toMoveUp.PursuitPosition - 1
         toMoveDown.PursuitPosition = toMoveDown.PursuitPosition + 1
-        await DB.updateResult(toMoveUp)
-        await DB.updateResult(toMoveDown)
 
-        mutateRace()
+        //wait for both to be updated
+        await Promise.all([DB.updateResult(toMoveUp), DB.updateResult(toMoveDown)])
+
+        await mutateRace()
     }
 
     const lapBoat = async (id: string) => {
         //modify local race data
-
         await DB.CreateLap(id, Math.floor(new Date().getTime() / 1000))
-        await mutateRace()
 
+        console.log(dynamicSorting)
         if (dynamicSorting) {
-            dynamicSort()
+            await dynamicSort()
         }
 
+        await mutateRace()
         let sound = document.getElementById("Beep") as HTMLAudioElement
         sound!.currentTime = 0
         sound!.play();
@@ -315,20 +317,6 @@ export default function Page({ params }: { params: { slug: string } }) {
     }
 
     const ontimeupdate = async (time: { minutes: number, seconds: number, countingUp: boolean }) => {
-        let timeInSeconds = time.minutes * 60 + time.seconds
-
-        let allStarted = true
-
-        race.fleets.flatMap(fleet => fleet.results).forEach(result => {
-            if ((result.boat?.pursuitStartTime || 0) < timeInSeconds && time.countingUp == true) {
-                //boat has started
-
-            } else {
-                //boat has not stated
-                allStarted = false
-            }
-
-        })
 
         //to catch race being finished on page load
         if (time.minutes > club.settings.pursuitLength && time.countingUp == true) {
@@ -426,8 +414,8 @@ export default function Page({ params }: { params: { slug: string } }) {
     return (
         <>
             <RetireModal isOpen={retireModal.isOpen} onSubmit={retireBoat} onClose={retireModal.onClose} result={activeResult} />
-            <audio id="Beep" src=".\beep-6.mp3" ></audio>
-            <audio id="Countdown" src=".\Countdown.mp3" ></audio>
+            <audio id="Beep" src="/Beep-6.mp3" ></audio>
+            <audio id="Countdown" src="/Countdown.mp3" ></audio>
             <div className="w-full flex flex-col items-center justify-start panel-height overflow-auto">
                 <div className="flex w-full flex-row justify-around">
                     <div className="w-1/4 p-2 m-2 border-4 rounded-lg bg-white text-lg font-medium">
