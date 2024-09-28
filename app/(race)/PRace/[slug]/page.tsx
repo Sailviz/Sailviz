@@ -7,6 +7,9 @@ import Cookies from "js-cookie";
 import * as Fetcher from 'components/Fetchers';
 import { mutate } from "swr";
 import { PageSkeleton } from "components/ui/PageSkeleton";
+import { Button, useDisclosure } from "@nextui-org/react";
+import PursuitTable from "components/ui/race/PursuitTable";
+import RetireModal from "components/ui/dashboard/RetireModal";
 
 enum raceStateType {
     running,
@@ -15,12 +18,20 @@ enum raceStateType {
     calculate
 }
 
+enum modeType {
+    Retire,
+    Lap,
+    NotStarted
+}
+
 //pursuit races don't work with fleets, why would you?
 //race organisation if based off of the first fleet, all boats from any fleets are used.
 
 export default function Page({ params }: { params: { slug: string } }) {
 
     const Router = useRouter()
+
+    const retireModal = useDisclosure();
 
     const startLength = 315 //5 mins 15 seconds in seconds
 
@@ -31,6 +42,14 @@ export default function Page({ params }: { params: { slug: string } }) {
     const { race, raceIsError, raceIsValidating, mutateRace } = Fetcher.Race(params.slug, true)
 
     var [raceState, setRaceState] = useState<raceStateType>(raceStateType.reset)
+    const [mode, setMode] = useState(modeType.NotStarted)
+
+    const [dynamicSorting, setDynamicSorting] = useState(true)
+    const [showStartTime, setShowStartTime] = useState(true)
+    var [lastAction, setLastAction] = useState<{ type: string, resultId: string }>({ type: "", resultId: "" })
+
+    const [activeResult, setActiveResult] = useState<ResultsDataType>({} as ResultsDataType)
+
 
     const startRaceButton = async () => {
         let localTime = Math.floor((new Date().getTime() / 1000) + startLength)
@@ -61,6 +80,7 @@ export default function Page({ params }: { params: { slug: string } }) {
 
     const startRace = async () => {
         setRaceState(raceStateType.running)
+        setMode(modeType.Lap)
         //start countdown timer
 
         let sound = document.getElementById("Beep") as HTMLAudioElement
@@ -135,6 +155,7 @@ export default function Page({ params }: { params: { slug: string } }) {
         sound!.currentTime = 0
         sound!.play();
 
+        setMode(modeType.Lap)
     };
 
     const stopRace = async () => {
@@ -164,34 +185,16 @@ export default function Page({ params }: { params: { slug: string } }) {
 
     }
 
-    const retireBoat = async (resultId: string) => {
-        let result: ResultsDataType | undefined;
-        race.fleets.some(fleet => {
-            result = fleet.results.find(result => result.id === resultId);
-            return result !== undefined;
-        });
-        if (result == undefined) {
-            console.error("Could not find result with id: " + resultId);
-            return
-        }
-        result.resultCode = "RET"
-        await DB.updateResult(result)
-        mutateRace()
-    }
-
-    const lapBoat = async (id: string) => {
-        //modify local race data
-
-        await DB.CreateLap(id, Math.floor(new Date().getTime() / 1000))
-        let updatedData = await DB.getRaceById(race.id)
-
+    const dynamicSort = async () => {
         //recalculate position
+        let racesCopy: RaceDataType = await DB.getRaceById(race.id)
         // there is just one fleet so grab the first one
-        updatedData.fleets[0]!.results.sort((a: ResultsDataType, b: ResultsDataType) => {
+        racesCopy.fleets[0]!.results.sort((a: ResultsDataType, b: ResultsDataType) => {
             // get the number of laps for each boat
             if (a.resultCode != "") return 1
             if (b.resultCode != "") return -1
-            console.log(b.laps.at(-1))
+            if (a.laps.length == 0) return 1
+            if (b.laps.length == 0) return -1
             let lapsA = a.laps.length;
             let lapsB = b.laps.length;
             // get the last lap time for each boat
@@ -201,15 +204,94 @@ export default function Page({ params }: { params: { slug: string } }) {
             return lapsB - lapsA || lastA - lastB;
         });
 
-        updatedData.fleets.flatMap(fleet => fleet.results).forEach(async (result, index) => {
+        racesCopy.fleets.flatMap(fleet => fleet.results).forEach(async (result, index) => {
             //there is only one fleet
             // updatedData.fleets[0]!.results[index]!.PursuitPosition = index + 1
             result.PursuitPosition = index + 1
             await DB.updateResult(result)
         })
 
-        mutateRace()
+        await mutateRace()
+    }
 
+
+    const retireBoat = async (resultCode: string) => {
+        let tempdata = activeResult
+        tempdata.resultCode = resultCode
+        let oldPosition = tempdata.PursuitPosition
+        tempdata.PursuitPosition = 0
+        await DB.updateResult(tempdata)
+
+        setLastAction({ type: "retire", resultId: tempdata.id })
+
+        //shift all boats up to fill the gap
+        let raceCopy: RaceDataType = window.structuredClone(race)
+        for (let i = oldPosition + 1; i < raceCopy.fleets[0]!.results.length - 1; i++) {
+            if (raceCopy.fleets[0]!.results[i]!.PursuitPosition != 0) {
+                raceCopy.fleets[0]!.results[i]!.PursuitPosition = raceCopy.fleets[0]!.results[i]!.PursuitPosition - 1
+                await DB.updateResult(raceCopy.fleets[0]!.results[i]!)
+            }
+        }
+
+
+        await mutateRace()
+        retireModal.onClose()
+    }
+
+    const moveUp = async (id: string) => {
+        //move selected boat up and boat above it down
+        let toMoveUp = race.fleets.flatMap(fleet => fleet.results).find(result => result.id === id)
+        let toMoveDown = race.fleets.flatMap(fleet => fleet.results).find(result => result.PursuitPosition == toMoveUp!.PursuitPosition - 1)
+        if (toMoveDown == undefined) {
+            console.error("no boat to move down")
+            return
+        }
+        if (toMoveUp == undefined) {
+            console.error("no boat to move up")
+            return
+        }
+
+        toMoveUp.PursuitPosition = toMoveUp.PursuitPosition - 1
+        toMoveDown.PursuitPosition = toMoveDown.PursuitPosition + 1
+
+        //wait for both to be updated
+        await Promise.all([DB.updateResult(toMoveUp), DB.updateResult(toMoveDown)])
+
+        await mutateRace()
+    }
+
+    const moveDown = async (id: string) => {
+        //move selected boat up and boat above it down
+        let toMoveDown = race.fleets.flatMap(fleet => fleet.results).find(result => result.id === id)
+        let toMoveUp: ResultsDataType | undefined = race.fleets.flatMap(fleet => fleet.results).find(result => result.PursuitPosition == toMoveDown!.PursuitPosition + 1)
+        if (toMoveDown == undefined) {
+            console.error("no boat to move down")
+            return
+        }
+        if (toMoveUp == undefined) {
+            console.error("no boat to move up")
+            return
+        }
+
+        toMoveUp.PursuitPosition = toMoveUp.PursuitPosition - 1
+        toMoveDown.PursuitPosition = toMoveDown.PursuitPosition + 1
+
+        //wait for both to be updated
+        await Promise.all([DB.updateResult(toMoveUp), DB.updateResult(toMoveDown)])
+
+        await mutateRace()
+    }
+
+    const lapBoat = async (id: string) => {
+        //modify local race data
+        await DB.CreateLap(id, Math.floor(new Date().getTime() / 1000))
+
+        console.log(dynamicSorting)
+        if (dynamicSorting) {
+            await dynamicSort()
+        }
+
+        await mutateRace()
         let sound = document.getElementById("Beep") as HTMLAudioElement
         sound!.currentTime = 0
         sound!.play();
@@ -231,43 +313,10 @@ export default function Page({ params }: { params: { slug: string } }) {
     }
 
     const submitResults = async () => {
-        for (const result of race.fleets.flatMap(fleet => fleet.results)) {
-            await DB.updateResult(result)
-        }
         Router.push('/Race/' + race.id)
     }
 
-    const setOrder = async (updatedResults: ResultsDataType[]) => {
-        if (updatedResults.length < 2) return
-        console.log(updatedResults)
-
-        // for (let i = 0; i < updatedResults.length; i++) {
-        //     updatedResults[i]!.PursuitPosition = i + 1
-        // }
-        // let tempResults = { ...race, results: updatedResults }
-        // setRace(tempResults)
-        updatedResults.forEach(result => {
-            result.PursuitPosition = updatedResults.indexOf(result) + 1
-            DB.updateResult(result)
-        })
-        mutateRace()
-    }
-
     const ontimeupdate = async (time: { minutes: number, seconds: number, countingUp: boolean }) => {
-        let timeInSeconds = time.minutes * 60 + time.seconds
-
-        let allStarted = true
-
-        race.fleets.flatMap(fleet => fleet.results).forEach(result => {
-            if ((result.boat?.pursuitStartTime || 0) < timeInSeconds && time.countingUp == true) {
-                //boat has started
-
-            } else {
-                //boat has not stated
-                allStarted = false
-            }
-
-        })
 
         //to catch race being finished on page load
         if (time.minutes > club.settings.pursuitLength && time.countingUp == true) {
@@ -275,6 +324,59 @@ export default function Page({ params }: { params: { slug: string } }) {
         }
 
     }
+
+    const showRetireModal = (resultId: String) => {
+        retireModal.onOpen()
+        let result: ResultsDataType | undefined;
+        race.fleets.some(fleet => {
+            result = fleet.results.find(result => result.id === resultId);
+            return result !== undefined;
+        });
+        if (result == undefined) {
+            console.error("Could not find result with id: " + resultId);
+            return
+        }
+        setActiveResult(result)
+    }
+
+    const undo = async () => {
+        if (lastAction.type == "") {
+            //no action has been done yet
+            return;
+        }
+        if (!confirm("are you sure you want to undo your last " + lastAction.type + "?")) {
+            return
+        }
+
+        let actionResult = race.fleets.flatMap(fleet => fleet.results).find(result => result.id === lastAction.resultId);
+        if (actionResult == undefined) {
+            console.error("Could not find result with id: " + lastAction.resultId);
+            return
+        }
+        //revert to last result
+        if (lastAction.type == "lap") {
+            let lapId = actionResult.laps.slice(-1)[0]?.id
+            if (lapId == undefined) {
+                console.error("no lap to delete")
+                return
+            }
+            await DB.DeleteLapById(lapId)
+        }
+        else if (lastAction.type == "finish") {
+            let lapId = actionResult.laps.slice(-1)[0]?.id
+            if (lapId == undefined) {
+                console.error("no finish lap to delete")
+                return
+            }
+            await DB.DeleteLapById(lapId)
+            await DB.updateResult({ ...actionResult, finishTime: 0 })
+        }
+
+
+        //mutate race
+
+    }
+
 
     const controller = new AbortController()
 
@@ -284,7 +386,6 @@ export default function Page({ params }: { params: { slug: string } }) {
                 setRaceState(raceStateType.running)
                 //check if race has already finished
                 if (Math.floor((new Date().getTime() / 1000) - race.fleets[0]!.startTime) > (club.settings.pursuitLength * 60)) {
-                    console.log(race.fleets[0]!.startTime)
                     setRaceState(raceStateType.calculate)
                 }
             }
@@ -312,9 +413,9 @@ export default function Page({ params }: { params: { slug: string } }) {
 
     return (
         <>
-
-            <audio id="Beep" src=".\beep-6.mp3" ></audio>
-            <audio id="Countdown" src=".\Countdown.mp3" ></audio>
+            <RetireModal isOpen={retireModal.isOpen} onSubmit={retireBoat} onClose={retireModal.onClose} result={activeResult} />
+            <audio id="Beep" src="/Beep-6.mp3" ></audio>
+            <audio id="Countdown" src="/Countdown.mp3" ></audio>
             <div className="w-full flex flex-col items-center justify-start panel-height overflow-auto">
                 <div className="flex w-full flex-row justify-around">
                     <div className="w-1/4 p-2 m-2 border-4 rounded-lg bg-white text-lg font-medium">
@@ -354,58 +455,47 @@ export default function Page({ params }: { params: { slug: string } }) {
                         })()}
                     </div>
                 </div>
-
+                <div className="flex w-full shrink flex-row justify-left">
+                    <div className="w-1/5 p-2">
+                        {dynamicSorting ?
+                            <Button onClick={() => setDynamicSorting(false)} size="lg" color="success" fullWidth>
+                                Dynamic Sorting: On
+                            </Button>
+                            :
+                            <Button onClick={() => setDynamicSorting(true)} size="lg" color="warning" fullWidth>
+                                Dynamic Sorting: Off
+                            </Button>
+                        }
+                    </div>
+                    <div className="w-1/5 p-2">
+                        <Button onClick={() => undo()} size="lg" color="danger" fullWidth>
+                            Undo
+                        </Button>
+                    </div>
+                    <div className="w-1/5 p-2">
+                        {showStartTime ?
+                            <Button onClick={() => setShowStartTime(false)} size="lg" color="success" fullWidth>
+                                Show Start Times: On
+                            </Button>
+                            :
+                            <Button onClick={() => setShowStartTime(true)} size="lg" color="warning" fullWidth>
+                                Show Start Times: Off
+                            </Button>
+                        }
+                    </div>
+                    <div className="w-1/5 p-2" id="RetireModeButton">
+                        <Button onClick={() => setMode(modeType.Retire)} size="lg" color={mode == modeType.Retire ? "success" : "primary"} fullWidth>
+                            Retire Mode
+                        </Button>
+                    </div>
+                    <div className="w-1/5 p-2" id="LapModeButton">
+                        <Button onClick={() => setMode(modeType.Lap)} size="lg" color={mode == modeType.Lap ? "success" : "primary"} fullWidth>
+                            Lap Mode
+                        </Button>
+                    </div>
+                </div>
                 <div className="">
-                    {race.fleets.flatMap(fleet => fleet.results)
-                        .sort((a: ResultsDataType, b: ResultsDataType) => {
-                            if (race.fleets[0]!.startTime != 0) {
-                                return a.PursuitPosition - b.PursuitPosition
-                            } else {
-                                return b.boat?.py - a.boat?.py
-                            }
-                        })
-                        .map((result: ResultsDataType, index) => {
-                            return (
-                                <div key={index}>
-                                    {(result.resultCode != "") ?
-                                        <div key={index} id={result.id} className={'bg-red-300 border-2 border-pink-500'}>
-                                            <div className="flex flex-row m-4 justify-between">
-                                                <h2 className="text-2xl text-gray-700 flex my-auto mr-5"> <span className="handle cursor-row-resize px-3">☰</span>{result.SailNumber} - {result.boat?.name} : {result.Helm} - {result.Crew} -</h2>
-                                                <div className="flex">
-                                                    <h2 className="text-2xl text-gray-700 flex my-auto mr-5">{result.resultCode} </h2>
-
-                                                </div>
-                                            </div>
-                                        </div>
-                                        :
-                                        <div id={result.id} className={'bg-green-300 border-2 border-pink-500'}>
-                                            <div className="flex flex-row m-4 justify-between">
-                                                <h2 className="text-2xl text-gray-700 flex my-auto mr-5"> <span className="handle cursor-row-resize px-3">☰</span>{result.SailNumber} - {result.boat?.name} : {result.Helm} - {result.Crew} -</h2>
-                                                {(raceState == raceStateType.running) ?
-                                                    <div className="flex">
-                                                        <p onClick={(e) => { confirm("are you sure you want to retire " + result.SailNumber) ? retireBoat(result.id) : null; }} className="cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-sm p-5 mx-2 ml-auto text-center flex">
-                                                            Retire
-                                                        </p>
-                                                        <h2 className="text-2xl text-gray-700 flex my-auto mr-5">Laps: {result.laps.length} Position: {result.PursuitPosition} </h2>
-                                                        <h2 className="text-2xl text-gray-700 flex my-auto mr-5"> Start Time: {String(Math.floor((result.boat?.pursuitStartTime || 0) / 60)).padStart(2, '0')}:{String((result.boat?.pursuitStartTime || 0) % 60).padStart(2, '0')}</h2>
-                                                        <p onClick={() => lapBoat(result.id)} className="cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-sm p-5 mx-2 text-center flex">
-                                                            lap
-                                                        </p>
-                                                    </div>
-                                                    :
-                                                    <>
-                                                        <h2 className="text-2xl text-gray-700 flex my-auto mr-5">Laps: {result.laps.length} Position: {result.PursuitPosition} </h2>
-                                                        <h2 className="text-2xl text-gray-700 flex my-auto mr-5"> Start Time: {String(Math.floor((result.boat?.pursuitStartTime || 0) / 60)).padStart(2, '0')}:{String((result.boat?.pursuitStartTime || 0) % 60).padStart(2, '0')}</h2>
-
-                                                    </>
-                                                }
-                                            </div>
-                                        </div>
-                                    }
-                                </div>
-                            )
-                        })
-                    }
+                    <PursuitTable fleetId={race.fleets[0]!.id} raceState={raceState} raceMode={mode} dynamicSorting={dynamicSorting} showStartTime={showStartTime} moveUp={moveUp} moveDown={moveDown} lapBoat={lapBoat} showRetireModal={showRetireModal} />
                 </div>
             </div>
         </>
