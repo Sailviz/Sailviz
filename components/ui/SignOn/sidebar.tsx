@@ -71,10 +71,9 @@ export const SidebarWrapper = () => {
                             <CollapseItems
                                 isActive={pathname === "/SignOn/Series"}
                                 icon={<SettingsIcon />}
-                                items={[...new Set(todaysRaces?.map(race => race.series.name))]
-                                }
+                                items={[...new Set(todaysRaces?.map(race => race.series.name))]}
                                 title="Today's Series"
-                                hrefs={todaysRaces?.map(race => '/SignOn/Series/' + race.series.id)}
+                                hrefs={[...new Set(todaysRaces?.map(race => '/SignOn/Series/' + race.series.id))]}
                             />
                             <SidebarItem
                                 isActive={pathname === "/SignOn/Guide"}

@@ -25,8 +25,6 @@ export default function Page({ params }: { params: { slug: string } }) {
     const { boats, boatsIsError, boatsIsValidating } = Fetcher.Boats()
     const { race, raceIsError, raceIsValidating } = Fetcher.Race(params.slug, true)
 
-    const [seriesName, setSeriesName] = useState("")
-
     const viewModal = useDisclosure();
 
     var [activeResult, setActiveResult] = useState<ResultsDataType>()
@@ -58,7 +56,7 @@ export default function Page({ params }: { params: { slug: string } }) {
                 return (
                     <div key={"fleetResults" + index}>
                         <div className="py-4">
-                            <h1 className={title({ color: "blue" })}>{seriesName} {race.number} Race Results</h1>
+                            <h1 className={title({ color: "blue" })}>{race.series.name} Race {race.number} Results</h1>
                         </div>
 
                         {race.Type == "Handicap" ?
