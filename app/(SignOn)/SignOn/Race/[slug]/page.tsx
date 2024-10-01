@@ -13,6 +13,8 @@ import { BreadcrumbItem, Breadcrumbs, Button, Input, useDisclosure } from "@next
 import CreateResultModal from "components/ui/dashboard/CreateResultModal";
 import ProgressModal from "components/ui/dashboard/ProgressModal";
 import EditResultModal from "components/ui/dashboard/EditResultModal";
+import { title } from "components/ui/home/primitaves";
+import ViewResultModal from "components/ui/dashboard/viewResultModal";
 
 export default function Page({ params }: { params: { slug: string } }) {
 
@@ -24,13 +26,7 @@ export default function Page({ params }: { params: { slug: string } }) {
 
     const [seriesName, setSeriesName] = useState("")
 
-    const createModal = useDisclosure();
-    const progressModal = useDisclosure();
-    const editModal = useDisclosure();
-
-    const [progressValue, setProgressValue] = useState(0)
-    const [progressMax, setProgressMax] = useState(0)
-    const [progressIndeterminate, setProgressIndeterminate] = useState(false)
+    const viewModal = useDisclosure();
 
     var [activeResult, setActiveResult] = useState<ResultsDataType>()
     var [activeFleet, setActiveFleet] = useState<FleetDataType>()
@@ -80,6 +76,19 @@ export default function Page({ params }: { params: { slug: string } }) {
         series: {} as SeriesDataType
     })
 
+    const openViewModal = (resultId: string) => {
+        let result = race.fleets.flatMap(fleet => fleet.results).find(result => result.id == resultId)
+        if (result == undefined) {
+            console.error("Could not find result with id: " + resultId);
+            return
+        }
+        console.log(result)
+        result.laps.sort((a, b) => a.time - b.time)
+        setActiveResult(result)
+        setActiveFleet(race.fleets.filter(fleet => fleet.id == result?.fleetId)[0]!)
+        viewModal.onOpen()
+    }
+
     useEffect(() => {
         let raceId = params.slug
         const getRace = async () => {
@@ -119,15 +128,17 @@ export default function Page({ params }: { params: { slug: string } }) {
     }
     return (
 
-        <div className="py-4 w-full">
+        <>
+            <ViewResultModal isOpen={viewModal.isOpen} result={activeResult} fleet={activeFleet} onClose={viewModal.onClose} />
             {race.fleets.map((fleet, index) => {
                 return (
                     <div key={"fleetResults" + index}>
-                        <p className='text-2xl font-bol'>
-                            {fleet.fleetSettings.name} - Boats Entered: {fleet.results.length}
-                        </p>
+                        <div className="py-4">
+                            <h1 className={title({ color: "blue" })}>{seriesName} {race.number} Race Results</h1>
+                        </div>
+
                         {race.Type == "Handicap" ?
-                            <FleetHandicapResultsTable showTime={true} editable={false} fleetId={fleet.id} startTime={fleet.startTime} key={JSON.stringify(race)} deleteResult={null} updateResult={null} raceId={race.id} showEditModal={null} />
+                            <FleetHandicapResultsTable showTime={true} editable={false} fleetId={fleet.id} startTime={fleet.startTime} key={JSON.stringify(race)} deleteResult={null} updateResult={null} raceId={race.id} showEditModal={null} showViewModal={openViewModal} />
                             :
                             <FleetPursuitResultsTable showTime={true} editable={false} fleetId={fleet.id} startTime={fleet.startTime} key={JSON.stringify(race)} deleteResult={null} updateResult={null} raceId={race.id} showEditModal={null} />
                         }
@@ -135,7 +146,7 @@ export default function Page({ params }: { params: { slug: string } }) {
                     </div>
                 )
             })}
-        </div>
+        </>
 
     )
 }
