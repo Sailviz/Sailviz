@@ -31,24 +31,26 @@ export const CollapseItems = ({ icon, items, title, hrefs, isActive }: Props) =>
                 isActive
                   ? "bg-primary-100 [&_svg_path]:fill-primary-500"
                   : "hover:bg-default-100",
-                "flex gap-2 w-full min-h-[44px] h-full items-center px-3.5 rounded-xl cursor-pointer transition-all duration-150 active:scale-[0.98]"
+                "flex gap-2 w-full min-h-[44px] h-full items-center pr-3.5 rounded-xl cursor-pointer transition-all duration-150 active:scale-[0.98]"
               ),
           }}
           aria-label="Accordion 1"
+          startContent={
+            <span>{icon}</span>
+          }
           title={
-            <div className="flex flex-row gap-2">
-              <span>{icon}</span>
-              <span>{title}</span>
+            <div className="flex flex-row">
+              {title}
             </div>
           }
         >
-          <div className="pl-12">
+          <div className="text-lg">
             {items.map((item, index) => (
               <NextLink
                 href={hrefs[index]!}
 
                 key={index}
-                className="active:bg-none max-w-full w-full flex  text-default-500 hover:text-default-900 transition-colors"
+                className="pl-12 active:bg-none max-w-full w-full flex text-default-500 rounded-xl hover:text-default-900 hover:bg-default-100 transition-colors py-3"
               >
                 {item}
               </NextLink>

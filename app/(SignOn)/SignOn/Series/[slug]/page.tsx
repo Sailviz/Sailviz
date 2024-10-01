@@ -3,6 +3,7 @@ import { useRouter } from "next/navigation"
 import SeriesResultsTable from "components/tables/SeriesResultsTable";
 import * as Fetcher from 'components/Fetchers';
 import { PageSkeleton } from "components/ui/PageSkeleton";
+import { title } from "components/ui/home/primitaves";
 
 export default function Page({ params }: { params: { slug: string } }) {
     const Router = useRouter();
@@ -18,10 +19,9 @@ export default function Page({ params }: { params: { slug: string } }) {
     }
     return (
         <>
-            <p className="text-6xl font-extrabold p-6">
-                {series.name} Series Results
-            </p>
-
+            <div className="py-4">
+                <h1 className={title({ color: "blue" })}>{series.name} Results</h1>
+            </div>
             <div className="mb-6">
                 <SeriesResultsTable key={JSON.stringify(series)} data={series} />
             </div>
