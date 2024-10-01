@@ -23,6 +23,7 @@ export default function Page({ params }: { params: { slug: string } }) {
     const { user, userIsError, userIsValidating } = Fetcher.UseUser()
     const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
     const { boats, boatsIsError, boatsIsValidating } = Fetcher.Boats()
+    const { race, raceIsError, raceIsValidating } = Fetcher.Race(params.slug, true)
 
     const [seriesName, setSeriesName] = useState("")
 
@@ -30,51 +31,6 @@ export default function Page({ params }: { params: { slug: string } }) {
 
     var [activeResult, setActiveResult] = useState<ResultsDataType>()
     var [activeFleet, setActiveFleet] = useState<FleetDataType>()
-
-    var [race, setRace] = useState<RaceDataType>({
-        id: "",
-        number: 0,
-        Time: "",
-        OOD: "",
-        AOD: "",
-        SO: "",
-        ASO: "",
-        fleets: [{
-            id: "",
-            startTime: 0,
-            raceId: "",
-            fleetSettings: {
-                id: "",
-                name: "",
-                boats: [],
-                startDelay: 0,
-                fleets: []
-            } as FleetSettingsType,
-            results: [{
-                id: "",
-                raceId: "",
-                Helm: "",
-                Crew: "",
-                boat: {} as BoatDataType,
-                SailNumber: "",
-                finishTime: 0,
-                CorrectedTime: 0,
-                laps: [{
-                    time: 0,
-                    id: "",
-                    resultId: ""
-                }],
-                PursuitPosition: 0,
-                HandicapPosition: 0,
-                resultCode: "",
-                fleetId: ""
-            } as ResultsDataType]
-
-        }],
-        Type: "",
-        seriesId: "",
-        series: {} as SeriesDataType
-    })
 
     const openViewModal = (resultId: string) => {
         let result = race.fleets.flatMap(fleet => fleet.results).find(result => result.id == resultId)
@@ -89,39 +45,7 @@ export default function Page({ params }: { params: { slug: string } }) {
         viewModal.onOpen()
     }
 
-    useEffect(() => {
-        let raceId = params.slug
-        const getRace = async () => {
-            const racedata = await DB.getRaceById(raceId)
-            setRace(racedata)
-            DB.GetSeriesById(racedata.seriesId).then((series: SeriesDataType) => {
-                setSeriesName(series.name)
-            })
-        }
-
-        if (raceId != undefined) {
-            getRace()
-        }
-
-    }, [Router])
-
-
-
-    useEffect(() => {
-        let timer1 = setTimeout(async () => {
-            console.log(document.activeElement?.tagName)
-            if (document.activeElement?.tagName == "INPUT") {
-                return
-            }
-            if (race.id == "") return
-            var data = await DB.getRaceById(race.id)
-            setRace({ ...data })
-        }, 5000);
-        return () => {
-            clearTimeout(timer1);
-        }
-    }, [race]);
-    if (userIsValidating || clubIsValidating || user == undefined || club == undefined) {
+    if (userIsValidating || clubIsValidating || raceIsValidating || user == undefined || club == undefined) {
         return (
             <PageSkeleton />
         )
