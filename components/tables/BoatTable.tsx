@@ -120,17 +120,18 @@ const BoatTable = (props: any) => {
         data,
         columns: [
             columnHelper.accessor('name', {
-                header: "name",
+                header: "Boat",
                 cell: props => <Text {...props} />,
                 enableColumnFilter: true
             }),
             columnHelper.accessor('crew', {
-                header: "crew",
+                header: "Crew",
                 cell: props => <Number {...props} />,
                 enableColumnFilter: false
             }),
             columnHelper.accessor('py', {
                 id: "py",
+                header: "PY",
                 cell: props => <Number {...props} />,
                 enableColumnFilter: false
             }),
@@ -143,7 +144,7 @@ const BoatTable = (props: any) => {
             columnHelper.accessor('id', {
                 id: "action",
                 enableColumnFilter: false,
-                header: "Action",
+                header: "Actions",
                 cell: props => <Action {...props} id={props.row.original.id} deleteBoat={deleteBoat} editBoat={editBoat} user={user} />
             }),
         ],
@@ -153,12 +154,7 @@ const BoatTable = (props: any) => {
 
     return (
         <div key={props.data}>
-            <Table
-                isStriped
-                classNames={{
-                    base: "max-h-[520px] overflow-scroll",
-                    table: "min-h-[420px]",
-                }}>
+            <Table isStriped>
                 <TableHeader>
                     {table.getHeaderGroups().flatMap(headerGroup => headerGroup.headers).map(header => {
                         return (
