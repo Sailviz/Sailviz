@@ -69,6 +69,7 @@ const UpcomingRacesTable = (props: any) => {
                 enableSorting: true
             }),
             columnHelper.accessor('number', {
+                header: "Number",
                 cell: info => info.getValue().toString(),
                 enableSorting: true
             }),
