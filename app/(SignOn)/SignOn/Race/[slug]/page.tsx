@@ -57,7 +57,7 @@ export default function Page({ params }: { params: { slug: string } }) {
                     <div key={"fleetResults" + index} className="h-screen">
                         <div className="p-6 h-1/6">
                             <h1 className={title({color: "blue"})}>Results - {race.series.name} - Race {race.number}</h1>
-                            <p className="py-4 text-2xl font-bol">
+                            <p className="py-4 text-2xl font-bold">
                                 {fleet?.fleetSettings.name} - Boats Entered: {fleet?.results.length}
                             </p>
                         </div>
