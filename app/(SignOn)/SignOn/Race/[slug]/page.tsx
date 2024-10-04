@@ -54,16 +54,21 @@ export default function Page({ params }: { params: { slug: string } }) {
             <ViewResultModal isOpen={viewModal.isOpen} result={activeResult} fleet={activeFleet} onClose={viewModal.onClose} />
             {race.fleets.map((fleet, index) => {
                 return (
-                    <div key={"fleetResults" + index}>
-                        <div className="py-4">
-                            <h1 className={title({ color: "blue" })}>{race.series.name} Race {race.number} Results</h1>
+                    <div key={"fleetResults" + index} className="h-screen">
+                        <div className="p-6 h-1/6">
+                            <h1 className={title({color: "blue"})}>Results - {race.series.name} - Race {race.number}</h1>
+                            <p className="py-4 text-2xl font-bol">
+                                {fleet?.fleetSettings.name} - Boats Entered: {fleet?.results.length}
+                            </p>
                         </div>
 
-                        {race.Type == "Handicap" ?
-                            <FleetHandicapResultsTable showTime={true} editable={false} fleetId={fleet.id} startTime={fleet.startTime} key={JSON.stringify(race)} deleteResult={null} updateResult={null} raceId={race.id} showEditModal={null} showViewModal={openViewModal} />
-                            :
-                            <FleetPursuitResultsTable showTime={true} editable={false} fleetId={fleet.id} startTime={fleet.startTime} key={JSON.stringify(race)} deleteResult={null} updateResult={null} raceId={race.id} showEditModal={null} />
-                        }
+                        <div className="p-6 h-5/6">
+                            {race.Type == "Handicap" ?
+                                <FleetHandicapResultsTable showTime={true} editable={false} fleetId={fleet.id} startTime={fleet.startTime} key={JSON.stringify(race)} deleteResult={null} updateResult={null} raceId={race.id} showEditModal={null} showViewModal={openViewModal} />
+                                :
+                                <FleetPursuitResultsTable showTime={true} editable={false} fleetId={fleet.id} startTime={fleet.startTime} key={JSON.stringify(race)} deleteResult={null} updateResult={null} raceId={race.id} showEditModal={null} />
+                            }
+                        </div>
 
                     </div>
                 )

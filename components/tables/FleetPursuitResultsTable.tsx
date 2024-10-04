@@ -97,6 +97,11 @@ const FleetPursuitResultsTable = (props: any) => {
     }]);
 
     let columns = [
+        columnHelper.accessor('PursuitPosition', {
+            header: "Position",
+            cell: props => <Text {...props} disabled={true} />,
+            enableSorting: true
+        }),
         columnHelper.accessor('Helm', {
             header: "Helm",
             cell: props => <Text {...props} />,
@@ -124,11 +129,6 @@ const FleetPursuitResultsTable = (props: any) => {
             cell: props => <Laps {...props} />,
             enableSorting: false
         }),
-        columnHelper.accessor('PursuitPosition', {
-            header: "Position",
-            cell: props => <Text {...props} disabled={true} />,
-            enableSorting: true
-        })
     ]
 
     const editColumn = columnHelper.display({
@@ -153,11 +153,8 @@ const FleetPursuitResultsTable = (props: any) => {
         getSortedRowModel: getSortedRowModel(),
     })
     return (
-        <div key={props.data}>
-            <p className='text-2xl font-bol'>
-                {fleet?.fleetSettings.name} - Boats Entered: {fleet?.results.length}
-            </p>
-            <Table isStriped id={"clubTable"}>
+        <div key={props.data} className="h-full">
+            <Table isStriped id={"clubTable"} isHeaderSticky fullWidth className="h-full overflow-auto">
                 <TableHeader>
                     {table.getHeaderGroups().flatMap(headerGroup => headerGroup.headers).map(header => {
                         return (
@@ -171,7 +168,7 @@ const FleetPursuitResultsTable = (props: any) => {
                     })}
                 </TableHeader>
                 <TableBody
-                    loadingContent={<Spinner />}
+                    loadingContent={<Spinner/>}
                     loadingState={loadingState}
                     emptyContent={"No Entries Yet."}
                 >
