@@ -22,6 +22,7 @@ export default function Page({ params }: { params: { slug: string } }) {
         <div className="h-screen">
             <div className="h-1/6 p-6">
                 <h1 className={title({color: "blue"})}>Series Results - {series.name} </h1>
+                <p className="py-4 text-2xl font-bold"> Series of {series.races.length} races - {series.settings.numberToCount} to count</p>
             </div>
             <div className="h-5/6 p-6">
                 <SeriesResultsTable key={JSON.stringify(series)} data={series}/>
