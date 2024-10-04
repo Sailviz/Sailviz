@@ -255,14 +255,8 @@ const SeriesResultsTable = (props: any) => {
     })
 
     return (
-        <div key={props.data}>
-            <Table isStriped id={"clubTable"} isHeaderSticky
-                classNames={{
-                    base: "max-h-[520px] overflow-scroll",
-                    table: "min-h-[400px]",
-                }}
-
-            >
+        <div key={props.data} className="h-full">
+            <Table isStriped id={"clubTable"} isHeaderSticky fullWidth className="h-full overflow-auto">
                 <TableHeader>
                     {table.getHeaderGroups().flatMap(headerGroup => headerGroup.headers).map(header => {
                         return (
