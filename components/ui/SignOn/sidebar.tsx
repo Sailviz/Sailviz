@@ -18,11 +18,16 @@ import * as Fetcher from 'components/Fetchers';
 import { PageSkeleton } from "../PageSkeleton";
 import { SignOutIcon } from "components/icons/sign-out";
 import Cookies from "js-cookie";
+import FleetHandicapResultsTable from "../../tables/FleetHandicapResultsTable";
+import FleetPursuitResultsTable from "../../tables/FleetPursuitResultsTable";
+import React from "react";
+import {AVAILABLE_PERMISSIONS, userHasPermission} from "../../helpers/users";
 
 export const SidebarWrapper = () => {
     const pathname = usePathname();
     const { collapsed, setCollapsed } = useSidebarContext();
 
+    const { user, userIsError, userIsValidating } = Fetcher.UseUser()
     const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
     const { todaysRaces, todaysRacesIsError, todaysRacesIsValidating } = Fetcher.GetTodaysRaceByClubId(club)
 
@@ -92,13 +97,23 @@ export const SidebarWrapper = () => {
                                 icon={<ChangeLogIcon />}
                             />
                         </SidebarMenu>
-                        <SidebarMenu title="Log Out" onClick={() => { Cookies.remove('token'); Cookies.remove('clubId'); Cookies.remove('userId') }}>
-                            <SidebarItem
-                                title="Log Out"
-                                icon={<SignOutIcon />}
-                                href="/"
-                            />
-                        </SidebarMenu>
+                        {userHasPermission(user, AVAILABLE_PERMISSIONS.dashboardAccess) ?
+                            <SidebarMenu title="Dashboard">
+                                <SidebarItem
+                                    title="Back to Dashboard"
+                                    icon={<SignOutIcon />}
+                                    href="/Dashboard"
+                                />
+                            </SidebarMenu>
+                            :
+                            <SidebarMenu title="Log Out" onClick={() => { Cookies.remove('token'); Cookies.remove('clubId'); Cookies.remove('userId') }}>
+                                <SidebarItem
+                                    title="Log Out"
+                                    icon={<SignOutIcon />}
+                                    href="/"
+                                />
+                            </SidebarMenu>
+                        }
                     </div>
 
                 </div>
