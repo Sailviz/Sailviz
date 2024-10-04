@@ -1,9 +1,25 @@
 'use client'
 import React, { useState, useEffect } from 'react';
 import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, useReactTable, SortingState } from '@tanstack/react-table'
-import { Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Dropdown, DropdownItem, DropdownTrigger, Button, DropdownMenu, Input, Spinner } from '@nextui-org/react';
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableColumn,
+    TableHeader,
+    TableRow,
+    Dropdown,
+    DropdownItem,
+    DropdownTrigger,
+    Button,
+    DropdownMenu,
+    Input,
+    Spinner,
+    Tooltip
+} from '@nextui-org/react';
 import * as Fetcher from 'components/Fetchers';
 import useSWR from 'swr';
+import {EyeIcon} from "../icons/eye-icon";
 
 
 
@@ -100,10 +116,11 @@ const View = ({ ...props }: any) => {
     }
     return (
         <>
-            <p className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0"
-                onClick={onClick} >
-                View
-            </p>
+            <Tooltip content="View" >
+                <span className="text-lg text-default-400 cursor-pointer active:opacity-50">
+                    <EyeIcon onClick={onClick} />
+                </span>
+            </Tooltip>
         </>
     );
 };
