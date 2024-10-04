@@ -60,7 +60,7 @@ export default function Page() {
                 <div>
                     <div>
                         <p className='text-2xl font-bold p-6 pb-1'>
-                            Today's Races
+                            Today&apos;s Races
                         </p>
                         <div className='p-6 pt-1'>
                             <UpcomingRacesTable club={club}/>
