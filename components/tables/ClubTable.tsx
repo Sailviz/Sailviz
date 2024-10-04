@@ -71,7 +71,7 @@ const ClubTable = (props: any) => {
         data,
         columns: [
             columnHelper.accessor('name', {
-                header: "name",
+                header: "Series Name",
                 cell: info => info.getValue(),
             }),
             columnHelper.accessor(row => row.races.length.toString(), {
@@ -79,12 +79,12 @@ const ClubTable = (props: any) => {
                 cell: info => info.getValue(),
             }),
             columnHelper.accessor(row => row.settings['numberToCount'], {
-                id: "Number to Count",
+                id: "Races to Count",
                 cell: info => info.getValue(),
             }),
             columnHelper.accessor('id', {
                 id: "Remove",
-                header: "Action",
+                header: "Actions",
                 cell: props => <Action {...props} id={props.row.original.id} deleteSeries={deleteSeries} viewSeries={viewSeries} user={user} />
             }),
         ],
