@@ -12,6 +12,7 @@ import RacesTable from "../../../components/tables/RacesTable";
 import CreateSeriesModal from "../../../components/ui/dashboard/CreateSeriesModal";
 import ClubTable from "../../../components/tables/ClubTable";
 import {AVAILABLE_PERMISSIONS, userHasPermission} from "../../../components/helpers/users";
+import {title} from "../../../components/ui/home/primitaves";
 
 enum raceStateType {
     running,
@@ -52,11 +53,9 @@ export default function Page() {
     return (
         <div>
             <CreateEventModal isOpen={createModal.isOpen} onSubmit={createEvent} onClose={() => createModal.onClose()}/>
-
-            <p className='text-4xl font-bold p-6'>
-                Whitefriars Sailing Club
-            </p>
-
+            <div className="p-6">
+                <h1 className={title({color: "blue"})}>{club.name}</h1>
+            </div>
             <div className="flex flex-row">
                 <div>
                     <div>
