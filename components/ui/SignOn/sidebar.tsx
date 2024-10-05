@@ -18,8 +18,6 @@ import * as Fetcher from 'components/Fetchers';
 import { PageSkeleton } from "../PageSkeleton";
 import { SignOutIcon } from "components/icons/sign-out";
 import Cookies from "js-cookie";
-import FleetHandicapResultsTable from "../../tables/FleetHandicapResultsTable";
-import FleetPursuitResultsTable from "../../tables/FleetPursuitResultsTable";
 import React from "react";
 import {AVAILABLE_PERMISSIONS, userHasPermission} from "../../helpers/users";
 
