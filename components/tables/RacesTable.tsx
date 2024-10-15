@@ -88,10 +88,12 @@ const RacesTable = (props: any) => {
                 cell: props => <Race {...props} />
             }),
             columnHelper.accessor('number', {
+                header: "Number",
                 cell: info => info.getValue().toString(),
                 enableSorting: true
             }),
             columnHelper.accessor('Time', {
+                header: "Date/Time",
                 cell: props => <Time {...props} />
             }),
             columnHelper.accessor('id', {

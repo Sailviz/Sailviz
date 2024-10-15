@@ -80,7 +80,7 @@ export default function EditBoatModal({ isOpen, boat, onSubmit, onClose }: { isO
                                         />
                                     </div>
                                     <div className='flex flex-col px-6 w-full'>
-                                        <p className='text-2xl font-bold'>
+                                        <p className='text-xl font-bold'>
                                             Pursuit Start Time
                                         </p>
                                         <Input
@@ -98,7 +98,7 @@ export default function EditBoatModal({ isOpen, boat, onSubmit, onClose }: { isO
                             </ModalBody>
                             <ModalFooter>
                                 <Button color="danger" variant="light" onPress={onClose}>
-                                    Close
+                                    Cancel
                                 </Button>
                                 <Button color="primary" onPress={() => onSubmit({ ...boat!, name: boatName, py: PY, crew: Crew, pursuitStartTime: pursuitStartTime })}>
                                     Save

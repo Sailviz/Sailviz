@@ -36,9 +36,13 @@ const Action = ({ ...props }: any) => {
     const Router = useRouter()
 
     return (
-        <Button color="primary" size="md" onClick={() => Router.push('/Race/' + props.row.original.id)}>
-            View
-        </Button>
+        <>
+            <Tooltip content="View" >
+                <span className="text-lg text-default-400 cursor-pointer active:opacity-50">
+                    <EyeIcon onClick={() => Router.push('/Race/' + props.row.original.id)} />
+                </span>
+            </Tooltip>
+        </>
     );
 };
 
@@ -69,6 +73,7 @@ const UpcomingRacesTable = (props: any) => {
                 enableSorting: true
             }),
             columnHelper.accessor('number', {
+                header: "Number",
                 cell: info => info.getValue().toString(),
                 enableSorting: true
             }),

@@ -5,6 +5,8 @@ import * as DB from 'components/apiMethods';
 import * as Fetcher from 'components/Fetchers';
 import { PageSkeleton } from 'components/ui/PageSkeleton';
 import RacesTable from "components/tables/RacesTable";
+import {title} from "../../../components/ui/home/primitaves";
+import UpcomingRacesTable from "../../../components/tables/UpcomingRacesTable";
 
 
 export default function Page() {
@@ -21,18 +23,29 @@ export default function Page() {
         return <PageSkeleton />
     }
     return (
-        <div className="flex flex-row">
-            <div className="px-3">
-                <p className='text-2xl font-bold p-6'>
-                    Upcoming Races
-                </p>
-                <RacesTable club={club} date={new Date()} historical={false} viewRace={viewRace} />
+        <div>
+            <div className="p-6">
+                <h1 className={title({color: "blue"})}>Races</h1>
             </div>
-            <div className="px-3">
-                <p className='text-2xl font-bold p-6'>
-                    Recent Races
-                </p>
-                <RacesTable club={club} date={new Date()} historical={true} viewRace={viewRace} />
+            <div className="flex flex-row">
+                <div className="px-3">
+                    <p className='text-2xl font-bold p-6'>
+                        Today
+                    </p>
+                    <UpcomingRacesTable club={club}/>
+                </div>
+                <div className="px-3">
+                    <p className='text-2xl font-bold p-6'>
+                        Upcoming
+                    </p>
+                    <RacesTable club={club} date={new Date()} historical={false} viewRace={viewRace}/>
+                </div>
+                <div className="px-3">
+                    <p className='text-2xl font-bold p-6'>
+                        Recent
+                    </p>
+                    <RacesTable club={club} date={new Date()} historical={true} viewRace={viewRace}/>
+                </div>
             </div>
         </div>
     )

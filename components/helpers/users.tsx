@@ -12,6 +12,7 @@ export class AVAILABLE_PERMISSIONS {
     static readonly viewIntegrations: PermissionType = { value: 'viewIntegrations', label: 'View Integrations' } //implemented
     static readonly viewDeveloper: PermissionType = { value: 'viewDeveloper', label: 'View Developer' } //implemented
     static readonly viewUsers: PermissionType = { value: 'viewUsers', label: 'View Users' } //implemented
+    static readonly dashboardAccess: PermissionType = { value: 'dashboardAccess', label: 'Dashboard Access'} //implemented, currently changes log out to back to dashboard on sign on
 };
 
 
