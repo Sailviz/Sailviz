@@ -11,7 +11,7 @@ import { Button, Input, useDisclosure, user } from "@nextui-org/react";
 import EditBoatModal from "components/ui/dashboard/EditBoatModal";
 import { mutate } from "swr";
 import { userHasPermission, AVAILABLE_PERMISSIONS } from "components/helpers/users";
-import {title} from "../../../../components/ui/home/primitaves";
+import { title } from "../../../../components/ui/home/primitaves";
 
 
 export default function Page() {
@@ -131,7 +131,7 @@ export default function Page() {
         <>
             <EditBoatModal isOpen={editModal.isOpen} boat={editingBoat} onSubmit={updateBoat} onClose={() => { editModal.onClose(); setEditingBoat(undefined) }} />
             <div className="p-6">
-                <h1 className={title({color: "blue"})}>Races</h1>
+                <h1 className={title({ color: "blue" })}>Boats</h1>
             </div>
             <div className='p-6'>
                 {userHasPermission(user, AVAILABLE_PERMISSIONS.editBoats) ?
