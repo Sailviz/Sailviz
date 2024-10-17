@@ -5,6 +5,7 @@ import * as DB from 'components/apiMethods';
 import { useReactToPrint } from "react-to-print";
 import HandicapPaperResultsTable from "components/tables/HandicapPaperResultsTable";
 import PursuitPaperResultsTable from "components/tables/PursuitPaperResultsTable";
+import dayjs from "dayjs";
 
 export default function Page({ params }: { params: { slug: string } }) {
 
@@ -60,10 +61,10 @@ export default function Page({ params }: { params: { slug: string } }) {
         series: {} as SeriesDataType
     })
 
-    const componentRef = useRef()
+    const contentRef = useRef<HTMLDivElement>(null);
 
     const handlePrint = useReactToPrint({
-        content: () => componentRef.current as any,
+        content: () => contentRef.current as any,
         onAfterPrint: () => {
             Router.back()
         }
@@ -75,6 +76,7 @@ export default function Page({ params }: { params: { slug: string } }) {
         const getRace = async () => {
             const racedata = await DB.getRaceById(raceId!)
             setRace(racedata)
+            DB.GetSeriesById(race.seriesId).then(series => series.name)
         }
 
         if (raceId != null) {
@@ -89,12 +91,14 @@ export default function Page({ params }: { params: { slug: string } }) {
         }
     }, [race])
 
+
     return (
-        <div className="h-full overflow-y-auto p-6">
+        <div className="h-full overflow-y-auto p-6" ref={contentRef}>
+            <p className="text-2xl">{race.series.name} - Race {race.number} ({dayjs(race.Time).format('DD/MM/YYYY HH:mm')})</p>
             {race.Type == "Handicap" ?
-                <HandicapPaperResultsTable results={race.fleets.flatMap(fleet => fleet.results)} key={JSON.stringify(race)} ref={componentRef} />
+                <HandicapPaperResultsTable results={race.fleets.flatMap(fleet => fleet.results)} key={JSON.stringify(race)}  />
                 :
-                <PursuitPaperResultsTable results={race.fleets.flatMap(fleet => fleet.results)} key={JSON.stringify(race)} ref={componentRef} />
+                <PursuitPaperResultsTable results={race.fleets.flatMap(fleet => fleet.results)} key={JSON.stringify(race)}  />
             }
         </div>
     )
