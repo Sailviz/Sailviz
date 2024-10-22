@@ -17,18 +17,20 @@ export default function CreateResultModal({ isOpen, races, boats, onSubmit, onCl
     const [selectedFleets, setSelectedFleets] = useState<string[]>([])
     const [selectedOption, setSelectedOption] = useState({ label: "", value: {} as BoatDataType })
 
+    const [helmError, setHelmError] = useState(false)
+    const [boatError, setBoatError] = useState(false)
+    const [sailNumError, setSailNumError] = useState(false)
+
     let options: { label: string; value: BoatDataType }[] = []
     boats.forEach((boat: BoatDataType) => {
         options.push({ value: boat as BoatDataType, label: boat.name })
     })
 
     const CapitaliseInput = (e: ChangeEvent<HTMLInputElement>) => {
-        console.log(e.target.id)
         const sentence = e.target.value.split(' ');
         const cursorPos = e.target.selectionStart
         const capitalizedWords = sentence.map(word => word.charAt(0).toUpperCase() + word.slice(1));
         const capitalisedSentence = capitalizedWords.join(' ')
-        console.log(capitalisedSentence)
         if (e.target.id == 'helm') setHelmValue(capitalisedSentence)
         if (e.target.id == 'crew') setCrewValue(capitalisedSentence)
     }
@@ -45,7 +47,30 @@ export default function CreateResultModal({ isOpen, races, boats, onSubmit, onCl
 
     }
 
+    const Submit = () => {
+        //check if all fields are filled in
+
+        let error = false
+        if (helmValue == '') {
+            setHelmError(true)
+            error = true
+        }
+        console.log(selectedOption)
+        if (selectedOption.label == '') {
+            setBoatError(true)
+            error = true
+        }
+        if (sailNumber == '') {
+            setSailNumError(true)
+            error = true
+        }
+        if (error) return
+
+        onSubmit(helmValue, crewValue, selectedOption.value, sailNumber, selectedFleets)
+    }
+
     const clearFields = () => {
+        console.log('clearing fields')
         setHelmValue('')
         setCrewValue('')
         setSailNumber('')
@@ -82,10 +107,11 @@ export default function CreateResultModal({ isOpen, races, boats, onSubmit, onCl
                                             id='helm'
                                             type="text"
                                             value={helmValue}
-                                            onChange={CapitaliseInput}
+                                            onChange={(e) => { setHelmError(false); CapitaliseInput(e) }}
                                             placeholder="J Bloggs"
                                             variant='bordered'
                                             autoComplete='off'
+                                            isInvalid={helmError}
                                         />
                                     </div>
                                     <div className='flex flex-col px-6 w-full'>
@@ -110,11 +136,11 @@ export default function CreateResultModal({ isOpen, races, boats, onSubmit, onCl
                                             className=' w-56 h-full text-3xl'
                                             options={options}
                                             value={selectedOption}
-                                            onChange={(choice) => setSelectedOption(choice!)}
+                                            onChange={(choice) => { setBoatError(false); setSelectedOption(choice!) }}
                                             styles={{
                                                 control: (provided, state) => ({
                                                     ...provided,
-                                                    border: 'none',
+                                                    border: boatError ? '2px solid #f31260' : 'none',
                                                     padding: '0.5rem',
                                                     fontSize: '1rem',
                                                     borderRadius: '0.5rem',
@@ -159,7 +185,8 @@ export default function CreateResultModal({ isOpen, races, boats, onSubmit, onCl
                                             id="SailNum"
                                             variant='bordered'
                                             autoComplete='off'
-                                            onChange={(e) => setSailNumber(e.target.value)}
+                                            onChange={(e) => { setSailNumError(false); setSailNumber(e.target.value) }}
+                                            isInvalid={sailNumError}
                                         />
                                     </div>
                                 </div>
@@ -215,7 +242,7 @@ export default function CreateResultModal({ isOpen, races, boats, onSubmit, onCl
 
                             </ModalBody>
                             <ModalFooter>
-                                <Button color="primary" onPress={() => onSubmit(helmValue, crewValue, selectedOption.value, sailNumber, selectedFleets)}>
+                                <Button color="primary" onPress={() => Submit()}>
                                     Submit
                                 </Button>
                             </ModalFooter>
