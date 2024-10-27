@@ -1,20 +1,21 @@
-import { Button, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Radio, RadioGroup } from '@nextui-org/react';
+import { Button, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Radio, RadioGroup, Switch, Tab, Tabs } from '@nextui-org/react';
+import { Key } from '@react-types/shared';
 import { use } from 'chai';
-import { set } from 'cypress/types/lodash';
 import { useTheme } from 'next-themes';
-import { ChangeEvent, useState } from 'react';
+import { ChangeEvent, useEffect, useState } from 'react';
 import Select, { CSSObjectWithLabel } from 'react-select';
 
-export default function CreateResultModal({ isOpen, race, boats, onSubmit, onClose }: { isOpen: boolean, race: RaceDataType, boats: BoatDataType[], onSubmit: (helmValue: string, crewValue: string, boat: BoatDataType, sailNum: string, fleetId: string) => void, onClose: () => void }) {
+export default function EditResultModal({ isOpen, race, result, boats, onSubmit, onClose, onDelete }: { isOpen: boolean, race: RaceDataType, result: ResultsDataType | undefined, boats: BoatDataType[], onSubmit: (result: ResultsDataType) => void, onClose: () => void, onDelete: (result: ResultsDataType) => void }) {
 
-    const [helmValue, setHelmValue] = useState('')
-    const [crewValue, setCrewValue] = useState('')
+    const [helm, setHelm] = useState('')
+    const [crew, setCrew] = useState('')
     const [sailNumber, setSailNumber] = useState('')
 
     const { theme, setTheme } = useTheme()
 
-    const [selectedFleet, setSelectedFleet] = useState(race.fleets[0]!.id)
-    const [selectedOption, setSelectedOption] = useState({ label: "", value: {} as BoatDataType })
+    const [selectedRaces, setSelectedRaces] = useState<string[]>([])
+    const [selectedFleets, setSelectedFleets] = useState<string[]>([])
+    const [selectedBoat, setSelectedBoat] = useState({ label: "", value: {} as BoatDataType })
 
     let options: { label: string; value: BoatDataType }[] = []
     boats.forEach((boat: BoatDataType) => {
@@ -28,18 +29,28 @@ export default function CreateResultModal({ isOpen, race, boats, onSubmit, onClo
         const capitalizedWords = sentence.map(word => word.charAt(0).toUpperCase() + word.slice(1));
         const capitalisedSentence = capitalizedWords.join(' ')
         console.log(capitalisedSentence)
-        if (e.target.id == 'helm') setHelmValue(capitalisedSentence)
-        if (e.target.id == 'crew') setCrewValue(capitalisedSentence)
+        if (e.target.id == 'helm') setHelm(capitalisedSentence)
+        if (e.target.id == 'crew') setCrew(capitalisedSentence)
     }
 
-    const openUpdate = (open: boolean) => {
-        if (!open) {
-            setHelmValue('')
-            setCrewValue('')
-            setSailNumber('')
-            setSelectedOption({ label: "", value: {} as BoatDataType })
-        }
+    function updateFleetSelection(race: RaceDataType, key: Key) {
+        var tempSelected = window.structuredClone(selectedFleets)
+        var filteredArray = tempSelected.filter((value: string) => !race.fleets.flatMap(fleet => fleet.id).includes(value));
+        filteredArray = [...filteredArray, key]
+        setSelectedFleets(filteredArray)
     }
+
+    useEffect(() => {
+        if (result == undefined) {
+            return
+        }
+        console.log(result)
+        setHelm(result.Helm)
+        setCrew(result.Crew)
+        setSailNumber(result.SailNumber)
+        setSelectedBoat({ label: result.boat.name, value: result.boat })
+        setSelectedRaces([race.id])
+    }, [result])
 
     return (
         <>
@@ -49,13 +60,12 @@ export default function CreateResultModal({ isOpen, race, boats, onSubmit, onClo
                 scrollBehavior={'outside'}
                 size='5xl'
                 backdrop='blur'
-                onOpenChange={(open) => openUpdate(open)}
             >
                 <ModalContent>
                     {(onClose) => (
                         <>
                             <ModalHeader className="flex flex-col gap-1">
-                                Create New Entry
+                                Edit Entry
                             </ModalHeader>
                             <ModalBody>
                                 <div className="flex w-full">
@@ -67,7 +77,7 @@ export default function CreateResultModal({ isOpen, race, boats, onSubmit, onClo
                                         <Input
                                             id='helm'
                                             type="text"
-                                            value={helmValue}
+                                            value={helm}
                                             onChange={CapitaliseInput}
                                             placeholder="J Bloggs"
                                             variant='bordered'
@@ -81,7 +91,7 @@ export default function CreateResultModal({ isOpen, race, boats, onSubmit, onClo
                                         <Input
                                             id='crew'
                                             type="text"
-                                            value={crewValue}
+                                            value={crew}
                                             onChange={CapitaliseInput}
                                             autoComplete='off'
                                             variant='bordered'
@@ -95,8 +105,8 @@ export default function CreateResultModal({ isOpen, race, boats, onSubmit, onClo
                                             id="Class"
                                             className=' w-56 h-full text-3xl'
                                             options={options}
-                                            value={selectedOption}
-                                            onChange={(choice) => setSelectedOption(choice!)}
+                                            value={selectedBoat}
+                                            onChange={(choice) => setSelectedBoat(choice!)}
                                             styles={{
                                                 control: (provided, state) => ({
                                                     ...provided,
@@ -145,7 +155,8 @@ export default function CreateResultModal({ isOpen, race, boats, onSubmit, onClo
                                             id="SailNum"
                                             variant='bordered'
                                             autoComplete='off'
-                                            onChange={(e) => setSailNumber(e.target.value)}
+                                            value={sailNumber}
+                                            onValueChange={setSailNumber}
                                         />
                                     </div>
                                 </div>
@@ -154,32 +165,53 @@ export default function CreateResultModal({ isOpen, race, boats, onSubmit, onClo
 
                                 <div className="mx-6 mb-10" key={race.id}>
                                     <div className="flex flex-row">
-                                        {/* show buttons for each fleet in a series */}
-                                        <RadioGroup
-                                            defaultValue={race.fleets[0]!.id}
-                                            onValueChange={(value) => setSelectedFleet(value)}
+                                        <Switch
+                                            id={race.id + "Switch"}
+                                            defaultSelected={selectedRaces.includes(race.id)}
+                                            onValueChange={(value) => { value ? setSelectedRaces([...selectedRaces, race.id]) : setSelectedRaces(selectedRaces.filter((value) => value != race.id)) }}
+                                            color="success"
+                                            size='lg'
                                         >
-                                            {
-                                                race.fleets.map((fleet: FleetDataType, index) => {
+                                            {race.series.name} {race.number}
+                                            <Tabs
+                                                aria-label="Options"
+                                                selectedKey={race.fleets[0]!.id}
+                                                color="primary"
+                                                isDisabled={selectedRaces.findIndex((r) => r == race.id) ? true : false}
+                                                onSelectionChange={(key) => { updateFleetSelection(race, key) }}
+                                            >
+                                                {race.fleets.map((fleet: FleetDataType) => {
                                                     return (
-                                                        <Radio value={fleet.id} key={"fleetoptions" + fleet.id}>
-                                                            {fleet.fleetSettings.name}
-                                                        </Radio>
+                                                        <Tab key={fleet.id} title={fleet.fleetSettings.name}>
+                                                        </Tab>
                                                     )
-                                                })
-                                            }
-                                        </RadioGroup>
-                                    </div >
-                                </div >
+                                                })}
+                                            </Tabs>
+                                        </Switch>
+
+                                        {race.Type == "Pursuit" ?
+                                            <div className="pl-6 py-auto text-2xl font-bold text-gray-700">
+                                                Start Time: {String(Math.floor((selectedBoat.value.pursuitStartTime || 0) / 60)).padStart(2, '0')}:{String((selectedBoat.value.pursuitStartTime || 0) % 60).padStart(2, '0')}
+                                            </div>
+                                            :
+                                            <></>
+                                        }
+
+                                    </div>
+                                </div>
+
 
 
                             </ModalBody>
                             <ModalFooter>
+                                <Button color="danger" onPress={() => onDelete(result!)}>
+                                    Remove
+                                </Button>
                                 <Button color="danger" variant="light" onPress={onClose}>
                                     Close
                                 </Button>
-                                <Button color="primary" onPress={() => onSubmit(helmValue, crewValue, selectedOption.value, sailNumber, race.fleets[0]!.id)}>
-                                    Add
+                                <Button color="primary" onPress={() => onSubmit({ ...result!, Helm: helm, Crew: crew, boat: selectedBoat.value, SailNumber: sailNumber })}>
+                                    Save
                                 </Button>
                             </ModalFooter>
                         </>

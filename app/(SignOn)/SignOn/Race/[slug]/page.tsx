@@ -10,9 +10,9 @@ import * as Fetcher from 'components/Fetchers';
 import { AVAILABLE_PERMISSIONS, userHasPermission } from "components/helpers/users";
 import { PageSkeleton } from "components/ui/PageSkeleton";
 import { BreadcrumbItem, Breadcrumbs, Button, Input, useDisclosure } from "@nextui-org/react";
-import CreateResultModal from "components/ui/dashboard/CreateResultModal";
+import CreateResultModal from "components/ui/CreateResultModal";
 import ProgressModal from "components/ui/dashboard/ProgressModal";
-import EditResultModal from "components/ui/dashboard/EditResultModal";
+import EditResultModal from "components/ui/EditResultModal";
 import { title } from "components/ui/home/primitaves";
 import ViewResultModal from "components/ui/dashboard/viewResultModal";
 
@@ -56,7 +56,7 @@ export default function Page({ params }: { params: { slug: string } }) {
                 return (
                     <div key={"fleetResults" + index} className="h-screen">
                         <div className="p-6 h-1/6">
-                            <h1 className={title({color: "blue"})}>Results - {race.series.name} - Race {race.number}</h1>
+                            <h1 className={title({ color: "blue" })}>Results - {race.series.name} - Race {race.number}</h1>
                             <p className="py-4 text-2xl font-bold">
                                 {fleet?.fleetSettings.name} - Boats Entered: {fleet?.results.length}
                             </p>

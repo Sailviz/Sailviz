@@ -7,8 +7,8 @@ import SignOnTable from "components/tables/SignOnTable";
 import * as Fetcher from 'components/Fetchers';
 import { PageSkeleton } from "components/ui/PageSkeleton";
 import { Button, useDisclosure } from "@nextui-org/react";
-import CreateResultModal from "components/ui/SignOn/CreateResultModal";
-import EditResultModal from "components/ui/SignOn/EditResultModal";
+import CreateResultModal from "components/ui/CreateResultModal";
+import EditResultModal from "components/ui/EditResultModal";
 import { mutate } from "swr";
 
 const SignOnPage = () => {
@@ -146,7 +146,7 @@ const SignOnPage = () => {
     return (
         <div>
             <CreateResultModal isOpen={createModal.isOpen} races={races} boats={boats} onSubmit={createResults} onClose={createModal.onClose} />
-            <EditResultModal isOpen={editModal.isOpen} result={activeResult} boats={boats} onSubmit={updateResult} onDelete={deleteResult} onClose={editModal.onClose} />
+            <EditResultModal isOpen={editModal.isOpen} race={races.find(race => race.fleets.filter(value => value.id == activeResult?.fleetId))!} result={activeResult} boats={boats} onSubmit={updateResult} onDelete={deleteResult} onClose={editModal.onClose} />
 
             {races.length > 0 ?
                 <div className="w-full">
