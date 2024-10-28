@@ -59,7 +59,11 @@ export default function Page({ params }: { params: { slug: string } }) {
     const updateResult = async (result: ResultsDataType) => {
         editModal.onClose()
         await DB.updateResult(result)
-        mutate('/api/GetFleetById?id=' + result.fleetId)
+
+        //mutate all incase fleet was changed
+        race.fleets.forEach(fleet => {
+            mutate('/api/GetFleetById?id=' + fleet.id)
+        })
     }
 
     const deleteResult = async (result: ResultsDataType) => {

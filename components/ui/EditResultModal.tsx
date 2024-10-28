@@ -11,7 +11,7 @@ export default function EditResultModal({ isOpen, race, result, boats, onSubmit,
 
     const { theme, setTheme } = useTheme()
 
-    const [selectedFleets, setSelectedFleets] = useState<string[]>([])
+    const [selectedFleet, setSelectedFleet] = useState<string>()
     const [selectedBoat, setSelectedBoat] = useState({ label: "", value: {} as BoatDataType })
 
     const [helmError, setHelmError] = useState(false)
@@ -34,13 +34,6 @@ export default function EditResultModal({ isOpen, race, result, boats, onSubmit,
         if (e.target.id == 'crew') setCrew(capitalisedSentence)
     }
 
-    function updateFleetSelection(race: RaceDataType, key: string | number) {
-        var tempSelected = window.structuredClone(selectedFleets)
-        var filteredArray = tempSelected.filter((value: string) => !race.fleets.flatMap(fleet => fleet.id).includes(value));
-        filteredArray = [...filteredArray, key]
-        setSelectedFleets(filteredArray)
-    }
-
     const Submit = () => {
         //check if all fields are filled in
 
@@ -57,15 +50,13 @@ export default function EditResultModal({ isOpen, race, result, boats, onSubmit,
             setSailNumError(true)
             error = true
         }
-        //check that at least one fleet is selected
-        if (selectedFleets.length == 0) {
-            console.log("no fleets selected")
+        if (selectedFleet == undefined) {
             error = true
         }
 
         if (error) return
 
-        onSubmit({ ...result!, Helm: helm, Crew: crew, boat: selectedBoat.value, SailNumber: sailNumber })
+        onSubmit({ ...result!, Helm: helm, Crew: crew, boat: selectedBoat.value, SailNumber: sailNumber, fleetId: selectedFleet! })
     }
 
     useEffect(() => {
@@ -77,7 +68,7 @@ export default function EditResultModal({ isOpen, race, result, boats, onSubmit,
         setCrew(result.Crew)
         setSailNumber(result.SailNumber)
         setSelectedBoat({ label: result.boat.name, value: result.boat })
-        setSelectedFleets([...selectedFleets, result.fleetId])
+        setSelectedFleet(result.fleetId)
     }, [result])
 
     return (
@@ -198,9 +189,9 @@ export default function EditResultModal({ isOpen, race, result, boats, onSubmit,
 
                                         <Tabs
                                             aria-label="Options"
-                                            selectedKey={race.fleets[0]!.id}
+                                            selectedKey={selectedFleet}
                                             color="primary"
-                                            onSelectionChange={(key) => { updateFleetSelection(race, key) }}
+                                            onSelectionChange={(key) => { setSelectedFleet(key.toString()) }}
                                         >
                                             {race.fleets.map((fleet: FleetDataType) => {
                                                 return (
