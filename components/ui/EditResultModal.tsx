@@ -1,6 +1,4 @@
 import { Button, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Radio, RadioGroup, Switch, Tab, Tabs } from '@nextui-org/react';
-import { Key } from '@react-types/shared';
-import { use } from 'chai';
 import { useTheme } from 'next-themes';
 import { ChangeEvent, useEffect, useState } from 'react';
 import Select, { CSSObjectWithLabel } from 'react-select';
@@ -13,9 +11,12 @@ export default function EditResultModal({ isOpen, race, result, boats, onSubmit,
 
     const { theme, setTheme } = useTheme()
 
-    const [selectedRaces, setSelectedRaces] = useState<string[]>([])
     const [selectedFleets, setSelectedFleets] = useState<string[]>([])
     const [selectedBoat, setSelectedBoat] = useState({ label: "", value: {} as BoatDataType })
+
+    const [helmError, setHelmError] = useState(false)
+    const [boatError, setBoatError] = useState(false)
+    const [sailNumError, setSailNumError] = useState(false)
 
     let options: { label: string; value: BoatDataType }[] = []
     boats.forEach((boat: BoatDataType) => {
@@ -33,11 +34,38 @@ export default function EditResultModal({ isOpen, race, result, boats, onSubmit,
         if (e.target.id == 'crew') setCrew(capitalisedSentence)
     }
 
-    function updateFleetSelection(race: RaceDataType, key: Key) {
+    function updateFleetSelection(race: RaceDataType, key: string | number) {
         var tempSelected = window.structuredClone(selectedFleets)
         var filteredArray = tempSelected.filter((value: string) => !race.fleets.flatMap(fleet => fleet.id).includes(value));
         filteredArray = [...filteredArray, key]
         setSelectedFleets(filteredArray)
+    }
+
+    const Submit = () => {
+        //check if all fields are filled in
+
+        let error = false
+        if (helm == '') {
+            setHelmError(true)
+            error = true
+        }
+        if (selectedBoat.label == '') {
+            setBoatError(true)
+            error = true
+        }
+        if (sailNumber == '') {
+            setSailNumError(true)
+            error = true
+        }
+        //check that at least one fleet is selected
+        if (selectedFleets.length == 0) {
+            console.log("no fleets selected")
+            error = true
+        }
+
+        if (error) return
+
+        onSubmit({ ...result!, Helm: helm, Crew: crew, boat: selectedBoat.value, SailNumber: sailNumber })
     }
 
     useEffect(() => {
@@ -49,7 +77,7 @@ export default function EditResultModal({ isOpen, race, result, boats, onSubmit,
         setCrew(result.Crew)
         setSailNumber(result.SailNumber)
         setSelectedBoat({ label: result.boat.name, value: result.boat })
-        setSelectedRaces([race.id])
+        setSelectedFleets([...selectedFleets, result.fleetId])
     }, [result])
 
     return (
@@ -78,10 +106,11 @@ export default function EditResultModal({ isOpen, race, result, boats, onSubmit,
                                             id='helm'
                                             type="text"
                                             value={helm}
-                                            onChange={CapitaliseInput}
+                                            onChange={(e) => { setHelmError(false); CapitaliseInput(e) }}
                                             placeholder="J Bloggs"
                                             variant='bordered'
                                             autoComplete='off'
+                                            isInvalid={helmError}
                                         />
                                     </div>
                                     <div className='flex flex-col px-6 w-full'>
@@ -110,7 +139,7 @@ export default function EditResultModal({ isOpen, race, result, boats, onSubmit,
                                             styles={{
                                                 control: (provided, state) => ({
                                                     ...provided,
-                                                    border: 'none',
+                                                    border: boatError ? '2px solid #f31260' : 'none',
                                                     padding: '0.5rem',
                                                     fontSize: '1rem',
                                                     borderRadius: '0.5rem',
@@ -156,7 +185,8 @@ export default function EditResultModal({ isOpen, race, result, boats, onSubmit,
                                             variant='bordered'
                                             autoComplete='off'
                                             value={sailNumber}
-                                            onValueChange={setSailNumber}
+                                            onChange={(e) => { setSailNumError(false); setSailNumber(e.target.value) }}
+                                            isInvalid={sailNumError}
                                         />
                                     </div>
                                 </div>
@@ -165,29 +195,20 @@ export default function EditResultModal({ isOpen, race, result, boats, onSubmit,
 
                                 <div className="mx-6 mb-10" key={race.id}>
                                     <div className="flex flex-row">
-                                        <Switch
-                                            id={race.id + "Switch"}
-                                            defaultSelected={selectedRaces.includes(race.id)}
-                                            onValueChange={(value) => { value ? setSelectedRaces([...selectedRaces, race.id]) : setSelectedRaces(selectedRaces.filter((value) => value != race.id)) }}
-                                            color="success"
-                                            size='lg'
+
+                                        <Tabs
+                                            aria-label="Options"
+                                            selectedKey={race.fleets[0]!.id}
+                                            color="primary"
+                                            onSelectionChange={(key) => { updateFleetSelection(race, key) }}
                                         >
-                                            {race.series.name} {race.number}
-                                            <Tabs
-                                                aria-label="Options"
-                                                selectedKey={race.fleets[0]!.id}
-                                                color="primary"
-                                                isDisabled={selectedRaces.findIndex((r) => r == race.id) ? true : false}
-                                                onSelectionChange={(key) => { updateFleetSelection(race, key) }}
-                                            >
-                                                {race.fleets.map((fleet: FleetDataType) => {
-                                                    return (
-                                                        <Tab key={fleet.id} title={fleet.fleetSettings.name}>
-                                                        </Tab>
-                                                    )
-                                                })}
-                                            </Tabs>
-                                        </Switch>
+                                            {race.fleets.map((fleet: FleetDataType) => {
+                                                return (
+                                                    <Tab key={fleet.id} title={fleet.fleetSettings.name}>
+                                                    </Tab>
+                                                )
+                                            })}
+                                        </Tabs>
 
                                         {race.Type == "Pursuit" ?
                                             <div className="pl-6 py-auto text-2xl font-bold text-gray-700">
@@ -210,7 +231,7 @@ export default function EditResultModal({ isOpen, race, result, boats, onSubmit,
                                 <Button color="danger" variant="light" onPress={onClose}>
                                     Close
                                 </Button>
-                                <Button color="primary" onPress={() => onSubmit({ ...result!, Helm: helm, Crew: crew, boat: selectedBoat.value, SailNumber: sailNumber })}>
+                                <Button color="primary" onPress={() => Submit()}>
                                     Save
                                 </Button>
                             </ModalFooter>
