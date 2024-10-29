@@ -7,8 +7,8 @@ import SeriesResultsTable from 'components/tables/SeriesResultsTable';
 import RaceTimer from "components/HRaceTimer"
 import LiveFleetResultsTable from 'components/tables/LiveFleetResultsTable';
 import { animateScroll, Events } from 'react-scroll';
-import Cookies from 'js-cookie';
 import { useTheme } from 'next-themes';
+import { Peer, DataConnection } from 'peerjs';
 
 const namespace = 'urn:x-cast:com.sailviz';
 
@@ -36,16 +36,12 @@ const scrollOptions = {
 //it receives messages from the chromecast and displays the appropriate data.
 // club id is stored in a cookie and is used to get the relavent data / page to display.
 
-const CastPage = () => {
+export default function Page({ params }: { params: { slug: string } }) {
     var interval: NodeJS.Timer | null = null
 
     const { theme, setTheme } = useTheme()
 
-    //force home page to light theme
-    // setTheme('light')
-
-
-    const [clubId, setClubId] = useState<string>("")
+    const [clubId, setClubId] = useState<string>(params.slug)
     const [pagestate, setPageState] = useState<pageStateType>(pageStateType.info)
     var [club, setClub] = useState<ClubDataType>({
         id: "",
@@ -122,7 +118,69 @@ const CastPage = () => {
         } as FleetSettingsType]
     })
 
+    var peer: Peer;
+    var conn: DataConnection | null;
+
+    function initialize() {
+        // Create own peer object with connection to shared PeerJS server
+        peer = new Peer();
+
+        peer.on('open', function (id) {
+            console.log('ID: ' + peer.id);
+        });
+        peer.on('connection', function (c) {
+
+            conn = c;
+            console.log("Connected to: " + conn.peer);
+            ready();
+        });
+        peer.on('disconnected', function () {
+            console.log('Connection lost. Please reconnect');
+
+            peer.reconnect();
+        });
+        peer.on('close', function () {
+            conn = null;
+            console.log('Connection destroyed');
+        });
+        peer.on('error', function (err) {
+            console.log(err);
+            alert('' + err);
+        });
+    };
+
+    /**
+     * Triggered once a connection has been achieved.
+     * Defines callbacks to handle incoming data and connection events.
+     */
+    const ready = () => {
+        conn!.on('data', function (datastring) {
+            console.log("Data recieved");
+            console.log("datastring: " + datastring)
+            let data = JSON.parse(datastring as string)
+            console.log(data)
+            if (data['type'] == 'showPage') {
+                showPage(data['id'], data['pageType'])
+            } else if (data['type'] == 'slideShow') {
+                slideShow(data['ids'], data['pageType'])
+            } else if (data['type'] == 'theme') {
+                console.log(data['theme'])
+                setTheme(data['theme'])
+            }
+
+        });
+        conn!.on('close', function () {
+            conn = null;
+        });
+    }
+
     const initializeCastApi = () => {
+        //check if running on a chromecast
+        let userAgent = navigator.userAgent
+        if (!userAgent.includes("CrKey")) {
+            console.log("Not running on chromecast - not loading receiver api")
+            return
+        }
         window.castReceiverManager = cast.receiver.CastReceiverManager.getInstance();
         console.log('Starting Receiver Manager');
 
@@ -148,20 +206,13 @@ const CastPage = () => {
 
             console.log('Message [' + event.senderId + ']: ' + event.data);
 
-            if (event.data['type'] == 'clubId') {
-                window.messageBus.send(event.senderId, event.data['clubId']);
-                setClubId(event.data['clubId'])
-                Cookies.set('clubId', event.data['clubId'])
-            } else if (event.data['type'] == 'showPage') {
-                setClubId(event.data['clubId'])
+            if (event.data['type'] == 'showPage') {
                 showPage(event.data['id'], event.data['pageType'])
                 window.messageBus.send(event.senderId, new Date().toISOString());
             } else if (event.data['type'] == 'slideShow') {
-                setClubId(event.data['clubId'])
                 slideShow(event.data['ids'], event.data['pageType'])
                 window.messageBus.send(event.senderId, new Date().toISOString());
             } else if (event.data['type'] == 'theme') {
-                setClubId(event.data['clubId'])
                 setTheme(event.data['theme'])
                 window.messageBus.send(event.senderId, new Date().toISOString());
             } else {
@@ -247,6 +298,8 @@ const CastPage = () => {
         if (clubId != "") {
             fetch()
         }
+        initialize();
+
     }, [clubId])
 
     useEffect(() => {
@@ -291,13 +344,6 @@ const CastPage = () => {
         }
     }, [club]);
 
-
-    useEffect(() => {
-        let cookie = Cookies.get('clubId')
-        if (cookie != undefined) {
-            setClubId(cookie)
-        }
-    }, [])
 
     return (
         <div>
@@ -362,5 +408,3 @@ const CastPage = () => {
         </div>
     )
 }
-
-export default CastPage;
