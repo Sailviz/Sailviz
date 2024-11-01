@@ -9,6 +9,8 @@ import LiveFleetResultsTable from 'components/tables/LiveFleetResultsTable';
 import { animateScroll, Events } from 'react-scroll';
 import { useTheme } from 'next-themes';
 import { Peer, DataConnection } from 'peerjs';
+import { useQRCode } from 'next-qrcode';
+import { set } from 'cypress/types/lodash';
 
 const namespace = 'urn:x-cast:com.sailviz';
 
@@ -40,6 +42,9 @@ export default function Page({ params }: { params: { slug: string } }) {
     var interval: NodeJS.Timer | null = null
 
     const { theme, setTheme } = useTheme()
+
+    const { Image: QRCode } = useQRCode()
+
 
     const [clubId, setClubId] = useState<string>(params.slug)
     const [pagestate, setPageState] = useState<pageStateType>(pageStateType.info)
@@ -118,6 +123,8 @@ export default function Page({ params }: { params: { slug: string } }) {
         } as FleetSettingsType]
     })
 
+    const [peerId, setPeerId] = useState<string>("")
+
     var peer: Peer;
     var conn: DataConnection | null;
 
@@ -127,6 +134,7 @@ export default function Page({ params }: { params: { slug: string } }) {
 
         peer.on('open', function (id) {
             console.log('ID: ' + peer.id);
+            setPeerId(peer.id)
         });
         peer.on('connection', function (c) {
 
@@ -347,6 +355,23 @@ export default function Page({ params }: { params: { slug: string } }) {
 
     return (
         <div>
+            <div onClick={() => window.open(window.location.origin + '/CastControl/' + peerId, '_blank')?.focus()}>
+                <QRCode
+                    text={window.location.origin + '/CastControl/' + peerId}
+                    options={{
+                        type: 'image/jpeg',
+                        quality: 0.3,
+                        errorCorrectionLevel: 'M',
+                        margin: 3,
+                        scale: 4,
+                        width: 200,
+                        color: {
+                            dark: '#000000',
+                            light: '#ffffff',
+                        },
+                    }}
+                />
+            </div>
             <Script type="text/javascript" src="//www.gstatic.com/cast/sdk/libs/receiver/2.0.0/cast_receiver.js" onReady={() => {
                 initializeCastApi()
             }}></Script>
