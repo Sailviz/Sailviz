@@ -8,7 +8,7 @@ import * as Fetcher from 'components/Fetchers';
 import { PageSkeleton } from "components/ui/PageSkeleton";
 import { Button, useDisclosure } from "@nextui-org/react";
 import CreateResultModal from "components/ui/CreateResultModal";
-import EditResultModal from "components/ui/EditResultModal";
+import EditResultModal from "components/ui/SignOn/EditResultModal";
 import { mutate } from "swr";
 
 const SignOnPage = () => {

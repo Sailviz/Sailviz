@@ -12,7 +12,7 @@ import { PageSkeleton } from "components/ui/PageSkeleton";
 import { BreadcrumbItem, Breadcrumbs, Button, Input, useDisclosure } from "@nextui-org/react";
 import CreateResultModal from "components/ui/CreateResultModal";
 import ProgressModal from "components/ui/dashboard/ProgressModal";
-import EditResultModal from "components/ui/EditResultModal";
+import EditResultModal from "components/ui/SignOn/EditResultModal";
 import { title } from "components/ui/home/primitaves";
 import ViewResultModal from "components/ui/dashboard/viewResultModal";
 

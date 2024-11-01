@@ -12,7 +12,7 @@ import { PageSkeleton } from "components/ui/PageSkeleton";
 import { BreadcrumbItem, Breadcrumbs, Button, Input, useDisclosure } from "@nextui-org/react";
 import CreateResultModal from "components/ui/CreateResultModal";
 import ProgressModal from "components/ui/dashboard/ProgressModal";
-import EditResultModal from "components/ui/EditResultModal";
+import EditResultModal from "components/ui/dashboard/EditResultModal";
 import { mutate } from "swr";
 import ViewResultModal from "components/ui/dashboard/viewResultModal";
 
@@ -242,7 +242,7 @@ export default function Page({ params }: { params: { slug: string } }) {
         <div id="race" className='h-full w-full overflow-y-auto'>
             <CreateResultModal isOpen={createModal.isOpen} races={[race]} boats={boats} onSubmit={createResult} onClose={createModal.onClose} />
             <ProgressModal key={progressValue} isOpen={progressModal.isOpen} Value={progressValue} Max={progressMax} Indeterminate={progressIndeterminate} onClose={progressModal.onClose} />
-            <EditResultModal isOpen={editModal.isOpen} race={race} result={activeResult} onSubmit={updateResult} onDelete={deleteResult} onClose={editModal.onClose} boats={boats} />
+            <EditResultModal isOpen={editModal.isOpen} fleet={activeFleet} result={activeResult} onSubmit={updateResult} onDelete={deleteResult} onClose={editModal.onClose} />
             <ViewResultModal isOpen={viewModal.isOpen} result={activeResult} fleet={activeFleet} onClose={viewModal.onClose} />
             <div className="flex flex-wrap justify-center gap-4 w-full">
                 <div className="flex flex-wrap px-4 divide-y divide-solid w-full justify-center">
