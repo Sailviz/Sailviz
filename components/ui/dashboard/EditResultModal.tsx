@@ -170,174 +170,111 @@ export default function EditResultModal({ isOpen, result, fleet, onSubmit, onClo
                 <ModalContent>
                     {(onClose) => (
                         <>
-                            <ModalHeader className="flex flex-col gap-1">
+                            <ModalHeader className="flex flex-col gap-1 text-2xl">
                                 Edit Result
                             </ModalHeader>
                             <ModalBody>
-                                <div className="flex w-full flex-col">
-                                    <div className="flex w-3/4">
+                                <div className="flex flex-col w-full">
+                                    <div className="flex flex-row w-full">
                                         <div className='flex flex-col px-6 w-full'>
+                                            <p className='text-2xl font-bold'>
+                                                Helm
+                                            </p>
+
                                             <Input
                                                 type="text"
                                                 value={helm}
                                                 onValueChange={setHelm}
                                                 fullWidth
-                                                label="Helm"
                                                 placeholder=' '
-                                                labelPlacement='outside'
                                             />
                                         </div>
+
                                         <div className='flex flex-col px-6 w-full'>
+                                            <p className='text-2xl font-bold'>
+                                                Crew
+                                            </p>
+
                                             <Input
                                                 type="text"
                                                 value={crew}
                                                 onValueChange={setCrew}
-                                                label="Crew"
                                                 placeholder=' '
-                                                labelPlacement='outside'
                                             />
                                         </div>
+
                                         <div className='flex flex-col px-6 w-full'>
                                             <p className='text-2xl font-bold'>
                                                 Class
                                             </p>
-                                            <div className="w-full p-2 mx-0 my-2">
-                                                <Select
-                                                    id="Class"
-                                                    className=' w-56 h-full text-3xl'
-                                                    options={options}
-                                                    value={boatOption}
-                                                    onChange={(choice) => setBoatOption(choice!)}
-                                                    styles={{
-                                                        control: (provided, state) => ({
-                                                            ...provided,
-                                                            border: 'none',
-                                                            padding: '0.5rem',
-                                                            fontSize: '1rem',
-                                                            borderRadius: '0.5rem',
-                                                            color: 'white',
-                                                            backgroundColor: theme == 'dark' ? '#27272a' : '#f4f4f5',
-                                                            '&:hover': {
-                                                                backgroundColor: theme == 'dark' ? '#3f3f46' : '#e4e4e7',
-                                                            },
-                                                        } as CSSObjectWithLabel),
-                                                        option: (provided, state) => ({
-                                                            ...provided,
-                                                            color: theme == 'dark' ? 'white' : 'black',
-                                                            backgroundColor: theme == 'dark' ? state.isSelected ? '#27272a' : '#18181b' : state.isSelected ? '#f4f4f5' : 'white',
-                                                            '&:hover': {
-                                                                backgroundColor: theme == 'dark' ? '#3f3f46' : '#d4d4d8',
-                                                            },
-                                                        } as CSSObjectWithLabel),
-                                                        menu: (provided, state) => ({
-                                                            ...provided,
-                                                            backgroundColor: theme == 'dark' ? '#18181b' : 'white',
-                                                            border: theme == 'dark' ? '2px solid #3f3f46' : '2px solid #d4d4d8',
-                                                            fontSize: '1rem',
 
-                                                        } as CSSObjectWithLabel),
-                                                        input: (provided, state) => ({
-                                                            ...provided,
-                                                            color: theme == 'dark' ? 'white' : 'black',
-                                                        } as CSSObjectWithLabel),
-                                                        singleValue: (provided, state) => ({
-                                                            ...provided,
-                                                            color: theme == 'dark' ? 'white' : 'black',
-                                                        } as CSSObjectWithLabel),
-                                                    }}
-                                                />
-                                            </div>
+                                            <Select
+                                                id="Class"
+                                                className=' w-56 h-full text-3xl'
+                                                options={options}
+                                                value={boatOption}
+                                                onChange={(choice) => setBoatOption(choice!)}
+                                                styles={{
+                                                    control: (provided, state) => ({
+                                                        ...provided,
+                                                        border: 'none',
+                                                        padding: '0.5rem',
+                                                        fontSize: '1rem',
+                                                        borderRadius: '0.5rem',
+                                                        color: 'white',
+                                                        backgroundColor: theme == 'dark' ? '#27272a' : '#f4f4f5',
+                                                        '&:hover': {
+                                                            backgroundColor: theme == 'dark' ? '#3f3f46' : '#e4e4e7',
+                                                        },
+                                                    } as CSSObjectWithLabel),
+                                                    option: (provided, state) => ({
+                                                        ...provided,
+                                                        color: theme == 'dark' ? 'white' : 'black',
+                                                        backgroundColor: theme == 'dark' ? state.isSelected ? '#27272a' : '#18181b' : state.isSelected ? '#f4f4f5' : 'white',
+                                                        '&:hover': {
+                                                            backgroundColor: theme == 'dark' ? '#3f3f46' : '#d4d4d8',
+                                                        },
+                                                    } as CSSObjectWithLabel),
+                                                    menu: (provided, state) => ({
+                                                        ...provided,
+                                                        backgroundColor: theme == 'dark' ? '#18181b' : 'white',
+                                                        border: theme == 'dark' ? '2px solid #3f3f46' : '2px solid #d4d4d8',
+                                                        fontSize: '1rem',
+
+                                                    } as CSSObjectWithLabel),
+                                                    input: (provided, state) => ({
+                                                        ...provided,
+                                                        color: theme == 'dark' ? 'white' : 'black',
+                                                    } as CSSObjectWithLabel),
+                                                    singleValue: (provided, state) => ({
+                                                        ...provided,
+                                                        color: theme == 'dark' ? 'white' : 'black',
+                                                    } as CSSObjectWithLabel),
+                                                }}
+                                            />
                                         </div>
+
                                         <div className='flex flex-col px-6 w-full'>
+                                            <p className='text-2xl font-bold'>
+                                                Sail Number
+                                            </p>
+
                                             <Input
                                                 type="text"
                                                 value={sailNumber}
                                                 onValueChange={setSailNumber}
                                                 fullWidth
-                                                label="Sail Number"
                                                 placeholder=' '
-                                                labelPlacement='outside'
                                             />
                                         </div>
                                     </div>
-                                    <div className="flex flex-row mt-2">
-                                        <div className='flex flex-col px-6 w-1/4'>
-                                            <Input
-                                                type="number"
-                                                label="Position"
-                                                placeholder=' '
-                                                labelPlacement='outside'
-                                            />
-                                        </div>
-                                        <div className='flex flex-col px-6 w-1/4'>
-                                            <p className='text-2xl font-bold'>
-                                                Finish Code
-                                            </p>
-                                            <div className="w-full p-2 mx-0 my-2">
-                                                <Select
-                                                    id="editResultCode"
-                                                    className=' w-56 h-full text-3xl'
-                                                    options={resultCodeOptions}
-                                                    value={resultCodeOption}
-                                                    onChange={(choice) => setResultCodeOption(choice!)}
-                                                    styles={{
-                                                        control: (provided, state) => ({
-                                                            ...provided,
-                                                            border: 'none',
-                                                            padding: '0.5rem',
-                                                            fontSize: '1rem',
-                                                            borderRadius: '0.5rem',
-                                                            color: 'white',
-                                                            backgroundColor: theme == 'dark' ? '#27272a' : '#f4f4f5',
-                                                            '&:hover': {
-                                                                backgroundColor: theme == 'dark' ? '#3f3f46' : '#e4e4e7',
-                                                            },
-                                                        } as CSSObjectWithLabel),
-                                                        option: (provided, state) => ({
-                                                            ...provided,
-                                                            color: theme == 'dark' ? 'white' : 'black',
-                                                            backgroundColor: theme == 'dark' ? state.isSelected ? '#27272a' : '#18181b' : state.isSelected ? '#f4f4f5' : 'white',
-                                                            '&:hover': {
-                                                                backgroundColor: theme == 'dark' ? '#3f3f46' : '#d4d4d8',
-                                                            },
-                                                        } as CSSObjectWithLabel),
-                                                        menu: (provided, state) => ({
-                                                            ...provided,
-                                                            backgroundColor: theme == 'dark' ? '#18181b' : 'white',
-                                                            border: theme == 'dark' ? '2px solid #3f3f46' : '2px solid #d4d4d8',
-                                                            fontSize: '1rem',
 
-                                                        } as CSSObjectWithLabel),
-                                                        input: (provided, state) => ({
-                                                            ...provided,
-                                                            color: theme == 'dark' ? 'white' : 'black',
-                                                        } as CSSObjectWithLabel),
-                                                        singleValue: (provided, state) => ({
-                                                            ...provided,
-                                                            color: theme == 'dark' ? 'white' : 'black',
-                                                        } as CSSObjectWithLabel),
-                                                    }}
-                                                />
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <div className="flex flex-row">
-                                            <p className="text-6xl font-extrabold p-6">
-                                                Result Info
-                                            </p>
-                                            <div className="flex flex-row">
-                                                <div className="py-4">
-                                                    <Switch
-                                                        id={"AdvancedModeSwitch"}
-                                                        isSelected={lapsAdvancedMode}
-                                                        onValueChange={() => { setLapsAdvancedMode(!lapsAdvancedMode) }}
-                                                    />
-                                                </div>
-                                                <label className=" pl-6 py-12 text-2xl font-bold" htmlFor={"AdvancedModeSwitch"}>Advanced Mode</label>
-                                            </div>
-                                        </div>
-                                        <div className="px-6 flex flex-row w-24">
+                                    <div className="flex flex-row mt-2">
+                                        <p className="text-2xl font-bold py-6">
+                                            Result Info
+                                        </p>
+
+                                        <div className="p-6 flex flex-row w-24">
                                             <Checkbox
                                                 onValueChange={(value) => setFinished(value)}
                                                 isSelected={finished}
@@ -345,11 +282,78 @@ export default function EditResultModal({ isOpen, result, fleet, onSubmit, onClo
                                                 Finished
                                             </Checkbox>
                                         </div>
+                                    </div>
+
+                                    <div className="flex flex-row mt-2">
+                                        <div className='flex flex-col px-6 w-1/4'>
+                                            <p className='text-2xl font-bold'>
+                                                Finish Code
+                                            </p>
+
+                                            <Select
+                                                id="editResultCode"
+                                                className=' w-56 h-full text-3xl'
+                                                options={resultCodeOptions}
+                                                value={resultCodeOption}
+                                                onChange={(choice) => setResultCodeOption(choice!)}
+                                                styles={{
+                                                    control: (provided, state) => ({
+                                                        ...provided,
+                                                        border: 'none',
+                                                        padding: '0.5rem',
+                                                        fontSize: '1rem',
+                                                        borderRadius: '0.5rem',
+                                                        color: 'white',
+                                                        backgroundColor: theme == 'dark' ? '#27272a' : '#f4f4f5',
+                                                        '&:hover': {
+                                                            backgroundColor: theme == 'dark' ? '#3f3f46' : '#e4e4e7',
+                                                        },
+                                                    } as CSSObjectWithLabel),
+                                                    option: (provided, state) => ({
+                                                        ...provided,
+                                                        color: theme == 'dark' ? 'white' : 'black',
+                                                        backgroundColor: theme == 'dark' ? state.isSelected ? '#27272a' : '#18181b' : state.isSelected ? '#f4f4f5' : 'white',
+                                                        '&:hover': {
+                                                            backgroundColor: theme == 'dark' ? '#3f3f46' : '#d4d4d8',
+                                                        },
+                                                    } as CSSObjectWithLabel),
+                                                    menu: (provided, state) => ({
+                                                        ...provided,
+                                                        backgroundColor: theme == 'dark' ? '#18181b' : 'white',
+                                                        border: theme == 'dark' ? '2px solid #3f3f46' : '2px solid #d4d4d8',
+                                                        fontSize: '1rem',
+
+                                                    } as CSSObjectWithLabel),
+                                                    input: (provided, state) => ({
+                                                        ...provided,
+                                                        color: theme == 'dark' ? 'white' : 'black',
+                                                    } as CSSObjectWithLabel),
+                                                    singleValue: (provided, state) => ({
+                                                        ...provided,
+                                                        color: theme == 'dark' ? 'white' : 'black',
+                                                    } as CSSObjectWithLabel),
+                                                }}
+                                            />
+                                        </div>
+
+                                        <div className='flex flex-col px-6 w-1/4'>
+                                            <p className='text-2xl font-bold'>
+                                                Position
+                                            </p>
+
+                                            <Input
+                                                type="number"
+                                                placeholder=' '
+                                            />
+                                        </div>
+
                                         {lapsAdvancedMode ?
-                                            <div className='flex flex-row w-full flex-wrap' id='LapData' key={JSON.stringify(laps)}>
+                                            <div className='flex flex-row w-full flex-wrap' id='LapData'
+                                                 key={JSON.stringify(laps)}>
                                                 {laps.map((lap: LapDataType, index: number) => {
                                                     return (
-                                                        <div className='flex flex-col px-6 w-min' key={lap.time + index}>
+                                                        <div className='flex flex-col px-6 w-min'
+                                                             key={lap.time + index}>
                                                             <p className='text-2xl font-bold p-2'>
                                                                 Lap {index + 1}
                                                             </p>
@@ -358,23 +362,31 @@ export default function EditResultModal({ isOpen, result, fleet, onSubmit, onClo
                                                                     type="time"
                                                                     step={"1"}
                                                                     defaultValue={new Date(Math.max(0, (lap.time - fleet!.startTime) * 1000)).toISOString().substring(11, 19)}
-                                                                    onBlur={(e) => { updateLapDataAdvanced(lap, (e.target as HTMLInputElement).value) }}
+                                                                    onBlur={(e) => {
+                                                                        updateLapDataAdvanced(lap, (e.target as HTMLInputElement).value)
+                                                                    }}
                                                                 />
-                                                                <div className="text-4xl font-extrabold text-red-600 px-2 float-right cursor-pointer" onClick={() => setLaps([...laps.slice(0, index), ...laps.slice(index + 1)])}>&times;</div>
+                                                                <div
+                                                                    className="text-4xl font-extrabold text-red-600 px-2 float-right cursor-pointer"
+                                                                    onClick={() => setLaps([...laps.slice(0, index), ...laps.slice(index + 1)])}>&times;</div>
                                                             </div>
 
                                                         </div>
                                                     )
                                                 })}
                                                 <div className="p-4 mr-2 w-96 flex justify-end">
-                                                    <Button onClick={() => setLaps([...laps, { id: "", time: 0, resultId: result!.id } as LapDataType])} >
+                                                    <Button onClick={() => setLaps([...laps, {
+                                                        id: "",
+                                                        time: 0,
+                                                        resultId: result!.id
+                                                    } as LapDataType])}>
                                                         Add Lap
                                                     </Button>
                                                 </div>
                                             </div>
                                             :
-                                            <div className="flex flex-row mt-2" key={basicNumLaps}>
-                                                <div className='flex flex-col px-6 w-1/4'>
+                                            <div className='flex flex-row w-full'>
+                                                <div className='flex flex-col px-6 w-full' key={basicNumLaps}>
                                                     <p className='text-2xl font-bold'>
                                                         Laps
                                                     </p>
@@ -383,23 +395,42 @@ export default function EditResultModal({ isOpen, result, fleet, onSubmit, onClo
                                                         type="number"
                                                         id="NumberofLaps"
                                                         defaultValue={basicNumLaps.toString()}
-                                                        onValueChange={(value) => { setBasicNumLaps(parseInt(value)) }}
+                                                        onValueChange={(value) => {
+                                                            setBasicNumLaps(parseInt(value))
+                                                        }}
                                                     />
                                                 </div>
-                                                <div className='flex flex-col px-6 w-1/4' key={basicElapsed}>
+
+                                                <div className='flex flex-col px-6 w-full' key={basicElapsed}>
                                                     <p className='text-2xl font-bold'>
                                                         Finish Time
                                                     </p>
+
                                                     <Input
                                                         type="time"
                                                         step={"1"}
                                                         defaultValue={basicElapsed}
-                                                        onValueChange={(value) => { setBasicElapsed(value) }}
+                                                        onValueChange={(value) => {
+                                                            setBasicElapsed(value)
+                                                        }}
                                                     />
-
                                                 </div>
                                             </div>
                                         }
+
+
+                                    </div>
+                                    <div className="flex flex-row mt-2 px-6">
+                                        <Switch
+                                            id={"AdvancedModeSwitch"}
+                                            isSelected={lapsAdvancedMode}
+                                            onValueChange={() => {
+                                                setLapsAdvancedMode(!lapsAdvancedMode)
+                                            }}
+                                        />
+
+                                        <label className="text-2xl font-bold"
+                                               htmlFor={"AdvancedModeSwitch"}>Advanced Mode</label>
                                     </div>
                                 </div>
 
