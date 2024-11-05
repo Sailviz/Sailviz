@@ -12,7 +12,6 @@ services:
       jwtSecret: ${jwtSecret}
       DATABASE_HOST: ${DATABASE_HOST}
       DATABASE_URL: mysql://${DATABASE_USER}:${DATABASE_PASSWORD}@${DATABASE_HOST}/srm
-      BASE_URL: ${BASE_URL}
       PORT: 3000
 
   mysql:
