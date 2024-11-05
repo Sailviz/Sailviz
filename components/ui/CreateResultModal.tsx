@@ -1,21 +1,25 @@
 import { Button, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Radio, RadioGroup, Switch, Tab, Tabs } from '@nextui-org/react';
 import { Key } from '@react-types/shared';
-import { use } from 'chai';
 import { useTheme } from 'next-themes';
 import { ChangeEvent, useEffect, useState } from 'react';
 import Select, { CSSObjectWithLabel } from 'react-select';
 
 export default function CreateResultModal({ isOpen, races, boats, onSubmit, onClose }: { isOpen: boolean, races: RaceDataType[], boats: BoatDataType[], onSubmit: (helmValue: string, crewValue: string, boat: any, sailNum: string, fleetId: string[]) => void, onClose: () => void }) {
 
-    const [helmValue, setHelmValue] = useState('')
-    const [crewValue, setCrewValue] = useState('')
+    const [helm, setHelm] = useState('')
+    const [crew, setCrew] = useState('')
     const [sailNumber, setSailNumber] = useState('')
 
     const { theme, setTheme } = useTheme()
 
     const [selectedRaces, setSelectedRaces] = useState<string[]>([])
+    //array of fleets, dimensionally equal to selectedRaces
     const [selectedFleets, setSelectedFleets] = useState<string[]>([])
-    const [selectedOption, setSelectedOption] = useState({ label: "", value: {} as BoatDataType })
+    const [selectedBoat, setSelectedBoat] = useState({ label: "", value: {} as BoatDataType })
+
+    const [helmError, setHelmError] = useState(false)
+    const [boatError, setBoatError] = useState(false)
+    const [sailNumError, setSailNumError] = useState(false)
 
     let options: { label: string; value: BoatDataType }[] = []
     boats.forEach((boat: BoatDataType) => {
@@ -23,20 +27,21 @@ export default function CreateResultModal({ isOpen, races, boats, onSubmit, onCl
     })
 
     const CapitaliseInput = (e: ChangeEvent<HTMLInputElement>) => {
-        console.log(e.target.id)
         const sentence = e.target.value.split(' ');
         const cursorPos = e.target.selectionStart
         const capitalizedWords = sentence.map(word => word.charAt(0).toUpperCase() + word.slice(1));
         const capitalisedSentence = capitalizedWords.join(' ')
-        console.log(capitalisedSentence)
-        if (e.target.id == 'helm') setHelmValue(capitalisedSentence)
-        if (e.target.id == 'crew') setCrewValue(capitalisedSentence)
+        if (e.target.id == 'helm') setHelm(capitalisedSentence)
+        if (e.target.id == 'crew') setCrew(capitalisedSentence)
     }
 
     const updateRaceSelection = (race: RaceDataType, value: boolean) => {
         if (value) {
             setSelectedRaces([...selectedRaces, race.id])
-            setSelectedFleets([...selectedFleets, race.fleets[0]!.id])
+            let arr = selectedFleets.slice()
+            //add the first fleet in
+            arr.splice(selectedRaces.length, 1, race.fleets[0]!.id)
+            setSelectedFleets(arr)
         } else {
             setSelectedRaces(selectedRaces.filter((value) => value != race.id))
             //remove all fleets from the selected fleets that are in this race
@@ -45,13 +50,35 @@ export default function CreateResultModal({ isOpen, races, boats, onSubmit, onCl
 
     }
 
+    const Submit = () => {
+        //check if all fields are filled in
+
+        let error = false
+        if (helm == '') {
+            setHelmError(true)
+            error = true
+        }
+        if (selectedBoat.label == '') {
+            setBoatError(true)
+            error = true
+        }
+        if (sailNumber == '') {
+            setSailNumError(true)
+            error = true
+        }
+        if (error) return
+
+        onSubmit(helm, crew, selectedBoat.value, sailNumber, selectedFleets)
+    }
+
     const clearFields = () => {
-        setHelmValue('')
-        setCrewValue('')
+        console.log('clearing fields')
+        setHelm('')
+        setCrew('')
         setSailNumber('')
         setSelectedRaces([])
         setSelectedFleets([])
-        setSelectedOption({ label: "", value: {} as BoatDataType })
+        setSelectedBoat({ label: "", value: {} as BoatDataType })
 
     }
 
@@ -81,11 +108,12 @@ export default function CreateResultModal({ isOpen, races, boats, onSubmit, onCl
                                         <Input
                                             id='helm'
                                             type="text"
-                                            value={helmValue}
-                                            onChange={CapitaliseInput}
+                                            value={helm}
+                                            onChange={(e) => { setHelmError(false); CapitaliseInput(e) }}
                                             placeholder="J Bloggs"
                                             variant='bordered'
                                             autoComplete='off'
+                                            isInvalid={helmError}
                                         />
                                     </div>
                                     <div className='flex flex-col px-6 w-full'>
@@ -95,7 +123,7 @@ export default function CreateResultModal({ isOpen, races, boats, onSubmit, onCl
                                         <Input
                                             id='crew'
                                             type="text"
-                                            value={crewValue}
+                                            value={crew}
                                             onChange={CapitaliseInput}
                                             autoComplete='off'
                                             variant='bordered'
@@ -109,12 +137,12 @@ export default function CreateResultModal({ isOpen, races, boats, onSubmit, onCl
                                             id="Class"
                                             className=' w-56 h-full text-3xl'
                                             options={options}
-                                            value={selectedOption}
-                                            onChange={(choice) => setSelectedOption(choice!)}
+                                            value={selectedBoat}
+                                            onChange={(choice) => { setBoatError(false); setSelectedBoat(choice!) }}
                                             styles={{
                                                 control: (provided, state) => ({
                                                     ...provided,
-                                                    border: 'none',
+                                                    border: boatError ? '2px solid #f31260' : 'none',
                                                     padding: '0.5rem',
                                                     fontSize: '1rem',
                                                     borderRadius: '0.5rem',
@@ -159,7 +187,8 @@ export default function CreateResultModal({ isOpen, races, boats, onSubmit, onCl
                                             id="SailNum"
                                             variant='bordered'
                                             autoComplete='off'
-                                            onChange={(e) => setSailNumber(e.target.value)}
+                                            onChange={(e) => { setSailNumError(false); setSailNumber(e.target.value) }}
+                                            isInvalid={sailNumError}
                                         />
                                     </div>
                                 </div>
@@ -185,10 +214,12 @@ export default function CreateResultModal({ isOpen, races, boats, onSubmit, onCl
                                                 <Tabs
                                                     aria-label="Options"
                                                     className='px-3'
-                                                    selectedKey={race.fleets[0]!.id}
+                                                    selectedKey={selectedFleets[index]}
                                                     color="primary"
+                                                    // enable fleet selection if race is selected.
                                                     isDisabled={selectedRaces.findIndex((r) => r == race.id) == -1 ? true : false}
-                                                    onSelectionChange={(key) => { console.log(key); key ? setSelectedFleets([...selectedFleets, key.toString()]) : setSelectedFleets(selectedFleets.filter((value) => value != key)) }}
+                                                    //insert the selected fleet into the selectedFleets array at the index of the race
+                                                    onSelectionChange={(key) => { console.log(key.toString()); let arr = selectedFleets.slice(); arr.splice(index, 1, key.toString()); setSelectedFleets(arr) }}
                                                 >
                                                     {/* show buttons for each fleet in a series */}
                                                     {race.fleets.map((fleet: FleetDataType, index) => {
@@ -201,7 +232,7 @@ export default function CreateResultModal({ isOpen, races, boats, onSubmit, onCl
 
                                                 {race.Type == "Pursuit" ?
                                                     <div className="pl-6 py-auto text-2xl font-bold text-gray-700">
-                                                        Start Time: {String(Math.floor((selectedOption.value.pursuitStartTime || 0) / 60)).padStart(2, '0')}:{String((selectedOption.value.pursuitStartTime || 0) % 60).padStart(2, '0')}
+                                                        Start Time: {String(Math.floor((selectedBoat.value.pursuitStartTime || 0) / 60)).padStart(2, '0')}:{String((selectedBoat.value.pursuitStartTime || 0) % 60).padStart(2, '0')}
                                                     </div>
                                                     :
                                                     <></>
@@ -215,7 +246,7 @@ export default function CreateResultModal({ isOpen, races, boats, onSubmit, onCl
 
                             </ModalBody>
                             <ModalFooter>
-                                <Button color="primary" onPress={() => onSubmit(helmValue, crewValue, selectedOption.value, sailNumber, selectedFleets)}>
+                                <Button color="primary" onPress={() => Submit()}>
                                     Submit
                                 </Button>
                             </ModalFooter>

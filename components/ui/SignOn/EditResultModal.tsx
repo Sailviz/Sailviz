@@ -1,11 +1,9 @@
 import { Button, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Radio, RadioGroup, Switch, Tab, Tabs } from '@nextui-org/react';
-import { Key } from '@react-types/shared';
-import { use } from 'chai';
 import { useTheme } from 'next-themes';
 import { ChangeEvent, useEffect, useState } from 'react';
 import Select, { CSSObjectWithLabel } from 'react-select';
 
-export default function EditResultModal({ isOpen, result, boats, onSubmit, onClose, onDelete }: { isOpen: boolean, result: ResultsDataType | undefined, boats: BoatDataType[], onSubmit: (result: ResultsDataType) => void, onClose: () => void, onDelete: (result: ResultsDataType) => void }) {
+export default function EditResultModal({ isOpen, race, result, boats, onSubmit, onClose, onDelete }: { isOpen: boolean, race: RaceDataType, result: ResultsDataType | undefined, boats: BoatDataType[], onSubmit: (result: ResultsDataType) => void, onClose: () => void, onDelete: (result: ResultsDataType) => void }) {
 
     const [helm, setHelm] = useState('')
     const [crew, setCrew] = useState('')
@@ -13,9 +11,12 @@ export default function EditResultModal({ isOpen, result, boats, onSubmit, onClo
 
     const { theme, setTheme } = useTheme()
 
-    const [selectedRaces, setSelectedRaces] = useState<string[]>([])
-    const [selectedFleets, setSelectedFleets] = useState<string[]>([])
+    const [selectedFleet, setSelectedFleet] = useState<string>()
     const [selectedBoat, setSelectedBoat] = useState({ label: "", value: {} as BoatDataType })
+
+    const [helmError, setHelmError] = useState(false)
+    const [boatError, setBoatError] = useState(false)
+    const [sailNumError, setSailNumError] = useState(false)
 
     let options: { label: string; value: BoatDataType }[] = []
     boats.forEach((boat: BoatDataType) => {
@@ -33,11 +34,29 @@ export default function EditResultModal({ isOpen, result, boats, onSubmit, onClo
         if (e.target.id == 'crew') setCrew(capitalisedSentence)
     }
 
-    function updateFleetSelection(race: RaceDataType, key: Key) {
-        var tempSelected = window.structuredClone(selectedFleets)
-        var filteredArray = tempSelected.filter((value: string) => !race.fleets.flatMap(fleet => fleet.id).includes(value));
-        filteredArray = [...filteredArray, key]
-        setSelectedFleets(filteredArray)
+    const Submit = () => {
+        //check if all fields are filled in
+
+        let error = false
+        if (helm == '') {
+            setHelmError(true)
+            error = true
+        }
+        if (selectedBoat.label == '') {
+            setBoatError(true)
+            error = true
+        }
+        if (sailNumber == '') {
+            setSailNumError(true)
+            error = true
+        }
+        if (selectedFleet == undefined) {
+            error = true
+        }
+
+        if (error) return
+
+        onSubmit({ ...result!, Helm: helm, Crew: crew, boat: selectedBoat.value, SailNumber: sailNumber, fleetId: selectedFleet! })
     }
 
     useEffect(() => {
@@ -49,6 +68,7 @@ export default function EditResultModal({ isOpen, result, boats, onSubmit, onClo
         setCrew(result.Crew)
         setSailNumber(result.SailNumber)
         setSelectedBoat({ label: result.boat.name, value: result.boat })
+        setSelectedFleet(result.fleetId)
     }, [result])
 
     return (
@@ -77,10 +97,11 @@ export default function EditResultModal({ isOpen, result, boats, onSubmit, onClo
                                             id='helm'
                                             type="text"
                                             value={helm}
-                                            onChange={CapitaliseInput}
+                                            onChange={(e) => { setHelmError(false); CapitaliseInput(e) }}
                                             placeholder="J Bloggs"
                                             variant='bordered'
                                             autoComplete='off'
+                                            isInvalid={helmError}
                                         />
                                     </div>
                                     <div className='flex flex-col px-6 w-full'>
@@ -109,7 +130,7 @@ export default function EditResultModal({ isOpen, result, boats, onSubmit, onClo
                                             styles={{
                                                 control: (provided, state) => ({
                                                     ...provided,
-                                                    border: 'none',
+                                                    border: boatError ? '2px solid #f31260' : 'none',
                                                     padding: '0.5rem',
                                                     fontSize: '1rem',
                                                     borderRadius: '0.5rem',
@@ -155,56 +176,42 @@ export default function EditResultModal({ isOpen, result, boats, onSubmit, onClo
                                             variant='bordered'
                                             autoComplete='off'
                                             value={sailNumber}
-                                            onValueChange={setSailNumber}
+                                            onChange={(e) => { setSailNumError(false); setSailNumber(e.target.value) }}
+                                            isInvalid={sailNumError}
                                         />
                                     </div>
                                 </div>
 
                                 <div className="text-4xl font-extrabold p-6">Select Fleet</div>
-                                {/* {races.map((race, index) => {
-                                    if (race.fleets.some(fleet => fleet.startTime != 0)) {
-                                        //a fleet in the race has started so don't allow entry
-                                        return <></>
-                                    }
 
-                                    return (
-                                        <div className="mx-6 mb-10" key={race.id}>
-                                            <div className="flex flex-row">
-                                                <Switch
-                                                    id={race.id + "Switch"}
-                                                    onValueChange={(value) => { value ? setSelectedRaces([...selectedRaces, race.id]) : setSelectedRaces(selectedRaces.filter((value) => value != race.id)) }}
-                                                    color="success"
-                                                    size='lg'
-                                                >
-                                                    {race.series.name} {race.number}
-                                                    <Tabs
-                                                        aria-label="Options"
-                                                        selectedKey={race.fleets[0]!.id}
-                                                        color="primary"
-                                                        isDisabled={selectedRaces.findIndex((r) => r == race.id) ? true : false}
-                                                        onSelectionChange={(key) => { updateFleetSelection(race, key) }}
-                                                    >
-                                                        {race.fleets.map((fleet: FleetDataType) => {
-                                                            return (
-                                                                <Tab key={fleet.id} title={fleet.fleetSettings.name}>
-                                                                </Tab>
-                                                            )
-                                                        })}
-                                                    </Tabs>
-                                                </Switch>
+                                <div className="mx-6 mb-10" key={race.id}>
+                                    <div className="flex flex-row">
 
-                                                {race.Type == "Pursuit" ?
-                                                    <div className="pl-6 py-auto text-2xl font-bold text-gray-700">
-                                                        Start Time: {String(Math.floor((selectedBoat.value.pursuitStartTime || 0) / 60)).padStart(2, '0')}:{String((selectedBoat.value.pursuitStartTime || 0) % 60).padStart(2, '0')}
-                                                    </div>
-                                                    :
-                                                    <></>
-                                                }
+                                        <Tabs
+                                            aria-label="Options"
+                                            selectedKey={selectedFleet}
+                                            color="primary"
+                                            onSelectionChange={(key) => { setSelectedFleet(key.toString()) }}
+                                        >
+                                            {race.fleets.map((fleet: FleetDataType) => {
+                                                return (
+                                                    <Tab key={fleet.id} title={fleet.fleetSettings.name}>
+                                                    </Tab>
+                                                )
+                                            })}
+                                        </Tabs>
 
+                                        {race.Type == "Pursuit" ?
+                                            <div className="pl-6 py-auto text-2xl font-bold text-gray-700">
+                                                Start Time: {String(Math.floor((selectedBoat.value.pursuitStartTime || 0) / 60)).padStart(2, '0')}:{String((selectedBoat.value.pursuitStartTime || 0) % 60).padStart(2, '0')}
                                             </div>
-                                        </div>
-                                    )
-                                })} */}
+                                            :
+                                            <></>
+                                        }
+
+                                    </div>
+                                </div>
+
 
 
                             </ModalBody>
@@ -215,7 +222,7 @@ export default function EditResultModal({ isOpen, result, boats, onSubmit, onClo
                                 <Button color="danger" variant="light" onPress={onClose}>
                                     Close
                                 </Button>
-                                <Button color="primary" onPress={() => onSubmit({ ...result!, Helm: helm, Crew: crew, boat: selectedBoat.value, SailNumber: sailNumber })}>
+                                <Button color="primary" onPress={() => Submit()}>
                                     Save
                                 </Button>
                             </ModalFooter>

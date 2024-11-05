@@ -87,7 +87,6 @@ const SignOnTable = (props: any) => {
         const onEditClick = () => {
             props.showEditModal(props.row.original)
         }
-        console.log(props.user)
         if (userHasPermission(props.user, AVAILABLE_PERMISSIONS.editResults)) {
             return (
                 <div className="relative flex items-center gap-2">
@@ -113,7 +112,6 @@ const SignOnTable = (props: any) => {
 
 
     const [sorting, setSorting] = useState<SortingState>([]);
-    console.log(user)
 
     let table = useReactTable({
         data,
