@@ -1,22 +1,23 @@
 'use client'
 import { useEffect, useState } from "react";
-import Layout from "../../../../components/ui/Layout";
 import { Peer, DataConnection } from "peerjs";
-import { Button } from "@nextui-org/react";
-
+import { title } from "components/ui/home/primitaves";
+import * as DB from 'components/apiMethods';
 
 //club page should contain:
 //list of current series
 //list of recent races
 //list of upcoming races
 
+var peer: Peer = new Peer()
+var conn: DataConnection | null = null;
+
 export default function Page({ params }: { params: { slug: string } }) {
 
     const [clubId, setClubId] = useState<string>('')
+    const [club, setClub] = useState<ClubDataType>({} as ClubDataType)
     const [races, setRaces] = useState<any[]>([])
     const [series, setSeries] = useState<any[]>([])
-    var peer: Peer = new Peer()
-    var conn: DataConnection | null = null;
 
     const initialize = async () => {
         // Create own peer object with connection to shared PeerJS server
@@ -74,8 +75,12 @@ export default function Page({ params }: { params: { slug: string } }) {
                 conn!.send(command);
         });
         // Handle incoming data (messages only since this is the signal sender)
-        conn.on('data', function (data) {
-            // addMessage("<span class=\"peerMsg\">Peer:</span> " + data);
+        conn.on('data', function (datastring) {
+            console.log("Received: " + datastring);
+            let data = JSON.parse(datastring as string)
+            if (data['type'] == 'clubId') {
+                setClubId(data['clubId'])
+            };
         });
         conn.on('close', function () {
             console.log("Connection closed");
@@ -138,6 +143,16 @@ export default function Page({ params }: { params: { slug: string } }) {
         signal(JSON.stringify(data))
     }
 
+    useEffect(() => {
+        const fetch = async () => {
+            setClub(await DB.GetClubById(clubId))
+        }
+        if (clubId != "") {
+            fetch()
+        }
+
+    }, [clubId])
+
     // Since all our callbacks are setup, start the process of obtaining an ID
     useEffect(() => {
         initialize();
@@ -145,58 +160,55 @@ export default function Page({ params }: { params: { slug: string } }) {
 
     return (
         <div className="flex flex-col px-6">
-            <div className="mx-auto my-20 px-a py-5 border w-7/12 bg-gray-300 rounded-sm">
-                <div className="text-6xl font-extrabold text-gray-700 flex justify-center">Control Cast</div>
-                <div className='flex flex-row'>
-                    <div className="m-6">
-                        <div onClick={() => sendTheme('light')} className="w-full cursor-pointer text-white bg-blue-600 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-md px-5 py-2.5 text-center mr-3 md:mr-0">
-                            set light theme
-                        </div>
-                    </div>
-                    <div className="m-6">
-                        <div onClick={() => sendTheme('dark')} className="w-full cursor-pointer text-white bg-blue-600 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-md px-5 py-2.5 text-center mr-3 md:mr-0">
-                            set dark theme
-                        </div>
+            <h1 className={title({ color: "blue" })}>{club.name} - Control</h1>
+            <div className='flex flex-row'>
+                <div className="m-6">
+                    <div onClick={() => sendTheme('light')} className="w-full cursor-pointer text-white bg-blue-600 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-md px-5 py-2.5 text-center mr-3 md:mr-0">
+                        set light theme
                     </div>
                 </div>
-                <div className="flex flex-row mb-2 justify-center">
-                    <div className='flex flex-col'>
-                        <div className="m-6">
-                            <div onClick={() => slideShow(races.flatMap(race => race.id), "race")} className="w-full cursor-pointer text-white bg-blue-600 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-md px-5 py-2.5 text-center mr-3 md:mr-0">
-                                Race Slideshow
-                            </div>
-                        </div>
-                        {races.map((race, index) => {
-                            return (
-                                <div className="m-6" key={JSON.stringify(races) + index}>
-                                    <div onClick={() => showPage(race.id, "race")} className="w-full cursor-pointer text-white bg-blue-600 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-md px-5 py-2.5 text-center mr-3 md:mr-0">
-                                        {race.series.name}: {race.number} at {race.Time.slice(10, 16)}
-                                    </div>
-
-                                </div>
-                            )
-                        })}
-                    </div>
-                    <div className='flex flex-col'>
-                        <div className="m-6">
-                            <div onClick={() => slideShow(series.flatMap(serie => serie.id), "series")} className="w-full cursor-pointer text-white bg-blue-600 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-md px-5 py-2.5 text-center mr-3 md:mr-0">
-                                Series Slideshow
-                            </div>
-                        </div>
-                        {series.map((series, index) => {
-                            return (
-                                <div className="m-6" key={JSON.stringify(races) + index}>
-                                    <div onClick={() => showPage(series.id, "series")} className="w-full cursor-pointer text-white bg-blue-600 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-md px-5 py-2.5 text-center mr-3 md:mr-0">
-                                        {series.name}
-                                    </div>
-
-                                </div>
-                            )
-                        })}
+                <div className="m-6">
+                    <div onClick={() => sendTheme('dark')} className="w-full cursor-pointer text-white bg-blue-600 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-md px-5 py-2.5 text-center mr-3 md:mr-0">
+                        set dark theme
                     </div>
                 </div>
             </div>
+            <div className="flex flex-row mb-2 justify-center">
+                <div className='flex flex-col'>
+                    <div className="m-6">
+                        <div onClick={() => slideShow(races.flatMap(race => race.id), "race")} className="w-full cursor-pointer text-white bg-blue-600 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-md px-5 py-2.5 text-center mr-3 md:mr-0">
+                            Race Slideshow
+                        </div>
+                    </div>
+                    {races.map((race, index) => {
+                        return (
+                            <div className="m-6" key={JSON.stringify(races) + index}>
+                                <div onClick={() => showPage(race.id, "race")} className="w-full cursor-pointer text-white bg-blue-600 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-md px-5 py-2.5 text-center mr-3 md:mr-0">
+                                    {race.series.name}: {race.number} at {race.Time.slice(10, 16)}
+                                </div>
 
+                            </div>
+                        )
+                    })}
+                </div>
+                <div className='flex flex-col'>
+                    <div className="m-6">
+                        <div onClick={() => slideShow(series.flatMap(serie => serie.id), "series")} className="w-full cursor-pointer text-white bg-blue-600 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-md px-5 py-2.5 text-center mr-3 md:mr-0">
+                            Series Slideshow
+                        </div>
+                    </div>
+                    {series.map((series, index) => {
+                        return (
+                            <div className="m-6" key={JSON.stringify(races) + index}>
+                                <div onClick={() => showPage(series.id, "series")} className="w-full cursor-pointer text-white bg-blue-600 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-md px-5 py-2.5 text-center mr-3 md:mr-0">
+                                    {series.name}
+                                </div>
+
+                            </div>
+                        )
+                    })}
+                </div>
+            </div>
         </div>
     );
 }

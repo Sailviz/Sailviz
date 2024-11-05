@@ -10,7 +10,8 @@ import { animateScroll, Events } from 'react-scroll';
 import { useTheme } from 'next-themes';
 import { Peer, DataConnection } from 'peerjs';
 import { useQRCode } from 'next-qrcode';
-import { set } from 'cypress/types/lodash';
+import { title } from "components/ui/home/primitaves";
+
 
 const namespace = 'urn:x-cast:com.sailviz';
 
@@ -162,6 +163,10 @@ export default function Page({ params }: { params: { slug: string } }) {
      * Defines callbacks to handle incoming data and connection events.
      */
     const ready = () => {
+        //delay to allow peer to connect before sending data
+        setTimeout(() => {
+            conn!.send(JSON.stringify({ type: 'clubId', clubId: clubId }));
+        }, 100)
         conn!.on('data', function (datastring) {
             console.log("Data recieved");
             console.log("datastring: " + datastring)
@@ -355,26 +360,35 @@ export default function Page({ params }: { params: { slug: string } }) {
 
     return (
         <div>
-            <div onClick={() => window.open(window.location.origin + '/CastControl/' + peerId, '_blank')?.focus()}>
-                <QRCode
-                    text={window.location.origin + '/CastControl/' + peerId}
-                    options={{
-                        type: 'image/jpeg',
-                        quality: 0.3,
-                        errorCorrectionLevel: 'M',
-                        margin: 3,
-                        scale: 4,
-                        width: 200,
-                        color: {
-                            dark: '#000000',
-                            light: '#ffffff',
-                        },
-                    }}
-                />
+            <div className=' absolute right-8 top-8'>
+                <div className='flex flex-row'>
+                    <h1 className={title({ color: "blue" })}>Scan to <br></br>Control</h1>
+                    <div onClick={() => window.open(window.location.origin + '/CastControl/' + peerId, '_blank')?.focus()}>
+                        <QRCode
+                            text={window.location.origin + '/CastControl/' + peerId}
+                            options={{
+                                type: 'image/jpeg',
+                                quality: 0.3,
+                                errorCorrectionLevel: 'M',
+                                margin: 3,
+                                scale: 4,
+                                width: 100,
+                                color: {
+                                    dark: '#000000',
+                                    light: '#ffffff',
+                                },
+                            }}
+                        />
+                    </div>
+                </div>
             </div>
             <Script type="text/javascript" src="//www.gstatic.com/cast/sdk/libs/receiver/2.0.0/cast_receiver.js" onReady={() => {
                 initializeCastApi()
             }}></Script>
+            <div className='p-4'>
+                <h1 className={title({ color: "blue" })}>SailViz - {club.name}</h1>
+            </div>
+
             {(() => {
                 switch (pagestate) {
                     case pageStateType.live:
@@ -423,7 +437,7 @@ export default function Page({ params }: { params: { slug: string } }) {
                     case pageStateType.info:
                         return (
                             <div className="text-6xl font-extrabold p-6">
-                                SailViz - Cast
+                                Placeholder
                             </div>
                         );
                     default:
