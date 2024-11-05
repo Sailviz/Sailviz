@@ -163,12 +163,12 @@ export default function Page({ params }: { params: { slug: string } }) {
             <h1 className={title({ color: "blue" })}>{club.name} - Control</h1>
             <div className='flex flex-row'>
                 <div className="m-6">
-                    <div onClick={() => sendTheme('light')} className="w-full cursor-pointer text-white bg-blue-600 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-md px-5 py-2.5 text-center mr-3 md:mr-0">
+                    <div onClick={() => sendTheme('light')} className="select-none w-full cursor-pointer text-white bg-blue-600 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-md px-5 py-2.5 text-center mr-3 md:mr-0">
                         set light theme
                     </div>
                 </div>
                 <div className="m-6">
-                    <div onClick={() => sendTheme('dark')} className="w-full cursor-pointer text-white bg-blue-600 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-md px-5 py-2.5 text-center mr-3 md:mr-0">
+                    <div onClick={() => sendTheme('dark')} className="select-none w-full cursor-pointer text-white bg-blue-600 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-md px-5 py-2.5 text-center mr-3 md:mr-0">
                         set dark theme
                     </div>
                 </div>
@@ -176,14 +176,14 @@ export default function Page({ params }: { params: { slug: string } }) {
             <div className="flex flex-row mb-2 justify-center">
                 <div className='flex flex-col'>
                     <div className="m-6">
-                        <div onClick={() => slideShow(races.flatMap(race => race.id), "race")} className="w-full cursor-pointer text-white bg-blue-600 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-md px-5 py-2.5 text-center mr-3 md:mr-0">
+                        <div onClick={() => slideShow(races.flatMap(race => race.id), "race")} className="select-none w-full cursor-pointer text-white bg-blue-600 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-md px-5 py-2.5 text-center mr-3 md:mr-0">
                             Race Slideshow
                         </div>
                     </div>
                     {races.map((race, index) => {
                         return (
                             <div className="m-6" key={JSON.stringify(races) + index}>
-                                <div onClick={() => showPage(race.id, "race")} className="w-full cursor-pointer text-white bg-blue-600 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-md px-5 py-2.5 text-center mr-3 md:mr-0">
+                                <div onClick={() => showPage(race.id, "race")} className="select-none w-full cursor-pointer text-white bg-blue-600 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-md px-5 py-2.5 text-center mr-3 md:mr-0">
                                     {race.series.name}: {race.number} at {race.Time.slice(10, 16)}
                                 </div>
 
@@ -193,14 +193,14 @@ export default function Page({ params }: { params: { slug: string } }) {
                 </div>
                 <div className='flex flex-col'>
                     <div className="m-6">
-                        <div onClick={() => slideShow(series.flatMap(serie => serie.id), "series")} className="w-full cursor-pointer text-white bg-blue-600 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-md px-5 py-2.5 text-center mr-3 md:mr-0">
+                        <div onClick={() => slideShow(series.flatMap(serie => serie.id), "series")} className="select-none w-full cursor-pointer text-white bg-blue-600 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-md px-5 py-2.5 text-center mr-3 md:mr-0">
                             Series Slideshow
                         </div>
                     </div>
                     {series.map((series, index) => {
                         return (
                             <div className="m-6" key={JSON.stringify(races) + index}>
-                                <div onClick={() => showPage(series.id, "series")} className="w-full cursor-pointer text-white bg-blue-600 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-md px-5 py-2.5 text-center mr-3 md:mr-0">
+                                <div onClick={() => showPage(series.id, "series")} className="select-none w-full cursor-pointer text-white bg-blue-600 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-md px-5 py-2.5 text-center mr-3 md:mr-0">
                                     {series.name}
                                 </div>
 
