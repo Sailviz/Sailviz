@@ -19,7 +19,7 @@ import {
 } from '@nextui-org/react';
 import * as Fetcher from 'components/Fetchers';
 import useSWR from 'swr';
-import {EyeIcon} from "../icons/eye-icon";
+import { EyeIcon } from "../icons/eye-icon";
 
 
 
@@ -154,7 +154,6 @@ const FleetHandicapResultsTable = (props: any) => {
     if (data == undefined) {
         data = []
     }
-    console.log(data)
     let [editable, setEditable] = useState(props.editable)
     let [showTime, setShowTime] = useState(props.showTime)
     let [startTime, setStartTime] = useState(fleet?.startTime || 0)

@@ -2,7 +2,6 @@
 import React, { useEffect, useState } from 'react';
 import Script from 'next/script';
 import * as DB from 'components/apiMethods'
-import FleetResultsTable from 'components/tables/FleetHandicapResultsTable';
 import SeriesResultsTable from 'components/tables/SeriesResultsTable';
 import RaceTimer from "components/HRaceTimer"
 import LiveFleetResultsTable from 'components/tables/LiveFleetResultsTable';
@@ -11,6 +10,12 @@ import { useTheme } from 'next-themes';
 import { Peer, DataConnection } from 'peerjs';
 import { useQRCode } from 'next-qrcode';
 import { title } from "components/ui/home/primitaves";
+import FleetHandicapResultsTable from 'components/tables/FleetHandicapResultsTable';
+import FleetPursuitResultsTable from 'components/tables/FleetPursuitResultsTable';
+import { Progress } from '@nextui-org/react';
+import * as Fetcher from 'components/Fetchers';
+import { mutate } from 'swr';
+
 
 
 const namespace = 'urn:x-cast:com.sailviz';
@@ -34,7 +39,6 @@ const scrollOptions = {
     smooth: false,
 };
 
-
 //This is the page that a chromecast is directed to.
 //it receives messages from the chromecast and displays the appropriate data.
 // club id is stored in a cookie and is used to get the relavent data / page to display.
@@ -46,85 +50,19 @@ export default function Page({ params }: { params: { slug: string } }) {
 
     const { Image: QRCode } = useQRCode()
 
+    const [club, setClub] = useState<ClubDataType>({ id: params.slug } as ClubDataType)
 
-    const [clubId, setClubId] = useState<string>(params.slug)
+    const { todaysRaces, todaysRacesIsError, todaysRacesIsValidating } = Fetcher.GetTodaysRaceByClubId(club)
+
     const [pagestate, setPageState] = useState<pageStateType>(pageStateType.info)
-    var [club, setClub] = useState<ClubDataType>({
-        id: "",
-        name: "",
-        settings: {
-            clockIP: "",
-            hornIP: "",
-            pursuitLength: 0,
-            clockOffset: 0
-        },
-        series: [],
-        boats: [],
-    })
-    var [activeRaceData, setActiveRaceData] = useState<RaceDataType>({
-        id: "",
-        number: 0,
-        Time: "",
-        OOD: "",
-        AOD: "",
-        SO: "",
-        ASO: "",
-        fleets: [{
-            id: "",
-            startTime: 0,
-            raceId: "",
-            fleetSettings: {
-                id: "",
-                name: "",
-                boats: [],
-                startDelay: 0,
-                fleets: []
-            } as FleetSettingsType,
-            results: [{
-                id: "",
-                raceId: "",
-                Helm: "",
-                Crew: "",
-                boat: {} as BoatDataType,
-                SailNumber: "",
-                finishTime: 0,
-                CorrectedTime: 0,
-                laps: [{
-                    time: 0,
-                    id: "",
-                    resultId: ""
-                }],
-                PursuitPosition: 0,
-                HandicapPosition: 0,
-                resultCode: "",
-                fleetId: ""
-            } as ResultsDataType]
-
-        }],
-        Type: "",
-        seriesId: "",
-        series: {
-            name: "",
-        } as SeriesDataType
-    })
-    var [activeSeriesData, setActiveSeriesData] = useState<SeriesDataType>({
-        id: "",
-        name: "",
-        clubId: "",
-        settings: {
-            numberToCount: 0
-        },
-        races: [],
-        fleetSettings: [{
-            id: "",
-            name: "",
-            boats: [],
-            startDelay: 0,
-            fleets: []
-        } as FleetSettingsType]
-    })
+    var [activeRaceData, setActiveRaceData] = useState<RaceDataType>({} as RaceDataType)
+    var [activeSeriesData, setActiveSeriesData] = useState<SeriesDataType>({} as SeriesDataType)
 
     const [peerId, setPeerId] = useState<string>("")
+
+    const [timerValue, setTimerValue] = useState<number>(0)
+    const [timerActive, setTimerActive] = useState<boolean>(false)
+    const [timerMax, setTimerMax] = useState<number>(0)
 
     var peer: Peer;
     var conn: DataConnection | null;
@@ -165,7 +103,7 @@ export default function Page({ params }: { params: { slug: string } }) {
     const ready = () => {
         //delay to allow peer to connect before sending data
         setTimeout(() => {
-            conn!.send(JSON.stringify({ type: 'clubId', clubId: clubId }));
+            conn!.send(JSON.stringify({ type: 'clubId', clubId: club.id }));
         }, 100)
         conn!.on('data', function (datastring) {
             console.log("Data recieved");
@@ -174,8 +112,6 @@ export default function Page({ params }: { params: { slug: string } }) {
             console.log(data)
             if (data['type'] == 'showPage') {
                 showPage(data['id'], data['pageType'])
-            } else if (data['type'] == 'slideShow') {
-                slideShow(data['ids'], data['pageType'])
             } else if (data['type'] == 'theme') {
                 console.log(data['theme'])
                 setTheme(data['theme'])
@@ -222,9 +158,6 @@ export default function Page({ params }: { params: { slug: string } }) {
             if (event.data['type'] == 'showPage') {
                 showPage(event.data['id'], event.data['pageType'])
                 window.messageBus.send(event.senderId, new Date().toISOString());
-            } else if (event.data['type'] == 'slideShow') {
-                slideShow(event.data['ids'], event.data['pageType'])
-                window.messageBus.send(event.senderId, new Date().toISOString());
             } else if (event.data['type'] == 'theme') {
                 setTheme(event.data['theme'])
                 window.messageBus.send(event.senderId, new Date().toISOString());
@@ -256,19 +189,6 @@ export default function Page({ params }: { params: { slug: string } }) {
         return false
     }
 
-    const slideShow = (ids: string[], type: string) => {
-        var i = 0
-        showPage(ids[i]!, type) // Run immediately
-        interval = setInterval(() => {
-            i++
-            //reset count if at end of array.
-            if (i >= ids.length) {
-                i = 0
-            }
-            showPage(ids[i]!, type) // Run on interval
-        }, 30000)
-    }
-
     const showPage = async (id: string, type: string) => {
         switch (type) {
             case "race":
@@ -285,6 +205,10 @@ export default function Page({ params }: { params: { slug: string } }) {
                 setPageState(pageStateType.live)
                 break;
         }
+        setTimerActive(true)
+        //set the timeout to 100 seconds
+        setTimerValue(20)
+        setTimerMax(20)
     }
 
     let scrollFlag = false
@@ -303,64 +227,97 @@ export default function Page({ params }: { params: { slug: string } }) {
         }
     });
 
+    const scaleRange = (value: number, r1: number[], r2: number[]) => {
+        return (value - r1[0]!) * (r2[1]! - r2[0]!) / (r1[1]! - r1[0]!) + r2[0]!;
+    }
+
+    const updateCheck = async () => {
+        console.log("refreshing results")
+        let activeFlag = false
+        var races = await DB.getTodaysRaceByClubId(club.id)
+        if (races.length > 0) {
+            for (let i = 0; i < races.length; i++) {
+                const res = await DB.getRaceById(races[i]!.id)
+                if (checkActive(res)) {
+                    setActiveRaceData(res)
+                    activeFlag = true
+                    break
+                }
+            }
+        } else {
+            //there aren't any races today so show info page
+            showPage("", "info")
+        }
+        if (activeFlag) {
+            showPage("", "live")
+        }
+        //if no active races decide if series results or race results are more important.
+        //if it is a trophy day show series results
+        //if it is a normal day show last race results.
+        if (!activeFlag && races.length > 0) {
+            //check if all races have the same series ID
+            let sameSeries = races.flatMap((race) => race.series.id).every((val, i, arr) => val === arr[0])
+            if (sameSeries) {
+                setActiveSeriesData(await DB.GetSeriesById(races[0]!.series.id))
+                setPageState(pageStateType.series)
+            } else {
+                //show the most recent results
+                races.sort((a, b) => { return a.Time < b.Time ? 1 : -1 })
+                showPage(races[0]!.id, "race")
+            }
+        }
+    }
+
+    // useEffect(() => {
+    //     const timer1 = setInterval(async () => {
+    //         updateCheck()
+    //     }, 10000);
+    //     return () => {
+    //         clearTimeout(timer1);
+    //     }
+    // }, [club]);
+
     useEffect(() => {
         animateScroll.scrollToBottom(scrollOptions)
         const fetch = async () => {
-            setClub(await DB.GetClubById(clubId))
+            setClub(await DB.GetClubById(club.id))
         }
-        if (clubId != "") {
+        if (club.id != "") {
             fetch()
         }
         initialize();
-
-    }, [clubId])
+    }, [])
 
     useEffect(() => {
-        const timer1 = setInterval(async () => {
-            console.log("refreshing results")
-            let activeFlag = false
-            var races = await DB.getTodaysRaceByClubId(club.id)
-            if (races.length > 0) {
-                for (let i = 0; i < races.length; i++) {
-                    const res = await DB.getRaceById(races[i]!.id)
-                    if (checkActive(res)) {
-                        setActiveRaceData(res)
-                        activeFlag = true
-                        break
-                    }
-                }
-            } else {
-                //there aren't any races today so show info page
-                showPage("", "info")
-            }
-            if (activeFlag) {
-                showPage("", "live")
-            }
-            //if no active races decide if series results or race results are more important.
-            //if it is a trophy day show series results
-            //if it is a normal day show last race results.
-            if (!activeFlag && races.length > 0) {
-                //check if all races have the same series ID
-                let sameSeries = races.flatMap((race) => race.series.id).every((val, i, arr) => val === arr[0])
-                if (sameSeries) {
-                    setActiveSeriesData(await DB.GetSeriesById(races[0]!.series.id))
-                    setPageState(pageStateType.series)
-                } else {
-                    //show the most recent results
-                    races.sort((a, b) => { return a.Time < b.Time ? 1 : -1 })
-                    showPage(races[0]!.id, "race")
-                }
-            }
-        }, 10000);
-        return () => {
-            clearTimeout(timer1);
+        if (!todaysRacesIsValidating && todaysRaces) {
+            updateCheck()
         }
-    }, [club]);
+    }, [todaysRaces, todaysRacesIsValidating])
+
+
+    useEffect(() => {
+        let localTimer = timerValue
+        if (timerActive) {
+            const timer = setInterval(() => {
+                if (localTimer > 0) {
+                    setTimerValue(prevTime => prevTime - 1)
+                    localTimer = localTimer - 1
+                } else {
+                    mutate('/api/GetTodaysRaceByClubId')
+                    setTimerActive(false)
+                    return
+                }
+            }, 1000)
+            return () => {
+                clearInterval(timer)
+            }
+        }
+    }, [timerActive])
 
 
     return (
         <div>
-            <div className=' absolute right-8 top-8'>
+            <div className='absolute right-8 top-8'>
                 <div className='flex flex-row'>
                     <h1 className={title({ color: "blue" })}>Scan to <br></br>Control</h1>
                     <div onClick={() => window.open(window.location.origin + '/CastControl/' + peerId, '_blank')?.focus()}>
@@ -382,10 +339,24 @@ export default function Page({ params }: { params: { slug: string } }) {
                     </div>
                 </div>
             </div>
+            <div key={JSON.stringify(timerActive)}>
+                {timerActive ?
+                    <div className='absolute left-0 bottom-0 w-full'>
+                        <Progress
+                            color='primary'
+                            size="md"
+                            aria-label="Loading..."
+                            value={scaleRange(timerValue, [0, timerMax], [100, 0])}
+                            className=""
+                            radius='none'
+                        />
+                    </div>
+                    : null}
+            </div>
             <Script type="text/javascript" src="//www.gstatic.com/cast/sdk/libs/receiver/2.0.0/cast_receiver.js" onReady={() => {
                 initializeCastApi()
             }}></Script>
-            <div className='p-4'>
+            <div className='p-6'>
                 <h1 className={title({ color: "blue" })}>SailViz - {club.name}</h1>
             </div>
 
@@ -426,14 +397,26 @@ export default function Page({ params }: { params: { slug: string } }) {
                         );
                     case pageStateType.race:
                         return (
-                            <div className="p-4">
-                                <div className="text-xl font-extrabold p-6">
-                                    {activeRaceData.series.name}: {activeRaceData.number}
-                                </div>
-                                <FleetResultsTable data={activeRaceData.fleets.flatMap(fleet => fleet.results)} startTime={activeRaceData.fleets[0]?.startTime} key={activeRaceData.id} editable={false} showTime={false} />
+                            <div>
+                                {activeRaceData.fleets.map((fleet, index) => {
+                                    return (
+                                        <div key={"fleetResults" + index}>
+                                            <div className="text-4xl font-extrabold p-6">
+                                                {activeRaceData.series.name}: {activeRaceData.number} - {fleet.fleetSettings.name}
+                                            </div>
+                                            {activeRaceData.Type == "Handicap" ?
+                                                <FleetHandicapResultsTable showTime={true} editable={false} fleetId={fleet.id} key={JSON.stringify(activeRaceData)} deleteResult={null} updateResult={null} raceId={fleet.raceId} showEditModal={null} />
+                                                :
+                                                <FleetPursuitResultsTable showTime={true} editable={false} fleetId={fleet.id} key={JSON.stringify(activeRaceData)} deleteResult={null} updateResult={null} raceId={fleet.id} showEditModal={null} />
+                                            }
 
+                                        </div>
+                                    )
+                                })}
                             </div>
-                        );
+                        )
+
+
                     case pageStateType.info:
                         return (
                             <div className="text-6xl font-extrabold p-6">

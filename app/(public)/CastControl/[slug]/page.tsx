@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Peer, DataConnection } from "peerjs";
 import { title } from "components/ui/home/primitaves";
 import * as DB from 'components/apiMethods';
+import { Race } from "@prisma/client";
 
 //club page should contain:
 //list of current series
@@ -134,21 +135,40 @@ export default function Page({ params }: { params: { slug: string } }) {
         signal(JSON.stringify(data))
     }
 
-    const slideShow = (ids: string[], type: string) => {
-        let data = {
-            type: "slideShow",
-            ids: ids,
-            pageType: type
-        }
-        signal(JSON.stringify(data))
-    }
-
     useEffect(() => {
         const fetch = async () => {
             setClub(await DB.GetClubById(clubId))
         }
+        const fetchTodaysRaces = async () => {
+            var data = await DB.getTodaysRaceByClubId(clubId)
+            console.log(data)
+            if (data) {
+                let racesCopy: RaceDataType[] = []
+                for (let i = 0; i < data.length; i++) {
+                    console.log(data[i]!.number)
+                    const res = await DB.getRaceById(data[i]!.id)
+                    racesCopy[i] = res
+                }
+                racesCopy.sort((a: RaceDataType, b: RaceDataType) => a.number - b.number)
+                setRaces(racesCopy)
+                let SeriesIds = racesCopy.flatMap(race => race.seriesId)
+                let uniqueSeriesIds = [...new Set(SeriesIds)]
+                let seriesCopy: SeriesDataType[] = []
+                uniqueSeriesIds.forEach(id => {
+                    DB.GetSeriesById(id).then((data) => {
+                        seriesCopy.push(data)
+                    }
+                    )
+                }
+                )
+                setSeries(seriesCopy)
+            } else {
+                console.log("no races today.")
+            }
+        }
         if (clubId != "") {
             fetch()
+            fetchTodaysRaces()
         }
 
     }, [clubId])
@@ -160,31 +180,30 @@ export default function Page({ params }: { params: { slug: string } }) {
 
     return (
         <div className="flex flex-col px-6">
-            <h1 className={title({ color: "blue" })}>{club.name} - Control</h1>
-            <div className='flex flex-row'>
-                <div className="m-6">
-                    <div onClick={() => sendTheme('light')} className="select-none w-full cursor-pointer text-white bg-blue-600 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-md px-5 py-2.5 text-center mr-3 md:mr-0">
-                        set light theme
-                    </div>
+            <div className="flex flex-col">
+                <div className='flex flex-row mb-2 justify-center'>
+                    <h1 className={title({ color: "blue" })}>{club.name} - Control</h1>
                 </div>
-                <div className="m-6">
-                    <div onClick={() => sendTheme('dark')} className="select-none w-full cursor-pointer text-white bg-blue-600 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-md px-5 py-2.5 text-center mr-3 md:mr-0">
-                        set dark theme
+                <div className='flex flex-row mb-2 justify-center'>
+                    <div className="m-6">
+                        <div onClick={() => sendTheme('light')} className="select-none w-full cursor-pointer text-white bg-blue-600 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-md px-5 py-2.5 text-center mr-3 md:mr-0">
+                            set light theme
+                        </div>
+                    </div>
+                    <div className="m-6">
+                        <div onClick={() => sendTheme('dark')} className="select-none w-full cursor-pointer text-white bg-blue-600 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-md px-5 py-2.5 text-center mr-3 md:mr-0">
+                            set dark theme
+                        </div>
                     </div>
                 </div>
             </div>
             <div className="flex flex-row mb-2 justify-center">
                 <div className='flex flex-col'>
-                    <div className="m-6">
-                        <div onClick={() => slideShow(races.flatMap(race => race.id), "race")} className="select-none w-full cursor-pointer text-white bg-blue-600 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-md px-5 py-2.5 text-center mr-3 md:mr-0">
-                            Race Slideshow
-                        </div>
-                    </div>
                     {races.map((race, index) => {
                         return (
                             <div className="m-6" key={JSON.stringify(races) + index}>
                                 <div onClick={() => showPage(race.id, "race")} className="select-none w-full cursor-pointer text-white bg-blue-600 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-md px-5 py-2.5 text-center mr-3 md:mr-0">
-                                    {race.series.name}: {race.number} at {race.Time.slice(10, 16)}
+                                    {race.series.name}: {race.number}
                                 </div>
 
                             </div>
@@ -192,11 +211,6 @@ export default function Page({ params }: { params: { slug: string } }) {
                     })}
                 </div>
                 <div className='flex flex-col'>
-                    <div className="m-6">
-                        <div onClick={() => slideShow(series.flatMap(serie => serie.id), "series")} className="select-none w-full cursor-pointer text-white bg-blue-600 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-md px-5 py-2.5 text-center mr-3 md:mr-0">
-                            Series Slideshow
-                        </div>
-                    </div>
                     {series.map((series, index) => {
                         return (
                             <div className="m-6" key={JSON.stringify(races) + index}>
