@@ -112,6 +112,10 @@ export default function Page({ params }: { params: { slug: string } }) {
             console.log(data)
             if (data['type'] == 'showPage') {
                 showPage(data['id'], data['pageType'])
+                setTimerActive(true)
+                //set the timeout to 100 seconds
+                setTimerValue(20)
+                setTimerMax(20)
             } else if (data['type'] == 'theme') {
                 console.log(data['theme'])
                 setTheme(data['theme'])
@@ -205,10 +209,6 @@ export default function Page({ params }: { params: { slug: string } }) {
                 setPageState(pageStateType.live)
                 break;
         }
-        setTimerActive(true)
-        //set the timeout to 100 seconds
-        setTimerValue(20)
-        setTimerMax(20)
     }
 
     let scrollFlag = false
@@ -289,7 +289,7 @@ export default function Page({ params }: { params: { slug: string } }) {
     }, [])
 
     useEffect(() => {
-        if (!todaysRacesIsValidating && todaysRaces) {
+        if (!todaysRacesIsValidating && todaysRaces && !timerActive) {
             updateCheck()
         }
     }, [todaysRaces, todaysRacesIsValidating])
