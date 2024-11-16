@@ -663,44 +663,6 @@ export async function DeleteLapById(lapId: string): Promise<LapDataType> {
         });
 };
 
-export async function GetChromecastByClubId(clubId: string): Promise<ChromecastDataType[]> {
-    const body = {
-        clubId: clubId,
-    }
-    return await fetch(`${server}/api/GetChromecastByClubId`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-    })
-        .then((res) => res.json())
-        .then(async (data) => {
-            if (data && data.error) {
-                console.log(data.message)
-            } else {
-                return data.chromecasts
-            }
-        });
-};
-
-export async function CreateChromecast(chromecast: ChromecastDataType): Promise<ChromecastDataType> {
-    const body = {
-        chromecast: chromecast,
-    }
-    return await fetch(`${server}/api/CreateChromecast`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-    })
-        .then((res) => res.json())
-        .then(async (data) => {
-            if (data && data.error) {
-                console.log(data.message)
-            } else {
-                return data.chromecast
-            }
-        });
-};
-
 export async function GetUsersByClubId(clubId: string): Promise<UserDataType[]> {
     const body = {
         clubId: clubId,

@@ -89,21 +89,6 @@ type ClubDataType = {
   boats: BoatDataType[];
 };
 
-type ChromecastDataType = {
-  id: string;
-  name: string;
-  host: string;
-  clubId: string;
-  settings: object;
-  status?: string;
-};
-
-type AvailableCastType = {
-  name: string;
-  host: string;
-  connected: boolean;
-};
-
 type UserDataType = {
   id: string;
   displayName: string;

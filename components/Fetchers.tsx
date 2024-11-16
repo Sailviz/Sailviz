@@ -159,7 +159,7 @@ export function GetTodaysRaceByClubId(club: ClubDataType) {
 }
 
 export function GetFleetSettingsBySeriesId(seriesId: string) {
-    const { data, error, isValidating } = useSWR(seriesId != "" ? `/api/GetFleetSettingsBySeriesId?id=${seriesId}` : null, fetcher)
+    const { data, error, isValidating } = useSWR(seriesId != "" ? `/api/GetFleetSettingsBySeriesId?id=${seriesId}` : null, fetcher, { refreshInterval: 10000 })
     console.log(data)
     return {
         fleetSettings: data as FleetSettingsType[],
