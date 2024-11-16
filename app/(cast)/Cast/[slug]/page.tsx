@@ -17,15 +17,6 @@ import * as Fetcher from 'components/Fetchers';
 import { mutate } from 'swr';
 
 
-
-const namespace = 'urn:x-cast:com.sailviz';
-
-declare global {
-    interface Window { castReceiverManager: any; messageBus: any; }
-}
-
-declare var cast: any;
-
 enum pageStateType {
     live,
     series,
@@ -127,54 +118,6 @@ export default function Page({ params }: { params: { slug: string } }) {
         });
     }
 
-    const initializeCastApi = () => {
-        //check if running on a chromecast
-        let userAgent = navigator.userAgent
-        if (!userAgent.includes("CrKey")) {
-            console.log("Not running on chromecast - not loading receiver api")
-            return
-        }
-        window.castReceiverManager = cast.receiver.CastReceiverManager.getInstance();
-        console.log('Starting Receiver Manager');
-
-        window.castReceiverManager.onReady = function (event: any) {
-            window.castReceiverManager.setApplicationState('chromecast-dashboard is ready...');
-        };
-
-        window.castReceiverManager.onSenderConnected = function (event: any) {
-            console.log('Received Sender Connected event: ' + event.senderId);
-        };
-
-        window.castReceiverManager.onSenderDisconnected = function (event: any) {
-            console.log('Received Sender Disconnected event: ' + event.senderId);
-        };
-
-        window.messageBus =
-            window.castReceiverManager.getCastMessageBus(
-                namespace, cast.receiver.CastMessageBus.MessageType.JSON);
-
-        window.messageBus.onMessage = function (event: any) {
-            //remove any existing intervals
-            if (interval != null) { clearInterval(interval) }
-
-            console.log('Message [' + event.senderId + ']: ' + event.data);
-
-            if (event.data['type'] == 'showPage') {
-                showPage(event.data['id'], event.data['pageType'])
-                window.messageBus.send(event.senderId, new Date().toISOString());
-            } else if (event.data['type'] == 'theme') {
-                setTheme(event.data['theme'])
-                window.messageBus.send(event.senderId, new Date().toISOString());
-            } else {
-                window.messageBus.send(event.senderId, new Date().toISOString());
-            }
-        }
-
-        // Initialize the CastReceiverManager with an application status message.
-        window.castReceiverManager.start({ statusText: 'Application is starting' });
-        console.log('Receiver Manager started');
-
-    }
 
     const checkActive = (race: RaceDataType) => {
         if (race.fleets.length == 0) {
@@ -353,9 +296,6 @@ export default function Page({ params }: { params: { slug: string } }) {
                     </div>
                     : null}
             </div>
-            <Script type="text/javascript" src="//www.gstatic.com/cast/sdk/libs/receiver/2.0.0/cast_receiver.js" onReady={() => {
-                initializeCastApi()
-            }}></Script>
             <div className='p-6'>
                 <h1 className={title({ color: "blue" })}>SailViz - {club.name}</h1>
             </div>
