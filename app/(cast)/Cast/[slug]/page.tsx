@@ -41,7 +41,7 @@ export default function Page({ params }: { params: { slug: string } }) {
 
     const { Image: QRCode } = useQRCode()
 
-    const [club, setClub] = useState<ClubDataType>({ id: params.slug, name: "" } as ClubDataType)
+    const [club, setClub] = useState<ClubDataType>({ id: params.slug } as ClubDataType)
 
     const { todaysRaces, todaysRacesIsError, todaysRacesIsValidating } = Fetcher.GetTodaysRaceByClubId(club)
 
@@ -95,7 +95,13 @@ export default function Page({ params }: { params: { slug: string } }) {
         //delay to allow peer to connect before sending data
         setTimeout(() => {
             conn!.send(JSON.stringify({ type: 'clubId', clubId: club.id }));
-        }, 100)
+        }, 400)
+        setTimeout(() => {
+            conn!.send(JSON.stringify({ type: 'clubId', clubId: club.id }));
+        }, 800)
+        setTimeout(() => {
+            conn!.send(JSON.stringify({ type: 'clubId', clubId: club.id }));
+        }, 1200)
         conn!.on('data', function (datastring) {
             console.log("Data recieved");
             console.log("datastring: " + datastring)
