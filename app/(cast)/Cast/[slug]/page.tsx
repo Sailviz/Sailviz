@@ -41,7 +41,7 @@ export default function Page({ params }: { params: { slug: string } }) {
 
     const { Image: QRCode } = useQRCode()
 
-    const [club, setClub] = useState<ClubDataType>({ id: params.slug } as ClubDataType)
+    const [club, setClub] = useState<ClubDataType>({ id: params.slug, name: "" } as ClubDataType)
 
     const { todaysRaces, todaysRacesIsError, todaysRacesIsValidating } = Fetcher.GetTodaysRaceByClubId(club)
 
