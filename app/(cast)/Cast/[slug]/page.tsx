@@ -15,6 +15,7 @@ import FleetPursuitResultsTable from 'components/tables/FleetPursuitResultsTable
 import { Progress } from '@nextui-org/react';
 import * as Fetcher from 'components/Fetchers';
 import { mutate } from 'swr';
+import { set } from 'cypress/types/lodash';
 
 
 enum pageStateType {
@@ -55,6 +56,8 @@ export default function Page({ params }: { params: { slug: string } }) {
     const [timerActive, setTimerActive] = useState<boolean>(false)
     const [timerMax, setTimerMax] = useState<number>(0)
 
+    const [origin, setOrigin] = useState<string>("")
+
     var peer: Peer;
     var conn: DataConnection | null;
 
@@ -92,16 +95,6 @@ export default function Page({ params }: { params: { slug: string } }) {
      * Defines callbacks to handle incoming data and connection events.
      */
     const ready = () => {
-        //delay to allow peer to connect before sending data
-        setTimeout(() => {
-            conn!.send(JSON.stringify({ type: 'clubId', clubId: club.id }));
-        }, 400)
-        setTimeout(() => {
-            conn!.send(JSON.stringify({ type: 'clubId', clubId: club.id }));
-        }, 800)
-        setTimeout(() => {
-            conn!.send(JSON.stringify({ type: 'clubId', clubId: club.id }));
-        }, 1200)
         conn!.on('data', function (datastring) {
             console.log("Data recieved");
             console.log("datastring: " + datastring)
@@ -233,6 +226,7 @@ export default function Page({ params }: { params: { slug: string } }) {
         }
         if (club.id != "") {
             fetch()
+            setOrigin(window.location.origin)
         }
         initialize();
     }, [])
@@ -270,8 +264,9 @@ export default function Page({ params }: { params: { slug: string } }) {
                 <div className='flex flex-row'>
                     <h1 className={title({ color: "blue" })}>Scan to <br></br>Control</h1>
                     <div onClick={() => window.open(window.location.origin + '/CastControl/' + peerId, '_blank')?.focus()}>
+
                         <QRCode
-                            text={window.location.origin + '/CastControl/' + peerId}
+                            text={origin + '/CastControl/' + peerId + '?clubId=' + club.id}
                             options={{
                                 type: 'image/jpeg',
                                 quality: 0.3,
@@ -285,6 +280,7 @@ export default function Page({ params }: { params: { slug: string } }) {
                                 },
                             }}
                         />
+
                     </div>
                 </div>
             </div>

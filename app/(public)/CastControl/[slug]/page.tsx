@@ -4,6 +4,7 @@ import { Peer, DataConnection } from "peerjs";
 import { title } from "components/ui/home/primitaves";
 import * as DB from 'components/apiMethods';
 import { Race } from "@prisma/client";
+import { useSearchParams } from 'next/navigation'
 
 //club page should contain:
 //list of current series
@@ -14,8 +15,9 @@ var peer: Peer = new Peer()
 var conn: DataConnection | null = null;
 
 export default function Page({ params }: { params: { slug: string } }) {
+    const searchParams = useSearchParams();
 
-    const [clubId, setClubId] = useState<string>('')
+    const [clubId, setClubId] = useState<string>(searchParams.get('clubId') || "")
     const [club, setClub] = useState<ClubDataType>({} as ClubDataType)
     const [races, setRaces] = useState<any[]>([])
     const [series, setSeries] = useState<any[]>([])
@@ -136,6 +138,7 @@ export default function Page({ params }: { params: { slug: string } }) {
     }
 
     useEffect(() => {
+        initialize()
         const fetch = async () => {
             setClub(await DB.GetClubById(clubId))
         }
@@ -172,11 +175,6 @@ export default function Page({ params }: { params: { slug: string } }) {
         }
 
     }, [clubId])
-
-    // Since all our callbacks are setup, start the process of obtaining an ID
-    useEffect(() => {
-        initialize();
-    }, [])
 
     return (
         <div className="flex flex-col px-6">
