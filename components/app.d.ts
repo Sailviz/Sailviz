@@ -70,6 +70,7 @@ type ClubSettingsType = {
   hornIP: string;
   pursuitLength: number;
   clockOffset: number;
+  duties: string[];
 };
 
 type BoatDataType = {
