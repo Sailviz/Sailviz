@@ -15,6 +15,7 @@ import ProgressModal from "components/ui/dashboard/ProgressModal";
 import EditResultModal from "components/ui/dashboard/EditResultModal";
 import { mutate } from "swr";
 import ViewResultModal from "components/ui/dashboard/viewResultModal";
+import { json } from "stream/consumers";
 
 export default function Page({ params }: { params: { slug: string } }) {
 
@@ -25,7 +26,7 @@ export default function Page({ params }: { params: { slug: string } }) {
     const { boats, boatsIsError, boatsIsValidating } = Fetcher.Boats()
 
     //TODO implement timer on fetch
-    const { race, raceIsError, raceIsValidating } = Fetcher.Race(params.slug, true)
+    const { race, raceIsError, raceIsValidating, mutateRace } = Fetcher.Race(params.slug, true)
 
     const [seriesName, setSeriesName] = useState("")
 
@@ -140,6 +141,26 @@ export default function Page({ params }: { params: { slug: string } }) {
         mutate('/api/GetRaceById?id=' + race.id)
     }
 
+    const copyFromPrevious = async () => {
+        let previousRaces = await DB.getTodaysRaceByClubId(club.id)
+        //sort by time and select most recent.
+        previousRaces.sort((a, b) => dayjs(a.Time).unix() - dayjs(b.Time).unix())
+        let previousRace = previousRaces[0]
+        if (previousRace == undefined) {
+            alert("No previous race found")
+            return
+        }
+        let previousRaceData = await DB.getRaceById(previousRace.id)
+        //copy duties
+        let newDuties = previousRaceData.Duties
+        //update DB
+        console.log(newDuties)
+        await DB.updateRaceById({ ...race, Duties: newDuties })
+        mutateRace()
+
+    }
+
+
     const entryFileUploadHandler = async (e: ChangeEvent<HTMLInputElement>) => {
         progressModal.onOpen()
         setProgressIndeterminate(true)
@@ -212,7 +233,7 @@ export default function Page({ params }: { params: { slug: string } }) {
         }
     }, [race])
 
-    if (userIsValidating || clubIsValidating || user == undefined || club == undefined || boats == undefined || raceIsValidating || race == undefined) {
+    if (userIsValidating || clubIsValidating || raceIsValidating || user == undefined || club == undefined || boats == undefined || race == undefined) {
         return (
             <PageSkeleton />
         )
@@ -236,7 +257,7 @@ export default function Page({ params }: { params: { slug: string } }) {
                     </div>
                     <div className="py-4 w-3/5 justify-center">
                         <p className="text-xl font-medium text-center">Duty Team</p>
-                        <div className="flex flex-wrap">
+                        <div className="flex flex-wrap" key={JSON.stringify(race.Duties)}>
                             {Object.entries(race.Duties).map(([displayName, name], index) => {
                                 return (
                                     <div key={"duty" + index} className="flex-col w-1/4 mr-4">
@@ -244,14 +265,18 @@ export default function Page({ params }: { params: { slug: string } }) {
                                             <label htmlFor={displayName}
                                                 className="block mb-2 font-medium text-gray-900 dark:text-white w-1/4">{displayName}</label>
                                             <Input type="text" id={displayName}
-                                                defaultValue={name as unknown as string}
+                                                defaultValue={name as unknown as string} //seems to be a bug, so explicitly cast
                                                 onBlur={saveRaceSettings}
                                             />
                                         </div>
                                     </div>
                                 )
                             })}
-
+                            <div className="w-1/4 mr-4 pb-4 pt-6">
+                                <Button color="warning" onClick={copyFromPrevious}>
+                                    Copy from previous race
+                                </Button>
+                            </div>
                         </div>
                     </div>
                     <div className="py-4 w-4/5">
@@ -299,6 +324,6 @@ export default function Page({ params }: { params: { slug: string } }) {
                     </div>
                 </div>
             </div>
-        </div>
+        </div >
     )
 }
