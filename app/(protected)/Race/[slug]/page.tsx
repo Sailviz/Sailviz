@@ -78,36 +78,15 @@ export default function Page({ params }: { params: { slug: string } }) {
     }
 
     //Capitalise the first letter of each word, and maintain cursor pos.
-    const saveRaceSettings = (e: ChangeEvent<HTMLInputElement>) => {
+    const saveRaceSettings = (e: any) => {
         let newRaceData: RaceDataType = race
         const sentence = e.target.value.split(' ');
         const cursorPos = e.target.selectionStart
-        const capitalizedWords = sentence.map(word => word.charAt(0).toUpperCase() + word.slice(1));
+        const capitalizedWords = sentence.map((word: string) => word.charAt(0).toUpperCase() + word.slice(1));
         const calitalisedSentence = capitalizedWords.join(' ')
 
-        // use e.target.id to update the correct field in the race data
-        switch (e.target.id) {
-            case "OOD":
-                newRaceData.OOD = calitalisedSentence
-                break;
-            case "AOD":
-                newRaceData.AOD = calitalisedSentence
-                break;
-            case "SO":
-                newRaceData.SO = calitalisedSentence
-                break;
-            case "ASO":
-                newRaceData.ASO = calitalisedSentence
-                break;
-            case "Time":
-                newRaceData.Time = e.target.value
-                break;
-            case "raceType":
-                newRaceData.Type = e.target.value
-                break;
-            default:
-                break;
-        }
+        newRaceData.Duties[e.target.id] = calitalisedSentence
+        DB.updateRaceById(newRaceData)
         mutate('/api/GetRaceById?id=' + race.id)
 
         let inputElement = document.getElementById(e.target.id) as HTMLInputElement
@@ -238,6 +217,7 @@ export default function Page({ params }: { params: { slug: string } }) {
             <PageSkeleton />
         )
     }
+    console.log(Object.entries(race.Duties))
     return (
         <div id="race" className='h-full w-full overflow-y-auto'>
             <CreateResultModal isOpen={createModal.isOpen} races={[race]} boats={boats} onSubmit={createResult} onClose={createModal.onClose} />
@@ -256,49 +236,23 @@ export default function Page({ params }: { params: { slug: string } }) {
                     </div>
                     <div className="py-4 w-3/5 justify-center">
                         <p className="text-xl font-medium text-center">Duty Team</p>
-                        <form className="flex">
-                            <div className="flex-col w-full mr-4">
-                                <div className="flex items-center py-4">
-                                    <label htmlFor="RO"
-                                        className="block mb-2 font-medium text-gray-900 dark:text-white w-1/4">RO</label>
-                                    <Input type="text" id="RO"
-                                        placeholder="Race Officer" />
-                                </div>
-                                <div className="flex items-center">
-                                    <label htmlFor="ARO"
-                                        className="block mb-2 font-medium text-gray-900 dark:text-white w-1/4">ARO</label>
-                                    <Input type="text" id="ARO"
-                                        placeholder="Assistant Race Officer" />
-                                </div>
-                            </div>
-                            <div className="flex-col w-full mr-4">
-                                <div className="flex items-center py-4">
-                                    <label htmlFor="SO"
-                                        className="block mb-2 font-medium text-gray-900 dark:text-white w-1/4">SO</label>
-                                    <Input type="text" id="SO"
-                                        placeholder="Safety Officer" />
-                                </div>
-                                <div className="flex items-center">
-                                    <label htmlFor="ASO"
-                                        className="block mb-2 font-medium text-gray-900 dark:text-white w-1/4">ASO</label>
-                                    <Input type="text" id="ASO"
-                                        placeholder="Assistant Safety Officer" />
-                                </div>
-                            </div>
-                            <div className="flex-col w-full mr-4">
-                                <div className="flex items-center py-4">
-                                    <label htmlFor="DO"
-                                        className="block mb-2 font-medium text-gray-900 dark:text-white w-1/4">DO</label>
-                                    <Input type="text" id="DO"
-                                        placeholder="Duty Officer" />
-                                </div>
-                                <div className="flex items-center justify-center">
-                                    <Button isDisabled color="warning">
-                                        Copy from previous race
-                                    </Button>
-                                </div>
-                            </div>
-                        </form>
+                        <div className="flex flex-wrap">
+                            {Object.entries(race.Duties).map(([displayName, name], index) => {
+                                return (
+                                    <div key={"duty" + index} className="flex-col w-1/4 mr-4">
+                                        <div className="flex items-center py-4">
+                                            <label htmlFor={displayName}
+                                                className="block mb-2 font-medium text-gray-900 dark:text-white w-1/4">{displayName}</label>
+                                            <Input type="text" id={displayName}
+                                                defaultValue={name as unknown as string}
+                                                onBlur={saveRaceSettings}
+                                            />
+                                        </div>
+                                    </div>
+                                )
+                            })}
+
+                        </div>
                     </div>
                     <div className="py-4 w-4/5">
                         <div className="flex flex-wrap justify-center">
