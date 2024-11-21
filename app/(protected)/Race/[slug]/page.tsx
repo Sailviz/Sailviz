@@ -10,7 +10,7 @@ import * as Fetcher from 'components/Fetchers';
 import { AVAILABLE_PERMISSIONS, userHasPermission } from "components/helpers/users";
 import { PageSkeleton } from "components/ui/PageSkeleton";
 import { BreadcrumbItem, Breadcrumbs, Button, Input, useDisclosure } from "@nextui-org/react";
-import CreateResultModal from "components/ui/CreateResultModal";
+import CreateResultModal from "components/ui/dashboard/CreateResultModal";
 import ProgressModal from "components/ui/dashboard/ProgressModal";
 import EditResultModal from "components/ui/dashboard/EditResultModal";
 import { mutate } from "swr";
@@ -42,18 +42,15 @@ export default function Page({ params }: { params: { slug: string } }) {
     var [activeFleet, setActiveFleet] = useState<FleetDataType>()
 
 
-    const createResult = async (helm: string, crew: string, boat: BoatDataType, sailNum: string, fleetId: string[]) => {
+    const createResult = async (helm: string, crew: string, boat: BoatDataType, sailNum: string, fleetId: string) => {
         //create a result for each fleet
-        fleetId.forEach(async fleetId => {
-            let result = await DB.createResult(fleetId)
-            await DB.updateResult({ ...result, Helm: helm, Crew: crew, boat: boat, SailNumber: sailNum })
-        })
+        let result = await DB.createResult(fleetId)
+        await DB.updateResult({ ...result, Helm: helm, Crew: crew, boat: boat, SailNumber: sailNum })
+
         console.log(helm, crew, boat, sailNum, fleetId)
         createModal.onClose() //close modal
 
-        fleetId.forEach(fleetId => {
-            mutate('/api/GetFleetById?id=' + fleetId)
-        })
+        mutate('/api/GetFleetById?id=' + fleetId)
     }
 
     const updateResult = async (result: ResultsDataType) => {
@@ -240,7 +237,7 @@ export default function Page({ params }: { params: { slug: string } }) {
     }
     return (
         <div id="race" className='h-full w-full overflow-y-auto'>
-            <CreateResultModal isOpen={createModal.isOpen} races={[race]} boats={boats} onSubmit={createResult} onClose={createModal.onClose} />
+            <CreateResultModal isOpen={createModal.isOpen} race={race} boats={boats} onSubmit={createResult} onClose={createModal.onClose} />
             <ProgressModal key={progressValue} isOpen={progressModal.isOpen} Value={progressValue} Max={progressMax} Indeterminate={progressIndeterminate} onClose={progressModal.onClose} />
             <EditResultModal isOpen={editModal.isOpen} fleet={activeFleet} result={activeResult} onSubmit={updateResult} onDelete={deleteResult} onClose={editModal.onClose} />
             <ViewResultModal isOpen={viewModal.isOpen} result={activeResult} fleet={activeFleet} onClose={viewModal.onClose} />
