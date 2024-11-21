@@ -38,6 +38,7 @@ type ResultsDataType = {
   boat: BoatDataType;
   SailNumber: string;
   finishTime: number;
+  numberLaps: number;
   laps: LapDataType[];
   CorrectedTime: number;
   PursuitPosition: number;

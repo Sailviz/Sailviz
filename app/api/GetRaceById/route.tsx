@@ -25,7 +25,7 @@ async function findRace(id: any, results: boolean) {
                                         orderBy: {
                                             time: 'asc'
                                         }
-                                    }
+                                    },
                                 }
                             },
                         } : {},

@@ -73,10 +73,6 @@ model Race {
   id       String   @id @unique @default(uuid())
   number   Int
   Time     String
-  OOD      String
-  AOD      String
-  SO       String
-  ASO      String
   fleets   Fleet[]
   Type     String
   series   Series   @relation(fields: [seriesId], references: [id], onDelete: Cascade)
@@ -119,6 +115,7 @@ model Result {
   boatId          String?
   SailNumber      String
   finishTime      Int
+  numberLaps      Int
   laps            Lap[]
   CorrectedTime   Float
   HandicapPosition Int
