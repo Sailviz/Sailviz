@@ -59,6 +59,7 @@ export default function Page({ params }: { params: { slug: string } }) {
         SailNumber: "",
         finishTime: 0,
         CorrectedTime: 0,
+        numberLaps: 0,
         laps: [{
             time: 0,
             id: "",
@@ -349,12 +350,18 @@ export default function Page({ params }: { params: { slug: string } }) {
 
             //calculate corrected time
             resultsData.forEach(result => {
+                console.log(result)
+                //if we don't have a number of laps, set it to the number of laps
+                if (result.numberLaps == 0) {
+                    result.numberLaps = result.laps.length
+                }
                 if (result.finishTime == 0) {
                     result.CorrectedTime = 0
                     return
                 }
+                console.log(result.numberLaps)
                 let seconds = result.finishTime - fleet.startTime
-                result.CorrectedTime = (seconds * 1000 * (maxLaps / result.laps.length)) / result.boat.py
+                result.CorrectedTime = (seconds * 1000 * (maxLaps / result.numberLaps)) / result.boat.py
                 result.CorrectedTime = Math.round(result.CorrectedTime * 10) / 10
             });
 

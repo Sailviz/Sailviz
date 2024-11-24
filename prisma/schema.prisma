@@ -74,6 +74,7 @@ model Race {
   number   Int
   Time     String
   Duties   Json // should be in the format of { "OD": "John Smith", "Safety": "Jane Doe" } for example. the key is then used to display.
+
   fleets   Fleet[]
   Type     String
   series   Series   @relation(fields: [seriesId], references: [id], onDelete: Cascade)
@@ -116,6 +117,7 @@ model Result {
   boatId          String?
   SailNumber      String
   finishTime      Int
+  numberLaps      Int
   laps            Lap[]
   CorrectedTime   Float
   HandicapPosition Int
