@@ -17,10 +17,7 @@ export default function Page({ params }: { params: { slug: string } }) {
         id: "",
         number: 0,
         Time: "",
-        OOD: "",
-        AOD: "",
-        SO: "",
-        ASO: "",
+        Duties: [{} as DutyDataType],
         fleets: [{
             id: "",
             startTime: 0,
@@ -96,9 +93,9 @@ export default function Page({ params }: { params: { slug: string } }) {
         <div className="h-full overflow-y-auto p-6" ref={contentRef}>
             <p className="text-2xl">{race.series.name} - Race {race.number} ({dayjs(race.Time).format('DD/MM/YYYY HH:mm')})</p>
             {race.Type == "Handicap" ?
-                <HandicapPaperResultsTable results={race.fleets.flatMap(fleet => fleet.results)} key={JSON.stringify(race)}  />
+                <HandicapPaperResultsTable results={race.fleets.flatMap(fleet => fleet.results)} key={JSON.stringify(race)} />
                 :
-                <PursuitPaperResultsTable results={race.fleets.flatMap(fleet => fleet.results)} key={JSON.stringify(race)}  />
+                <PursuitPaperResultsTable results={race.fleets.flatMap(fleet => fleet.results)} key={JSON.stringify(race)} />
             }
         </div>
     )

@@ -95,7 +95,31 @@ const SeriesResultsTable = (props: any) => {
                 }
 
             })
+
         });
+
+        //give duty team their average score if they have raced in the series
+        seriesData.races.forEach(race => {
+            //loop through duty team on each race.
+            Object.entries(race.Duties).map(([displayName, name]) => {
+                let index = tempresults.findIndex(function (t) {
+                    return (t.Helm == name as unknown as string) //cast to unknown to avoid type error
+                })
+                if (index != -1) {
+                    //get average score
+                    let total = 0
+                    let count = 0
+                    tempresults[index]!.racePositions.forEach((position, i) => {
+                        if (position != 0) {
+                            total += position
+                            count++
+                        }
+                    })
+                    let average = total / count
+                    tempresults[index]!.racePositions.splice(race.number - 1, 1, average)
+                }
+            })
+        })
 
         //fill dnc
         tempresults.forEach((result, i) => {
