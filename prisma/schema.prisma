@@ -118,6 +118,7 @@ model Result {
   SailNumber      String
   finishTime      Int
   laps            Lap[]
+  numberLaps      Int
   CorrectedTime   Float
   HandicapPosition Int
   PursuitPosition Int
