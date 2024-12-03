@@ -12,7 +12,7 @@ type SeriesResultsType = {
     SailNumber: string;
     Total: number;
     Net: number;
-    racePositions: number[];
+    racePositions: { race: number, position: number, discarded: boolean }[];
 }
 
 
@@ -29,8 +29,20 @@ const Text = ({ ...props }) => {
 const Number = ({ ...props }: any) => {
     const initialValue = props.getValue()
     const [value, setValue] = React.useState(initialValue)
+    const [discarded, setDiscarded] = React.useState(props.discarded)
     return (
-        <div>
+        <div className={discarded ? 'line-through' : ''}>
+            {Math.round(value)}
+        </div>
+    );
+};
+
+const Result = ({ ...props }: any) => {
+    const initialValue = props.getValue()
+    const [value, setValue] = React.useState(initialValue.position)
+    const [discarded, setDiscarded] = React.useState(initialValue.discarded)
+    return (
+        <div className={discarded ? 'line-through' : ''}>
             {Math.round(value)}
         </div>
     );
@@ -83,13 +95,13 @@ const SeriesResultsTable = (props: any) => {
                         SailNumber: result.SailNumber,
                         Total: 0,
                         Net: 0,
-                        racePositions: Array(seriesData.races.length).fill(0),
+                        racePositions: Array(seriesData.races.length).fill({ position: 0, discarded: false })
                     })
                     index -= 1
                 }
                 //add result to tempresults
                 if (tempresults[index]) {
-                    tempresults[index]!.racePositions.splice(race.number - 1, 1, result.HandicapPosition)
+                    tempresults[index]!.racePositions.splice(race.number - 1, 1, { race: race.number, position: result.HandicapPosition, discarded: false })
                 } else {
                     console.log("something went wrong")
                 }
@@ -110,13 +122,13 @@ const SeriesResultsTable = (props: any) => {
                     let total = 0
                     let count = 0
                     tempresults[index]!.racePositions.forEach((position, i) => {
-                        if (position != 0) {
-                            total += position
+                        if (position.position != 0) {
+                            total += position.position
                             count++
                         }
                     })
                     let average = total / count
-                    tempresults[index]!.racePositions.splice(race.number - 1, 1, average)
+                    tempresults[index]!.racePositions.splice(race.number - 1, 1, { race: race.number, position: average, discarded: false })
                 }
             })
         })
@@ -124,28 +136,36 @@ const SeriesResultsTable = (props: any) => {
         //fill dnc
         tempresults.forEach((result, i) => {
             result.racePositions.forEach((position, j) => {
-                if (position == 0) {
+                if (position.position == 0) {
                     //set to number of series entrants + 1
-                    tempresults[i]!.racePositions[j] = tempresults.length + 1
+                    tempresults[i]!.racePositions[j] = { race: j, position: tempresults.length + 1, discarded: false }
                 }
             })
         })
         //calculate total
         tempresults.forEach(result => {
-            result.Total = result.racePositions.reduce((partialSum, a) => partialSum + a, 0)
+            result.Total = result.racePositions.reduce((partialSum, a) => partialSum + a.position, 0)
         })
         //calculate discards/net
         tempresults.forEach(result => {
             let sortedResult = JSON.parse(JSON.stringify(result)) as SeriesResultsType
-            sortedResult.racePositions.sort((a, b) => a - b)
+            sortedResult.racePositions.sort((a, b) => a.position - b.position)
             let Net = 0
-            sortedResult.racePositions.forEach((position, index) => {
+            let modifiedResult = sortedResult.racePositions.map((position, index) => {
                 if (index < seriesData.settings.numberToCount) {
-                    Net += position
+                    Net += position.position;
+                    return { ...position, discarded: false }; // Ensure discarded is false for counted positions
+                } else {
+                    return { ...position, discarded: true }; // Mark position as discarded
                 }
-            })
+            });
             result.Net = Net
+            //sort race positions by race number
+            result.racePositions = modifiedResult
+            result.racePositions.sort((a, b) => a.race - b.race)
         })
+        console.log(tempresults)
+
 
         //sort results by Net, split results if necessary
         tempresults.sort((a: SeriesResultsType, b: SeriesResultsType) => {
@@ -159,15 +179,15 @@ const SeriesResultsTable = (props: any) => {
                 let result = 0
                 for (let i = 1; i < 1000; i++) {
                     //calculate number of positions.
-                    let aNumber = a.racePositions.reduce((partialSum: number, position: number) => {
-                        if (position == i) {
+                    let aNumber = a.racePositions.reduce((partialSum: number, position: { position: number, discarded: boolean }) => {
+                        if (position.position == i) {
                             return partialSum + 1
                         } else {
                             return partialSum
                         }
                     }, 0)
-                    let bNumber = b.racePositions.reduce((partialSum: number, position: number) => {
-                        if (position == i) {
+                    let bNumber = b.racePositions.reduce((partialSum: number, position: { position: number, discarded: boolean }) => {
+                        if (position.position == i) {
                             return partialSum + 1
                         }
                         else {
@@ -182,6 +202,7 @@ const SeriesResultsTable = (props: any) => {
                         break
                     }
                 }
+
                 return result
             }
         })
@@ -239,9 +260,9 @@ const SeriesResultsTable = (props: any) => {
     //add column for each race in series
     seriesData.races.forEach((race: RaceDataType, index: number) => {
         const newColumn = columnHelper.accessor((data) => data.racePositions[index], {
-            id: "R" + race.number.toString(),
+            id: race.number.toString(),
             header: "R" + race.number.toString(),
-            cell: props => <Number {...props} disabled={true} />,
+            cell: props => <Result {...props} disabled={true} />,
             enableSorting: false
         })
         columns.push(newColumn)
