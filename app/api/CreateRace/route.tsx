@@ -12,16 +12,13 @@ async function findRace(seriesId: any) {
     return result;
 }
 
-async function createRace(number: number, seriesId: any, time: any) {
+async function createRace(number: number, seriesId: any, time: any, duties: object) {
     var res = await prisma.race.create({
         data: {
             number: number,
             Time: time,
             Type: "Handicap",
-            OOD: "",
-            AOD: "",
-            SO: "",
-            ASO: "",
+            Duties: duties,
             series: {
                 connect: {
                     id: seriesId
@@ -75,6 +72,20 @@ export async function POST(request: NextRequest) {
     var clubId = req.clubId
     var time = req.time
 
+    var clubdata = await prisma.club.findUnique({
+        where: {
+            id: clubId
+        }
+    })
+    if (!clubdata) {
+        return NextResponse.json({ error: true, message: 'Could not find club' });
+    }
+    let club = { ...clubdata } as ClubDataType
+    let duties = club.settings!.duties.reduce((obj, key, index) => {
+        obj[key] = "";
+        return obj;
+    }, {} as { [key: string]: any });
+
     var races: RaceDataType[] = (await findRace(seriesId)) as RaceDataType[]
     var number = 1
     //this numbers the race with the lowest number that is not being used.
@@ -82,7 +93,7 @@ export async function POST(request: NextRequest) {
         number++;
     }
     if (races) {
-        var race = await createRace(number, seriesId, time)
+        var race = await createRace(number, seriesId, time, duties)
         createFleets(race.id, seriesId)
         return NextResponse.json({ error: false, race: race });
     }

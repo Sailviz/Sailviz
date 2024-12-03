@@ -19,10 +19,7 @@ export default function Page({ params }: { params: { slug: string } }) {
         id: "",
         number: 0,
         Time: "",
-        OOD: "",
-        AOD: "",
-        SO: "",
-        ASO: "",
+        Duties: [{} as DutyDataType],
         fleets: [{
             raceId: "",
             id: "",

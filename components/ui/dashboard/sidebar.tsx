@@ -84,10 +84,10 @@ export const SidebarWrapper = () => {
                         <SidebarMenu title="Admin">
                             <CollapseItems
                                 icon={<SettingsIcon />}
-                                isActive={pathname === "/Dashboard/Boats" || pathname === "/Dashboard/Hardware" || pathname === "/Dashboard/Integrations"}
-                                items={["Boats", "Hardware", "Integrations"]}
+                                isActive={pathname === "/Dashboard/Club" || pathname === "/Dashboard/Boats" || pathname === "/Dashboard/Hardware" || pathname === "/Dashboard/Integrations"}
+                                items={["Club", "Boats", "Hardware", "Integrations"]}
                                 title="Settings"
-                                hrefs={["/Dashboard/Boats", "/Dashboard/Hardware", "/Dashboard/Integrations"]}
+                                hrefs={["/Dashboard/Club", "/Dashboard/Boats", "/Dashboard/Hardware", "/Dashboard/Integrations"]}
                             />
                             <SidebarItem
                                 isActive={pathname === "/Dashboard/Users"}

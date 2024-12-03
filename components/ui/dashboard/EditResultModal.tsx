@@ -23,12 +23,10 @@ export default function EditResultModal({ isOpen, result, fleet, onSubmit, onClo
     const [lapsAdvancedMode, setLapsAdvancedMode] = useState(false)
     const [resultCodeOption, setResultCodeOption] = useState({ label: "", value: "" })
     const [boatOption, setBoatOption] = useState({ label: "", value: {} as BoatDataType })
-    const [laps, setLaps] = useState([] as LapDataType[])
-    let finishTime = 0
+    const [numberLaps, setNumberLaps] = useState(0)
 
     const [finished, setFinished] = useState(false)
 
-    const [basicNumLaps, setBasicNumLaps] = useState(0)
     const [basicElapsed, setBasicElapsed] = useState("00:00:00")
 
     const [helm, setHelm] = useState("")
@@ -43,103 +41,10 @@ export default function EditResultModal({ isOpen, result, fleet, onSubmit, onClo
     })
 
 
-    const updateLapDataAdvanced = async (lap: LapDataType, value: string) => {
-        var parts = value.split(':'); // split it at the colons
-
-        // minutes are 60 seconds. Hours are 60 minutes * 60 seconds.
-        var seconds = (+parts[0]!) * 60 * 60 + (+parts[1]!) * 60 + (+parts[2]!);
-        //add lap time to fleet start time
-        var unixTime = seconds + fleet!.startTime
-
-        lap = { ...lap, time: unixTime }
-
-        let index = laps.findIndex(l => l.id == lap.id)
-        setLaps([...laps.slice(0, index), lap, ...laps.slice(index + 1)])
-    }
-
-    const updateLapDataBasic = async () => {
-        if (result == undefined) return
-        var parts = basicElapsed.split(':'); // split it at the colons
-
-        // minutes are 60 seconds. Hours are 60 minutes * 60 seconds.
-        var seconds = (+parts[0]!) * 60 * 60 + (+parts[1]!) * 60 + (+parts[2]!);
-        //add lap time to fleet start time
-        var unixTime = seconds + fleet!.startTime
-        console.log(unixTime)
-        finishTime = finished ? unixTime : 0
-
-        let entryLaps = laps.length
-        console.log(entryLaps, basicNumLaps)
-        if (entryLaps == basicNumLaps) {
-            //don't do anything if there aren't any laps
-            if (basicNumLaps != 0) {
-                //don't have an update for the last lap
-                await DB.DeleteLapById(laps[entryLaps - 1]!.id)
-                await DB.CreateLap(result.id, unixTime)
-            }
-        } else if (entryLaps < basicNumLaps) {
-            let difference = basicNumLaps - entryLaps
-            for (let i = 0; i < difference - 1; i++) {
-                await DB.CreateLap(result.id, 0)
-            }
-            await DB.CreateLap(result.id, unixTime)
-        } else {
-            if (basicNumLaps == 0) {
-                //delete all laps
-                for (let i = 0; i < entryLaps; i++) {
-                    await DB.DeleteLapById(laps[i]!.id)
-                }
-            } else {
-                //delete the extra laps
-                let difference = entryLaps - basicNumLaps
-                console.log(difference)
-                console.log(result.laps)
-                for (let i = 0; i <= difference; i++) {
-                    console.log(laps[entryLaps - 1 - i]!.id)
-                    await DB.DeleteLapById(laps[entryLaps - 1 - i]!.id)
-                }
-                await DB.CreateLap(result.id, unixTime)
-            }
-
-        }
-    }
-
     const submit = async () => {
-        if (lapsAdvancedMode) {
-            if (result == undefined) {
-                console.log('result is undefined')
-                return
-            }
+        let finishTime = basicElapsed.split(':').reduce((acc, time) => (60 * acc) + +time, 0) + fleet!.startTime
 
-            let lapscopy = window.structuredClone(laps)
-
-            if (result.laps.length < laps.length) {
-                //add the extra laps
-                for (let i = lapscopy.length - 1; i >= result.laps.length; i--) {
-                    let lap = await DB.CreateLap(result.id, lapscopy[i]!.time)
-                    //modify local laps to include the lap id
-                    lapscopy = [...lapscopy.slice(0, i), lap, ...lapscopy.slice(i + 1)]
-                }
-            } else {
-                //delete the extra laps
-                for (let i = result.laps.length - 1; i >= lapscopy.length; i--) {
-                    await DB.DeleteLapById(result.laps[i]!.id)
-                }
-            }
-
-            //update the times
-            for (let i = 0; i < lapscopy.length; i++) {
-                if (laps[i]!.time != result?.laps[i]!.time) {
-                    await DB.DeleteLapById(lapscopy[i]!.id)
-                    await DB.CreateLap(result!.id, lapscopy[i]!.time)
-                }
-            }
-
-            finishTime = finished ? lapscopy[lapscopy.length - 1]!.time : 0
-        } else {
-            await updateLapDataBasic()
-        }
-        onSubmit({ ...result!, Helm: helm, Crew: crew, boat: boat, SailNumber: sailNumber, finishTime: finishTime, resultCode: resultCodeOption.value })
+        onSubmit({ ...result!, Helm: helm, Crew: crew, boat: boat, SailNumber: sailNumber, finishTime: finishTime, resultCode: resultCodeOption.value, numberLaps: numberLaps })
     }
 
     useEffect(() => {
@@ -150,8 +55,7 @@ export default function EditResultModal({ isOpen, result, fleet, onSubmit, onClo
         setCrew(result.Crew)
         setBoat(result.boat)
         setSailNumber(result.SailNumber)
-        setLaps(result.laps)
-        setBasicNumLaps(result.laps.length)
+        setNumberLaps(result.numberLaps)
         setBasicElapsed(new Date(Math.max(0, (result.finishTime - fleet!.startTime) * 1000)).toISOString().substring(11, 19))
         setFinished(result.finishTime != 0)
         setBoatOption({ label: result.boat.name, value: result.boat })
@@ -347,76 +251,37 @@ export default function EditResultModal({ isOpen, result, fleet, onSubmit, onClo
                                             />
                                         </div>
 
-                                        {lapsAdvancedMode ?
-                                            <div className='flex flex-row w-full flex-wrap' id='LapData'
-                                                 key={JSON.stringify(laps)}>
-                                                {laps.map((lap: LapDataType, index: number) => {
-                                                    return (
-                                                        <div className='flex flex-col px-6 w-min'
-                                                             key={lap.time + index}>
-                                                            <p className='text-2xl font-bold p-2'>
-                                                                Lap {index + 1}
-                                                            </p>
-                                                            <div className='flex flex-row'>
-                                                                <Input
-                                                                    type="time"
-                                                                    step={"1"}
-                                                                    defaultValue={new Date(Math.max(0, (lap.time - fleet!.startTime) * 1000)).toISOString().substring(11, 19)}
-                                                                    onBlur={(e) => {
-                                                                        updateLapDataAdvanced(lap, (e.target as HTMLInputElement).value)
-                                                                    }}
-                                                                />
-                                                                <div
-                                                                    className="text-4xl font-extrabold text-red-600 px-2 float-right cursor-pointer"
-                                                                    onClick={() => setLaps([...laps.slice(0, index), ...laps.slice(index + 1)])}>&times;</div>
-                                                            </div>
+                                        <div className='flex flex-row w-full'>
+                                            <div className='flex flex-col px-6 w-full' key={numberLaps}>
+                                                <p className='text-2xl font-bold'>
+                                                    Laps
+                                                </p>
 
-                                                        </div>
-                                                    )
-                                                })}
-                                                <div className="p-4 mr-2 w-96 flex justify-end">
-                                                    <Button onClick={() => setLaps([...laps, {
-                                                        id: "",
-                                                        time: 0,
-                                                        resultId: result!.id
-                                                    } as LapDataType])}>
-                                                        Add Lap
-                                                    </Button>
-                                                </div>
+                                                <Input
+                                                    type="number"
+                                                    id="NumberofLaps"
+                                                    defaultValue={numberLaps.toString()}
+                                                    onValueChange={(value) => {
+                                                        setNumberLaps(parseInt(value))
+                                                    }}
+                                                />
                                             </div>
-                                            :
-                                            <div className='flex flex-row w-full'>
-                                                <div className='flex flex-col px-6 w-full' key={basicNumLaps}>
-                                                    <p className='text-2xl font-bold'>
-                                                        Laps
-                                                    </p>
 
-                                                    <Input
-                                                        type="number"
-                                                        id="NumberofLaps"
-                                                        defaultValue={basicNumLaps.toString()}
-                                                        onValueChange={(value) => {
-                                                            setBasicNumLaps(parseInt(value))
-                                                        }}
-                                                    />
-                                                </div>
+                                            <div className='flex flex-col px-6 w-full' key={basicElapsed}>
+                                                <p className='text-2xl font-bold'>
+                                                    Finish Time
+                                                </p>
 
-                                                <div className='flex flex-col px-6 w-full' key={basicElapsed}>
-                                                    <p className='text-2xl font-bold'>
-                                                        Finish Time
-                                                    </p>
-
-                                                    <Input
-                                                        type="time"
-                                                        step={"1"}
-                                                        defaultValue={basicElapsed}
-                                                        onValueChange={(value) => {
-                                                            setBasicElapsed(value)
-                                                        }}
-                                                    />
-                                                </div>
+                                                <Input
+                                                    type="time"
+                                                    step={"1"}
+                                                    defaultValue={basicElapsed}
+                                                    onValueChange={(value) => {
+                                                        setBasicElapsed(value)
+                                                    }}
+                                                />
                                             </div>
-                                        }
+                                        </div>
 
 
                                     </div>
@@ -430,8 +295,29 @@ export default function EditResultModal({ isOpen, result, fleet, onSubmit, onClo
                                         />
 
                                         <label className="text-2xl font-bold"
-                                               htmlFor={"AdvancedModeSwitch"}>Advanced Mode</label>
+                                            htmlFor={"AdvancedModeSwitch"}>View Lap Data</label>
                                     </div>
+                                    {lapsAdvancedMode ?
+                                        <div className='flex flex-row w-full flex-wrap' id='LapData'
+                                            key={JSON.stringify(result!.laps)}>
+                                            {result!.laps.map((lap: LapDataType, index: number) => {
+                                                return (
+                                                    <div className='flex flex-col px-6 w-min'
+                                                        key={lap.time + index}>
+                                                        <p className='text-2xl font-bold p-2'>
+                                                            Lap {index + 1}
+                                                        </p>
+                                                        <div className='flex flex-row'>
+                                                            {new Date(Math.max(0, (lap.time - fleet!.startTime) * 1000)).toISOString().substring(11, 19)}
+
+                                                        </div>
+                                                    </div>
+                                                )
+                                            })}
+                                        </div>
+                                        :
+                                        <></>
+                                    }
                                 </div>
 
 

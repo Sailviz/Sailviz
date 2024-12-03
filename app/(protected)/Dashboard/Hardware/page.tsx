@@ -14,19 +14,17 @@ export default function Page() {
     const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
     const { user, userIsError, userIsValidating } = Fetcher.UseUser()
 
-    const [pursuitLength, setPursuitLength] = useState("")
     const [clockIP, setClockIP] = useState("")
     const [clockOffset, setClockOffset] = useState("")
     const [hornIP, setHornIP] = useState("")
 
     const saveClubSettings = async () => {
         console.log("ran")
-        await DB.UpdateClubById({ ...club, settings: { pursuitLength: parseInt(pursuitLength), clockIP: clockIP, clockOffset: parseInt(clockOffset), hornIP: hornIP } })
+        await DB.UpdateClubById({ ...club, settings: { ...club.settings, clockIP: clockIP, clockOffset: parseInt(clockOffset), hornIP: hornIP } })
     }
 
     useEffect(() => {
         if (club == undefined) return
-        setPursuitLength(club.settings.pursuitLength.toString())
         setClockIP(club.settings.clockIP)
         setClockOffset(club.settings.clockOffset.toString())
         setHornIP(club.settings.hornIP)
@@ -38,15 +36,6 @@ export default function Page() {
     if (userHasPermission(user, AVAILABLE_PERMISSIONS.editHardware))
         return (
             <>
-                <p className='text-2xl font-bold p-6'>
-                    Pursuit Race Length
-                </p>
-                <div className='flex flex-col px-6 w-full '>
-                    <Input type="number"
-                        value={pursuitLength}
-                        onValueChange={setPursuitLength}
-                    />
-                </div>
                 <p className='text-2xl font-bold p-6'>
                     Clock Config
                 </p>

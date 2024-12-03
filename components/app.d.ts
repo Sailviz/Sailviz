@@ -2,14 +2,16 @@ type RaceDataType = {
   id: string;
   number: number;
   Time: string;
-  OOD: string;
-  AOD: string;
-  SO: string;
-  ASO: string;
+  Duties: DutyDataType[];
   Type: string;
   fleets: FleetDataType[];
   seriesId: string;
   series: SeriesDataType;
+};
+
+type DutyDataType = {
+  displayName: string;
+  name: string;
 };
 
 type SeriesDataType = {
@@ -38,6 +40,7 @@ type ResultsDataType = {
   boat: BoatDataType;
   SailNumber: string;
   finishTime: number;
+  numberLaps: number;
   laps: LapDataType[];
   CorrectedTime: number;
   PursuitPosition: number;
@@ -70,6 +73,7 @@ type ClubSettingsType = {
   hornIP: string;
   pursuitLength: number;
   clockOffset: number;
+  duties: string[];
 };
 
 type BoatDataType = {

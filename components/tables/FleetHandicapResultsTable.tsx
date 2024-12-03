@@ -40,7 +40,7 @@ const Laps = ({ ...props }: any) => {
 
     return (
         <div className=' text-center'>
-            {value.length}
+            {value}
         </div>
     );
 };
@@ -199,7 +199,7 @@ const FleetHandicapResultsTable = (props: any) => {
             cell: props => <Text {...props} />,
             enableSorting: false
         }),
-        columnHelper.accessor('laps', {
+        columnHelper.accessor('numberLaps', {
             header: "Laps",
             cell: props => <Laps {...props} />,
             enableSorting: false

@@ -73,10 +73,8 @@ model Race {
   id       String   @id @unique @default(uuid())
   number   Int
   Time     String
-  OOD      String
-  AOD      String
-  SO       String
-  ASO      String
+  Duties   Json // should be in the format of { "OD": "John Smith", "Safety": "Jane Doe" } for example. the key is then used to display.
+
   fleets   Fleet[]
   Type     String
   series   Series   @relation(fields: [seriesId], references: [id], onDelete: Cascade)

@@ -9,10 +9,7 @@ async function updateRace(race: RaceDataType) {
             id: race.id
         },
         data: {
-            OOD: race.OOD,
-            AOD: race.AOD,
-            SO: race.SO,
-            ASO: race.ASO,
+            Duties: race.Duties,
             Time: race.Time,
             Type: race.Type,
         }
