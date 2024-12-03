@@ -257,13 +257,13 @@ export default function Page({ params }: { params: { slug: string } }) {
                     </div>
                     <div className="py-4 w-3/5 justify-center">
                         <p className="text-xl font-medium text-center">Duty Team</p>
-                        <div className="flex flex-wrap" key={JSON.stringify(race.Duties)}>
+                        <div className="flex flex-wrap justify-stretch" key={JSON.stringify(race.Duties)}>
                             {Object.entries(race.Duties).map(([displayName, name], index) => {
                                 return (
-                                    <div key={"duty" + index} className="flex-col w-1/4 mr-4">
+                                    <div key={"duty" + index} className="flex-col w-1/3 pr-4">
                                         <div className="flex items-center py-4">
                                             <label htmlFor={displayName}
-                                                className="block mb-2 font-medium text-gray-900 dark:text-white w-1/4">{displayName}</label>
+                                                className="block mb-2 font-medium text-gray-900 dark:text-white w-1/2">{displayName}</label>
                                             <Input type="text" id={displayName}
                                                 defaultValue={name as unknown as string} //seems to be a bug, so explicitly cast
                                                 onBlur={saveRaceSettings}
