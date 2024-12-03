@@ -29,9 +29,8 @@ const Text = ({ ...props }) => {
 const Number = ({ ...props }: any) => {
     const initialValue = props.getValue()
     const [value, setValue] = React.useState(initialValue)
-    const [discarded, setDiscarded] = React.useState(props.discarded)
     return (
-        <div className={discarded ? 'line-through' : ''}>
+        <div>
             {Math.round(value)}
         </div>
     );
@@ -222,7 +221,7 @@ const SeriesResultsTable = (props: any) => {
         }
     }, [seriesData])
 
-    let columns = [
+    let columns: any = [
         columnHelper.accessor('Rank', {
             header: "Rank",
             cell: props => <Number {...props} />,
@@ -260,9 +259,9 @@ const SeriesResultsTable = (props: any) => {
     //add column for each race in series
     seriesData.races.forEach((race: RaceDataType, index: number) => {
         const newColumn = columnHelper.accessor((data) => data.racePositions[index], {
-            id: race.number.toString(),
+            id: "R" + race.number.toString(),
             header: "R" + race.number.toString(),
-            cell: props => <Result {...props} disabled={true} />,
+            cell: props => <Result {...props} />,
             enableSorting: false
         })
         columns.push(newColumn)
@@ -270,7 +269,7 @@ const SeriesResultsTable = (props: any) => {
 
     const totalColumn = columnHelper.accessor('Total', {
         header: "Total",
-        cell: props => <Number {...props} disabled={true} />,
+        cell: props => <Number {...props} />,
         enableSorting: true
     })
 
