@@ -19,7 +19,6 @@ async function updateResult(result: ResultsDataType) {
             PursuitPosition: result.PursuitPosition,
             HandicapPosition: result.HandicapPosition,
             fleetId: result.fleetId,
-            numberLaps: result.numberLaps,
         }
     })
     return res;

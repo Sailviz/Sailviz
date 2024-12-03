@@ -117,7 +117,6 @@ model Result {
   boatId          String?
   SailNumber      String
   finishTime      Int
-  numberLaps      Int
   laps            Lap[]
   CorrectedTime   Float
   HandicapPosition Int
