@@ -50,6 +50,7 @@ model Boat {
 model Club {
   id       String   @id @unique @default(uuid())
   name     String   @unique
+  displayName String?
   settings Json
   series   Series[]
   boats    Boat[]

@@ -88,6 +88,7 @@ type BoatDataType = {
 type ClubDataType = {
   id: string;
   name: string;
+  displayName: string;
   settings: ClubSettingsType;
   series: SeriesDataType[];
   boats: BoatDataType[];

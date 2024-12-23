@@ -63,7 +63,7 @@ export default function Page({ params }: { params: { club: string } }) {
         <div className="flex flex-col px-6">
             <div className="py-4">
                 <div className={title({ color: "green" })}>
-                    {club.name}
+                    {club.displayName}
                 </div>
             </div>
             <div className="py-4">
