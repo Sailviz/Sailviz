@@ -18,7 +18,7 @@ export default function Page() {
     if (clubIsValidating || clubIsError || club == undefined || userIsValidating || userIsError || user == undefined) {
         return <PageSkeleton />
     }
-    if (userHasPermission(user, AVAILABLE_PERMISSIONS.viewIntegrations))
+    if (userHasPermission(user, AVAILABLE_PERMISSIONS.trackableView))
         return (
             <>
             </>

@@ -9,11 +9,12 @@ export class AVAILABLE_PERMISSIONS {
     static readonly editRoles: PermissionType = { value: "editRoles", label: "Edit Roles" } //implemented
     static readonly DownloadResults: PermissionType = { value: 'DownloadResults', label: 'Download Results' } //implemented
     static readonly UploadEntires: PermissionType = { value: 'UploadEntires', label: 'Upload Entries' } //implemented
-    static readonly viewIntegrations: PermissionType = { value: 'viewIntegrations', label: 'View Integrations' } //implemented
-    static readonly viewDeveloper: PermissionType = { value: 'viewDeveloper', label: 'View Developer' } //implemented
+    static readonly viewIntegrations: PermissionType = { value: 'viewIntegrations', label: 'View Integrations' } //integrations settings removed so not currently required
+    static readonly viewDeveloper: PermissionType = { value: 'viewDeveloper', label: 'View Developer' } //developer settings removed so not currently required
     static readonly viewUsers: PermissionType = { value: 'viewUsers', label: 'View Users' } //implemented
     static readonly dashboardAccess: PermissionType = { value: 'dashboardAccess', label: 'Dashboard Access' } //implemented, currently changes log out to back to dashboard on sign on
     static readonly editDuties: PermissionType = { value: 'editDuties', label: 'Edit Duties' } //implemented
+    static readonly trackableView: PermissionType = { value: 'trackableView', label: 'Trackable - View Settings'}
 };
 
 
