@@ -99,6 +99,17 @@ export function Boats() {
         boatsIsError: error
     }
 }
+
+export function Trackers() {
+    const { data, error, isValidating } = useSWR('/api/Trackable/GetTrackers', fetcher)
+
+    return {
+        trackers: data?.trackers as TrackerDataType[],
+        trackersIsValidating: isValidating,
+        trackersIsError: error
+    }
+}
+
 /**
  * 
  * @param fleetId 

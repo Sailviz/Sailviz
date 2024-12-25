@@ -74,6 +74,10 @@ type ClubSettingsType = {
   pursuitLength: number;
   clockOffset: number;
   duties: string[];
+  trackable: {
+    enabled: boolean;
+    orgID: string
+  }
 };
 
 type BoatDataType = {
@@ -130,3 +134,8 @@ type AuthedUserDataType = {
   user: UserDataType;
   token: string;
 };
+
+type TrackerDataType = {
+  id: string;
+  name: string;
+}
