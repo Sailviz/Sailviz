@@ -136,6 +136,17 @@ type AuthedUserDataType = {
 };
 
 type TrackerDataType = {
-  id: string;
+  trackerID: string;
   name: string;
+  status?: string;
+  details?: {
+    orgID?: string,
+    position?: {
+      lat: number,
+      lon: number
+    },
+    battery?: number,
+    gps?: string,
+    timestamp?: number
+  }
 }

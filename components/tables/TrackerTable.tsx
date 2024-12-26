@@ -39,14 +39,14 @@ function Filter({ column, table }: { column: any, table: any }) {
 
 const Action = ({ ...props }: any) => {
 
-    const trackerInfo = () => {
-        props.trackerInfo(props.row.original)
+    const onTrackerStatusClick = () => {
+        props.trackerStatus(props.row.original)
     }
     return (
         <div className="relative flex items-center gap-2">
             <Tooltip content="Info">
                 <span className="text-lg text-default-400 cursor-pointer active:opacity-50">
-                    <EyeIcon onClick={trackerInfo} />
+                    <EyeIcon onClick={onTrackerStatusClick} />
                 </span>
             </Tooltip>
         </div>
@@ -60,8 +60,8 @@ const TrackerTable = (props: any) => {
 
     const data = trackers || []
 
-    const trackerInfo = (id: String) => {
-        props.trackerInfo(id)
+    const trackerStatus = (tracker: TrackerDataType) => {
+        props.trackerStatus(tracker)
     }
 
     const loadingState = trackersIsValidating || data?.length === 0 ? "loading" : "idle";
@@ -74,11 +74,11 @@ const TrackerTable = (props: any) => {
                 cell: props => <Text {...props} />,
                 enableColumnFilter: true
             }),
-            columnHelper.accessor('id', {
+            columnHelper.accessor('trackerID', {
                 id: "action",
                 enableColumnFilter: false,
                 header: "Actions",
-                cell: props => <Action {...props} id={props.row.original.id} trackerInfo={trackerInfo} user={user} />
+                cell: props => <Action {...props} id={props.row.original.trackerID} trackerStatus={trackerStatus} user={user} />
             }),
         ],
         getCoreRowModel: getCoreRowModel(),

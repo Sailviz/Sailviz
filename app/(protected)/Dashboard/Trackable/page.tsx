@@ -1,26 +1,25 @@
 'use client'
-import { ChangeEvent, MouseEventHandler, useEffect, useState } from "react"
-import { useRouter } from "next/navigation";
-import * as DB from 'components/apiMethods';
 import * as Fetcher from 'components/Fetchers';
 import { PageSkeleton } from 'components/ui/PageSkeleton';
-import { Input, Button } from "@nextui-org/react";
+import {Button, useDisclosure} from "@nextui-org/react";
 import { AVAILABLE_PERMISSIONS, userHasPermission } from "components/helpers/users";
 import {title} from "../../../../components/ui/home/primitaves";
 import TrackerTable from "../../../../components/tables/TrackerTable";
+import TrackerStatusModal from "components/ui/dashboard/TrackerStatusModal";
 import * as Trackable from 'components/trackable'
-import {mutate} from "swr";
+import {useState} from "react";
 
 
 export default function Page() {
-    const Router = useRouter();
-
     const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
     const { user, userIsError, userIsValidating } = Fetcher.UseUser()
 
+    const statusModal = useDisclosure();
+    const [viewingTracker, setviewingTracker] = useState<TrackerDataType>()
 
-    const trackerInfo = async (id: string) => {
-
+    const trackerStatus = async (tracker: TrackerDataType) => {
+        statusModal.onOpen()
+        setviewingTracker(await Trackable.getTrackerStatus(tracker.trackerID))
     }
 
     const syncTrackers = async () => {
@@ -50,20 +49,21 @@ export default function Page() {
 
     return (
         <>
+            <TrackerStatusModal isOpen={statusModal.isOpen} tracker={viewingTracker} onClose={() => { statusModal.onClose(); setviewingTracker(undefined) }}></TrackerStatusModal>
             <div className="p-6">
-            <h1 className={title({color: "blue"})}>Trackable Settings</h1>
-                </div>
-                <p className='text-2xl font-bold px-6 py-2'>
-                    Trackers
-                </p>
-                <div className='flex flex-row items-center px-6 py-2 w-1/2 justify-around'>
-                    <Button className="mx-1" color='primary' fullWidth onClick={syncTrackers}>
-                        Sync Trackers
-                    </Button>
-                </div>
-                <div className='text-2xl font-bold px-6 py-2'>
-                    <TrackerTable/>
-                </div>
-            </>
-        )
+                <h1 className={title({color: "blue"})}>Trackable Settings</h1>
+            </div>
+            <p className='text-2xl font-bold px-6 py-2'>
+                Trackers
+            </p>
+            <div className='flex flex-row items-center px-6 py-2 w-1/2 justify-around'>
+                <Button className="mx-1" color='primary' fullWidth onClick={syncTrackers}>
+                    Sync Trackers
+                </Button>
+            </div>
+            <div className='text-2xl font-bold px-6 py-2'>
+                <TrackerTable trackerStatus={trackerStatus}/>
+            </div>
+        </>
+    )
 }
