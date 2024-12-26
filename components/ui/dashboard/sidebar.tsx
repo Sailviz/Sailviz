@@ -15,6 +15,11 @@ import { ThemeSwitcher } from "components/ui/ThemeSwitcher";
 import { SailVizIcon } from "components/icons/sailviz-icon";
 import { SignOutIcon } from "components/icons/sign-out";
 import Cookies from "js-cookie";
+import {MapIcon} from "../../icons/map-icon";
+import {SignOnIcon} from "../../icons/sign-on";
+import {DocsIcon} from "../../icons/docs-icon";
+import {RaceIcon} from "../../icons/race-icon";
+import {SeriesIcon} from "../../icons/series-icon";
 
 export const SidebarWrapper = () => {
     const pathname = usePathname();
@@ -54,19 +59,19 @@ export const SidebarWrapper = () => {
                             <SidebarItem
                                 isActive={pathname === "/Race"}
                                 title="Races"
-                                icon={<AccountsIcon />}
+                                icon={<RaceIcon />}
                                 href="/Race"
                             />
                             <SidebarItem
                                 isActive={pathname === "/Series"}
                                 title="Series"
-                                icon={<HomeIcon />}
+                                icon={<SeriesIcon />}
                                 href="/Series"
                             />
                             <SidebarItem
                                 isActive={pathname === "/Documentation"}
                                 title="User Guide"
-                                icon={<HomeIcon />}
+                                icon={<DocsIcon />}
                                 href="/Documentation"
 
                             />
@@ -76,7 +81,7 @@ export const SidebarWrapper = () => {
                             <SidebarItem
                                 isActive={pathname === "/SignOn"}
                                 title="SignOn"
-                                icon={<DevIcon />}
+                                icon={<SignOnIcon />}
                                 href="/SignOn"
                             />
                         </SidebarMenu>
@@ -98,7 +103,7 @@ export const SidebarWrapper = () => {
                             <SidebarItem
                                 isActive={pathname === "/Dashboard/Trackable/"}
                                 title="Trackable"
-                                icon={<DevIcon />}
+                                icon={<MapIcon />}
                                 href="/Dashboard/Trackable"
                             />
                         </SidebarMenu>
