@@ -8,6 +8,8 @@ import { Input, Button } from "@nextui-org/react";
 import { AVAILABLE_PERMISSIONS, userHasPermission } from "components/helpers/users";
 import {title} from "../../../../components/ui/home/primitaves";
 import TrackerTable from "../../../../components/tables/TrackerTable";
+import * as Trackable from 'components/trackable'
+import {mutate} from "swr";
 
 
 export default function Page() {
@@ -19,6 +21,10 @@ export default function Page() {
 
     const trackerInfo = async (id: string) => {
 
+    }
+
+    const syncTrackers = async () => {
+        await Trackable.syncTrackers(club.settings.trackable.orgID, club.id)
     }
 
 
@@ -51,9 +57,9 @@ export default function Page() {
                     Trackers
                 </p>
                 <div className='flex flex-row items-center px-6 py-2 w-1/2 justify-around'>
-                    <Button className="mx-1" color='primary' fullWidth>
-                            Sync Trackers
-                        </Button>
+                    <Button className="mx-1" color='primary' fullWidth onClick={syncTrackers}>
+                        Sync Trackers
+                    </Button>
                 </div>
                 <div className='text-2xl font-bold px-6 py-2'>
                     <TrackerTable/>
