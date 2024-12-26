@@ -1,5 +1,6 @@
 import { Modal, ModalBody, ModalContent, ModalHeader } from '@nextui-org/react';
 import { useTheme } from 'next-themes';
+import dayjs from 'dayjs';
 
 export default function TrackerStatusModal({isOpen, tracker, onClose}: { isOpen: boolean, tracker: TrackerDataType | undefined, onClose?: () => void }) {
     const { theme, setTheme } = useTheme()
@@ -31,7 +32,7 @@ export default function TrackerStatusModal({isOpen, tracker, onClose}: { isOpen:
                                             <strong>GPS Status:</strong> {tracker?.details?.gps}<br/>
                                             <strong>Position (Lat, Lon):</strong> {tracker?.details?.position?.lat}, {tracker?.details?.position?.lon}<br/>
                                             <strong>Battery:</strong> {tracker?.details?.battery}<br/>
-                                            <strong>Received:</strong> {tracker?.details?.timestamp}<br/>
+                                            <strong>Received:</strong> {dayjs(tracker?.details?.timestamp as number).format('HH:mm:ss')}<br/>
                                         </p>
                                         :
                                         <></>
