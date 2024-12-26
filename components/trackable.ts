@@ -12,7 +12,7 @@ export async function syncTrackers(trackableOrgID: string, clubId: string) {
     const trackers = json.trackers
 
     for (const tracker of trackers) {
-        await prisma.trackers.upsert({
+        await prisma.tracker.upsert({
             where: {
                 trackerID: tracker.trackerID,
             },

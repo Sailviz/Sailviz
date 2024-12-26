@@ -12,7 +12,7 @@ export async function GET(req: NextRequest) {
             { status: 400 });
     }
 
-    const trackers = await prisma.trackers.findMany({
+    const trackers = await prisma.tracker.findMany({
         where: {
             clubId: clubId.value
         }

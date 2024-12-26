@@ -56,7 +56,9 @@ model Club {
   boats    Boat[]
   users    User[]
   roles Role[]
-  Trackers Trackers[]
+  Trackers Tracker[]
+
+  Buoy Buoy[]
 }
 
 model Series {
@@ -141,11 +143,24 @@ model Lap {
   @@index([resultId])
 }
 
-model Trackers {
+model Tracker {
   trackerID   String @id @unique
   club        Club     @relation(fields: [clubId], references: [id])
   clubId      String
   name        String
+
+  @@index([clubId])
+
+}
+
+model Buoy {
+  id          String @id @unique @default(uuid())
+  name        String
+  club        Club     @relation(fields: [clubId], references: [id])
+  clubId      String
+  pos         Json
+  isMoveable  Boolean
+  trackerID   String
 
   @@index([clubId])
 }
