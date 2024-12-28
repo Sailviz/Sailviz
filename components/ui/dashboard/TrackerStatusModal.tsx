@@ -32,7 +32,7 @@ export default function TrackerStatusModal({isOpen, tracker, onClose}: { isOpen:
                                             <strong>GPS Status:</strong> {tracker?.details?.gps}<br/>
                                             <strong>Position (Lat, Lon):</strong> {tracker?.details?.position?.lat}, {tracker?.details?.position?.lon}<br/>
                                             <strong>Battery:</strong> {tracker?.details?.battery}<br/>
-                                            <strong>Received:</strong> {dayjs(tracker?.details?.timestamp as number).format('HH:mm:ss')}<br/>
+                                            <strong>Received:</strong> {dayjs(tracker?.details?.position?.timestamp as number * 1000).format('HH:mm:ss')}<br/>
                                         </p>
                                         :
                                         <></>

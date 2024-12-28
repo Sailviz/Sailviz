@@ -143,10 +143,10 @@ type TrackerDataType = {
     orgID?: string,
     position?: {
       lat: number,
-      lon: number
+      lon: number,
+      timestamp?: number
     },
     battery?: number,
-    gps?: string,
-    timestamp?: number
+    gps?: string
   }
 }
