@@ -1,8 +1,8 @@
 import prisma from 'components/prisma'
 import { NextRequest, NextResponse } from "next/server";
-
-
 import assert from 'assert';
+import { AVAILABLE_PERMISSIONS } from 'components/helpers/users';
+import { isRequestAuthorised } from 'components/helpers/auth';
 
 async function findResult(resultId: any) {
     var result = await prisma.result.findFirst({
@@ -28,18 +28,20 @@ export async function POST(request: NextRequest) {
         assert.notStrictEqual(undefined, req.resultId, 'resultId required');
 
     } catch (bodyError) {
-        return NextResponse.json({ error: true, message: "information missing" });
+        return NextResponse.json({ error: "information missing" }, { status: 400 });
     }
-    console.log(req.body)
+
+    let authorised = await isRequestAuthorised(request.cookies.get("token")!.value, AVAILABLE_PERMISSIONS.editResults)
+    if (!authorised) {
+        return NextResponse.json({ error: "not authorized" }, { status: 401 });
+    }
 
     var resultId = req.resultId
 
     var result = await findResult(resultId)
     if (result) {
         await deleteResult(resultId)
-        return NextResponse.json({ error: false, result: result });
-    } else {
-        // User exists
-        return NextResponse.json({ error: true, message: 'result not found' });
+        return NextResponse.json({ res: result }, { status: 200 });
     }
+    return NextResponse.json({ error: 'result not found' }, { status: 400 });
 }

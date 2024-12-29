@@ -1,6 +1,8 @@
 import prisma from 'components/prisma'
 import { NextRequest, NextResponse } from "next/server";
 import assert from 'assert';
+import { AVAILABLE_PERMISSIONS } from 'components/helpers/users';
+import { isRequestAuthorised } from 'components/helpers/auth';
 
 async function findClub(clubId: string) {
     var result = await prisma.club.findUnique({
@@ -31,7 +33,12 @@ export async function POST(request: NextRequest) {
         assert.notStrictEqual(undefined, req.clubId, 'club required');
 
     } catch (bodyError) {
-        return NextResponse.json({ error: true, message: "information missing" });
+        return NextResponse.json({ error: "information missing" }, { status: 400 });
+    }
+
+    let authorised = await isRequestAuthorised(request.cookies.get("token")!.value, AVAILABLE_PERMISSIONS.editUsers)
+    if (!authorised) {
+        return NextResponse.json({ error: "not authorized" }, { status: 401 });
     }
 
     var clubId = req.clubId
@@ -39,15 +46,15 @@ export async function POST(request: NextRequest) {
     //check club exists
     var club = await findClub(clubId)
     if (club == null) {
-        return NextResponse.json({ error: true, message: 'Club does not exist' });
+        return NextResponse.json({ error: 'Club does not exist' }, { status: 400 });
     }
 
     var user = await createUser(club.id)
     if (user) {
-        return NextResponse.json({ error: false, user: user });
+        return NextResponse.json({ res: user }, { status: 200 });
     }
     else {
-        return NextResponse.json({ error: true, message: 'Something went wrong crating user account' });
+        return NextResponse.json({ error: 'Something went wrong crating user account' }, { status: 500 });
     }
 
 }
