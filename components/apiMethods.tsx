@@ -266,7 +266,7 @@ export async function updateBoatById(boatData: BoatDataType) {
         });
 };
 
-export async function createBoat(boatName: string, crew: number, py: number, pursuitStartTime: number, clubId: string): Promise<boolean> {
+export async function createBoat(boatName: string, crew: number, py: number, pursuitStartTime: number, clubId: string): Promise<BoatDataType> {
     const body = {
         "name": boatName,
         "crew": crew,
@@ -279,9 +279,10 @@ export async function createBoat(boatName: string, crew: number, py: number, pur
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
     })
-        .then((res) => {
+        .then(async (res) => {
             if (res.ok) {
-                return true
+                let data = await res.json()
+                return data.res
             } else {
                 return false
             }
@@ -516,17 +517,17 @@ export async function createFleet(seriesId: string): Promise<FleetDataType> {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
     })
-        .then((res) => res.json())
-        .then(async (data) => {
-            if (data && data.error) {
-                console.log(data.message)
+        .then(async (res) => {
+            if (res.ok) {
+                let data = await res.json()
+                return data.res
             } else {
-                return data.fleet
+                return false
             }
-        });
+        })
 };
 
-export async function createFleetSettings(seriesId: string): Promise<FleetSettingsType> {
+export async function createFleetSettings(seriesId: string): Promise<boolean> {
     const body = {
         seriesId: seriesId,
     }
@@ -535,14 +536,14 @@ export async function createFleetSettings(seriesId: string): Promise<FleetSettin
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
     })
-        .then((res) => res.json())
-        .then(async (data) => {
-            if (data && data.error) {
-                console.log(data.message)
+        .then(async (res) => {
+            if (res.ok) {
+                let data = await res.json()
+                return data.res
             } else {
-                return data.fleet
+                return false
             }
-        });
+        })
 };
 
 export async function GetFleetSettingsBySeries(seriesId: string): Promise<FleetSettingsType[]> {

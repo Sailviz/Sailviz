@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
     if (!ExistingBoat) {
         var creationResult = await createBoat(name, crew, py, pursuitStartTime, clubId)
         if (creationResult) {
-            return NextResponse.json({ status: 200 });
+            return NextResponse.json({ res: creationResult }, { status: 200 });
         }
         else {
             return NextResponse.json({ error: 'Something went wrong crating boat' }, { status: 500 });
