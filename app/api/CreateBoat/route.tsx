@@ -2,7 +2,7 @@ import prisma from 'components/prisma'
 import { NextRequest, NextResponse } from "next/server";
 import assert from 'assert';
 import { AVAILABLE_PERMISSIONS, userHasPermission } from 'components/helpers/users';
-import { is } from 'cypress/types/bluebird';
+
 import { isRequestAuthorised } from 'components/helpers/auth';
 
 const jwt = require('jsonwebtoken');
@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
     }
 
     //check that the user is authorized to perform the request
-    let authorised = await isRequestAuthorised(req.token, AVAILABLE_PERMISSIONS.editBoats)
+    let authorised = await isRequestAuthorised(request.cookies.get("token")!.value, AVAILABLE_PERMISSIONS.editBoats)
     if (!authorised) {
         return NextResponse.json({ error: "not authorized" }, { status: 401 });
     }
@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
     if (!ExistingBoat) {
         var creationResult = await createBoat(name, crew, py, pursuitStartTime, clubId)
         if (creationResult) {
-            return NextResponse.json({ error: false, boat: creationResult }, { status: 200 });
+            return NextResponse.json({ status: 200 });
         }
         else {
             return NextResponse.json({ error: 'Something went wrong crating boat' }, { status: 500 });
