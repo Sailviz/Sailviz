@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
         assert.notStrictEqual(undefined, req.pursuitStartTime);
 
     } catch (bodyError) {
-        return NextResponse.json({ error: true, message: "information missing" });
+        return NextResponse.json({ error: "information missing" }, { status: 400 });
     }
 
     //check that the user is authorized to perform the request
