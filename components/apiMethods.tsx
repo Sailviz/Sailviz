@@ -266,7 +266,7 @@ export async function updateBoatById(boatData: BoatDataType) {
         });
 };
 
-export async function createBoat(boatName: string, crew: number, py: number, pursuitStartTime: number, clubId: string): Promise<BoatDataType> {
+export async function createBoat(boatName: string, crew: number, py: number, pursuitStartTime: number, clubId: string): Promise<boolean> {
     const body = {
         "name": boatName,
         "crew": crew,
@@ -279,15 +279,13 @@ export async function createBoat(boatName: string, crew: number, py: number, pur
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
     })
-        .then((res) => res.json())
-        .then(async (data) => {
-            if (data && data.error) {
-                console.log(data.message)
+        .then((res) => {
+            if (res.ok) {
+                return true
             } else {
-                console.log(data)
-                return data.boat
+                return false
             }
-        });
+        })
 };
 
 export async function deleteBoatById(id: string): Promise<BoatDataType> {
