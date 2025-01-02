@@ -25,12 +25,12 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: "information missing" }, { status: 400 });
     }
 
-    let authorised = await isRequestAuthorised(request.cookies.get("token")!.value, AVAILABLE_PERMISSIONS.editHardware)
+    var club: ClubDataType = req.club
+
+    let authorised = await isRequestAuthorised(request.cookies, AVAILABLE_PERMISSIONS.editHardware, club.id, "club")
     if (!authorised) {
         return NextResponse.json({ error: "not authorized" }, { status: 401 });
     }
-
-    var club: ClubDataType = req.club
 
     var updatedClub = await updateClub(club)
     if (updatedClub) {

@@ -68,12 +68,13 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: "information missing" }, { status: 400 });
     }
 
-    let authorised = await isRequestAuthorised(request.cookies.get("token")!.value, AVAILABLE_PERMISSIONS.editRaces)
+    var seriesId = req.seriesId
+
+    let authorised = await isRequestAuthorised(request.cookies, AVAILABLE_PERMISSIONS.editRaces, seriesId, "series")
     if (!authorised) {
         return NextResponse.json({ error: "not authorized" }, { status: 401 });
     }
 
-    var seriesId = req.seriesId
     var clubId = req.clubId
     var time = req.time
 

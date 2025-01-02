@@ -28,12 +28,12 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: "information missing" }, { status: 400 });
     }
 
-    let authorised = await isRequestAuthorised(request.cookies.get("token")!.value, AVAILABLE_PERMISSIONS.editRaces)
+    var race: RaceDataType = req.race
+
+    let authorised = await isRequestAuthorised(request.cookies, AVAILABLE_PERMISSIONS.editRaces, race.id, "race")
     if (!authorised) {
         return NextResponse.json({ error: "not authorized" }, { status: 401 });
     }
-
-    var race: RaceDataType = req.race
 
     var updatedRace = await updateRace(race)
     if (updatedRace) {

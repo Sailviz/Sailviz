@@ -31,12 +31,12 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: "information missing" }, { status: 400 });
     }
 
-    let authorised = await isRequestAuthorised(request.cookies.get("token")!.value, AVAILABLE_PERMISSIONS.editResults)
+    var raceId = req.raceId
+
+    let authorised = await isRequestAuthorised(request.cookies, AVAILABLE_PERMISSIONS.editResults, raceId, "race")
     if (!authorised) {
         return NextResponse.json({ error: "not authorized" }, { status: 401 });
     }
-
-    var raceId = req.raceId
 
     var race = await findRace(raceId)
     if (race) {

@@ -42,13 +42,14 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: "information missing" }, { status: 400 });
     }
 
+    var seriesId = req.seriesId
+
     //check that the user is authorized to perform the request
-    let authorised = await isRequestAuthorised(request.cookies.get("token")!.value, AVAILABLE_PERMISSIONS.editFleets)
+    let authorised = await isRequestAuthorised(request.cookies, AVAILABLE_PERMISSIONS.editFleets, seriesId, "series")
     if (!authorised) {
         return NextResponse.json({ error: "not authorized" }, { status: 401 });
     }
 
-    var seriesId = req.seriesId
     var fleetSettingsId = req.fleetSettingsId
 
     var series = await findSeries(seriesId)

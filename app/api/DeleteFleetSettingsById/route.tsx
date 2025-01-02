@@ -31,12 +31,12 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: "information missing" }, { status: 400 });
     }
 
-    let authorised = await isRequestAuthorised(request.cookies.get("token")!.value, AVAILABLE_PERMISSIONS.editFleets)
+    var fleetSettingsId = req.fleetSettingsId
+
+    let authorised = await isRequestAuthorised(request.cookies, AVAILABLE_PERMISSIONS.editFleets, fleetSettingsId, "fleetsettings")
     if (!authorised) {
         return NextResponse.json({ error: "not authorized" }, { status: 401 });
     }
-
-    var fleetSettingsId = req.fleetSettingsId
 
     var fleet = await findFleet(fleetSettingsId)
     if (fleet) {

@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import assert from 'assert';
 import { AVAILABLE_PERMISSIONS, userHasPermission } from 'components/helpers/users';
 
-import { isRequestAuthorised } from 'components/helpers/auth';
+import { isRequestAuthorised, isRequestOwnData } from 'components/helpers/auth';
 
 const jwt = require('jsonwebtoken');
 const jwtSecret = process.env.jwtSecret;
@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
     }
 
     //check that the user is authorized to perform the request
-    let authorised = await isRequestAuthorised(request.cookies.get("token")!.value, AVAILABLE_PERMISSIONS.editBoats)
+    let authorised = await isRequestAuthorised(request.cookies, AVAILABLE_PERMISSIONS.editBoats, req.clubId, "club")
     if (!authorised) {
         return NextResponse.json({ error: "not authorized" }, { status: 401 });
     }

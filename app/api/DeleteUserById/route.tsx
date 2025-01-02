@@ -31,12 +31,12 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: "information missing" }, { status: 400 });
     }
 
-    let authorised = await isRequestAuthorised(request.cookies.get("token")!.value, AVAILABLE_PERMISSIONS.editSeries)
+    var user = req.user
+
+    let authorised = await isRequestAuthorised(request.cookies, AVAILABLE_PERMISSIONS.editSeries, user.id, "user")
     if (!authorised) {
         return NextResponse.json({ error: "not authorized" }, { status: 401 });
     }
-
-    var user = req.user
 
     var deletedUser = await findUser(user)
     if (deletedUser) {
