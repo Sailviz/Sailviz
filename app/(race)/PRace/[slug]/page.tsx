@@ -54,7 +54,7 @@ export default function Page({ params }: { params: { slug: string } }) {
     const startRaceButton = async () => {
         let localTime = Math.floor((new Date().getTime() / 1000) + startLength)
         const timeoutId = setTimeout(() => controller.abort(), 2000)
-        fetch("https://" + club.settings.hornIP + "/medium", { signal: controller.signal, mode: 'no-cors' }).then(response => {
+        fetch("https://" + club.settings.hornIP + "/hoot?startTime=500", { signal: controller.signal, mode: 'no-cors' }).then(response => {
         }).catch((err) => {
             console.log("horn not connected")
             console.log(err)
@@ -99,7 +99,7 @@ export default function Page({ params }: { params: { slug: string } }) {
         console.log('5 minutes left')
 
         //sound horn
-        fetch("https://" + club.settings.hornIP + "/medium", { signal: controller.signal, mode: 'no-cors' }).then(response => {
+        fetch("https://" + club.settings.hornIP + "/hoot?startTime=500", { signal: controller.signal, mode: 'no-cors' }).then(response => {
         }).catch((err) => {
             console.log("horn not connected")
             console.log(err)
@@ -113,7 +113,7 @@ export default function Page({ params }: { params: { slug: string } }) {
         console.log('4 minutes left')
 
         //sound horn
-        fetch("https://" + club.settings.hornIP + "/medium", { signal: controller.signal, mode: 'no-cors' }).then(response => {
+        fetch("https://" + club.settings.hornIP + "/hoot?startTime=500", { signal: controller.signal, mode: 'no-cors' }).then(response => {
         }).catch((err) => {
             console.log("horn not connected")
             console.log(err)
@@ -130,7 +130,7 @@ export default function Page({ params }: { params: { slug: string } }) {
 
 
         //sound horn
-        fetch("https://" + club.settings.hornIP + "/long", { signal: controller.signal, mode: 'no-cors' }).then(response => {
+        fetch("https://" + club.settings.hornIP + "/hoot?startTime=800", { signal: controller.signal, mode: 'no-cors' }).then(response => {
         }).catch((err) => {
             console.log("horn not connected")
             console.log(err)
@@ -145,7 +145,7 @@ export default function Page({ params }: { params: { slug: string } }) {
         console.log('GO!')
 
         //sound horn
-        fetch("https://" + club.settings.hornIP + "/medium", { signal: controller.signal, mode: 'no-cors' }).then(response => {
+        fetch("https://" + club.settings.hornIP + "/hoot?startTime=500", { signal: controller.signal, mode: 'no-cors' }).then(response => {
         }).catch((err) => {
             console.log("horn not connected")
             console.log(err)
@@ -304,7 +304,7 @@ export default function Page({ params }: { params: { slug: string } }) {
         setRaceState(raceStateType.calculate)
 
         //sound horn
-        fetch("http://" + club.settings.hornIP + "/medium", { signal: controller.signal, mode: 'no-cors' }).then(response => {
+        fetch("http://" + club.settings.hornIP + "/hoot?startTime=500", { signal: controller.signal, mode: 'no-cors' }).then(response => {
         }).catch((err) => {
             console.log("horn not connected")
             console.log(err)
