@@ -39,7 +39,6 @@ export async function isRequestAuthorised(cookies: NextRequest["cookies"], permi
     if (!userHasPermission(user as UserDataType, permission)) {
         return false;
     }
-
     let ownData = await isRequestOwnData(id, clubId, table)
     return ownData
 }
@@ -63,8 +62,8 @@ export async function isRequestOwnData(id: string, clubId: string, table: string
                     id: id
                 }
             })
-            if (club == undefined) {
-                return false;
+            if (club?.id == clubId) {
+                return true;
             }
             break;
         case "race":
