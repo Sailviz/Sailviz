@@ -240,7 +240,7 @@ export default function Page({ params }: { params: { slug: string } }) {
         <div id="race" className='h-full w-full overflow-y-auto'>
             <CreateResultModal isOpen={createModal.isOpen} race={race} boats={boats} onSubmit={createResult} onClose={createModal.onClose} />
             <ProgressModal key={progressValue} isOpen={progressModal.isOpen} Value={progressValue} Max={progressMax} Indeterminate={progressIndeterminate} onClose={progressModal.onClose} />
-            <EditResultModal isOpen={editModal.isOpen} fleet={activeFleet} result={activeResult} onSubmit={updateResult} onDelete={deleteResult} onClose={editModal.onClose} />
+            <EditResultModal isOpen={editModal.isOpen} fleet={activeFleet} raceType={race.Type} result={activeResult} onSubmit={updateResult} onDelete={deleteResult} onClose={editModal.onClose} />
             <ViewResultModal isOpen={viewModal.isOpen} result={activeResult} fleet={activeFleet} onClose={viewModal.onClose} />
             <div className="flex flex-wrap justify-center gap-4 w-full">
                 <div className="flex flex-wrap px-4 divide-y divide-solid w-full justify-center">
