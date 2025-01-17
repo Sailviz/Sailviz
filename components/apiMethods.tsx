@@ -180,12 +180,7 @@ export async function updateRaceById(raceData: RaceDataType) {
     })
         .then((res) => res.json())
         .then(async (data) => {
-            if (data && data.error) {
-                console.log(data.message)
-            } else {
-                console.log(data)
-                //TODO reload series data.
-            }
+            return data
         });
 };
 

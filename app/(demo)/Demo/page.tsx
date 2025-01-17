@@ -1,27 +1,31 @@
 'use client'
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import cookie from 'js-cookie';
+import * as DB from 'components/apiMethods';
 
 export default function DemoPage({ params }: { params: { slug: string } }) {
     const router = useRouter();
 
     useEffect(() => {
-        // Set a cookie
+        const run = async () => {
+            //create a new race for the demo
+            const newRace = await DB.createRace('2ad3c0f0-1a54-4e49-bef1-50256d5ce9e9', 'd21e2ca9-22fd-43a2-95fe-6a9b24cf4466');
 
-        //we want to sign the user in as an account for a sailing club, then feed fake data to the page
+            //load demo data into the new race
+            const demoData = await DB.getRaceById('ca1941a9-9cd8-4a41-8508-3e1a258a42c2');
 
-        //set cookies
-        cookie.set('clubId', '2ad3c0f0-1a54-4e49-bef1-50256d5ce9e9', { expires: 2 });
-        cookie.set('userId', '45e5f7be-d6d3-4f9c-b4fd-6a0704895e3f', { expires: 2 })
+            await DB.updateRaceById({ ...demoData, id: newRace.id, Type: 'Handicap' });
 
-        // Redirect to another page
-        router.push('/Demo/Race');
+
+            // Redirect to another page
+            router.push(`/Demo/Race/${newRace.id}`);
+        }
+        run();
     }, [router]);
 
     return (
         <div>
-            <p>Setting cookies and redirecting...</p>
+            <p>Setting up practice Mode</p>
         </div>
     );
 };

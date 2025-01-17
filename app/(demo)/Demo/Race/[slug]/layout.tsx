@@ -14,11 +14,6 @@ export default function DashboardLayout({
 }) {
     return (
         <div>
-            <div className="bg-green-500 text-center p-3 font-bold flex flex-row justify-between">
-                <BackButton />
-                <div className=" text-center">Demo Mode</div>
-                <div></div>
-            </div>
             {children}
         </div>
     )
