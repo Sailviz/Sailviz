@@ -44,7 +44,7 @@ export default function Page({ params }: { params: { slug: string } }) {
     var [raceState, setRaceState] = useState<raceStateType>(raceStateType.reset)
     const [mode, setMode] = useState(modeType.NotStarted)
 
-    const [dynamicSorting, setDynamicSorting] = useState(true)
+    const [dynamicSorting, setDynamicSorting] = useState(false)
     const [showStartTime, setShowStartTime] = useState(true)
     var [lastAction, setLastAction] = useState<{ type: string, resultId: string }>({ type: "", resultId: "" })
 
@@ -389,7 +389,10 @@ export default function Page({ params }: { params: { slug: string } }) {
                 //check if race has already finished
                 if (Math.floor((new Date().getTime() / 1000) - race.fleets[0]!.startTime) > (club.settings.pursuitLength * 60)) {
                     setRaceState(raceStateType.calculate)
+                    setDynamicSorting(false)
                 }
+            } else {
+                setDynamicSorting(true)
             }
             setSeriesName(await DB.GetSeriesById(race.seriesId).then((res) => { return (res.name) }))
         }
