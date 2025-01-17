@@ -1,5 +1,5 @@
 import prisma from 'components/prisma'
-import { NextRequest, NextResponse } from "next/server";
+import {NextRequest, NextResponse} from "next/server";
 
 import assert from 'assert';
 
@@ -12,14 +12,14 @@ async function findClub(name: string) {
     return result;
 }
 
-async function createClub(name: string) {
-    var club = await prisma.club.create({
+async function createClub(name: string, displayName?: string){
+    return prisma.club.create({
         data: {
             name: name,
+            displayName: displayName,
             settings: {}
         },
-    })
-    return club;
+    });
 }
 
 export async function POST(request: NextRequest) {
@@ -31,10 +31,11 @@ export async function POST(request: NextRequest) {
     }
 
     var name = req.name
+    var displayName = req.displayName
 
     var Existingclub = await findClub(name)
     if (!Existingclub) {
-        var Club = await createClub(name)
+        var Club = await createClub(name, displayName)
         if (Club) {
             return NextResponse.json({ error: false, Club: Club });
         }
