@@ -50,11 +50,15 @@ model Boat {
 model Club {
   id       String   @id @unique @default(uuid())
   name     String   @unique
+  displayName String?
   settings Json
   series   Series[]
   boats    Boat[]
   users    User[]
   roles Role[]
+  Trackers Tracker[]
+
+  Buoy Buoy[]
 }
 
 model Series {
@@ -137,4 +141,26 @@ model Lap {
   isDeleted Boolean
 
   @@index([resultId])
+}
+
+model Tracker {
+  trackerID   String @id @unique
+  club        Club     @relation(fields: [clubId], references: [id])
+  clubId      String
+  name        String
+
+  @@index([clubId])
+
+}
+
+model Buoy {
+  id          String @id @unique @default(uuid())
+  name        String
+  club        Club     @relation(fields: [clubId], references: [id])
+  clubId      String
+  pos         Json
+  isMoveable  Boolean
+  trackerID   String
+
+  @@index([clubId])
 }
