@@ -9,16 +9,23 @@ export default function DemoPage({ params }: { params: { slug: string } }) {
     useEffect(() => {
         const run = async () => {
             //create a new race for the demo
-            const newRace = await DB.createRace('2ad3c0f0-1a54-4e49-bef1-50256d5ce9e9', 'd21e2ca9-22fd-43a2-95fe-6a9b24cf4466');
-
+            let newRace = await DB.createRace('2ad3c0f0-1a54-4e49-bef1-50256d5ce9e9', 'd21e2ca9-22fd-43a2-95fe-6a9b24cf4466')
+            newRace = await DB.getRaceById(newRace.id, true)
             //load demo data into the new race
-            const demoData = await DB.getRaceById('ca1941a9-9cd8-4a41-8508-3e1a258a42c2');
-
-            await DB.updateRaceById({ ...demoData, id: newRace.id, Type: 'Handicap' });
+            const demoData = await DB.getRaceById('ca1941a9-9cd8-4a41-8508-3e1a258a42c2', true);
+            console.log(newRace)
+            //update race data
+            await DB.updateRaceById({ ...demoData, id: newRace.id, Type: "handicap", seriesId: 'd21e2ca9-22fd-43a2-95fe-6a9b24cf4466' });
+            //add results data
+            await Promise.all(demoData.fleets.flatMap(fleet => fleet.results).map(result => {
+                return DB.createResult(newRace.fleets[0]!.id).then(newResult => {
+                    DB.updateResult({ ...newResult, Helm: result.Helm, Crew: result.Crew, boat: result.boat })
+                })
+            }))
 
 
             // Redirect to another page
-            router.push(`/Demo/Race/${newRace.id}`);
+            router.replace(`/Demo/Race/${newRace.id}`);
         }
         run();
     }, [router]);
