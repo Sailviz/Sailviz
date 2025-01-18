@@ -1,11 +1,8 @@
 import prisma from 'components/prisma'
 import { NextRequest, NextResponse } from "next/server";
-
 import assert from 'assert';
-
-type SettingsType = {
-    numberToCount: number
-}
+import { AVAILABLE_PERMISSIONS } from 'components/helpers/users';
+import { isRequestAuthorised } from 'components/helpers/auth';
 
 async function updateSeries(series: SeriesDataType) {
     var result = await prisma.series.update({
@@ -27,16 +24,19 @@ export async function POST(request: NextRequest) {
         assert.notStrictEqual(undefined, req.series);
 
     } catch (bodyError) {
-        return NextResponse.json({ error: true, message: "information missing" });
-        return;
+        return NextResponse.json({ error: "information missing" }, { status: 400 });
     }
+
     var series = req.series
+
+    let authorised = await isRequestAuthorised(request.cookies, AVAILABLE_PERMISSIONS.editSeries, series.id, "series")
+    if (!authorised) {
+        return NextResponse.json({ error: "not authorized" }, { status: 401 });
+    }
 
     var updatedSeries = await updateSeries(series)
     if (updatedSeries) {
-        return NextResponse.json({ error: false, series: updatedSeries });
-    } else {
-        // User exists
-        return NextResponse.json({ error: true, message: 'series not found' });
+        return NextResponse.json({ res: updatedSeries }, { status: 200 });
     }
+    return NextResponse.json({ error: 'series not found' }, { status: 400 });
 }

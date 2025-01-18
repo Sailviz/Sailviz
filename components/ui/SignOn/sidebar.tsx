@@ -20,6 +20,10 @@ import { SignOutIcon } from "components/icons/sign-out";
 import Cookies from "js-cookie";
 import React from "react";
 import {AVAILABLE_PERMISSIONS, userHasPermission} from "../../helpers/users";
+import {SignOnIcon} from "../../icons/sign-on";
+import {RaceIcon} from "../../icons/race-icon";
+import {SeriesIcon} from "../../icons/series-icon";
+import {DocsIcon} from "../../icons/docs-icon";
 
 export const SidebarWrapper = () => {
     const pathname = usePathname();
@@ -59,21 +63,21 @@ export const SidebarWrapper = () => {
                     <div className={Sidebar.Body()}>
                         <SidebarItem
                             title="SignOn Sheet"
-                            icon={<HomeIcon />}
+                            icon={<SignOnIcon />}
                             isActive={pathname === "/SignOn"}
                             href="/SignOn"
                         />
                         <SidebarMenu title="Main Menu">
                             <CollapseItems
                                 isActive={pathname === "/SignOn/Race"}
-                                icon={<SettingsIcon />}
+                                icon={<RaceIcon />}
                                 items={todaysRaces?.map(race => race.series.name + ": " + race.number)}
                                 title="Today's Races"
                                 hrefs={todaysRaces?.map(race => '/SignOn/Race/' + race.id)}
                             />
                             <CollapseItems
                                 isActive={pathname === "/SignOn/Series"}
-                                icon={<SettingsIcon />}
+                                icon={<SeriesIcon />}
                                 items={[...new Set(todaysRaces?.map(race => race.series.name))]}
                                 title="Today's Series"
                                 hrefs={[...new Set(todaysRaces?.map(race => '/SignOn/Series/' + race.series.id))]}
@@ -81,7 +85,7 @@ export const SidebarWrapper = () => {
                             <SidebarItem
                                 isActive={pathname === "/SignOn/Guide"}
                                 title="User Guide"
-                                icon={<HomeIcon />}
+                                icon={<DocsIcon />}
                                 href="/SignOn/Guide"
 
                             />

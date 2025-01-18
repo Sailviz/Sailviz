@@ -54,7 +54,7 @@ export default function Page() {
         <div>
             <CreateEventModal isOpen={createModal.isOpen} onSubmit={createEvent} onClose={() => createModal.onClose()} />
             <div className="p-6">
-                <h1 className={title({ color: "blue" })}>{club.name}</h1>
+                <h1 className={title({ color: "blue" })}>{club.displayName}</h1>
             </div>
             <div className="flex flex-row">
                 <div>

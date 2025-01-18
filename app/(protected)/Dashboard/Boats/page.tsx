@@ -11,7 +11,7 @@ import { Button, Input, useDisclosure, user } from "@nextui-org/react";
 import EditBoatModal from "components/ui/dashboard/EditBoatModal";
 import { mutate } from "swr";
 import { userHasPermission, AVAILABLE_PERMISSIONS } from "components/helpers/users";
-import { title } from "../../../../components/ui/home/primitaves";
+import { title } from "components/ui/home/primitaves";
 
 
 export default function Page() {
@@ -114,12 +114,11 @@ export default function Page() {
 
     const createBoat = async () => {
         const tempdata = boats
-        const Boat: BoatDataType = await DB.createBoat("", 0, 0, 0, club.id)
-        console.log(Boat)
-        if (Boat) {
-            //mutate boats
+        const res = await DB.createBoat("", 0, 0, 0, club.id)
+        if (res) {
+            mutate('/api/GetBoatsByClubId')
         } else {
-            alert("something went wrong")
+            alert("Boat Creation Failed")
         }
     }
 

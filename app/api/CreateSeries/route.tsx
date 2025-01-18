@@ -1,6 +1,8 @@
 import prisma from 'components/prisma'
 import { NextRequest, NextResponse } from "next/server";
 import assert from 'assert';
+import { AVAILABLE_PERMISSIONS } from 'components/helpers/users';
+import { isRequestAuthorised } from 'components/helpers/auth';
 
 async function createSeries(seriesName: string, clubId: string) {
     var res = await prisma.series.create({
@@ -40,17 +42,23 @@ export async function POST(request: NextRequest) {
         assert.notStrictEqual(undefined, req.seriesName, 'Name required');
         assert.notStrictEqual(undefined, req.clubId, 'Club required');
     } catch (bodyError) {
-        return NextResponse.json({ error: true, message: "information missing" });
+        return NextResponse.json({ error: "information missing" }, { status: 400 });
+    }
+
+    var clubId = req.clubId
+
+    let authorised = await isRequestAuthorised(request.cookies, AVAILABLE_PERMISSIONS.editSeries, clubId, "club")
+    if (!authorised) {
+        return NextResponse.json({ error: "not authorized" }, { status: 401 });
     }
 
     var seriesName = req.seriesName
-    var clubId = req.clubId
     var Series = await createSeries(seriesName, clubId)
     if (Series) {
         await attachFleetSettings(Series.id)
-        return NextResponse.json({ error: false, series: Series })
+        return NextResponse.json({ res: Series }, { status: 200 });
     }
     else {
-        return NextResponse.json({ error: true, message: 'Something went wrong creating Series' });
+        return NextResponse.json({ error: 'Something went wrong creating Series' }, { status: 500 });
     }
 }

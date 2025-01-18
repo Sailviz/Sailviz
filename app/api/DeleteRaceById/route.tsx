@@ -1,7 +1,8 @@
 import prisma from 'components/prisma'
 import { NextRequest, NextResponse } from "next/server";
-
 import assert from 'assert';
+import { AVAILABLE_PERMISSIONS } from 'components/helpers/users';
+import { isRequestAuthorised } from 'components/helpers/auth';
 
 async function findRace(raceId: any) {
     var result = await prisma.race.findFirst({
@@ -27,18 +28,20 @@ export async function POST(request: NextRequest) {
         assert.notStrictEqual(undefined, req.raceId, 'raceId required');
 
     } catch (bodyError) {
-        return NextResponse.json({ error: true, message: "information missing" });
+        return NextResponse.json({ error: "information missing" }, { status: 400 });
     }
-    console.log(req.body)
 
     var raceId = req.raceId
+
+    let authorised = await isRequestAuthorised(request.cookies, AVAILABLE_PERMISSIONS.editResults, raceId, "race")
+    if (!authorised) {
+        return NextResponse.json({ error: "not authorized" }, { status: 401 });
+    }
 
     var race = await findRace(raceId)
     if (race) {
         await deleteRace(raceId)
-        return NextResponse.json({ error: false, race: race });
-    } else {
-        // User exists
-        return NextResponse.json({ error: true, message: 'race not found' });
+        return NextResponse.json({ res: race }, { status: 200 });
     }
+    return NextResponse.json({ error: 'race not found' }, { status: 400 });
 }

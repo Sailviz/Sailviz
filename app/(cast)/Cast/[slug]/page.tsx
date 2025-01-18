@@ -299,7 +299,7 @@ export default function Page({ params }: { params: { slug: string } }) {
                     : null}
             </div>
             <div className='p-6'>
-                <h1 className={title({ color: "blue" })}>SailViz - {club.name}</h1>
+                <h1 className={title({ color: "blue" })}>SailViz - {club.displayName}</h1>
             </div>
 
             {(() => {

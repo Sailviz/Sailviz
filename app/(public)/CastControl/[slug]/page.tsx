@@ -180,7 +180,7 @@ export default function Page({ params }: { params: { slug: string } }) {
         <div className="flex flex-col px-6">
             <div className="flex flex-col">
                 <div className='flex flex-row mb-2 justify-center'>
-                    <h1 className={title({ color: "blue" })}>{club.name} - Control</h1>
+                    <h1 className={title({ color: "blue" })}>{club.displayName} - Control</h1>
                 </div>
                 <div className='flex flex-row mb-2 justify-center'>
                     <div className="m-6">
