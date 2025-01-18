@@ -62,6 +62,7 @@ export default function Page({ params }: { params: { slug: string } }) {
         race.fleets.forEach(fleet => {
             mutate('/api/GetFleetById?id=' + fleet.id)
         })
+        mutateRace()
     }
 
     const deleteResult = async (result: ResultsDataType) => {
@@ -230,7 +231,7 @@ export default function Page({ params }: { params: { slug: string } }) {
         }
     }, [race])
 
-    if (userIsValidating || clubIsValidating || raceIsValidating || user == undefined || club == undefined || boats == undefined || race == undefined) {
+    if (userIsValidating || clubIsValidating || user == undefined || club == undefined || boats == undefined || race == undefined) {
         return (
             <PageSkeleton />
         )
