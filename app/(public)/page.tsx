@@ -3,9 +3,12 @@ import { Button, Card, CardFooter, CardHeader, Image } from '@nextui-org/react'
 import LapsCounter from 'components/ui/home/LapsCounter'
 import { useTheme } from 'next-themes'
 import { title, subtitle } from 'components/ui/home/primitaves'
+import { useRouter } from 'next/navigation'
 
 export default function Page() {
     const { theme, setTheme } = useTheme()
+
+    const router = useRouter()
 
     //force home page to light theme
     setTheme('light')
@@ -24,8 +27,8 @@ export default function Page() {
                 </h2>
             </div>
 
-            <Button color='primary'>
-                Get Started
+            <Button color='primary' onClick={() => router.push('/Demo')}>
+                Try it now!
             </Button>
 
             <div className="w-full gap-2 grid grid-cols-12 grid-rows-2 px-8">

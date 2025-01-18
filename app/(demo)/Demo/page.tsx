@@ -2,6 +2,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import * as DB from 'components/apiMethods';
+import cookie from 'js-cookie'
 
 export default function DemoPage({ params }: { params: { slug: string } }) {
     const router = useRouter();
@@ -23,6 +24,13 @@ export default function DemoPage({ params }: { params: { slug: string } }) {
                 })
             }))
 
+            // set user cookies if they don't exist
+            if (!cookie.get('userId')) {
+                cookie.set('userId', 'dfcc60fd-2f12-4f4b-b847-016ac9883553', { expires: 1 });
+            }
+            if (!cookie.get('clubId')) {
+                cookie.set('clubId', '2ad3c0f0-1a54-4e49-bef1-50256d5ce9e9', { expires: 1 });
+            }
 
             // Redirect to another page
             router.replace(`/Demo/Race/${newRace.id}`);
