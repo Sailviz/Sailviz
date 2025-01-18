@@ -44,7 +44,7 @@ export default function Page({ params }: { params: { slug: string } }) {
     var [raceState, setRaceState] = useState<raceStateType>(raceStateType.reset)
     const [mode, setMode] = useState(modeType.NotStarted)
 
-    const [dynamicSorting, setDynamicSorting] = useState(true)
+    const [dynamicSorting, setDynamicSorting] = useState(false)
     const [showStartTime, setShowStartTime] = useState(true)
     var [lastAction, setLastAction] = useState<{ type: string, resultId: string }>({ type: "", resultId: "" })
 
@@ -176,36 +176,6 @@ export default function Page({ params }: { params: { slug: string } }) {
 
     }
 
-    const dynamicSort = async () => {
-        //recalculate position
-        let racesCopy: RaceDataType = await DB.getRaceById(race.id)
-        // there is just one fleet so grab the first one
-        racesCopy.fleets[0]!.results.sort((a: ResultsDataType, b: ResultsDataType) => {
-            // get the number of laps for each boat
-            if (a.resultCode != "") return 1
-            if (b.resultCode != "") return -1
-            if (a.laps.length == 0) return 1
-            if (b.laps.length == 0) return -1
-            let lapsA = a.laps.length;
-            let lapsB = b.laps.length;
-            // get the last lap time for each boat
-            let lastA = a.laps.at(-1)?.time!;
-            let lastB = b.laps.at(-1)?.time!;
-            // compare the number of laps first, then the last lap time
-            return lapsB - lapsA || lastA - lastB;
-        });
-
-        racesCopy.fleets.flatMap(fleet => fleet.results).forEach(async (result, index) => {
-            //there is only one fleet
-            // updatedData.fleets[0]!.results[index]!.PursuitPosition = index + 1
-            result.PursuitPosition = index + 1
-            await DB.updateResult(result)
-        })
-
-        await mutateRace()
-    }
-
-
     const retireBoat = async (resultCode: string) => {
         let tempdata = activeResult
         tempdata.resultCode = resultCode
@@ -248,7 +218,7 @@ export default function Page({ params }: { params: { slug: string } }) {
         //wait for both to be updated
         await Promise.all([DB.updateResult(toMoveUp), DB.updateResult(toMoveDown)])
 
-        await mutateRace()
+        await mutate(`/api/GetFleetById?id=${race.fleets[0]!.id}`)
     }
 
     const moveDown = async (id: string) => {
@@ -270,30 +240,57 @@ export default function Page({ params }: { params: { slug: string } }) {
         //wait for both to be updated
         await Promise.all([DB.updateResult(toMoveUp), DB.updateResult(toMoveDown)])
 
-        await mutateRace()
+        await mutate(`/api/GetFleetById?id=${race.fleets[0]!.id}`)
+    }
+
+    const dynamicSort = async () => {
+        //recalculate position
+        let racesCopy: RaceDataType = await DB.getRaceById(race.id)
+        // there is just one fleet so grab the first one
+        racesCopy.fleets[0]!.results.sort((a: ResultsDataType, b: ResultsDataType) => {
+            // get the number of laps for each boat
+            if (a.resultCode != "") return 1
+            if (b.resultCode != "") return -1
+            if (a.laps.length == 0) return 1
+            if (b.laps.length == 0) return -1
+            let lapsA = a.laps.length;
+            let lapsB = b.laps.length;
+            // get the last lap time for each boat
+            let lastA = a.laps.at(-1)?.time!;
+            let lastB = b.laps.at(-1)?.time!;
+            // compare the number of laps first, then the last lap time
+            return lapsB - lapsA || lastA - lastB;
+        });
+
+        racesCopy.fleets.flatMap(fleet => fleet.results).forEach(async (result, index) => {
+            //there is only one fleet
+            // updatedData.fleets[0]!.results[index]!.PursuitPosition = index + 1
+            result.PursuitPosition = index + 1
+            await DB.updateResult(result)
+        })
     }
 
     const lapBoat = async (id: string) => {
         //modify local race data
         await DB.CreateLap(id, Math.floor(new Date().getTime() / 1000))
 
-        console.log(dynamicSorting)
-        if (dynamicSorting) {
-            await dynamicSort()
-        }
+        //trigger view table to update.
+        await mutate(`/api/GetFleetById?id=${race.fleets[0]!.id}`)
 
-        await mutateRace()
         let sound = document.getElementById("Beep") as HTMLAudioElement
         sound!.currentTime = 0
         sound!.play();
 
         setLastAction({ type: "lap", resultId: id })
 
+        //save new positions
+        if (dynamicSorting) {
+            dynamicSort()
+        }
+
     }
 
     const endRace = async () => {
-        setRaceState(raceStateType.calculate)
-
         //sound horn
         fetch("http://" + club.settings.hornIP + "/hoot?startTime=500", { signal: controller.signal, mode: 'no-cors' }).then(response => {
         }).catch((err) => {
@@ -303,9 +300,19 @@ export default function Page({ params }: { params: { slug: string } }) {
         let sound = document.getElementById("Beep") as HTMLAudioElement
         sound!.currentTime = 0
         sound!.play();
+
+        setRaceState(raceStateType.calculate)
+        setDynamicSorting(false)
     }
 
     const submitResults = async () => {
+        //copy lap data into final result
+        race.fleets.flatMap(fleet => fleet.results).forEach(async result => {
+            if (result.numberLaps == 0) {
+                result.numberLaps = result.laps.length
+            }
+            await DB.updateResult(result)
+        })
         Router.push('/Race/' + race.id)
     }
 
@@ -373,7 +380,10 @@ export default function Page({ params }: { params: { slug: string } }) {
                 //check if race has already finished
                 if (Math.floor((new Date().getTime() / 1000) - race.fleets[0]!.startTime) > (club.settings.pursuitLength * 60)) {
                     setRaceState(raceStateType.calculate)
+                    setDynamicSorting(false)
                 }
+            } else {
+                setDynamicSorting(true)
             }
             setSeriesName(await DB.GetSeriesById(race.seriesId).then((res) => { return (res.name) }))
         }

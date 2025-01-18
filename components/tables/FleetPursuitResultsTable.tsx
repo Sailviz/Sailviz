@@ -21,7 +21,7 @@ const Laps = ({ ...props }: any) => {
 
     return (
         <div >
-            {value.length}
+            {value}
         </div>
     );
 };
@@ -124,7 +124,7 @@ const FleetPursuitResultsTable = (props: any) => {
             cell: props => <Text {...props} />,
             enableSorting: false
         }),
-        columnHelper.accessor('laps', {
+        columnHelper.accessor('numberLaps', {
             header: "Laps",
             cell: props => <Laps {...props} />,
             enableSorting: false
@@ -168,7 +168,7 @@ const FleetPursuitResultsTable = (props: any) => {
                     })}
                 </TableHeader>
                 <TableBody
-                    loadingContent={<Spinner/>}
+                    loadingContent={<Spinner />}
                     loadingState={loadingState}
                     emptyContent={"No Entries Yet."}
                 >

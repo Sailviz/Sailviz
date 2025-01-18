@@ -16,7 +16,7 @@ const resultCodeOptions = [
     { label: 'Not Sailed Course', value: 'NSC' }]
 
 
-export default function EditResultModal({ isOpen, result, fleet, onSubmit, onClose, onDelete }: { isOpen: boolean, result: ResultsDataType | undefined, fleet: FleetDataType | undefined, onSubmit: (resut: ResultsDataType) => void, onDelete: (result: ResultsDataType) => void, onClose: () => void }) {
+export default function EditResultModal({ isOpen, result, fleet, raceType, onSubmit, onClose, onDelete }: { isOpen: boolean, result: ResultsDataType | undefined, fleet: FleetDataType | undefined, raceType: string, onSubmit: (resut: ResultsDataType) => void, onDelete: (result: ResultsDataType) => void, onClose: () => void }) {
     const { theme, setTheme } = useTheme()
     const { boats, boatsIsError, boatsIsValidating } = Fetcher.Boats()
 
@@ -25,14 +25,15 @@ export default function EditResultModal({ isOpen, result, fleet, onSubmit, onClo
     const [boatOption, setBoatOption] = useState({ label: "", value: {} as BoatDataType })
     const [numberLaps, setNumberLaps] = useState(0)
 
-    const [finished, setFinished] = useState(false)
-
     const [basicElapsed, setBasicElapsed] = useState("00:00:00")
 
     const [helm, setHelm] = useState("")
     const [crew, setCrew] = useState("")
     const [boat, setBoat] = useState<BoatDataType>({} as BoatDataType)
     const [sailNumber, setSailNumber] = useState("")
+
+    const [handicapPosition, setHandicapPosition] = useState(0)
+    const [pursuitPosition, setPursuitPosition] = useState(0)
 
 
     let options: { label: string; value: BoatDataType }[] = []
@@ -44,7 +45,7 @@ export default function EditResultModal({ isOpen, result, fleet, onSubmit, onClo
     const submit = async () => {
         let finishTime = basicElapsed.split(':').reduce((acc, time) => (60 * acc) + +time, 0) + fleet!.startTime
 
-        onSubmit({ ...result!, Helm: helm, Crew: crew, boat: boat, SailNumber: sailNumber, finishTime: finishTime, resultCode: resultCodeOption.value, numberLaps: numberLaps })
+        onSubmit({ ...result!, Helm: helm, Crew: crew, boat: boat, SailNumber: sailNumber, finishTime: finishTime, resultCode: resultCodeOption.value, numberLaps: numberLaps, PursuitPosition: pursuitPosition, HandicapPosition: handicapPosition })
     }
 
     useEffect(() => {
@@ -54,10 +55,11 @@ export default function EditResultModal({ isOpen, result, fleet, onSubmit, onClo
         setHelm(result.Helm)
         setCrew(result.Crew)
         setBoat(result.boat)
+        setHandicapPosition(result.HandicapPosition)
+        setPursuitPosition(result.PursuitPosition)
         setSailNumber(result.SailNumber)
         setNumberLaps(result.numberLaps)
         setBasicElapsed(new Date(Math.max(0, (result.finishTime - fleet!.startTime) * 1000)).toISOString().substring(11, 19))
-        setFinished(result.finishTime != 0)
         setBoatOption({ label: result.boat.name, value: result.boat })
         setResultCodeOption(result.resultCode == '' ? { label: 'None', value: '' } : { label: result.resultCode, value: result.resultCode })
     }, [result])
@@ -177,15 +179,6 @@ export default function EditResultModal({ isOpen, result, fleet, onSubmit, onClo
                                         <p className="text-2xl font-bold py-6">
                                             Result Info
                                         </p>
-
-                                        <div className="p-6 flex flex-row w-24">
-                                            <Checkbox
-                                                onValueChange={(value) => setFinished(value)}
-                                                isSelected={finished}
-                                            >
-                                                Finished
-                                            </Checkbox>
-                                        </div>
                                     </div>
 
                                     <div className="flex flex-row mt-2">
@@ -239,17 +232,31 @@ export default function EditResultModal({ isOpen, result, fleet, onSubmit, onClo
                                                 }}
                                             />
                                         </div>
+                                        {raceType == 'Handicap' ?
+                                            <div className='flex flex-col px-6 w-1/4'>
+                                                <p className='text-2xl font-bold'>
+                                                    Position
+                                                </p>
 
-                                        <div className='flex flex-col px-6 w-1/4'>
-                                            <p className='text-2xl font-bold'>
-                                                Position
-                                            </p>
+                                                <Input
+                                                    type="number"
+                                                    value={handicapPosition.toString()}
+                                                    onValueChange={(e) => setHandicapPosition(parseInt(e))}
+                                                />
+                                            </div>
+                                            :
+                                            <div className='flex flex-col px-6 w-1/4'>
+                                                <p className='text-2xl font-bold'>
+                                                    Position
+                                                </p>
 
-                                            <Input
-                                                type="number"
-                                                placeholder=' '
-                                            />
-                                        </div>
+                                                <Input
+                                                    type="number"
+                                                    value={pursuitPosition.toString()}
+                                                    onValueChange={(e) => setPursuitPosition(parseInt(e))}
+                                                />
+                                            </div>
+                                        }
 
                                         <div className='flex flex-row w-full'>
                                             <div className='flex flex-col px-6 w-full' key={numberLaps}>
@@ -266,21 +273,25 @@ export default function EditResultModal({ isOpen, result, fleet, onSubmit, onClo
                                                     }}
                                                 />
                                             </div>
+                                            {raceType == 'Handicap' ?
+                                                <div className='flex flex-col px-6 w-full' key={basicElapsed}>
+                                                    <p className='text-2xl font-bold'>
+                                                        Finish Time
+                                                    </p>
 
-                                            <div className='flex flex-col px-6 w-full' key={basicElapsed}>
-                                                <p className='text-2xl font-bold'>
-                                                    Finish Time
-                                                </p>
-
-                                                <Input
-                                                    type="time"
-                                                    step={"1"}
-                                                    defaultValue={basicElapsed}
-                                                    onValueChange={(value) => {
-                                                        setBasicElapsed(value)
-                                                    }}
-                                                />
-                                            </div>
+                                                    <Input
+                                                        type="time"
+                                                        step={"1"}
+                                                        defaultValue={basicElapsed}
+                                                        onValueChange={(value) => {
+                                                            setBasicElapsed(value)
+                                                        }}
+                                                    />
+                                                </div>
+                                                :
+                                                <div className='flex flex-col px-6 w-full' key={basicElapsed}>
+                                                </div>
+                                            }
                                         </div>
 
 
