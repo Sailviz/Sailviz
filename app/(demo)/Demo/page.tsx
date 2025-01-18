@@ -5,7 +5,7 @@ import * as DB from 'components/apiMethods';
 import cookie from 'js-cookie'
 
 export default function DemoPage({ params }: { params: { slug: string } }) {
-    const router = useRouter();
+    const Router = useRouter();
 
     useEffect(() => {
         const run = async () => {
@@ -33,10 +33,10 @@ export default function DemoPage({ params }: { params: { slug: string } }) {
             }
 
             // Redirect to another page
-            router.replace(`/Demo/Race/${newRace.id}`);
+            Router.replace(`/Demo/Race/${newRace.id}`);
         }
         run();
-    }, [router]);
+    }, [Router]);
 
     return (
         <div>

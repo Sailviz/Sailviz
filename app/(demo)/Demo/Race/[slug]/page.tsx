@@ -53,7 +53,7 @@ export default function Page({ params }: { params: { slug: string } }) {
         }))
         params.slug = newRace.id
         setRaceType(requestedType)
-        window.history.pushState(null, "", `/Demo/Race/${newRace.id}`)
+        window.history.replaceState(null, "", `/Demo/Race/${newRace.id}`)
         // mutate('/api/GetFleetById?id=' + newRace.fleets[0]!.id)
     }
 
