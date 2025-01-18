@@ -1,8 +1,8 @@
 import prisma from 'components/prisma'
 import { NextRequest, NextResponse } from "next/server";
-
-
 import assert from 'assert';
+import { AVAILABLE_PERMISSIONS } from 'components/helpers/users';
+import { isRequestAuthorised } from 'components/helpers/auth';
 
 async function findSeries(seriesId: any) {
     var result = await prisma.series.findUnique({
@@ -37,19 +37,21 @@ export async function POST(request: NextRequest) {
         assert.notStrictEqual(undefined, req.seriesId, 'seriesId required');
 
     } catch (bodyError) {
-        return NextResponse.json({ error: true, message: "information missing" });
+        return NextResponse.json({ error: "information missing" }, { status: 400 });
     }
 
     var seriesId = req.seriesId
-    console.log(seriesId)
+
+    let authorised = await isRequestAuthorised(request.cookies, AVAILABLE_PERMISSIONS.editSeries, seriesId, "series")
+    if (!authorised) {
+        return NextResponse.json({ error: "not authorized" }, { status: 401 });
+    }
 
     var series = await findSeries(seriesId)
     if (series) {
         await deleteraces(seriesId)
         await deleteSeries(seriesId)
-        return NextResponse.json({ error: false });
-    } else {
-        // User exists
-        return NextResponse.json({ error: true, message: 'series not found' });
+        return NextResponse.json({ res: series }, { status: 200 });
     }
+    return NextResponse.json({ error: 'series not found' }, { status: 400 });
 }

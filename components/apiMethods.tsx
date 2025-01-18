@@ -121,14 +121,14 @@ export async function UpdateClubById(clubData: ClubDataType): Promise<ClubDataTy
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
     })
-        .then((res) => res.json())
-        .then((data) => {
-            if (data && data.error) {
-                console.log(data.message)
+        .then(async (res) => {
+            if (res.ok) {
+                let data = await res.json()
+                return data.res
             } else {
-                return (data.series)
+                return undefined
             }
-        });
+        })
 };
 
 export async function getBoats(clubId: string): Promise<BoatDataType[]> {
@@ -178,15 +178,14 @@ export async function updateRaceById(raceData: RaceDataType) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
     })
-        .then((res) => res.json())
-        .then(async (data) => {
-            if (data && data.error) {
-                console.log(data.message)
+        .then(async (res) => {
+            if (res.ok) {
+                let data = await res.json()
+                return data.res
             } else {
-                console.log(data)
-                //TODO reload series data.
+                return undefined
             }
-        });
+        })
 };
 
 export async function getRaceById(raceId: string, results: boolean = true): Promise<RaceDataType> {
@@ -256,14 +255,14 @@ export async function updateBoatById(boatData: BoatDataType) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
     })
-        .then((res) => res.json())
-        .then(async (data) => {
-            if (data && data.error) {
-                console.log(data.message)
+        .then(async (res) => {
+            if (res.ok) {
+                let data = await res.json()
+                return data.res
             } else {
-                console.log(data)
+                return undefined
             }
-        });
+        })
 };
 
 export async function createBoat(boatName: string, crew: number, py: number, pursuitStartTime: number, clubId: string): Promise<BoatDataType> {
@@ -279,15 +278,14 @@ export async function createBoat(boatName: string, crew: number, py: number, pur
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
     })
-        .then((res) => res.json())
-        .then(async (data) => {
-            if (data && data.error) {
-                console.log(data.message)
+        .then(async (res) => {
+            if (res.ok) {
+                let data = await res.json()
+                return data.res
             } else {
-                console.log(data)
-                return data.boat
+                return undefined
             }
-        });
+        })
 };
 
 export async function deleteBoatById(id: string): Promise<BoatDataType> {
@@ -299,14 +297,14 @@ export async function deleteBoatById(id: string): Promise<BoatDataType> {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
     })
-        .then((res) => res.json())
-        .then(async (data) => {
-            if (data && data.error) {
-                console.log(data.message)
+        .then(async (res) => {
+            if (res.ok) {
+                let data = await res.json()
+                return data.res
             } else {
-                return data.boat
+                return undefined
             }
-        });
+        })
 };
 
 export async function updateSeries(seriesData: SeriesDataType) {
@@ -318,14 +316,14 @@ export async function updateSeries(seriesData: SeriesDataType) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
     })
-        .then((res) => res.json())
-        .then((data) => {
-            if (data && data.error) {
-                console.log(data.message)
+        .then(async (res) => {
+            if (res.ok) {
+                let data = await res.json()
+                return data.res
             } else {
-                console.log(data)
+                return undefined
             }
-        });
+        })
 };
 
 export async function createRace(clubId: string, seriesId: string): Promise<RaceDataType> {
@@ -340,15 +338,14 @@ export async function createRace(clubId: string, seriesId: string): Promise<Race
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
     })
-        .then((res) => res.json())
-        .then(async (data) => {
-            if (data && data.error) {
-                console.log(data.message)
+        .then(async (res) => {
+            if (res.ok) {
+                let data = await res.json()
+                return data.res
             } else {
-                data.race.results = [] //this adds a results list to the object
-                return data.race
+                return undefined
             }
-        });
+        })
 };
 
 export async function createSeries(clubId: string, seriesName: string): Promise<SeriesDataType> {
@@ -361,14 +358,14 @@ export async function createSeries(clubId: string, seriesName: string): Promise<
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
     })
-        .then((res) => res.json())
-        .then(async (data) => {
-            if (data && data.error) {
-                console.log(data.message)
+        .then(async (res) => {
+            if (res.ok) {
+                let data = await res.json()
+                return data.res
             } else {
-                return data.series
+                return undefined
             }
-        });
+        })
 };
 
 export async function deleteSeriesById(seriesId: string): Promise<SeriesDataType> {
@@ -380,14 +377,14 @@ export async function deleteSeriesById(seriesId: string): Promise<SeriesDataType
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
     })
-        .then((res) => res.json())
-        .then(async (data) => {
-            if (data && data.error) {
-                console.log(data.message)
+        .then(async (res) => {
+            if (res.ok) {
+                let data = await res.json()
+                return data.res
             } else {
-                return data
+                return undefined
             }
-        });
+        })
 };
 
 export async function deleteRaceById(id: string): Promise<RaceDataType> {
@@ -399,15 +396,14 @@ export async function deleteRaceById(id: string): Promise<RaceDataType> {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
     })
-        .then((res) => res.json())
-        .then(async (data) => {
-            if (data && data.error) {
-                console.log(data.message)
-                return false
+        .then(async (res) => {
+            if (res.ok) {
+                let data = await res.json()
+                return data.res
             } else {
-                return data.race
+                return undefined
             }
-        });
+        })
 };
 
 export async function getClubByName(club: string): Promise<ClubDataType> {
@@ -459,14 +455,14 @@ export async function createResult(fleetId: string): Promise<ResultsDataType> {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
     })
-        .then((res) => res.json())
-        .then(async (data) => {
-            if (data && data.error) {
-                console.log(data.message)
+        .then(async (res) => {
+            if (res.ok) {
+                let data = await res.json()
+                return data.res
             } else {
-                return data.result
+                return undefined
             }
-        });
+        })
 };
 
 export async function DeleteResultById(result: ResultsDataType): Promise<ResultsDataType> {
@@ -478,14 +474,14 @@ export async function DeleteResultById(result: ResultsDataType): Promise<Results
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
     })
-        .then((res) => res.json())
-        .then(async (data) => {
-            if (data && data.error) {
-                console.log(data.message)
+        .then(async (res) => {
+            if (res.ok) {
+                let data = await res.json()
+                return data.res
             } else {
-                return data.result
+                return undefined
             }
-        });
+        })
 };
 
 export async function updateResult(result: ResultsDataType): Promise<RaceDataType> {
@@ -499,14 +495,14 @@ export async function updateResult(result: ResultsDataType): Promise<RaceDataTyp
             (key, value) => (typeof value === 'bigint' ? value.toString() : value) // return everything else unchanged
         ),
     })
-        .then((res) => res.json())
-        .then(async (data) => {
-            if (data && data.error) {
-                console.log(data.message)
+        .then(async (res) => {
+            if (res.ok) {
+                let data = await res.json()
+                return data.res
             } else {
-                return data.race
+                return undefined
             }
-        });
+        })
 };
 
 export async function createFleet(seriesId: string): Promise<FleetDataType> {
@@ -518,17 +514,17 @@ export async function createFleet(seriesId: string): Promise<FleetDataType> {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
     })
-        .then((res) => res.json())
-        .then(async (data) => {
-            if (data && data.error) {
-                console.log(data.message)
+        .then(async (res) => {
+            if (res.ok) {
+                let data = await res.json()
+                return data.res
             } else {
-                return data.fleet
+                return undefined
             }
-        });
+        })
 };
 
-export async function createFleetSettings(seriesId: string): Promise<FleetSettingsType> {
+export async function createFleetSettings(seriesId: string): Promise<boolean> {
     const body = {
         seriesId: seriesId,
     }
@@ -537,14 +533,14 @@ export async function createFleetSettings(seriesId: string): Promise<FleetSettin
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
     })
-        .then((res) => res.json())
-        .then(async (data) => {
-            if (data && data.error) {
-                console.log(data.message)
+        .then(async (res) => {
+            if (res.ok) {
+                let data = await res.json()
+                return data.res
             } else {
-                return data.fleet
+                return undefined
             }
-        });
+        })
 };
 
 export async function GetFleetSettingsBySeries(seriesId: string): Promise<FleetSettingsType[]> {
@@ -576,14 +572,14 @@ export async function updateFleetById(fleet: FleetDataType): Promise<FleetDataTy
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
     })
-        .then((res) => res.json())
-        .then(async (data) => {
-            if (data && data.error) {
-                console.log(data.message)
+        .then(async (res) => {
+            if (res.ok) {
+                let data = await res.json()
+                return data.res
             } else {
-                return data.fleet
+                return undefined
             }
-        });
+        })
 };
 
 export async function updateFleetSettingsById(fleet: FleetSettingsType): Promise<FleetSettingsType> {
@@ -595,14 +591,14 @@ export async function updateFleetSettingsById(fleet: FleetSettingsType): Promise
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
     })
-        .then((res) => res.json())
-        .then(async (data) => {
-            if (data && data.error) {
-                console.log(data.message)
+        .then(async (res) => {
+            if (res.ok) {
+                let data = await res.json()
+                return data.res
             } else {
-                return data.fleet
+                return undefined
             }
-        });
+        })
 };
 
 export async function DeleteFleetSettingsById(fleetSettingsId: string): Promise<FleetDataType> {
@@ -614,14 +610,14 @@ export async function DeleteFleetSettingsById(fleetSettingsId: string): Promise<
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
     })
-        .then((res) => res.json())
-        .then(async (data) => {
-            if (data && data.error) {
-                console.log(data.message)
+        .then(async (res) => {
+            if (res.ok) {
+                let data = await res.json()
+                return data.res
             } else {
-                return data.fleet
+                return undefined
             }
-        });
+        })
 };
 
 export async function CreateLap(resultId: string, time: number): Promise<LapDataType> {
@@ -634,14 +630,14 @@ export async function CreateLap(resultId: string, time: number): Promise<LapData
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
     })
-        .then((res) => res.json())
-        .then(async (data) => {
-            if (data && data.error) {
-                console.log(data.message)
+        .then(async (res) => {
+            if (res.ok) {
+                let data = await res.json()
+                return data.res
             } else {
-                return data.fleet
+                return undefined
             }
-        });
+        })
 };
 
 export async function DeleteLapById(lapId: string): Promise<LapDataType> {
@@ -653,14 +649,14 @@ export async function DeleteLapById(lapId: string): Promise<LapDataType> {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
     })
-        .then((res) => res.json())
-        .then(async (data) => {
-            if (data && data.error) {
-                console.log(data.message)
+        .then(async (res) => {
+            if (res.ok) {
+                let data = await res.json()
+                return data.res
             } else {
-                return data.fleet
+                return undefined
             }
-        });
+        })
 };
 
 export async function GetUsersByClubId(clubId: string): Promise<UserDataType[]> {
@@ -714,14 +710,14 @@ export async function createUser(clubId: string): Promise<UserDataType[]> {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
     })
-        .then((res) => res.json())
-        .then(async (data) => {
-            if (data && data.error) {
-                console.log(data.message)
+        .then(async (res) => {
+            if (res.ok) {
+                let data = await res.json()
+                return data.res
             } else {
-                return data.user
+                return undefined
             }
-        });
+        })
 };
 
 export async function updateUser(user: UserDataType, password: string): Promise<UserDataType[]> {
@@ -734,14 +730,14 @@ export async function updateUser(user: UserDataType, password: string): Promise<
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
     })
-        .then((res) => res.json())
-        .then(async (data) => {
-            if (data && data.error) {
-                console.log(data.message)
+        .then(async (res) => {
+            if (res.ok) {
+                let data = await res.json()
+                return data.res
             } else {
-                return data.user
+                return undefined
             }
-        });
+        })
 };
 
 export async function deleteUser(user: UserDataType): Promise<UserDataType[]> {
@@ -753,17 +749,17 @@ export async function deleteUser(user: UserDataType): Promise<UserDataType[]> {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
     })
-        .then((res) => res.json())
-        .then(async (data) => {
-            if (data && data.error) {
-                console.log(data.message)
+        .then(async (res) => {
+            if (res.ok) {
+                let data = await res.json()
+                return data.res
             } else {
-                return data.user
+                return undefined
             }
-        });
+        })
 };
 
-export async function createRole(clubId: string) {
+export async function createRole(clubId: string): Promise<RoleDataType> {
     const body = {
         clubId: clubId,
     }
@@ -772,14 +768,14 @@ export async function createRole(clubId: string) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
     })
-        .then((res) => res.json())
-        .then(async (data) => {
-            if (data && data.error) {
-                console.log(data.message)
+        .then(async (res) => {
+            if (res.ok) {
+                let data = await res.json()
+                return data.res
             } else {
-                return data.role
+                return undefined
             }
-        });
+        })
 };
 
 export async function updateRole(role: RoleDataType): Promise<RoleDataType[]> {
@@ -791,14 +787,14 @@ export async function updateRole(role: RoleDataType): Promise<RoleDataType[]> {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
     })
-        .then((res) => res.json())
-        .then(async (data) => {
-            if (data && data.error) {
-                console.log(data.message)
+        .then(async (res) => {
+            if (res.ok) {
+                let data = await res.json()
+                return data.res
             } else {
-                return data.role
+                return undefined
             }
-        });
+        })
 };
 
 export async function deleteRole(role: RoleDataType): Promise<RoleDataType[]> {
@@ -810,12 +806,12 @@ export async function deleteRole(role: RoleDataType): Promise<RoleDataType[]> {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
     })
-        .then((res) => res.json())
-        .then(async (data) => {
-            if (data && data.error) {
-                console.log(data.message)
+        .then(async (res) => {
+            if (res.ok) {
+                let data = await res.json()
+                return data.res
             } else {
-                return data.role
+                return undefined
             }
-        });
+        })
 };

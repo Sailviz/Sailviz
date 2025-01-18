@@ -1,7 +1,8 @@
 import prisma from 'components/prisma'
 import { NextRequest, NextResponse } from "next/server";
-
 import assert from 'assert';
+import { AVAILABLE_PERMISSIONS } from 'components/helpers/users';
+import { isRequestAuthorised } from 'components/helpers/auth';
 
 async function findRole(role: RoleDataType) {
     var result = await prisma.role.findFirst({
@@ -27,20 +28,21 @@ export async function POST(request: NextRequest) {
         assert.notStrictEqual(undefined, req.role, 'role required');
 
     } catch (bodyError) {
-        return NextResponse.json({ error: true, message: "information missing" });
+        return NextResponse.json({ error: "information missing" }, { status: 400 });
     }
 
     var role = req.role
-    console.log("this")
-    console.log(role)
+
+    let authorised = await isRequestAuthorised(request.cookies, AVAILABLE_PERMISSIONS.editRoles, role.id, "role")
+    if (!authorised) {
+        return NextResponse.json({ error: "not authorized" }, { status: 401 });
+    }
 
     var deletedRole = await findRole(role)
     if (deletedRole) {
         await deleteRole(role)
-        return NextResponse.json({ error: false, role: deletedRole });
-    } else {
-        // Role exists
-        return NextResponse.json({ error: true, message: 'role not found' });
+        return NextResponse.json({ res: deletedRole }, { status: 200 });
     }
+    return NextResponse.json({ error: 'role not found' }, { status: 400 });
 }
 

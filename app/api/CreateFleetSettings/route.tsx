@@ -1,7 +1,9 @@
 import prisma from 'components/prisma'
 import { NextRequest, NextResponse } from "next/server";
 import assert from 'assert';
+import { AVAILABLE_PERMISSIONS, userHasPermission } from 'components/helpers/users';
 
+import { isRequestAuthorised } from 'components/helpers/auth';
 
 async function findSeries(seriesId: any) {
     var result = await prisma.series.findUnique({
@@ -55,10 +57,16 @@ export async function POST(request: NextRequest) {
         assert.notStrictEqual(undefined, req.seriesId, 'Id required');
 
     } catch (bodyError) {
-        return NextResponse.json({ error: true, message: "information missing" });
+        return NextResponse.json({ error: "information missing" }, { status: 400 });
     }
 
     var seriesId = req.seriesId
+
+    //check that the user is authorized to perform the request
+    let authorised = await isRequestAuthorised(request.cookies, AVAILABLE_PERMISSIONS.editFleets, seriesId, "series")
+    if (!authorised) {
+        return NextResponse.json({ error: "not authorized" }, { status: 401 });
+    }
 
     var series = await findSeries(seriesId)
 
@@ -67,11 +75,10 @@ export async function POST(request: NextRequest) {
         series.races.forEach((race) => {
             createFleet(race.id, fleetSettings.id)
 
-        }
-        )
-        return NextResponse.json({ error: false, fleet: fleetSettings });
+        })
+        return NextResponse.json({ res: fleetSettings }, { status: 200 });
     }
     else {
-        return NextResponse.json({ error: true, message: 'Could not find series' });
+        return NextResponse.json({ error: 'Could not find series' }, { status: 400 });
     }
 };

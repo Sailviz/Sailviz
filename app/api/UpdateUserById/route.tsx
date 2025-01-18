@@ -2,8 +2,9 @@ import prisma from 'components/prisma'
 import { NextRequest, NextResponse } from "next/server";
 const bcrypt = require('bcrypt');
 import assert from 'assert';
+import { AVAILABLE_PERMISSIONS } from 'components/helpers/users';
+import { isRequestAuthorised, isRequestOwnData } from 'components/helpers/auth';
 const saltRounds = 10;
-const jwtSecret = process.env.jwtSecret;
 
 //this only updates the settings part of the club record
 
@@ -32,17 +33,22 @@ export async function POST(request: NextRequest) {
     try {
         assert.notStrictEqual(undefined, req.user);
     } catch (bodyError) {
-        return NextResponse.json({ error: true, message: "information missing" });
+        return NextResponse.json({ error: "information missing" }, { status: 400 });
     }
+
+    // let authorised = await isRequestAuthorised(request.cookies.get("token")!.value, AVAILABLE_PERMISSIONS.editUsers)
+    // if (!authorised) {
+    //     return NextResponse.json({ error: "not authorized" }, { status: 401 });
+    // }
 
     var user: UserDataType = req.user
     var password: string = req.password
 
+    await isRequestOwnData(user.id, "", "club")
+
     var updatedUser = await updateUser(user, password)
     if (updatedUser) {
-        return NextResponse.json({ error: false, user: updatedUser });
-    } else {
-        // user is not there
-        return NextResponse.json({ error: true, message: 'user not found' });
+        return NextResponse.json({ res: updatedUser }, { status: 200 });
     }
+    return NextResponse.json({ error: 'user not found' }, { status: 400 });
 }
