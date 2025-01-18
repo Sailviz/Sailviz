@@ -147,7 +147,7 @@ export default function Page({ params }: { params: { slug: string } }) {
                             {race.fleets.map((fleet, index) => {
                                 return (
                                     <div key={"fleetResults" + index}>
-                                        {race.Type == "Handicap" ?
+                                        {race.Type == "handicap" ?
                                             <FleetHandicapResultsTable showTime={true} editable={false} fleetId={fleet.id} key={JSON.stringify(race)} deleteResult={null} updateResult={null} raceId={race.id} showEditModal={null} showViewModal={null} />
                                             :
                                             <FleetPursuitResultsTable showTime={true} editable={false} fleetId={fleet.id} key={JSON.stringify(race)} deleteResult={null} updateResult={null} raceId={race.id} showEditModal={null} showViewModal={null} />
