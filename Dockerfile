@@ -1,4 +1,4 @@
-FROM node:20-alpine
+FROM node:20-alpine.20
 
 ENV jwtSecret ${jwtSecret}
 
