@@ -4,15 +4,24 @@ import { NextRequest, NextResponse } from "next/server";
 import assert from 'assert';
 
 async function findSeries(clubId: any) {
-    var result = await prisma.series.findMany({
-        where: {
-            clubId: clubId
-        },
-        include: {
-            races: true
-        }
-    })
-    return result;
+    return prisma.$queryRaw`
+        SELECT s.*, 
+               JSON_ARRAYAGG(
+                   JSON_OBJECT(
+                       'id', r.id,
+                       'number', r.number,
+                       'Time', r.Time,
+                       'Duties', r.Duties,
+                       'Type', r.Type,
+                       'seriesId', r.seriesId
+                   )
+               ) as races
+        FROM Series s
+        LEFT JOIN Race r ON s.id = r.seriesId
+        WHERE s.clubId = ${clubId}
+        GROUP BY s.id
+        ORDER BY MAX(r.Time) DESC
+    `;
 }
 
 
