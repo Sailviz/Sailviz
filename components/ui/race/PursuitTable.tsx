@@ -70,28 +70,28 @@ const Sort = ({ result, max, moveUp, moveDown }: { result: ResultsDataType, max:
         <>
             <Button
                 variant='bordered'
-                size="sm"
-                className='mx-1'
+                size="lg"
+                className='mx-1 stroke-green-400 stroke-2 disabled:stroke-0'
                 onClick={async () => { setUpLoading(true); await moveUp(result.id) }}
                 isDisabled={result.PursuitPosition == 1}
             >
                 {upLoading ?
                     <SmoothSpinner />
                     :
-                    <ChevronUpIcon />
+                    <ChevronUpIcon transform="scale(-2)"/>
                 }
             </Button>
             <Button
                 variant='bordered'
-                size="sm"
-                className='mx-1'
+                size="lg"
+                className='mx-1 stroke-red-400 stroke-2 disabled:stroke-0'
                 onClick={async () => { setDownLoading(true); await moveDown(result.id) }}
                 isDisabled={result.PursuitPosition == max}
             >
                 {downLoading ?
                     <SmoothSpinner />
                     :
-                    <ChevronDownIcon />
+                    <ChevronDownIcon transform="scale(2)"/>
                 }
             </Button>
         </>
