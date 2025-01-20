@@ -142,8 +142,8 @@ const dynamicSort: SortingFn<ResultsDataType> = (rowA: Row<ResultsDataType>, row
 
 const columnHelper = createColumnHelper<ResultsDataType>()
 
-const PursuitTable = ({ fleetId, raceState, raceMode, dynamicSorting, showStartTime, lapBoat, showRetireModal, moveUp, moveDown }:
-    { fleetId: string, raceState: raceStateType, raceMode: modeType, dynamicSorting: boolean, showStartTime: boolean, lapBoat: (id: string) => void, showRetireModal: (id: string) => void, moveUp: (id: string) => Promise<void>, moveDown: (id: string) => Promise<void> }) => {
+const PursuitTable = ({ fleetId, raceState, raceMode, dynamicSorting, lapBoat, showRetireModal, moveUp, moveDown }:
+    { fleetId: string, raceState: raceStateType, raceMode: modeType, dynamicSorting: boolean, lapBoat: (id: string) => void, showRetireModal: (id: string) => void, moveUp: (id: string) => Promise<void>, moveDown: (id: string) => Promise<void> }) => {
     const { fleet, fleetIsValidating, fleetIsError } = Fetcher.Fleet(fleetId)
     let data = fleet?.results
     if (data == undefined) {
@@ -153,7 +153,6 @@ const PursuitTable = ({ fleetId, raceState, raceMode, dynamicSorting, showStartT
     let columnVisibility = {
         //only visible when race is running and dynamic sorting is disabled. or when finished.
         Sort: (!dynamicSorting && raceMode != modeType.NotStarted) || raceState == raceStateType.calculate,
-        StartTime: showStartTime
     };
 
     const [sorting, setSorting] = useState<SortingState>([{
@@ -170,7 +169,7 @@ const PursuitTable = ({ fleetId, raceState, raceMode, dynamicSorting, showStartT
 
         }),
         columnHelper.display({
-            header: "Sort",
+            header: "Adjust Position",
             id: "Sort",
             cell: props => <Sort result={props.row.original} moveUp={moveUp} moveDown={moveDown} max={data.length} />,
         }),
