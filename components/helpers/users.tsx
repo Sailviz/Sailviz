@@ -14,7 +14,8 @@ export class AVAILABLE_PERMISSIONS {
     static readonly viewUsers: PermissionType = { value: 'viewUsers', label: 'View Users' } //implemented
     static readonly dashboardAccess: PermissionType = { value: 'dashboardAccess', label: 'Dashboard Access' } //implemented, currently changes log out to back to dashboard on sign on
     static readonly editDuties: PermissionType = { value: 'editDuties', label: 'Edit Duties' } //implemented
-    static readonly trackableView: PermissionType = { value: 'trackableView', label: 'Trackable - View Settings'}
+    static readonly trackableView: PermissionType = { value: 'trackableView', label: 'Trackable - View Settings' }
+    static readonly advancedResultEdit: PermissionType = { value: 'advancedResultEdit', label: 'Adcanved Result edit' }
 };
 
 
