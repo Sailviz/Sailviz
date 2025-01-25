@@ -9,6 +9,15 @@ datasource db {
   relationMode = "prisma"
 }
 
+model globalConfig {
+  id          String  @id @unique @default(uuid())
+  active    Boolean
+  demoClubId  String
+  demoSeriesId String
+  demoDataId String
+  demoUUID String
+}
+
 model User {
   id          String  @id @unique @default(uuid())
   displayName String

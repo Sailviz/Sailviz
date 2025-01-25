@@ -21,6 +21,8 @@ export default function Page({ params }: { params: { slug: string } }) {
     const { user, userIsError, userIsValidating } = Fetcher.UseUser()
     const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
     const { boats, boatsIsError, boatsIsValidating } = Fetcher.Boats()
+    const { GlobalConfig, GlobalConfigIsError, GlobalConfigIsValidating } = Fetcher.UseGlobalConfig()
+
 
     const { race, raceIsError, raceIsValidating, mutateRace } = Fetcher.Race(params.slug, true)
 
@@ -38,13 +40,13 @@ export default function Page({ params }: { params: { slug: string } }) {
     }
 
     const createNewRace = async (requestedType: string) => {
-        let newRace = await DB.createRace('2ad3c0f0-1a54-4e49-bef1-50256d5ce9e9', 'd21e2ca9-22fd-43a2-95fe-6a9b24cf4466')
+        let newRace = await DB.createRace(GlobalConfig.demoClubId, GlobalConfig.demoSeriesId)
         newRace = await DB.getRaceById(newRace.id, true)
         //load demo data into the new race
-        const demoData = await DB.getRaceById('ca1941a9-9cd8-4a41-8508-3e1a258a42c2', true);
+        const demoData = await DB.getRaceById(GlobalConfig.demoDataId, true);
         console.log(newRace)
         //update race data
-        await DB.updateRaceById({ ...demoData, id: newRace.id, Type: requestedType, seriesId: 'd21e2ca9-22fd-43a2-95fe-6a9b24cf4466' });
+        await DB.updateRaceById({ ...demoData, id: newRace.id, Type: requestedType, seriesId: GlobalConfig.demoSeriesId });
         //add results data
         await Promise.all(demoData.fleets.flatMap(fleet => fleet.results).map(result => {
             return DB.createResult(newRace.fleets[0]!.id).then(newResult => {
@@ -78,7 +80,7 @@ export default function Page({ params }: { params: { slug: string } }) {
     return (
         <>
             <div className="bg-green-500 text-center p-3 font-bold grid grid-cols-3 justify-items-start text-xl">
-                <BackButton />
+                <BackButton demoMode={true} />
                 <div className="my-auto text-center justify-self-stretch">Demo Mode</div>
                 <RadioGroup className="my-auto justify-self-start" orientation="horizontal" onValueChange={createNewRace} value={raceType} size="lg">
                     <Radio value="handicap" >Handicap</Radio>

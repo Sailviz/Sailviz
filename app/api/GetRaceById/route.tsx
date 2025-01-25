@@ -47,13 +47,13 @@ export async function GET(request: NextRequest) {
     var results = (searchParams.get('results') === 'true')
 
     if (id == undefined || results == undefined) {
-        return NextResponse.json({ error: "can't find fleet" }, { status: 400 });
+        return NextResponse.json({ error: "can't find race" }, { status: 400 });
     }
-    var fleet = await findRace(id, results)
-    if (fleet) {
-        return NextResponse.json(fleet);
+    var race = await findRace(id, results)
+    if (race) {
+        return NextResponse.json(race);
     }
     else {
-        return NextResponse.json({ error: "can't find fleet" }, { status: 406 });
+        return NextResponse.json({ error: "can't find race" }, { status: 406 });
     }
 }
