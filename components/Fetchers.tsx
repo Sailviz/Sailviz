@@ -34,12 +34,13 @@ export async function advancedFetcher(url: string, data: object) {
 }
 
 export function UseUser() {
-    const { data, error, isValidating } = useSWR('/api/user', fetcher)
+    const { data, error, isValidating, mutate } = useSWR('/api/user', fetcher)
 
     return {
         user: data as UserDataType,
         userIsValidating: isValidating,
-        userIsError: error
+        userIsError: error,
+        mutateUser: mutate
     }
 }
 
@@ -50,6 +51,16 @@ export function UseClub() {
         club: data as ClubDataType,
         clubIsValidating: isValidating,
         clubIsError: error
+    }
+}
+
+export function UseGlobalConfig() {
+    const { data, error, isValidating } = useSWR('/api/GlobalConfig', fetcher)
+
+    return {
+        GlobalConfig: data as GlobalConfigType,
+        GlobalConfigIsValidating: isValidating,
+        GlobalConfigIsError: error
     }
 }
 

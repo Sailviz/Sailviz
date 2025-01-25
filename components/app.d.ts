@@ -1,152 +1,158 @@
 type RaceDataType = {
-  id: string;
-  number: number;
-  Time: string;
-  Duties: DutyDataType[];
-  Type: string;
-  fleets: FleetDataType[];
-  seriesId: string;
-  series: SeriesDataType;
+    id: string;
+    number: number;
+    Time: string;
+    Duties: DutyDataType[];
+    Type: string;
+    fleets: FleetDataType[];
+    seriesId: string;
+    series: SeriesDataType;
 };
 
+type GlobalConfigType = {
+    demoClubId: string;
+    demoSeriesId: string;
+    demoDataId: string;
+    demoUUID: string;
+};
 type DutyDataType = {
-  displayName: string;
-  name: string;
+    displayName: string;
+    name: string;
 };
 
 type SeriesDataType = {
-  id: string;
-  name: string;
-  clubId: string;
-  settings: SettingsType;
-  races: RaceDataType[];
-  fleetSettings: FleetSettingsType[];
+    id: string;
+    name: string;
+    clubId: string;
+    settings: SettingsType;
+    races: RaceDataType[];
+    fleetSettings: FleetSettingsType[];
 };
 
 type FleetSettingsType = {
-  id: string;
-  name: string;
-  boats: BoatDataType[];
-  startDelay: number;
-  fleets: FleetDataType[];
+    id: string;
+    name: string;
+    boats: BoatDataType[];
+    startDelay: number;
+    fleets: FleetDataType[];
 };
 
 type ResultsDataType = {
-  id: string;
-  fleetId: string;
-  raceId: string;
-  Helm: string;
-  Crew: string;
-  boat: BoatDataType;
-  SailNumber: string;
-  finishTime: number;
-  numberLaps: number;
-  laps: LapDataType[];
-  CorrectedTime: number;
-  PursuitPosition: number;
-  HandicapPosition: number;
-  resultCode: string;
+    id: string;
+    fleetId: string;
+    raceId: string;
+    Helm: string;
+    Crew: string;
+    boat: BoatDataType;
+    SailNumber: string;
+    finishTime: number;
+    numberLaps: number;
+    laps: LapDataType[];
+    CorrectedTime: number;
+    PursuitPosition: number;
+    HandicapPosition: number;
+    resultCode: string;
 };
 
 type LapDataType = {
-  id: string;
-  resultId: string;
-  time: number;
+    id: string;
+    resultId: string;
+    time: number;
 };
 
 type NextRaceDataType = {
-  id: string;
-  number: number;
-  Time: string;
-  series: {
-    name: string;
     id: string;
-  };
+    number: number;
+    Time: string;
+    series: {
+        name: string;
+        id: string;
+    };
 };
 
 type RaceSettingsType = {
-  numberToCount: number;
+    numberToCount: number;
 };
 
 type ClubSettingsType = {
-  clockIP: string;
-  hornIP: string;
-  pursuitLength: number;
-  clockOffset: number;
-  duties: string[];
-  trackable: {
-    enabled: boolean;
-    orgID: string
-  }
+    clockIP: string;
+    hornIP: string;
+    pursuitLength: number;
+    clockOffset: number;
+    duties: string[];
+    trackable: {
+        enabled: boolean;
+        orgID: string
+    }
 };
 
 type BoatDataType = {
-  id: string;
-  name: string;
-  crew: number;
-  py: number;
-  pursuitStartTime: number;
-  clubId: string;
+    id: string;
+    name: string;
+    crew: number;
+    py: number;
+    pursuitStartTime: number;
+    clubId: string;
 };
 
 type ClubDataType = {
-  id: string;
-  name: string;
-  displayName: string;
-  settings: ClubSettingsType;
-  series: SeriesDataType[];
-  boats: BoatDataType[];
+    id: string;
+    name: string;
+    displayName: string;
+    settings: ClubSettingsType;
+    series: SeriesDataType[];
+    boats: BoatDataType[];
 };
 
 type UserDataType = {
-  id: string;
-  displayName: string;
-  username: string;
-  roles: RoleDataType[];
-  clubId: string;
-  startPage: string;
-  uuid: string;
+    id: string;
+    displayName: string;
+    username: string;
+    roles: RoleDataType[];
+    clubId: string;
+    startPage: string;
+    uuid: string;
 };
 
 type RoleDataType = {
-  id: string;
-  name: string;
-  clubId: string;
-  permissions: {
-    allowed: PermissionType[];
-  };
+    id: string;
+    name: string;
+    clubId: string;
+    permissions: {
+        allowed: PermissionType[];
+    };
 };
 
 type PermissionType = {
-  value: string;
-  label: string;
+    value: string;
+    label: string;
 };
 
 type FleetDataType = {
-  id: string;
-  raceId: String;
-  startTime: number;
-  fleetSettings: FleetSettingsType;
-  results: ResultsDataType[];
+    id: string;
+    raceId: String;
+    startTime: number;
+    fleetSettings: FleetSettingsType;
+    results: ResultsDataType[];
 };
 
 type AuthedUserDataType = {
-  user: UserDataType;
-  token: string;
+    user: UserDataType;
+    token: string;
 };
 
 type TrackerDataType = {
-  trackerID: string;
-  name: string;
-  status?: string;
-  details?: {
-    orgID?: string,
-    position?: {
-      lat: number,
-      lon: number,
-      timestamp?: number
-    },
-    battery?: number,
-    gps?: string
-  }
+    trackerID: string;
+    name: string;
+    status?: string;
+    details?: {
+        orgID?: string,
+        position?: {
+            lat: number,
+            lon: number,
+            timestamp?: number
+        },
+        battery?: number,
+        gps?: string
+    }
 }

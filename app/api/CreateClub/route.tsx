@@ -1,5 +1,5 @@
 import prisma from 'components/prisma'
-import {NextRequest, NextResponse} from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 import assert from 'assert';
 
@@ -12,7 +12,25 @@ async function findClub(name: string) {
     return result;
 }
 
-async function createClub(name: string, displayName?: string){
+async function setDefaultSettings(clubId: string) {
+    var result = await prisma.club.update({
+        where: { id: clubId },
+        data: {
+            settings: {
+                "duties": ["OD", "Safety", "Rescue"],
+                "trackable": {
+                    "enabled": false,
+                    "orgID": ""
+                },
+                "clockOffset": 1,
+                "pursuitLength": 60,
+            }
+        }
+    });
+    return result;
+}
+
+async function createClub(name: string, displayName?: string) {
     return prisma.club.create({
         data: {
             name: name,
@@ -37,6 +55,8 @@ export async function POST(request: NextRequest) {
     if (!Existingclub) {
         var Club = await createClub(name, displayName)
         if (Club) {
+            // add default settings to club
+            await setDefaultSettings(Club.id)
             return NextResponse.json({ error: false, Club: Club });
         }
         else {

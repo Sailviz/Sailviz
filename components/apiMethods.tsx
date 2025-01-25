@@ -178,14 +178,10 @@ export async function updateRaceById(raceData: RaceDataType) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
     })
-        .then(async (res) => {
-            if (res.ok) {
-                let data = await res.json()
-                return data.res
-            } else {
-                return undefined
-            }
-        })
+        .then((res) => res.json())
+        .then(async (data) => {
+            return data
+        });
 };
 
 export async function getRaceById(raceId: string, results: boolean = true): Promise<RaceDataType> {
