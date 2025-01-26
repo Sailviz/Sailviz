@@ -325,11 +325,25 @@ export default function Page({ params }: { params: { slug: string } }) {
         //save state for undo
         setLastAction({ type: "lap", resultId: resultId })
 
-        await DB.CreateLap(resultId, Math.floor(new Date().getTime() / 1000))
+        // await DB.CreateLap(resultId, Math.floor(new Date().getTime() / 1000))
         //load back race data
-
+        let optimisticData = window.structuredClone(race)
+        //update optimistic data with new lap
+        optimisticData.fleets.forEach((fleet: FleetDataType) => {
+            fleet.results.forEach(res => {
+                if (res.id == resultId) {
+                    res.laps.push({ resultId: resultId, time: Math.floor(new Date().getTime() / 1000), id: "" })
+                }
+            })
+        })
+        console.log(optimisticData)
         //mutate race
-        mutate(`/api/GetRaceById?id=${race.id}&results=true`)
+        mutate(`/api/GetRaceById?id=${race.id}&results=true`, async update => {
+            await DB.CreateLap(resultId, Math.floor(new Date().getTime() / 1000))
+            return await DB.getRaceById(race.id, true)
+        },
+            { optimisticData: optimisticData, rollbackOnError: false, revalidate: false }
+        )
 
         let sound = document.getElementById("Beep") as HTMLAudioElement
         sound!.currentTime = 0
@@ -536,6 +550,7 @@ export default function Page({ params }: { params: { slug: string } }) {
         return <PageSkeleton />
     }
 
+    console.log(race)
     return (
         <>
             <RetireModal isOpen={retireModal.isOpen} onSubmit={retireBoat} onClose={retireModal.onClose} result={activeResult} />
