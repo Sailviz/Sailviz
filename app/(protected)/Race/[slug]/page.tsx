@@ -279,7 +279,7 @@ export default function Page({ params }: { params: { slug: string } }) {
                     </div>
                     <div className="py-4 w-4/5">
                         <div className="flex flex-wrap justify-center">
-                            <Button className="mx-1" onClick={() => openRacePanel()}>Race</Button>
+                            <Button className="mx-1" onClick={() => openRacePanel()} color="success">Race Mode</Button>
                             <Button className="mx-1" onClick={createModal.onOpen}>Add Entry</Button>
                             <Button isDisabled className="mx-1">Calculate</Button>
                             <Button className="mx-1" onClick={() => printRaceSheet()}>Print Race Sheet</Button>

@@ -599,24 +599,13 @@ export default function Page({ params }: { params: { slug: string } }) {
                 </div>
                 <div className="flex w-full shrink flex-row justify-around">
                     <div className="w-1/5 p-2">
-                        {dynamicSorting ?
-                            <Button onClick={() => setDynamicSorting(false)} size="lg" color="success" fullWidth>
-                                Dynamic Sorting: On
-                            </Button>
-                            :
-                            <Button onClick={() => setDynamicSorting(true)} size="lg" color="warning" fullWidth>
-                                Dynamic Sorting: Off
-                            </Button>
-                        }
-                    </div>
-                    <div className="w-1/5 p-2">
-                        <Button onClick={() => undo()} size="lg" color="danger" fullWidth>
-                            Undo
+                        <Button onClick={() => undo()} size="lg" color="warning" fullWidth>
+                            Undo Last Action
                         </Button>
                     </div>
                     <div className="w-1/5 p-2" id="RetireModeButton">
                         <Button onClick={() => setMode(modeType.Retire)} size="lg" color={mode == modeType.Retire ? "success" : "primary"} fullWidth>
-                            Retire Mode
+                            Retire a Boat
                         </Button>
                     </div>
                     <div className="w-1/5 p-2" id="LapModeButton">

@@ -45,7 +45,6 @@ export default function Page({ params }: { params: { slug: string } }) {
     const [mode, setMode] = useState(modeType.NotStarted)
 
     const [dynamicSorting, setDynamicSorting] = useState(false)
-    const [showStartTime, setShowStartTime] = useState(true)
     var [lastAction, setLastAction] = useState<{ type: string, resultId: string }>({ type: "", resultId: "" })
 
     const [activeResult, setActiveResult] = useState<ResultsDataType>({} as ResultsDataType)
@@ -453,35 +452,13 @@ export default function Page({ params }: { params: { slug: string } }) {
                 </div>
                 <div className="flex w-full shrink flex-row justify-left">
                     <div className="w-1/5 p-2">
-                        {dynamicSorting ?
-                            <Button onClick={() => setDynamicSorting(false)} size="lg" color="success" fullWidth>
-                                Dynamic Sorting: On
-                            </Button>
-                            :
-                            <Button onClick={() => setDynamicSorting(true)} size="lg" color="warning" fullWidth>
-                                Dynamic Sorting: Off
-                            </Button>
-                        }
-                    </div>
-                    <div className="w-1/5 p-2">
-                        <Button onClick={() => undo()} size="lg" color="danger" fullWidth>
-                            Undo
+                        <Button onClick={() => undo()} size="lg" color="warning" fullWidth>
+                            Undo Last Action
                         </Button>
-                    </div>
-                    <div className="w-1/5 p-2">
-                        {showStartTime ?
-                            <Button onClick={() => setShowStartTime(false)} size="lg" color="success" fullWidth>
-                                Show Start Times: On
-                            </Button>
-                            :
-                            <Button onClick={() => setShowStartTime(true)} size="lg" color="warning" fullWidth>
-                                Show Start Times: Off
-                            </Button>
-                        }
                     </div>
                     <div className="w-1/5 p-2" id="RetireModeButton">
                         <Button onClick={() => setMode(modeType.Retire)} size="lg" color={mode == modeType.Retire ? "success" : "primary"} fullWidth>
-                            Retire Mode
+                            Retire a Boat
                         </Button>
                     </div>
                     <div className="w-1/5 p-2" id="LapModeButton">
@@ -491,7 +468,7 @@ export default function Page({ params }: { params: { slug: string } }) {
                     </div>
                 </div>
                 <div className="">
-                    <PursuitTable fleetId={race.fleets[0]!.id} raceState={raceState} raceMode={mode} dynamicSorting={dynamicSorting} showStartTime={showStartTime} moveUp={moveUp} moveDown={moveDown} lapBoat={lapBoat} showRetireModal={showRetireModal} />
+                    <PursuitTable fleetId={race.fleets[0]!.id} raceState={raceState} raceMode={mode} dynamicSorting={dynamicSorting} moveUp={moveUp} moveDown={moveDown} lapBoat={lapBoat} showRetireModal={showRetireModal} />
                 </div>
             </div>
         </>
