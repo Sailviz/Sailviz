@@ -12,6 +12,7 @@ import { PageSkeleton } from "components/ui/PageSkeleton";
 import { mutate } from "swr";
 
 enum raceStateType {
+    countdown,
     running,
     stopped,
     reset,
@@ -34,8 +35,6 @@ export default function Page({ params }: { params: { slug: string } }) {
     const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
 
     const { race, raceIsError, raceIsValidating } = Fetcher.Race(params.slug, true)
-
-    var [seriesName, setSeriesName] = useState("")
 
     const retireModal = useDisclosure();
 
@@ -71,9 +70,7 @@ export default function Page({ params }: { params: { slug: string } }) {
         fleetId: ""
     })
 
-    const [mode, setMode] = useState(modeType.Lap)
-
-    const [dynamicSorting, setDynamicSorting] = useState(true)
+    const [mode, setMode] = useState(modeType.Retire)
 
     const startRaceButton = async (fleetId: string) => {
         //use time for button
@@ -106,7 +103,7 @@ export default function Page({ params }: { params: { slug: string } }) {
     const startRace = async (fleetId: string) => {
         let index = race.fleets.findIndex(fleet => fleet.id == fleetId)
         //modify racestate at index to match fleet index
-        setRaceState([...raceState.slice(0, index), raceStateType.running, ...raceState.slice(index + 1)])
+        setRaceState([...raceState.slice(0, index), raceStateType.countdown, ...raceState.slice(index + 1)])
 
         let sound = document.getElementById("Beep") as HTMLAudioElement
         sound!.currentTime = 0
@@ -166,9 +163,10 @@ export default function Page({ params }: { params: { slug: string } }) {
         sound!.play();
     };
 
-    const handleGo = () => {
+    const handleGo = (fleetId: string) => {
+        let index = race.fleets.findIndex(fleet => fleet.id == fleetId)
         console.log('GO!')
-
+        setRaceState([...raceState.slice(0, index), raceStateType.countdown, ...raceState.slice(index + 1)])
         //sound horn
         fetch("https://" + club.settings.hornIP + "/hoot?startTime=500", { signal: controller.signal, mode: 'no-cors' }).then(response => {
         }).catch((err) => {
@@ -180,23 +178,6 @@ export default function Page({ params }: { params: { slug: string } }) {
         sound!.currentTime = 0
         sound!.play();
     };
-
-    const sortByPY = async (results: ResultsDataType[]) => {
-        results.sort((a, b) => {
-            if (a.boat.py - b.boat.py != 0) {
-                return a.boat.py - b.boat.py
-            } else {
-                return parseInt(a.SailNumber) - parseInt(b.SailNumber)
-            }
-        });
-
-        results.forEach((res, index) => {
-            const element = document.getElementById(res.id)
-            if (element) {
-                element.style.order = index.toString()
-            }
-        })
-    }
 
     const dynamicSort = async (results: ResultsDataType[]) => {
         results.sort((a, b) => {
@@ -224,6 +205,9 @@ export default function Page({ params }: { params: { slug: string } }) {
 
         results.forEach((res, index) => {
             const element = document.getElementById(res.id)
+            //loop until we find an element that exists
+
+            console.log(element)
             if (element) {
                 element.style.order = index.toString()
             }
@@ -462,6 +446,17 @@ export default function Page({ params }: { params: { slug: string } }) {
         return allFinished
     }
 
+    const checkAnyFinished = (results: ResultsDataType[]) => {
+        //check if any boats in fleet have finished
+        let anyFinished = false
+        results.forEach(data => {
+            if (data.finishTime != 0) {
+                anyFinished = true
+            }
+        })
+        return anyFinished
+    }
+
     const undo = async () => {
         if (lastAction.type == "") {
             //no action has been done yet
@@ -503,39 +498,51 @@ export default function Page({ params }: { params: { slug: string } }) {
     const controller = new AbortController()
 
     useEffect(() => {
-        const fetchRace = async () => {
-            setSeriesName(await DB.GetSeriesById(race.seriesId).then((res) => { return (res.name) }))
-            setRaceState(race.fleets.map((fleet) => {
-                if (checkAllFinished(fleet)) {
-                    return raceStateType.calculate
-                } else if (fleet.startTime != 0) {
-                    return raceStateType.running
-                } else {
-                    return raceStateType.reset
-                }
-            }))
+        //select mode based on race conditions
+        //if one boat has finished, we are in finish mode
+        //if no boats have finished, but the race has started, we are in lap mode
+        //if the race has not began, we are in retire mode
+        if (checkAnyFinished(race.fleets.flatMap(fleet => fleet.results))) {
+            setMode(modeType.Finish)
+        } else {
+            if (race.fleets[0]!.startTime != 0) {
+                setMode(modeType.Lap)
+            } else {
+                setMode(modeType.Retire)
+            }
+        }
+    }, [])
+
+    useEffect(() => {
+        if (mode == modeType.Finish) {
+            sortByLastLap(race.fleets.flatMap(fleet => fleet.results))
+        }
+        else if (mode == modeType.Lap) {
+            //this doesn't work on first load as the results are not loaded yet
+            dynamicSort(race.fleets.flatMap(fleet => fleet.results))
         }
 
-        if (race != undefined) {
-            fetchRace()
-        }
-
-    }, [race])
+    }, [mode])
 
     useEffect(() => {
         if (race == undefined) return
+
+        setRaceState(race.fleets.map((fleet) => {
+            if (checkAllFinished(fleet)) {
+                return raceStateType.calculate
+            } else if (fleet.startTime != 0) {
+                // if in countdown period
+                if (fleet.startTime + startLength > Math.floor(new Date().getTime() / 1000)) {
+                    return raceStateType.countdown
+                } else {
+                    return raceStateType.running
+                }
+            } else {
+                return raceStateType.reset
+            }
+        }))
         //sort results
-        if (dynamicSorting) {
-            if (mode == modeType.Finish) {
-                sortByLastLap(race.fleets.flatMap(fleet => fleet.results))
-            }
-            else if (mode == modeType.Lap) {
-                dynamicSort(race.fleets.flatMap(fleet => fleet.results))
-            }
-        }
-        else {
-            sortByPY(race.fleets.flatMap(fleet => fleet.results))
-        }
+
 
         race.fleets.forEach((fleet, index) => {
             if (checkAllFinished(fleet)) {
@@ -545,13 +552,12 @@ export default function Page({ params }: { params: { slug: string } }) {
                 setRaceState([...raceState.slice(0, index), raceStateType.running, ...raceState.slice(index + 1)])
             }
         })
-    }, [race, dynamicSorting, mode])
+    }, [race])
 
     if (raceIsError || race == undefined || clubIsError || club == undefined || userIsError || user == undefined) {
         return <PageSkeleton />
     }
 
-    console.log(race)
     return (
         <>
             <RetireModal isOpen={retireModal.isOpen} onSubmit={retireBoat} onClose={retireModal.onClose} result={activeResult} />
@@ -564,10 +570,10 @@ export default function Page({ params }: { params: { slug: string } }) {
                         return (
                             <div className="flex flex-row" key={"fleetBar" + index}>
                                 <div className="w-1/4 p-2 m-2 border-4 rounded-lg  text-lg font-medium">
-                                    Event: {seriesName} - {race.number} - {fleet.fleetSettings.name}
+                                    Event: {race.series.name} - {race.number} - {fleet.fleetSettings.name}
                                 </div>
                                 <div className="w-1/4 p-2 m-2 border-4 rounded-lg text-lg font-medium">
-                                    Race Time: <RaceTimer key={"fleetTimer" + index} startTime={fleet.startTime} timerActive={raceState[index] == raceStateType.running} onFiveMinutes={handleFiveMinutes} onFourMinutes={handleFourMinutes} onOneMinute={handleOneMinute} onGo={handleGo} onWarning={handleWarning} reset={raceState[index] == raceStateType.reset} />
+                                    Race Time: <RaceTimer key={"fleetTimer" + index} fleetId={fleet.id} startTime={fleet.startTime} timerActive={raceState[index] == raceStateType.running} onFiveMinutes={handleFiveMinutes} onFourMinutes={handleFourMinutes} onOneMinute={handleOneMinute} onGo={handleGo} onWarning={handleWarning} reset={raceState[index] == raceStateType.reset} />
                                 </div>
                                 <div className="p-2 w-1/4" id="RaceStateButton">
                                     {(() => {
@@ -606,7 +612,7 @@ export default function Page({ params }: { params: { slug: string } }) {
                     </div>
                     <div className="w-1/5 p-2" id="RetireModeButton">
                         {mode == modeType.Retire ?
-                            <Button onClick={() => setMode(modeType.Lap)} size="lg" color={"primary"} fullWidth>
+                            <Button onClick={() => setMode(checkAnyFinished(race.fleets.flatMap(fleet => fleet.results)) ? modeType.Finish : modeType.Lap)} size="lg" color={"primary"} fullWidth>
                                 Cancel Retirement
                             </Button>
                             :
@@ -623,7 +629,7 @@ export default function Page({ params }: { params: { slug: string } }) {
                         </div>
                         :
                         <div className="w-1/5 p-2" id="LapModeButton">
-                            <Button onClick={() => setMode(modeType.Lap)} size="lg" color={"primary"} fullWidth>
+                            <Button onClick={() => setMode(modeType.Lap)} size="lg" color={"primary"} fullWidth isDisabled={checkAnyFinished(race.fleets.flatMap(fleet => fleet.results))}>
                                 Lap Mode
                             </Button>
                         </div>

@@ -2,6 +2,7 @@ import { Button } from "@nextui-org/react"
 import { useEffect, useRef, useState } from "react"
 
 enum raceStateType {
+    countdown,
     running,
     stopped,
     reset,
@@ -39,11 +40,13 @@ export default function BoatCard({ result, fleet, raceState, mode, lapBoat, fini
                     <h2 className="text-2xl text-gray-700">{result.boat?.name}</h2>
                     <p className="text-base text-gray-600">{result.Helm} - {result.Crew}</p>
                 </div>
-                <div className="px-5 py-1">
-                    <p className="text-2xl text-gray-700 px-5 py-2.5 text-center mr-3 md:mr-0">
-                        {text}
-                    </p>
-                </div>
+                <Button
+                    color="danger"
+                    isDisabled={true}
+                    className=" w-36 m-6 h-4/6 text-xl"
+                >
+                    {text}
+                </Button>
             </div>
         )
     }
@@ -61,55 +64,50 @@ export default function BoatCard({ result, fleet, raceState, mode, lapBoat, fini
                         <p className="text-base text-gray-600">Laps: {result.laps.length} </p>
                     }
                 </div>
-                {(raceState == raceStateType.running) ?
-                    <div>
-                        {(isDisabled) ?
-                            <Button
-                                isLoading={true}
-                                color="default"
-                            >
-                            </Button> :
-                            <>
-                                {(() => {
-                                    switch (mode) {
-                                        case modeType.Finish:
-                                            return (
-                                                <Button
-                                                    color="primary"
-                                                    className=" w-36 m-6 h-4/6 text-xl"
-                                                    onClick={(e) => { setIsDisabled(true); timeoutRef.current = setTimeout(() => { setIsDisabled(false); timeoutRef.current = null }, 15000); finishBoat(result.id) }}
-                                                >
-                                                    Finish
-                                                </Button>
+                {(isDisabled) ?
+                    <Button
+                        isLoading={true}
+                        color="default"
+                        className=" w-36 m-6 h-4/6 text-xl"
+                    >
+                    </Button> :
+                    <>
+                        {(() => {
+                            switch (mode) {
+                                case modeType.Finish:
+                                    return (
+                                        <Button
+                                            color="primary"
+                                            className=" w-36 m-6 h-4/6 text-xl"
+                                            onClick={(e) => { setIsDisabled(true); timeoutRef.current = setTimeout(() => { setIsDisabled(false); timeoutRef.current = null }, 15000); finishBoat(result.id) }}
+                                        >
+                                            Finish
+                                        </Button>
 
-                                            )
-                                        case modeType.Retire:
-                                            return (
-                                                <Button
-                                                    color="primary"
-                                                    className=" w-36 m-6 h-4/6 text-xl"
-                                                    onClick={(e) => { setIsDisabled(true); timeoutRef.current = setTimeout(() => { setIsDisabled(false); timeoutRef.current = null }, 15000); showRetireModal(result.id) }}
-                                                >
-                                                    Retire
-                                                </Button>
-                                            )
-                                        case modeType.Lap:
-                                            return (
-                                                <Button
-                                                    color="primary"
-                                                    className=" w-36 m-6 h-4/6 text-xl"
-                                                    onClick={(e) => { setIsDisabled(true); timeoutRef.current = setTimeout(() => { setIsDisabled(false); timeoutRef.current = null }, 15000); lapBoat(result.id) }}
-                                                >
-                                                    Lap
-                                                </Button>
-                                            )
-                                    }
-                                })()}
-                            </>
-                        }
-                    </div>
-                    :
-                    <></>
+                                    )
+                                case modeType.Retire:
+                                    return (
+                                        <Button
+                                            color="primary"
+                                            className=" w-36 m-6 h-4/6 text-xl"
+                                            onClick={(e) => { setIsDisabled(true); timeoutRef.current = setTimeout(() => { setIsDisabled(false); timeoutRef.current = null }, 15000); showRetireModal(result.id) }}
+                                        >
+                                            Retire
+                                        </Button>
+                                    )
+                                case modeType.Lap:
+                                    return (
+                                        <Button
+                                            color="primary"
+                                            className=" w-36 m-6 h-4/6 text-xl"
+                                            onClick={(e) => { setIsDisabled(true); timeoutRef.current = setTimeout(() => { setIsDisabled(false); timeoutRef.current = null }, 15000); lapBoat(result.id) }}
+                                        >
+                                            Lap
+                                        </Button>
+                                    )
+                            }
+                        })()}
+                    </>
                 }
 
             </div>
@@ -125,12 +123,12 @@ export default function BoatCard({ result, fleet, raceState, mode, lapBoat, fini
                     <p className="text-base text-gray-600">{result.Helm} - {result.Crew}</p>
                     <p className="text-base text-gray-600">Laps: {result.laps.length} Finish: {secondsToTimeString(result.finishTime - fleet.startTime)}</p>
                 </div>
-                <div className="px-5 py-1">
-                    <p className="text-white bg-blue-600 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0">
-                        {text}
-                    </p>
-
-                </div>
+                <Button
+                    color="primary"
+                    className=" w-36 m-6 h-4/6 text-xl"
+                >
+                    Finished
+                </Button>
             </div>
         )
     }
