@@ -309,7 +309,8 @@ export default function Page({ params }: { params: { slug: string } }) {
         let data = await DB.getRaceById(race.id)
         //mutate race
 
-
+        //change back to lap mode
+        setMode(modeType.Lap)
     }
 
     const lapBoat = async (resultId: string) => {
@@ -604,20 +605,29 @@ export default function Page({ params }: { params: { slug: string } }) {
                         </Button>
                     </div>
                     <div className="w-1/5 p-2" id="RetireModeButton">
-                        <Button onClick={() => setMode(modeType.Retire)} size="lg" color={mode == modeType.Retire ? "success" : "primary"} fullWidth>
-                            Retire a Boat
-                        </Button>
+                        {mode == modeType.Retire ?
+                            <Button onClick={() => setMode(modeType.Lap)} size="lg" color={"primary"} fullWidth>
+                                Cancel Retirement
+                            </Button>
+                            :
+                            <Button onClick={() => setMode(modeType.Retire)} size="lg" color={"primary"} fullWidth>
+                                Retire a Boat
+                            </Button>
+                        }
                     </div>
-                    <div className="w-1/5 p-2" id="LapModeButton">
-                        <Button onClick={() => setMode(modeType.Lap)} size="lg" color={mode == modeType.Lap ? "success" : "primary"} fullWidth>
-                            Lap Mode
-                        </Button>
-                    </div>
-                    <div className="w-1/5 p-2" id="FinishModeButton">
-                        <Button onClick={() => setMode(modeType.Finish)} size="lg" color={mode == modeType.Finish ? "success" : "primary"} fullWidth>
-                            Finish Mode
-                        </Button>
-                    </div>
+                    {mode == modeType.Lap ?
+                        <div className="w-1/5 p-2" id="FinishModeButton">
+                            <Button onClick={() => setMode(modeType.Finish)} size="lg" color={"primary"} fullWidth>
+                                Finish Mode
+                            </Button>
+                        </div>
+                        :
+                        <div className="w-1/5 p-2" id="LapModeButton">
+                            <Button onClick={() => setMode(modeType.Lap)} size="lg" color={"primary"} fullWidth>
+                                Lap Mode
+                            </Button>
+                        </div>
+                    }
                 </div>
                 <div className="overflow-auto">
                     <div className="flex flex-row justify-around flex-wrap" id="EntrantCards">
