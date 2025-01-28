@@ -12,6 +12,7 @@ enum raceStateType {
 enum modeType {
     Retire,
     Lap,
+    NotStarted,
     Finish
 }
 
@@ -21,7 +22,7 @@ const secondsToTimeString = (seconds: number) => {
     return minutes.toString().padStart(2, '0') + ":" + remainder.toString().padStart(2, '0')
 }
 
-export default function BoatCard({ result, fleet, raceState, mode, lapBoat, finishBoat, showRetireModal }: { result: ResultsDataType, fleet: FleetDataType, raceState: raceStateType, mode: modeType, lapBoat: (id: string) => void, finishBoat: (id: string) => void, showRetireModal: (id: string) => void }) {
+export default function BoatCard({ result, fleet, pursuit, mode, lapBoat, finishBoat, showRetireModal }: { result: ResultsDataType, fleet: FleetDataType, pursuit: boolean, mode: modeType, lapBoat: (id: string) => void, finishBoat: (id: string) => void, showRetireModal: (id: string) => void }) {
     const [isDisabled, setIsDisabled] = useState(false)
 
     const timeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -61,7 +62,14 @@ export default function BoatCard({ result, fleet, raceState, mode, lapBoat, fini
                     {result.laps.length >= 1 ?
                         <p className="text-base text-gray-600">Laps: {result.laps.length} Last: {secondsToTimeString(result.laps[result.laps.length - 1]?.time! - fleet.startTime)}</p>
                         :
-                        <p className="text-base text-gray-600">Laps: {result.laps.length} </p>
+                        <>
+                            {pursuit ?
+                                <p className="text-base text-gray-600">start Time: {new Date(result.boat.pursuitStartTime * 1000).toISOString().substr(14, 5)} </p>
+                                :
+                                <p className="text-base text-gray-600">Laps: {result.laps.length} </p>
+
+                            }
+                        </>
                     }
                 </div>
                 {(isDisabled) ?
@@ -114,7 +122,6 @@ export default function BoatCard({ result, fleet, raceState, mode, lapBoat, fini
         )
     } else {
         //result has finished
-        let text = "Finished"
         return (
             <div id={result.id} className='flex bg-red-300 flex-row justify-between p-6 m-4 border-2 border-pink-500 rounded-lg shadow-xl w-96 shrink-0'>
                 <div className="flex flex-col">

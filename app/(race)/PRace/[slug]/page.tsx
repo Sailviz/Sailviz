@@ -10,6 +10,7 @@ import { PageSkeleton } from "components/ui/PageSkeleton";
 import { Button, useDisclosure } from "@nextui-org/react";
 import PursuitTable from "components/ui/race/PursuitTable";
 import RetireModal from "components/ui/dashboard/RetireModal";
+import BoatCard from "components/ui/race/BoatCard";
 
 enum raceStateType {
     running,
@@ -21,7 +22,8 @@ enum raceStateType {
 enum modeType {
     Retire,
     Lap,
-    NotStarted
+    NotStarted,
+    Finish
 }
 
 //pursuit races don't work with fleets, why would you?
@@ -44,11 +46,11 @@ export default function Page({ params }: { params: { slug: string } }) {
     var [raceState, setRaceState] = useState<raceStateType>(raceStateType.reset)
     const [mode, setMode] = useState(modeType.NotStarted)
 
-    const [dynamicSorting, setDynamicSorting] = useState(false)
     var [lastAction, setLastAction] = useState<{ type: string, resultId: string }>({ type: "", resultId: "" })
 
     const [activeResult, setActiveResult] = useState<ResultsDataType>({} as ResultsDataType)
 
+    const [tableView, setTableView] = useState(false)
 
     const startRaceButton = async () => {
         let localTime = Math.floor((new Date().getTime() / 1000) + startLength)
@@ -283,9 +285,7 @@ export default function Page({ params }: { params: { slug: string } }) {
         setLastAction({ type: "lap", resultId: id })
 
         //save new positions
-        if (dynamicSorting) {
-            dynamicSort()
-        }
+        dynamicSort()
 
     }
 
@@ -301,7 +301,6 @@ export default function Page({ params }: { params: { slug: string } }) {
         sound!.play();
 
         setRaceState(raceStateType.calculate)
-        setDynamicSorting(false)
     }
 
     const submitResults = async () => {
@@ -374,15 +373,10 @@ export default function Page({ params }: { params: { slug: string } }) {
 
     useEffect(() => {
         const loadRace = async () => {
-            if (race.fleets[0]?.startTime != 0) {
-                setRaceState(raceStateType.running)
-                //check if race has already finished
-                if (Math.floor((new Date().getTime() / 1000) - race.fleets[0]!.startTime) > (club.settings.pursuitLength * 60)) {
-                    setRaceState(raceStateType.calculate)
-                    setDynamicSorting(false)
-                }
-            } else {
-                setDynamicSorting(true)
+            setRaceState(raceStateType.running)
+            //check if race has already finished
+            if (Math.floor((new Date().getTime() / 1000) - race.fleets[0]!.startTime) > (club.settings.pursuitLength * 60)) {
+                setRaceState(raceStateType.calculate)
             }
             setSeriesName(await DB.GetSeriesById(race.seriesId).then((res) => { return (res.name) }))
         }
@@ -457,19 +451,33 @@ export default function Page({ params }: { params: { slug: string } }) {
                         </Button>
                     </div>
                     <div className="w-1/5 p-2" id="RetireModeButton">
-                        <Button onClick={() => setMode(modeType.Retire)} size="lg" color={mode == modeType.Retire ? "success" : "primary"} fullWidth>
-                            Retire a Boat
-                        </Button>
-                    </div>
-                    <div className="w-1/5 p-2" id="LapModeButton">
-                        <Button onClick={() => setMode(modeType.Lap)} size="lg" color={mode == modeType.Lap ? "success" : "primary"} fullWidth>
-                            Lap Mode
-                        </Button>
+                        {mode == modeType.Retire ?
+                            <Button onClick={() => setMode(modeType.Lap)} size="lg" color={"primary"} fullWidth>
+                                Cancel Retirement
+                            </Button>
+                            :
+                            <Button onClick={() => setMode(modeType.Retire)} size="lg" color={"primary"} fullWidth>
+                                Retire a Boat
+                            </Button>
+                        }
                     </div>
                 </div>
-                <div className="">
-                    <PursuitTable fleetId={race.fleets[0]!.id} raceState={raceState} raceMode={mode} dynamicSorting={dynamicSorting} moveUp={moveUp} moveDown={moveDown} lapBoat={lapBoat} showRetireModal={showRetireModal} />
-                </div>
+                {tableView ?
+                    <PursuitTable fleetId={race.fleets[0]!.id} raceState={raceState} raceMode={mode} moveUp={moveUp} moveDown={moveDown} lapBoat={lapBoat} showRetireModal={showRetireModal} />
+                    :
+
+                    <div className="overflow-auto">
+                        <div className="flex flex-row justify-around flex-wrap" id="EntrantCards">
+                            {race.fleets.flatMap(fleets => fleets.results).map((result: ResultsDataType, index) => {
+                                let fleetIndex = race.fleets.findIndex(fleet => fleet.id == result.fleetId)
+                                return <BoatCard key={result.id} result={result} fleet={race.fleets.find((fleet) => fleet.id == result.fleetId)!} pursuit={true} mode={mode} lapBoat={lapBoat} finishBoat={() => null} showRetireModal={showRetireModal} />
+
+                            })}
+                        </div>
+                    </div>
+                }
+
+
             </div>
         </>
     )

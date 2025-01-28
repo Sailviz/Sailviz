@@ -22,6 +22,7 @@ enum raceStateType {
 enum modeType {
     Retire,
     Lap,
+    NotStarted,
     Finish
 }
 
@@ -639,7 +640,7 @@ export default function Page({ params }: { params: { slug: string } }) {
                     <div className="flex flex-row justify-around flex-wrap" id="EntrantCards">
                         {race.fleets.flatMap(fleets => fleets.results).map((result: ResultsDataType, index) => {
                             let fleetIndex = race.fleets.findIndex(fleet => fleet.id == result.fleetId)
-                            return <BoatCard key={result.id} result={result} fleet={race.fleets.find((fleet) => fleet.id == result.fleetId)!} raceState={raceState[fleetIndex]!} mode={mode} lapBoat={lapBoat} finishBoat={finishBoat} showRetireModal={showRetireModal} />
+                            return <BoatCard key={result.id} result={result} fleet={race.fleets.find((fleet) => fleet.id == result.fleetId)!} pursuit={false} mode={mode} lapBoat={lapBoat} finishBoat={finishBoat} showRetireModal={showRetireModal} />
 
                         })}
                     </div>
