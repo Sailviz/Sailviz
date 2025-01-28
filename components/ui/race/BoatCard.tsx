@@ -1,5 +1,5 @@
 import { Button } from "@nextui-org/react"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 
 enum raceStateType {
     running,
@@ -21,10 +21,12 @@ const secondsToTimeString = (seconds: number) => {
 }
 
 export default function BoatCard({ result, fleet, raceState, mode, lapBoat, finishBoat, showRetireModal }: { result: ResultsDataType, fleet: FleetDataType, raceState: raceStateType, mode: modeType, lapBoat: (id: string) => void, finishBoat: (id: string) => void, showRetireModal: (id: string) => void }) {
-    const [isLoading, setIsLoading] = useState(false)
+    const [isDisabled, setIsDisabled] = useState(false)
+
+    const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
     useEffect(() => {
-        setIsLoading(false)
+        setIsDisabled(timeoutRef.current != null)
     }, [result])
 
     if (result.resultCode != "") {
@@ -62,41 +64,47 @@ export default function BoatCard({ result, fleet, raceState, mode, lapBoat, fini
                 <div className="px-5 py-2 w-2/4">
                     {(raceState == raceStateType.running) ?
                         <div>
-                            {(() => {
-                                switch (mode) {
-                                    case modeType.Finish:
-                                        return (
-                                            <Button
-                                                isLoading={isLoading}
-                                                color="primary"
-                                                onClick={(e) => { setIsLoading(true); finishBoat(result.id) }}
-                                            >
-                                                Finish
-                                            </Button>
+                            {(isDisabled) ?
+                                <Button
+                                    isLoading={true}
+                                    color="default"
+                                >
+                                </Button> :
+                                <>
+                                    {(() => {
+                                        switch (mode) {
+                                            case modeType.Finish:
+                                                return (
+                                                    <Button
+                                                        color="primary"
+                                                        onClick={(e) => { setIsDisabled(true); timeoutRef.current = setTimeout(() => { setIsDisabled(false); timeoutRef.current = null }, 15000); finishBoat(result.id) }}
+                                                    >
+                                                        Finish
+                                                    </Button>
 
-                                        )
-                                    case modeType.Retire:
-                                        return (
-                                            <Button
-                                                isLoading={isLoading}
-                                                color="primary"
-                                                onClick={(e) => { setIsLoading(true); showRetireModal(result.id) }}
-                                            >
-                                                Retire
-                                            </Button>
-                                        )
-                                    case modeType.Lap:
-                                        return (
-                                            <Button
-                                                isLoading={isLoading}
-                                                color="primary"
-                                                onClick={(e) => { setIsLoading(true); lapBoat(result.id) }}
-                                            >
-                                                Lap
-                                            </Button>
-                                        )
-                                }
-                            })()}
+                                                )
+                                            case modeType.Retire:
+                                                return (
+                                                    <Button
+                                                        color="primary"
+                                                        onClick={(e) => { setIsDisabled(true); timeoutRef.current = setTimeout(() => { setIsDisabled(false); timeoutRef.current = null }, 15000); showRetireModal(result.id) }}
+                                                    >
+                                                        Retire
+                                                    </Button>
+                                                )
+                                            case modeType.Lap:
+                                                return (
+                                                    <Button
+                                                        color="primary"
+                                                        onClick={(e) => { setIsDisabled(true); timeoutRef.current = setTimeout(() => { setIsDisabled(false); timeoutRef.current = null }, 15000); lapBoat(result.id) }}
+                                                    >
+                                                        Lap
+                                                    </Button>
+                                                )
+                                        }
+                                    })()}
+                                </>
+                            }
                         </div>
                         :
                         <></>
