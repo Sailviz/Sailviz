@@ -61,56 +61,57 @@ export default function BoatCard({ result, fleet, raceState, mode, lapBoat, fini
                         <p className="text-base text-gray-600">Laps: {result.laps.length} </p>
                     }
                 </div>
-                <div className="px-5 py-2 w-2/4">
-                    {(raceState == raceStateType.running) ?
-                        <div>
-                            {(isDisabled) ?
-                                <Button
-                                    isLoading={true}
-                                    color="default"
-                                >
-                                </Button> :
-                                <>
-                                    {(() => {
-                                        switch (mode) {
-                                            case modeType.Finish:
-                                                return (
-                                                    <Button
-                                                        color="primary"
-                                                        onClick={(e) => { setIsDisabled(true); timeoutRef.current = setTimeout(() => { setIsDisabled(false); timeoutRef.current = null }, 15000); finishBoat(result.id) }}
-                                                    >
-                                                        Finish
-                                                    </Button>
+                {(raceState == raceStateType.running) ?
+                    <div>
+                        {(isDisabled) ?
+                            <Button
+                                isLoading={true}
+                                color="default"
+                            >
+                            </Button> :
+                            <>
+                                {(() => {
+                                    switch (mode) {
+                                        case modeType.Finish:
+                                            return (
+                                                <Button
+                                                    color="primary"
+                                                    className=" w-36 m-6 h-4/6 text-xl"
+                                                    onClick={(e) => { setIsDisabled(true); timeoutRef.current = setTimeout(() => { setIsDisabled(false); timeoutRef.current = null }, 15000); finishBoat(result.id) }}
+                                                >
+                                                    Finish
+                                                </Button>
 
-                                                )
-                                            case modeType.Retire:
-                                                return (
-                                                    <Button
-                                                        color="primary"
-                                                        onClick={(e) => { setIsDisabled(true); timeoutRef.current = setTimeout(() => { setIsDisabled(false); timeoutRef.current = null }, 15000); showRetireModal(result.id) }}
-                                                    >
-                                                        Retire
-                                                    </Button>
-                                                )
-                                            case modeType.Lap:
-                                                return (
-                                                    <Button
-                                                        color="primary"
-                                                        onClick={(e) => { setIsDisabled(true); timeoutRef.current = setTimeout(() => { setIsDisabled(false); timeoutRef.current = null }, 15000); lapBoat(result.id) }}
-                                                    >
-                                                        Lap
-                                                    </Button>
-                                                )
-                                        }
-                                    })()}
-                                </>
-                            }
-                        </div>
-                        :
-                        <></>
-                    }
+                                            )
+                                        case modeType.Retire:
+                                            return (
+                                                <Button
+                                                    color="primary"
+                                                    className=" w-36 m-6 h-4/6 text-xl"
+                                                    onClick={(e) => { setIsDisabled(true); timeoutRef.current = setTimeout(() => { setIsDisabled(false); timeoutRef.current = null }, 15000); showRetireModal(result.id) }}
+                                                >
+                                                    Retire
+                                                </Button>
+                                            )
+                                        case modeType.Lap:
+                                            return (
+                                                <Button
+                                                    color="primary"
+                                                    className=" w-36 m-6 h-4/6 text-xl"
+                                                    onClick={(e) => { setIsDisabled(true); timeoutRef.current = setTimeout(() => { setIsDisabled(false); timeoutRef.current = null }, 15000); lapBoat(result.id) }}
+                                                >
+                                                    Lap
+                                                </Button>
+                                            )
+                                    }
+                                })()}
+                            </>
+                        }
+                    </div>
+                    :
+                    <></>
+                }
 
-                </div>
             </div>
         )
     } else {
