@@ -11,6 +11,8 @@ import { Button, useDisclosure } from "@nextui-org/react";
 import PursuitTable from "components/ui/race/PursuitTable";
 import RetireModal from "components/ui/dashboard/RetireModal";
 import BoatCard from "components/ui/race/BoatCard";
+import { result, set } from "cypress/types/lodash";
+import { use } from "chai";
 
 enum raceStateType {
     running,
@@ -72,7 +74,6 @@ export default function Page({ params }: { params: { slug: string } }) {
 
     const startRace = async () => {
         setRaceState(raceStateType.running)
-        setMode(modeType.Lap)
         //start countdown timer
 
         let sound = document.getElementById("Beep") as HTMLAudioElement
@@ -244,49 +245,62 @@ export default function Page({ params }: { params: { slug: string } }) {
         await mutate(`/api/GetFleetById?id=${race.fleets[0]!.id}`)
     }
 
-    const dynamicSort = async () => {
-        //recalculate position
-        let racesCopy: RaceDataType = await DB.getRaceById(race.id)
+    const dynamicSort = async (data: RaceDataType) => {
         // there is just one fleet so grab the first one
-        racesCopy.fleets[0]!.results.sort((a: ResultsDataType, b: ResultsDataType) => {
-            // get the number of laps for each boat
-            if (a.resultCode != "") return 1
-            if (b.resultCode != "") return -1
-            if (a.laps.length == 0) return 1
-            if (b.laps.length == 0) return -1
-            let lapsA = a.laps.length;
-            let lapsB = b.laps.length;
-            // get the last lap time for each boat
-            let lastA = a.laps.at(-1)?.time!;
-            let lastB = b.laps.at(-1)?.time!;
-            // compare the number of laps first, then the last lap time
-            return lapsB - lapsA || lastA - lastB;
+        let start = race.fleets[0]!.startTime
+        data.fleets[0]!.results.sort((a: ResultsDataType, b: ResultsDataType) => {
+            //if done a lap, predicted is sum of lap times + last lap.
+            //if no lap done, predicted is py.
+            let aPredicted = a.laps.length > 0 ? (a.laps[a.laps.length - 1]!.time) + (a.laps[a.laps.length - 1]!.time) - ((a.laps[a.laps.length - 2]?.time) || start) : a.boat.pursuitStartTime
+            let bPredicted = b.laps.length > 0 ? (b.laps[b.laps.length - 1]!.time) + (b.laps[b.laps.length - 1]!.time) - ((b.laps[b.laps.length - 2]?.time) || start) : b.boat.pursuitStartTime
+            //force resultcodes to the end
+            if (a.resultCode != "") {
+                aPredicted = Number.MAX_SAFE_INTEGER
+            }
+            if (b.resultCode != "") {
+                bPredicted = Number.MAX_SAFE_INTEGER
+            }
+            //force finished one off end
+            if (a.finishTime != 0) {
+                aPredicted = Number.MAX_SAFE_INTEGER - 1
+            }
+            if (b.finishTime != 0) {
+                bPredicted = Number.MAX_SAFE_INTEGER - 1
+            }
+            return aPredicted - bPredicted;
         });
 
-        racesCopy.fleets.flatMap(fleet => fleet.results).forEach(async (result, index) => {
-            //there is only one fleet
-            // updatedData.fleets[0]!.results[index]!.PursuitPosition = index + 1
-            result.PursuitPosition = index + 1
-            await DB.updateResult(result)
-        })
     }
 
-    const lapBoat = async (id: string) => {
-        //modify local race data
-        await DB.CreateLap(id, Math.floor(new Date().getTime() / 1000))
+    const lapBoat = async (resultId: string) => {
+        let time = Math.floor(new Date().getTime() / 1000)
+        //load back race data
+        let optimisticData = window.structuredClone(race)
+        //update optimistic data with new lap
+        optimisticData.fleets.forEach((fleet: FleetDataType) => {
+            fleet.results.forEach(res => {
+                if (res.id == resultId) {
+                    res.laps.push({ resultId: resultId, time: time, id: "" })
+                }
+            })
+        })
 
-        //trigger view table to update.
-        await mutate(`/api/GetFleetById?id=${race.fleets[0]!.id}`)
+        console.log(optimisticData)
+        dynamicSort(optimisticData)
+        console.log(optimisticData)
+        //mutate race
+        mutate(`/api/GetRaceById?id=${race.id}&results=true`, async update => {
+            await DB.CreateLap(resultId, time)
+            return await DB.getRaceById(race.id, true)
+        },
+            { optimisticData: optimisticData, rollbackOnError: false, revalidate: false }
+        )
 
         let sound = document.getElementById("Beep") as HTMLAudioElement
         sound!.currentTime = 0
         sound!.play();
 
-        setLastAction({ type: "lap", resultId: id })
-
-        //save new positions
-        dynamicSort()
-
+        setLastAction({ type: "lap", resultId: resultId })
     }
 
     const endRace = async () => {
@@ -301,6 +315,7 @@ export default function Page({ params }: { params: { slug: string } }) {
         sound!.play();
 
         setRaceState(raceStateType.calculate)
+        setTableView(true)
     }
 
     const submitResults = async () => {
@@ -373,17 +388,26 @@ export default function Page({ params }: { params: { slug: string } }) {
 
     useEffect(() => {
         const loadRace = async () => {
-            setRaceState(raceStateType.running)
-            //check if race has already finished
-            if (Math.floor((new Date().getTime() / 1000) - race.fleets[0]!.startTime) > (club.settings.pursuitLength * 60)) {
+            //check state of race and set ui accordingly
+            if (race.fleets[0]!.startTime == 0) {
+                setRaceState(raceStateType.reset)
+            } else if (race.fleets[0]!.startTime + club.settings.pursuitLength * 60 < Math.floor(new Date().getTime() / 1000)) {
                 setRaceState(raceStateType.calculate)
+                setTableView(true)
+            } else {
+                setRaceState(raceStateType.running)
+                setMode(modeType.Lap)
             }
-            setSeriesName(await DB.GetSeriesById(race.seriesId).then((res) => { return (res.name) }))
-        }
 
+            if (seriesName == "") {
+                setSeriesName(await DB.GetSeriesById(race.seriesId).then((res) => { return (res.name) }))
+            }
+        }
         if (race != undefined) {
             loadRace()
+            dynamicSort(race)
         }
+
 
     }, [race])
 

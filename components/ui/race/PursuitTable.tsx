@@ -127,20 +127,6 @@ const Action = ({ raceMode, resultId, lapBoat, showRetireModal }: { raceMode: mo
 
 };
 
-const dynamicSort: SortingFn<ResultsDataType> = (rowA: Row<ResultsDataType>, rowB: Row<ResultsDataType>, columnId: string) => {
-    if (rowA.original.resultCode != "") return 1
-    if (rowB.original.resultCode != "") return -1
-    if (rowA.original.laps.length == 0) return 1
-    if (rowB.original.laps.length == 0) return -1
-    let lapsA = rowA.original.laps.length;
-    let lapsB = rowB.original.laps.length;
-    // get the last lap time for each boat
-    let lastA = rowA.original.laps.at(-1)?.time!;
-    let lastB = rowB.original.laps.at(-1)?.time!;
-    // compare the number of laps first, then the last lap time
-    return lapsB - lapsA || lastA - lastB;
-}
-
 const columnHelper = createColumnHelper<ResultsDataType>()
 
 const PursuitTable = ({ fleetId, raceState, raceMode, lapBoat, showRetireModal, moveUp, moveDown }:
@@ -161,7 +147,6 @@ const PursuitTable = ({ fleetId, raceState, raceMode, lapBoat, showRetireModal, 
             header: "Position",
             cell: props => <Position text={props.getValue().toString()} result={props.row.original} />,
             enableSorting: true,
-            sortingFn: dynamicSort
 
         }),
         columnHelper.display({
@@ -206,9 +191,6 @@ const PursuitTable = ({ fleetId, raceState, raceMode, lapBoat, showRetireModal, 
     let table = useReactTable({
         data,
         columns: columns,
-        sortingFns: {
-            dynamicSort,
-        },
         state: {
             sorting
         },
