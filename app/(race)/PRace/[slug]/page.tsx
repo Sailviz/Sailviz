@@ -270,12 +270,21 @@ export default function Page({ params }: { params: { slug: string } }) {
             return aPredicted - bPredicted;
         });
 
+        data.fleets[0]!.results.forEach((res, index) => {
+            const element = document.getElementById(res.id)
+            //loop until we find an element that exists
+
+            if (element) {
+                element.style.order = index.toString()
+            }
+        })
+
     }
 
     const lapBoat = async (resultId: string) => {
         let time = Math.floor(new Date().getTime() / 1000)
         //load back race data
-        let optimisticData = window.structuredClone(race)
+        let optimisticData: RaceDataType = window.structuredClone(race)
         //update optimistic data with new lap
         optimisticData.fleets.forEach((fleet: FleetDataType) => {
             fleet.results.forEach(res => {
@@ -285,9 +294,6 @@ export default function Page({ params }: { params: { slug: string } }) {
             })
         })
 
-        console.log(optimisticData)
-        dynamicSort(optimisticData)
-        console.log(optimisticData)
         //mutate race
         mutate(`/api/GetRaceById?id=${race.id}&results=true`, async update => {
             await DB.CreateLap(resultId, time)
@@ -299,6 +305,7 @@ export default function Page({ params }: { params: { slug: string } }) {
         let sound = document.getElementById("Beep") as HTMLAudioElement
         sound!.currentTime = 0
         sound!.play();
+        dynamicSort(optimisticData)
 
         setLastAction({ type: "lap", resultId: resultId })
     }
