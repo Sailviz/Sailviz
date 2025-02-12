@@ -71,7 +71,7 @@ export default function Page({ params }: { params: { slug: string } }) {
         fleetId: ""
     })
 
-    const [mode, setMode] = useState(modeType.Retire)
+    const [mode, setMode] = useState(modeType.NotStarted)
 
     const startRaceButton = async (fleetId: string) => {
         //use time for button
@@ -104,7 +104,7 @@ export default function Page({ params }: { params: { slug: string } }) {
     const startRace = async (fleetId: string) => {
         let index = race.fleets.findIndex(fleet => fleet.id == fleetId)
         //modify racestate at index to match fleet index
-        setRaceState([...raceState.slice(0, index), raceStateType.countdown, ...raceState.slice(index + 1)])
+        setRaceState([...raceState.slice(0, index), raceStateType.running, ...raceState.slice(index + 1)])
 
         let sound = document.getElementById("Beep") as HTMLAudioElement
         sound!.currentTime = 0
@@ -167,7 +167,8 @@ export default function Page({ params }: { params: { slug: string } }) {
     const handleGo = (fleetId: string) => {
         let index = race.fleets.findIndex(fleet => fleet.id == fleetId)
         console.log('GO!')
-        setRaceState([...raceState.slice(0, index), raceStateType.countdown, ...raceState.slice(index + 1)])
+        setRaceState([...raceState.slice(0, index), raceStateType.running, ...raceState.slice(index + 1)])
+        setMode(modeType.Lap)
         //sound horn
         fetch("https://" + club.settings.hornIP + "/hoot?startTime=500", { signal: controller.signal, mode: 'no-cors' }).then(response => {
         }).catch((err) => {
@@ -208,7 +209,6 @@ export default function Page({ params }: { params: { slug: string } }) {
             const element = document.getElementById(res.id)
             //loop until we find an element that exists
 
-            console.log(element)
             if (element) {
                 element.style.order = index.toString()
             }
@@ -313,7 +313,7 @@ export default function Page({ params }: { params: { slug: string } }) {
 
         // await DB.CreateLap(resultId, Math.floor(new Date().getTime() / 1000))
         //load back race data
-        let optimisticData = window.structuredClone(race)
+        let optimisticData: RaceDataType = window.structuredClone(race)
         //update optimistic data with new lap
         optimisticData.fleets.forEach((fleet: FleetDataType) => {
             fleet.results.forEach(res => {
@@ -334,6 +334,7 @@ export default function Page({ params }: { params: { slug: string } }) {
         let sound = document.getElementById("Beep") as HTMLAudioElement
         sound!.currentTime = 0
         sound!.play();
+        dynamicSort(optimisticData.fleets.flatMap(fleet => fleet.results))
     }
 
     const calculateResults = () => {
@@ -499,22 +500,6 @@ export default function Page({ params }: { params: { slug: string } }) {
     const controller = new AbortController()
 
     useEffect(() => {
-        //select mode based on race conditions
-        //if one boat has finished, we are in finish mode
-        //if no boats have finished, but the race has started, we are in lap mode
-        //if the race has not began, we are in retire mode
-        if (checkAnyFinished(race.fleets.flatMap(fleet => fleet.results))) {
-            setMode(modeType.Finish)
-        } else {
-            if (race.fleets[0]!.startTime != 0) {
-                setMode(modeType.Lap)
-            } else {
-                setMode(modeType.Retire)
-            }
-        }
-    }, [])
-
-    useEffect(() => {
         if (mode == modeType.Finish) {
             sortByLastLap(race.fleets.flatMap(fleet => fleet.results))
         }
@@ -525,25 +510,13 @@ export default function Page({ params }: { params: { slug: string } }) {
 
     }, [mode])
 
+    //on page
     useEffect(() => {
         if (race == undefined) return
 
         setRaceState(race.fleets.map((fleet) => {
-            if (checkAllFinished(fleet)) {
-                return raceStateType.calculate
-            } else if (fleet.startTime != 0) {
-                // if in countdown period
-                if (fleet.startTime + startLength > Math.floor(new Date().getTime() / 1000)) {
-                    return raceStateType.countdown
-                } else {
-                    return raceStateType.running
-                }
-            } else {
-                return raceStateType.reset
-            }
+            return raceStateType.reset
         }))
-        //sort results
-
 
         race.fleets.forEach((fleet, index) => {
             if (checkAllFinished(fleet)) {
@@ -553,6 +526,17 @@ export default function Page({ params }: { params: { slug: string } }) {
                 setRaceState([...raceState.slice(0, index), raceStateType.running, ...raceState.slice(index + 1)])
             }
         })
+
+        if (checkAnyFinished(race.fleets.flatMap(fleet => fleet.results))) {
+            setMode(modeType.Finish)
+        } else {
+            if (race.fleets[0]!.startTime < Math.floor(new Date().getTime() / 1000)) {
+                setMode(modeType.Lap)
+            } else {
+                setMode(modeType.NotStarted)
+            }
+        }
+
     }, [race])
 
     if (raceIsError || race == undefined || clubIsError || club == undefined || userIsError || user == undefined) {
