@@ -54,6 +54,8 @@ export default function Page({ params }: { params: { slug: string } }) {
 
     const [tableView, setTableView] = useState(false)
 
+    const [firstLoad, setFirstLoad] = useState(true)
+
     const startRaceButton = async () => {
         let localTime = Math.floor((new Date().getTime() / 1000) + startLength)
 
@@ -311,6 +313,7 @@ export default function Page({ params }: { params: { slug: string } }) {
     }
 
     const endRace = async () => {
+        console.log("ending race")
         //sound horn
         fetch("http://" + club.settings.hornIP + "/hoot?startTime=500", { signal: controller.signal, mode: 'no-cors' }).then(response => {
         }).catch((err) => {
@@ -322,6 +325,28 @@ export default function Page({ params }: { params: { slug: string } }) {
         sound!.play();
 
         setRaceState(raceStateType.calculate)
+
+        //set provisional positions
+
+        race.fleets[0]!.results.sort((a: ResultsDataType, b: ResultsDataType) => {
+            //sort by nubmer of laps then last lap time
+            if (a.numberLaps != b.numberLaps) {
+                return b.numberLaps - a.numberLaps
+            } else {
+                return a.laps.slice(-1)[0]!.time - b.laps.slice(-1)[0]!.time
+            }
+        });
+
+        console.log(race.fleets[0]!.results)
+
+        race.fleets[0]!.results.forEach(async (res, index) => {
+            res.PursuitPosition = index + 1
+            console.log(res.SailNumber + " " + res.PursuitPosition)
+            await DB.updateResult(res)
+        })
+
+        await mutateRace()
+
         setTableView(true)
     }
 
@@ -410,9 +435,10 @@ export default function Page({ params }: { params: { slug: string } }) {
                 setSeriesName(await DB.GetSeriesById(race.seriesId).then((res) => { return (res.name) }))
             }
         }
-        if (race != undefined) {
+        if (race != undefined && firstLoad) {
             loadRace()
             dynamicSort(race)
+            setFirstLoad(false)
         }
 
 
