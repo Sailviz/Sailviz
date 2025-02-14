@@ -31,11 +31,9 @@ export async function POST(request: NextRequest) {
     } catch (bodyError) {
         return NextResponse.json({ error: true, message: "username or password missing" });
     }
-    console.log(req)
+
     const username = req.username;
     const password = req.password;
-
-    console.log(username, password)
 
     var user = await findUser(username)
     if (user) {
