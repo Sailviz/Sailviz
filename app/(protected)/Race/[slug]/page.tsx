@@ -231,7 +231,7 @@ export default function Page({ params }: { params: { slug: string } }) {
         }
     }, [race])
 
-    if (userIsValidating || clubIsValidating || user == undefined || club == undefined || boats == undefined || race == undefined) {
+    if (user == undefined || club == undefined || boats == undefined || race == undefined) {
         return (
             <PageSkeleton />
         )
