@@ -1,5 +1,4 @@
 import { Button, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Radio, RadioGroup, Switch, Tab, Tabs } from '@nextui-org/react';
-import { Key } from '@react-types/shared';
 import { useTheme } from 'next-themes';
 import { ChangeEvent, useEffect, useState } from 'react';
 import Select, { CSSObjectWithLabel } from 'react-select';
@@ -11,6 +10,7 @@ export default function CreateResultModal({ isOpen, races, boats, onSubmit, onCl
     const [sailNumber, setSailNumber] = useState('')
 
     const { theme, setTheme } = useTheme()
+    let submitDisabled = false
 
     const [selectedRaces, setSelectedRaces] = useState<string[]>([])
     //array of fleets, dimensionally equal to selectedRaces
@@ -51,8 +51,11 @@ export default function CreateResultModal({ isOpen, races, boats, onSubmit, onCl
     }
 
     const Submit = () => {
-        //check if all fields are filled in
+        //don't process submission if it's disabled
+        if (submitDisabled == true) return
 
+        //check if all fields are filled in
+        submitDisabled = true
         let error = false
         if (helm == '') {
             setHelmError(true)
@@ -66,8 +69,12 @@ export default function CreateResultModal({ isOpen, races, boats, onSubmit, onCl
             setSailNumError(true)
             error = true
         }
-        if (error) return
-
+        // if not all filled in, enable submit button and return
+        if (error) {
+            submitDisabled = false
+            return
+        }
+        console.log('submitting')
         onSubmit(helm, crew, selectedBoat.value, sailNumber, selectedFleets)
     }
 
@@ -79,7 +86,7 @@ export default function CreateResultModal({ isOpen, races, boats, onSubmit, onCl
         setSelectedRaces([])
         setSelectedFleets([])
         setSelectedBoat({ label: "", value: {} as BoatDataType })
-
+        submitDisabled = false
     }
 
     return (
@@ -246,7 +253,7 @@ export default function CreateResultModal({ isOpen, races, boats, onSubmit, onCl
 
                             </ModalBody>
                             <ModalFooter>
-                                <Button color="primary" onPress={() => Submit()}>
+                                <Button color="primary" onPress={Submit}>
                                     Submit
                                 </Button>
                             </ModalFooter>
