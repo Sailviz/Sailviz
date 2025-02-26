@@ -60,7 +60,11 @@ export default function EditResultModal({ isOpen, result, fleet, raceType, advan
         setSailNumber(result.SailNumber)
         setNumberLaps(result.numberLaps)
         setBasicElapsed(new Date(Math.max(0, (result.finishTime - fleet!.startTime) * 1000)).toISOString().substring(11, 19))
-        setBoatOption({ label: result.boat.name, value: result.boat })
+        if (result.boat != null) {
+            setBoatOption({ label: result.boat.name, value: result.boat })
+        } else {
+            setBoatOption({ label: '', value: {} as BoatDataType })
+        }
         setResultCodeOption(result.resultCode == '' ? { label: 'None', value: '' } : { label: result.resultCode, value: result.resultCode })
     }, [result])
 
@@ -122,7 +126,7 @@ export default function EditResultModal({ isOpen, result, fleet, raceType, advan
                                                 className=' w-56 h-full text-3xl'
                                                 options={options}
                                                 value={boatOption}
-                                                onChange={(choice) => setBoatOption(choice!)}
+                                                onChange={(choice) => {setBoatOption(choice!); setBoat(choice!.value)}}
                                                 styles={{
                                                     control: (provided, state) => ({
                                                         ...provided,
