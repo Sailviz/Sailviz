@@ -37,6 +37,7 @@ export default function CreateResultModal({ isOpen, races, boats, onSubmit, onCl
 
     const updateRaceSelection = (race: RaceDataType, value: boolean) => {
         if (value) {
+            console.log(race)
             setSelectedRaces([...selectedRaces, race.id])
             let arr = selectedFleets.slice()
             //add the first fleet in
@@ -45,6 +46,7 @@ export default function CreateResultModal({ isOpen, races, boats, onSubmit, onCl
         } else {
             setSelectedRaces(selectedRaces.filter((value) => value != race.id))
             //remove all fleets from the selected fleets that are in this race
+
             setSelectedFleets(selectedFleets.filter((value) => !race.fleets.flatMap(fleet => fleet.id).includes(value)))
         }
 
@@ -226,7 +228,7 @@ export default function CreateResultModal({ isOpen, races, boats, onSubmit, onCl
                                                     // enable fleet selection if race is selected.
                                                     isDisabled={selectedRaces.findIndex((r) => r == race.id) == -1 ? true : false}
                                                     //insert the selected fleet into the selectedFleets array at the index of the race
-                                                    onSelectionChange={(key) => { console.log(key.toString()); let arr = selectedFleets.slice(); arr.splice(index, 1, key.toString()); setSelectedFleets(arr) }}
+                                                    // onSelectionChange={(key) => { console.log(key.toString()); let arr = selectedFleets.slice(); arr.splice(index, 1, key.toString()); setSelectedFleets(arr) }}
                                                 >
                                                     {/* show buttons for each fleet in a series */}
                                                     {race.fleets.map((fleet: FleetDataType, index) => {
