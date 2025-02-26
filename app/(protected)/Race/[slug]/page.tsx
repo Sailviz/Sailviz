@@ -167,6 +167,7 @@ export default function Page({ params }: { params: { slug: string } }) {
             header: true,
             skipEmptyLines: true,
             complete: async function (results: any) {
+                console.log(results)
                 setProgressIndeterminate(false)
                 setProgressMax(results.data.length)
                 let index = 0
@@ -175,6 +176,7 @@ export default function Page({ params }: { params: { slug: string } }) {
                     //check if all fields are present
                     if (line.Helm == undefined || line.Crew == undefined || line.Boat == undefined || line.SailNumber == undefined) {
                         alert("missing fields")
+                        progressModal.onClose()
                         return
                     }
                     let result: ResultsDataType = {} as ResultsDataType
@@ -193,7 +195,7 @@ export default function Page({ params }: { params: { slug: string } }) {
                     result.Crew = line.Crew
                     result.SailNumber = line.SailNumber
                     const boatName = line.Boat
-                    let boat = boats.find(boat => boat.name == boatName)
+                    let boat = boats.find(boat => boat.name.toUpperCase() == boatName.toUpperCase())
                     if (boat == undefined) {
                         console.error("Boat " + boatName + " not found")
                     } else {
@@ -290,7 +292,7 @@ export default function Page({ params }: { params: { slug: string } }) {
                                         id="entryFileUpload"
                                         type="file"
                                         accept=".csv"
-                                        onChange={entryFileUploadHandler}
+                                        onChange={(e) => entryFileUploadHandler(e)}
                                         className="hidden"
                                     />
                                 </>
