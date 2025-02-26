@@ -67,7 +67,11 @@ export default function EditResultModal({ isOpen, race, result, boats, onSubmit,
         setHelm(result.Helm)
         setCrew(result.Crew)
         setSailNumber(result.SailNumber)
-        setSelectedBoat({ label: result.boat.name, value: result.boat })
+        if (result.boat != null) {
+            setSelectedBoat({ label: result.boat.name, value: result.boat })
+        } else {
+            setSelectedBoat({ label: '', value: {} as BoatDataType })
+        }
         setSelectedFleet(result.fleetId)
     }, [result])
 
