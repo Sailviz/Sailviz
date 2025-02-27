@@ -1,9 +1,28 @@
-import { Button, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Radio, RadioGroup, Switch, Tab, Tabs } from '@nextui-org/react';
-import { useTheme } from 'next-themes';
-import { ChangeEvent, useEffect, useState } from 'react';
-import Select, { CSSObjectWithLabel } from 'react-select';
+import { Button, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Tab, Tabs } from '@nextui-org/react'
+import { useTheme } from 'next-themes'
+import { ChangeEvent, useEffect, useState } from 'react'
+import Select, { CSSObjectWithLabel } from 'react-select'
+import * as Fetcher from 'components/Fetchers'
+import { PageSkeleton } from 'components/ui/PageSkeleton'
 
-export default function EditResultModal({ isOpen, race, result, boats, onSubmit, onClose, onDelete }: { isOpen: boolean, race: RaceDataType, result: ResultsDataType | undefined, boats: BoatDataType[], onSubmit: (result: ResultsDataType) => void, onClose: () => void, onDelete: (result: ResultsDataType) => void }) {
+export default function EditResultModal({
+    isOpen,
+    raceId,
+    result,
+    boats,
+    onSubmit,
+    onClose,
+    onDelete
+}: {
+    isOpen: boolean
+    raceId: string
+    result: ResultsDataType | undefined
+    boats: BoatDataType[]
+    onSubmit: (result: ResultsDataType) => void
+    onClose: () => void
+    onDelete: (result: ResultsDataType) => void
+}) {
+    const { race, raceIsError, raceIsValidating, mutateRace } = Fetcher.Race(raceId, true)
 
     const [helm, setHelm] = useState('')
     const [crew, setCrew] = useState('')
@@ -12,7 +31,7 @@ export default function EditResultModal({ isOpen, race, result, boats, onSubmit,
     const { theme, setTheme } = useTheme()
 
     const [selectedFleet, setSelectedFleet] = useState<string>()
-    const [selectedBoat, setSelectedBoat] = useState({ label: "", value: {} as BoatDataType })
+    const [selectedBoat, setSelectedBoat] = useState({ label: '', value: {} as BoatDataType })
 
     const [helmError, setHelmError] = useState(false)
     const [boatError, setBoatError] = useState(false)
@@ -25,9 +44,9 @@ export default function EditResultModal({ isOpen, race, result, boats, onSubmit,
 
     const CapitaliseInput = (e: ChangeEvent<HTMLInputElement>) => {
         console.log(e.target.id)
-        const sentence = e.target.value.split(' ');
+        const sentence = e.target.value.split(' ')
         const cursorPos = e.target.selectionStart
-        const capitalizedWords = sentence.map(word => word.charAt(0).toUpperCase() + word.slice(1));
+        const capitalizedWords = sentence.map(word => word.charAt(0).toUpperCase() + word.slice(1))
         const capitalisedSentence = capitalizedWords.join(' ')
         console.log(capitalisedSentence)
         if (e.target.id == 'helm') setHelm(capitalisedSentence)
@@ -77,156 +96,144 @@ export default function EditResultModal({ isOpen, race, result, boats, onSubmit,
 
     return (
         <>
-            <Modal
-                isOpen={isOpen}
-                onClose={onClose}
-                scrollBehavior={'outside'}
-                size='5xl'
-                backdrop='blur'
-            >
+            <Modal isOpen={isOpen} onClose={onClose} scrollBehavior={'outside'} size='5xl' backdrop='blur'>
                 <ModalContent>
-                    {(onClose) => (
+                    {onClose => (
                         <>
-                            <ModalHeader className="flex flex-col gap-1">
-                                Edit Entry
-                            </ModalHeader>
+                            <ModalHeader className='flex flex-col gap-1'>Edit Entry</ModalHeader>
                             <ModalBody>
-                                <div className="flex w-full">
+                                <div className='flex w-full'>
                                     <div className='flex flex-col px-6 w-full'>
-                                        <p className='text-2xl font-bold'>
-                                            Helm
-                                        </p>
+                                        <p className='text-2xl font-bold'>Helm</p>
 
                                         <Input
                                             id='helm'
-                                            type="text"
+                                            type='text'
                                             value={helm}
-                                            onChange={(e) => { setHelmError(false); CapitaliseInput(e) }}
-                                            placeholder="J Bloggs"
+                                            onChange={e => {
+                                                setHelmError(false)
+                                                CapitaliseInput(e)
+                                            }}
+                                            placeholder='J Bloggs'
                                             variant='bordered'
                                             autoComplete='off'
                                             isInvalid={helmError}
                                         />
                                     </div>
                                     <div className='flex flex-col px-6 w-full'>
-                                        <p className='text-2xl font-bold'>
-                                            Crew
-                                        </p>
-                                        <Input
-                                            id='crew'
-                                            type="text"
-                                            value={crew}
-                                            onChange={CapitaliseInput}
-                                            autoComplete='off'
-                                            variant='bordered'
-                                        />
+                                        <p className='text-2xl font-bold'>Crew</p>
+                                        <Input id='crew' type='text' value={crew} onChange={CapitaliseInput} autoComplete='off' variant='bordered' />
                                     </div>
                                     <div className='flex flex-col px-6 w-full'>
-                                        <p className='text-2xl font-bold'>
-                                            Class
-                                        </p>
+                                        <p className='text-2xl font-bold'>Class</p>
                                         <Select
-                                            id="Class"
+                                            id='Class'
                                             className=' w-56 h-full text-3xl'
                                             options={options}
                                             value={selectedBoat}
-                                            onChange={(choice) => setSelectedBoat(choice!)}
+                                            onChange={choice => setSelectedBoat(choice!)}
                                             styles={{
-                                                control: (provided, state) => ({
-                                                    ...provided,
-                                                    border: boatError ? '2px solid #f31260' : 'none',
-                                                    padding: '0.5rem',
-                                                    fontSize: '1rem',
-                                                    borderRadius: '0.5rem',
-                                                    color: 'white',
-                                                    backgroundColor: theme == 'dark' ? '#27272a' : '#f4f4f5',
-                                                    '&:hover': {
-                                                        backgroundColor: theme == 'dark' ? '#3f3f46' : '#e4e4e7',
-                                                    },
-                                                } as CSSObjectWithLabel),
-                                                option: (provided, state) => ({
-                                                    ...provided,
-                                                    color: theme == 'dark' ? 'white' : 'black',
-                                                    backgroundColor: theme == 'dark' ? state.isSelected ? '#27272a' : '#18181b' : state.isSelected ? '#f4f4f5' : 'white',
-                                                    '&:hover': {
-                                                        backgroundColor: theme == 'dark' ? '#3f3f46' : '#d4d4d8',
-                                                    },
-                                                } as CSSObjectWithLabel),
-                                                menu: (provided, state) => ({
-                                                    ...provided,
-                                                    backgroundColor: theme == 'dark' ? '#18181b' : 'white',
-                                                    border: theme == 'dark' ? '2px solid #3f3f46' : '2px solid #d4d4d8',
-                                                    fontSize: '1rem',
-
-                                                } as CSSObjectWithLabel),
-                                                input: (provided, state) => ({
-                                                    ...provided,
-                                                    color: theme == 'dark' ? 'white' : 'black',
-                                                } as CSSObjectWithLabel),
-                                                singleValue: (provided, state) => ({
-                                                    ...provided,
-                                                    color: theme == 'dark' ? 'white' : 'black',
-                                                } as CSSObjectWithLabel),
+                                                control: (provided, state) =>
+                                                    ({
+                                                        ...provided,
+                                                        border: boatError ? '2px solid #f31260' : 'none',
+                                                        padding: '0.5rem',
+                                                        fontSize: '1rem',
+                                                        borderRadius: '0.5rem',
+                                                        color: 'white',
+                                                        backgroundColor: theme == 'dark' ? '#27272a' : '#f4f4f5',
+                                                        '&:hover': {
+                                                            backgroundColor: theme == 'dark' ? '#3f3f46' : '#e4e4e7'
+                                                        }
+                                                    } as CSSObjectWithLabel),
+                                                option: (provided, state) =>
+                                                    ({
+                                                        ...provided,
+                                                        color: theme == 'dark' ? 'white' : 'black',
+                                                        backgroundColor: theme == 'dark' ? (state.isSelected ? '#27272a' : '#18181b') : state.isSelected ? '#f4f4f5' : 'white',
+                                                        '&:hover': {
+                                                            backgroundColor: theme == 'dark' ? '#3f3f46' : '#d4d4d8'
+                                                        }
+                                                    } as CSSObjectWithLabel),
+                                                menu: (provided, state) =>
+                                                    ({
+                                                        ...provided,
+                                                        backgroundColor: theme == 'dark' ? '#18181b' : 'white',
+                                                        border: theme == 'dark' ? '2px solid #3f3f46' : '2px solid #d4d4d8',
+                                                        fontSize: '1rem'
+                                                    } as CSSObjectWithLabel),
+                                                input: (provided, state) =>
+                                                    ({
+                                                        ...provided,
+                                                        color: theme == 'dark' ? 'white' : 'black'
+                                                    } as CSSObjectWithLabel),
+                                                singleValue: (provided, state) =>
+                                                    ({
+                                                        ...provided,
+                                                        color: theme == 'dark' ? 'white' : 'black'
+                                                    } as CSSObjectWithLabel)
                                             }}
                                         />
                                     </div>
                                     <div className='flex flex-col px-6 w-full'>
-                                        <p className='text-2xl font-bold'>
-                                            Sail Number
-                                        </p>
+                                        <p className='text-2xl font-bold'>Sail Number</p>
                                         <Input
-                                            type="text"
-                                            id="SailNum"
+                                            type='text'
+                                            id='SailNum'
                                             variant='bordered'
                                             autoComplete='off'
                                             value={sailNumber}
-                                            onChange={(e) => { setSailNumError(false); setSailNumber(e.target.value) }}
+                                            onChange={e => {
+                                                setSailNumError(false)
+                                                setSailNumber(e.target.value)
+                                            }}
                                             isInvalid={sailNumError}
                                         />
                                     </div>
                                 </div>
 
-                                <div className="text-4xl font-extrabold p-6">Select Fleet</div>
+                                <div className='text-4xl font-extrabold p-6'>Select Fleet</div>
 
-                                <div className="mx-6 mb-10" key={race.id}>
-                                    <div className="flex flex-row">
+                                {race != undefined ? (
+                                    <div className='mx-6 mb-10' key={race.id}>
+                                        <div className='flex flex-row'>
+                                            <Tabs
+                                                aria-label='Options'
+                                                selectedKey={selectedFleet}
+                                                color='primary'
+                                                onSelectionChange={key => {
+                                                    setSelectedFleet(key.toString())
+                                                }}
+                                            >
+                                                <>
+                                                    {race.fleets.map((fleet: FleetDataType) => {
+                                                        return <Tab key={fleet.id} title={fleet.fleetSettings.name}></Tab>
+                                                    })}
+                                                </>
+                                            </Tabs>
 
-                                        <Tabs
-                                            aria-label="Options"
-                                            selectedKey={selectedFleet}
-                                            color="primary"
-                                            onSelectionChange={(key) => { setSelectedFleet(key.toString()) }}
-                                        >
-                                            {race.fleets.map((fleet: FleetDataType) => {
-                                                return (
-                                                    <Tab key={fleet.id} title={fleet.fleetSettings.name}>
-                                                    </Tab>
-                                                )
-                                            })}
-                                        </Tabs>
-
-                                        {race.Type == "Pursuit" ?
-                                            <div className="pl-6 py-auto text-2xl font-bold text-gray-700">
-                                                Start Time: {String(Math.floor((selectedBoat.value.pursuitStartTime || 0) / 60)).padStart(2, '0')}:{String((selectedBoat.value.pursuitStartTime || 0) % 60).padStart(2, '0')}
-                                            </div>
-                                            :
-                                            <></>
-                                        }
-
+                                            {race.Type == 'Pursuit' ? (
+                                                <div className='pl-6 py-auto text-2xl font-bold text-gray-700'>
+                                                    Start Time: {String(Math.floor((selectedBoat.value.pursuitStartTime || 0) / 60)).padStart(2, '0')}:
+                                                    {String((selectedBoat.value.pursuitStartTime || 0) % 60).padStart(2, '0')}
+                                                </div>
+                                            ) : (
+                                                <></>
+                                            )}
+                                        </div>
                                     </div>
-                                </div>
-
-
-
+                                ) : (
+                                    <></>
+                                )}
                             </ModalBody>
                             <ModalFooter>
-                                <Button color="danger" onPress={() => onDelete(result!)}>
+                                <Button color='danger' onPress={() => onDelete(result!)}>
                                     Remove
                                 </Button>
-                                <Button color="danger" variant="light" onPress={onClose}>
+                                <Button color='danger' variant='light' onPress={onClose}>
                                     Close
                                 </Button>
-                                <Button color="primary" onPress={() => Submit()}>
+                                <Button color='primary' onPress={() => Submit()}>
                                     Save
                                 </Button>
                             </ModalFooter>
@@ -235,5 +242,5 @@ export default function EditResultModal({ isOpen, race, result, boats, onSubmit,
                 </ModalContent>
             </Modal>
         </>
-    );
-};
+    )
+}

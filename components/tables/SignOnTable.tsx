@@ -1,18 +1,19 @@
-import React, { ChangeEvent, useState, useRef } from 'react'
+import React, { ChangeEvent, useState, useRef, useEffect } from 'react'
 import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, useReactTable, SortingState } from '@tanstack/react-table'
 import { Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Tooltip } from '@nextui-org/react'
 import { EditIcon } from 'components/icons/edit-icon'
 import * as Fetcher from 'components/Fetchers'
 import { AVAILABLE_PERMISSIONS, userHasPermission } from 'components/helpers/users'
 import { PageSkeleton } from 'components/ui/PageSkeleton'
+import { use } from 'chai'
 
 const columnHelper = createColumnHelper<ResultsDataType>()
 
 const SignOnTable = (props: any) => {
     const { user, userIsError, userIsValidating } = Fetcher.UseUser()
-    let [data, setData] = useState<ResultsDataType[]>(props.data)
+    const { race, raceIsError, raceIsValidating } = Fetcher.Race(props.raceId, true)
+    let [data, setData] = useState<ResultsDataType[]>([])
     let clubId = props.clubId
-    let raceId = props.raceId
     let options: object[] = []
 
     const Text = ({ ...props }) => {
@@ -60,11 +61,9 @@ const SignOnTable = (props: any) => {
         if (userHasPermission(props.user, AVAILABLE_PERMISSIONS.editResults)) {
             return (
                 <div className='relative flex items-center gap-2'>
-                    <Tooltip content='Edit'>
-                        <span className='text-lg text-default-400 cursor-pointer active:opacity-50'>
-                            <EditIcon onClick={onEditClick} />
-                        </span>
-                    </Tooltip>
+                    <span className='text-lg text-default-400 cursor-pointer active:opacity-50'>
+                        <EditIcon onClick={onEditClick} />
+                    </span>
                 </div>
             )
         } else {
@@ -81,13 +80,19 @@ const SignOnTable = (props: any) => {
 
     const [sorting, setSorting] = useState<SortingState>([])
 
+    useEffect(() => {
+        if (race == undefined) return
+        setData(race.fleets.flatMap(fleet => fleet.results))
+    }, [race])
+
     let table = useReactTable({
         data,
         columns: [
             columnHelper.accessor('Helm', {
                 header: 'Helm',
                 cell: props => <Text {...props} />,
-                enableSorting: false
+                enableSorting: false,
+                meta: { 'aria-label': 'Helm' }
             }),
             columnHelper.accessor('Crew', {
                 header: 'Crew',
@@ -119,12 +124,13 @@ const SignOnTable = (props: any) => {
         getCoreRowModel: getCoreRowModel(),
         getSortedRowModel: getSortedRowModel()
     })
-    if (userIsValidating || userIsError || user == undefined) {
+    if (userIsValidating || userIsError || user == undefined || race == undefined) {
         return <PageSkeleton />
     }
     return (
         <div key={props.data}>
             <Table
+                aria-label='SignOn Table'
                 isStriped
                 isHeaderSticky
                 removeWrapper
