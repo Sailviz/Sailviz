@@ -4,7 +4,7 @@ let hootFlag = true
 
 let warningFlag = true
 
-const CountdownTimer = ({ startTime, timerActive, onFiveMinutes, onFourMinutes, onOneMinute, onGo, onWarning, reset }: { startTime: number, timerActive: boolean, onFiveMinutes: any, onFourMinutes: any, onOneMinute: any, onGo: any, onWarning: any, reset: boolean }) => {
+const CountdownTimer = ({ startTime, timerActive, fleetId, onFiveMinutes, onFourMinutes, onOneMinute, onGo, onWarning, reset }: { startTime: number, timerActive: boolean, fleetId: string, onFiveMinutes: any, onFourMinutes: any, onOneMinute: any, onGo: any, onWarning: any, reset: boolean }) => {
     const [timeLeft, setTimeLeft] = useState({ minutes: 5, seconds: 15, countingUp: false });
 
 
@@ -32,7 +32,7 @@ const CountdownTimer = ({ startTime, timerActive, onFiveMinutes, onFourMinutes, 
             //full minute signals
             if (time.minutes == 0 && time.seconds == 0 && time.countingUp == false) {
                 if (onGo && hootFlag) {
-                    onGo();
+                    onGo(fleetId);
                     hootFlag = false
                     warningFlag = true
                 }

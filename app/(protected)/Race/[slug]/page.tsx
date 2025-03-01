@@ -167,6 +167,7 @@ export default function Page({ params }: { params: { slug: string } }) {
             header: true,
             skipEmptyLines: true,
             complete: async function (results: any) {
+                console.log(results)
                 setProgressIndeterminate(false)
                 setProgressMax(results.data.length)
                 let index = 0
@@ -175,6 +176,7 @@ export default function Page({ params }: { params: { slug: string } }) {
                     //check if all fields are present
                     if (line.Helm == undefined || line.Crew == undefined || line.Boat == undefined || line.SailNumber == undefined) {
                         alert("missing fields")
+                        progressModal.onClose()
                         return
                     }
                     let result: ResultsDataType = {} as ResultsDataType
@@ -193,7 +195,7 @@ export default function Page({ params }: { params: { slug: string } }) {
                     result.Crew = line.Crew
                     result.SailNumber = line.SailNumber
                     const boatName = line.Boat
-                    let boat = boats.find(boat => boat.name == boatName)
+                    let boat = boats.find(boat => boat.name.toUpperCase() == boatName.toUpperCase())
                     if (boat == undefined) {
                         console.error("Boat " + boatName + " not found")
                     } else {
@@ -231,7 +233,7 @@ export default function Page({ params }: { params: { slug: string } }) {
         }
     }, [race])
 
-    if (userIsValidating || clubIsValidating || user == undefined || club == undefined || boats == undefined || race == undefined) {
+    if (user == undefined || club == undefined || boats == undefined || race == undefined) {
         return (
             <PageSkeleton />
         )
@@ -241,7 +243,7 @@ export default function Page({ params }: { params: { slug: string } }) {
         <div id="race" className='h-full w-full overflow-y-auto'>
             <CreateResultModal isOpen={createModal.isOpen} race={race} boats={boats} onSubmit={createResult} onClose={createModal.onClose} />
             <ProgressModal key={progressValue} isOpen={progressModal.isOpen} Value={progressValue} Max={progressMax} Indeterminate={progressIndeterminate} onClose={progressModal.onClose} />
-            <EditResultModal isOpen={editModal.isOpen} fleet={activeFleet} raceType={race.Type} result={activeResult} onSubmit={updateResult} onDelete={deleteResult} onClose={editModal.onClose} />
+            <EditResultModal advancedEdit={userHasPermission(user, AVAILABLE_PERMISSIONS.advancedResultEdit)} isOpen={editModal.isOpen} fleet={activeFleet} raceType={race.Type} result={activeResult} onSubmit={updateResult} onDelete={deleteResult} onClose={editModal.onClose} />
             <ViewResultModal isOpen={viewModal.isOpen} result={activeResult} fleet={activeFleet} onClose={viewModal.onClose} />
             <div className="flex flex-wrap justify-center gap-4 w-full">
                 <div className="flex flex-wrap px-4 divide-y divide-solid w-full justify-center">
@@ -279,7 +281,7 @@ export default function Page({ params }: { params: { slug: string } }) {
                     </div>
                     <div className="py-4 w-4/5">
                         <div className="flex flex-wrap justify-center">
-                            <Button className="mx-1" onClick={() => openRacePanel()}>Race</Button>
+                            <Button className="mx-1" onClick={() => openRacePanel()} color="success">Race Mode</Button>
                             <Button className="mx-1" onClick={createModal.onOpen}>Add Entry</Button>
                             <Button isDisabled className="mx-1">Calculate</Button>
                             <Button className="mx-1" onClick={() => printRaceSheet()}>Print Race Sheet</Button>
@@ -290,7 +292,7 @@ export default function Page({ params }: { params: { slug: string } }) {
                                         id="entryFileUpload"
                                         type="file"
                                         accept=".csv"
-                                        onChange={entryFileUploadHandler}
+                                        onChange={(e) => entryFileUploadHandler(e)}
                                         className="hidden"
                                     />
                                 </>

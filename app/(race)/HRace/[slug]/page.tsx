@@ -12,6 +12,7 @@ import { PageSkeleton } from "components/ui/PageSkeleton";
 import { mutate } from "swr";
 
 enum raceStateType {
+    countdown,
     running,
     stopped,
     reset,
@@ -21,6 +22,7 @@ enum raceStateType {
 enum modeType {
     Retire,
     Lap,
+    NotStarted,
     Finish
 }
 
@@ -34,8 +36,6 @@ export default function Page({ params }: { params: { slug: string } }) {
     const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
 
     const { race, raceIsError, raceIsValidating } = Fetcher.Race(params.slug, true)
-
-    var [seriesName, setSeriesName] = useState("")
 
     const retireModal = useDisclosure();
 
@@ -71,9 +71,7 @@ export default function Page({ params }: { params: { slug: string } }) {
         fleetId: ""
     })
 
-    const [mode, setMode] = useState(modeType.Lap)
-
-    const [dynamicSorting, setDynamicSorting] = useState(true)
+    const [mode, setMode] = useState(modeType.NotStarted)
 
     const startRaceButton = async (fleetId: string) => {
         //use time for button
@@ -166,9 +164,11 @@ export default function Page({ params }: { params: { slug: string } }) {
         sound!.play();
     };
 
-    const handleGo = () => {
+    const handleGo = (fleetId: string) => {
+        let index = race.fleets.findIndex(fleet => fleet.id == fleetId)
         console.log('GO!')
-
+        setRaceState([...raceState.slice(0, index), raceStateType.running, ...raceState.slice(index + 1)])
+        setMode(modeType.Lap)
         //sound horn
         fetch("https://" + club.settings.hornIP + "/hoot?startTime=500", { signal: controller.signal, mode: 'no-cors' }).then(response => {
         }).catch((err) => {
@@ -180,23 +180,6 @@ export default function Page({ params }: { params: { slug: string } }) {
         sound!.currentTime = 0
         sound!.play();
     };
-
-    const sortByPY = async (results: ResultsDataType[]) => {
-        results.sort((a, b) => {
-            if (a.boat.py - b.boat.py != 0) {
-                return a.boat.py - b.boat.py
-            } else {
-                return parseInt(a.SailNumber) - parseInt(b.SailNumber)
-            }
-        });
-
-        results.forEach((res, index) => {
-            const element = document.getElementById(res.id)
-            if (element) {
-                element.style.order = index.toString()
-            }
-        })
-    }
 
     const dynamicSort = async (results: ResultsDataType[]) => {
         results.sort((a, b) => {
@@ -224,6 +207,8 @@ export default function Page({ params }: { params: { slug: string } }) {
 
         results.forEach((res, index) => {
             const element = document.getElementById(res.id)
+            //loop until we find an element that exists
+
             if (element) {
                 element.style.order = index.toString()
             }
@@ -309,7 +294,8 @@ export default function Page({ params }: { params: { slug: string } }) {
         let data = await DB.getRaceById(race.id)
         //mutate race
 
-
+        //change back to lap mode
+        setMode(modeType.Lap)
     }
 
     const lapBoat = async (resultId: string) => {
@@ -325,15 +311,30 @@ export default function Page({ params }: { params: { slug: string } }) {
         //save state for undo
         setLastAction({ type: "lap", resultId: resultId })
 
-        await DB.CreateLap(resultId, Math.floor(new Date().getTime() / 1000))
+        // await DB.CreateLap(resultId, Math.floor(new Date().getTime() / 1000))
         //load back race data
-
+        let optimisticData: RaceDataType = window.structuredClone(race)
+        //update optimistic data with new lap
+        optimisticData.fleets.forEach((fleet: FleetDataType) => {
+            fleet.results.forEach(res => {
+                if (res.id == resultId) {
+                    res.laps.push({ resultId: resultId, time: Math.floor(new Date().getTime() / 1000), id: "" })
+                }
+            })
+        })
+        console.log(optimisticData)
         //mutate race
-        mutate(`/api/GetRaceById?id=${race.id}&results=true`)
+        mutate(`/api/GetRaceById?id=${race.id}&results=true`, async update => {
+            await DB.CreateLap(resultId, Math.floor(new Date().getTime() / 1000))
+            return await DB.getRaceById(race.id, true)
+        },
+            { optimisticData: optimisticData, rollbackOnError: false, revalidate: false }
+        )
 
         let sound = document.getElementById("Beep") as HTMLAudioElement
         sound!.currentTime = 0
         sound!.play();
+        dynamicSort(optimisticData.fleets.flatMap(fleet => fleet.results))
     }
 
     const calculateResults = () => {
@@ -447,6 +448,17 @@ export default function Page({ params }: { params: { slug: string } }) {
         return allFinished
     }
 
+    const checkAnyFinished = (results: ResultsDataType[]) => {
+        //check if any boats in fleet have finished
+        let anyFinished = false
+        results.forEach(data => {
+            if (data.finishTime != 0) {
+                anyFinished = true
+            }
+        })
+        return anyFinished
+    }
+
     const undo = async () => {
         if (lastAction.type == "") {
             //no action has been done yet
@@ -488,39 +500,23 @@ export default function Page({ params }: { params: { slug: string } }) {
     const controller = new AbortController()
 
     useEffect(() => {
-        const fetchRace = async () => {
-            setSeriesName(await DB.GetSeriesById(race.seriesId).then((res) => { return (res.name) }))
-            setRaceState(race.fleets.map((fleet) => {
-                if (checkAllFinished(fleet)) {
-                    return raceStateType.calculate
-                } else if (fleet.startTime != 0) {
-                    return raceStateType.running
-                } else {
-                    return raceStateType.reset
-                }
-            }))
+        if (mode == modeType.Finish) {
+            sortByLastLap(race.fleets.flatMap(fleet => fleet.results))
+        }
+        else if (mode == modeType.Lap) {
+            //this doesn't work on first load as the results are not loaded yet
+            dynamicSort(race.fleets.flatMap(fleet => fleet.results))
         }
 
-        if (race != undefined) {
-            fetchRace()
-        }
+    }, [mode])
 
-    }, [race])
-
+    //on page
     useEffect(() => {
         if (race == undefined) return
-        //sort results
-        if (dynamicSorting) {
-            if (mode == modeType.Finish) {
-                sortByLastLap(race.fleets.flatMap(fleet => fleet.results))
-            }
-            else if (mode == modeType.Lap) {
-                dynamicSort(race.fleets.flatMap(fleet => fleet.results))
-            }
-        }
-        else {
-            sortByPY(race.fleets.flatMap(fleet => fleet.results))
-        }
+
+        setRaceState(race.fleets.map((fleet) => {
+            return raceStateType.reset
+        }))
 
         race.fleets.forEach((fleet, index) => {
             if (checkAllFinished(fleet)) {
@@ -530,7 +526,18 @@ export default function Page({ params }: { params: { slug: string } }) {
                 setRaceState([...raceState.slice(0, index), raceStateType.running, ...raceState.slice(index + 1)])
             }
         })
-    }, [race, dynamicSorting, mode])
+
+        if (checkAnyFinished(race.fleets.flatMap(fleet => fleet.results))) {
+            setMode(modeType.Finish)
+        } else {
+            if (race.fleets[0]!.startTime < Math.floor(new Date().getTime() / 1000)) {
+                setMode(modeType.Lap)
+            } else {
+                setMode(modeType.NotStarted)
+            }
+        }
+
+    }, [race])
 
     if (raceIsError || race == undefined || clubIsError || club == undefined || userIsError || user == undefined) {
         return <PageSkeleton />
@@ -548,10 +555,10 @@ export default function Page({ params }: { params: { slug: string } }) {
                         return (
                             <div className="flex flex-row" key={"fleetBar" + index}>
                                 <div className="w-1/4 p-2 m-2 border-4 rounded-lg  text-lg font-medium">
-                                    Event: {seriesName} - {race.number} - {fleet.fleetSettings.name}
+                                    Event: {race.series.name} - {race.number} - {fleet.fleetSettings.name}
                                 </div>
                                 <div className="w-1/4 p-2 m-2 border-4 rounded-lg text-lg font-medium">
-                                    Race Time: <RaceTimer key={"fleetTimer" + index} startTime={fleet.startTime} timerActive={raceState[index] == raceStateType.running} onFiveMinutes={handleFiveMinutes} onFourMinutes={handleFourMinutes} onOneMinute={handleOneMinute} onGo={handleGo} onWarning={handleWarning} reset={raceState[index] == raceStateType.reset} />
+                                    Race Time: <RaceTimer key={"fleetTimer" + index} fleetId={fleet.id} startTime={fleet.startTime} timerActive={raceState[index] == raceStateType.running} onFiveMinutes={handleFiveMinutes} onFourMinutes={handleFourMinutes} onOneMinute={handleOneMinute} onGo={handleGo} onWarning={handleWarning} reset={raceState[index] == raceStateType.reset} />
                                 </div>
                                 <div className="p-2 w-1/4" id="RaceStateButton">
                                     {(() => {
@@ -584,42 +591,40 @@ export default function Page({ params }: { params: { slug: string } }) {
                 </div>
                 <div className="flex w-full shrink flex-row justify-around">
                     <div className="w-1/5 p-2">
-                        {dynamicSorting ?
-                            <Button onClick={() => setDynamicSorting(false)} size="lg" color="success" fullWidth>
-                                Dynamic Sorting: On
-                            </Button>
-                            :
-                            <Button onClick={() => setDynamicSorting(true)} size="lg" color="warning" fullWidth>
-                                Dynamic Sorting: Off
-                            </Button>
-                        }
-                    </div>
-                    <div className="w-1/5 p-2">
-                        <Button onClick={() => undo()} size="lg" color="danger" fullWidth>
-                            Undo
+                        <Button onClick={() => undo()} size="lg" color="warning" fullWidth>
+                            Undo Last Action
                         </Button>
                     </div>
                     <div className="w-1/5 p-2" id="RetireModeButton">
-                        <Button onClick={() => setMode(modeType.Retire)} size="lg" color={mode == modeType.Retire ? "success" : "primary"} fullWidth>
-                            Retire Mode
-                        </Button>
+                        {mode == modeType.Retire ?
+                            <Button onClick={() => setMode(checkAnyFinished(race.fleets.flatMap(fleet => fleet.results)) ? modeType.Finish : modeType.Lap)} size="lg" color={"primary"} fullWidth>
+                                Cancel Retirement
+                            </Button>
+                            :
+                            <Button onClick={() => setMode(modeType.Retire)} size="lg" color={"primary"} fullWidth>
+                                Retire a Boat
+                            </Button>
+                        }
                     </div>
-                    <div className="w-1/5 p-2" id="LapModeButton">
-                        <Button onClick={() => setMode(modeType.Lap)} size="lg" color={mode == modeType.Lap ? "success" : "primary"} fullWidth>
-                            Lap Mode
-                        </Button>
-                    </div>
-                    <div className="w-1/5 p-2" id="FinishModeButton">
-                        <Button onClick={() => setMode(modeType.Finish)} size="lg" color={mode == modeType.Finish ? "success" : "primary"} fullWidth>
-                            Finish Mode
-                        </Button>
-                    </div>
+                    {mode == modeType.Lap ?
+                        <div className="w-1/5 p-2" id="FinishModeButton">
+                            <Button onClick={() => setMode(modeType.Finish)} size="lg" color={"primary"} fullWidth>
+                                Finish Mode
+                            </Button>
+                        </div>
+                        :
+                        <div className="w-1/5 p-2" id="LapModeButton">
+                            <Button onClick={() => setMode(modeType.Lap)} size="lg" color={"primary"} fullWidth isDisabled={checkAnyFinished(race.fleets.flatMap(fleet => fleet.results))}>
+                                Lap Mode
+                            </Button>
+                        </div>
+                    }
                 </div>
                 <div className="overflow-auto">
                     <div className="flex flex-row justify-around flex-wrap" id="EntrantCards">
                         {race.fleets.flatMap(fleets => fleets.results).map((result: ResultsDataType, index) => {
                             let fleetIndex = race.fleets.findIndex(fleet => fleet.id == result.fleetId)
-                            return <BoatCard key={result.id} result={result} fleet={race.fleets.find((fleet) => fleet.id == result.fleetId)!} raceState={raceState[fleetIndex]!} mode={mode} lapBoat={lapBoat} finishBoat={finishBoat} showRetireModal={showRetireModal} />
+                            return <BoatCard key={result.id} result={result} fleet={race.fleets.find((fleet) => fleet.id == result.fleetId)!} pursuit={false} mode={mode} lapBoat={lapBoat} finishBoat={finishBoat} showRetireModal={showRetireModal} />
 
                         })}
                     </div>

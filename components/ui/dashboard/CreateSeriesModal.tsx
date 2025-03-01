@@ -50,7 +50,7 @@ export default function CreateSeriesModal({ isOpen, onSubmit, onClose }: { isOpe
                                     Close
                                 </Button>
                                 <Button color="primary" onPress={() => onSubmit(seriesName)}>
-                                    Save
+                                    Create
                                 </Button>
                             </ModalFooter>
                         </>

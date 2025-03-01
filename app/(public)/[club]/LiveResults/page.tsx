@@ -145,7 +145,7 @@ export default function Page({ params }: { params: { slug: string } }) {
                                         <>
                                             <div className="w-1/4 p-2 m-2 border-4 rounded-lg bg-white text-lg font-medium">
                                                 <div key={fleet.id}>
-                                                    Race Time: <RaceTimer startTime={fleet.startTime} timerActive={true} onFiveMinutes={null} onFourMinutes={null} onOneMinute={null} onGo={null} onWarning={null} reset={false} />
+                                                    Race Time: <RaceTimer fleetId={fleet.id} startTime={fleet.startTime} timerActive={true} onFiveMinutes={null} onFourMinutes={null} onOneMinute={null} onGo={null} onWarning={null} reset={false} />
                                                 </div>
                                             </div>
                                             <div className="m-6" key={activeRace.id}>

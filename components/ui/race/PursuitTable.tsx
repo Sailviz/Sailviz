@@ -16,7 +16,8 @@ enum raceStateType {
 enum modeType {
     Retire,
     Lap,
-    NotStarted
+    NotStarted,
+    Finish
 }
 
 const Text = ({ text }: { text: string }) => {
@@ -70,28 +71,28 @@ const Sort = ({ result, max, moveUp, moveDown }: { result: ResultsDataType, max:
         <>
             <Button
                 variant='bordered'
-                size="sm"
-                className='mx-1'
+                size="lg"
+                className='mx-1 stroke-green-400 stroke-2 disabled:stroke-0'
                 onClick={async () => { setUpLoading(true); await moveUp(result.id) }}
                 isDisabled={result.PursuitPosition == 1}
             >
                 {upLoading ?
                     <SmoothSpinner />
                     :
-                    <ChevronUpIcon />
+                    <ChevronUpIcon transform="scale(-2)" />
                 }
             </Button>
             <Button
                 variant='bordered'
-                size="sm"
-                className='mx-1'
+                size="lg"
+                className='mx-1 stroke-red-400 stroke-2 disabled:stroke-0'
                 onClick={async () => { setDownLoading(true); await moveDown(result.id) }}
                 isDisabled={result.PursuitPosition == max}
             >
                 {downLoading ?
                     <SmoothSpinner />
                     :
-                    <ChevronDownIcon />
+                    <ChevronDownIcon transform="scale(2)" />
                 }
             </Button>
         </>
@@ -126,35 +127,15 @@ const Action = ({ raceMode, resultId, lapBoat, showRetireModal }: { raceMode: mo
 
 };
 
-const dynamicSort: SortingFn<ResultsDataType> = (rowA: Row<ResultsDataType>, rowB: Row<ResultsDataType>, columnId: string) => {
-    if (rowA.original.resultCode != "") return 1
-    if (rowB.original.resultCode != "") return -1
-    if (rowA.original.laps.length == 0) return 1
-    if (rowB.original.laps.length == 0) return -1
-    let lapsA = rowA.original.laps.length;
-    let lapsB = rowB.original.laps.length;
-    // get the last lap time for each boat
-    let lastA = rowA.original.laps.at(-1)?.time!;
-    let lastB = rowB.original.laps.at(-1)?.time!;
-    // compare the number of laps first, then the last lap time
-    return lapsB - lapsA || lastA - lastB;
-}
-
 const columnHelper = createColumnHelper<ResultsDataType>()
 
-const PursuitTable = ({ fleetId, raceState, raceMode, dynamicSorting, showStartTime, lapBoat, showRetireModal, moveUp, moveDown }:
-    { fleetId: string, raceState: raceStateType, raceMode: modeType, dynamicSorting: boolean, showStartTime: boolean, lapBoat: (id: string) => void, showRetireModal: (id: string) => void, moveUp: (id: string) => Promise<void>, moveDown: (id: string) => Promise<void> }) => {
+const PursuitTable = ({ fleetId, raceState, raceMode, lapBoat, showRetireModal, moveUp, moveDown }:
+    { fleetId: string, raceState: raceStateType, raceMode: modeType, lapBoat: (id: string) => void, showRetireModal: (id: string) => void, moveUp: (id: string) => Promise<void>, moveDown: (id: string) => Promise<void> }) => {
     const { fleet, fleetIsValidating, fleetIsError } = Fetcher.Fleet(fleetId)
     let data = fleet?.results
     if (data == undefined) {
         data = []
     }
-
-    let columnVisibility = {
-        //only visible when race is running and dynamic sorting is disabled. or when finished.
-        Sort: (!dynamicSorting && raceMode != modeType.NotStarted) || raceState == raceStateType.calculate,
-        StartTime: showStartTime
-    };
 
     const [sorting, setSorting] = useState<SortingState>([{
         id: "PursuitPosition",
@@ -166,11 +147,10 @@ const PursuitTable = ({ fleetId, raceState, raceMode, dynamicSorting, showStartT
             header: "Position",
             cell: props => <Position text={props.getValue().toString()} result={props.row.original} />,
             enableSorting: true,
-            sortingFn: dynamicSorting ? dynamicSort : sortingFns.alphanumeric
 
         }),
         columnHelper.display({
-            header: "Sort",
+            header: "Adjust Position",
             id: "Sort",
             cell: props => <Sort result={props.row.original} moveUp={moveUp} moveDown={moveDown} max={data.length} />,
         }),
@@ -211,12 +191,8 @@ const PursuitTable = ({ fleetId, raceState, raceMode, dynamicSorting, showStartT
     let table = useReactTable({
         data,
         columns: columns,
-        sortingFns: {
-            dynamicSort,
-        },
         state: {
-            sorting,
-            columnVisibility
+            sorting
         },
         onSortingChange: setSorting,
         getCoreRowModel: getCoreRowModel(),
