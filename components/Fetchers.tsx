@@ -53,12 +53,13 @@ export function UseClub() {
 }
 
 export function Series(seriesId: string) {
-    const { data, error, isValidating } = useSWR(seriesId != '' ? `/api/GetSeriesById?id=${seriesId}` : null, fetcher)
+    const { data, error, isValidating, mutate } = useSWR(seriesId != '' ? `/api/GetSeriesById?id=${seriesId}` : null, fetcher)
     console.log(data)
     return {
         series: data as SeriesDataType,
         seriesIsValidating: isValidating,
-        seriesIsError: error
+        seriesIsError: error,
+        mutateSeries: mutate
     }
 }
 
