@@ -1,5 +1,6 @@
 'use client'
 import useSWR from 'swr'
+import * as Sentry from '@sentry/react'
 
 export async function fetcher(url: string) {
     const res = await fetch(url)
@@ -32,6 +33,7 @@ export async function advancedFetcher(url: string, data: object) {
 
 export function UseUser() {
     const { data, error, isValidating } = useSWR('/api/user', fetcher)
+    Sentry.setUser(data)
 
     return {
         user: data as UserDataType,
