@@ -1,8 +1,8 @@
 import prisma from 'components/prisma'
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from 'next/server'
 
-import assert from 'assert';
-import { cookies } from 'next/headers';
+import assert from 'assert'
+import { cookies } from 'next/headers'
 
 async function findSeries(seriesId: any) {
     var result = await prisma.series.findUnique({
@@ -26,9 +26,8 @@ async function findSeries(seriesId: any) {
             fleetSettings: true
         }
     })
-    return result;
+    return result
 }
-
 
 export async function GET(request: NextRequest) {
     const cookieStore = cookies()
@@ -37,14 +36,12 @@ export async function GET(request: NextRequest) {
     var id = searchParams.get('id')
 
     if (id == undefined) {
-        return NextResponse.json({ error: "can't find series" }, { status: 400 });
+        return NextResponse.json({ error: "can't find series" }, { status: 400 })
     }
     var Series = await findSeries(id)
     if (Series) {
-        return NextResponse.json(Series);
+        return NextResponse.json(Series)
+    } else {
+        return NextResponse.json({ error: "can't find series" }, { status: 406 })
     }
-    else {
-        return NextResponse.json({ error: "can't find series" }, { status: 406 });
-    }
-
-};
+}

@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from 'next/server'
 import prisma from 'components/prisma'
-import assert from 'assert';
-import { cookies } from "next/headers";
+import assert from 'assert'
+import { cookies } from 'next/headers'
 
 async function getFleets(seriesId: string) {
     var result = await prisma.fleetSettings.findMany({
@@ -15,7 +15,7 @@ async function getFleets(seriesId: string) {
     if (result == null) {
         return
     }
-    return result;
+    return result
 }
 
 export async function GET(request: NextRequest) {
@@ -25,16 +25,13 @@ export async function GET(request: NextRequest) {
     var seriesId = searchParams.get('id')
 
     if (seriesId == undefined) {
-        return NextResponse.json({ error: "can't find series" }, { status: 400 });
+        return NextResponse.json({ error: "can't find series" }, { status: 400 })
     }
-
 
     var fleet = await getFleets(seriesId)
     if (fleet) {
-        return NextResponse.json(fleet);
+        return NextResponse.json(fleet)
+    } else {
+        return NextResponse.json({ error: "can't find fleets" }, { status: 406 })
     }
-    else {
-        return NextResponse.json({ error: "can't find fleets" }, { status: 406 });
-    }
-
 }

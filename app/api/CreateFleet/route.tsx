@@ -1,17 +1,16 @@
 import prisma from 'components/prisma'
-import { NextRequest, NextResponse } from "next/server";
-import assert from 'assert';
-import { AVAILABLE_PERMISSIONS, userHasPermission } from 'components/helpers/users';
+import { NextRequest, NextResponse } from 'next/server'
+import assert from 'assert'
 
-import { isRequestAuthorised } from 'components/helpers/auth';
+import { isRequestAuthorised } from 'components/helpers/auth'
 
 async function findSeries(seriesId: any) {
     var result = await prisma.series.findUnique({
         where: {
             id: seriesId
-        },
+        }
     })
-    return result;
+    return result
 }
 
 async function createFleet(raceId: string, fleetSettingsId: string) {
@@ -28,26 +27,25 @@ async function createFleet(raceId: string, fleetSettingsId: string) {
                     id: fleetSettingsId
                 }
             }
-        },
+        }
     })
-    return res;
+    return res
 }
 
 export async function POST(request: NextRequest) {
     const req = await request.json()
     try {
-        assert.notStrictEqual(undefined, req.seriesId, 'Id required');
-
+        assert.notStrictEqual(undefined, req.seriesId, 'Id required')
     } catch (bodyError) {
-        return NextResponse.json({ error: "information missing" }, { status: 400 });
+        return NextResponse.json({ error: 'information missing' }, { status: 400 })
     }
 
     var seriesId = req.seriesId
 
     //check that the user is authorized to perform the request
-    let authorised = await isRequestAuthorised(request.cookies, AVAILABLE_PERMISSIONS.editFleets, seriesId, "series")
+    let authorised = await isRequestAuthorised(request.cookies, seriesId, 'series')
     if (!authorised) {
-        return NextResponse.json({ error: "not authorized" }, { status: 401 });
+        return NextResponse.json({ error: 'not authorized' }, { status: 401 })
     }
 
     var fleetSettingsId = req.fleetSettingsId
@@ -56,9 +54,8 @@ export async function POST(request: NextRequest) {
 
     if (series) {
         let res = await createFleet(seriesId, fleetSettingsId)
-        return NextResponse.json({ res: res }, { status: 200 });
+        return NextResponse.json({ res: res }, { status: 200 })
+    } else {
+        return NextResponse.json({ error: 'Could not find series' }, { status: 400 })
     }
-    else {
-        return NextResponse.json({ error: 'Could not find series' }, { status: 400 });
-    }
-};
+}
