@@ -91,12 +91,13 @@ export function Fleet(fleetId: string) {
 }
 
 export function Boats() {
-    const { data, error, isValidating } = useSWR('/api/GetBoats', fetcher)
+    const { data, error, isValidating, mutate } = useSWR('/api/GetBoats', fetcher)
 
     return {
         boats: data?.boats as BoatDataType[],
         boatsIsValidating: isValidating,
-        boatsIsError: error
+        boatsIsError: error,
+        mutateBoats: mutate
     }
 }
 

@@ -1,12 +1,20 @@
-import { Button, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Radio, RadioGroup } from '@nextui-org/react';
-import { useTheme } from 'next-themes';
-import { ChangeEvent, useEffect, useState } from 'react';
-import { PageSkeleton } from '../PageSkeleton';
+import { Button, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Radio, RadioGroup } from '@nextui-org/react'
+import { useTheme } from 'next-themes'
+import { ChangeEvent, useEffect, useState } from 'react'
+import { PageSkeleton } from '../PageSkeleton'
 
-export default function EditBoatModal({ isOpen, boat, onSubmit, onClose }: { isOpen: boolean, boat: BoatDataType | undefined, onSubmit: (boat: BoatDataType) => void, onClose: () => void }) {
-
-
-    const [boatName, setBoatName] = useState("")
+export default function EditBoatModal({
+    isOpen,
+    boat,
+    onSubmit,
+    onClose
+}: {
+    isOpen: boolean
+    boat: BoatDataType | undefined
+    onSubmit: (boat: BoatDataType) => void
+    onClose: () => void
+}) {
+    const [boatName, setBoatName] = useState('')
     const [PY, setPY] = useState(0)
     const [Crew, setCrew] = useState(0)
     const [pursuitStartTime, setPursuitStartTime] = useState(0)
@@ -23,84 +31,66 @@ export default function EditBoatModal({ isOpen, boat, onSubmit, onClose }: { isO
 
     return (
         <>
-            <Modal
-                isOpen={isOpen}
-                onClose={onClose}
-                scrollBehavior={'outside'}
-                size='5xl'
-                backdrop='blur'
-            >
+            <Modal isOpen={isOpen} onClose={onClose} scrollBehavior={'outside'} size='5xl' backdrop='blur'>
                 <ModalContent>
-                    {(onClose) => (
+                    {onClose => (
                         <>
-                            <ModalHeader className="flex flex-col gap-1">
-                                Edit Boat
-                            </ModalHeader>
+                            <ModalHeader className='flex flex-col gap-1'>Edit Boat</ModalHeader>
                             <ModalBody>
-                                <div className="flex w-full">
+                                <div className='flex w-full'>
                                     <div className='flex flex-col px-6 w-full'>
-                                        <p className='text-2xl font-bold'>
-                                            Name
-                                        </p>
+                                        <p className='text-2xl font-bold'>Name</p>
 
                                         <Input
                                             id='name'
-                                            type="text"
+                                            type='text'
                                             value={boatName}
-                                            onChange={(e) => setBoatName(e.target.value)}
-                                            placeholder="J Bloggs"
+                                            onChange={e => setBoatName(e.target.value)}
+                                            placeholder='J Bloggs'
                                             variant='bordered'
                                             autoComplete='off'
                                         />
                                     </div>
                                     <div className='flex flex-col px-6 w-full'>
-                                        <p className='text-2xl font-bold'>
-                                            PY
-                                        </p>
+                                        <p className='text-2xl font-bold'>PY</p>
                                         <Input
                                             id='py'
-                                            type="number"
+                                            type='number'
                                             value={PY.toString()}
-                                            onChange={(e) => setPY(parseInt(e.target.value))}
+                                            onChange={e => setPY(parseInt(e.target.value))}
                                             autoComplete='off'
                                             variant='bordered'
                                         />
                                     </div>
                                     <div className='flex flex-col px-6 w-full'>
-                                        <p className='text-2xl font-bold'>
-                                            Crew
-                                        </p>
+                                        <p className='text-2xl font-bold'>Crew</p>
                                         <Input
                                             id='crew'
-                                            type="number"
+                                            type='number'
                                             value={Crew.toString()}
-                                            onChange={(e) => setCrew(parseInt(e.target.value))}
+                                            onChange={e => setCrew(parseInt(e.target.value))}
                                             autoComplete='off'
                                             variant='bordered'
                                         />
                                     </div>
                                     <div className='flex flex-col px-6 w-full'>
-                                        <p className='text-xl font-bold'>
-                                            Pursuit Start Time
-                                        </p>
+                                        <p className='text-xl font-bold'>Pursuit Start Time (s)</p>
                                         <Input
                                             id='starttime'
-                                            type="time"
-                                            value={new Date(pursuitStartTime * 1000).toISOString().slice(14, 19)}
-                                            onChange={(e) => setPursuitStartTime(parseInt(e.target.value) * 60)}
+                                            type='number'
+                                            value={pursuitStartTime.toString()}
+                                            onChange={e => setPursuitStartTime(parseInt(e.target.value))}
                                             autoComplete='off'
                                             variant='bordered'
                                         />
                                     </div>
                                 </div>
-
-
                             </ModalBody>
                             <ModalFooter>
-                                <Button color="danger" variant="light" onPress={onClose}>
+                                <Button color='danger' variant='light' onPress={onClose}>
                                     Cancel
                                 </Button>
-                                <Button color="primary" onPress={() => onSubmit({ ...boat!, name: boatName, py: PY, crew: Crew, pursuitStartTime: pursuitStartTime })}>
+                                <Button color='primary' onPress={() => onSubmit({ ...boat!, name: boatName, py: PY, crew: Crew, pursuitStartTime: pursuitStartTime })}>
                                     Save
                                 </Button>
                             </ModalFooter>
@@ -109,5 +99,5 @@ export default function EditBoatModal({ isOpen, boat, onSubmit, onClose }: { isO
                 </ModalContent>
             </Modal>
         </>
-    );
-};
+    )
+}

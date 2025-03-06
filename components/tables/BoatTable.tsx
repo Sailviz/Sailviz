@@ -41,12 +41,15 @@ const Text = ({ ...props }) => {
 }
 
 const StartTime = ({ ...props }: any) => {
-    const initialValue = props.getValue()
+    const initialValue: number = props.getValue()
     //change to minutes:seconds
-    const time = new Date(initialValue * 1000).toISOString().substr(14, 5)
+    const time = new Date(Math.abs(initialValue) * 1000).toISOString().substr(14, 5)
     const [value, setValue] = React.useState(time)
-
-    return <div className=''>{value}</div>
+    if (initialValue >= 0) {
+        return <div className=''>+{value}</div>
+    } else {
+        return <div className=''>-{value}</div>
+    }
 }
 
 function Filter({ column, table }: { column: any; table: any }) {
