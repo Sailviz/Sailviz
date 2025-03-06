@@ -108,7 +108,7 @@ const UpcomingRacesTable = (props: any) => {
     })
     return (
         <div key={props.club.id}>
-            <Table id={'seriesTable'}>
+            <Table id={'seriesTable'} aria-label='Upcoming Races Table'>
                 <TableHeader>
                     {table
                         .getHeaderGroups()

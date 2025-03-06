@@ -1,13 +1,28 @@
-import React, { ChangeEvent, useState } from 'react';
+import React, { ChangeEvent, useState } from 'react'
 import { createColumnHelper, flexRender, getCoreRowModel, useReactTable, getFilteredRowModel } from '@tanstack/react-table'
-import { Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Dropdown, DropdownItem, DropdownTrigger, Button, DropdownMenu, Input, Tooltip, Spinner } from '@nextui-org/react';
-import { VerticalDotsIcon } from 'components/icons/vertical-dots-icon';
-import { EyeIcon } from 'components/icons/eye-icon';
-import { EditIcon } from 'components/icons/edit-icon';
-import { DeleteIcon } from 'components/icons/delete-icon';
-import { SearchIcon } from 'components/icons/search-icon';
-import * as Fetcher from 'components/Fetchers';
-import { AVAILABLE_PERMISSIONS, userHasPermission } from 'components/helpers/users';
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableColumn,
+    TableHeader,
+    TableRow,
+    Dropdown,
+    DropdownItem,
+    DropdownTrigger,
+    Button,
+    DropdownMenu,
+    Input,
+    Tooltip,
+    Spinner
+} from '@nextui-org/react'
+import { VerticalDotsIcon } from 'components/icons/vertical-dots-icon'
+import { EyeIcon } from 'components/icons/eye-icon'
+import { EditIcon } from 'components/icons/edit-icon'
+import { DeleteIcon } from 'components/icons/delete-icon'
+import { SearchIcon } from 'components/icons/search-icon'
+import * as Fetcher from 'components/Fetchers'
+import { AVAILABLE_PERMISSIONS, userHasPermission } from 'components/helpers/users'
 
 const columnHelper = createColumnHelper<BoatDataType>()
 
@@ -15,23 +30,15 @@ const Number = ({ ...props }: any) => {
     const initialValue = props.getValue()
     const [value, setValue] = React.useState(initialValue)
 
-    return (
-        <div className=''>
-            {value}
-        </div>
-    );
-};
+    return <div className=''>{value}</div>
+}
 
 const Text = ({ ...props }) => {
     const initialValue = props.getValue()
     const [value, setValue] = React.useState(initialValue)
 
-    return (
-        <div className=''>
-            {value}
-        </div>
-    );
-};
+    return <div className=''>{value}</div>
+}
 
 const StartTime = ({ ...props }: any) => {
     const initialValue = props.getValue()
@@ -39,35 +46,34 @@ const StartTime = ({ ...props }: any) => {
     const time = new Date(initialValue * 1000).toISOString().substr(14, 5)
     const [value, setValue] = React.useState(time)
 
-    return (
-        <div className=''>
-            {value}
-        </div>
-    );
-};
+    return <div className=''>{value}</div>
+}
 
-function Filter({ column, table }: { column: any, table: any }) {
-    const columnFilterValue = column.getFilterValue();
-
+function Filter({ column, table }: { column: any; table: any }) {
+    const columnFilterValue = column.getFilterValue()
 
     return (
         <Input
             isClearable
-            className="w-full"
-            placeholder="Search by name..."
+            className='w-full'
+            placeholder='Search by name...'
             startContent={<SearchIcon />}
             value={column.getFilterValue()}
-            onClear={() => column.setFilterValue("")}
-            onValueChange={(value) => column.setFilterValue(value)}
+            onClear={() => column.setFilterValue('')}
+            onValueChange={value => column.setFilterValue(value)}
             //so that you can type a space, otherwise it will be blocked
-            onKeyDown={(e: any) => { if (e.key === " ") { e.stopPropagation() } }}
+            onKeyDown={(e: any) => {
+                if (e.key === ' ') {
+                    e.stopPropagation()
+                }
+            }}
         />
-    );
+    )
 }
 
 const Action = ({ ...props }: any) => {
     const onDeleteClick = () => {
-        if (confirm("are you sure you want to do this?")) {
+        if (confirm('are you sure you want to do this?')) {
             props.deleteBoat(props.row.original)
         }
     }
@@ -77,24 +83,23 @@ const Action = ({ ...props }: any) => {
     }
     if (userHasPermission(props.user, AVAILABLE_PERMISSIONS.editBoats)) {
         return (
-            <div className="relative flex items-center gap-2">
-                <Tooltip content="Edit">
-                    <span className="text-lg text-default-400 cursor-pointer active:opacity-50">
+            <div className='relative flex items-center gap-2'>
+                <Tooltip content='Edit'>
+                    <span className='text-lg text-default-400 cursor-pointer active:opacity-50'>
                         <EditIcon onClick={onEditClick} />
                     </span>
                 </Tooltip>
-                <Tooltip color="danger" content="Delete" >
-                    <span className="text-lg text-danger cursor-pointer active:opacity-50">
+                <Tooltip color='danger' content='Delete'>
+                    <span className='text-lg text-danger cursor-pointer active:opacity-50'>
                         <DeleteIcon onClick={onDeleteClick} />
                     </span>
                 </Tooltip>
             </div>
-        );
+        )
     } else {
-        return (<>  </>)
+        return <> </>
     }
-};
-
+}
 
 const BoatTable = (props: any) => {
     const { boats, boatsIsError, boatsIsValidating } = Fetcher.Boats()
@@ -114,39 +119,39 @@ const BoatTable = (props: any) => {
         props.createBoat()
     }
 
-    const loadingState = boatsIsValidating || data?.length === 0 ? "loading" : "idle";
+    const loadingState = boatsIsValidating || data?.length === 0 ? 'loading' : 'idle'
 
     var table = useReactTable({
         data,
         columns: [
             columnHelper.accessor('name', {
-                header: "Boat",
+                header: 'Boat',
                 cell: props => <Text {...props} />,
                 enableColumnFilter: true
             }),
             columnHelper.accessor('crew', {
-                header: "Crew",
+                header: 'Crew',
                 cell: props => <Number {...props} />,
                 enableColumnFilter: false
             }),
             columnHelper.accessor('py', {
-                id: "py",
-                header: "PY",
+                id: 'py',
+                header: 'PY',
                 cell: props => <Number {...props} />,
                 enableColumnFilter: false
             }),
             columnHelper.accessor('pursuitStartTime', {
-                id: "pursuitStartTime",
+                id: 'pursuitStartTime',
                 header: () => <span>Pursuit Start Time</span>,
                 cell: props => <StartTime {...props} />,
                 enableColumnFilter: false
             }),
             columnHelper.accessor('id', {
-                id: "action",
+                id: 'action',
                 enableColumnFilter: false,
-                header: "Actions",
+                header: 'Actions',
                 cell: props => <Action {...props} id={props.row.original.id} deleteBoat={deleteBoat} editBoat={editBoat} user={user} />
-            }),
+            })
         ],
         getCoreRowModel: getCoreRowModel(),
         getFilteredRowModel: getFilteredRowModel()
@@ -154,41 +159,34 @@ const BoatTable = (props: any) => {
 
     return (
         <div key={props.data}>
-            <Table isStriped>
+            <Table isStriped aria-label='Boat Table'>
                 <TableHeader>
-                    {table.getHeaderGroups().flatMap(headerGroup => headerGroup.headers).map(header => {
-                        return (
-                            <TableColumn key={header.id}>
-                                <div className='flex justify-between flex-row'>
-                                    <div className='py-3'>
-                                        {flexRender(
-                                            header.column.columnDef.header,
-                                            header.getContext()
-                                        )}
+                    {table
+                        .getHeaderGroups()
+                        .flatMap(headerGroup => headerGroup.headers)
+                        .map(header => {
+                            return (
+                                <TableColumn key={header.id}>
+                                    <div className='flex justify-between flex-row'>
+                                        <div className='py-3'>{flexRender(header.column.columnDef.header, header.getContext())}</div>
+                                        {header.column.getCanFilter() ? (
+                                            <div className='w-full'>
+                                                <Filter column={header.column} table={table} />
+                                            </div>
+                                        ) : null}
                                     </div>
-                                    {header.column.getCanFilter() ? (
-                                        <div className='w-full'>
-                                            <Filter column={header.column} table={table} />
-                                        </div>
-                                    ) : null}
-                                </div>
-                            </TableColumn>
-                        );
-                    })}
+                                </TableColumn>
+                            )
+                        })}
                 </TableHeader>
-                <TableBody
-                    loadingContent={<Spinner />}
-                    loadingState={loadingState}>
+                <TableBody loadingContent={<Spinner />} loadingState={loadingState}>
                     {table.getRowModel().rows.map(row => (
                         <TableRow key={row.id}>
                             {row.getVisibleCells().map(cell => (
-                                <TableCell key={cell.id}>
-                                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                                </TableCell>
+                                <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
                             ))}
                         </TableRow>
                     ))}
-
                 </TableBody>
             </Table>
         </div>

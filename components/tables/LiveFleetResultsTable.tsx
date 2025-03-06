@@ -1,82 +1,56 @@
-import React, { useState } from 'react';
+import React, { useState } from 'react'
 import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, useReactTable, SortingState } from '@tanstack/react-table'
-import { Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Dropdown, DropdownItem, DropdownTrigger, Button, DropdownMenu } from '@nextui-org/react';
-import { VerticalDotsIcon } from 'components/icons/vertical-dots-icon';
-
+import { Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Dropdown, DropdownItem, DropdownTrigger, Button, DropdownMenu } from '@nextui-org/react'
+import { VerticalDotsIcon } from 'components/icons/vertical-dots-icon'
 
 const Text = ({ ...props }) => {
     const value = props.getValue()
 
-    return (
-        <div className=' text-center'>
-            {value}
-        </div>
-    );
-};
+    return <div className=' text-center'>{value}</div>
+}
 
 const Number = ({ ...props }) => {
     const value = Math.round(props.getValue())
     //round value to nearest integer
 
-    return (
-        <div className=' text-center'>
-            {value}
-        </div>
-    );
-};
+    return <div className=' text-center'>{value}</div>
+}
 
 const CorrectedTime = ({ ...props }) => {
     let value = Math.round(props.getValue())
     let result = props.result
-    let valueString = ""
-    if (result.resultCode != "") {
+    let valueString = ''
+    if (result.resultCode != '') {
         valueString = result.resultCode
     } else {
         valueString = value.toString()
     }
     //round value to nearest integer
 
-    return (
-        <div className=' text-center'>
-            {valueString}
-        </div>
-    );
-};
-
-
+    return <div className=' text-center'>{valueString}</div>
+}
 
 const Time = ({ ...props }) => {
     const value = props.getValue()
     if (value === undefined) {
-        return (
-            <div className=' text-center'>
-                -
-            </div>
-        )
+        return <div className=' text-center'>-</div>
     }
     let time = new Date((value - props.startTime) * 1000).toISOString().substring(11, 19)
 
-    return (
-        <div className=' text-center'>
-            {time}
-        </div>
-    );
-};
+    return <div className=' text-center'>{time}</div>
+}
 
+function Sort({ column, table }: { column: any; table: any }) {
+    const firstValue = table.getPreFilteredRowModel().flatRows[0]?.getValue(column.id)
 
-function Sort({ column, table }: { column: any, table: any }) {
-    const firstValue = table
-        .getPreFilteredRowModel()
-        .flatRows[0]?.getValue(column.id);
-
-    const columnFilterValue = column.getFilterValue();
+    const columnFilterValue = column.getFilterValue()
 
     return (
         <div className='flex flex-row justify-center'>
-            <p onClick={(e) => column.toggleSorting(true)} className='cursor-pointer'>
+            <p onClick={e => column.toggleSorting(true)} className='cursor-pointer'>
                 ▲
             </p>
-            <p onClick={(e) => column.toggleSorting(false)} className='cursor-pointer'>
+            <p onClick={e => column.toggleSorting(false)} className='cursor-pointer'>
                 ▼
             </p>
         </div>
@@ -85,25 +59,32 @@ function Sort({ column, table }: { column: any, table: any }) {
 
 const calculateHandicapResults = (fleet: FleetDataType) => {
     //most nuber of laps.
-    const maxLaps = Math.max.apply(null, fleet.results.map(function (o: ResultsDataType) { return o.laps.length }))
+    const maxLaps = Math.max.apply(
+        null,
+        fleet.results.map(function (o: ResultsDataType) {
+            return o.laps.length
+        })
+    )
 
     //calculate corrected time
     fleet.results.forEach(result => {
         //don't know why types aren't quite working here
-        if (result.laps.length == 0) { return }
+        if (result.laps.length == 0) {
+            return
+        }
         let seconds = result.laps[result.laps.length - 1]!.time - fleet.startTime
         result.CorrectedTime = (seconds * 1000 * (maxLaps / result.laps.length)) / result.boat.py
         console.log(result.CorrectedTime)
-    });
+    })
 
     //calculate finish position
 
     //sort by corrected time, if corrected time is 0 move to end, and rtd to end
     fleet.results.sort((a, b) => {
-        if (a.resultCode != "") {
+        if (a.resultCode != '') {
             return 1
         }
-        if (b.resultCode != "") {
+        if (b.resultCode != '') {
             return -1
         }
         if (a.CorrectedTime == 0) {
@@ -127,22 +108,19 @@ const calculateHandicapResults = (fleet: FleetDataType) => {
     return fleet
 }
 
-
 const calculatePursuitResults = (fleet: FleetDataType) => {
     return fleet
 }
 
-
 const columnHelper = createColumnHelper<ResultsDataType>()
-
 
 const LiveResultsTable = (props: any) => {
     let [fleet, setFleet] = useState<FleetDataType>(props.fleet)
     let [startTime, setStartTime] = useState<number>(props.startTime)
     console.log(props.handicap)
-    let [handicap, setHandicap] = useState<boolean>(props.handicap == "Handicap" ? true : false)
+    let [handicap, setHandicap] = useState<boolean>(props.handicap == 'Handicap' ? true : false)
 
-    let [results, setResults] = useState<ResultsDataType[]>(props.handicap == "Handicap" ? calculateHandicapResults(fleet).results : calculatePursuitResults(fleet).results)
+    let [results, setResults] = useState<ResultsDataType[]>(props.handicap == 'Handicap' ? calculateHandicapResults(fleet).results : calculatePursuitResults(fleet).results)
     let maxLaps = 0
     results.forEach((result, index) => {
         if (result.laps.length > maxLaps) {
@@ -153,44 +131,46 @@ const LiveResultsTable = (props: any) => {
     console.log(results)
 
     //sets sorting to position by default
-    const [sorting, setSorting] = useState<SortingState>([{
-        id: "Position",
-        desc: false,
-    }]);
+    const [sorting, setSorting] = useState<SortingState>([
+        {
+            id: 'Position',
+            desc: false
+        }
+    ])
 
     let columns = [
-        columnHelper.accessor("Helm", {
-            header: "Helm",
+        columnHelper.accessor('Helm', {
+            header: 'Helm',
             cell: props => <Text {...props} />,
             enableSorting: false
         }),
-        columnHelper.accessor("Crew", {
-            header: "Crew",
+        columnHelper.accessor('Crew', {
+            header: 'Crew',
             cell: props => <Text {...props} />,
             enableSorting: false
         }),
-        columnHelper.accessor((data) => data.boat?.name, {
-            header: "Class",
-            id: "Class",
+        columnHelper.accessor(data => data.boat?.name, {
+            header: 'Class',
+            id: 'Class',
             cell: props => <Text {...props} />,
             enableSorting: false
         }),
-        columnHelper.accessor((data) => data.SailNumber, {
-            header: "Sail Number",
+        columnHelper.accessor(data => data.SailNumber, {
+            header: 'Sail Number',
             cell: props => <Number {...props} />,
             enableSorting: false
         }),
-        columnHelper.accessor((data) => data.laps.length, {
-            header: "Laps",
+        columnHelper.accessor(data => data.laps.length, {
+            header: 'Laps',
             cell: props => <Number {...props} />,
-            enableSorting: false,
+            enableSorting: false
         })
-    ];
+    ]
 
     // add column for each lap
     for (let i = maxLaps - 3; i < maxLaps; i++) {
-        const newColumn = columnHelper.accessor((data) => data.laps[i]?.time, {
-            header: "LAP " + (i + 1).toString(),
+        const newColumn = columnHelper.accessor(data => data.laps[i]?.time, {
+            header: 'LAP ' + (i + 1).toString(),
             cell: props => <Time {...props} disabled={true} startTime={startTime} />,
             enableSorting: false
         })
@@ -198,14 +178,14 @@ const LiveResultsTable = (props: any) => {
     }
 
     const Correctedtime = columnHelper.accessor('CorrectedTime', {
-        header: "Corrected Time",
+        header: 'Corrected Time',
         cell: props => <CorrectedTime {...props} result={results.find(result => result.id == props.row.original.id)} />,
         enableSorting: false
     })
 
     //results are ordered by corrected time so the index is the position
-    const Position = columnHelper.accessor((data) => handicap ? data.HandicapPosition : data.PursuitPosition, {
-        header: "Position",
+    const Position = columnHelper.accessor(data => (handicap ? data.HandicapPosition : data.PursuitPosition), {
+        header: 'Position',
         cell: props => <Number {...props} />,
         enableSorting: true
     })
@@ -217,38 +197,31 @@ const LiveResultsTable = (props: any) => {
         data: results,
         columns,
         state: {
-            sorting,
+            sorting
         },
         onSortingChange: setSorting,
         getCoreRowModel: getCoreRowModel(),
-        getSortedRowModel: getSortedRowModel(),
+        getSortedRowModel: getSortedRowModel()
     })
     return (
         <div key={props.data}>
-            <Table isStriped id={"clubTable"}>
+            <Table isStriped id={'clubTable'} aria-label='Live Results Table'>
                 <TableHeader>
-                    {table.getHeaderGroups().flatMap(headerGroup => headerGroup.headers).map(header => {
-                        return (
-                            <TableColumn key={header.id}>
-                                {flexRender(
-                                    header.column.columnDef.header,
-                                    header.getContext()
-                                )}
-                            </TableColumn>
-                        );
-                    })}
+                    {table
+                        .getHeaderGroups()
+                        .flatMap(headerGroup => headerGroup.headers)
+                        .map(header => {
+                            return <TableColumn key={header.id}>{flexRender(header.column.columnDef.header, header.getContext())}</TableColumn>
+                        })}
                 </TableHeader>
                 <TableBody>
                     {table.getRowModel().rows.map(row => (
                         <TableRow key={row.id}>
                             {row.getVisibleCells().map(cell => (
-                                <TableCell key={cell.id}>
-                                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                                </TableCell>
+                                <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
                             ))}
                         </TableRow>
                     ))}
-
                 </TableBody>
             </Table>
         </div>

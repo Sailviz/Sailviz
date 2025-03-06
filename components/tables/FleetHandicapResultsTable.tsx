@@ -1,5 +1,5 @@
 'use client'
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react'
 import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, useReactTable, SortingState } from '@tanstack/react-table'
 import {
     Table,
@@ -16,83 +16,58 @@ import {
     Input,
     Spinner,
     Tooltip
-} from '@nextui-org/react';
-import * as Fetcher from 'components/Fetchers';
-import useSWR from 'swr';
-import { EyeIcon } from "../icons/eye-icon";
-
-
+} from '@nextui-org/react'
+import * as Fetcher from 'components/Fetchers'
+import useSWR from 'swr'
+import { EyeIcon } from '../icons/eye-icon'
 
 const Text = ({ ...props }) => {
     const value = props.getValue()
 
-    return (
-        <div className=' text-center'>
-            {value}
-        </div>
-    );
-};
-
+    return <div className=' text-center'>{value}</div>
+}
 
 const Laps = ({ ...props }: any) => {
     const value = props.getValue()
     // value is the array of laps
 
-    return (
-        <div className=' text-center'>
-            {value}
-        </div>
-    );
-};
+    return <div className=' text-center'>{value}</div>
+}
 
 const Time = ({ ...props }: any) => {
     const initialValue = props.getValue()
     const [value, setValue] = React.useState(new Date((initialValue - props.startTime) * 1000).toISOString().substring(11, 19))
     if (initialValue == -1) {
-        return (
-            <p className="p-2 m-2 text-center w-full">
-                Retired
-            </p>
-        )
+        return <p className='p-2 m-2 text-center w-full'>Retired</p>
     } else {
-        return (
-            <p> {value}</p>
-        )
+        return <p> {value}</p>
     }
-};
+}
 
 const CorrectedTime = ({ ...props }) => {
     let value = Math.round(props.getValue())
     let result = props.result
-    let valueString = ""
-    if (result.resultCode != "") {
+    let valueString = ''
+    if (result.resultCode != '') {
         valueString = result.resultCode
     } else {
         valueString = value.toString()
     }
     //round value to nearest integer
 
-    return (
-        <div className=' text-center'>
-            {valueString}
-        </div>
-    );
-};
+    return <div className=' text-center'>{valueString}</div>
+}
 
 const Class = ({ ...props }: any) => {
     let value = props.getValue()
     try {
         value = value.name
     } catch (error) {
-        value = ""
+        value = ''
     }
 
-    return (
-        <div className=' text-center'>
-            {value}
-        </div>
-    );
-};
+    return <div className=' text-center'>{value}</div>
+}
 
 const Edit = ({ ...props }: any) => {
     const onClick = () => {
@@ -101,13 +76,15 @@ const Edit = ({ ...props }: any) => {
     }
     return (
         <>
-            <p className="cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0"
-                onClick={onClick} >
+            <p
+                className='cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0'
+                onClick={onClick}
+            >
                 Edit
             </p>
         </>
-    );
-};
+    )
+}
 
 const View = ({ ...props }: any) => {
     const onClick = () => {
@@ -116,37 +93,33 @@ const View = ({ ...props }: any) => {
     }
     return (
         <>
-            <Tooltip content="View" >
-                <span className="text-lg text-default-400 cursor-pointer active:opacity-50">
+            <Tooltip content='View'>
+                <span className='text-lg text-default-400 cursor-pointer active:opacity-50'>
                     <EyeIcon onClick={onClick} />
                 </span>
             </Tooltip>
         </>
-    );
-};
+    )
+}
 
-function Sort({ column, table }: { column: any, table: any }) {
-    const firstValue = table
-        .getPreFilteredRowModel()
-        .flatRows[0]?.getValue(column.id);
+function Sort({ column, table }: { column: any; table: any }) {
+    const firstValue = table.getPreFilteredRowModel().flatRows[0]?.getValue(column.id)
 
-    const columnFilterValue = column.getFilterValue();
+    const columnFilterValue = column.getFilterValue()
 
     return (
         <div className='flex flex-row justify-center'>
-            <p onClick={(e) => column.toggleSorting(true)} className='cursor-pointer'>
+            <p onClick={e => column.toggleSorting(true)} className='cursor-pointer'>
                 ▲
             </p>
-            <p onClick={(e) => column.toggleSorting(false)} className='cursor-pointer'>
+            <p onClick={e => column.toggleSorting(false)} className='cursor-pointer'>
                 ▼
             </p>
         </div>
     )
 }
 
-
 const columnHelper = createColumnHelper<ResultsDataType>()
-
 
 const FleetHandicapResultsTable = (props: any) => {
     const { fleet, fleetIsValidating, fleetIsError } = Fetcher.Fleet(props.fleetId)
@@ -166,55 +139,57 @@ const FleetHandicapResultsTable = (props: any) => {
         props.showViewModal(id)
     }
 
-    const [sorting, setSorting] = useState<SortingState>([{
-        id: "HandicapPosition",
-        desc: false,
-    }]);
+    const [sorting, setSorting] = useState<SortingState>([
+        {
+            id: 'HandicapPosition',
+            desc: false
+        }
+    ])
 
     let columns = [
         columnHelper.accessor('HandicapPosition', {
-            header: "Position",
+            header: 'Position',
             cell: props => <Text {...props} disabled={true} />,
             enableSorting: true
         }),
         columnHelper.accessor('Helm', {
-            header: "Helm",
+            header: 'Helm',
             cell: props => <Text {...props} />,
             enableSorting: false
         }),
         columnHelper.accessor('Crew', {
-            header: "Crew",
+            header: 'Crew',
             cell: props => <Text {...props} />,
             enableSorting: false
         }),
         columnHelper.accessor('boat', {
-            header: "Class",
-            id: "Class",
+            header: 'Class',
+            id: 'Class',
             size: 300,
             cell: props => <Class {...props} />,
             enableSorting: false
         }),
         columnHelper.accessor('SailNumber', {
-            header: "Sail Number",
+            header: 'Sail Number',
             cell: props => <Text {...props} />,
             enableSorting: false
         }),
         columnHelper.accessor('numberLaps', {
-            header: "Laps",
+            header: 'Laps',
             cell: props => <Laps {...props} />,
             enableSorting: false
-        }),
+        })
     ]
 
     const timeColumn = columnHelper.accessor('finishTime', {
-        header: "Time",
+        header: 'Time',
         cell: props => <Time {...props} startTime={startTime} />,
         enableSorting: false
     })
 
     const correctedTimeColumn = columnHelper.accessor('CorrectedTime', {
-        header: "Corrected Time",
-        cell: props => <CorrectedTime {...props} result={data?.find((result) => result.id == props.row.original.id)} />,
+        header: 'Corrected Time',
+        cell: props => <CorrectedTime {...props} result={data?.find(result => result.id == props.row.original.id)} />,
         enableSorting: false
     })
 
@@ -224,13 +199,27 @@ const FleetHandicapResultsTable = (props: any) => {
     }
 
     const editColumn = columnHelper.display({
-        id: "Edit",
-        cell: props => <Edit {...props} showEditModal={(id: string) => { showEditModal(id) }} />
+        id: 'Edit',
+        cell: props => (
+            <Edit
+                {...props}
+                showEditModal={(id: string) => {
+                    showEditModal(id)
+                }}
+            />
+        )
     })
 
     const viewColumn = columnHelper.display({
-        id: "Edit",
-        cell: props => <View {...props} showViewModal={(id: string) => { showViewModal(id) }} />
+        id: 'Edit',
+        cell: props => (
+            <View
+                {...props}
+                showViewModal={(id: string) => {
+                    showViewModal(id)
+                }}
+            />
+        )
     })
 
     if (editable) {
@@ -239,48 +228,37 @@ const FleetHandicapResultsTable = (props: any) => {
         columns.push(viewColumn)
     }
 
-    const loadingState = fleetIsValidating ? "loading" : "idle";
+    const loadingState = fleetIsValidating ? 'loading' : 'idle'
 
     let table = useReactTable({
         data,
         columns: columns,
         state: {
-            sorting,
+            sorting
         },
         onSortingChange: setSorting,
         getCoreRowModel: getCoreRowModel(),
-        getSortedRowModel: getSortedRowModel(),
+        getSortedRowModel: getSortedRowModel()
     })
     return (
-        <div key={props.data} className="h-full">
-            <Table isStriped id={"clubTable"} isHeaderSticky fullWidth className="h-full overflow-auto">
+        <div key={props.data} className='h-full'>
+            <Table isStriped id={'clubTable'} isHeaderSticky fullWidth className='h-full overflow-auto' aria-label='Results Table'>
                 <TableHeader>
-                    {table.getHeaderGroups().flatMap(headerGroup => headerGroup.headers).map(header => {
-                        return (
-                            <TableColumn key={header.id}>
-                                {flexRender(
-                                    header.column.columnDef.header,
-                                    header.getContext()
-                                )}
-                            </TableColumn>
-                        );
-                    })}
+                    {table
+                        .getHeaderGroups()
+                        .flatMap(headerGroup => headerGroup.headers)
+                        .map(header => {
+                            return <TableColumn key={header.id}>{flexRender(header.column.columnDef.header, header.getContext())}</TableColumn>
+                        })}
                 </TableHeader>
-                <TableBody
-                    loadingContent={<Spinner />}
-                    loadingState={loadingState}
-                    emptyContent={"No Entries Yet."}
-                >
+                <TableBody loadingContent={<Spinner />} loadingState={loadingState} emptyContent={'No Entries Yet.'}>
                     {table.getRowModel().rows.map(row => (
                         <TableRow key={row.id}>
                             {row.getVisibleCells().map(cell => (
-                                <TableCell key={cell.id}>
-                                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                                </TableCell>
+                                <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
                             ))}
                         </TableRow>
                     ))}
-
                 </TableBody>
             </Table>
         </div>

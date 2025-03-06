@@ -1,74 +1,57 @@
-import React, { ChangeEvent, useState, useEffect } from 'react';
+import React, { ChangeEvent, useState, useEffect } from 'react'
 import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, useReactTable, SortingState } from '@tanstack/react-table'
-import { Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Dropdown, DropdownItem, DropdownTrigger, Button, DropdownMenu } from '@nextui-org/react';
-import { VerticalDotsIcon } from 'components/icons/vertical-dots-icon';
+import { Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Dropdown, DropdownItem, DropdownTrigger, Button, DropdownMenu } from '@nextui-org/react'
+import { VerticalDotsIcon } from 'components/icons/vertical-dots-icon'
 
 //not a db type, only used here
 type SeriesResultsType = {
-    Rank: number;
-    Helm: string;
-    Crew: string;
-    Boat: BoatDataType;
-    SailNumber: string;
-    Total: number;
-    Net: number;
-    racePositions: { race: number, position: number, discarded: boolean }[];
+    Rank: number
+    Helm: string
+    Crew: string
+    Boat: BoatDataType
+    SailNumber: string
+    Total: number
+    Net: number
+    racePositions: { race: number; position: number; discarded: boolean }[]
 }
-
 
 const Text = ({ ...props }) => {
     const value = props.getValue()
 
-    return (
-        <div>
-            {value}
-        </div>
-    );
-};
+    return <div>{value}</div>
+}
 
 const Number = ({ ...props }: any) => {
     const initialValue = props.getValue()
     const [value, setValue] = React.useState(initialValue)
-    return (
-        <div>
-            {Math.round(value)}
-        </div>
-    );
-};
+    return <div>{Math.round(value)}</div>
+}
 
 const Result = ({ ...props }: any) => {
     const initialValue = props.getValue()
     const [value, setValue] = React.useState(initialValue.position)
     const [discarded, setDiscarded] = React.useState(initialValue.discarded)
-    return (
-        <div className={discarded ? 'line-through' : ''}>
-            {Math.round(value)}
-        </div>
-    );
-};
+    return <div className={discarded ? 'line-through' : ''}>{Math.round(value)}</div>
+}
 
-function Sort({ column, table }: { column: any, table: any }) {
-    const firstValue = table
-        .getPreFilteredRowModel()
-        .flatRows[0]?.getValue(column.id);
+function Sort({ column, table }: { column: any; table: any }) {
+    const firstValue = table.getPreFilteredRowModel().flatRows[0]?.getValue(column.id)
 
-    const columnFilterValue = column.getFilterValue();
+    const columnFilterValue = column.getFilterValue()
 
     return (
         <div className='flex flex-row justify-center'>
-            <p onClick={(e) => column.toggleSorting(true)} className='cursor-pointer'>
+            <p onClick={e => column.toggleSorting(true)} className='cursor-pointer'>
                 ▲
             </p>
-            <p onClick={(e) => column.toggleSorting(false)} className='cursor-pointer'>
+            <p onClick={e => column.toggleSorting(false)} className='cursor-pointer'>
                 ▼
             </p>
         </div>
     )
 }
 
-
 const columnHelper = createColumnHelper<SeriesResultsType>()
-
 
 const SeriesResultsTable = (props: any) => {
     let [seriesData, setSeriesData] = useState<SeriesDataType>(props.data)
@@ -80,41 +63,42 @@ const SeriesResultsTable = (props: any) => {
         let tempresults: SeriesResultsType[] = []
         //collate results from same person.
         seriesData.races.forEach(race => {
-            race.fleets.flatMap(fleet => fleet.results).forEach(result => {
-                //if new racer, add to tempresults
-                let index = tempresults.findIndex(function (t) {
-                    return (t.Helm == result.Helm && t.Boat?.id == result.boat?.id)
-                })
-                if (index == -1) {
-                    index = tempresults.push({ //sets index to index of newly pushed element
-                        Rank: 0,
-                        Helm: result.Helm,
-                        Crew: result.Crew,
-                        Boat: result.boat,
-                        SailNumber: result.SailNumber,
-                        Total: 0,
-                        Net: 0,
-                        racePositions: Array(seriesData.races.length).fill({ position: 0, discarded: false })
+            race.fleets
+                .flatMap(fleet => fleet.results)
+                .forEach(result => {
+                    //if new racer, add to tempresults
+                    let index = tempresults.findIndex(function (t) {
+                        return t.Helm == result.Helm && t.Boat?.id == result.boat?.id
                     })
-                    index -= 1
-                }
-                //add result to tempresults
-                if (tempresults[index]) {
-                    tempresults[index]!.racePositions.splice(race.number - 1, 1, { race: race.number, position: result.HandicapPosition, discarded: false })
-                } else {
-                    console.log("something went wrong")
-                }
-
-            })
-
-        });
+                    if (index == -1) {
+                        index = tempresults.push({
+                            //sets index to index of newly pushed element
+                            Rank: 0,
+                            Helm: result.Helm,
+                            Crew: result.Crew,
+                            Boat: result.boat,
+                            SailNumber: result.SailNumber,
+                            Total: 0,
+                            Net: 0,
+                            racePositions: Array(seriesData.races.length).fill({ position: 0, discarded: false })
+                        })
+                        index -= 1
+                    }
+                    //add result to tempresults
+                    if (tempresults[index]) {
+                        tempresults[index]!.racePositions.splice(race.number - 1, 1, { race: race.number, position: result.HandicapPosition, discarded: false })
+                    } else {
+                        console.log('something went wrong')
+                    }
+                })
+        })
 
         //give duty team their average score if they have raced in the series
         seriesData.races.forEach(race => {
             //loop through duty team on each race.
             Object.entries(race.Duties).map(([displayName, name]) => {
                 let index = tempresults.findIndex(function (t) {
-                    return (t.Helm == name as unknown as string) //cast to unknown to avoid type error
+                    return t.Helm == (name as unknown as string) //cast to unknown to avoid type error
                 })
                 if (index != -1) {
                     //get average score
@@ -152,19 +136,18 @@ const SeriesResultsTable = (props: any) => {
             let Net = 0
             let modifiedResult = sortedResult.racePositions.map((position, index) => {
                 if (index < seriesData.settings.numberToCount) {
-                    Net += position.position;
-                    return { ...position, discarded: false }; // Ensure discarded is false for counted positions
+                    Net += position.position
+                    return { ...position, discarded: false } // Ensure discarded is false for counted positions
                 } else {
-                    return { ...position, discarded: true }; // Mark position as discarded
+                    return { ...position, discarded: true } // Mark position as discarded
                 }
-            });
+            })
             result.Net = Net
             //sort race positions by race number
             result.racePositions = modifiedResult
             result.racePositions.sort((a, b) => a.race - b.race)
         })
         console.log(tempresults)
-
 
         //sort results by Net, split results if necessary
         tempresults.sort((a: SeriesResultsType, b: SeriesResultsType) => {
@@ -178,18 +161,17 @@ const SeriesResultsTable = (props: any) => {
                 let result = 0
                 for (let i = 1; i < 1000; i++) {
                     //calculate number of positions.
-                    let aNumber = a.racePositions.reduce((partialSum: number, position: { position: number, discarded: boolean }) => {
+                    let aNumber = a.racePositions.reduce((partialSum: number, position: { position: number; discarded: boolean }) => {
                         if (position.position == i) {
                             return partialSum + 1
                         } else {
                             return partialSum
                         }
                     }, 0)
-                    let bNumber = b.racePositions.reduce((partialSum: number, position: { position: number, discarded: boolean }) => {
+                    let bNumber = b.racePositions.reduce((partialSum: number, position: { position: number; discarded: boolean }) => {
                         if (position.position == i) {
                             return partialSum + 1
-                        }
-                        else {
+                        } else {
                             return partialSum
                         }
                     }, 0)
@@ -212,7 +194,6 @@ const SeriesResultsTable = (props: any) => {
         })
 
         setData(tempresults)
-
     }
 
     useEffect(() => {
@@ -223,44 +204,43 @@ const SeriesResultsTable = (props: any) => {
 
     let columns: any = [
         columnHelper.accessor('Rank', {
-            header: "Rank",
+            header: 'Rank',
             cell: props => <Number {...props} />,
             enableSorting: true
         }),
         columnHelper.accessor('Helm', {
-            header: "Helm",
+            header: 'Helm',
             size: 300,
             cell: props => <Text {...props} />,
             enableSorting: false
         }),
-        columnHelper.accessor("Crew", {
-            header: "Crew",
+        columnHelper.accessor('Crew', {
+            header: 'Crew',
             size: 300,
             cell: props => <Text {...props} />,
             enableSorting: false
         }),
-        columnHelper.accessor((data) => data.Boat?.name, {
-            header: "Class",
+        columnHelper.accessor(data => data.Boat?.name, {
+            header: 'Class',
             size: 300,
-            id: "Class",
+            id: 'Class',
             cell: props => <Text {...props} />,
             enableSorting: false
         }),
-        columnHelper.accessor((data) => data.SailNumber, {
-            header: "Sail Number",
+        columnHelper.accessor(data => data.SailNumber, {
+            header: 'Sail Number',
             cell: props => <Text {...props} />,
             enableSorting: false
-        }),
-
-    ];
+        })
+    ]
 
     seriesData.races.sort((a, b) => a.number - b.number)
 
     //add column for each race in series
     seriesData.races.forEach((race: RaceDataType, index: number) => {
-        const newColumn = columnHelper.accessor((data) => data.racePositions[index], {
-            id: "R" + race.number.toString(),
-            header: "R" + race.number.toString(),
+        const newColumn = columnHelper.accessor(data => data.racePositions[index], {
+            id: 'R' + race.number.toString(),
+            header: 'R' + race.number.toString(),
             cell: props => <Result {...props} />,
             enableSorting: false
         })
@@ -268,13 +248,13 @@ const SeriesResultsTable = (props: any) => {
     })
 
     const totalColumn = columnHelper.accessor('Total', {
-        header: "Total",
+        header: 'Total',
         cell: props => <Number {...props} />,
         enableSorting: true
     })
 
     const netColumn = columnHelper.accessor('Net', {
-        header: "Net",
+        header: 'Net',
         cell: props => <Number {...props} disabled={true} />,
         enableSorting: true
     })
@@ -282,48 +262,43 @@ const SeriesResultsTable = (props: any) => {
     columns.push(totalColumn)
     columns.push(netColumn)
 
-    const [sorting, setSorting] = useState<SortingState>([{
-        id: "Rank",
-        desc: false,
-    }]);
+    const [sorting, setSorting] = useState<SortingState>([
+        {
+            id: 'Rank',
+            desc: false
+        }
+    ])
 
     let table = useReactTable({
         data,
         columns,
         state: {
-            sorting,
+            sorting
         },
         onSortingChange: setSorting,
         getCoreRowModel: getCoreRowModel(),
-        getSortedRowModel: getSortedRowModel(),
+        getSortedRowModel: getSortedRowModel()
     })
 
     return (
-        <div key={props.data} className="h-full">
-            <Table isStriped id={"clubTable"} isHeaderSticky fullWidth className="h-full overflow-auto">
+        <div key={props.data} className='h-full'>
+            <Table isStriped id={'clubTable'} isHeaderSticky fullWidth className='h-full overflow-auto' aria-label='Series Results Table'>
                 <TableHeader>
-                    {table.getHeaderGroups().flatMap(headerGroup => headerGroup.headers).map(header => {
-                        return (
-                            <TableColumn key={header.id}>
-                                {flexRender(
-                                    header.column.columnDef.header,
-                                    header.getContext()
-                                )}
-                            </TableColumn>
-                        );
-                    })}
+                    {table
+                        .getHeaderGroups()
+                        .flatMap(headerGroup => headerGroup.headers)
+                        .map(header => {
+                            return <TableColumn key={header.id}>{flexRender(header.column.columnDef.header, header.getContext())}</TableColumn>
+                        })}
                 </TableHeader>
-                <TableBody emptyContent={"No results yet."}>
+                <TableBody emptyContent={'No results yet.'}>
                     {table.getRowModel().rows.map(row => (
                         <TableRow key={row.id}>
                             {row.getVisibleCells().map(cell => (
-                                <TableCell key={cell.id}>
-                                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                                </TableCell>
+                                <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
                             ))}
                         </TableRow>
                     ))}
-
                 </TableBody>
             </Table>
         </div>
