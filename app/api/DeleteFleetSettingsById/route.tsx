@@ -12,7 +12,16 @@ async function findFleet(fleetSettingsId: any) {
     return result
 }
 
-async function deleteFleet(fleetSettingsId: any) {
+async function deleteFleets(fleetSettingsId: any) {
+    var result = await prisma.fleet.deleteMany({
+        where: {
+            settingsId: fleetSettingsId
+        }
+    })
+    return result
+}
+
+async function deleteSettings(fleetSettingsId: any) {
     var result = await prisma.fleetSettings.delete({
         where: {
             id: fleetSettingsId
@@ -30,6 +39,7 @@ export async function POST(request: NextRequest) {
     }
 
     var fleetSettingsId = req.fleetSettingsId
+    console.log(fleetSettingsId)
 
     let authorised = await isRequestAuthorised(request.cookies, fleetSettingsId, 'fleetsettings')
     if (!authorised) {
@@ -38,7 +48,8 @@ export async function POST(request: NextRequest) {
 
     var fleet = await findFleet(fleetSettingsId)
     if (fleet) {
-        await deleteFleet(fleetSettingsId)
+        await deleteFleets(fleetSettingsId)
+        await deleteSettings(fleetSettingsId)
         return NextResponse.json({ res: fleet }, { status: 200 })
     }
     return NextResponse.json({ error: 'fleet not found' }, { status: 400 })

@@ -46,7 +46,7 @@ const Action = ({ ...props }: any) => {
 
     const onDeleteClick = () => {
         if (confirm('are you sure you want to do this?')) {
-            props.remove(props.row.original)
+            props.remove(props.row.original.id)
         }
     }
     return (
