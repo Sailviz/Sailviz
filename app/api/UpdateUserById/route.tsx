@@ -1,10 +1,10 @@
 import prisma from 'components/prisma'
-import { NextRequest, NextResponse } from "next/server";
-const bcrypt = require('bcrypt');
-import assert from 'assert';
-import { AVAILABLE_PERMISSIONS } from 'components/helpers/users';
-import { isRequestAuthorised, isRequestOwnData } from 'components/helpers/auth';
-const saltRounds = 10;
+import { NextRequest, NextResponse } from 'next/server'
+const bcrypt = require('bcrypt')
+import assert from 'assert'
+import { AVAILABLE_PERMISSIONS } from 'components/helpers/users'
+import { isRequestAuthorised, isRequestOwnData } from 'components/helpers/auth'
+const saltRounds = 10
 
 //this only updates the settings part of the club record
 
@@ -19,21 +19,20 @@ async function updateUser(user: UserDataType, password: string) {
             username: user.username,
             roles: {
                 set: user.roles.map(role => ({ id: role.id }))
-
             },
-            ...password != "" ? { password: hash } : {}
+            ...(password != '' ? { password: hash } : {})
         }
     })
-    return result;
+    return result
 }
 
 export async function POST(request: NextRequest) {
     const req = await request.json()
 
     try {
-        assert.notStrictEqual(undefined, req.user);
+        assert.notStrictEqual(undefined, req.user)
     } catch (bodyError) {
-        return NextResponse.json({ error: "information missing" }, { status: 400 });
+        return NextResponse.json({ error: 'information missing' }, { status: 400 })
     }
 
     // let authorised = await isRequestAuthorised(request.cookies.get("token")!.value, AVAILABLE_PERMISSIONS.editUsers)
@@ -44,11 +43,11 @@ export async function POST(request: NextRequest) {
     var user: UserDataType = req.user
     var password: string = req.password
 
-    await isRequestOwnData(user.id, "", "club")
+    await isRequestOwnData(user.id, '', 'club')
 
     var updatedUser = await updateUser(user, password)
     if (updatedUser) {
-        return NextResponse.json({ res: updatedUser }, { status: 200 });
+        return NextResponse.json({ res: updatedUser }, { status: 200 })
     }
-    return NextResponse.json({ error: 'user not found' }, { status: 400 });
+    return NextResponse.json({ error: 'user not found' }, { status: 400 })
 }

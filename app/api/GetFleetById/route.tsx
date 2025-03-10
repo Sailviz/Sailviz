@@ -1,6 +1,6 @@
 import prisma from 'components/prisma'
-import { NextRequest, NextResponse } from "next/server";
-import { cookies } from 'next/headers';
+import { NextRequest, NextResponse } from 'next/server'
+import { cookies } from 'next/headers'
 
 async function findFleet(fleetId: any) {
     var result = await prisma.fleet.findUnique({
@@ -20,15 +20,12 @@ async function findFleet(fleetId: any) {
                         }
                     }
                 }
-
-
             },
             fleetSettings: true
         }
     })
-    return result;
+    return result
 }
-
 
 export async function GET(request: NextRequest) {
     const cookieStore = cookies()
@@ -37,14 +34,12 @@ export async function GET(request: NextRequest) {
     var id = searchParams.get('id')
 
     if (id == undefined) {
-        return NextResponse.json({ error: "can't find fleet" }, { status: 400 });
+        return NextResponse.json({ error: "can't find fleet" }, { status: 400 })
     }
     var fleet = await findFleet(id)
     if (fleet) {
-        return NextResponse.json(fleet);
+        return NextResponse.json(fleet)
+    } else {
+        return NextResponse.json({ error: "can't find fleet" }, { status: 406 })
     }
-    else {
-        return NextResponse.json({ error: "can't find fleet" }, { status: 406 });
-    }
-
-};
+}

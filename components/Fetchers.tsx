@@ -1,5 +1,6 @@
 'use client'
 import useSWR from 'swr'
+import * as Sentry from '@sentry/react'
 
 export async function fetcher(url: string) {
     const res = await fetch(url)
@@ -32,6 +33,7 @@ export async function advancedFetcher(url: string, data: object) {
 
 export function UseUser() {
     const { data, error, isValidating } = useSWR('/api/user', fetcher)
+    Sentry.setUser(data)
 
     return {
         user: data as UserDataType,
@@ -51,12 +53,13 @@ export function UseClub() {
 }
 
 export function Series(seriesId: string) {
-    const { data, error, isValidating } = useSWR(seriesId != '' ? `/api/GetSeriesById?id=${seriesId}` : null, fetcher)
+    const { data, error, isValidating, mutate } = useSWR(seriesId != '' ? `/api/GetSeriesById?id=${seriesId}` : null, fetcher)
     console.log(data)
     return {
         series: data as SeriesDataType,
         seriesIsValidating: isValidating,
-        seriesIsError: error
+        seriesIsError: error,
+        mutateSeries: mutate
     }
 }
 
@@ -88,12 +91,13 @@ export function Fleet(fleetId: string) {
 }
 
 export function Boats() {
-    const { data, error, isValidating } = useSWR('/api/GetBoats', fetcher)
+    const { data, error, isValidating, mutate } = useSWR('/api/GetBoats', fetcher)
 
     return {
         boats: data?.boats as BoatDataType[],
         boatsIsValidating: isValidating,
-        boatsIsError: error
+        boatsIsError: error,
+        mutateBoats: mutate
     }
 }
 

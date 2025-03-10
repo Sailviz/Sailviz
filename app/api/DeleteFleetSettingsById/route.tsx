@@ -1,48 +1,56 @@
 import prisma from 'components/prisma'
-import { NextRequest, NextResponse } from "next/server";
-import assert from 'assert';
-import { AVAILABLE_PERMISSIONS } from 'components/helpers/users';
-import { isRequestAuthorised } from 'components/helpers/auth';
+import { NextRequest, NextResponse } from 'next/server'
+import assert from 'assert'
+import { isRequestAuthorised } from 'components/helpers/auth'
 
 async function findFleet(fleetSettingsId: any) {
     var result = await prisma.fleetSettings.findFirst({
         where: {
             id: fleetSettingsId
-        },
+        }
     })
-    return result;
+    return result
 }
 
-async function deleteFleet(fleetSettingsId: any) {
+async function deleteFleets(fleetSettingsId: any) {
+    var result = await prisma.fleet.deleteMany({
+        where: {
+            settingsId: fleetSettingsId
+        }
+    })
+    return result
+}
+
+async function deleteSettings(fleetSettingsId: any) {
     var result = await prisma.fleetSettings.delete({
         where: {
             id: fleetSettingsId
         }
     })
-    return result;
+    return result
 }
 
 export async function POST(request: NextRequest) {
     const req = await request.json()
     try {
-        assert.notStrictEqual(undefined, req.fleetSettingsId, 'fleetSettingsId required');
-
+        assert.notStrictEqual(undefined, req.fleetSettingsId, 'fleetSettingsId required')
     } catch (bodyError) {
-        return NextResponse.json({ error: "information missing" }, { status: 400 });
+        return NextResponse.json({ error: 'information missing' }, { status: 400 })
     }
 
     var fleetSettingsId = req.fleetSettingsId
+    console.log(fleetSettingsId)
 
-    let authorised = await isRequestAuthorised(request.cookies, AVAILABLE_PERMISSIONS.editFleets, fleetSettingsId, "fleetsettings")
+    let authorised = await isRequestAuthorised(request.cookies, fleetSettingsId, 'fleetsettings')
     if (!authorised) {
-        return NextResponse.json({ error: "not authorized" }, { status: 401 });
+        return NextResponse.json({ error: 'not authorized' }, { status: 401 })
     }
 
     var fleet = await findFleet(fleetSettingsId)
     if (fleet) {
-        await deleteFleet(fleetSettingsId)
-        return NextResponse.json({ res: fleet }, { status: 200 });
+        await deleteFleets(fleetSettingsId)
+        await deleteSettings(fleetSettingsId)
+        return NextResponse.json({ res: fleet }, { status: 200 })
     }
-    return NextResponse.json({ error: 'fleet not found' }, { status: 400 });
-
+    return NextResponse.json({ error: 'fleet not found' }, { status: 400 })
 }

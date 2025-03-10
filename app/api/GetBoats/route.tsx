@@ -1,6 +1,6 @@
 import prisma from 'components/prisma'
-import { NextRequest, NextResponse } from "next/server";
-import { cookies } from 'next/headers';
+import { NextRequest, NextResponse } from 'next/server'
+import { cookies } from 'next/headers'
 
 async function findBoats(clubId: string) {
     var result = await prisma.boat.findMany({
@@ -11,10 +11,8 @@ async function findBoats(clubId: string) {
             name: 'asc'
         }
     })
-    return result;
+    return result
 }
-
-
 
 export async function GET(request: NextRequest) {
     const cookieStore = cookies()
@@ -23,15 +21,13 @@ export async function GET(request: NextRequest) {
     var clubId = cookieStore.get('clubId')
 
     if (clubId == undefined) {
-        return NextResponse.json({ error: true, message: "information missing" });
+        return NextResponse.json({ error: true, message: 'information missing' })
     }
 
     var boat = await findBoats(clubId.value)
     if (boat) {
-        return NextResponse.json({ error: false, boats: boat });
+        return NextResponse.json({ error: false, boats: boat })
+    } else {
+        return NextResponse.json({ error: "can't find boat" }, { status: 406 })
     }
-    else {
-        return NextResponse.json({ error: "can't find boat" }, { status: 406 });
-    }
-
-};
+}
