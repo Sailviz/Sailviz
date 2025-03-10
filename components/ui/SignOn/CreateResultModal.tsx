@@ -90,8 +90,10 @@ export default function CreateResultModal({
             return
         }
         console.log('submitting')
+        console.log(selectedFleets)
         //call submit for each fleet selected
         for (let i = 0; i < selectedFleets.length; i++) {
+            console.log(i)
             onSubmit(selectedFleets[i]!, helm, crew, selectedBoat.value, sailNumber)
         }
     }
@@ -111,21 +113,11 @@ export default function CreateResultModal({
 
     useEffect(() => {
         clearFields()
-    }, [todaysRaces])
+    }, [isOpen])
 
-    console.log(races)
     return (
         <>
-            <Modal
-                isOpen={isOpen}
-                onClose={onClose}
-                scrollBehavior={'outside'}
-                size='5xl'
-                backdrop='blur'
-                onOpenChange={open => {
-                    clearFields()
-                }}
-            >
+            <Modal isOpen={isOpen} onClose={onClose} scrollBehavior={'outside'} size='5xl' backdrop='blur'>
                 <ModalContent>
                     {onClose => (
                         <>

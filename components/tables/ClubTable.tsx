@@ -1,47 +1,60 @@
-"use client"
-import React, { ChangeEvent, useState } from 'react';
+'use client'
+import React, { ChangeEvent, useState } from 'react'
 import { createColumnHelper, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table'
-import { Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Dropdown, DropdownItem, DropdownTrigger, Button, DropdownMenu, Tooltip, user } from '@nextui-org/react';
-import { VerticalDotsIcon } from 'components/icons/vertical-dots-icon';
-import { EyeIcon } from 'components/icons/eye-icon';
-import { EditIcon } from 'components/icons/edit-icon';
-import { DeleteIcon } from 'components/icons/delete-icon';
-import * as Fetcher from 'components/Fetchers';
-import { AVAILABLE_PERMISSIONS, userHasPermission } from 'components/helpers/users';
-
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableColumn,
+    TableHeader,
+    TableRow,
+    Dropdown,
+    DropdownItem,
+    DropdownTrigger,
+    Button,
+    DropdownMenu,
+    Tooltip,
+    user
+} from '@nextui-org/react'
+import { VerticalDotsIcon } from 'components/icons/vertical-dots-icon'
+import { EyeIcon } from 'components/icons/eye-icon'
+import { EditIcon } from 'components/icons/edit-icon'
+import { DeleteIcon } from 'components/icons/delete-icon'
+import * as Fetcher from 'components/Fetchers'
+import { AVAILABLE_PERMISSIONS, userHasPermission } from 'components/helpers/users'
 
 const Action = ({ ...props }: any) => {
     const onDeleteClick = () => {
-        if (confirm("are you sure you want to do this?")) {
+        if (confirm('are you sure you want to do this?')) {
             props.deleteSeries(props.row.original.id)
         }
     }
     return (
-        <div className="relative flex items-center gap-2">
-            <Tooltip content="View" >
-                <span className="text-lg text-default-400 cursor-pointer active:opacity-50">
+        <div className='relative flex items-center gap-2'>
+            <Tooltip content='View'>
+                <span className='text-lg text-default-400 cursor-pointer active:opacity-50'>
                     <EyeIcon onClick={() => props.viewSeries(props.row.original.id)} />
                 </span>
             </Tooltip>
-            {userHasPermission(props.user, AVAILABLE_PERMISSIONS.editSeries) ?
+            {userHasPermission(props.user, AVAILABLE_PERMISSIONS.editSeries) ? (
                 <>
-                    <Tooltip content="Edit">
-                        <span className="text-lg text-default-400 cursor-pointer active:opacity-50">
+                    <Tooltip content='Edit'>
+                        <span className='text-lg text-default-400 cursor-pointer active:opacity-50'>
                             <EditIcon />
                         </span>
                     </Tooltip>
-                    <Tooltip color="danger" content="Delete" >
-                        <span className="text-lg text-danger cursor-pointer active:opacity-50">
+                    <Tooltip color='danger' content='Delete'>
+                        <span className='text-lg text-danger cursor-pointer active:opacity-50'>
                             <DeleteIcon onClick={onDeleteClick} />
                         </span>
                     </Tooltip>
                 </>
-                :
+            ) : (
                 <></>
-            }
+            )}
         </div>
-    );
-};
+    )
+}
 
 const columnHelper = createColumnHelper<SeriesDataType>()
 
@@ -71,51 +84,44 @@ const ClubTable = (props: any) => {
         data,
         columns: [
             columnHelper.accessor('name', {
-                header: "Series Name",
-                cell: info => info.getValue(),
+                header: 'Series Name',
+                cell: info => info.getValue()
             }),
             columnHelper.accessor(row => row.races.length.toString(), {
-                id: "Number of Races",
-                cell: info => info.getValue(),
+                id: 'Number of Races',
+                cell: info => info.getValue()
             }),
             columnHelper.accessor(row => row.settings['numberToCount'], {
-                id: "Races to Count",
-                cell: info => info.getValue(),
+                id: 'Races to Count',
+                cell: info => info.getValue()
             }),
             columnHelper.accessor('id', {
-                id: "Remove",
-                header: "Actions",
+                id: 'Remove',
+                header: 'Actions',
                 cell: props => <Action {...props} id={props.row.original.id} deleteSeries={deleteSeries} viewSeries={viewSeries} user={user} />
-            }),
+            })
         ],
-        getCoreRowModel: getCoreRowModel(),
+        getCoreRowModel: getCoreRowModel()
     })
     return (
         <div key={props.data}>
-            <Table isStriped id={"clubTable"}>
+            <Table isStriped id={'clubTable'} aria-label='table of series'>
                 <TableHeader>
-                    {table.getHeaderGroups().flatMap(headerGroup => headerGroup.headers).map(header => {
-                        return (
-                            <TableColumn key={header.id}>
-                                {flexRender(
-                                    header.column.columnDef.header,
-                                    header.getContext()
-                                )}
-                            </TableColumn>
-                        );
-                    })}
+                    {table
+                        .getHeaderGroups()
+                        .flatMap(headerGroup => headerGroup.headers)
+                        .map(header => {
+                            return <TableColumn key={header.id}>{flexRender(header.column.columnDef.header, header.getContext())}</TableColumn>
+                        })}
                 </TableHeader>
                 <TableBody>
                     {table.getRowModel().rows.map(row => (
                         <TableRow key={row.id}>
                             {row.getVisibleCells().map(cell => (
-                                <TableCell key={cell.id}>
-                                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                                </TableCell>
+                                <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
                             ))}
                         </TableRow>
                     ))}
-
                 </TableBody>
             </Table>
         </div>
