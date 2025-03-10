@@ -120,7 +120,7 @@ const FleetTable = (props: any) => {
     })
     return (
         <div key={props.data}>
-            <Table isStriped id={'clubTable'} aria-label='Fleet Table'>
+            <Table isStriped id={'clubTable'} aria-label='fleets in series'>
                 <TableHeader>
                     {table
                         .getHeaderGroups()

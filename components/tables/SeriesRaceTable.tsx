@@ -235,7 +235,7 @@ const SeriesRaceTable = (props: any) => {
     })
     return (
         <div key={props.data}>
-            <Table id={'seriesTable'} aria-label='Series Table'>
+            <Table id={'seriesTable'} aria-label='table of races in this series'>
                 <TableHeader>
                     {table
                         .getHeaderGroups()

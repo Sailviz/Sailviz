@@ -20,6 +20,7 @@ const SignOnPage = () => {
     const [activeResult, setActiveResult] = useState<ResultsDataType>()
 
     const createResult = async (fleetId: string, helm: string, crew: string, boat: BoatDataType, sailNum: string) => {
+        console.log(fleetId, helm, crew, boat, sailNum)
         createModal.onClose()
         let entry = await DB.createResult(fleetId)
 
