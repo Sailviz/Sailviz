@@ -96,7 +96,11 @@ export default function Page({ params }: { params: { slug: string } }) {
         console.log('5 minutes left')
 
         //sound horn
-        fetch('https://' + club.settings.hornIP + '/hoot?startTime=500', { signal: controller.signal, mode: 'no-cors' })
+        fetch('https://' + club.settings.hornIP + '/hoot?startTime=300', {
+            signal: controller.signal,
+            mode: 'no-cors',
+            headers: new Headers({ 'content-type': 'text/plain', 'Access-Control-Allow-Methods': 'POST' })
+        })
             .then(response => {})
             .catch(err => {
                 console.log('horn not connected')
@@ -111,7 +115,11 @@ export default function Page({ params }: { params: { slug: string } }) {
         console.log('4 minutes left')
 
         //sound horn
-        fetch('https://' + club.settings.hornIP + '/hoot?startTime=500', { signal: controller.signal, mode: 'no-cors' })
+        fetch('https://' + club.settings.hornIP + '/hoot?startTime=300', {
+            signal: controller.signal,
+            mode: 'no-cors',
+            headers: new Headers({ 'content-type': 'text/plain', 'Access-Control-Allow-Methods': 'POST' })
+        })
             .then(response => {})
             .catch(err => {
                 console.log('horn not connected')
@@ -127,7 +135,11 @@ export default function Page({ params }: { params: { slug: string } }) {
         console.log('1 minute left')
 
         //sound horn
-        fetch('https://' + club.settings.hornIP + '/hoot?startTime=800', { signal: controller.signal, mode: 'no-cors' })
+        fetch('https://' + club.settings.hornIP + '/hoot?startTime=500', {
+            signal: controller.signal,
+            mode: 'no-cors',
+            headers: new Headers({ 'content-type': 'text/plain', 'Access-Control-Allow-Methods': 'POST' })
+        })
             .then(response => {})
             .catch(err => {
                 console.log('horn not connected')
@@ -143,7 +155,11 @@ export default function Page({ params }: { params: { slug: string } }) {
         console.log('GO!')
 
         //sound horn
-        fetch('https://' + club.settings.hornIP + '/hoot?startTime=500', { signal: controller.signal, mode: 'no-cors' })
+        fetch('https://' + club.settings.hornIP + '/hoot?startTime=300', {
+            signal: controller.signal,
+            mode: 'no-cors',
+            headers: new Headers({ 'content-type': 'text/plain', 'Access-Control-Allow-Methods': 'POST' })
+        })
             .then(response => {})
             .catch(err => {
                 console.log('horn not connected')
@@ -338,7 +354,11 @@ export default function Page({ params }: { params: { slug: string } }) {
     const endRace = async () => {
         console.log('ending race')
         //sound horn
-        fetch('http://' + club.settings.hornIP + '/hoot?startTime=500', { signal: controller.signal, mode: 'no-cors' })
+        fetch('http://' + club.settings.hornIP + '/hoot?startTime=300', {
+            signal: controller.signal,
+            mode: 'no-cors',
+            headers: new Headers({ 'content-type': 'text/plain', 'Access-Control-Allow-Methods': 'POST' })
+        })
             .then(response => {})
             .catch(err => {
                 console.log('horn not connected')
