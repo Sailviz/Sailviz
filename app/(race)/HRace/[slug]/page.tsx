@@ -329,6 +329,10 @@ export default function Page({ params }: { params: { slug: string } }) {
             console.error('Could not find result with id: ' + resultId)
             return
         }
+        //we have the data to do the lap, so beep user
+        let sound = document.getElementById('Beep') as HTMLAudioElement
+        sound!.currentTime = 0
+        sound!.play()
         //save state for undo
         setLastAction({ type: 'lap', resultId: resultId })
 
@@ -354,9 +358,6 @@ export default function Page({ params }: { params: { slug: string } }) {
             { optimisticData: optimisticData, rollbackOnError: false, revalidate: false }
         )
 
-        let sound = document.getElementById('Beep') as HTMLAudioElement
-        sound!.currentTime = 0
-        sound!.play()
         dynamicSort(optimisticData.fleets.flatMap(fleet => fleet.results))
     }
 
@@ -441,6 +442,10 @@ export default function Page({ params }: { params: { slug: string } }) {
                 console.log('horn not connected')
                 console.log(err)
             })
+        //sound beep
+        let sound = document.getElementById('Beep') as HTMLAudioElement
+        sound!.currentTime = 0
+        sound!.play()
 
         await DB.CreateLap(resultId, time)
 
@@ -458,10 +463,6 @@ export default function Page({ params }: { params: { slug: string } }) {
 
         //mutate race
         mutate(`/api/GetRaceById?id=${race.id}&results=true`)
-
-        let sound = document.getElementById('Beep') as HTMLAudioElement
-        sound!.currentTime = 0
-        sound!.play()
     }
 
     const checkAllFinished = (fleet: FleetDataType) => {
