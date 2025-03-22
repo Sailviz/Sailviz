@@ -13,6 +13,7 @@ import RetireModal from 'components/ui/dashboard/RetireModal'
 import BoatCard from 'components/ui/race/BoatCard'
 import { result, set } from 'cypress/types/lodash'
 import { use } from 'chai'
+import FlagModal from 'components/ui/dashboard/Flag Modal'
 
 enum raceStateType {
     running,
@@ -35,6 +36,8 @@ export default function Page({ params }: { params: { slug: string } }) {
     const Router = useRouter()
 
     const retireModal = useDisclosure()
+    const flagModal = useDisclosure()
+    const [flagStatus, setFlagStatus] = useState<boolean[]>([false, false])
 
     const startLength = 315 //5 mins 15 seconds in seconds
 
@@ -72,6 +75,10 @@ export default function Page({ params }: { params: { slug: string } }) {
             fleet.startTime = localTime
             await DB.updateFleetById(fleet)
         })
+        flagModal.onOpen()
+        //set flag status to false
+        setFlagStatus([false, false])
+
         mutateRace()
         startRace()
     }
@@ -94,6 +101,7 @@ export default function Page({ params }: { params: { slug: string } }) {
 
     const handleFiveMinutes = () => {
         console.log('5 minutes left')
+        setFlagStatus([true, false])
 
         //sound horn
         fetch('https://' + club.settings.hornIP + '/hoot?startTime=300', {
@@ -113,6 +121,7 @@ export default function Page({ params }: { params: { slug: string } }) {
     }
     const handleFourMinutes = () => {
         console.log('4 minutes left')
+        setFlagStatus([true, true])
 
         //sound horn
         fetch('https://' + club.settings.hornIP + '/hoot?startTime=300', {
@@ -133,6 +142,7 @@ export default function Page({ params }: { params: { slug: string } }) {
 
     const handleOneMinute = () => {
         console.log('1 minute left')
+        setFlagStatus([true, false])
 
         //sound horn
         fetch('https://' + club.settings.hornIP + '/hoot?startTime=500', {
@@ -153,6 +163,7 @@ export default function Page({ params }: { params: { slug: string } }) {
 
     const handleGo = () => {
         console.log('GO!')
+        setFlagStatus([false, false])
 
         //sound horn
         fetch('https://' + club.settings.hornIP + '/hoot?startTime=300', {
@@ -503,6 +514,8 @@ export default function Page({ params }: { params: { slug: string } }) {
     return (
         <>
             <RetireModal isOpen={retireModal.isOpen} onSubmit={retireBoat} onClose={retireModal.onClose} result={activeResult} />
+            <FlagModal isOpen={flagModal.isOpen} flagStatus={flagStatus} onClose={flagModal.onClose} onSubmit={() => null} />
+
             <audio id='Beep' src='/Beep-6.mp3'></audio>
             <audio id='Countdown' src='/Countdown.mp3'></audio>
             <div className='w-full flex flex-col items-center justify-start panel-height overflow-auto'>
