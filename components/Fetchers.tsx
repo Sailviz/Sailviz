@@ -1,5 +1,5 @@
 'use client'
-import useSWR from 'swr'
+import useSWR, { mutate } from 'swr'
 import * as Sentry from '@sentry/react'
 
 export async function fetcher(url: string) {
@@ -150,7 +150,7 @@ export function Roles(club: ClubDataType) {
 
 export function GetSeriesByClubId(club: ClubDataType) {
     let body = { clubId: club?.id }
-    const { data, error, isValidating } = useSWR(club && club.id ? '/api/GetSeriesByClubId' : null, url => advancedFetcher(url!, body), { suspense: true })
+    const { data, error, isValidating } = useSWR(club && club.id ? '/api/GetSeriesByClubId' : null, url => advancedFetcher(url!, body))
 
     return {
         series: data?.series as SeriesDataType[],

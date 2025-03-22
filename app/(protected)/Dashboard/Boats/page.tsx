@@ -12,11 +12,13 @@ import EditBoatModal from 'components/ui/dashboard/EditBoatModal'
 import { mutate } from 'swr'
 import { userHasPermission, AVAILABLE_PERMISSIONS } from 'components/helpers/users'
 import { title } from 'components/ui/home/primitaves'
+import CreateBoatModal from 'components/ui/dashboard/CreateBoatModal'
 
 export default function Page() {
     const Router = useRouter()
 
     const editModal = useDisclosure()
+    const createModal = useDisclosure()
 
     const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
     const { boats, boatsIsError, boatsIsValidating, mutateBoats } = Fetcher.Boats()
@@ -124,14 +126,15 @@ export default function Page() {
         await DB.deleteBoatById(boat.id)
     }
 
-    const createBoat = async () => {
-        const tempdata = boats
-        const res = await DB.createBoat('', 0, 0, 0, club.id)
+    const createBoat = async (boat: BoatDataType) => {
+        const res = await DB.createBoat(boat.name, boat.crew, boat.py, boat.pursuitStartTime, club.id)
         if (res) {
             mutateBoats()
         } else {
             alert('Boat Creation Failed')
         }
+        mutateBoats()
+        createModal.onClose()
     }
 
     if (userIsValidating || clubIsValidating || club == undefined || user == undefined) {
@@ -149,6 +152,7 @@ export default function Page() {
                     setEditingBoat(undefined)
                 }}
             />
+            <CreateBoatModal isOpen={createModal.isOpen} onSubmit={createBoat} onClose={() => createModal.onClose()} />
             <div className='p-6'>
                 <h1 className={title({ color: 'blue' })}>Boats</h1>
             </div>
@@ -162,7 +166,7 @@ export default function Page() {
                         <Button className='mx-1' onClick={downloadBoats} color='primary' fullWidth>
                             Download Boat Data
                         </Button>
-                        <Button className='mx-1' onClick={() => createBoat()} color='primary' fullWidth>
+                        <Button className='mx-1' onClick={() => createModal.onOpen()} color='primary' fullWidth>
                             Add Boat
                         </Button>
                     </div>
