@@ -29,6 +29,9 @@ const Action = ({ ...props }: any) => {
             props.deleteSeries(props.row.original.id)
         }
     }
+    const onEditClick = () => {
+        props.editSeries(props.row.original.id)
+    }
     return (
         <div className='relative flex items-center gap-2'>
             <Tooltip content='View'>
@@ -40,7 +43,7 @@ const Action = ({ ...props }: any) => {
                 <>
                     <Tooltip content='Edit'>
                         <span className='text-lg text-default-400 cursor-pointer active:opacity-50'>
-                            <EditIcon />
+                            <EditIcon onClick={onEditClick} />
                         </span>
                     </Tooltip>
                     <Tooltip color='danger' content='Delete'>
@@ -62,22 +65,16 @@ const ClubTable = (props: any) => {
     var [data, setData] = useState(props.data)
     const { user, userIsError, userIsValidating } = Fetcher.UseUser()
 
-    const updateSeries = (boat: SeriesDataType) => {
-        //update local copy
-        const tempdata = data
-        tempdata[tempdata.findIndex((x: SeriesDataType) => x.id === boat.id)] = boat
-        setData([...tempdata])
-
-        //update main record and database
-        props.updateSeries(boat)
-    }
-
     const viewSeries = (seriesId: string) => {
         props.viewSeries(seriesId)
     }
 
     const deleteSeries = (seriesId: string) => {
         props.deleteSeries(seriesId)
+    }
+
+    const editSeries = (seriesId: string) => {
+        props.editSeries(seriesId)
     }
 
     var table = useReactTable({
@@ -98,7 +95,7 @@ const ClubTable = (props: any) => {
             columnHelper.accessor('id', {
                 id: 'Remove',
                 header: 'Actions',
-                cell: props => <Action {...props} id={props.row.original.id} deleteSeries={deleteSeries} viewSeries={viewSeries} user={user} />
+                cell: props => <Action {...props} id={props.row.original.id} deleteSeries={deleteSeries} viewSeries={viewSeries} editSeries={editSeries} user={user} />
             })
         ],
         getCoreRowModel: getCoreRowModel()
