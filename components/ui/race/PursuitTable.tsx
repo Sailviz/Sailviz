@@ -88,13 +88,7 @@ const Action = ({
     lapBoat: (id: string) => void
     showRetireModal: (id: string) => void
 }) => {
-    if (raceMode == modeType.Lap) {
-        return (
-            <Button color='primary' onClick={() => lapBoat(resultId)}>
-                Lap
-            </Button>
-        )
-    } else if (raceMode == modeType.Retire) {
+    if (raceMode == modeType.Retire) {
         return (
             <Button color='danger' variant='ghost' onClick={() => showRetireModal(resultId)}>
                 Retire

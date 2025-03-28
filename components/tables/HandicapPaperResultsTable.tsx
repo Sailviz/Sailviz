@@ -1,26 +1,17 @@
-import React, { forwardRef, useState } from 'react';
+import React, { forwardRef, useState } from 'react'
 import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, useReactTable, SortingState } from '@tanstack/react-table'
-
 
 const Text = ({ ...props }) => {
     const value = props.getValue()
 
-    return (
-        <div className=' text-center'>
-            {value}
-        </div>
-    );
-};
+    return <div className=' text-center'>{value}</div>
+}
 
 const Empty = ({ ...props }) => {
-    return (
-        <div />
-    );
-};
-
+    return <div />
+}
 
 const columnHelper = createColumnHelper<ResultsDataType>()
-
 
 const HandicapPaperResultsTable = forwardRef((props: { results: ResultsDataType[] }, ref: any) => {
     let [results, setResults] = useState<ResultsDataType[]>(props.results)
@@ -31,34 +22,36 @@ const HandicapPaperResultsTable = forwardRef((props: { results: ResultsDataType[
     results.push({} as ResultsDataType)
 
     //sets sorting to position by default
-    const [sorting, setSorting] = useState<SortingState>([{
-        id: "PY",
-        desc: true,
-    }]);
+    const [sorting, setSorting] = useState<SortingState>([
+        {
+            id: 'PY',
+            desc: false
+        }
+    ])
 
     let columns = [
-        columnHelper.accessor("Helm", {
-            header: "Helm",
+        columnHelper.accessor('Helm', {
+            header: 'Helm',
             cell: props => <Text {...props} />,
             enableSorting: false
         }),
-        columnHelper.accessor("Crew", {
-            header: "Crew",
+        columnHelper.accessor('Crew', {
+            header: 'Crew',
             cell: props => <Text {...props} />,
             enableSorting: false
         }),
-        columnHelper.accessor((data) => data.boat?.name, {
-            header: "Class",
-            id: "Class",
+        columnHelper.accessor(data => data.boat?.name, {
+            header: 'Class',
+            id: 'Class',
             cell: props => <Text {...props} />,
             enableSorting: false
         }),
-        columnHelper.accessor((data) => data.SailNumber, {
-            header: "Sail Number",
+        columnHelper.accessor(data => data.SailNumber, {
+            header: 'Sail Number',
             cell: props => <Text {...props} />,
             enableSorting: false
-        }),
-    ];
+        })
+    ]
 
     // add column for each lap
     for (let i = 0; i < 6; i++) {
@@ -72,51 +65,59 @@ const HandicapPaperResultsTable = forwardRef((props: { results: ResultsDataType[
     }
 
     const ElapsedTime = columnHelper.display({
-        header: "Elapsed Time",
+        header: 'Elapsed Time',
         cell: props => <Empty {...props} />,
         enableSorting: false
     })
     columns.push(ElapsedTime)
 
     const Seconds = columnHelper.display({
-        header: "Seconds",
+        header: 'Seconds',
         cell: props => <Empty {...props} />,
         enableSorting: false
     })
     columns.push(Seconds)
 
-    const PY = columnHelper.accessor((data) => (data.boat?.py.toString() || "-"), {
-        header: "PY",
-        id: "PY",
+    const PY = columnHelper.accessor(data => data.boat?.py.toString() || '-', {
+        header: 'PY',
+        id: 'PY',
         cell: props => <Text {...props} />,
-        enableSorting: true
+        enableSorting: true,
+        sortingFn: (rowA, rowB, columnId) => {
+            if (rowA.original.boat?.py == undefined) {
+                return Number.MAX_SAFE_INTEGER
+            }
+            if (rowB.original.boat?.py == undefined) {
+                return Number.MAX_SAFE_INTEGER
+            }
+            return rowA.original.boat.py - rowB.original.boat.py
+        }
     })
     columns.push(PY)
 
     const Correctedtime = columnHelper.display({
-        header: "Corrected Time",
+        header: 'Corrected Time',
         cell: props => <Empty {...props} />,
         enableSorting: false
     })
     columns.push(Correctedtime)
 
     const Position = columnHelper.display({
-        header: "Position",
+        header: 'Position',
         cell: props => <Empty {...props} />,
         enableSorting: false
     })
     columns.push(Position)
 
-
     let table = useReactTable({
         data: results,
         columns,
         state: {
-            sorting,
+            sorting
         },
         onSortingChange: setSorting,
         getCoreRowModel: getCoreRowModel(),
-        getSortedRowModel: getSortedRowModel(),
+        getSortedRowModel: getSortedRowModel()
     })
     return (
         <div key={JSON.stringify(props.results)} className='block max-w-full' ref={ref}>
@@ -126,12 +127,7 @@ const HandicapPaperResultsTable = forwardRef((props: { results: ResultsDataType[
                         <tr key={headerGroup.id}>
                             {headerGroup.headers.map(header => (
                                 <th key={header.id} className='border-2 p-2 text-sm border-black' style={{ width: header.getSize() }}>
-                                    {header.isPlaceholder
-                                        ? null
-                                        : flexRender(
-                                            header.column.columnDef.header,
-                                            header.getContext()
-                                        )}
+                                    {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
                                 </th>
                             ))}
                         </tr>
