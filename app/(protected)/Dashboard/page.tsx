@@ -47,8 +47,7 @@ export default function Page() {
     const hornTest = async () => {
         fetch('https://' + club.settings.hornIP + '/hoot?startTime=100', {
             signal: controller.signal,
-            mode: 'no-cors',
-            headers: new Headers({ 'content-type': 'text/plain', 'Access-Control-Allow-Methods': 'POST' })
+            headers: new Headers({ 'content-type': 'text/plain' })
         })
     }
 
@@ -93,7 +92,7 @@ export default function Page() {
                         </div>
                     </div>
                 </div>
-                <div>Second Column!</div>
+                <div></div>
             </div>
         </div>
     )

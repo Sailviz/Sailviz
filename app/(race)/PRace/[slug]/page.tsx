@@ -106,8 +106,7 @@ export default function Page({ params }: { params: { slug: string } }) {
         //sound horn
         fetch('https://' + club.settings.hornIP + '/hoot?startTime=300', {
             signal: controller.signal,
-            mode: 'no-cors',
-            headers: new Headers({ 'content-type': 'text/plain', 'Access-Control-Allow-Methods': 'POST' })
+            headers: new Headers({ 'content-type': 'text/plain' })
         })
             .then(response => {})
             .catch(err => {
@@ -126,8 +125,7 @@ export default function Page({ params }: { params: { slug: string } }) {
         //sound horn
         fetch('https://' + club.settings.hornIP + '/hoot?startTime=300', {
             signal: controller.signal,
-            mode: 'no-cors',
-            headers: new Headers({ 'content-type': 'text/plain', 'Access-Control-Allow-Methods': 'POST' })
+            headers: new Headers({ 'content-type': 'text/plain' })
         })
             .then(response => {})
             .catch(err => {
@@ -147,8 +145,7 @@ export default function Page({ params }: { params: { slug: string } }) {
         //sound horn
         fetch('https://' + club.settings.hornIP + '/hoot?startTime=500', {
             signal: controller.signal,
-            mode: 'no-cors',
-            headers: new Headers({ 'content-type': 'text/plain', 'Access-Control-Allow-Methods': 'POST' })
+            headers: new Headers({ 'content-type': 'text/plain' })
         })
             .then(response => {})
             .catch(err => {
@@ -168,8 +165,7 @@ export default function Page({ params }: { params: { slug: string } }) {
         //sound horn
         fetch('https://' + club.settings.hornIP + '/hoot?startTime=300', {
             signal: controller.signal,
-            mode: 'no-cors',
-            headers: new Headers({ 'content-type': 'text/plain', 'Access-Control-Allow-Methods': 'POST' })
+            headers: new Headers({ 'content-type': 'text/plain' })
         })
             .then(response => {})
             .catch(err => {
