@@ -161,6 +161,7 @@ export default function Page({ params }: { params: { slug: string } }) {
     const handleGo = () => {
         console.log('GO!')
         setFlagStatus([false, false])
+        flagModal.onClose()
 
         //sound horn
         fetch('https://' + club.settings.hornIP + '/hoot?startTime=300', {
