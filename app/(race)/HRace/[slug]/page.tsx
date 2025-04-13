@@ -40,6 +40,7 @@ export default function Page({ params }: { params: { slug: string } }) {
     const retireModal = useDisclosure()
     const flagModal = useDisclosure()
     const [flagStatus, setFlagStatus] = useState<boolean[]>([false, false])
+    const [nextFlagStatus, setNextFlagStatus] = useState<boolean[]>([false, false])
 
     var [lastAction, setLastAction] = useState<{ type: string; resultId: string }>({ type: '', resultId: '' })
 
@@ -106,6 +107,7 @@ export default function Page({ params }: { params: { slug: string } }) {
         flagModal.onOpen()
         //set flag status to false
         setFlagStatus([false, false])
+        setNextFlagStatus([true, false])
         //send to DB
         startRace(fleetId)
     }
@@ -126,6 +128,12 @@ export default function Page({ params }: { params: { slug: string } }) {
         let sound = document.getElementById('Countdown') as HTMLAudioElement
         sound!.currentTime = 0
         sound!.play()
+
+        //this is to cache the horn TLS so that when it needs to hoot it is quicker.
+        fetch('https://' + club.settings.hornIP + '/reset', {
+            signal: controller.signal,
+            headers: new Headers({ 'content-type': 'text/plain' })
+        })
     }
 
     const handleFiveMinutes = () => {
@@ -142,6 +150,7 @@ export default function Page({ params }: { params: { slug: string } }) {
                 console.log(err)
             })
         setFlagStatus([true, false])
+        setNextFlagStatus([true, true])
 
         let sound = document.getElementById('Beep') as HTMLAudioElement
         sound!.currentTime = 0
@@ -162,6 +171,7 @@ export default function Page({ params }: { params: { slug: string } }) {
                 console.log(err)
             })
         setFlagStatus([true, true])
+        setNextFlagStatus([true, false])
 
         let sound = document.getElementById('Beep') as HTMLAudioElement
         sound!.currentTime = 0
@@ -182,6 +192,7 @@ export default function Page({ params }: { params: { slug: string } }) {
                 console.log(err)
             })
         setFlagStatus([true, false])
+        setNextFlagStatus([false, false])
 
         let sound = document.getElementById('Beep') as HTMLAudioElement
         sound!.currentTime = 0
@@ -204,6 +215,7 @@ export default function Page({ params }: { params: { slug: string } }) {
                 console.log(err)
             })
         setFlagStatus([false, false])
+        setNextFlagStatus([false, false])
         flagModal.onClose()
         let sound = document.getElementById('Beep') as HTMLAudioElement
         sound!.currentTime = 0
@@ -577,7 +589,7 @@ export default function Page({ params }: { params: { slug: string } }) {
     return (
         <>
             <RetireModal isOpen={retireModal.isOpen} onSubmit={retireBoat} onClose={retireModal.onClose} result={activeResult} />
-            <FlagModal isOpen={flagModal.isOpen} flagStatus={flagStatus} onClose={flagModal.onClose} onSubmit={() => null} />
+            <FlagModal isOpen={flagModal.isOpen} currentFlagStatus={flagStatus} nextFlagStatus={nextFlagStatus} onClose={flagModal.onClose} onSubmit={() => null} />
             <audio id='Beep' src='/Beep-6.mp3'></audio>
             <audio id='Countdown' src='/Countdown.mp3'></audio>
             <div className='w-full flex flex-col items-center justify-start panel-height'>
