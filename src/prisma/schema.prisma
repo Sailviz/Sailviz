@@ -1,0 +1,204 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model globalConfig {
+  id           String  @id @unique @default(uuid())
+  active       Boolean
+  demoClubId   String
+  demoSeriesId String
+  demoDataId   String
+  demoUUID     String
+}
+
+model User {
+  displayName String
+  id          String    @id @unique @default(uuid())
+  username    String    @unique
+  password    String?
+  clubId      String
+  uuid        String?   @unique
+  startPage   String
+  accounts    Account[]
+  sessions    Session[]
+  club        Club      @relation(fields: [clubId], references: [id])
+  roles       Role[]    @relation("RoleToUser")
+
+  @@index([clubId])
+}
+
+model Role {
+  id          String @id @unique @default(uuid())
+  name        String
+  clubId      String
+  permissions Json
+  club        Club   @relation(fields: [clubId], references: [id])
+  users       User[] @relation("RoleToUser")
+
+  @@index([clubId])
+}
+
+model Boat {
+  id               String          @id @unique @default(uuid())
+  name             String
+  crew             Int
+  py               Int
+  pursuitStartTime Int
+  clubId           String
+  club             Club            @relation(fields: [clubId], references: [id])
+  results          Result[]
+  fleets           FleetSettings[] @relation("BoatToFleetSettings")
+
+  @@index([clubId])
+}
+
+model Club {
+  id          String    @id @unique @default(uuid())
+  name        String    @unique
+  settings    Json
+  displayName String?
+  boats       Boat[]
+  Buoy        Buoy[]
+  roles       Role[]
+  series      Series[]
+  Trackers    Tracker[]
+  users       User[]
+}
+
+model Series {
+  id            String          @id @unique @default(uuid())
+  name          String
+  clubId        String
+  settings      Json
+  fleetSettings FleetSettings[]
+  races         Race[]
+  club          Club            @relation(fields: [clubId], references: [id], onDelete: Cascade)
+
+  @@index([clubId])
+}
+
+model Race {
+  id       String  @id @unique @default(uuid())
+  number   Int
+  Time     String
+  Type     String
+  seriesId String
+  Duties   Json
+  fleets   Fleet[]
+  series   Series  @relation(fields: [seriesId], references: [id], onDelete: Cascade)
+
+  @@index([seriesId])
+}
+
+model FleetSettings {
+  id         String  @id @unique @default(uuid())
+  seriesId   String
+  startDelay Int
+  name       String
+  fleets     Fleet[]
+  series     Series  @relation(fields: [seriesId], references: [id], onDelete: Cascade)
+  boats      Boat[]  @relation("BoatToFleetSettings")
+
+  @@index([seriesId])
+}
+
+model Fleet {
+  id            String        @id @unique @default(uuid())
+  raceId        String
+  startTime     Int
+  settingsId    String
+  race          Race          @relation(fields: [raceId], references: [id], onDelete: Cascade)
+  fleetSettings FleetSettings @relation(fields: [settingsId], references: [id])
+  results       Result[]
+
+  @@index([raceId])
+  @@index([settingsId])
+}
+
+model Result {
+  id               String  @id @unique @default(uuid())
+  fleetId          String?
+  Helm             String
+  Crew             String
+  boatId           String?
+  SailNumber       String
+  finishTime       Int
+  CorrectedTime    Float
+  HandicapPosition Int
+  PursuitPosition  Int
+  isDeleted        Boolean
+  resultCode       String
+  numberLaps       Int
+  laps             Lap[]
+  boat             Boat?   @relation(fields: [boatId], references: [id])
+  fleet            Fleet?  @relation(fields: [fleetId], references: [id], onDelete: Cascade)
+
+  @@index([fleetId])
+  @@index([boatId])
+}
+
+model Lap {
+  id        String  @id @unique @default(uuid())
+  resultId  String
+  time      Int
+  isDeleted Boolean
+  result    Result  @relation(fields: [resultId], references: [id])
+
+  @@index([resultId])
+}
+
+model Tracker {
+  trackerID String @id @unique
+  clubId    String
+  name      String
+  club      Club   @relation(fields: [clubId], references: [id])
+
+  @@index([clubId])
+}
+
+model Buoy {
+  id         String  @id @unique @default(uuid())
+  name       String
+  clubId     String
+  pos        Json
+  isMoveable Boolean
+  trackerID  String
+  club       Club    @relation(fields: [clubId], references: [id])
+
+  @@index([clubId])
+}
+
+model Account {
+  id                       String  @id @default(cuid())
+  userId                   String
+  type                     String
+  provider                 String
+  providerAccountId        String
+  refresh_token            String? @db.Text
+  access_token             String?
+  expires_at               Int?
+  token_type               String?
+  scope                    String?
+  id_token                 String?
+  session_state            String?
+  refresh_token_expires_in Int?
+  user                     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId], map: "Account_userId_fkey")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId], map: "Session_userId_fkey")
+}
