@@ -1,8 +1,7 @@
 import prisma from 'components/prisma'
-import { NextRequest, NextResponse } from "next/server";
-import assert from 'assert';
-import { AVAILABLE_PERMISSIONS } from 'components/helpers/users';
-import { isRequestAuthorised } from 'components/helpers/auth';
+import { NextRequest, NextResponse } from 'next/server'
+import assert from 'assert'
+import { isRequestAuthorised } from 'components/helpers/auth'
 
 async function updateResult(result: ResultsDataType) {
     var res = await prisma.result.update({
@@ -19,10 +18,10 @@ async function updateResult(result: ResultsDataType) {
             PursuitPosition: result.PursuitPosition,
             HandicapPosition: result.HandicapPosition,
             fleetId: result.fleetId,
-            numberLaps: result.numberLaps,
+            numberLaps: result.numberLaps
         }
     })
-    return res;
+    return res
 }
 
 async function updateBoat(result: ResultsDataType) {
@@ -41,25 +40,23 @@ async function updateBoat(result: ResultsDataType) {
             boat: true
         }
     })
-    return res;
+    return res
 }
-
 
 export async function POST(request: NextRequest) {
     const req = await request.json()
 
     try {
-        assert.notStrictEqual(undefined, req.result);
-
+        assert.notStrictEqual(undefined, req.result)
     } catch (bodyError) {
-        return NextResponse.json({ error: "information missing" }, { status: 400 });
+        return NextResponse.json({ error: 'information missing' }, { status: 400 })
     }
 
     var result = req.result
 
-    let authorised = await isRequestAuthorised(request.cookies, AVAILABLE_PERMISSIONS.editResults, result.id, "result")
+    let authorised = await isRequestAuthorised(request.cookies, result.id, 'result')
     if (!authorised) {
-        return NextResponse.json({ error: "not authorized" }, { status: 401 });
+        return NextResponse.json({ error: 'not authorized' }, { status: 401 })
     }
 
     if (result.boat != null) {
@@ -67,7 +64,7 @@ export async function POST(request: NextRequest) {
     }
     var race = await updateResult(result)
     if (race) {
-        return NextResponse.json({ res: race }, { status: 200 });
+        return NextResponse.json({ res: race }, { status: 200 })
     }
-    return NextResponse.json({ error: 'result not found' }, { status: 400 });
+    return NextResponse.json({ error: 'result not found' }, { status: 400 })
 }

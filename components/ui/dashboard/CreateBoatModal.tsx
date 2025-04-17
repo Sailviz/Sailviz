@@ -3,31 +3,13 @@ import { useTheme } from 'next-themes'
 import { ChangeEvent, useEffect, useState } from 'react'
 import { PageSkeleton } from '../PageSkeleton'
 
-export default function EditBoatModal({
-    isOpen,
-    boat,
-    onSubmit,
-    onClose
-}: {
-    isOpen: boolean
-    boat: BoatDataType | undefined
-    onSubmit: (boat: BoatDataType) => void
-    onClose: () => void
-}) {
+export default function CreateBoatModal({ isOpen, onSubmit, onClose }: { isOpen: boolean; onSubmit: (boat: BoatDataType) => void; onClose: () => void }) {
     const [boatName, setBoatName] = useState('')
     const [PY, setPY] = useState(0)
     const [Crew, setCrew] = useState(0)
     const [pursuitStartTime, setPursuitStartTime] = useState(0)
 
     const { theme, setTheme } = useTheme()
-
-    useEffect(() => {
-        if (boat === undefined) return
-        setBoatName(boat.name)
-        setPY(boat.py)
-        setCrew(boat.crew)
-        setPursuitStartTime(boat.pursuitStartTime)
-    }, [boat])
 
     return (
         <>
@@ -41,15 +23,7 @@ export default function EditBoatModal({
                                     <div className='flex flex-col px-6 w-full'>
                                         <p className='text-2xl font-bold'>Name</p>
 
-                                        <Input
-                                            id='name'
-                                            type='text'
-                                            value={boatName}
-                                            onChange={e => setBoatName(e.target.value)}
-                                            placeholder='J Bloggs'
-                                            variant='bordered'
-                                            autoComplete='off'
-                                        />
+                                        <Input id='name' type='text' value={boatName} onChange={e => setBoatName(e.target.value)} variant='bordered' autoComplete='off' />
                                     </div>
                                     <div className='flex flex-col px-6 w-full'>
                                         <p className='text-2xl font-bold'>PY</p>
@@ -90,8 +64,8 @@ export default function EditBoatModal({
                                 <Button color='danger' variant='light' onPress={onClose}>
                                     Cancel
                                 </Button>
-                                <Button color='primary' onPress={() => onSubmit({ ...boat!, name: boatName, py: PY, crew: Crew, pursuitStartTime: pursuitStartTime })}>
-                                    Save
+                                <Button color='primary' onPress={() => onSubmit({ name: boatName, py: PY, crew: Crew, pursuitStartTime: pursuitStartTime } as BoatDataType)}>
+                                    Create
                                 </Button>
                             </ModalFooter>
                         </>

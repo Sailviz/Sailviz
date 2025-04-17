@@ -313,7 +313,7 @@ export default function Page({ params }: { params: { slug: string } }) {
                                         <>
                                             <div className='flex flex-row'>
                                                 <div className="w-1/4 p-2 m-2 border-4 rounded-lg text-lg font-medium">
-                                                    Race Time: <RaceTimer key={"fleetTimer" + index} startTime={fleet.startTime} timerActive={true} onFiveMinutes={null} onFourMinutes={null} onOneMinute={null} onGo={null} onWarning={null} reset={false} />
+                                                    Race Time: <RaceTimer key={"fleetTimer" + index} fleetId={fleet.id} startTime={fleet.startTime} timerActive={true} onFiveMinutes={null} onFourMinutes={null} onOneMinute={null} onGo={null} onWarning={null} reset={false} />
                                                 </div>
                                                 <div className="text-4xl font-extrabold px-6 py-3">
                                                     {activeRaceData.series.name}: {activeRaceData.number} - {fleet.fleetSettings.name}

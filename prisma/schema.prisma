@@ -1,5 +1,5 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
   previewFeatures = ["omitApi"]
 }
 
@@ -33,143 +33,144 @@ model User {
 }
 
 model Role {
-  id   String @id @unique @default(uuid())
-  name String
-  club Club  @relation(fields: [clubId], references: [id])
-  clubId String
-  users User[]
+  id          String @id @unique @default(uuid())
+  name        String
+  club        Club   @relation(fields: [clubId], references: [id])
+  clubId      String
+  users       User[]
   permissions Json
 
   @@index([clubId])
 }
 
 model Boat {
-  id               String   @id @unique @default(uuid())
+  id               String          @id @unique @default(uuid())
   name             String
   crew             Int
   py               Int
   pursuitStartTime Int
-  club             Club     @relation(fields: [clubId], references: [id])
+  club             Club            @relation(fields: [clubId], references: [id])
   clubId           String
   results          Result[]
   fleets           FleetSettings[]
+
   @@index([clubId])
 }
 
 model Club {
-  id       String   @id @unique @default(uuid())
-  name     String   @unique
+  id          String    @id @unique @default(uuid())
+  name        String    @unique
   displayName String?
-  settings Json
-  series   Series[]
-  boats    Boat[]
-  users    User[]
-  roles Role[]
-  Trackers Tracker[]
+  settings    Json
+  series      Series[]
+  boats       Boat[]
+  users       User[]
+  roles       Role[]
+  Trackers    Tracker[]
 
   Buoy Buoy[]
 }
 
 model Series {
-  id       String  @id @unique @default(uuid())
-  name     String
-  club     Club    @relation(fields: [clubId], references: [id], onDelete: Cascade)
-  clubId   String
-  settings Json
-  races    Race[]
+  id            String          @id @unique @default(uuid())
+  name          String
+  club          Club            @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  clubId        String
+  settings      Json
+  races         Race[]
   fleetSettings FleetSettings[]
 
   @@index([clubId])
 }
 
 model Race {
-  id       String   @id @unique @default(uuid())
-  number   Int
-  Time     String
-  Duties   Json // should be in the format of { "OD": "John Smith", "Safety": "Jane Doe" } for example. the key is then used to display.
+  id     String @id @unique @default(uuid())
+  number Int
+  Time   String
+  Duties Json // should be in the format of { "OD": "John Smith", "Safety": "Jane Doe" } for example. the key is then used to display.
 
   fleets   Fleet[]
   Type     String
-  series   Series   @relation(fields: [seriesId], references: [id], onDelete: Cascade)
+  series   Series  @relation(fields: [seriesId], references: [id], onDelete: Cascade)
   seriesId String
 
   @@index([seriesId])
 }
 
 model FleetSettings {
-  id        String @id @unique @default(uuid())
+  id         String  @id @unique @default(uuid())
   series     Series  @relation(fields: [seriesId], references: [id], onDelete: Cascade)
   seriesId   String
-  boats Boat[]
+  boats      Boat[]
   startDelay Int
-  fleets Fleet[]
-  name String
+  fleets     Fleet[]
+  name       String
+
   @@index([seriesId])
 }
 
 model Fleet {
-  id        String   @id @unique @default(uuid())
-  race    Race   @relation(fields: [raceId], references: [id], onDelete: Cascade)
-  raceId  String
-  startTime Int
-  results   Result[]
+  id            String        @id @unique @default(uuid())
+  race          Race          @relation(fields: [raceId], references: [id], onDelete: Cascade)
+  raceId        String
+  startTime     Int
+  results       Result[]
   fleetSettings FleetSettings @relation(fields: [settingsId], references: [id])
-  settingsId String
+  settingsId    String
 
   @@index([raceId])
   @@index([settingsId])
 }
 
 model Result {
-  id              String  @id @unique @default(uuid())
-  fleet           Fleet?   @relation(fields: [fleetId], references: [id], onDelete: Cascade)
-  fleetId         String?
-  Helm            String
-  Crew            String
-  boat            Boat?  @relation(fields: [boatId], references: [id])
-  boatId          String?
-  SailNumber      String
-  finishTime      Int
-  laps            Lap[]
-  numberLaps      Int
-  CorrectedTime   Float
+  id               String  @id @unique @default(uuid())
+  fleet            Fleet?  @relation(fields: [fleetId], references: [id], onDelete: Cascade)
+  fleetId          String?
+  Helm             String
+  Crew             String
+  boat             Boat?   @relation(fields: [boatId], references: [id])
+  boatId           String?
+  SailNumber       String
+  finishTime       Int
+  laps             Lap[]
+  numberLaps       Int
+  CorrectedTime    Float
   HandicapPosition Int
-  PursuitPosition Int
-  isDeleted       Boolean
-  resultCode String
+  PursuitPosition  Int
+  isDeleted        Boolean
+  resultCode       String
 
   @@index([fleetId])
   @@index([boatId])
 }
 
 model Lap {
-  id       String @id @unique @default(uuid())
-  result   Result @relation(fields: [resultId], references: [id], onDelete: Cascade)
-  resultId String
-  time     Int
+  id        String  @id @unique @default(uuid())
+  result    Result  @relation(fields: [resultId], references: [id], onDelete: Cascade)
+  resultId  String
+  time      Int
   isDeleted Boolean
 
   @@index([resultId])
 }
 
 model Tracker {
-  trackerID   String @id @unique
-  club        Club     @relation(fields: [clubId], references: [id])
-  clubId      String
-  name        String
+  trackerID String @id @unique
+  club      Club   @relation(fields: [clubId], references: [id])
+  clubId    String
+  name      String
 
   @@index([clubId])
-
 }
 
 model Buoy {
-  id          String @id @unique @default(uuid())
-  name        String
-  club        Club     @relation(fields: [clubId], references: [id])
-  clubId      String
-  pos         Json
-  isMoveable  Boolean
-  trackerID   String
+  id         String  @id @unique @default(uuid())
+  name       String
+  club       Club    @relation(fields: [clubId], references: [id])
+  clubId     String
+  pos        Json
+  isMoveable Boolean
+  trackerID  String
 
   @@index([clubId])
 }

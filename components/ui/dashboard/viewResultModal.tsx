@@ -114,7 +114,9 @@ export default function EditResultModal({ isOpen, result, fleet, onClose }: { is
         setBasicNumLaps(result.laps.length)
         setBasicElapsed(new Date(Math.max(0, (result.finishTime - fleet!.startTime) * 1000)).toISOString().substring(11, 19))
         setFinished(result.finishTime != 0)
-        setBoatOption({ label: result.boat.name, value: result.boat })
+        if (result.boat != null) {
+            setBoatOption({ label: result.boat.name, value: result.boat })
+        }
         setResultCodeOption(result.resultCode == '' ? { label: 'None', value: '' } : { label: result.resultCode, value: result.resultCode })
     }, [result])
 

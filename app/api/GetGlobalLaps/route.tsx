@@ -1,25 +1,21 @@
 export const dynamic = 'force-dynamic'
 
 import prisma from 'components/prisma'
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from 'next/server'
 
 async function getLaps() {
-    var result = await prisma.lap.count({
-
-    })
+    var result = await prisma.lap.count({})
     if (result == null) {
         return
     }
-    return result;
+    return result
 }
 
 export async function GET(request: NextRequest) {
-
     var laps = await getLaps()
     if (laps) {
-        return NextResponse.json(laps);
+        return NextResponse.json(laps)
+    } else {
+        return NextResponse.json({ error: "can't find user" }, { status: 406 })
     }
-    else {
-        return NextResponse.json({ error: "can't find user" }, { status: 406 });
-    }
-};
+}
