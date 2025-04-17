@@ -1,5 +1,5 @@
 import { PrismaAdapter } from '@auth/prisma-adapter'
-import NextAuth, { type DefaultSession } from 'next-auth'
+import NextAuth, { type DefaultSession, type NextAuthConfig } from 'next-auth'
 
 import { db } from '@/server/db'
 import GitHub from 'next-auth/providers/github'

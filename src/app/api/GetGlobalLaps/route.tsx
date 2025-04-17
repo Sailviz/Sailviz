@@ -16,6 +16,6 @@ export async function GET(request: NextRequest) {
     if (laps) {
         return NextResponse.json(laps)
     } else {
-        return NextResponse.json({ error: "can't find user" }, { status: 406 })
+        return NextResponse.json({ error: "can't find laps" }, { status: 406 })
     }
 }

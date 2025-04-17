@@ -16,13 +16,11 @@ export function Providers({ children }: { children: React.ReactNode }) {
     return (
         <ErrorBoundary>
             <PlausibleProvider domain='sailviz.com' customDomain='https://stats.sailviz.com' selfHosted enabled>
-                <SessionProvider>
-                    <NextUIProvider>
-                        <ThemeProvider attribute='class' defaultTheme='light'>
-                            {children}
-                        </ThemeProvider>
-                    </NextUIProvider>
-                </SessionProvider>
+                <NextUIProvider>
+                    <ThemeProvider attribute='class' defaultTheme='light'>
+                        <SessionProvider>{children}</SessionProvider>
+                    </ThemeProvider>
+                </NextUIProvider>
             </PlausibleProvider>
         </ErrorBoundary>
     )
