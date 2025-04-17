@@ -1,6 +1,5 @@
 import prisma from 'components/prisma'
-import { omit } from 'cypress/types/lodash';
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from 'next/server'
 
 async function getConfig() {
     var result = await prisma.globalConfig.findFirst({
@@ -11,15 +10,14 @@ async function getConfig() {
     if (result == null) {
         return
     }
-    return result;
+    return result
 }
 
 export async function GET(request: NextRequest) {
     let config = await getConfig()
     if (config) {
-        return NextResponse.json(config);
+        return NextResponse.json(config)
+    } else {
+        return NextResponse.json({ error: "can't find config" }, { status: 406 })
     }
-    else {
-        return NextResponse.json({ error: "can't find config" }, { status: 406 });
-    }
-};
+}
