@@ -7,9 +7,6 @@ async function getUser(id: string) {
         where: {
             id: id
         },
-        omit: {
-            password: true
-        },
         include: {
             roles: true
         }

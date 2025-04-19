@@ -26,9 +26,6 @@ export async function isRequestAuthorised(cookies: NextRequest['cookies'], id: s
         },
         include: {
             roles: true
-        },
-        omit: {
-            password: true
         }
     })
     if (user == undefined) {

@@ -22,6 +22,7 @@ export function LoginForm({ justCredentials }: { justCredentials: boolean }) {
 
             {Object.values(providerMap).map(provider => (
                 <form
+                    key={provider.id}
                     action={async formData => {
                         'use server'
                         if (provider.id === 'credentials') {

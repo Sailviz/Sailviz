@@ -7,9 +7,6 @@ async function getUsers(clubId: string) {
         where: {
             clubId: clubId
         },
-        omit: {
-            password: true
-        },
         include: {
             roles: true
         }
