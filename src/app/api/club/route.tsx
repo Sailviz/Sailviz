@@ -1,4 +1,5 @@
 import prisma from '@/components/prisma'
+import { auth } from '@/server/auth'
 import { NextRequest, NextResponse } from 'next/server'
 
 async function getClub(id: string) {
@@ -14,7 +15,8 @@ async function getClub(id: string) {
 }
 
 export async function GET(request: NextRequest) {
-    var clubId = request.cookies.get('clubId')?.value
+    const session = await auth()
+    var clubId = session?.user.clubId
     if (clubId == null) {
         return NextResponse.json({ error: 'information missing' }, { status: 400 })
     }

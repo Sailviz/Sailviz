@@ -21,7 +21,7 @@
         "@tanstack/react-table": "^8.7.6",
         "@types/mdx": "^2.0.13",
         "@types/react": "^18.3.3",
-        "bcrypt": "^5.0.1",
+        "bcryptjs": "^3.0.2",
         "csvtojson": "^2.0.10",
         "dayjs": "^1.11.7",
         "framer-motion": "^11.3.8",

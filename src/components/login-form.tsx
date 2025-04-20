@@ -27,12 +27,12 @@ export function LoginForm({ justCredentials }: { justCredentials: boolean }) {
                         'use server'
                         if (provider.id === 'credentials') {
                             await signIn(provider.id, {
-                                redirectTo: '/dashboard',
+                                redirectTo: '/Dashboard',
                                 password: formData.get('password'),
                                 username: formData.get('username')
                             })
                         } else {
-                            await signIn(provider.id, { redirectTo: '/dashboard' })
+                            await signIn(provider.id, { callbackUrl: '/Dashboard' })
                         }
                     }}
                 >
@@ -41,11 +41,11 @@ export function LoginForm({ justCredentials }: { justCredentials: boolean }) {
                             <div className='flex flex-col gap-6'>
                                 <div className='grid gap-2'>
                                     Username
-                                    <Input id='username' name='username' type='email' required />
+                                    <Input id='username' name='username' required />
                                 </div>
                                 <div className='grid gap-2'>
                                     Password
-                                    <Input id='password' type='password' required />
+                                    <Input id='password' name='password' type='password' required />
                                 </div>
                                 <Button type='submit' className='w-full'>
                                     <span>Login</span>

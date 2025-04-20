@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/components/prisma'
 import assert from 'assert'
-import { cookies } from 'next/headers'
 
 async function getFleets(seriesId: string) {
     var result = await prisma.fleetSettings.findMany({
@@ -19,7 +18,6 @@ async function getFleets(seriesId: string) {
 }
 
 export async function GET(request: NextRequest) {
-    const cookieStore = cookies()
     const searchParams = request.nextUrl.searchParams
 
     var seriesId = searchParams.get('id')

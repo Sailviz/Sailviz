@@ -1,5 +1,4 @@
 'use client'
-import { ChangeEvent, MouseEventHandler, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import * as DB from '@/components/apiMethods'
 import * as Fetcher from '@/components/Fetchers'
@@ -8,25 +7,21 @@ import { PageSkeleton } from '@/components/ui/PageSkeleton'
 import { Button, useDisclosure } from '@nextui-org/react'
 import CreateEventModal from '@/components/ui/dashboard/CreateEventModal'
 import { mutate } from 'swr'
-import RacesTable from '../../../components/tables/RacesTable'
-import CreateSeriesModal from '../../../components/ui/dashboard/CreateSeriesModal'
-import ClubTable from '../../../components/tables/ClubTable'
-import { AVAILABLE_PERMISSIONS, userHasPermission } from '../../../components/helpers/users'
 import { title } from '../../../components/ui/home/primitaves'
-
-enum raceStateType {
-    running,
-    stopped,
-    reset,
-    calculate
-}
+import { useSession } from 'next-auth/react'
 
 export default function Page() {
     const Router = useRouter()
     const createModal = useDisclosure()
     const controller = new AbortController()
 
-    const { user, userIsError, userIsValidating } = Fetcher.UseUser()
+    const { data: session, status } = useSession({
+        required: true,
+        onUnauthenticated() {
+            console.log('unauthenticated')
+            Router.push('/Login')
+        }
+    })
     const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
 
     const createEvent = async (name: string, numberOfRaces: number) => {
@@ -50,9 +45,6 @@ export default function Page() {
         })
     }
 
-    if (userIsError) {
-        Router.push('/Login')
-    }
     if (clubIsError || clubIsValidating || club == undefined) {
         return <PageSkeleton />
     }

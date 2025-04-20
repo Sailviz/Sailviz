@@ -5,6 +5,8 @@ import { db } from '@/server/db'
 import GitHub from 'next-auth/providers/github'
 import Credentials from 'next-auth/providers/credentials'
 import { Provider } from 'next-auth/providers'
+import bcrypt from 'bcryptjs'
+import prisma from '@/components/prisma'
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -14,29 +16,43 @@ import { Provider } from 'next-auth/providers'
  */
 declare module 'next-auth' {
     interface Session extends DefaultSession {
-        user: {
-            id: string
-            // ...other properties
-            // role: UserRole;
-        } & DefaultSession['user']
+        user: UserDataType
     }
 }
 
 const providers: Provider[] = [
     Credentials({
         credentials: {
-            username: { label: 'Username' },
+            username: { label: 'Username', type: 'text' },
             password: { label: 'Password', type: 'password' }
         },
-        async authorize({ username, password }) {
-            const request = new Request('/api/auth/signin', {
-                method: 'POST',
-                body: JSON.stringify({ username, password }),
-                headers: { 'Content-Type': 'application/json' }
+        async authorize(credentials) {
+            // check to see if email and password is there
+            if (!credentials?.username || !credentials?.password) {
+                throw new Error('Please enter an email and password')
+            }
+
+            // check to see if user exists
+            const user = await prisma.user.findUnique({
+                where: {
+                    username: credentials.username
+                }
             })
-            const response = await fetch(request)
-            if (!response.ok) return null
-            return (await response.json()) ?? null
+
+            // if no user was found
+            if (!user || !user?.password) {
+                throw new Error('No user found')
+            }
+
+            // check to see if password matches
+            const passwordMatch = await bcrypt.compare(credentials.password, user.password)
+
+            // if password does not match
+            if (!passwordMatch) {
+                throw new Error('Incorrect password')
+            }
+
+            return { id: user.id, username: user.username, displayName: user.displayName, clubId: user.clubId, startPage: user.startPage }
         }
     }),
     GitHub
@@ -56,14 +72,17 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     pages: {
         signIn: '/signin'
     },
+    session: {
+        strategy: 'jwt'
+    },
     adapter: PrismaAdapter(db),
     callbacks: {
-        session: ({ session, user }) => ({
-            ...session,
-            user: {
-                ...session.user,
-                id: user.id
-            }
-        })
+        async jwt({ token, user }) {
+            return { ...token, ...user }
+        },
+        async session({ session, token, user }) {
+            session.user = token as any
+            return session
+        }
     }
 })

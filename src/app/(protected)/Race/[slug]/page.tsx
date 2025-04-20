@@ -15,13 +15,17 @@ import ProgressModal from '@/components/ui/dashboard/ProgressModal'
 import EditResultModal from '@/components/ui/dashboard/EditResultModal'
 import { mutate } from 'swr'
 import ViewResultModal from '@/components/ui/dashboard/viewResultModal'
-import { json } from 'stream/consumers'
+import { useSession, signIn } from 'next-auth/react'
 
 export default function Page({ params }: { params: { slug: string } }) {
     const Router = useRouter()
+    const { data: session, status } = useSession({
+        required: true,
+        onUnauthenticated() {
+            signIn()
+        }
+    })
 
-    const { user, userIsError, userIsValidating } = Fetcher.UseUser()
-    const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
     const { boats, boatsIsError, boatsIsValidating } = Fetcher.Boats()
 
     //TODO implement timer on fetch
@@ -137,7 +141,7 @@ export default function Page({ params }: { params: { slug: string } }) {
     }
 
     const copyFromPrevious = async () => {
-        let today = await DB.getTodaysRaceByClubId(club.id)
+        let today = await DB.getTodaysRaceByClubId(session?.user.clubId!)
         //sort by time, oldest first
         today.sort((a, b) => dayjs(a.Time).unix() - dayjs(b.Time).unix())
         console.log(today)
@@ -232,7 +236,7 @@ export default function Page({ params }: { params: { slug: string } }) {
         }
     }, [race])
 
-    if (user == undefined || club == undefined || boats == undefined || race == undefined) {
+    if (session == undefined || boats == undefined || race == undefined) {
         return <PageSkeleton />
     }
 
@@ -248,7 +252,7 @@ export default function Page({ params }: { params: { slug: string } }) {
                 onClose={progressModal.onClose}
             />
             <EditResultModal
-                advancedEdit={userHasPermission(user, AVAILABLE_PERMISSIONS.advancedResultEdit)}
+                advancedEdit={userHasPermission(session.user, AVAILABLE_PERMISSIONS.advancedResultEdit)}
                 isOpen={editModal.isOpen}
                 fleet={activeFleet}
                 raceType={race.Type}
@@ -309,7 +313,7 @@ export default function Page({ params }: { params: { slug: string } }) {
                             <Button className='mx-1' onClick={() => printRaceSheet()}>
                                 Print Race Sheet
                             </Button>
-                            {userHasPermission(user, AVAILABLE_PERMISSIONS.UploadEntires) ? (
+                            {userHasPermission(session.user, AVAILABLE_PERMISSIONS.UploadEntires) ? (
                                 <>
                                     <Button className='mx-1' onClick={() => document.getElementById('entryFileUpload')!.click()}>
                                         Upload Entries
@@ -319,7 +323,7 @@ export default function Page({ params }: { params: { slug: string } }) {
                             ) : (
                                 <></>
                             )}
-                            {userHasPermission(user, AVAILABLE_PERMISSIONS.DownloadResults) ? <Button onClick={downloadResults}>Download Results</Button> : <></>}
+                            {userHasPermission(session.user, AVAILABLE_PERMISSIONS.DownloadResults) ? <Button onClick={downloadResults}>Download Results</Button> : <></>}
                         </div>
                     </div>
                     <div className='py-4 w-full'>
@@ -329,7 +333,7 @@ export default function Page({ params }: { params: { slug: string } }) {
                                     {race.Type == 'Handicap' ? (
                                         <FleetHandicapResultsTable
                                             showTime={true}
-                                            editable={userHasPermission(user, AVAILABLE_PERMISSIONS.editResults)}
+                                            editable={userHasPermission(session.user, AVAILABLE_PERMISSIONS.editResults)}
                                             fleetId={fleet.id}
                                             key={JSON.stringify(race)}
                                             deleteResult={deleteResult}
@@ -341,7 +345,7 @@ export default function Page({ params }: { params: { slug: string } }) {
                                     ) : (
                                         <FleetPursuitResultsTable
                                             showTime={true}
-                                            editable={userHasPermission(user, AVAILABLE_PERMISSIONS.editResults)}
+                                            editable={userHasPermission(session.user, AVAILABLE_PERMISSIONS.editResults)}
                                             fleetId={fleet.id}
                                             key={JSON.stringify(race)}
                                             deleteResult={deleteResult}

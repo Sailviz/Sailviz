@@ -1,10 +1,6 @@
 import prisma from '@/components/prisma'
 import { NextRequest, NextResponse } from 'next/server'
 
-import assert from 'assert'
-import { cookies } from 'next/headers'
-import { select } from '@nextui-org/react'
-
 async function findFleet(fleetId: any) {
     var result = await prisma.fleet.findUnique({
         where: {
@@ -44,7 +40,6 @@ async function findFleet(fleetId: any) {
 }
 
 export async function GET(request: NextRequest) {
-    const cookieStore = cookies()
     const searchParams = request.nextUrl.searchParams
     // Your logic to fetch or generate the CSV data
 

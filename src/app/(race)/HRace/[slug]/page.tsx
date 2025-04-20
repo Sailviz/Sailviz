@@ -3,7 +3,7 @@ import React, { ChangeEvent, MouseEventHandler, useEffect, useState } from 'reac
 import { useRouter } from 'next/navigation'
 import * as DB from '@/components/apiMethods'
 import RaceTimer from '@/components/HRaceTimer'
-import Cookies from 'js-cookie'
+
 import * as Fetcher from '@/components/Fetchers'
 import { Button, useDisclosure } from '@nextui-org/react'
 import RetireModal from '@/components/ui/dashboard/RetireModal'
@@ -11,6 +11,7 @@ import BoatCard from '@/components/ui/race/BoatCard'
 import { PageSkeleton } from '@/components/ui/PageSkeleton'
 import { mutate } from 'swr'
 import FlagModal from '@/components/ui/dashboard/Flag Modal'
+import { useSession, signIn } from 'next-auth/react'
 
 enum raceStateType {
     countdown,
@@ -32,7 +33,12 @@ export default function Page({ params }: { params: { slug: string } }) {
 
     const startLength = 315 //5 15secs in seconds
 
-    const { user, userIsError, userIsValidating } = Fetcher.UseUser()
+    const { data: session, status } = useSession({
+        required: true,
+        onUnauthenticated() {
+            signIn()
+        }
+    })
     const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
 
     const { race, raceIsError, raceIsValidating } = Fetcher.Race(params.slug, true)
@@ -582,7 +588,7 @@ export default function Page({ params }: { params: { slug: string } }) {
         }
     }, [race])
 
-    if (raceIsError || race == undefined || clubIsError || club == undefined || userIsError || user == undefined) {
+    if (raceIsError || race == undefined || clubIsError || club == undefined || session == undefined) {
         return <PageSkeleton />
     }
 

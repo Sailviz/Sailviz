@@ -8,12 +8,17 @@ import { Input, Button, Table, TableHeader, TableColumn, TableBody, TableRow, Ta
 import { AVAILABLE_PERMISSIONS, userHasPermission } from '@/components/helpers/users'
 import { mutate } from 'swr'
 import { EditIcon } from '@/components/icons/edit-icon'
+import { useSession, signIn } from 'next-auth/react'
 
 export default function Page() {
     const Router = useRouter()
-
+    const { data: session, status } = useSession({
+        required: true,
+        onUnauthenticated() {
+            signIn()
+        }
+    })
     const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
-    const { user, userIsError, userIsValidating } = Fetcher.UseUser()
 
     const savePursuitLength = async (pursuitLength: string) => {
         await DB.UpdateClubById({ ...club, settings: { ...club.settings, pursuitLength: parseInt(pursuitLength) } })
@@ -36,10 +41,10 @@ export default function Page() {
         if (club.settings.pursuitLength == undefined) return
     }, [club])
 
-    if (clubIsValidating || clubIsError || club == undefined) {
+    if (clubIsValidating || clubIsError || club == undefined || session == undefined) {
         return <PageSkeleton />
     }
-    if (userHasPermission(user, AVAILABLE_PERMISSIONS.editHardware))
+    if (userHasPermission(session.user, AVAILABLE_PERMISSIONS.editHardware))
         return (
             <>
                 <p className='text-2xl font-bold p-6'>Pursuit Race Length</p>

@@ -10,12 +10,17 @@ import * as Fetcher from '@/components/Fetchers'
 import { PageSkeleton } from '@/components/ui/PageSkeleton'
 import { BreadcrumbItem, Breadcrumbs, Button, Input, Radio, RadioGroup, Switch, useDisclosure } from '@nextui-org/react'
 import BackButton from '@/components/ui/backButton'
-import { mutate } from 'swr'
+import { useSession, signIn } from 'next-auth/react'
 
 export default function Page({ params }: { params: { slug: string } }) {
     const Router = useRouter()
 
-    const { user, userIsError, userIsValidating } = Fetcher.UseUser()
+    const { data: session, status } = useSession({
+        required: true,
+        onUnauthenticated() {
+            signIn()
+        }
+    })
     const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
     const { boats, boatsIsError, boatsIsValidating } = Fetcher.Boats()
     const { GlobalConfig, GlobalConfigIsError, GlobalConfigIsValidating } = Fetcher.UseGlobalConfig()
@@ -71,7 +76,7 @@ export default function Page({ params }: { params: { slug: string } }) {
         }
     }, [race])
 
-    if (userIsValidating || clubIsValidating || user == undefined || club == undefined || boats == undefined || race == undefined) {
+    if (clubIsValidating || club == undefined || boats == undefined || race == undefined) {
         return <PageSkeleton />
     }
     return (

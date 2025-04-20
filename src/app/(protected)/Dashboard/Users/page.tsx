@@ -11,15 +11,20 @@ import { Button, useDisclosure } from '@nextui-org/react'
 import { mutate } from 'swr'
 import EditRoleModal from '@/components/ui/dashboard/EditRoleModal'
 import { AVAILABLE_PERMISSIONS, userHasPermission } from '@/components/helpers/users'
+import { signIn, useSession } from 'next-auth/react'
 
 export default function Page() {
     const Router = useRouter()
-
+    const { data: session, status } = useSession({
+        required: true,
+        onUnauthenticated() {
+            signIn()
+        }
+    })
     const editUserModal = useDisclosure()
     const editRoleModal = useDisclosure()
 
     const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
-    const { user, userIsError, userIsValidating } = Fetcher.UseUser()
 
     const [activeUser, setActiveUser] = useState<UserDataType>({} as UserDataType)
     const [activeRole, setActiveRole] = useState<RoleDataType>({} as RoleDataType)
@@ -73,11 +78,11 @@ export default function Page() {
         editRoleModal.onOpen()
     }
 
-    if (userIsValidating || clubIsValidating || club == undefined || user == undefined) {
+    if (clubIsValidating || club == undefined || session == undefined) {
         return <PageSkeleton />
     }
 
-    if (userHasPermission(user, AVAILABLE_PERMISSIONS.viewUsers)) {
+    if (userHasPermission(session.user, AVAILABLE_PERMISSIONS.viewUsers)) {
         return (
             <>
                 <EditUserModal
@@ -98,11 +103,11 @@ export default function Page() {
                 />
                 <div className='p-6'>
                     <UsersTable edit={showUserEditModal} deleteUser={deleteUser} />
-                    {userHasPermission(user, AVAILABLE_PERMISSIONS.editUsers) ? <Button onClick={createUser}>Create User</Button> : <></>}
+                    {userHasPermission(session.user, AVAILABLE_PERMISSIONS.editUsers) ? <Button onClick={createUser}>Create User</Button> : <></>}
                 </div>
                 <div className='p-6'>
                     <RoleTable edit={showRoleEditModal} deleteRole={deleteRole} />
-                    {userHasPermission(user, AVAILABLE_PERMISSIONS.editRoles) ? <Button onClick={createRole}>Create Role</Button> : <></>}
+                    {userHasPermission(session.user, AVAILABLE_PERMISSIONS.editRoles) ? <Button onClick={createRole}>Create Role</Button> : <></>}
                 </div>
             </>
         )

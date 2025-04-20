@@ -20,6 +20,7 @@ import { EditIcon } from '@/components/icons/edit-icon'
 import { DeleteIcon } from '@/components/icons/delete-icon'
 import * as Fetcher from '@/components/Fetchers'
 import { AVAILABLE_PERMISSIONS, userHasPermission } from '@/components/helpers/users'
+import { useSession, signIn } from 'next-auth/react'
 
 const Action = ({ ...props }: any) => {
     const onEditClick = () => {
@@ -54,9 +55,14 @@ const Action = ({ ...props }: any) => {
 const columnHelper = createColumnHelper<RoleDataType>()
 
 const UsersTable = (props: any) => {
+    const { data: session, status } = useSession({
+        required: true,
+        onUnauthenticated() {
+            signIn()
+        }
+    })
     const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
     const { roles, rolesIsError, rolesIsValidating } = Fetcher.Roles(club)
-    const { user, userIsError, userIsValidating } = Fetcher.UseUser()
 
     const [sorting, setSorting] = useState<SortingState>([
         {
@@ -91,7 +97,7 @@ const UsersTable = (props: any) => {
             columnHelper.accessor('id', {
                 id: 'edit',
                 header: 'Action',
-                cell: props => <Action {...props} id={props.row.original.id} edit={edit} deleteRole={deleteRole} user={user} />
+                cell: props => <Action {...props} id={props.row.original.id} edit={edit} deleteRole={deleteRole} user={session!.user} />
             })
         ],
         state: {

@@ -72,11 +72,9 @@ const UpcomingRacesTable = (props: any) => {
         }
     ])
     var data = todaysRaces
-    console.log(data)
     if (todaysRacesIsValidating) {
         data = []
     }
-    console.log(data)
     var table = useReactTable({
         data,
         columns: [

@@ -1,6 +1,6 @@
 import prisma from '@/components/prisma'
 import { NextRequest, NextResponse } from 'next/server'
-import { cookies } from 'next/headers'
+import { auth } from '@/server/auth'
 
 async function findBoats(clubId: string) {
     var result = await prisma.boat.findMany({
@@ -15,16 +15,15 @@ async function findBoats(clubId: string) {
 }
 
 export async function GET(request: NextRequest) {
-    const cookieStore = cookies()
-    const searchParams = request.nextUrl.searchParams
+    var session = await auth()
 
-    var clubId = cookieStore.get('clubId')
+    var clubId = session?.user.clubId
 
     if (clubId == undefined) {
         return NextResponse.json({ error: true, message: 'information missing' })
     }
 
-    var boat = await findBoats(clubId.value)
+    var boat = await findBoats(clubId)
     if (boat) {
         return NextResponse.json({ error: false, boats: boat })
     } else {

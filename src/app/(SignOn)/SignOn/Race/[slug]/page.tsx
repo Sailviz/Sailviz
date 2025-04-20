@@ -1,25 +1,23 @@
 'use client'
 import React, { act, ChangeEvent, MouseEventHandler, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import * as DB from '@/components/apiMethods'
-import dayjs from 'dayjs'
-import Papa from 'papaparse'
 import FleetHandicapResultsTable from '@/components/tables/FleetHandicapResultsTable'
 import FleetPursuitResultsTable from '@/components/tables/FleetPursuitResultsTable'
 import * as Fetcher from '@/components/Fetchers'
-import { AVAILABLE_PERMISSIONS, userHasPermission } from '@/components/helpers/users'
 import { PageSkeleton } from '@/components/ui/PageSkeleton'
-import { BreadcrumbItem, Breadcrumbs, Button, Input, useDisclosure } from '@nextui-org/react'
-import CreateResultModal from '@/components/ui/SignOn/CreateResultModal'
-import ProgressModal from '@/components/ui/dashboard/ProgressModal'
-import EditResultModal from '@/components/ui/SignOn/EditResultModal'
+import { useDisclosure } from '@nextui-org/react'
 import { title } from '@/components/ui/home/primitaves'
 import ViewResultModal from '@/components/ui/dashboard/viewResultModal'
+import { useSession, signIn } from 'next-auth/react'
 
 export default function Page({ params }: { params: { slug: string } }) {
     const Router = useRouter()
-
-    const { user, userIsError, userIsValidating } = Fetcher.UseUser()
+    const { data: session, status } = useSession({
+        required: true,
+        onUnauthenticated() {
+            signIn()
+        }
+    })
     const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
     const { boats, boatsIsError, boatsIsValidating } = Fetcher.Boats()
     const { race, raceIsError, raceIsValidating } = Fetcher.Race(params.slug, true)
@@ -42,7 +40,7 @@ export default function Page({ params }: { params: { slug: string } }) {
         viewModal.onOpen()
     }
 
-    if (userIsValidating || clubIsValidating || raceIsValidating || user == undefined || club == undefined) {
+    if (clubIsValidating || raceIsValidating || session == undefined || club == undefined) {
         return <PageSkeleton />
     }
     return (

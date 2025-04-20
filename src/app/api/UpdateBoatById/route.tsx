@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
 
     var boat: BoatDataType = req.boat
 
-    let authorised = await isRequestAuthorised(request.cookies, boat.id, 'boat')
+    let authorised = await isRequestAuthorised(boat.id, 'boat')
     if (!authorised) {
         return NextResponse.json({ error: 'not authorized' }, { status: 401 })
     }

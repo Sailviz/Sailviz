@@ -1,6 +1,7 @@
 'use client'
 import useSWR, { mutate } from 'swr'
 import * as Sentry from '@sentry/react'
+import { useSession } from 'next-auth/react'
 
 export async function fetcher(url: string) {
     const res = await fetch(url)
@@ -29,18 +30,6 @@ export async function advancedFetcher(url: string, data: object) {
         throw new Error('An error occurred while fetching the data.')
     }
     return res.json()
-}
-
-export function UseUser() {
-    const { data, error, isValidating } = useSWR('/api/user', fetcher)
-    Sentry.setUser(data)
-
-    return {
-        user: data as UserDataType,
-        userIsValidating: isValidating,
-        userIsError: error,
-        mutateUser: mutate
-    }
 }
 
 export function UseClub() {

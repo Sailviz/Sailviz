@@ -3,15 +3,21 @@ import * as Fetcher from '@/components/Fetchers'
 import { PageSkeleton } from '@/components/ui/PageSkeleton'
 import { Button, useDisclosure } from '@nextui-org/react'
 import { AVAILABLE_PERMISSIONS, userHasPermission } from '@/components/helpers/users'
-import { title } from '../../../../components/ui/home/primitaves'
-import TrackerTable from '../../../../components/tables/TrackerTable'
+import { title } from '@/components/ui/home/primitaves'
+import TrackerTable from '@/components/tables/TrackerTable'
 import TrackerStatusModal from '@/components/ui/dashboard/TrackerStatusModal'
 import * as Trackable from '@/components/trackable'
 import { useState } from 'react'
+import { useSession, signIn } from 'next-auth/react'
 
 export default function Page() {
+    const { data: session, status } = useSession({
+        required: true,
+        onUnauthenticated() {
+            signIn()
+        }
+    })
     const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
-    const { user, userIsError, userIsValidating } = Fetcher.UseUser()
 
     const statusModal = useDisclosure()
     const [viewingTracker, setviewingTracker] = useState<TrackerDataType>()
@@ -25,7 +31,7 @@ export default function Page() {
         await Trackable.syncTrackers(club.settings.trackable.orgID, club.id)
     }
 
-    if (clubIsValidating || clubIsError || userIsValidating || userIsError || user == undefined) {
+    if (clubIsValidating || clubIsError || session == undefined) {
         return <PageSkeleton />
     }
 
@@ -37,7 +43,7 @@ export default function Page() {
         )
     }
 
-    if (!userHasPermission(user, AVAILABLE_PERMISSIONS.trackableView)) {
+    if (!userHasPermission(session.user, AVAILABLE_PERMISSIONS.trackableView)) {
         return (
             <div>
                 <p> These Settings are unavailable to you.</p>

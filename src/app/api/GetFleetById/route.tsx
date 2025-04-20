@@ -1,6 +1,5 @@
 import prisma from '@/components/prisma'
 import { NextRequest, NextResponse } from 'next/server'
-import { cookies } from 'next/headers'
 
 async function findFleet(fleetId: any) {
     var result = await prisma.fleet.findUnique({
@@ -28,7 +27,6 @@ async function findFleet(fleetId: any) {
 }
 
 export async function GET(request: NextRequest) {
-    const cookieStore = cookies()
     const searchParams = request.nextUrl.searchParams
 
     var id = searchParams.get('id')

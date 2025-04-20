@@ -2,7 +2,6 @@ import prisma from '@/components/prisma'
 import { NextRequest, NextResponse } from 'next/server'
 
 import assert from 'assert'
-import { cookies } from 'next/headers'
 
 async function findSeries(seriesId: any) {
     var result = await prisma.series.findUnique({
@@ -30,7 +29,6 @@ async function findSeries(seriesId: any) {
 }
 
 export async function GET(request: NextRequest) {
-    const cookieStore = cookies()
     const searchParams = request.nextUrl.searchParams
 
     var id = searchParams.get('id')

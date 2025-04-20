@@ -5,13 +5,14 @@ import * as DB from '@/components/apiMethods'
 import * as Fetcher from '@/components/Fetchers'
 import { PageSkeleton } from '@/components/ui/PageSkeleton'
 import RacesTable from '@/components/tables/RacesTable'
-import { title } from '../../../components/ui/home/primitaves'
-import UpcomingRacesTable from '../../../components/tables/UpcomingRacesTable'
+import { title } from '@/components/ui/home/primitaves'
+import UpcomingRacesTable from '@/components/tables/UpcomingRacesTable'
+import { useSession } from 'next-auth/react'
 
 export default function Page() {
     const Router = useRouter()
 
-    const { user, userIsError, userIsValidating } = Fetcher.UseUser()
+    const { data: session, status } = useSession()
     const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
 
     const viewRace = (raceId: string) => {

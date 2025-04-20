@@ -1,6 +1,5 @@
 import prisma from '@/components/prisma'
 import { NextRequest, NextResponse } from 'next/server'
-import { cookies } from 'next/headers'
 
 async function findRace(id: any, results: boolean) {
     var result = await prisma.race.findFirst({
@@ -40,7 +39,6 @@ async function findRace(id: any, results: boolean) {
 }
 
 export async function GET(request: NextRequest) {
-    const cookieStore = cookies()
     const searchParams = request.nextUrl.searchParams
 
     var id = searchParams.get('id')

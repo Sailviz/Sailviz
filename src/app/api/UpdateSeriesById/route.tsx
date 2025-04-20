@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
 
     var series = req.series
 
-    let authorised = await isRequestAuthorised(request.cookies, series.id, 'series')
+    let authorised = await isRequestAuthorised(series.id, 'series')
     if (!authorised) {
         return NextResponse.json({ error: 'not authorized' }, { status: 401 })
     }

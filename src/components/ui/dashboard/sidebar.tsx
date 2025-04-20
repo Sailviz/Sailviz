@@ -1,25 +1,23 @@
 import { Sidebar } from '../sidebar/sidebar.styles'
-import { Avatar, Tooltip } from '@nextui-org/react'
 import { HomeIcon } from '@/components/icons/home-icon'
 import { AccountsIcon } from '@/components/icons/accounts-icon'
-import { DevIcon } from '@/components/icons/dev-icon'
 import { SettingsIcon } from '@/components/icons/settings-icon'
 import { CollapseItems } from '@/components/ui/sidebar/collapse-items'
 import { SidebarItem } from '@/components/ui/sidebar/sidebar-item'
 import { SidebarMenu } from '@/components/ui/sidebar/sidebar-menu'
-import { FilterIcon } from '@/components/icons/filter-icon'
 import { useSidebarContext } from '@/components/ui/sidebar/layout-context'
 import { ChangeLogIcon } from '@/components/icons/changelog-icon'
 import { usePathname } from 'next/navigation'
 import { ThemeSwitcher } from '@/components/ui/ThemeSwitcher'
 import { SailVizIcon } from '@/components/icons/sailviz-icon'
 import { SignOutIcon } from '@/components/icons/sign-out'
-import Cookies from 'js-cookie'
-import { MapIcon } from '../../icons/map-icon'
-import { SignOnIcon } from '../../icons/sign-on'
-import { DocsIcon } from '../../icons/docs-icon'
-import { RaceIcon } from '../../icons/race-icon'
-import { SeriesIcon } from '../../icons/series-icon'
+
+import { MapIcon } from '@/components/icons/map-icon'
+import { SignOnIcon } from '@/components/icons/sign-on'
+import { DocsIcon } from '@/components/icons/docs-icon'
+import { RaceIcon } from '@/components/icons/race-icon'
+import { SeriesIcon } from '@/components/icons/series-icon'
+import { signOut } from 'next-auth/react'
 
 export const SidebarWrapper = () => {
     const pathname = usePathname()
@@ -73,9 +71,7 @@ export const SidebarWrapper = () => {
                         <SidebarMenu
                             title='Log Out'
                             onClick={() => {
-                                Cookies.remove('token')
-                                Cookies.remove('clubId')
-                                Cookies.remove('userId')
+                                signOut({ callbackUrl: '/' })
                             }}
                         >
                             <SidebarItem title='Log Out' icon={<SignOutIcon />} href='/' />

@@ -5,12 +5,17 @@ import { EditIcon } from '@/components/icons/edit-icon'
 import * as Fetcher from '@/components/Fetchers'
 import { AVAILABLE_PERMISSIONS, userHasPermission } from '@/components/helpers/users'
 import { PageSkeleton } from '@/components/ui/PageSkeleton'
-import { use } from 'chai'
+import { useSession, signIn } from 'next-auth/react'
 
 const columnHelper = createColumnHelper<ResultsDataType>()
 
 const SignOnTable = (props: any) => {
-    const { user, userIsError, userIsValidating } = Fetcher.UseUser()
+    const { data: session, status } = useSession({
+        required: true,
+        onUnauthenticated() {
+            signIn()
+        }
+    })
     const { race, raceIsError, raceIsValidating } = Fetcher.Race(props.raceId, true)
     let [data, setData] = useState<ResultsDataType[]>([])
     let clubId = props.clubId
@@ -80,6 +85,8 @@ const SignOnTable = (props: any) => {
 
     const [sorting, setSorting] = useState<SortingState>([])
 
+    const loadingState = session == undefined || race == undefined ? 'loading' : 'idle'
+
     useEffect(() => {
         if (race == undefined) return
         setData(race.fleets.flatMap(fleet => fleet.results))
@@ -114,7 +121,7 @@ const SignOnTable = (props: any) => {
             columnHelper.display({
                 id: 'Edit',
                 header: 'Edit',
-                cell: props => <Action {...props} deleteResult={deleteResult} showEditModal={showEditModal} user={user} />
+                cell: props => <Action {...props} deleteResult={deleteResult} showEditModal={showEditModal} user={session!.user} />
             })
         ],
         state: {
@@ -124,9 +131,6 @@ const SignOnTable = (props: any) => {
         getCoreRowModel: getCoreRowModel(),
         getSortedRowModel: getSortedRowModel()
     })
-    if (userIsValidating || userIsError || user == undefined || race == undefined) {
-        return <PageSkeleton />
-    }
     return (
         <div key={props.data}>
             <Table
@@ -151,7 +155,7 @@ const SignOnTable = (props: any) => {
                             )
                         })}
                 </TableHeader>
-                <TableBody emptyContent={'No entries yet.'}>
+                <TableBody emptyContent={'No entries yet.'} loadingContent={<PageSkeleton />} loadingState={loadingState}>
                     {table.getRowModel().rows.map(row => (
                         <TableRow key={row.id}>
                             {row.getVisibleCells().map(cell => (

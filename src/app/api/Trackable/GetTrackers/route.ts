@@ -1,9 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import prisma from '@/components/prisma'
-import { cookies } from 'next/headers'
 
 export async function GET(req: NextRequest) {
-    const cookieStore = cookies()
     const clubId = cookieStore.get('clubId')
 
     if (!clubId) {

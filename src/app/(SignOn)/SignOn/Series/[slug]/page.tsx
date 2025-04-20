@@ -4,16 +4,21 @@ import SeriesResultsTable from '@/components/tables/SeriesResultsTable'
 import * as Fetcher from '@/components/Fetchers'
 import { PageSkeleton } from '@/components/ui/PageSkeleton'
 import { title } from '@/components/ui/home/primitaves'
-import ClubTable from '../../../../../components/tables/ClubTable'
+import { useSession, signIn } from 'next-auth/react'
 
 export default function Page({ params }: { params: { slug: string } }) {
     const Router = useRouter()
-    const { user, userIsError, userIsValidating } = Fetcher.UseUser()
+    const { data: session, status } = useSession({
+        required: true,
+        onUnauthenticated() {
+            signIn()
+        }
+    })
     const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
     const { series, seriesIsError, seriesIsValidating } = Fetcher.Series(params.slug)
 
     console.log(series)
-    if (userIsValidating || clubIsValidating || seriesIsError || series == undefined || club == undefined || user == undefined) {
+    if (clubIsValidating || seriesIsError || series == undefined || club == undefined || session == undefined) {
         return <PageSkeleton />
     }
     return (

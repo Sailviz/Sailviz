@@ -1,24 +1,11 @@
 import React, { ChangeEvent, useState } from 'react'
 import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, RowSelection, SortingState, useReactTable } from '@tanstack/react-table'
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableColumn,
-    TableHeader,
-    TableRow,
-    Dropdown,
-    DropdownItem,
-    DropdownTrigger,
-    Button,
-    DropdownMenu,
-    Tooltip,
-    Spinner
-} from '@nextui-org/react'
+import { Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Tooltip, Spinner } from '@nextui-org/react'
 import { EditIcon } from '@/components/icons/edit-icon'
 import { DeleteIcon } from '@/components/icons/delete-icon'
 import * as Fetcher from '@/components/Fetchers'
 import { AVAILABLE_PERMISSIONS, userHasPermission } from '@/components/helpers/users'
+import { useSession, signIn } from 'next-auth/react'
 
 const Action = ({ ...props }: any) => {
     const onEditClick = () => {
@@ -53,9 +40,14 @@ const Action = ({ ...props }: any) => {
 const columnHelper = createColumnHelper<UserDataType>()
 
 const UsersTable = (props: any) => {
+    const { data: session, status } = useSession({
+        required: true,
+        onUnauthenticated() {
+            signIn()
+        }
+    })
     const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
     const { users, usersIsError, usersIsValidating } = Fetcher.Users(club)
-    const { user, userIsError, userIsValidating } = Fetcher.UseUser()
 
     const [sorting, setSorting] = useState<SortingState>([
         {
@@ -90,7 +82,7 @@ const UsersTable = (props: any) => {
             columnHelper.accessor('id', {
                 id: 'Edit',
                 header: 'Action',
-                cell: props => <Action {...props} id={props.row.original.id} edit={edit} deleteUser={deleteUser} user={user} />
+                cell: props => <Action {...props} id={props.row.original.id} edit={edit} deleteUser={deleteUser} user={session!.user} />
             })
         ],
         state: {

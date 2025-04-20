@@ -1,25 +1,12 @@
 import React, { ChangeEvent, MouseEventHandler, useEffect, useState } from 'react'
 import { createColumnHelper, flexRender, getCoreRowModel, RowSelection, useReactTable } from '@tanstack/react-table'
 import Select from 'react-select'
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableColumn,
-    TableHeader,
-    TableRow,
-    Dropdown,
-    DropdownItem,
-    DropdownTrigger,
-    Button,
-    DropdownMenu,
-    Spinner,
-    Tooltip
-} from '@nextui-org/react'
+import { Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Spinner, Tooltip } from '@nextui-org/react'
 import * as Fetcher from '@/components/Fetchers'
 import { EditIcon } from '@/components/icons/edit-icon'
 import { DeleteIcon } from '@/components/icons/delete-icon'
 import { AVAILABLE_PERMISSIONS, userHasPermission } from '@/components/helpers/users'
+import { useSession, signIn } from 'next-auth/react'
 
 const Boats = ({ ...props }: any) => {
     const initialValue = props.getValue()
@@ -78,7 +65,12 @@ const columnHelper = createColumnHelper<FleetSettingsType>()
 
 const FleetTable = (props: any) => {
     const { fleetSettings, fleetSettingsIsError, fleetSettingsIsValidating } = Fetcher.GetFleetSettingsBySeriesId(props.seriesId)
-    const { user, userIsError, userIsValidating } = Fetcher.UseUser()
+    const { data: session, status } = useSession({
+        required: true,
+        onUnauthenticated() {
+            signIn()
+        }
+    })
     console.log(props.data)
 
     const edit = (data: any) => {
@@ -94,7 +86,7 @@ const FleetTable = (props: any) => {
         data = []
     }
 
-    const loadingState = fleetSettingsIsValidating || userIsValidating ? 'loading' : 'idle'
+    const loadingState = fleetSettingsIsValidating ? 'loading' : 'idle'
 
     var table = useReactTable({
         data,
@@ -113,7 +105,7 @@ const FleetTable = (props: any) => {
             }),
             columnHelper.accessor('id', {
                 id: 'Edit',
-                cell: props => <Action {...props} id={props.row.original.id} edit={edit} remove={remove} user={user} />
+                cell: props => <Action {...props} id={props.row.original.id} edit={edit} remove={remove} user={session!.user} />
             })
         ],
         getCoreRowModel: getCoreRowModel()

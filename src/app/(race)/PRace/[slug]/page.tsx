@@ -3,7 +3,7 @@ import React, { ChangeEvent, MouseEventHandler, useEffect, useState } from 'reac
 import { useRouter } from 'next/navigation'
 import * as DB from '@/components/apiMethods'
 import PursuitTimer from '@/components/PRaceTimer'
-import Cookies from 'js-cookie'
+
 import * as Fetcher from '@/components/Fetchers'
 import { mutate } from 'swr'
 import { PageSkeleton } from '@/components/ui/PageSkeleton'
@@ -14,6 +14,7 @@ import BoatCard from '@/components/ui/race/BoatCard'
 import { result, set } from 'cypress/types/lodash'
 import { use } from 'chai'
 import FlagModal from '@/components/ui/dashboard/Flag Modal'
+import { useSession, signIn } from 'next-auth/react'
 
 enum raceStateType {
     running,
@@ -35,6 +36,13 @@ enum modeType {
 export default function Page({ params }: { params: { slug: string } }) {
     const Router = useRouter()
 
+    const { data: session, status } = useSession({
+        required: true,
+        onUnauthenticated() {
+            signIn()
+        }
+    })
+
     const retireModal = useDisclosure()
     const flagModal = useDisclosure()
     const [flagStatus, setFlagStatus] = useState<boolean[]>([false, false])
@@ -44,7 +52,6 @@ export default function Page({ params }: { params: { slug: string } }) {
 
     var [seriesName, setSeriesName] = useState('')
 
-    const { user, userIsError, userIsValidating } = Fetcher.UseUser()
     const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
     const { race, raceIsError, raceIsValidating, mutateRace } = Fetcher.Race(params.slug, true)
 

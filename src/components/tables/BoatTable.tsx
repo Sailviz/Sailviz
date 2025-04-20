@@ -16,13 +16,12 @@ import {
     Tooltip,
     Spinner
 } from '@nextui-org/react'
-import { VerticalDotsIcon } from '@/components/icons/vertical-dots-icon'
-import { EyeIcon } from '@/components/icons/eye-icon'
 import { EditIcon } from '@/components/icons/edit-icon'
 import { DeleteIcon } from '@/components/icons/delete-icon'
 import { SearchIcon } from '@/components/icons/search-icon'
 import * as Fetcher from '@/components/Fetchers'
 import { AVAILABLE_PERMISSIONS, userHasPermission } from '@/components/helpers/users'
+import { useSession, signIn } from 'next-auth/react'
 
 const columnHelper = createColumnHelper<BoatDataType>()
 
@@ -106,7 +105,12 @@ const Action = ({ ...props }: any) => {
 
 const BoatTable = (props: any) => {
     const { boats, boatsIsError, boatsIsValidating } = Fetcher.Boats()
-    const { user, userIsError, userIsValidating } = Fetcher.UseUser()
+    const { data: session, status } = useSession({
+        required: true,
+        onUnauthenticated() {
+            signIn()
+        }
+    })
 
     const data = boats || []
 
@@ -153,7 +157,7 @@ const BoatTable = (props: any) => {
                 id: 'action',
                 enableColumnFilter: false,
                 header: 'Actions',
-                cell: props => <Action {...props} id={props.row.original.id} deleteBoat={deleteBoat} editBoat={editBoat} user={user} />
+                cell: props => <Action {...props} id={props.row.original.id} deleteBoat={deleteBoat} editBoat={editBoat} user={session!.user} />
             })
         ],
         getCoreRowModel: getCoreRowModel(),

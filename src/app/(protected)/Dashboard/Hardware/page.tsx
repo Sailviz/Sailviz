@@ -7,12 +7,17 @@ import { PageSkeleton } from '@/components/ui/PageSkeleton'
 import { Input, Button } from '@nextui-org/react'
 import { AVAILABLE_PERMISSIONS, userHasPermission } from '@/components/helpers/users'
 import { title } from '../../../../components/ui/home/primitaves'
+import { useSession, signIn } from 'next-auth/react'
 
 export default function Page() {
     const Router = useRouter()
-
+    const { data: session, status } = useSession({
+        required: true,
+        onUnauthenticated() {
+            signIn()
+        }
+    })
     const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
-    const { user, userIsError, userIsValidating } = Fetcher.UseUser()
 
     const [clockIP, setClockIP] = useState('')
     const [clockOffset, setClockOffset] = useState('')
@@ -30,10 +35,10 @@ export default function Page() {
         setHornIP(club.settings.hornIP)
     }, [club])
 
-    if (clubIsValidating || clubIsError || club == undefined) {
+    if (clubIsValidating || clubIsError || club == undefined || session == undefined) {
         return <PageSkeleton />
     }
-    if (userHasPermission(user, AVAILABLE_PERMISSIONS.editHardware))
+    if (userHasPermission(session.user, AVAILABLE_PERMISSIONS.editHardware))
         return (
             <>
                 <div className='p-6'>

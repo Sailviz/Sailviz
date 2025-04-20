@@ -1,27 +1,12 @@
 'use client'
 import React, { ChangeEvent, useState } from 'react'
 import { createColumnHelper, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table'
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableColumn,
-    TableHeader,
-    TableRow,
-    Dropdown,
-    DropdownItem,
-    DropdownTrigger,
-    Button,
-    DropdownMenu,
-    Tooltip,
-    user
-} from '@nextui-org/react'
-import { VerticalDotsIcon } from '@/components/icons/vertical-dots-icon'
+import { Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Tooltip, user } from '@nextui-org/react'
 import { EyeIcon } from '@/components/icons/eye-icon'
 import { EditIcon } from '@/components/icons/edit-icon'
 import { DeleteIcon } from '@/components/icons/delete-icon'
-import * as Fetcher from '@/components/Fetchers'
 import { AVAILABLE_PERMISSIONS, userHasPermission } from '@/components/helpers/users'
+import { useSession, signIn } from 'next-auth/react'
 
 const Action = ({ ...props }: any) => {
     const onDeleteClick = () => {
@@ -63,7 +48,12 @@ const columnHelper = createColumnHelper<SeriesDataType>()
 
 const ClubTable = (props: any) => {
     var [data, setData] = useState(props.data)
-    const { user, userIsError, userIsValidating } = Fetcher.UseUser()
+    const { data: session, status } = useSession({
+        required: true,
+        onUnauthenticated() {
+            signIn()
+        }
+    })
 
     const viewSeries = (seriesId: string) => {
         props.viewSeries(seriesId)
@@ -95,7 +85,9 @@ const ClubTable = (props: any) => {
             columnHelper.accessor('id', {
                 id: 'Remove',
                 header: 'Actions',
-                cell: props => <Action {...props} id={props.row.original.id} deleteSeries={deleteSeries} viewSeries={viewSeries} editSeries={editSeries} user={user} />
+                cell: props => (
+                    <Action {...props} id={props.row.original.id} deleteSeries={deleteSeries} viewSeries={viewSeries} editSeries={editSeries} user={session!.user} />
+                )
             })
         ],
         getCoreRowModel: getCoreRowModel()

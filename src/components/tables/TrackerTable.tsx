@@ -1,24 +1,10 @@
 import React, { ChangeEvent, useState } from 'react'
 import { createColumnHelper, flexRender, getCoreRowModel, useReactTable, getFilteredRowModel } from '@tanstack/react-table'
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableColumn,
-    TableHeader,
-    TableRow,
-    Dropdown,
-    DropdownItem,
-    DropdownTrigger,
-    Button,
-    DropdownMenu,
-    Input,
-    Tooltip,
-    Spinner
-} from '@nextui-org/react'
+import { Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Input, Tooltip, Spinner } from '@nextui-org/react'
 import { EyeIcon } from '@/components/icons/eye-icon'
 import { SearchIcon } from '@/components/icons/search-icon'
 import * as Fetcher from '@/components/Fetchers'
+import { useSession, signIn } from 'next-auth/react'
 
 const columnHelper = createColumnHelper<TrackerDataType>()
 
@@ -67,7 +53,12 @@ const Action = ({ ...props }: any) => {
 }
 
 const TrackerTable = (props: any) => {
-    const { user, userIsError, userIsValidating } = Fetcher.UseUser()
+    const { data: session, status } = useSession({
+        required: true,
+        onUnauthenticated() {
+            signIn()
+        }
+    })
     const { trackers, trackersIsError, trackersIsValidating } = Fetcher.Trackers()
 
     const data = trackers || []
@@ -90,7 +81,7 @@ const TrackerTable = (props: any) => {
                 id: 'action',
                 enableColumnFilter: false,
                 header: 'Actions',
-                cell: props => <Action {...props} id={props.row.original.trackerID} trackerStatus={trackerStatus} user={user} />
+                cell: props => <Action {...props} id={props.row.original.trackerID} trackerStatus={trackerStatus} user={session!.user} />
             })
         ],
         getCoreRowModel: getCoreRowModel(),

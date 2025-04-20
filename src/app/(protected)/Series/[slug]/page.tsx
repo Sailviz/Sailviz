@@ -12,11 +12,16 @@ import { Slider, useDisclosure } from '@nextui-org/react'
 import { mutate } from 'swr'
 import EditFleetModal from '@/components/ui/dashboard/EditFleetSettingsModal'
 import { AVAILABLE_PERMISSIONS, userHasPermission } from '@/components/helpers/users'
-import { use } from 'chai'
+import { signIn, useSession } from 'next-auth/react'
 
 export default function Page({ params }: { params: { slug: string } }) {
     const Router = useRouter()
-    const { user, userIsError, userIsValidating } = Fetcher.UseUser()
+    const { data: session, status } = useSession({
+        required: true,
+        onUnauthenticated() {
+            signIn()
+        }
+    })
     const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
     const { series, seriesIsError, seriesIsValidating, mutateSeries } = Fetcher.Series(params.slug)
     const { boats, boatsIsError, boatsIsValidating } = Fetcher.Boats()
@@ -84,7 +89,8 @@ export default function Page({ params }: { params: { slug: string } }) {
     }
 
     console.log(series)
-    if (userIsValidating || clubIsValidating || boatsIsValidating || seriesIsError || series == undefined || club == undefined || user == undefined || boats == undefined) {
+    if (session == undefined || clubIsValidating || boatsIsValidating || seriesIsError || series == undefined || club == undefined || boats == undefined) {
+        console.log(seriesIsError)
         return <PageSkeleton />
     }
     return (
@@ -95,7 +101,7 @@ export default function Page({ params }: { params: { slug: string } }) {
                 <div className='p-6'>
                     <SeriesRaceTable id={seriesId} removeRace={removeRace} goToRace={goToRace} />
                 </div>
-                {userHasPermission(user, AVAILABLE_PERMISSIONS.editRaces) ? (
+                {userHasPermission(session.user, AVAILABLE_PERMISSIONS.editRaces) ? (
                     <div className='p-6'>
                         <p
                             id='seriesAddRace'
@@ -112,7 +118,7 @@ export default function Page({ params }: { params: { slug: string } }) {
                 <div className='p-6'>
                     <FleetTable seriesId={params.slug} edit={showFleetSettingsModal} remove={deleteFleetSettings} />
                 </div>
-                {userHasPermission(user, AVAILABLE_PERMISSIONS.editFleets) ? (
+                {userHasPermission(session.user, AVAILABLE_PERMISSIONS.editFleets) ? (
                     <>
                         <div className='p-6'>
                             <p

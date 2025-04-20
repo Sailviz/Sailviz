@@ -2,7 +2,7 @@ import prisma from '@/components/prisma'
 import { NextRequest, NextResponse } from 'next/server'
 
 import assert from 'assert'
-import { cookies } from 'next/headers'
+
 import dayjs from 'dayjs'
 
 async function findSeries(id: string) {
@@ -47,10 +47,9 @@ async function countRaces(seriesId: string[], date: string, historical: boolean)
 }
 
 export async function GET(request: NextRequest) {
-    const cookieStore = cookies()
     const searchParams = request.nextUrl.searchParams
 
-    var id = cookieStore.get('clubId')
+    var id = searchParams.get('id')
     var page = searchParams.get('page')
     var date = searchParams.get('date')
     var historical = searchParams.get('historical') == 'true'
@@ -61,7 +60,7 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: true, message: 'information missing' })
     }
 
-    var series = await findSeries(id.value)
+    var series = await findSeries(id)
     if (series) {
         var races = await findRaces(
             series.map(s => s.id),

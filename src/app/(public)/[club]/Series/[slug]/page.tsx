@@ -1,7 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 import Layout from '@/components/ui/Layout'
-import Cookies from 'js-cookie'
+
 import { useRouter } from 'next/navigation'
 import * as DB from '@/components/apiMethods'
 import SeriesResultsTable from '@/components/tables/SeriesResultsTable'
@@ -32,7 +32,7 @@ export default function Page({ params }: { params: { slug: string; club: string 
 
     useEffect(() => {
         let seriesId = params.slug
-        setClubId(Cookies.get('clubId') || params.club)
+        setClubId(params.club)
         const getSeries = async () => {
             const seriesData = await DB.GetSeriesById(seriesId)
             setSeries(seriesData)

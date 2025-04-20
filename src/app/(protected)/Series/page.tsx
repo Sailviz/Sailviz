@@ -11,10 +11,16 @@ import { AVAILABLE_PERMISSIONS, userHasPermission } from '@/components/helpers/u
 import { title } from '../../../components/ui/home/primitaves'
 import EditSeriesModal from '@/components/ui/dashboard/EditSeriesModal'
 import { useState } from 'react'
+import { useSession, signIn } from 'next-auth/react'
 
 export default function Page() {
     const Router = useRouter()
-    const { user, userIsError, userIsValidating } = Fetcher.UseUser()
+    const { data: session, status } = useSession({
+        required: true,
+        onUnauthenticated() {
+            signIn()
+        }
+    })
     const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
     const { series, seriesIsError, seriesIsValidating } = Fetcher.GetSeriesByClubId(club)
 
@@ -44,7 +50,7 @@ export default function Page() {
         mutate('/api/GetSeriesByClubId')
     }
 
-    if (seriesIsValidating || seriesIsError || series == undefined) {
+    if (seriesIsValidating || seriesIsError || series == undefined || session == undefined) {
         return <PageSkeleton />
     }
     return (
@@ -65,7 +71,7 @@ export default function Page() {
                     viewSeries={(seriesId: string) => viewSeries(seriesId)}
                 />
             </div>
-            {userHasPermission(user, AVAILABLE_PERMISSIONS.editSeries) ? (
+            {userHasPermission(session.user, AVAILABLE_PERMISSIONS.editSeries) ? (
                 <div className='p-6'>
                     <p
                         id='seriesAddRace'

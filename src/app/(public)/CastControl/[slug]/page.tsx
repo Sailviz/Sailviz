@@ -3,7 +3,6 @@ import { useEffect, useState } from 'react'
 import { Peer, DataConnection } from 'peerjs'
 import { title } from '@/components/ui/home/primitaves'
 import * as DB from '@/components/apiMethods'
-import { Race } from '@prisma/client'
 import { useSearchParams } from 'next/navigation'
 
 //club page should contain:

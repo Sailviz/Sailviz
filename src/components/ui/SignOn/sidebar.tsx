@@ -1,13 +1,7 @@
 import { Sidebar } from '../sidebar/sidebar.styles'
-import { Avatar, Tooltip } from '@nextui-org/react'
-import { HomeIcon } from '@/components/icons/home-icon'
-import { AccountsIcon } from '@/components/icons/accounts-icon'
-import { DevIcon } from '@/components/icons/dev-icon'
-import { SettingsIcon } from '@/components/icons/settings-icon'
 import { CollapseItems } from '@/components/ui/sidebar/collapse-items'
 import { SidebarItem } from '@/components/ui/sidebar/sidebar-item'
 import { SidebarMenu } from '@/components/ui/sidebar/sidebar-menu'
-import { FilterIcon } from '@/components/icons/filter-icon'
 import { useSidebarContext } from '@/components/ui/SignOn/layout-context'
 import { ChangeLogIcon } from '@/components/icons/changelog-icon'
 import { usePathname } from 'next/navigation'
@@ -17,23 +11,31 @@ import { SailVizIcon } from '@/components/icons/sailviz-icon'
 import * as Fetcher from '@/components/Fetchers'
 import { PageSkeleton } from '../PageSkeleton'
 import { SignOutIcon } from '@/components/icons/sign-out'
-import Cookies from 'js-cookie'
+
 import React from 'react'
 import { AVAILABLE_PERMISSIONS, userHasPermission } from '../../helpers/users'
 import { SignOnIcon } from '../../icons/sign-on'
 import { RaceIcon } from '../../icons/race-icon'
 import { SeriesIcon } from '../../icons/series-icon'
 import { DocsIcon } from '../../icons/docs-icon'
+import { useSession, signIn } from 'next-auth/react'
+import { signOut } from '@/server/auth'
 
 export const SidebarWrapper = () => {
+    const { data: session, status } = useSession({
+        required: true,
+        onUnauthenticated() {
+            signIn()
+        }
+    })
+
     const pathname = usePathname()
     const { collapsed, setCollapsed } = useSidebarContext()
 
-    const { user, userIsError, userIsValidating } = Fetcher.UseUser()
     const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
     const { todaysRaces, todaysRacesIsError, todaysRacesIsValidating } = Fetcher.GetTodaysRaceByClubId(club)
 
-    if (todaysRacesIsValidating || todaysRacesIsError || todaysRaces == undefined) {
+    if (todaysRacesIsValidating || todaysRacesIsError || todaysRaces == undefined || session == undefined) {
         return <PageSkeleton />
     }
 
@@ -78,7 +80,7 @@ export const SidebarWrapper = () => {
                         <SidebarMenu title='Updates'>
                             <SidebarItem isActive={pathname === '/changelog'} title='Changelog' icon={<ChangeLogIcon />} />
                         </SidebarMenu>
-                        {userHasPermission(user, AVAILABLE_PERMISSIONS.dashboardAccess) ? (
+                        {userHasPermission(session.user, AVAILABLE_PERMISSIONS.dashboardAccess) ? (
                             <SidebarMenu title='Dashboard'>
                                 <SidebarItem title='Back to Dashboard' icon={<SignOutIcon />} href='/Dashboard' />
                             </SidebarMenu>
@@ -87,9 +89,7 @@ export const SidebarWrapper = () => {
                                 title='Log Out'
                                 aria-label='log out'
                                 onClick={() => {
-                                    Cookies.remove('token')
-                                    Cookies.remove('clubId')
-                                    Cookies.remove('userId')
+                                    signOut()
                                 }}
                             >
                                 <SidebarItem title='Log Out' icon={<SignOutIcon />} href='/' />

@@ -76,7 +76,10 @@ const RacesTable = (props: any) => {
         data: races,
         error: racesIsError,
         isValidating: racesIsValidating
-    } = useSWR(`/api/GetRacesByClubId?page=${page}&date=${props.date}&historical=${props.historical}`, Fetcher.fetcher, { keepPreviousData: true, suspense: true })
+    } = useSWR(`/api/GetRacesByClubId?id=${club.id}&page=${page}&date=${props.date}&historical=${props.historical}`, Fetcher.fetcher, {
+        keepPreviousData: true,
+        suspense: true
+    })
 
     const data = races.races
     const count = races?.count

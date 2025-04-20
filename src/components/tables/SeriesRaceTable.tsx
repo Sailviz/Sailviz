@@ -4,23 +4,7 @@ import dayjs from 'dayjs'
 import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, RowSelection, SortingState, useReactTable } from '@tanstack/react-table'
 import * as DB from '@/components/apiMethods'
 import Select, { CSSObjectWithLabel } from 'react-select'
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableColumn,
-    TableHeader,
-    TableRow,
-    Dropdown,
-    DropdownItem,
-    DropdownTrigger,
-    Button,
-    DropdownMenu,
-    Input,
-    Tooltip,
-    Spinner,
-    user
-} from '@nextui-org/react'
+import { Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Input, Tooltip, Spinner, user } from '@nextui-org/react'
 import { VerticalDotsIcon } from '@/components/icons/vertical-dots-icon'
 import { EyeIcon } from '@/components/icons/eye-icon'
 import { EditIcon } from '@/components/icons/edit-icon'
@@ -30,6 +14,7 @@ import { useTheme } from 'next-themes'
 import useSWR from 'swr'
 import * as Fetcher from '@/components/Fetchers'
 import { AVAILABLE_PERMISSIONS, userHasPermission } from '@/components/helpers/users'
+import { useSession, signIn } from 'next-auth/react'
 
 const raceOptions = [
     { value: 'Pursuit', label: 'Pursuit' },
@@ -180,7 +165,13 @@ const SeriesRaceTable = (props: any) => {
         error: seriesIsError,
         isValidating: seriesIsValidating
     } = useSWR(`/api/GetSeriesById?id=${seriesId}`, Fetcher.fetcher, { keepPreviousData: true, suspense: true })
-    const { user, userIsError, userIsValidating } = Fetcher.UseUser()
+
+    const { data: session, status } = useSession({
+        required: true,
+        onUnauthenticated() {
+            signIn()
+        }
+    })
 
     let data = series.races
     if (data == undefined) {
@@ -223,7 +214,7 @@ const SeriesRaceTable = (props: any) => {
             columnHelper.accessor('id', {
                 id: 'action',
                 header: 'Actions',
-                cell: props => <Action {...props} id={props.row.original.id} removeRace={updateData} user={user} />
+                cell: props => <Action {...props} id={props.row.original.id} removeRace={updateData} user={session!.user} />
             })
         ],
         state: {

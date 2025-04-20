@@ -1,34 +1,12 @@
 const jwt = require('jsonwebtoken')
 const jwtSecret = process.env.jwtSecret
 import prisma from '@/components/prisma'
-import { NextRequest, NextResponse } from 'next/server'
+import { auth } from '@/server/auth'
 
-export async function isRequestAuthorised(cookies: NextRequest['cookies'], id: string, table: string) {
-    let token = cookies.get('token')?.value
-    let clubId = cookies.get('clubId')?.value
-    // check that required cookies are present
-    if (token == undefined || clubId == undefined) {
-        return false
-    }
-
-    let decoded: any
-    if (token) {
-        try {
-            decoded = jwt.verify(token, jwtSecret)
-        } catch (e) {
-            return false
-        }
-    }
-
-    const user = await prisma.user.findUnique({
-        where: {
-            id: decoded.id
-        },
-        include: {
-            roles: true
-        }
-    })
-    if (user == undefined) {
+export async function isRequestAuthorised(id: string, table: string) {
+    const session = await auth()
+    var clubId = session?.user.clubId
+    if (clubId == null) {
         return false
     }
 
