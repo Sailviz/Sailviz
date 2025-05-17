@@ -3,8 +3,7 @@
 import ErrorBoundary from './ErrorBoundary'
 import PlausibleProvider from 'next-plausible'
 import { NextUIProvider } from '@nextui-org/react'
-import { ThemeProvider as NextThemesProvider } from 'next-themes'
-import { type ThemeProviderProps } from 'next-themes/dist/types'
+import { ThemeProvider as NextThemesProvider, ThemeProviderProps } from 'next-themes'
 import { SessionProvider } from 'next-auth/react'
 import { Session } from 'next-auth'
 
