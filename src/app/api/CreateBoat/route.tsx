@@ -2,6 +2,7 @@ import prisma from '@/lib/prisma'
 import { NextRequest, NextResponse } from 'next/server'
 import assert from 'assert'
 
+import { isRequestAuthorised, isRequestOwnData } from 'components/helpers/auth'
 import { isRequestAuthorised, isRequestOwnData } from '@/components/helpers/auth'
 
 async function findBoat(name: string, clubId: string) {
@@ -16,7 +17,9 @@ async function findBoat(name: string, clubId: string) {
                 }
             ]
         }
+        }
     })
+    return result
     return result
 }
 
@@ -33,7 +36,9 @@ async function createBoat(name: string, crew: number, py: number, pursuitStartTi
                 }
             }
         }
+        }
     })
+    return boat
     return boat
 }
 
@@ -45,13 +50,21 @@ export async function POST(request: NextRequest) {
         assert.notStrictEqual(undefined, req.py)
         assert.notStrictEqual(undefined, req.clubId)
         assert.notStrictEqual(undefined, req.pursuitStartTime)
+        assert.notStrictEqual(undefined, req.name)
+        assert.notStrictEqual(undefined, req.crew)
+        assert.notStrictEqual(undefined, req.py)
+        assert.notStrictEqual(undefined, req.clubId)
+        assert.notStrictEqual(undefined, req.pursuitStartTime)
     } catch (bodyError) {
+        return NextResponse.json({ error: 'information missing' }, { status: 400 })
         return NextResponse.json({ error: 'information missing' }, { status: 400 })
     }
 
     //check that the user is authorized to perform the request
+    let authorised = await isRequestAuthorised(request.cookies, req.clubId, 'club')
     let authorised = await isRequestAuthorised(req.clubId, 'club')
     if (!authorised) {
+        return NextResponse.json({ error: 'not authorized' }, { status: 401 })
         return NextResponse.json({ error: 'not authorized' }, { status: 401 })
     }
 
@@ -69,8 +82,14 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ res: creationResult }, { status: 200 })
         } else {
             return NextResponse.json({ error: 'Something went wrong crating boat' }, { status: 500 })
+            return NextResponse.json({ res: creationResult }, { status: 200 })
+        } else {
+            return NextResponse.json({ error: 'Something went wrong crating boat' }, { status: 500 })
         }
     } else {
+        return NextResponse.json({ error: 'Boat already exists' }, { status: 409 })
+    }
+}
         return NextResponse.json({ error: 'Boat already exists' }, { status: 409 })
     }
 }
