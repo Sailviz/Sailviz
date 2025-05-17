@@ -70,7 +70,7 @@ export default async function Page(props: PageProps) {
             <div className='py-4'>
                 <div className={title({ color: 'violet' })}>Series:</div>
             </div>
-            <ClubTable data={series} key={JSON.stringify(series)} deleteSeries={null} editSeries={null} viewSeries={(seriesId: string) => viewSeries(seriesId)} />
+            <ClubTable />
         </div>
     )
 }

@@ -2,7 +2,7 @@ import prisma from '@/lib/prisma'
 import { NextRequest, NextResponse } from 'next/server'
 import assert from 'assert'
 
-import { isRequestAuthorised } from 'components/helpers/auth'
+import { isRequestAuthorised } from '@/components/helpers/auth'
 
 async function findSeries(seriesId: any) {
     var result = await prisma.series.findUnique({
@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
     var seriesId = req.seriesId
 
     //check that the user is authorized to perform the request
-    let authorised = await isRequestAuthorised(request.cookies, seriesId, 'series')
+    let authorised = await isRequestAuthorised(seriesId, 'series')
     if (!authorised) {
         return NextResponse.json({ error: 'not authorized' }, { status: 401 })
     }
