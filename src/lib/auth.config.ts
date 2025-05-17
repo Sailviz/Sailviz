@@ -7,8 +7,8 @@ const authConfig = {
         GithubProvider({}),
         CredentialProvider({
             credentials: {
-                email: {
-                    type: 'email'
+                username: {
+                    type: 'username'
                 },
                 password: {
                     type: 'password'
@@ -17,8 +17,7 @@ const authConfig = {
             async authorize(credentials, req) {
                 const user = {
                     id: '1',
-                    name: 'John',
-                    email: credentials?.email as string
+                    name: 'John'
                 }
                 if (user) {
                     // Any object returned will be saved in `user` property of the JWT

@@ -16,26 +16,38 @@ import { loginSchema } from '@/constants/validation'
  * @see https://next-auth.js.org/getting-started/typescript#module-augmentation
  */
 declare module 'next-auth' {
-    interface Session extends DefaultSession {
+    interface Session {
+        expires: string
         user: UserDataType
+        club: ClubDataType
     }
 }
 
 const providers: Provider[] = [
     Credentials({
         credentials: {
-            username: { label: 'Username', type: 'text' },
+            username: { label: 'username', type: 'text' },
             password: { label: 'Password', type: 'password' }
         },
+        /*@ts-ignore*/ // throws a type error, but it works.
         authorize: async credentials => {
             const result = await loginSchema.parseAsync(credentials)
 
-            const { name, password } = result
+            const { username, password } = result
 
             // check to see if user exists
             const user = await prisma.user.findUnique({
                 where: {
-                    username: name
+                    username: username
+                },
+                include: {
+                    roles: true
+                }
+            })
+
+            const club = await prisma.club.findUnique({
+                where: {
+                    id: user?.clubId
                 }
             })
 
@@ -52,7 +64,7 @@ const providers: Provider[] = [
                 throw new Error('Incorrect password')
             }
 
-            return { id: user.id, username: user.username, displayName: user.displayName, clubId: user.clubId, startPage: user.startPage }
+            return { user: user, club: club }
         }
     }),
     GitHub
@@ -77,11 +89,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
     adapter: PrismaAdapter(db),
     callbacks: {
-        async jwt({ token, user }) {
+        jwt({ token, user }) {
             return { ...token, ...user }
         },
         async session({ session, token, user }) {
-            session.user = token as any
+            console.log('token', token)
+            session.user = token.user as any
+            session.club = token.club as any
+            console.log('session', session)
             return session
         }
     }

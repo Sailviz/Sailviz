@@ -1,5 +1,5 @@
 import { signIn, providerMap } from '@/server/auth'
-import { Button, Input } from '@nextui-org/react'
+// import { Button, Input } from '@nextui-org/react'
 import { DynamicIcon, IconName } from 'lucide-react/dynamic'
 
 export function LoginForm({ justCredentials }: { justCredentials: boolean }) {
@@ -19,7 +19,6 @@ export function LoginForm({ justCredentials }: { justCredentials: boolean }) {
                     </div>
                 </div>
             </div>
-
             {Object.values(providerMap).map(provider => (
                 <form
                     key={provider.id}
@@ -41,15 +40,15 @@ export function LoginForm({ justCredentials }: { justCredentials: boolean }) {
                             <div className='flex flex-col gap-6'>
                                 <div className='grid gap-2'>
                                     Username
-                                    <Input id='username' name='username' required />
+                                    <input id='username' name='username' required />
                                 </div>
                                 <div className='grid gap-2'>
                                     Password
-                                    <Input id='password' name='password' type='password' required />
+                                    <input id='password' name='password' type='password' required />
                                 </div>
-                                <Button type='submit' className='w-full'>
+                                <button type='submit' className='w-full'>
                                     <span>Login</span>
-                                </Button>
+                                </button>
                                 <div className='relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border'>
                                     <span className='relative z-10 bg-background px-2 text-muted-foreground'>Or</span>
                                 </div>
@@ -57,10 +56,10 @@ export function LoginForm({ justCredentials }: { justCredentials: boolean }) {
                         </>
                     )}
                     {provider.id !== 'credentials' && (
-                        <Button type='submit' variant='bordered' className='w-full'>
+                        <button type='submit' className='w-full'>
                             <DynamicIcon name={provider.name.toLowerCase() as IconName} />
                             <span>Continue with {provider.name}</span>
-                        </Button>
+                        </button>
                     )}
                 </form>
             ))}

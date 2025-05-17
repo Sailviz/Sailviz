@@ -3,7 +3,7 @@
     "version": "0.1.0",
     "private": true,
     "scripts": {
-        "dev": "next dev --experimental-https",
+        "dev": "next dev --turbopack --experimental-https",
         "build": "next build",
         "start": "next start",
         "lint": "next lint",
@@ -14,7 +14,7 @@
         "@mdx-js/loader": "^3.0.1",
         "@mdx-js/react": "^3.0.1",
         "@next/mdx": "^14.2.6",
-        "@nextui-org/react": "^2.4.6",
+        "@nextui-org/react": "^2.6.11",
         "@prisma/client": "^6.1.0",
         "@sentry/nextjs": "^9.19.0",
         "@t3-oss/env-nextjs": "^0.13.4",

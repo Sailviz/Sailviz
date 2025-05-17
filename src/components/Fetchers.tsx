@@ -159,6 +159,17 @@ export function GetSeriesByClubId(club: ClubDataType) {
     }
 }
 
+export function GetSeriesById(seriesId: string) {
+    let body = { seriesId: seriesId }
+    const { data, error, isValidating } = useSWR('/api/GetSeriesById', url => advancedFetcher(url!, body))
+
+    return {
+        series: data?.series as SeriesDataType,
+        seriesIsValidating: isValidating,
+        seriesIsError: error
+    }
+}
+
 export function GetTodaysRaceByClubId(club: ClubDataType) {
     let body = { clubId: club?.id }
     const { data, error, isValidating } = useSWR(club && club.id ? '/api/GetTodaysRaceByClubId' : null, url => advancedFetcher(url!, body))

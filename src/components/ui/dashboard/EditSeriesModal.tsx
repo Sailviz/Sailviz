@@ -1,19 +1,23 @@
+'use client'
 import { Button, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Radio, RadioGroup } from '@nextui-org/react'
 import { useTheme } from 'next-themes'
 import { ChangeEvent, useState } from 'react'
 import { PageSkeleton } from '../PageSkeleton'
+import * as Fetcher from '@/components/Fetchers'
 
 export default function EditSeriesModal({
     isOpen,
-    series,
+    seriesId,
     onSubmit,
     onClose
 }: {
     isOpen: boolean
-    series: SeriesDataType
+    seriesId: string
     onSubmit: (series: SeriesDataType) => void
     onClose: () => void
 }) {
+    const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
+    const { series, seriesIsError, seriesIsValidating } = Fetcher.GetSeriesById(seriesId)
     const [seriesName, setSeriesName] = useState(series.name)
 
     const { theme, setTheme } = useTheme()
