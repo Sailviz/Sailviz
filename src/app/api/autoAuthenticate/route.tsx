@@ -1,8 +1,7 @@
-import prisma from '@/components/prisma'
+import prisma from '@/lib/prisma'
 import { NextRequest, NextResponse } from 'next/server'
-
+import bcrypt from 'bcryptjs'
 const jwt = require('jsonwebtoken')
-const bcrypt = require('bcrypt')
 import assert from 'assert'
 const saltRounds = 10
 const jwtSecret = process.env.jwtSecret
@@ -13,15 +12,6 @@ async function findUser(uuid: string) {
             uuid: uuid
         }
     })
-    return result
-}
-
-async function authUser(email: string, password: string) {
-    var user = await findUser(email)
-    if (user == null) {
-        return false
-    }
-    var result = bcrypt.compare(password, user.password)
     return result
 }
 

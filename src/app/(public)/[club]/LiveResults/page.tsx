@@ -12,8 +12,12 @@ enum pageModes {
     notLive
 }
 
-export default function Page({ params }: { params: { slug: string } }) {
+type PageProps = { params: Promise<{ club: string }> }
+
+export default async function Page(props: PageProps) {
     const Router = useRouter()
+
+    const params = await props.params
 
     var [clubId, setClubId] = useState<string>('invalid')
     var [races, setRaces] = useState<RaceDataType[]>([
@@ -64,7 +68,7 @@ export default function Page({ params }: { params: { slug: string } }) {
     }
 
     useEffect(() => {
-        let clubName = params.slug
+        let clubName = params.club
         if (clubName) {
             DB.getClubByName(clubName.toString()).then(data => {
                 if (data) {
@@ -175,7 +179,7 @@ export default function Page({ params }: { params: { slug: string } }) {
                             <div>
                                 <p className='text-6xl font-extrabold text-gray-700 p-6'>
                                     {' '}
-                                    {params.slug} <br /> No Races Currently Active
+                                    {params.club} <br /> No Races Currently Active
                                 </p>
                             </div>
                         )

@@ -1,5 +1,3 @@
-'use client'
-
 import React from 'react'
 import { useLockedBody } from '@/components/hooks/useBodyLock'
 import { SidebarWrapper } from '@/components/ui/SignOn/sidebar'

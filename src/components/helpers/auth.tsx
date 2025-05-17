@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken')
 const jwtSecret = process.env.jwtSecret
-import prisma from '@/components/prisma'
+import prisma from '@/lib/prisma'
 import { auth } from '@/server/auth'
 
 export async function isRequestAuthorised(id: string, table: string) {

@@ -1,8 +1,8 @@
 import { type NextRequest, NextResponse } from 'next/server'
-import prisma from '@/components/prisma'
+import prisma from '@/lib/prisma'
 
 export async function GET(req: NextRequest) {
-    const clubId = cookieStore.get('clubId')
+    const clubId = ''
 
     if (!clubId) {
         return NextResponse.json({ message: 'Missing Club ID' }, { status: 400 })
@@ -10,7 +10,7 @@ export async function GET(req: NextRequest) {
 
     const trackers = await prisma.tracker.findMany({
         where: {
-            clubId: clubId.value
+            clubId: clubId
         }
     })
 

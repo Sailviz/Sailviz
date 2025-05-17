@@ -6,7 +6,8 @@ import GitHub from 'next-auth/providers/github'
 import Credentials from 'next-auth/providers/credentials'
 import { Provider } from 'next-auth/providers'
 import bcrypt from 'bcryptjs'
-import prisma from '@/components/prisma'
+import prisma from '@/lib/prisma'
+import { loginSchema } from '@/constants/validation'
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -26,16 +27,15 @@ const providers: Provider[] = [
             username: { label: 'Username', type: 'text' },
             password: { label: 'Password', type: 'password' }
         },
-        async authorize(credentials) {
-            // check to see if email and password is there
-            if (!credentials?.username || !credentials?.password) {
-                throw new Error('Please enter an email and password')
-            }
+        authorize: async credentials => {
+            const result = await loginSchema.parseAsync(credentials)
+
+            const { name, password } = result
 
             // check to see if user exists
             const user = await prisma.user.findUnique({
                 where: {
-                    username: credentials.username
+                    username: name
                 }
             })
 
@@ -45,7 +45,7 @@ const providers: Provider[] = [
             }
 
             // check to see if password matches
-            const passwordMatch = await bcrypt.compare(credentials.password, user.password)
+            const passwordMatch = await bcrypt.compare(password, user.password)
 
             // if password does not match
             if (!passwordMatch) {

@@ -17,8 +17,12 @@ import { mutate } from 'swr'
 import ViewResultModal from '@/components/ui/dashboard/viewResultModal'
 import { useSession, signIn } from 'next-auth/react'
 
-export default function Page({ params }: { params: { slug: string } }) {
+type PageProps = { params: Promise<{ slug: string }> }
+
+export default async function Page(props: PageProps) {
     const Router = useRouter()
+
+    const params = await props.params
     const { data: session, status } = useSession({
         required: true,
         onUnauthenticated() {

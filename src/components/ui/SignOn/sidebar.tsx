@@ -1,3 +1,4 @@
+'use client'
 import { Sidebar } from '../sidebar/sidebar.styles'
 import { CollapseItems } from '@/components/ui/sidebar/collapse-items'
 import { SidebarItem } from '@/components/ui/sidebar/sidebar-item'
@@ -20,6 +21,7 @@ import { SeriesIcon } from '../../icons/series-icon'
 import { DocsIcon } from '../../icons/docs-icon'
 import { useSession, signIn } from 'next-auth/react'
 import { signOut } from '@/server/auth'
+import ReturnButton from './returnButton'
 
 export const SidebarWrapper = () => {
     const { data: session, status } = useSession({
@@ -80,21 +82,7 @@ export const SidebarWrapper = () => {
                         <SidebarMenu title='Updates'>
                             <SidebarItem isActive={pathname === '/changelog'} title='Changelog' icon={<ChangeLogIcon />} />
                         </SidebarMenu>
-                        {userHasPermission(session.user, AVAILABLE_PERMISSIONS.dashboardAccess) ? (
-                            <SidebarMenu title='Dashboard'>
-                                <SidebarItem title='Back to Dashboard' icon={<SignOutIcon />} href='/Dashboard' />
-                            </SidebarMenu>
-                        ) : (
-                            <SidebarMenu
-                                title='Log Out'
-                                aria-label='log out'
-                                onClick={() => {
-                                    signOut()
-                                }}
-                            >
-                                <SidebarItem title='Log Out' icon={<SignOutIcon />} href='/' />
-                            </SidebarMenu>
-                        )}
+                        <ReturnButton />
                     </div>
                 </div>
                 <div className={Sidebar.Footer()}>

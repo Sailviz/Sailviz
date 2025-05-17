@@ -1,4 +1,4 @@
-import prisma from '@/components/prisma'
+import prisma from '@/lib/prisma'
 import { NextRequest, NextResponse } from 'next/server'
 import assert from 'assert'
 import { isRequestAuthorised, isRequestOwnData } from '@/components/helpers/auth'

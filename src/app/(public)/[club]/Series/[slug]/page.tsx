@@ -7,7 +7,12 @@ import * as DB from '@/components/apiMethods'
 import SeriesResultsTable from '@/components/tables/SeriesResultsTable'
 import { title, subtitle } from '@/components/ui/home/primitaves'
 
-export default function Page({ params }: { params: { slug: string; club: string } }) {
+type PageProps = { params: Promise<{ slug: string; club: string }> }
+
+export default async function Page(props: PageProps) {
+    const Router = useRouter()
+
+    const params = await props.params
     const router = useRouter()
 
     var [clubId, setClubId] = useState<string>('invalid')

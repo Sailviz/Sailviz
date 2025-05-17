@@ -14,8 +14,12 @@ import EditFleetModal from '@/components/ui/dashboard/EditFleetSettingsModal'
 import { AVAILABLE_PERMISSIONS, userHasPermission } from '@/components/helpers/users'
 import { signIn, useSession } from 'next-auth/react'
 
-export default function Page({ params }: { params: { slug: string } }) {
+type PageProps = { params: Promise<{ slug: string }> }
+
+export default async function Page(props: PageProps) {
     const Router = useRouter()
+
+    const params = await props.params
     const { data: session, status } = useSession({
         required: true,
         onUnauthenticated() {

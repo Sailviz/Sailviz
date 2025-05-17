@@ -5,7 +5,7 @@ import * as DB from '@/components/apiMethods'
 import cookie from 'js-cookie'
 import * as Fetcher from '@/components/Fetchers'
 
-export default function DemoPage({ params }: { params: { slug: string } }) {
+export default async function Page() {
     const Router = useRouter()
 
     const { GlobalConfig, GlobalConfigIsError, GlobalConfigIsValidating } = Fetcher.UseGlobalConfig()

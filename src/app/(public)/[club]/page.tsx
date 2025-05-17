@@ -15,8 +15,12 @@ import cookie from 'js-cookie'
 //list of recent races
 //list of upcoming races
 
-export default function Page({ params }: { params: { club: string } }) {
+type PageProps = { params: Promise<{ club: string }> }
+
+export default async function Page(props: PageProps) {
     const router = useRouter()
+
+    const params = await props.params
 
     var [club, setClub] = useState<ClubDataType>()
     var [series, setSeries] = useState<SeriesDataType[]>([])

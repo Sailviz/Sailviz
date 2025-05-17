@@ -1,5 +1,5 @@
 'use server'
-import prisma from '@/components/prisma'
+import prisma from '@/lib/prisma'
 
 export async function syncTrackers(trackableOrgID: string, clubId: string) {
     const response = await fetch(`${process.env.TRACKABLE_BASE}/api/tracker/org/${trackableOrgID}`)

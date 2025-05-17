@@ -1,6 +1,6 @@
-import prisma from '@/components/prisma'
+import prisma from '@/lib/prisma'
 import { NextRequest, NextResponse } from 'next/server'
-const bcrypt = require('bcrypt')
+import bcrypt from 'bcryptjs'
 import assert from 'assert'
 import { AVAILABLE_PERMISSIONS } from '@/components/helpers/users'
 import { isRequestAuthorised, isRequestOwnData } from '@/components/helpers/auth'

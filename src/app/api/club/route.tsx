@@ -1,4 +1,4 @@
-import prisma from '@/components/prisma'
+import prisma from '@/lib/prisma'
 import { auth } from '@/server/auth'
 import { NextRequest, NextResponse } from 'next/server'
 

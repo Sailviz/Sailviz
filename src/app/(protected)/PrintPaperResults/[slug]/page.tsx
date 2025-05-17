@@ -7,10 +7,12 @@ import HandicapPaperResultsTable from '@/components/tables/HandicapPaperResultsT
 import PursuitPaperResultsTable from '@/components/tables/PursuitPaperResultsTable'
 import dayjs from 'dayjs'
 
-export default function Page({ params }: { params: { slug: string } }) {
+type PageProps = { params: Promise<{ slug: string }> }
+
+export default async function Page(props: PageProps) {
     const Router = useRouter()
 
-    const searchParams = useSearchParams()
+    const params = await props.params
 
     var [race, setRace] = useState<RaceDataType>({
         id: '',

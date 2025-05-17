@@ -15,7 +15,6 @@ import FleetPursuitResultsTable from '@/components/tables/FleetPursuitResultsTab
 import { Progress } from '@nextui-org/react'
 import * as Fetcher from '@/components/Fetchers'
 import { mutate } from 'swr'
-import { set } from 'cypress/types/lodash'
 
 enum pageStateType {
     live,
@@ -34,8 +33,11 @@ const scrollOptions = {
 //it receives messages from the chromecast and displays the appropriate data.
 // club id is stored in a cookie and is used to get the relavent data / page to display.
 
-export default function Page({ params }: { params: { slug: string } }) {
+type PageProps = { params: Promise<{ slug: string }> }
+
+export default async function Page(props: PageProps) {
     var interval: NodeJS.Timer | null = null
+    const params = await props.params
 
     const { theme, setTheme } = useTheme()
 

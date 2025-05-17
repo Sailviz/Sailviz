@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import prisma from '@/components/prisma'
+import prisma from '@/lib/prisma'
 import assert from 'assert'
 
 async function getClub(id: string) {

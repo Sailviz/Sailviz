@@ -1,3 +1,4 @@
+'use client'
 import { Sidebar } from '../sidebar/sidebar.styles'
 import { HomeIcon } from '@/components/icons/home-icon'
 import { AccountsIcon } from '@/components/icons/accounts-icon'

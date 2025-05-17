@@ -33,8 +33,12 @@ enum modeType {
 //pursuit races don't work with fleets, why would you?
 //race organisation if based off of the first fleet, all boats from any fleets are used.
 
-export default function Page({ params }: { params: { slug: string } }) {
+type PageProps = { params: Promise<{ slug: string }> }
+
+export default async function Page(props: PageProps) {
     const Router = useRouter()
+
+    const params = await props.params
 
     const { data: session, status } = useSession({
         required: true,

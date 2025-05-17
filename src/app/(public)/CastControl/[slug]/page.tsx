@@ -13,10 +13,12 @@ import { useSearchParams } from 'next/navigation'
 var peer: Peer = new Peer()
 var conn: DataConnection | null = null
 
-export default function Page({ params }: { params: { slug: string } }) {
-    const searchParams = useSearchParams()
+type PageProps = { params: Promise<{ slug: string }> }
 
-    const [clubId, setClubId] = useState<string>(searchParams.get('clubId') || '')
+export default async function Page(props: PageProps) {
+    const params = await props.params
+
+    const [clubId, setClubId] = useState<string>(params.slug)
     const [club, setClub] = useState<ClubDataType>({} as ClubDataType)
     const [races, setRaces] = useState<any[]>([])
     const [series, setSeries] = useState<any[]>([])

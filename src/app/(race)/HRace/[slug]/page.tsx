@@ -28,8 +28,12 @@ enum modeType {
     Finish
 }
 
-export default function Page({ params }: { params: { slug: string } }) {
+type PageProps = { params: Promise<{ slug: string }> }
+
+export default async function Page(props: PageProps) {
     const Router = useRouter()
+
+    const params = await props.params
 
     const startLength = 315 //5 15secs in seconds
 

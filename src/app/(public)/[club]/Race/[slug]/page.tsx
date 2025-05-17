@@ -11,8 +11,12 @@ import FleetHandicapResultsTable from '@/components/tables/FleetHandicapResultsT
 import FleetPursuitResultsTable from '@/components/tables/FleetPursuitResultsTable'
 import { title, subtitle } from '@/components/ui/home/primitaves'
 
-export default function Page({ params }: { params: { slug: string } }) {
+type PageProps = { params: Promise<{ slug: string }> }
+
+export default async function Page(props: PageProps) {
     const Router = useRouter()
+
+    const params = await props.params
 
     var [race, setRace] = useState<RaceDataType>({
         id: '',
