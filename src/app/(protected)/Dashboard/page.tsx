@@ -12,39 +12,14 @@ import Button from '@/components/ui/Button'
 
 export default async function Page() {
     // const createModal = useDisclosure()
-    const controller = new AbortController()
 
     const session = await auth()
     if (session == null) {
         redirect(authConfig.pages.signIn)
     }
-    console.log('session', session)
-    // const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
-
-    // const createEvent = async (name: string, numberOfRaces: number) => {
-    //     //create a series
-    //     if (name == '' || numberOfRaces < 1) {
-    //         //show error saying data is invalid
-    //         return
-    //     }
-    //     let series = await DB.createSeries(club.id, name)
-    //     for (let i = 0; i < numberOfRaces; i++) {
-    //         await DB.createRace(club.id, series.id)
-    //     }
-    //     createModal.onClose()
-    //     // mutate('/api/GetTodaysRaceByClubId')
-    // }
-
-    // const hornTest = async () => {
-    //     fetch('https://' + club.settings.hornIP + '/hoot?startTime=100', {
-    //         signal: controller.signal,
-    //         headers: new Headers({ 'content-type': 'text/plain' })
-    //     })
-    // }
 
     return (
         <div>
-            {/* <CreateEventModal isOpen={createModal.isOpen} onSubmit={createEvent} onClose={() => createModal.onClose()} /> */}
             <div className='p-6'>
                 <h1 className={title({ color: 'blue' })}>{session.club.displayName}</h1>
             </div>
@@ -60,7 +35,7 @@ export default async function Page() {
                     <div>
                         <p className='text-2xl font-bold p-6 pb-1'>Quick Actions</p>
                         <div className='p-6 py-1'>
-                            <Button href='/'>Create New Event</Button>
+                            <Button href='/Dashboard/createEvent'>Create New Event</Button>
                         </div>
                         <div className='p-6 pt-1'>
                             <Button href={'/Demo'}>Practice Mode</Button>

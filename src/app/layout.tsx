@@ -10,16 +10,21 @@ export const metadata: Metadata = {
     description: 'Sailing race system for clubs and regattas'
 }
 export default async function Layout({
-    children // will be a page or nested layout
+    children, // will be a page or nested layout
+    modal
 }: {
     children: React.ReactNode
+    modal: React.ReactNode
 }) {
     const session = await auth()
     const fallbackSession = {} as Session // Provide a default or mock Session object
     return (
         <html lang='en' suppressHydrationWarning={true}>
             <body className={clsx('font-sans antialiased', fontSans.className)}>
-                <Providers session={session ?? fallbackSession}>{children}</Providers>
+                <Providers session={session ?? fallbackSession}>
+                    {modal}
+                    {children}
+                </Providers>
             </body>
         </html>
     )

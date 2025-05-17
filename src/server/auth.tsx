@@ -93,10 +93,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             return { ...token, ...user }
         },
         async session({ session, token, user }) {
-            console.log('token', token)
             session.user = token.user as any
             session.club = token.club as any
-            console.log('session', session)
             return session
         }
     }

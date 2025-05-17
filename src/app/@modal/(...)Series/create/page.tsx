@@ -1,6 +1,6 @@
 'use client'
 // Update the import path below to the correct relative path if necessary
-import CreateSeriesModal from '../../../../../components/ui/dashboard/CreateSeriesModal'
+import CreateSeriesModal from '@/components/ui/dashboard/CreateSeriesModal'
 import { useRouter } from 'next/navigation'
 export default function Page() {
     const Router = useRouter()
