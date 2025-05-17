@@ -27,6 +27,7 @@ import { useRouter } from 'next/navigation'
 import { useTheme } from 'next-themes'
 import * as Fetcher from '@/components/Fetchers'
 import { PageSkeleton } from '@/components/ui/PageSkeleton'
+import { useSession } from 'next-auth/react'
 
 const Time = ({ ...props }: any) => {
     const initialValue = props.getValue()
@@ -60,10 +61,10 @@ const Action = ({ ...props }: any) => {
 
 const columnHelper = createColumnHelper<NextRaceDataType>()
 
-const UpcomingRacesTable = (props: any) => {
-    const [club, setClub] = useState(props.club)
+const UpcomingRacesTable = () => {
+    const { data: session, status } = useSession()
 
-    const { todaysRaces, todaysRacesIsError, todaysRacesIsValidating } = Fetcher.GetTodaysRaceByClubId(club)
+    const { todaysRaces, todaysRacesIsError, todaysRacesIsValidating } = Fetcher.GetTodaysRaceByClubId(session?.club!)
     const { theme, setTheme } = useTheme()
     const [sorting, setSorting] = useState<SortingState>([
         {
@@ -105,7 +106,7 @@ const UpcomingRacesTable = (props: any) => {
         getSortedRowModel: getSortedRowModel()
     })
     return (
-        <div key={props.club.id}>
+        <div>
             <Table id={'seriesTable'} aria-label='Upcoming Races Table'>
                 <TableHeader>
                     {table

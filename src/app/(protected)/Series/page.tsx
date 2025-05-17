@@ -18,25 +18,6 @@ export default async function Page() {
     }
     console.log('Session:', session)
 
-    const viewSeries = (seriesId: string) => {
-        redirect('/Series/' + seriesId)
-    }
-
-    const editSeries = async (series: SeriesDataType) => {
-        await DB.updateSeries(series)
-        // mutate('/api/GetSeriesByClubId')
-    }
-
-    const createSeries = async (name: string) => {
-        await DB.createSeries(session.user.clubId, name)
-        // mutate('/api/GetSeriesByClubId')
-    }
-
-    const deleteSeries = async (seriesId: string) => {
-        await DB.deleteSeriesById(seriesId)
-        // mutate('/api/GetSeriesByClubId')
-    }
-
     return (
         <div>
             {/* <EditSeriesModal seriesId={''} isOpen={editModal.isOpen} onSubmit={editSeries} onClose={editModal.onClose} /> */}
@@ -44,7 +25,7 @@ export default async function Page() {
                 <h1 className={title({ color: 'blue' })}>Series</h1>
             </div>
             <div className='p-6'>
-                {/* <ClubTable clubId={session.user.clubId} deleteSeries={() => {}} editSeries={(series: SeriesDataType) => {}} viewSeries={(seriesId: string) => {}} /> */}
+                <ClubTable />
             </div>
             {userHasPermission(session.user, AVAILABLE_PERMISSIONS.editSeries) ? (
                 <div className='p-6'>

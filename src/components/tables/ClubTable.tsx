@@ -1,12 +1,14 @@
 'use client'
-import React, { ChangeEvent, useState } from 'react'
+import React, { ChangeEvent, useEffect, useState } from 'react'
 import { createColumnHelper, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table'
-import { Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Tooltip, user } from '@nextui-org/react'
+import { Spinner, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Tooltip, user } from '@nextui-org/react'
 import { EyeIcon } from '@/components/icons/eye-icon'
 import { EditIcon } from '@/components/icons/edit-icon'
 import { DeleteIcon } from '@/components/icons/delete-icon'
 import { AVAILABLE_PERMISSIONS, userHasPermission } from '@/components/helpers/users'
 import { useSession, signIn } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
+import * as DB from '@/components/apiMethods'
 
 const Action = ({ ...props }: any) => {
     const onDeleteClick = () => {
@@ -46,26 +48,34 @@ const Action = ({ ...props }: any) => {
 
 const columnHelper = createColumnHelper<SeriesDataType>()
 
-const ClubTable = (props: any) => {
-    var [data, setData] = useState(props.data)
-    const { data: session, status } = useSession({
-        required: true,
-        onUnauthenticated() {
-            signIn()
-        }
-    })
+const ClubTable = () => {
+    const { data: session, status } = useSession()
+    const [data, setData] = useState<SeriesDataType[]>([])
+    const loadingState = data?.length === 0 ? 'loading' : 'idle'
+
+    const Router = useRouter()
 
     const viewSeries = (seriesId: string) => {
-        props.viewSeries(seriesId)
+        Router.push('/Series/' + seriesId)
     }
 
-    const deleteSeries = (seriesId: string) => {
-        props.deleteSeries(seriesId)
+    const deleteSeries = async (seriesId: string) => {
+        await DB.deleteSeriesById(seriesId)
     }
 
-    const editSeries = (seriesId: string) => {
-        props.editSeries(seriesId)
+    const editSeries = async (series: SeriesDataType) => {
+        await DB.updateSeries(series)
     }
+
+    useEffect(() => {
+        const fetchData = async () => {
+            if (session) {
+                const series = await DB.GetSeriesByClubId(session.user.clubId)
+                setData(series)
+            }
+        }
+        fetchData()
+    }, [session])
 
     var table = useReactTable({
         data,
@@ -93,7 +103,7 @@ const ClubTable = (props: any) => {
         getCoreRowModel: getCoreRowModel()
     })
     return (
-        <div key={props.data}>
+        <div>
             <Table isStriped id={'clubTable'} aria-label='table of series'>
                 <TableHeader>
                     {table
@@ -103,7 +113,7 @@ const ClubTable = (props: any) => {
                             return <TableColumn key={header.id}>{flexRender(header.column.columnDef.header, header.getContext())}</TableColumn>
                         })}
                 </TableHeader>
-                <TableBody>
+                <TableBody loadingContent={<Spinner />} loadingState={loadingState}>
                     {table.getRowModel().rows.map(row => (
                         <TableRow key={row.id}>
                             {row.getVisibleCells().map(cell => (
