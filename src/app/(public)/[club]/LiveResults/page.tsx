@@ -1,6 +1,6 @@
 'use client'
 import { useEffect, useState } from 'react'
-import Layout from '@/components/ui/Layout'
+import Layout from '@/components/layout/Layout'
 
 import { useRouter } from 'next/navigation'
 import * as DB from '@/components/apiMethods'

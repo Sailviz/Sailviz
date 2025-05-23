@@ -1,5 +1,5 @@
 import type { MDXComponents } from 'mdx/types'
-import { title, subtitle } from '@/components/ui/home/primitaves'
+import { title, subtitle } from '@/components/layout/home/primitaves'
 import Image from 'next/image'
 
 export function useMDXComponents(components: MDXComponents): MDXComponents {

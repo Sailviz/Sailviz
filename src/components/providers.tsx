@@ -2,7 +2,6 @@
 
 import ErrorBoundary from './ErrorBoundary'
 import PlausibleProvider from 'next-plausible'
-import { NextUIProvider } from '@nextui-org/react'
 import { ThemeProvider as NextThemesProvider, ThemeProviderProps } from 'next-themes'
 import { SessionProvider } from 'next-auth/react'
 import { Session } from 'next-auth'
@@ -17,11 +16,9 @@ export function Providers({ children, session }: { children: React.ReactNode; se
         <ErrorBoundary>
             <PlausibleProvider domain='sailviz.com' customDomain='https://stats.sailviz.com' selfHosted enabled>
                 <SessionProvider session={session}>
-                    <NextUIProvider>
-                        <ThemeProvider attribute='class' defaultTheme='light'>
-                            {children}
-                        </ThemeProvider>
-                    </NextUIProvider>
+                    <ThemeProvider attribute='class' defaultTheme='light'>
+                        {children}
+                    </ThemeProvider>
                 </SessionProvider>
             </PlausibleProvider>
         </ErrorBoundary>

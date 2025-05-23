@@ -2,13 +2,15 @@ import { redirect } from 'next/navigation'
 import * as DB from '@/components/apiMethods'
 import * as Fetcher from '@/components/Fetchers'
 import UpcomingRacesTable from '@/components/tables/UpcomingRacesTable'
-import { PageSkeleton } from '@/components/ui/PageSkeleton'
-import CreateEventModal from '@/components/ui/dashboard/CreateEventModal'
-import { title } from '../../../components/ui/home/primitaves'
+import { PageSkeleton } from '@/components/layout/PageSkeleton'
+import CreateEventModal from '@/components/layout/dashboard/CreateEventModal'
+import { title } from '../../../components/layout/home/primitaves'
 import { useSession } from 'next-auth/react'
 import { auth } from '@/server/auth'
 import authConfig from '@/lib/auth.config'
-import Button from '@/components/ui/Button'
+import { Button } from '@/components/ui/button'
+import Link from 'next/link'
+import HornTestButton from '@/components/layout/home/HornTestButton'
 
 export default async function Page() {
     // const createModal = useDisclosure()
@@ -35,13 +37,17 @@ export default async function Page() {
                     <div>
                         <p className='text-2xl font-bold p-6 pb-1'>Quick Actions</p>
                         <div className='p-6 py-1'>
-                            <Button href='/Dashboard/createEvent'>Create New Event</Button>
+                            <Link href='/SignOn'>
+                                <Button>Create New Event</Button>
+                            </Link>
                         </div>
                         <div className='p-6 pt-1'>
-                            <Button href={'/Demo'}>Practice Mode</Button>
+                            <Link href='/SignOn'>
+                                <Button>Practice Mode</Button>
+                            </Link>
                         </div>
                         <div className='p-6 pt-1'>
-                            <Button href='/'>Horn Test</Button>
+                            <HornTestButton />
                         </div>
                     </div>
                 </div>

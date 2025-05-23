@@ -4,10 +4,9 @@ import { useRouter } from 'next/navigation'
 import FleetHandicapResultsTable from '@/components/tables/FleetHandicapResultsTable'
 import FleetPursuitResultsTable from '@/components/tables/FleetPursuitResultsTable'
 import * as Fetcher from '@/components/Fetchers'
-import { PageSkeleton } from '@/components/ui/PageSkeleton'
-import { useDisclosure } from '@nextui-org/react'
-import { title } from '@/components/ui/home/primitaves'
-import ViewResultModal from '@/components/ui/dashboard/viewResultModal'
+import { PageSkeleton } from '@/components/layout/PageSkeleton'
+import { title } from '@/components/layout/home/primitaves'
+import ViewResultModal from '@/components/layout/dashboard/viewResultModal'
 import { useSession, signIn } from 'next-auth/react'
 
 type PageProps = { params: Promise<{ slug: string }> }
@@ -26,7 +25,7 @@ export default async function Page(props: PageProps) {
     const { boats, boatsIsError, boatsIsValidating } = Fetcher.Boats()
     const { race, raceIsError, raceIsValidating } = Fetcher.Race(params.slug, true)
 
-    const viewModal = useDisclosure()
+    // const viewModal = useDisclosure()
 
     var [activeResult, setActiveResult] = useState<ResultsDataType>()
     var [activeFleet, setActiveFleet] = useState<FleetDataType>()
@@ -41,7 +40,7 @@ export default async function Page(props: PageProps) {
         result.laps.sort((a, b) => a.time - b.time)
         setActiveResult(result)
         setActiveFleet(race.fleets.filter(fleet => fleet.id == result?.fleetId)[0]!)
-        viewModal.onOpen()
+        // viewModal.onOpen()
     }
 
     if (clubIsValidating || raceIsValidating || session == undefined || club == undefined) {
@@ -49,7 +48,7 @@ export default async function Page(props: PageProps) {
     }
     return (
         <>
-            <ViewResultModal isOpen={viewModal.isOpen} result={activeResult} fleet={activeFleet} onClose={viewModal.onClose} />
+            {/* <ViewResultModal isOpen={viewModal.isOpen} result={activeResult} fleet={activeFleet} onClose={viewModal.onClose} /> */}
             {race.fleets.map((fleet, index) => {
                 return (
                     <div key={'fleetResults' + index} className='h-screen'>

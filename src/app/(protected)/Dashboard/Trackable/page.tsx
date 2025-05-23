@@ -1,14 +1,14 @@
 'use client'
 import * as Fetcher from '@/components/Fetchers'
-import { PageSkeleton } from '@/components/ui/PageSkeleton'
-import { Button, useDisclosure } from '@nextui-org/react'
+import { PageSkeleton } from '@/components/layout/PageSkeleton'
 import { AVAILABLE_PERMISSIONS, userHasPermission } from '@/components/helpers/users'
-import { title } from '@/components/ui/home/primitaves'
+import { title } from '@/components/layout/home/primitaves'
 import TrackerTable from '@/components/tables/TrackerTable'
-import TrackerStatusModal from '@/components/ui/dashboard/TrackerStatusModal'
+import TrackerStatusModal from '@/components/layout/dashboard/TrackerStatusModal'
 import * as Trackable from '@/components/trackable'
 import { useState } from 'react'
 import { useSession, signIn } from 'next-auth/react'
+import { Button } from '@/components/ui/button'
 
 export default function Page() {
     const { data: session, status } = useSession({
@@ -19,11 +19,11 @@ export default function Page() {
     })
     const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
 
-    const statusModal = useDisclosure()
+    // const statusModal = useDisclosure()
     const [viewingTracker, setviewingTracker] = useState<TrackerDataType>()
 
     const trackerStatus = async (tracker: TrackerDataType) => {
-        statusModal.onOpen()
+        // statusModal.onOpen()
         setviewingTracker(await Trackable.getTrackerStatus(tracker.trackerID))
     }
 
@@ -53,20 +53,20 @@ export default function Page() {
 
     return (
         <>
-            <TrackerStatusModal
+            {/* <TrackerStatusModal
                 isOpen={statusModal.isOpen}
                 tracker={viewingTracker}
                 onClose={() => {
                     statusModal.onClose()
                     setviewingTracker(undefined)
                 }}
-            ></TrackerStatusModal>
+            ></TrackerStatusModal> */}
             <div className='p-6'>
                 <h1 className={title({ color: 'blue' })}>Trackable Settings</h1>
             </div>
             <p className='text-2xl font-bold px-6 py-2'>Trackers</p>
             <div className='flex flex-row items-center px-6 py-2 w-1/2 justify-around'>
-                <Button className='mx-1' color='primary' fullWidth onClick={syncTrackers}>
+                <Button className='mx-1' color='primary' onClick={syncTrackers}>
                     Sync Trackers
                 </Button>
             </div>

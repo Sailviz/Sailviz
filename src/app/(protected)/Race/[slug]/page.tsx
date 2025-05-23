@@ -1,53 +1,43 @@
-'use client'
-import React, { act, ChangeEvent, MouseEventHandler, useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import React, { act, ChangeEvent, MouseEventHandler } from 'react'
 import * as DB from '@/components/apiMethods'
 import dayjs from 'dayjs'
 import Papa from 'papaparse'
 import FleetHandicapResultsTable from '@/components/tables/FleetHandicapResultsTable'
 import FleetPursuitResultsTable from '@/components/tables/FleetPursuitResultsTable'
-import * as Fetcher from '@/components/Fetchers'
 import { AVAILABLE_PERMISSIONS, userHasPermission } from '@/components/helpers/users'
-import { PageSkeleton } from '@/components/ui/PageSkeleton'
-import { BreadcrumbItem, Breadcrumbs, Button, Input, useDisclosure } from '@nextui-org/react'
-import CreateResultModal from '@/components/ui/dashboard/CreateResultModal'
-import ProgressModal from '@/components/ui/dashboard/ProgressModal'
-import EditResultModal from '@/components/ui/dashboard/EditResultModal'
-import { mutate } from 'swr'
-import ViewResultModal from '@/components/ui/dashboard/viewResultModal'
-import { useSession, signIn } from 'next-auth/react'
+// import CreateResultModal from '@/components/ui/dashboard/CreateResultModal'
+// import ProgressModal from '@/components/ui/dashboard/ProgressModal'
+// import EditResultModal from '@/components/ui/dashboard/EditResultModal'
+// import { mutate } from 'swr'
+// import ViewResultModal from '@/components/ui/dashboard/viewResultModal'
+import { notFound, redirect } from 'next/navigation'
+import { auth } from '@/server/auth'
+import { api, HydrateClient } from '@/trpc/server'
+import { Breadcrumbs } from '@/components/breadcrumbs'
+import { Input } from '@/components/ui/input'
 
 type PageProps = { params: Promise<{ slug: string }> }
 
 export default async function Page(props: PageProps) {
-    const Router = useRouter()
-
     const params = await props.params
-    const { data: session, status } = useSession({
-        required: true,
-        onUnauthenticated() {
-            signIn()
-        }
-    })
+    const session = await auth()
 
-    const { boats, boatsIsError, boatsIsValidating } = Fetcher.Boats()
+    const race = await api.race({ id: params.slug })
+    if (!race) {
+        notFound()
+    }
 
     //TODO implement timer on fetch
-    const { race, raceIsError, raceIsValidating, mutateRace } = Fetcher.Race(params.slug, true)
+    // const { race, raceIsError, raceIsValidating, mutateRace } = Fetcher.Race(params.slug, true)
 
-    const [seriesName, setSeriesName] = useState('')
+    // const createModal = useDisclosure()
+    // const progressModal = useDisclosure()
+    // const editModal = useDisclosure()
+    // const viewModal = useDisclosure()
 
-    const createModal = useDisclosure()
-    const progressModal = useDisclosure()
-    const editModal = useDisclosure()
-    const viewModal = useDisclosure()
-
-    const [progressValue, setProgressValue] = useState(0)
-    const [progressMax, setProgressMax] = useState(0)
-    const [progressIndeterminate, setProgressIndeterminate] = useState(false)
-
-    var [activeResult, setActiveResult] = useState<ResultsDataType>()
-    var [activeFleet, setActiveFleet] = useState<FleetDataType>()
+    // const [progressValue, setProgressValue] = useState(0)
+    // const [progressMax, setProgressMax] = useState(0)
+    // const [progressIndeterminate, setProgressIndeterminate] = useState(false)
 
     const createResult = async (helm: string, crew: string, boat: BoatDataType, sailNum: string, fleetId: string) => {
         //create a result for each fleet
@@ -55,31 +45,31 @@ export default async function Page(props: PageProps) {
         await DB.updateResult({ ...result, Helm: helm, Crew: crew, boat: boat, SailNumber: sailNum })
 
         console.log(helm, crew, boat, sailNum, fleetId)
-        createModal.onClose() //close modal
+        // createModal.onClose() //close modal
 
-        mutate('/api/GetFleetById?id=' + fleetId)
+        // mutate('/api/GetFleetById?id=' + fleetId)
     }
 
     const updateResult = async (result: ResultsDataType) => {
-        editModal.onClose()
+        // editModal.onClose()
         await DB.updateResult(result)
 
         //mutate all incase fleet was changed
         race.fleets.forEach(fleet => {
-            mutate('/api/GetFleetById?id=' + fleet.id)
+            //     // mutate('/api/GetFleetById?id=' + fleet.id)
         })
-        mutateRace()
+        // mutateRace()
     }
 
     const deleteResult = async (result: ResultsDataType) => {
         await DB.DeleteResultById(result)
-        mutate('/api/GetFleetById?id=' + result.fleetId)
+        // mutate('/api/GetFleetById?id=' + result.fleetId)
         console.log('deleted')
-        editModal.onClose()
+        // editModal.onClose()
     }
 
     const printRaceSheet = async () => {
-        Router.push('/PrintPaperResults/' + race.id)
+        redirect('/PrintPaperResults/' + race.id)
     }
 
     //Capitalise the first letter of each word, and maintain cursor pos.
@@ -92,7 +82,7 @@ export default async function Page(props: PageProps) {
 
         newRaceData.Duties[e.target.id] = calitalisedSentence
         DB.updateRaceById(newRaceData)
-        mutate('/api/GetRaceById?id=' + race.id)
+        // mutate('/api/GetRaceById?id=' + race.id)
 
         let inputElement = document.getElementById(e.target.id) as HTMLInputElement
         inputElement.value = calitalisedSentence
@@ -101,9 +91,9 @@ export default async function Page(props: PageProps) {
 
     const openRacePanel = async () => {
         if (race.Type == 'Handicap') {
-            Router.push('/HRace/' + race.id)
+            redirect('/HRace/' + race.id)
         } else {
-            Router.push('/PRace/' + race.id)
+            redirect('/PRace/' + race.id)
         }
     }
 
@@ -115,11 +105,11 @@ export default async function Page(props: PageProps) {
         }
         console.log(result)
         result.laps.sort((a, b) => a.time - b.time)
-        setActiveResult(result)
+        // setActiveResult(result)
 
-        setActiveFleet(race.fleets.filter(fleet => fleet.id == result?.fleetId)[0]!)
+        // setActiveFleet(race.fleets.filter(fleet => fleet.id == result?.fleetId)[0]!)
 
-        editModal.onOpen()
+        // editModal.onOpen()
     }
 
     const showViewModal = async (resultId: string) => {
@@ -130,18 +120,18 @@ export default async function Page(props: PageProps) {
         }
         console.log(result)
         result.laps.sort((a, b) => a.time - b.time)
-        setActiveResult(result)
+        // setActiveResult(result)
 
-        setActiveFleet(race.fleets.filter(fleet => fleet.id == result?.fleetId)[0]!)
+        // setActiveFleet(race.fleets.filter(fleet => fleet.id == result?.fleetId)[0]!)
 
-        viewModal.onOpen()
+        // viewModal.onOpen()
     }
 
     const saveRaceType = async (newValue: any) => {
         console.log(newValue)
 
         await DB.updateRaceById({ ...race, Type: newValue.value })
-        mutate('/api/GetRaceById?id=' + race.id)
+        // mutate('/api/GetRaceById?id=' + race.id)
     }
 
     const copyFromPrevious = async () => {
@@ -166,27 +156,27 @@ export default async function Page(props: PageProps) {
         //update DB
         console.log(newDuties)
         await DB.updateRaceById({ ...race, Duties: newDuties })
-        mutateRace()
+        // mutateRace()
     }
 
     const entryFileUploadHandler = async (e: ChangeEvent<HTMLInputElement>) => {
-        progressModal.onOpen()
-        setProgressIndeterminate(true)
-        setProgressValue(0)
+        // progressModal.onOpen()
+        // setProgressIndeterminate(true)
+        // setProgressValue(0)
         Papa.parse(e.target.files![0]!, {
             header: true,
             skipEmptyLines: true,
             complete: async function (results: any) {
                 console.log(results)
-                setProgressIndeterminate(false)
-                setProgressMax(results.data.length)
+                // setProgressIndeterminate(false)
+                // setProgressMax(results.data.length)
                 let index = 0
                 for (const line of results.data) {
-                    setProgressValue(++index)
+                    // setProgressValue(++index)
                     //check if all fields are present
                     if (line.Helm == undefined || line.Crew == undefined || line.Boat == undefined || line.SailNumber == undefined) {
                         alert('missing fields')
-                        progressModal.onClose()
+                        // progressModal.onClose()
                         return
                     }
                     let result: ResultsDataType = {} as ResultsDataType
@@ -205,21 +195,21 @@ export default async function Page(props: PageProps) {
                     result.Crew = line.Crew
                     result.SailNumber = line.SailNumber
                     const boatName = line.Boat
-                    let boat = boats.find(boat => boat.name.toUpperCase() == boatName.toUpperCase())
-                    if (boat == undefined) {
-                        console.error('Boat ' + boatName + ' not found')
-                    } else {
-                        result.boat = boat
-                    }
+                    // let boat = boats.find(boat => boat.name.toUpperCase() == boatName.toUpperCase())
+                    // if (boat == undefined) {
+                    //     console.error('Boat ' + boatName + ' not found')
+                    // } else {
+                    //     result.boat = boat
+                    // }
                     console.log(result)
                     //update with info
                     await DB.updateResult(result)
                 }
-                mutate('/api/GetRaceById?id=' + race.id)
+                // mutate('/api/GetRaceById?id=' + race.id)
                 race.fleets.forEach(fleet => {
-                    mutate('/api/GetFleetById?id=' + fleet.id)
+                    // mutate('/api/GetFleetById?id=' + fleet.id)
                 })
-                progressModal.onClose()
+                // progressModal.onClose()
             }
         })
     }
@@ -231,31 +221,27 @@ export default async function Page(props: PageProps) {
         })
     }
 
-    useEffect(() => {
-        const fetchName = async () => {
-            setSeriesName(await DB.GetSeriesById(race.seriesId).then(series => series.name))
-        }
-        if (race != undefined) {
-            fetchName()
-        }
-    }, [race])
-
-    if (session == undefined || boats == undefined || race == undefined) {
-        return <PageSkeleton />
-    }
+    // useEffect(() => {
+    //     const fetchName = async () => {
+    //         setSeriesName(await DB.GetSeriesById(race.seriesId).then(series => series.name))
+    //     }
+    //     if (race != undefined) {
+    //         fetchName()
+    //     }
+    // }, [race])
 
     return (
         <div id='race' className='h-full w-full overflow-y-auto'>
-            <CreateResultModal isOpen={createModal.isOpen} race={race} boats={boats} onSubmit={createResult} onClose={createModal.onClose} />
-            <ProgressModal
+            {/* <CreateResultModal isOpen={createModal.isOpen} race={race} boats={boats} onSubmit={createResult} onClose={createModal.onClose} /> */}
+            {/* <ProgressModal
                 key={progressValue}
                 isOpen={progressModal.isOpen}
                 Value={progressValue}
                 Max={progressMax}
                 Indeterminate={progressIndeterminate}
                 onClose={progressModal.onClose}
-            />
-            <EditResultModal
+            /> */}
+            {/* <EditResultModal
                 advancedEdit={userHasPermission(session.user, AVAILABLE_PERMISSIONS.advancedResultEdit)}
                 isOpen={editModal.isOpen}
                 fleet={activeFleet}
@@ -264,21 +250,18 @@ export default async function Page(props: PageProps) {
                 onSubmit={updateResult}
                 onDelete={deleteResult}
                 onClose={editModal.onClose}
-            />
-            <ViewResultModal isOpen={viewModal.isOpen} result={activeResult} fleet={activeFleet} onClose={viewModal.onClose} />
+            /> */}
+            {/* <ViewResultModal isOpen={viewModal.isOpen} result={activeResult} fleet={activeFleet} onClose={viewModal.onClose} /> */}
             <div className='flex flex-wrap justify-center gap-4 w-full'>
                 <div className='flex flex-wrap px-4 divide-y divide-solid w-full justify-center'>
                     <div className='py-4 w-3/5'>
-                        <Breadcrumbs>
-                            <BreadcrumbItem onClick={() => Router.push('/Series/' + race.seriesId)}>{seriesName}</BreadcrumbItem>
-                            <BreadcrumbItem>Race {race.number} </BreadcrumbItem>
-                        </Breadcrumbs>
+                        <Breadcrumbs />
                         <p className='text-2xl'>{race.Type} Race</p>
                         <p className='text-2xl'>{dayjs(race.Time).format('DD/MM/YYYY HH:mm')}</p>
                     </div>
                     <div className='py-4 w-3/5 justify-center'>
                         <p className='text-xl font-medium text-center'>Duty Team</p>
-                        <div className='flex flex-wrap justify-stretch' key={JSON.stringify(race.Duties)}>
+                        <div className='flex flex-wrap justify-stretch'>
                             {Object.entries(race.Duties).map(([displayName, name], index) => {
                                 return (
                                     <div key={'duty' + index} className='flex-col w-1/3 pr-4'>
@@ -290,34 +273,32 @@ export default async function Page(props: PageProps) {
                                                 type='text'
                                                 id={displayName}
                                                 defaultValue={name as unknown as string} //seems to be a bug, so explicitly cast
-                                                onBlur={saveRaceSettings}
+                                                // onBlur={saveRaceSettings}
                                             />
                                         </div>
                                     </div>
                                 )
                             })}
                             <div className='w-1/4 mr-4 pb-4 pt-6'>
-                                <Button color='warning' onClick={copyFromPrevious}>
+                                {/* <Button color='warning' onClick={copyFromPrevious}>
                                     Copy from previous race
-                                </Button>
+                                </Button> */}
                             </div>
                         </div>
                     </div>
                     <div className='py-4 w-4/5'>
                         <div className='flex flex-wrap justify-center'>
-                            <Button className='mx-1' onClick={() => openRacePanel()} color='success'>
+                            {/* <Button className='mx-1' onClick={() => openRacePanel()} color='success'>
                                 Race Mode
                             </Button>
-                            <Button className='mx-1' onClick={createModal.onOpen}>
-                                Add Entry
-                            </Button>
+                            <Button className='mx-1'>Add Entry</Button>
                             <Button isDisabled className='mx-1'>
                                 Calculate
                             </Button>
                             <Button className='mx-1' onClick={() => printRaceSheet()}>
                                 Print Race Sheet
-                            </Button>
-                            {userHasPermission(session.user, AVAILABLE_PERMISSIONS.UploadEntires) ? (
+                            </Button> */}
+                            {/* {userHasPermission(session!.user, AVAILABLE_PERMISSIONS.UploadEntires) ? (
                                 <>
                                     <Button className='mx-1' onClick={() => document.getElementById('entryFileUpload')!.click()}>
                                         Upload Entries
@@ -326,37 +307,29 @@ export default async function Page(props: PageProps) {
                                 </>
                             ) : (
                                 <></>
-                            )}
-                            {userHasPermission(session.user, AVAILABLE_PERMISSIONS.DownloadResults) ? <Button onClick={downloadResults}>Download Results</Button> : <></>}
+                            )} */}
+                            {/* {userHasPermission(session!.user, AVAILABLE_PERMISSIONS.DownloadResults) ? <Button onClick={downloadResults}>Download Results</Button> : <></>} */}
                         </div>
                     </div>
                     <div className='py-4 w-full'>
-                        {race.fleets.map((fleet, index) => {
+                        {race!.fleets.map((fleet, index) => {
                             return (
                                 <div key={'fleetResults' + index}>
                                     {race.Type == 'Handicap' ? (
                                         <FleetHandicapResultsTable
                                             showTime={true}
-                                            editable={userHasPermission(session.user, AVAILABLE_PERMISSIONS.editResults)}
+                                            editable={userHasPermission(session!.user, AVAILABLE_PERMISSIONS.editResults)}
                                             fleetId={fleet.id}
                                             key={JSON.stringify(race)}
-                                            deleteResult={deleteResult}
-                                            updateResult={updateResult}
                                             raceId={race.id}
-                                            showEditModal={showEditModal}
-                                            showViewModal={showViewModal}
                                         />
                                     ) : (
                                         <FleetPursuitResultsTable
                                             showTime={true}
-                                            editable={userHasPermission(session.user, AVAILABLE_PERMISSIONS.editResults)}
+                                            editable={userHasPermission(session!.user, AVAILABLE_PERMISSIONS.editResults)}
                                             fleetId={fleet.id}
                                             key={JSON.stringify(race)}
-                                            deleteResult={deleteResult}
-                                            updateResult={updateResult}
                                             raceId={race.id}
-                                            showEditModal={showEditModal}
-                                            showViewModal={showViewModal}
                                         />
                                     )}
                                 </div>

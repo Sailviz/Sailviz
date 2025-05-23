@@ -1,10 +1,16 @@
+'use client'
 import React, { ChangeEvent, useState } from 'react'
 import { createColumnHelper, flexRender, getCoreRowModel, useReactTable, getFilteredRowModel } from '@tanstack/react-table'
-import { Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Input, Tooltip, Spinner } from '@nextui-org/react'
 import { EyeIcon } from '@/components/icons/eye-icon'
 import { SearchIcon } from '@/components/icons/search-icon'
 import * as Fetcher from '@/components/Fetchers'
 import { useSession, signIn } from 'next-auth/react'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
+import { Button } from '../ui/button'
+import { Input } from '../ui/input'
+import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from '../ui/dropdown-menu'
+import { ChevronDown } from 'lucide-react'
+import Link from 'next/link'
 
 const columnHelper = createColumnHelper<TrackerDataType>()
 
@@ -20,13 +26,9 @@ function Filter({ column, table }: { column: any; table: any }) {
 
     return (
         <Input
-            isClearable
             className='w-full'
             placeholder='Search by name...'
-            startContent={<SearchIcon />}
             value={column.getFilterValue()}
-            onClear={() => column.setFilterValue('')}
-            onValueChange={value => column.setFilterValue(value)}
             //so that you can type a space, otherwise it will be blocked
             onKeyDown={(e: any) => {
                 if (e.key === ' ') {
@@ -43,11 +45,7 @@ const Action = ({ ...props }: any) => {
     }
     return (
         <div className='relative flex items-center gap-2'>
-            <Tooltip content='Info'>
-                <span className='text-lg text-default-400 cursor-pointer active:opacity-50'>
-                    <EyeIcon onClick={onTrackerStatusClick} />
-                </span>
-            </Tooltip>
+            <EyeIcon onClick={onTrackerStatusClick} />
         </div>
     )
 }
@@ -89,37 +87,63 @@ const TrackerTable = (props: any) => {
     })
 
     return (
-        <div key={props.data}>
-            <Table isStriped aria-label='Tracker Table'>
-                <TableHeader>
-                    {table
-                        .getHeaderGroups()
-                        .flatMap(headerGroup => headerGroup.headers)
-                        .map(header => {
-                            return (
-                                <TableColumn key={header.id}>
-                                    <div className='flex justify-between flex-row'>
-                                        <div className='py-3'>{flexRender(header.column.columnDef.header, header.getContext())}</div>
-                                        {header.column.getCanFilter() ? (
-                                            <div className='w-full'>
-                                                <Filter column={header.column} table={table} />
-                                            </div>
-                                        ) : null}
-                                    </div>
-                                </TableColumn>
-                            )
-                        })}
-                </TableHeader>
-                <TableBody loadingContent={<Spinner />} loadingState={loadingState}>
-                    {table.getRowModel().rows.map(row => (
-                        <TableRow key={row.id}>
-                            {row.getVisibleCells().map(cell => (
-                                <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
-                            ))}
-                        </TableRow>
-                    ))}
-                </TableBody>
-            </Table>
+        <div className='w-full'>
+            <div className='flex items-center py-4'>
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant='outline' className='ml-auto'>
+                            Columns <ChevronDown />
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align='end'>
+                        {table
+                            .getAllColumns()
+                            .filter(column => column.getCanHide())
+                            .map(column => {
+                                return (
+                                    <DropdownMenuCheckboxItem
+                                        key={column.id}
+                                        className='capitalize'
+                                        checked={column.getIsVisible()}
+                                        onCheckedChange={value => column.toggleVisibility(!!value)}
+                                    >
+                                        {column.id}
+                                    </DropdownMenuCheckboxItem>
+                                )
+                            })}
+                    </DropdownMenuContent>
+                </DropdownMenu>
+            </div>
+            <div className='rounded-md border'>
+                <Table>
+                    <TableHeader>
+                        {table.getHeaderGroups().map(headerGroup => (
+                            <TableRow key={headerGroup.id}>
+                                {headerGroup.headers.map(header => {
+                                    return (
+                                        <TableHead key={header.id}>{header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}</TableHead>
+                                    )
+                                })}
+                            </TableRow>
+                        ))}
+                    </TableHeader>
+                    <TableBody>
+                        {table.getRowModel().rows?.length ? (
+                            table.getRowModel().rows.map(row => (
+                                <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
+                                    {row.getVisibleCells().map(cell => (
+                                        <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
+                                    ))}
+                                </TableRow>
+                            ))
+                        ) : (
+                            <TableRow>
+                                <TableCell className='h-24 text-center'>No results.</TableCell>
+                            </TableRow>
+                        )}
+                    </TableBody>
+                </Table>
+            </div>
         </div>
     )
 }

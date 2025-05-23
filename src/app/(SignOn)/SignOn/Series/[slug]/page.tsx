@@ -2,8 +2,8 @@
 import { useRouter } from 'next/navigation'
 import SeriesResultsTable from '@/components/tables/SeriesResultsTable'
 import * as Fetcher from '@/components/Fetchers'
-import { PageSkeleton } from '@/components/ui/PageSkeleton'
-import { title } from '@/components/ui/home/primitaves'
+import { PageSkeleton } from '@/components/layout/PageSkeleton'
+import { title } from '@/components/layout/home/primitaves'
 import { useSession, signIn } from 'next-auth/react'
 
 type PageProps = { params: Promise<{ slug: string }> }

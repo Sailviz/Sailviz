@@ -2,28 +2,19 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import dayjs from 'dayjs'
 import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, RowSelection, SortingState, useReactTable } from '@tanstack/react-table'
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableColumn,
-    TableHeader,
-    TableRow,
-    Dropdown,
-    DropdownItem,
-    DropdownTrigger,
-    Button,
-    DropdownMenu,
-    Input,
-    Tooltip,
-    Pagination,
-    Spinner
-} from '@nextui-org/react'
+
 import { EyeIcon } from '@/components/icons/eye-icon'
 import { useRouter } from 'next/navigation'
 import { useTheme } from 'next-themes'
 import * as Fetcher from '@/components/Fetchers'
 import useSWR, { mutate } from 'swr'
+import { useSession } from 'next-auth/react'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
+import { Button } from '../ui/button'
+import { Input } from '../ui/input'
+import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from '../ui/dropdown-menu'
+import { ChevronDown } from 'lucide-react'
+import Link from 'next/link'
 
 const Time = ({ ...props }: any) => {
     const initialValue = props.getValue()
@@ -57,37 +48,30 @@ const Action = ({ ...props }: any) => {
     const Router = useRouter()
 
     return (
-        <div className='relative flex items-center gap-2'>
-            <Tooltip content='View'>
-                <span className='text-lg text-default-400 cursor-pointer active:opacity-50'>
-                    <EyeIcon onClick={() => props.viewRace(props.row.original.id)} />
-                </span>
-            </Tooltip>
-        </div>
+        <Link href={`/Race/${props.row.original.id}`} className='text-default-900'>
+            <Button variant='outline' className='w-16 h-8 p-0'>
+                Open
+            </Button>
+        </Link>
     )
 }
 
 const columnHelper = createColumnHelper<NextRaceDataType>()
 
 const RacesTable = (props: any) => {
-    const [club, setClub] = useState(props.club)
+    const { data: session, status } = useSession()
     const [page, setPage] = useState(1)
     const {
         data: races,
         error: racesIsError,
         isValidating: racesIsValidating
-    } = useSWR(`/api/GetRacesByClubId?id=${club.id}&page=${page}&date=${props.date}&historical=${props.historical}`, Fetcher.fetcher, {
-        keepPreviousData: true,
-        suspense: true
+    } = useSWR(`/api/GetRacesByClubId?id=${session?.user.clubId}&page=${page}&date=${props.date}&historical=${props.historical}`, Fetcher.fetcher, {
+        keepPreviousData: true
     })
 
-    const data = races.races
+    const data = races!.races
     const count = races?.count
     const rowsPerPage = 10
-
-    const viewRace = (raceId: string) => {
-        props.viewRace(raceId)
-    }
 
     const pages = useMemo(() => {
         return count ? Math.ceil(count / rowsPerPage) : 0
@@ -115,41 +99,83 @@ const RacesTable = (props: any) => {
             columnHelper.accessor('id', {
                 id: 'action',
                 header: 'Actions',
-                cell: props => <Action {...props} id={props.row.original.id} viewRace={viewRace} />
+                cell: props => <Action {...props} id={props.row.original.id} />
             })
         ],
         getCoreRowModel: getCoreRowModel()
     })
     return (
-        <Table
-            id={'racesTable'}
-            aria-label={'table showing list of races'}
-            bottomContent={
-                pages > 0 ? (
-                    <div className='flex w-full justify-center'>
-                        <Pagination isCompact showControls showShadow color='primary' page={page} total={pages} onChange={(page: any) => setPage(page)} />
-                    </div>
-                ) : null
-            }
-        >
-            <TableHeader>
-                {table
-                    .getHeaderGroups()
-                    .flatMap(headerGroup => headerGroup.headers)
-                    .map(header => {
-                        return <TableColumn key={header.id}>{flexRender(header.column.columnDef.header, header.getContext())}</TableColumn>
-                    })}
-            </TableHeader>
-            <TableBody emptyContent={'No races Found.'} loadingContent={<Spinner />} loadingState={loadingState}>
-                {table.getRowModel().rows.map(row => (
-                    <TableRow key={row.id}>
-                        {row.getVisibleCells().map(cell => (
-                            <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
+        <div className='w-full'>
+            <div className='flex items-center py-4'>
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant='outline' className='ml-auto'>
+                            Columns <ChevronDown />
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align='end'>
+                        {table
+                            .getAllColumns()
+                            .filter(column => column.getCanHide())
+                            .map(column => {
+                                return (
+                                    <DropdownMenuCheckboxItem
+                                        key={column.id}
+                                        className='capitalize'
+                                        checked={column.getIsVisible()}
+                                        onCheckedChange={value => column.toggleVisibility(!!value)}
+                                    >
+                                        {column.id}
+                                    </DropdownMenuCheckboxItem>
+                                )
+                            })}
+                    </DropdownMenuContent>
+                </DropdownMenu>
+            </div>
+            <div className='rounded-md border'>
+                <Table>
+                    <TableHeader>
+                        {table.getHeaderGroups().map(headerGroup => (
+                            <TableRow key={headerGroup.id}>
+                                {headerGroup.headers.map(header => {
+                                    return (
+                                        <TableHead key={header.id}>{header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}</TableHead>
+                                    )
+                                })}
+                            </TableRow>
                         ))}
-                    </TableRow>
-                ))}
-            </TableBody>
-        </Table>
+                    </TableHeader>
+                    <TableBody>
+                        {table.getRowModel().rows?.length ? (
+                            table.getRowModel().rows.map(row => (
+                                <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
+                                    {row.getVisibleCells().map(cell => (
+                                        <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
+                                    ))}
+                                </TableRow>
+                            ))
+                        ) : (
+                            <TableRow>
+                                <TableCell className='h-24 text-center'>No results.</TableCell>
+                            </TableRow>
+                        )}
+                    </TableBody>
+                </Table>
+            </div>
+            <div className='flex items-center justify-end space-x-2 py-4'>
+                <div className='flex-1 text-sm text-muted-foreground'>
+                    {table.getFilteredSelectedRowModel().rows.length} of {table.getFilteredRowModel().rows.length} row(s) selected.
+                </div>
+                <div className='space-x-2'>
+                    <Button variant='outline' size='sm' onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()}>
+                        Previous
+                    </Button>
+                    <Button variant='outline' size='sm' onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>
+                        Next
+                    </Button>
+                </div>
+            </div>
+        </div>
     )
 }
 

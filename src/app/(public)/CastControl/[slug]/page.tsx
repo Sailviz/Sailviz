@@ -1,7 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { Peer, DataConnection } from 'peerjs'
-import { title } from '@/components/ui/home/primitaves'
+import { title } from '@/components/layout/home/primitaves'
 import * as DB from '@/components/apiMethods'
 import { useSearchParams } from 'next/navigation'
 

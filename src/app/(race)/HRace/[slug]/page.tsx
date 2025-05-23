@@ -5,13 +5,13 @@ import * as DB from '@/components/apiMethods'
 import RaceTimer from '@/components/HRaceTimer'
 
 import * as Fetcher from '@/components/Fetchers'
-import { Button, useDisclosure } from '@nextui-org/react'
-import RetireModal from '@/components/ui/dashboard/RetireModal'
-import BoatCard from '@/components/ui/race/BoatCard'
-import { PageSkeleton } from '@/components/ui/PageSkeleton'
+import RetireModal from '@/components/layout/dashboard/RetireModal'
+import BoatCard from '@/components/layout/race/BoatCard'
+import { PageSkeleton } from '@/components/layout/PageSkeleton'
 import { mutate } from 'swr'
-import FlagModal from '@/components/ui/dashboard/Flag Modal'
+import FlagModal from '@/components/layout/dashboard/Flag Modal'
 import { useSession, signIn } from 'next-auth/react'
+import { Button } from '@/components/ui/button'
 
 enum raceStateType {
     countdown,
@@ -47,8 +47,8 @@ export default async function Page(props: PageProps) {
 
     const { race, raceIsError, raceIsValidating } = Fetcher.Race(params.slug, true)
 
-    const retireModal = useDisclosure()
-    const flagModal = useDisclosure()
+    // const retireModal = useDisclosure()
+    // const flagModal = useDisclosure()
     const [flagStatus, setFlagStatus] = useState<boolean[]>([false, false])
     const [nextFlagStatus, setNextFlagStatus] = useState<boolean[]>([false, false])
 
@@ -114,7 +114,7 @@ export default async function Page(props: PageProps) {
             console.error('start time was: ' + localTime)
         }
 
-        flagModal.onOpen()
+        // flagModal.onOpen()
         //set flag status to false
         setFlagStatus([false, false])
         setNextFlagStatus([true, false])
@@ -226,7 +226,7 @@ export default async function Page(props: PageProps) {
             })
         setFlagStatus([false, false])
         setNextFlagStatus([false, false])
-        flagModal.onClose()
+        // flagModal.onClose()
         let sound = document.getElementById('Beep') as HTMLAudioElement
         sound!.currentTime = 0
         sound!.play()
@@ -322,7 +322,7 @@ export default async function Page(props: PageProps) {
     }
 
     const showRetireModal = (resultId: String) => {
-        retireModal.onOpen()
+        // retireModal.onOpen()
         let result: ResultsDataType | undefined
         race.fleets.some(fleet => {
             result = fleet.results.find(result => result.id === resultId)
@@ -336,7 +336,7 @@ export default async function Page(props: PageProps) {
     }
 
     const retireBoat = async (resultCode: string) => {
-        retireModal.onClose()
+        // retireModal.onClose()
         let tempdata = activeResult
         tempdata.resultCode = resultCode
         await DB.updateResult(tempdata)
@@ -598,8 +598,8 @@ export default async function Page(props: PageProps) {
 
     return (
         <>
-            <RetireModal isOpen={retireModal.isOpen} onSubmit={retireBoat} onClose={retireModal.onClose} result={activeResult} />
-            <FlagModal isOpen={flagModal.isOpen} currentFlagStatus={flagStatus} nextFlagStatus={nextFlagStatus} onClose={flagModal.onClose} onSubmit={() => null} />
+            {/* <RetireModal isOpen={retireModal.isOpen} onSubmit={retireBoat} onClose={retireModal.onClose} result={activeResult} /> */}
+            {/* <FlagModal isOpen={flagModal.isOpen} currentFlagStatus={flagStatus} nextFlagStatus={nextFlagStatus} onClose={flagModal.onClose} onSubmit={() => null} /> */}
             <audio id='Beep' src='/Beep-6.mp3'></audio>
             <audio id='Countdown' src='/Countdown.mp3'></audio>
             <div className='w-full flex flex-col items-center justify-start panel-height'>
@@ -630,7 +630,7 @@ export default async function Page(props: PageProps) {
                                         switch (raceState[index]) {
                                             case raceStateType.reset:
                                                 return (
-                                                    <Button onClick={() => startRaceButton(fleet.id)} size='lg' color='success' fullWidth>
+                                                    <Button onClick={() => startRaceButton(fleet.id)} size='lg' color='success'>
                                                         Start
                                                     </Button>
                                                 )
@@ -642,20 +642,19 @@ export default async function Page(props: PageProps) {
                                                         }}
                                                         size='lg'
                                                         color='danger'
-                                                        fullWidth
                                                     >
                                                         Stop
                                                     </Button>
                                                 )
                                             case raceStateType.stopped:
                                                 return (
-                                                    <Button onClick={() => resetRace(fleet.id)} size='lg' color='primary' fullWidth>
+                                                    <Button onClick={() => resetRace(fleet.id)} size='lg' color='primary'>
                                                         Reset
                                                     </Button>
                                                 )
                                             case raceStateType.calculate:
                                                 return (
-                                                    <Button id='CalcResultsButton' onClick={calculateResults} size='lg' color='primary' fullWidth>
+                                                    <Button id='CalcResultsButton' onClick={calculateResults} size='lg' color='primary'>
                                                         Calculate Results
                                                     </Button>
                                                 )
@@ -670,7 +669,7 @@ export default async function Page(props: PageProps) {
                 </div>
                 <div className='flex w-full shrink flex-row justify-around'>
                     <div className='w-1/5 p-2'>
-                        <Button onClick={() => undo()} size='lg' color='warning' fullWidth>
+                        <Button onClick={() => undo()} size='lg' color='warning'>
                             Undo Last Action
                         </Button>
                     </div>
@@ -680,19 +679,18 @@ export default async function Page(props: PageProps) {
                                 onClick={() => setMode(checkAnyFinished(race.fleets.flatMap(fleet => fleet.results)) ? modeType.Finish : modeType.Lap)}
                                 size='lg'
                                 color={'primary'}
-                                fullWidth
                             >
                                 Cancel Retirement
                             </Button>
                         ) : (
-                            <Button onClick={() => setMode(modeType.Retire)} size='lg' color={'primary'} fullWidth>
+                            <Button onClick={() => setMode(modeType.Retire)} size='lg' color={'primary'}>
                                 Retire a Boat
                             </Button>
                         )}
                     </div>
                     {mode == modeType.Lap ? (
                         <div className='w-1/5 p-2' id='FinishModeButton'>
-                            <Button onClick={() => setMode(modeType.Finish)} size='lg' color={'primary'} fullWidth>
+                            <Button onClick={() => setMode(modeType.Finish)} size='lg' color={'primary'}>
                                 Finish Mode
                             </Button>
                         </div>
@@ -702,8 +700,7 @@ export default async function Page(props: PageProps) {
                                 onClick={() => setMode(modeType.Lap)}
                                 size='lg'
                                 color={'primary'}
-                                fullWidth
-                                isDisabled={checkAnyFinished(race.fleets.flatMap(fleet => fleet.results))}
+                                // isDisabled={checkAnyFinished(race.fleets.flatMap(fleet => fleet.results))}
                             >
                                 Lap Mode
                             </Button>

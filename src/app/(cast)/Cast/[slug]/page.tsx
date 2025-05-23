@@ -9,12 +9,12 @@ import { animateScroll, Events } from 'react-scroll'
 import { useTheme } from 'next-themes'
 import { Peer, DataConnection } from 'peerjs'
 import { useQRCode } from 'next-qrcode'
-import { title } from '@/components/ui/home/primitaves'
+import { title } from '@/components/layout/home/primitaves'
 import FleetHandicapResultsTable from '@/components/tables/FleetHandicapResultsTable'
 import FleetPursuitResultsTable from '@/components/tables/FleetPursuitResultsTable'
-import { Progress } from '@nextui-org/react'
 import * as Fetcher from '@/components/Fetchers'
 import { mutate } from 'swr'
+import { Progress } from '@/components/ui/progress'
 
 enum pageStateType {
     live,
@@ -287,7 +287,7 @@ export default async function Page(props: PageProps) {
             <div key={JSON.stringify(timerActive)}>
                 {timerActive ? (
                     <div className='absolute left-0 bottom-0 w-full'>
-                        <Progress color='primary' size='md' aria-label='Loading...' value={scaleRange(timerValue, [0, timerMax], [100, 0])} className='' radius='none' />
+                        <Progress color='primary' aria-label='Loading...' value={scaleRange(timerValue, [0, timerMax], [100, 0])} className='' />
                     </div>
                 ) : null}
             </div>

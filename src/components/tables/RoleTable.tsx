@@ -1,26 +1,13 @@
 import React, { ChangeEvent, useState } from 'react'
 import dayjs from 'dayjs'
 import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, RowSelection, SortingState, useReactTable } from '@tanstack/react-table'
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableColumn,
-    TableHeader,
-    TableRow,
-    Dropdown,
-    DropdownItem,
-    DropdownTrigger,
-    Button,
-    DropdownMenu,
-    Tooltip,
-    Spinner
-} from '@nextui-org/react'
+
 import { EditIcon } from '@/components/icons/edit-icon'
 import { DeleteIcon } from '@/components/icons/delete-icon'
 import * as Fetcher from '@/components/Fetchers'
 import { AVAILABLE_PERMISSIONS, userHasPermission } from '@/components/helpers/users'
 import { useSession, signIn } from 'next-auth/react'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
 
 const Action = ({ ...props }: any) => {
     const onEditClick = () => {
@@ -35,16 +22,9 @@ const Action = ({ ...props }: any) => {
     if (userHasPermission(props.user, AVAILABLE_PERMISSIONS.editRoles)) {
         return (
             <div className='relative flex items-center gap-2'>
-                <Tooltip content='Edit'>
-                    <span className='text-lg text-default-400 cursor-pointer active:opacity-50'>
-                        <EditIcon onClick={onEditClick} />
-                    </span>
-                </Tooltip>
-                <Tooltip color='danger' content='Delete'>
-                    <span className='text-lg text-danger cursor-pointer active:opacity-50'>
-                        <DeleteIcon onClick={onDeleteClick} />
-                    </span>
-                </Tooltip>
+                <EditIcon onClick={onEditClick} />
+
+                <DeleteIcon onClick={onDeleteClick} />
             </div>
         )
     } else {
@@ -108,24 +88,31 @@ const UsersTable = (props: any) => {
         getSortedRowModel: getSortedRowModel()
     })
     return (
-        <div key={props.data}>
-            <Table isStriped id={'clubTable'} aria-label='Role Table'>
+        <div className='rounded-md border w-full'>
+            <Table>
                 <TableHeader>
-                    {table
-                        .getHeaderGroups()
-                        .flatMap(headerGroup => headerGroup.headers)
-                        .map(header => {
-                            return <TableColumn key={header.id}>{flexRender(header.column.columnDef.header, header.getContext())}</TableColumn>
-                        })}
-                </TableHeader>
-                <TableBody loadingContent={<Spinner />} loadingState={loadingState}>
-                    {table.getRowModel().rows.map(row => (
-                        <TableRow key={row.id}>
-                            {row.getVisibleCells().map(cell => (
-                                <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
-                            ))}
+                    {table.getHeaderGroups().map(headerGroup => (
+                        <TableRow key={headerGroup.id}>
+                            {headerGroup.headers.map(header => {
+                                return <TableHead key={header.id}>{header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}</TableHead>
+                            })}
                         </TableRow>
                     ))}
+                </TableHeader>
+                <TableBody>
+                    {table.getRowModel().rows?.length ? (
+                        table.getRowModel().rows.map(row => (
+                            <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
+                                {row.getVisibleCells().map(cell => (
+                                    <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
+                                ))}
+                            </TableRow>
+                        ))
+                    ) : (
+                        <TableRow>
+                            <TableCell className='h-24 text-center'>No results.</TableCell>
+                        </TableRow>
+                    )}
                 </TableBody>
             </Table>
         </div>

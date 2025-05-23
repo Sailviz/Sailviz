@@ -6,15 +6,15 @@ import PursuitTimer from '@/components/PRaceTimer'
 
 import * as Fetcher from '@/components/Fetchers'
 import { mutate } from 'swr'
-import { PageSkeleton } from '@/components/ui/PageSkeleton'
-import { Button, useDisclosure } from '@nextui-org/react'
-import PursuitTable from '@/components/ui/race/PursuitTable'
-import RetireModal from '@/components/ui/dashboard/RetireModal'
-import BoatCard from '@/components/ui/race/BoatCard'
+import { PageSkeleton } from '@/components/layout/PageSkeleton'
+import PursuitTable from '@/components/layout/race/PursuitTable'
+import RetireModal from '@/components/layout/dashboard/RetireModal'
+import BoatCard from '@/components/layout/race/BoatCard'
 import { result, set } from 'cypress/types/lodash'
 import { use } from 'chai'
-import FlagModal from '@/components/ui/dashboard/Flag Modal'
+import FlagModal from '@/components/layout/dashboard/Flag Modal'
 import { useSession, signIn } from 'next-auth/react'
+import { Button } from '@/components/ui/button'
 
 enum raceStateType {
     running,
@@ -47,8 +47,8 @@ export default async function Page(props: PageProps) {
         }
     })
 
-    const retireModal = useDisclosure()
-    const flagModal = useDisclosure()
+    // const retireModal = useDisclosure()
+    // const flagModal = useDisclosure()
     const [flagStatus, setFlagStatus] = useState<boolean[]>([false, false])
     const [nextFlagStatus, setNextFlagStatus] = useState<boolean[]>([false, false])
 
@@ -87,7 +87,7 @@ export default async function Page(props: PageProps) {
             fleet.startTime = localTime
             await DB.updateFleetById(fleet)
         })
-        flagModal.onOpen()
+        // flagModal.onOpen()
         //set flag status to false
         setFlagStatus([false, false])
         setNextFlagStatus([true, false])
@@ -183,7 +183,7 @@ export default async function Page(props: PageProps) {
         console.log('GO!')
         setFlagStatus([false, false])
         setNextFlagStatus([false, false])
-        flagModal.onClose()
+        // flagModal.onClose()
 
         //sound horn
         fetch('https://' + club.settings.hornIP + '/hoot?startTime=300', {
@@ -239,7 +239,7 @@ export default async function Page(props: PageProps) {
 
         setLastAction({ type: 'retire', resultId: tempdata.id })
 
-        retireModal.onClose()
+        // retireModal.onClose()
         let optimisticData: RaceDataType = window.structuredClone(race)
         //update optimistic data with new lap
         optimisticData.fleets.forEach((fleet: FleetDataType) => {
@@ -444,7 +444,7 @@ export default async function Page(props: PageProps) {
     }
 
     const showRetireModal = (resultId: String) => {
-        retireModal.onOpen()
+        // retireModal.onOpen()
         let result: ResultsDataType | undefined
         race.fleets.some(fleet => {
             result = fleet.results.find(result => result.id === resultId)
@@ -532,8 +532,8 @@ export default async function Page(props: PageProps) {
 
     return (
         <>
-            <RetireModal isOpen={retireModal.isOpen} onSubmit={retireBoat} onClose={retireModal.onClose} result={activeResult} />
-            <FlagModal isOpen={flagModal.isOpen} currentFlagStatus={flagStatus} nextFlagStatus={nextFlagStatus} onClose={flagModal.onClose} onSubmit={() => null} />
+            {/* <RetireModal isOpen={retireModal.isOpen} onSubmit={retireBoat} onClose={retireModal.onClose} result={activeResult} /> */}
+            {/* <FlagModal isOpen={flagModal.isOpen} currentFlagStatus={flagStatus} nextFlagStatus={nextFlagStatus} onClose={flagModal.onClose} onSubmit={() => null} /> */}
 
             <audio id='Beep' src='/Beep-6.mp3'></audio>
             <audio id='Countdown' src='/Countdown.mp3'></audio>
@@ -601,17 +601,17 @@ export default async function Page(props: PageProps) {
                 </div>
                 <div className='flex w-full shrink flex-row justify-left'>
                     <div className='w-1/5 p-2'>
-                        <Button onClick={() => undo()} size='lg' color='warning' fullWidth>
+                        <Button onClick={() => undo()} size='lg' color='warning'>
                             Undo Last Action
                         </Button>
                     </div>
                     <div className='w-1/5 p-2' id='RetireModeButton'>
                         {mode == modeType.Retire ? (
-                            <Button onClick={() => setMode(modeType.Lap)} size='lg' color={'primary'} fullWidth>
+                            <Button onClick={() => setMode(modeType.Lap)} size='lg' color={'primary'}>
                                 Cancel Retirement
                             </Button>
                         ) : (
-                            <Button onClick={() => setMode(modeType.Retire)} size='lg' color={'primary'} fullWidth>
+                            <Button onClick={() => setMode(modeType.Retire)} size='lg' color={'primary'}>
                                 Retire a Boat
                             </Button>
                         )}

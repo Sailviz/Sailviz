@@ -3,15 +3,15 @@ import { ChangeEvent, MouseEventHandler, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import * as DB from '@/components/apiMethods'
 import * as Fetcher from '@/components/Fetchers'
-import { PageSkeleton } from '@/components/ui/PageSkeleton'
+import { PageSkeleton } from '@/components/layout/PageSkeleton'
 import UsersTable from '@/components/tables/UsersTable'
 import RoleTable from '@/components/tables/RoleTable'
-import EditUserModal from '@/components/ui/dashboard/EditUserModal'
-import { Button, useDisclosure } from '@nextui-org/react'
+import EditUserModal from '@/components/layout/dashboard/EditUserModal'
 import { mutate } from 'swr'
-import EditRoleModal from '@/components/ui/dashboard/EditRoleModal'
+import EditRoleModal from '@/components/layout/dashboard/EditRoleModal'
 import { AVAILABLE_PERMISSIONS, userHasPermission } from '@/components/helpers/users'
 import { signIn, useSession } from 'next-auth/react'
+import { Button } from '@/components/ui/button'
 
 export default function Page() {
     const Router = useRouter()
@@ -21,8 +21,8 @@ export default function Page() {
             signIn()
         }
     })
-    const editUserModal = useDisclosure()
-    const editRoleModal = useDisclosure()
+    // const editUserModal = useDisclosure()
+    // const editRoleModal = useDisclosure()
 
     const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
 
@@ -39,7 +39,7 @@ export default function Page() {
     }
 
     const updateUser = async (user: UserDataType, password: string) => {
-        editUserModal.onClose()
+        // editUserModal.onClose()
         await DB.updateUser(user, password)
         mutate('/api/GetUsersByClubId')
     }
@@ -58,7 +58,7 @@ export default function Page() {
         }
     }
     const updateRole = async (role: RoleDataType) => {
-        editRoleModal.onClose()
+        // editRoleModal.onClose()
         await DB.updateRole(role)
         mutate('/api/GetRolesByClubId')
     }
@@ -70,12 +70,12 @@ export default function Page() {
 
     const showUserEditModal = async (user: UserDataType) => {
         setActiveUser(user)
-        editUserModal.onOpen()
+        // editUserModal.onOpen()
     }
 
     const showRoleEditModal = async (role: RoleDataType) => {
         setActiveRole(role)
-        editRoleModal.onOpen()
+        // editRoleModal.onOpen()
     }
 
     if (clubIsValidating || club == undefined || session == undefined) {
@@ -85,22 +85,22 @@ export default function Page() {
     if (userHasPermission(session.user, AVAILABLE_PERMISSIONS.viewUsers)) {
         return (
             <>
-                <EditUserModal
+                {/* <EditUserModal
                     isOpen={editUserModal.isOpen}
                     user={activeUser}
                     onSubmit={updateUser}
                     onClose={() => {
                         editUserModal.onClose()
                     }}
-                />
-                <EditRoleModal
+                /> */}
+                {/* <EditRoleModal
                     isOpen={editRoleModal.isOpen}
                     role={activeRole}
                     onSubmit={updateRole}
                     onClose={() => {
                         editRoleModal.onClose()
                     }}
-                />
+                /> */}
                 <div className='p-6'>
                     <UsersTable edit={showUserEditModal} deleteUser={deleteUser} />
                     {userHasPermission(session.user, AVAILABLE_PERMISSIONS.editUsers) ? <Button onClick={createUser}>Create User</Button> : <></>}

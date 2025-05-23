@@ -1,25 +1,14 @@
 'use client'
 import React, { useState, useEffect } from 'react'
 import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, useReactTable, SortingState } from '@tanstack/react-table'
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableColumn,
-    TableHeader,
-    TableRow,
-    Dropdown,
-    DropdownItem,
-    DropdownTrigger,
-    Button,
-    DropdownMenu,
-    Input,
-    Spinner,
-    Tooltip
-} from '@nextui-org/react'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
+import { Button } from '../ui/button'
+import { Input } from '../ui/input'
+import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from '../ui/dropdown-menu'
 import * as Fetcher from '@/components/Fetchers'
 import useSWR from 'swr'
 import { EyeIcon } from '../icons/eye-icon'
+import { ChevronDown } from 'lucide-react'
 
 const Text = ({ ...props }) => {
     const value = props.getValue()
@@ -93,11 +82,7 @@ const View = ({ ...props }: any) => {
     }
     return (
         <>
-            <Tooltip content='View'>
-                <span className='text-lg text-default-400 cursor-pointer active:opacity-50'>
-                    <EyeIcon onClick={onClick} />
-                </span>
-            </Tooltip>
+            <EyeIcon onClick={onClick} />
         </>
     )
 }
@@ -241,26 +226,77 @@ const FleetHandicapResultsTable = (props: any) => {
         getSortedRowModel: getSortedRowModel()
     })
     return (
-        <div key={props.data} className='h-full'>
-            <Table isStriped id={'clubTable'} isHeaderSticky fullWidth className='h-full overflow-auto' aria-label='Results Table'>
-                <TableHeader>
-                    {table
-                        .getHeaderGroups()
-                        .flatMap(headerGroup => headerGroup.headers)
-                        .map(header => {
-                            return <TableColumn key={header.id}>{flexRender(header.column.columnDef.header, header.getContext())}</TableColumn>
-                        })}
-                </TableHeader>
-                <TableBody loadingContent={<Spinner />} loadingState={loadingState} emptyContent={'No Entries Yet.'}>
-                    {table.getRowModel().rows.map(row => (
-                        <TableRow key={row.id}>
-                            {row.getVisibleCells().map(cell => (
-                                <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
-                            ))}
-                        </TableRow>
-                    ))}
-                </TableBody>
-            </Table>
+        <div className='w-full'>
+            <div className='flex items-center py-4'>
+                <h1>{data.length} boats entered</h1>
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant='outline' className='ml-auto'>
+                            Columns <ChevronDown />
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align='end'>
+                        {table
+                            .getAllColumns()
+                            .filter(column => column.getCanHide())
+                            .map(column => {
+                                return (
+                                    <DropdownMenuCheckboxItem
+                                        key={column.id}
+                                        className='capitalize'
+                                        checked={column.getIsVisible()}
+                                        onCheckedChange={value => column.toggleVisibility(!!value)}
+                                    >
+                                        {column.id}
+                                    </DropdownMenuCheckboxItem>
+                                )
+                            })}
+                    </DropdownMenuContent>
+                </DropdownMenu>
+            </div>
+            <div className='rounded-md border'>
+                <Table>
+                    <TableHeader>
+                        {table.getHeaderGroups().map(headerGroup => (
+                            <TableRow key={headerGroup.id}>
+                                {headerGroup.headers.map(header => {
+                                    return (
+                                        <TableHead key={header.id}>{header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}</TableHead>
+                                    )
+                                })}
+                            </TableRow>
+                        ))}
+                    </TableHeader>
+                    <TableBody>
+                        {table.getRowModel().rows?.length ? (
+                            table.getRowModel().rows.map(row => (
+                                <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
+                                    {row.getVisibleCells().map(cell => (
+                                        <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
+                                    ))}
+                                </TableRow>
+                            ))
+                        ) : (
+                            <TableRow>
+                                <TableCell className='h-24 text-center'>No results.</TableCell>
+                            </TableRow>
+                        )}
+                    </TableBody>
+                </Table>
+            </div>
+            <div className='flex items-center justify-end space-x-2 py-4'>
+                <div className='flex-1 text-sm text-muted-foreground'>
+                    {table.getFilteredSelectedRowModel().rows.length} of {table.getFilteredRowModel().rows.length} row(s) selected.
+                </div>
+                <div className='space-x-2'>
+                    <Button variant='outline' size='sm' onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()}>
+                        Previous
+                    </Button>
+                    <Button variant='outline' size='sm' onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>
+                        Next
+                    </Button>
+                </div>
+            </div>
         </div>
     )
 }

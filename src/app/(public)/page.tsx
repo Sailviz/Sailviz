@@ -1,9 +1,11 @@
 'use client'
-import { Button, Card, CardFooter, CardHeader, Image } from '@nextui-org/react'
-import LapsCounter from '@/components/ui/home/LapsCounter'
+import LapsCounter from '@/components/layout/home/LapsCounter'
 import { useTheme } from 'next-themes'
-import { title, subtitle } from '@/components/ui/home/primitaves'
+import { title, subtitle } from '@/components/layout/home/primitaves'
 import { useRouter } from 'next/navigation'
+import { Button } from '@/components/ui/button'
+import { Card, CardFooter, CardHeader } from '@/components/ui/card'
+import Image from 'next/image'
 
 export default function Page() {
     const { theme, setTheme } = useTheme()
@@ -29,48 +31,37 @@ export default function Page() {
 
             <div className='w-full gap-2 grid grid-cols-12 grid-rows-2 px-8'>
                 <Card className='col-span-12 sm:col-span-2 h-[300px]'>
-                    <CardHeader className='absolute z-10 top-1 flex-col !items-start'>
+                    <CardHeader>
                         <p className='text-tiny text-black/60 uppercase font-bold'>Race Sign On</p>
                         <h4 className='text-black font-medium text-large'>Digital Race Sign On</h4>
                     </CardHeader>
-                    <Image removeWrapper alt='Card background' className='z-0 w-full h-full object-cover' src='/' />
                 </Card>
 
                 <Card className='col-span-12 sm:col-span-2 h-[300px]'>
-                    <CardHeader className='absolute z-10 top-1 flex-col !items-start'>
+                    <CardHeader>
                         <p className='text-tiny text-black/60 uppercase font-bold'>Starting</p>
                         <h4 className='text-black font-medium text-large'>Fully automated start procedure</h4>
                     </CardHeader>
-                    <Image removeWrapper alt='Card background' className='z-0 w-full h-full object-cover' src='/' />
                 </Card>
                 <Card className='col-span-12 sm:col-span-2 h-[300px]'>
-                    <CardHeader className='absolute z-10 top-1 flex-col !items-start'>
+                    <CardHeader>
                         <p className='text-tiny text-black/60 uppercase font-bold'>Racing</p>
                         <h4 className='text-black font-medium text-large'>Touch friendly interface for recording lap times</h4>
                     </CardHeader>
-                    <Image removeWrapper alt='Card background' className='z-0 w-full h-full object-cover' src='/' />
                 </Card>
                 <Card className='col-span-12 sm:col-span-2 h-[300px]'>
-                    <CardHeader className='absolute z-10 top-1 flex-col !items-start'>
+                    <CardHeader>
                         <p className='text-tiny text-black/60 uppercase font-bold'>Live Results</p>
                         <h4 className='text-black font-medium text-large'>See Calculated Positions in real-time</h4>
                     </CardHeader>
-                    <Image removeWrapper alt='Card background' className='z-0 w-full h-full object-cover' src='/' />
                 </Card>
-                <Card isFooterBlurred className='w-full h-[300px] col-span-12 sm:col-span-4'>
-                    <CardHeader className='absolute z-10 top-1 flex-col items-start'>
+                <Card className='w-full col-span-12 sm:col-span-4'>
+                    <CardHeader>
                         <p className='text-tiny text-black/60 uppercase font-bold'>Upcoming Feature</p>
                         <h4 className='text-black font-medium text-2xl'>Live Boat Tracking</h4>
                     </CardHeader>
-                    <Image removeWrapper alt='Card example background' className='z-0 w-full h-full scale-125 -translate-y-6 object-cover' src='/' />
-                    <CardFooter className='absolute bg-black/30 bottom-0 border-t-1 border-zinc-100/50 z-10 justify-between'>
-                        <div>
-                            <p className='text-black text-tiny'>Available soon.</p>
-                            <p className='text-black text-tiny'>Get notified.</p>
-                        </div>
-                        <Button className='text-tiny' color='primary' radius='full' size='sm'>
-                            Notify Me
-                        </Button>
+                    <CardFooter>
+                        <Button className='w-full'>Notify Me</Button>
                     </CardFooter>
                 </Card>
             </div>

@@ -1,7 +1,6 @@
-import { Button } from '@nextui-org/react'
 import { Metadata } from 'next'
-import 'styles/globals.css'
-import BackButton from '@/components/ui/backButton'
+import '@/styles/globals.css'
+import BackButton from '@/components/layout/backButton'
 
 export const metadata: Metadata = {
     title: 'SailViz',

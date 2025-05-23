@@ -1,27 +1,11 @@
-'use client'
-import { ChangeEvent, MouseEventHandler, useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
-import * as DB from '@/components/apiMethods'
-import * as Fetcher from '@/components/Fetchers'
-import { PageSkeleton } from '@/components/ui/PageSkeleton'
 import RacesTable from '@/components/tables/RacesTable'
-import { title } from '@/components/ui/home/primitaves'
+import { title } from '@/components/layout/home/primitaves'
 import UpcomingRacesTable from '@/components/tables/UpcomingRacesTable'
-import { useSession } from 'next-auth/react'
+import { auth } from '@/server/auth'
 
-export default function Page() {
-    const Router = useRouter()
+export default async function Page() {
+    const session = await auth()
 
-    const { data: session, status } = useSession()
-    const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
-
-    const viewRace = (raceId: string) => {
-        Router.push('/Race/' + raceId)
-    }
-
-    if (clubIsValidating || clubIsError || club == undefined) {
-        return <PageSkeleton />
-    }
     return (
         <div>
             <div className='p-6'>
@@ -34,11 +18,11 @@ export default function Page() {
                 </div>
                 <div className='px-3'>
                     <p className='text-2xl font-bold p-6'>Upcoming</p>
-                    <RacesTable club={club} date={new Date()} historical={false} viewRace={viewRace} />
+                    <RacesTable club={session?.user.clubId} date={new Date()} historical={false} />
                 </div>
                 <div className='px-3'>
                     <p className='text-2xl font-bold p-6'>Recent</p>
-                    <RacesTable club={club} date={new Date()} historical={true} viewRace={viewRace} />
+                    <RacesTable club={session?.user.clubId} date={new Date()} historical={true} />
                 </div>
             </div>
         </div>

@@ -1,7 +1,6 @@
 import { Metadata } from 'next'
-import 'styles/globals.css'
+import '@/styles/globals.css'
 
-import { Navbar, NavbarBrand, NavbarContent, NavbarItem, Link, Button } from '@nextui-org/react'
 import { SailVizIcon } from '@/components/icons/sailviz-icon'
 import { Suspense } from 'react'
 

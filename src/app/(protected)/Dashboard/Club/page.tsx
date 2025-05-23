@@ -3,12 +3,14 @@ import { ChangeEvent, MouseEventHandler, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import * as DB from '@/components/apiMethods'
 import * as Fetcher from '@/components/Fetchers'
-import { PageSkeleton } from '@/components/ui/PageSkeleton'
-import { Input, Button, Table, TableHeader, TableColumn, TableBody, TableRow, TableCell } from '@nextui-org/react'
+import { PageSkeleton } from '@/components/layout/PageSkeleton'
 import { AVAILABLE_PERMISSIONS, userHasPermission } from '@/components/helpers/users'
 import { mutate } from 'swr'
 import { EditIcon } from '@/components/icons/edit-icon'
 import { useSession, signIn } from 'next-auth/react'
+import { Input } from '@/components/ui/input'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Button } from '@/components/ui/button'
 
 export default function Page() {
     const Router = useRouter()
@@ -46,33 +48,31 @@ export default function Page() {
     }
     if (userHasPermission(session.user, AVAILABLE_PERMISSIONS.editHardware))
         return (
-            <>
+            <div className='flex flex-col'>
                 <p className='text-2xl font-bold p-6'>Pursuit Race Length</p>
                 <div className='flex flex-col px-6 w-full '>
-                    <Input type='number' defaultValue={club.settings.pursuitLength.toString()} onValueChange={savePursuitLength} />
+                    <Input type='number' defaultValue={club.settings.pursuitLength.toString()} onChange={e => savePursuitLength(e.target.value)} />
                 </div>
                 <p className='text-2xl font-bold p-6'>Duties</p>
-                <Table hideHeader>
+                <Table>
                     <TableHeader>
                         {[{ key: 'main', label: 'nope' }].map(column => (
-                            <TableColumn key={column.key}>{column.label}</TableColumn>
+                            <TableHead key={column.key}>{column.label}</TableHead>
                         ))}
                     </TableHeader>
                     <TableBody>
                         {club.settings.duties.map((row: string, index: number) => (
                             <TableRow key={row}>
-                                {columnKey => (
-                                    <TableCell>
-                                        <div className='grow justify-self-start'>
-                                            <Input
-                                                defaultValue={row}
-                                                onBlur={(e: any) => {
-                                                    editDuty(index, e.target.value)
-                                                }}
-                                            ></Input>
-                                        </div>
-                                    </TableCell>
-                                )}
+                                <TableCell>
+                                    <div className='grow justify-self-start'>
+                                        <Input
+                                            defaultValue={row}
+                                            onBlur={(e: any) => {
+                                                editDuty(index, e.target.value)
+                                            }}
+                                        ></Input>
+                                    </div>
+                                </TableCell>
                             </TableRow>
                         ))}
                     </TableBody>
@@ -81,7 +81,7 @@ export default function Page() {
                 <p className='text-2xl font-bold p-6'>
                     <Button onClick={addDuty}>Add Duty</Button>
                 </p>
-            </>
+            </div>
         )
     else
         return (

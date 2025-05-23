@@ -4,7 +4,6 @@ import dayjs from 'dayjs'
 import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, RowSelection, SortingState, useReactTable } from '@tanstack/react-table'
 import * as DB from '@/components/apiMethods'
 import Select, { CSSObjectWithLabel } from 'react-select'
-import { Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Input, Tooltip, Spinner, user } from '@nextui-org/react'
 import { VerticalDotsIcon } from '@/components/icons/vertical-dots-icon'
 import { EyeIcon } from '@/components/icons/eye-icon'
 import { EditIcon } from '@/components/icons/edit-icon'
@@ -15,6 +14,11 @@ import useSWR from 'swr'
 import * as Fetcher from '@/components/Fetchers'
 import { AVAILABLE_PERMISSIONS, userHasPermission } from '@/components/helpers/users'
 import { useSession, signIn } from 'next-auth/react'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
+import { Button } from '../ui/button'
+import { Input } from '../ui/input'
+import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from '../ui/dropdown-menu'
+import { ChevronDown } from 'lucide-react'
 
 const raceOptions = [
     { value: 'Pursuit', label: 'Pursuit' },
@@ -131,23 +135,12 @@ const Action = ({ ...props }: any) => {
     }
     return (
         <div className='relative flex items-center gap-2'>
-            <Tooltip content='View'>
-                <span className='text-lg text-default-400 cursor-pointer active:opacity-50'>
-                    <EyeIcon onClick={() => Router.push('/Race/' + props.row.original.id)} />
-                </span>
-            </Tooltip>
+            <EyeIcon onClick={() => Router.push('/Race/' + props.row.original.id)} />
+
             {userHasPermission(props.user, AVAILABLE_PERMISSIONS.editRaces) ? (
                 <>
-                    <Tooltip content='Edit'>
-                        <span className='text-lg text-default-400 cursor-pointer active:opacity-50'>
-                            <EditIcon />
-                        </span>
-                    </Tooltip>
-                    <Tooltip color='danger' content='Delete'>
-                        <span className='text-lg text-danger cursor-pointer active:opacity-50'>
-                            <DeleteIcon onClick={onDeleteClick} />
-                        </span>
-                    </Tooltip>
+                    <EditIcon />
+                    <DeleteIcon onClick={onDeleteClick} />
                 </>
             ) : (
                 <></>
@@ -225,26 +218,63 @@ const SeriesRaceTable = (props: any) => {
         getSortedRowModel: getSortedRowModel()
     })
     return (
-        <div key={props.data}>
-            <Table id={'seriesTable'} aria-label='table of races in this series'>
-                <TableHeader>
-                    {table
-                        .getHeaderGroups()
-                        .flatMap(headerGroup => headerGroup.headers)
-                        .map(header => {
-                            return <TableColumn key={header.id}>{flexRender(header.column.columnDef.header, header.getContext())}</TableColumn>
-                        })}
-                </TableHeader>
-                <TableBody emptyContent={'No races yet.'} loadingContent={<Spinner />} loadingState={loadingState}>
-                    {table.getRowModel().rows.map(row => (
-                        <TableRow key={row.id}>
-                            {row.getVisibleCells().map(cell => (
-                                <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
-                            ))}
-                        </TableRow>
-                    ))}
-                </TableBody>
-            </Table>
+        <div className='w-full'>
+            <div className='flex items-center py-4'>
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant='outline' className='ml-auto'>
+                            Columns <ChevronDown />
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align='end'>
+                        {table
+                            .getAllColumns()
+                            .filter(column => column.getCanHide())
+                            .map(column => {
+                                return (
+                                    <DropdownMenuCheckboxItem
+                                        key={column.id}
+                                        className='capitalize'
+                                        checked={column.getIsVisible()}
+                                        onCheckedChange={value => column.toggleVisibility(!!value)}
+                                    >
+                                        {column.id}
+                                    </DropdownMenuCheckboxItem>
+                                )
+                            })}
+                    </DropdownMenuContent>
+                </DropdownMenu>
+            </div>
+            <div className='rounded-md border'>
+                <Table>
+                    <TableHeader>
+                        {table.getHeaderGroups().map(headerGroup => (
+                            <TableRow key={headerGroup.id}>
+                                {headerGroup.headers.map(header => {
+                                    return (
+                                        <TableHead key={header.id}>{header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}</TableHead>
+                                    )
+                                })}
+                            </TableRow>
+                        ))}
+                    </TableHeader>
+                    <TableBody>
+                        {table.getRowModel().rows?.length ? (
+                            table.getRowModel().rows.map(row => (
+                                <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
+                                    {row.getVisibleCells().map(cell => (
+                                        <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
+                                    ))}
+                                </TableRow>
+                            ))
+                        ) : (
+                            <TableRow>
+                                <TableCell className='h-24 text-center'>No results.</TableCell>
+                            </TableRow>
+                        )}
+                    </TableBody>
+                </Table>
+            </div>
         </div>
     )
 }

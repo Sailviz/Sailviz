@@ -1,6 +1,7 @@
 import { signIn, providerMap } from '@/server/auth'
-// import { Button, Input } from '@nextui-org/react'
 import { DynamicIcon, IconName } from 'lucide-react/dynamic'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 
 export function LoginForm({ justCredentials }: { justCredentials: boolean }) {
     return (
@@ -40,15 +41,15 @@ export function LoginForm({ justCredentials }: { justCredentials: boolean }) {
                             <div className='flex flex-col gap-6'>
                                 <div className='grid gap-2'>
                                     Username
-                                    <input id='username' name='username' required />
+                                    <Input id='username' name='username' required />
                                 </div>
                                 <div className='grid gap-2'>
                                     Password
-                                    <input id='password' name='password' type='password' required />
+                                    <Input id='password' name='password' type='password' required />
                                 </div>
-                                <button type='submit' className='w-full'>
+                                <Button type='submit' className='w-full'>
                                     <span>Login</span>
-                                </button>
+                                </Button>
                                 <div className='relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border'>
                                     <span className='relative z-10 bg-background px-2 text-muted-foreground'>Or</span>
                                 </div>
@@ -56,10 +57,10 @@ export function LoginForm({ justCredentials }: { justCredentials: boolean }) {
                         </>
                     )}
                     {provider.id !== 'credentials' && (
-                        <button type='submit' className='w-full'>
+                        <Button type='submit' className='w-full' variant='outline'>
                             <DynamicIcon name={provider.name.toLowerCase() as IconName} />
                             <span>Continue with {provider.name}</span>
-                        </button>
+                        </Button>
                     )}
                 </form>
             ))}

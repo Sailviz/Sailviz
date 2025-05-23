@@ -1,12 +1,17 @@
+'use client'
 import React, { ChangeEvent, useState, useRef, useEffect } from 'react'
 import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, useReactTable, SortingState } from '@tanstack/react-table'
-import { Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Tooltip } from '@nextui-org/react'
 import { EditIcon } from '@/components/icons/edit-icon'
 import * as Fetcher from '@/components/Fetchers'
 import { AVAILABLE_PERMISSIONS, userHasPermission } from '@/components/helpers/users'
-import { PageSkeleton } from '@/components/ui/PageSkeleton'
+import { PageSkeleton } from '@/components/layout/PageSkeleton'
 import { useSession, signIn } from 'next-auth/react'
-
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
+import { Button } from '../ui/button'
+import { Input } from '../ui/input'
+import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from '../ui/dropdown-menu'
+import { ChevronDown } from 'lucide-react'
+import Link from 'next/link'
 const columnHelper = createColumnHelper<ResultsDataType>()
 
 const SignOnTable = (props: any) => {
@@ -132,39 +137,63 @@ const SignOnTable = (props: any) => {
         getSortedRowModel: getSortedRowModel()
     })
     return (
-        <div key={props.data}>
-            <Table
-                aria-label='SignOn Table'
-                isStriped
-                isHeaderSticky
-                removeWrapper
-                classNames={{
-                    base: 'max-h-[75vh] overflow-scroll',
-                    table: ''
-                }}
-            >
-                <TableHeader>
-                    {table
-                        .getHeaderGroups()
-                        .flatMap(headerGroup => headerGroup.headers)
-                        .map(header => {
-                            return (
-                                <TableColumn key={header.id} className={'max-h-'}>
-                                    {flexRender(header.column.columnDef.header, header.getContext())}
-                                </TableColumn>
-                            )
-                        })}
-                </TableHeader>
-                <TableBody emptyContent={'No entries yet.'} loadingContent={<PageSkeleton />} loadingState={loadingState}>
-                    {table.getRowModel().rows.map(row => (
-                        <TableRow key={row.id}>
-                            {row.getVisibleCells().map(cell => (
-                                <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
-                            ))}
-                        </TableRow>
-                    ))}
-                </TableBody>
-            </Table>
+        <div className='w-full'>
+            <div className='flex items-center py-4'>
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant='outline' className='ml-auto'>
+                            Columns <ChevronDown />
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align='end'>
+                        {table
+                            .getAllColumns()
+                            .filter(column => column.getCanHide())
+                            .map(column => {
+                                return (
+                                    <DropdownMenuCheckboxItem
+                                        key={column.id}
+                                        className='capitalize'
+                                        checked={column.getIsVisible()}
+                                        onCheckedChange={value => column.toggleVisibility(!!value)}
+                                    >
+                                        {column.id}
+                                    </DropdownMenuCheckboxItem>
+                                )
+                            })}
+                    </DropdownMenuContent>
+                </DropdownMenu>
+            </div>
+            <div className='rounded-md border'>
+                <Table>
+                    <TableHeader>
+                        {table.getHeaderGroups().map(headerGroup => (
+                            <TableRow key={headerGroup.id}>
+                                {headerGroup.headers.map(header => {
+                                    return (
+                                        <TableHead key={header.id}>{header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}</TableHead>
+                                    )
+                                })}
+                            </TableRow>
+                        ))}
+                    </TableHeader>
+                    <TableBody>
+                        {table.getRowModel().rows?.length ? (
+                            table.getRowModel().rows.map(row => (
+                                <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
+                                    {row.getVisibleCells().map(cell => (
+                                        <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
+                                    ))}
+                                </TableRow>
+                            ))
+                        ) : (
+                            <TableRow>
+                                <TableCell className='h-24 text-center'>No results.</TableCell>
+                            </TableRow>
+                        )}
+                    </TableBody>
+                </Table>
+            </div>
         </div>
     )
 }

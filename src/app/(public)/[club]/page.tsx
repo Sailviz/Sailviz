@@ -1,13 +1,13 @@
 'use client'
 import { useEffect, useState } from 'react'
-import Layout from '../../../components/ui/Layout'
+import Layout from '../../../components/layout/Layout'
 import { useRouter } from 'next/navigation'
 import * as DB from '../../../components/apiMethods'
 import * as Fetcher from '../../../components/Fetchers'
 import RacesTable from '@/components/tables/RacesTable'
 import ClubTable from '@/components/tables/ClubTable'
-import { PageSkeleton } from '@/components/ui/PageSkeleton'
-import { title, subtitle } from '@/components/ui/home/primitaves'
+import { PageSkeleton } from '@/components/layout/PageSkeleton'
+import { title, subtitle } from '@/components/layout/home/primitaves'
 import cookie from 'js-cookie'
 
 //club page should contain:

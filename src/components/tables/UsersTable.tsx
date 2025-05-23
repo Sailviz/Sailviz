@@ -1,12 +1,16 @@
 import React, { ChangeEvent, useState } from 'react'
 import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, RowSelection, SortingState, useReactTable } from '@tanstack/react-table'
-import { Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Tooltip, Spinner } from '@nextui-org/react'
 import { EditIcon } from '@/components/icons/edit-icon'
 import { DeleteIcon } from '@/components/icons/delete-icon'
 import * as Fetcher from '@/components/Fetchers'
 import { AVAILABLE_PERMISSIONS, userHasPermission } from '@/components/helpers/users'
 import { useSession, signIn } from 'next-auth/react'
-
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
+import { Button } from '../ui/button'
+import { Input } from '../ui/input'
+import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from '../ui/dropdown-menu'
+import { ChevronDown } from 'lucide-react'
+import Link from 'next/link'
 const Action = ({ ...props }: any) => {
     const onEditClick = () => {
         props.edit(props.row.original)
@@ -20,16 +24,8 @@ const Action = ({ ...props }: any) => {
     if (userHasPermission(props.user, AVAILABLE_PERMISSIONS.editUsers)) {
         return (
             <div className='relative flex items-center gap-2'>
-                <Tooltip content='Edit'>
-                    <span className='text-lg text-default-400 cursor-pointer active:opacity-50'>
-                        <EditIcon onClick={onEditClick} />
-                    </span>
-                </Tooltip>
-                <Tooltip color='danger' content='Delete'>
-                    <span className='text-lg text-danger cursor-pointer active:opacity-50'>
-                        <DeleteIcon onClick={onDeleteClick} />
-                    </span>
-                </Tooltip>
+                <EditIcon onClick={onEditClick} />
+                <DeleteIcon onClick={onDeleteClick} />
             </div>
         )
     } else {
@@ -93,17 +89,19 @@ const UsersTable = (props: any) => {
         getSortedRowModel: getSortedRowModel()
     })
     return (
-        <div key={props.data}>
-            <Table isStriped id={'clubTable'} aria-label='Users Table'>
+        <div>
+            <Table id={'seriesTable'} aria-label='Upcoming Races Table'>
                 <TableHeader>
-                    {table
-                        .getHeaderGroups()
-                        .flatMap(headerGroup => headerGroup.headers)
-                        .map(header => {
-                            return <TableColumn key={header.id}>{flexRender(header.column.columnDef.header, header.getContext())}</TableColumn>
-                        })}
+                    <TableRow>
+                        {table
+                            .getHeaderGroups()
+                            .flatMap(headerGroup => headerGroup.headers)
+                            .map(header => {
+                                return <TableHead key={header.id}>{flexRender(header.column.columnDef.header, header.getContext())}</TableHead>
+                            })}
+                    </TableRow>
                 </TableHeader>
-                <TableBody loadingContent={<Spinner />} loadingState={loadingState}>
+                <TableBody>
                     {table.getRowModel().rows.map(row => (
                         <TableRow key={row.id}>
                             {row.getVisibleCells().map(cell => (

@@ -7,10 +7,13 @@ import Papa from 'papaparse'
 import FleetHandicapResultsTable from '@/components/tables/FleetHandicapResultsTable'
 import FleetPursuitResultsTable from '@/components/tables/FleetPursuitResultsTable'
 import * as Fetcher from '@/components/Fetchers'
-import { PageSkeleton } from '@/components/ui/PageSkeleton'
-import { BreadcrumbItem, Breadcrumbs, Button, Input, Radio, RadioGroup, Switch, useDisclosure } from '@nextui-org/react'
-import BackButton from '@/components/ui/backButton'
+import { PageSkeleton } from '@/components/layout/PageSkeleton'
+import BackButton from '@/components/layout/backButton'
 import { useSession, signIn } from 'next-auth/react'
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
+import { Breadcrumbs } from '@/components/breadcrumbs'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
 
 type PageProps = { params: Promise<{ slug: string }> }
 
@@ -88,9 +91,9 @@ export default async function Page(props: PageProps) {
             <div className='bg-green-500 text-center p-3 font-bold grid grid-cols-3 justify-items-start text-xl'>
                 <BackButton demoMode={true} />
                 <div className='my-auto text-center justify-self-stretch'>Demo Mode</div>
-                <RadioGroup className='my-auto justify-self-start' orientation='horizontal' onValueChange={createNewRace} value={raceType} size='lg'>
-                    <Radio value='handicap'>Handicap</Radio>
-                    <Radio value='pursuit'>Pursuit</Radio>
+                <RadioGroup className='my-auto justify-self-start' orientation='horizontal' onValueChange={createNewRace} value={raceType}>
+                    <RadioGroupItem value='handicap'>Handicap</RadioGroupItem>
+                    <RadioGroupItem value='pursuit'>Pursuit</RadioGroupItem>
                 </RadioGroup>
             </div>
 
@@ -102,10 +105,7 @@ export default async function Page(props: PageProps) {
                 <div className='flex flex-wrap justify-center gap-4 w-full'>
                     <div className='flex flex-wrap px-4 divide-y divide-solid w-full justify-center'>
                         <div className='py-4 w-3/5'>
-                            <Breadcrumbs>
-                                <BreadcrumbItem>{seriesName}</BreadcrumbItem>
-                                <BreadcrumbItem>Race {race.number} </BreadcrumbItem>
-                            </Breadcrumbs>
+                            <Breadcrumbs />
                             <p className='text-2xl'>{race.Type} Race</p>
                             <p className='text-2xl'>{dayjs(race.Time).format('DD/MM/YYYY HH:mm')}</p>
                         </div>
@@ -139,7 +139,7 @@ export default async function Page(props: PageProps) {
                                     Race
                                 </Button>
                                 <Button className='mx-1'>Add Entry</Button>
-                                <Button isDisabled className='mx-1'>
+                                <Button disabled className='mx-1'>
                                     Calculate
                                 </Button>
                                 <Button className='mx-1'>Print Race Sheet</Button>

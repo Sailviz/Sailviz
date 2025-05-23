@@ -1,27 +1,17 @@
+'use client'
 import React, { ChangeEvent, useState } from 'react'
 import { createColumnHelper, flexRender, getCoreRowModel, useReactTable, getFilteredRowModel } from '@tanstack/react-table'
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableColumn,
-    TableHeader,
-    TableRow,
-    Dropdown,
-    DropdownItem,
-    DropdownTrigger,
-    Button,
-    DropdownMenu,
-    Input,
-    Tooltip,
-    Spinner
-} from '@nextui-org/react'
 import { EditIcon } from '@/components/icons/edit-icon'
 import { DeleteIcon } from '@/components/icons/delete-icon'
 import { SearchIcon } from '@/components/icons/search-icon'
 import * as Fetcher from '@/components/Fetchers'
 import { AVAILABLE_PERMISSIONS, userHasPermission } from '@/components/helpers/users'
 import { useSession, signIn } from 'next-auth/react'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
+import { Button } from '../ui/button'
+import { Input } from '../ui/input'
+import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from '../ui/dropdown-menu'
+import { ChevronDown } from 'lucide-react'
 
 const columnHelper = createColumnHelper<BoatDataType>()
 
@@ -56,13 +46,12 @@ function Filter({ column, table }: { column: any; table: any }) {
 
     return (
         <Input
-            isClearable
             className='w-full'
             placeholder='Search by name...'
-            startContent={<SearchIcon />}
+            // startContent={<SearchIcon />}
             value={column.getFilterValue()}
-            onClear={() => column.setFilterValue('')}
-            onValueChange={value => column.setFilterValue(value)}
+            // onClear={() => column.setFilterValue('')}
+            // onValueChange={value => column.setFilterValue(value)}
             //so that you can type a space, otherwise it will be blocked
             onKeyDown={(e: any) => {
                 if (e.key === ' ') {
@@ -86,16 +75,9 @@ const Action = ({ ...props }: any) => {
     if (userHasPermission(props.user, AVAILABLE_PERMISSIONS.editBoats)) {
         return (
             <div className='relative flex items-center gap-2'>
-                <Tooltip content='Edit'>
-                    <span className='text-lg text-default-400 cursor-pointer active:opacity-50'>
-                        <EditIcon onClick={onEditClick} />
-                    </span>
-                </Tooltip>
-                <Tooltip color='danger' content='Delete'>
-                    <span className='text-lg text-danger cursor-pointer active:opacity-50'>
-                        <DeleteIcon onClick={onDeleteClick} />
-                    </span>
-                </Tooltip>
+                <EditIcon onClick={onEditClick} />
+
+                <DeleteIcon onClick={onDeleteClick} />
             </div>
         )
     } else {
@@ -165,37 +147,76 @@ const BoatTable = (props: any) => {
     })
 
     return (
-        <div key={props.data}>
-            <Table isStriped aria-label='Boat Table'>
-                <TableHeader>
-                    {table
-                        .getHeaderGroups()
-                        .flatMap(headerGroup => headerGroup.headers)
-                        .map(header => {
-                            return (
-                                <TableColumn key={header.id}>
-                                    <div className='flex justify-between flex-row'>
-                                        <div className='py-3'>{flexRender(header.column.columnDef.header, header.getContext())}</div>
-                                        {header.column.getCanFilter() ? (
-                                            <div className='w-full'>
-                                                <Filter column={header.column} table={table} />
-                                            </div>
-                                        ) : null}
-                                    </div>
-                                </TableColumn>
-                            )
-                        })}
-                </TableHeader>
-                <TableBody loadingContent={<Spinner />} loadingState={loadingState}>
-                    {table.getRowModel().rows.map(row => (
-                        <TableRow key={row.id}>
-                            {row.getVisibleCells().map(cell => (
-                                <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
-                            ))}
-                        </TableRow>
-                    ))}
-                </TableBody>
-            </Table>
+        <div className='w-full'>
+            <div className='flex items-center py-4'>
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant='outline' className='ml-auto'>
+                            Columns <ChevronDown />
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align='end'>
+                        {table
+                            .getAllColumns()
+                            .filter(column => column.getCanHide())
+                            .map(column => {
+                                return (
+                                    <DropdownMenuCheckboxItem
+                                        key={column.id}
+                                        className='capitalize'
+                                        checked={column.getIsVisible()}
+                                        onCheckedChange={value => column.toggleVisibility(!!value)}
+                                    >
+                                        {column.id}
+                                    </DropdownMenuCheckboxItem>
+                                )
+                            })}
+                    </DropdownMenuContent>
+                </DropdownMenu>
+            </div>
+            <div className='rounded-md border'>
+                <Table>
+                    <TableHeader>
+                        {table.getHeaderGroups().map(headerGroup => (
+                            <TableRow key={headerGroup.id}>
+                                {headerGroup.headers.map(header => {
+                                    return (
+                                        <TableHead key={header.id}>{header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}</TableHead>
+                                    )
+                                })}
+                            </TableRow>
+                        ))}
+                    </TableHeader>
+                    <TableBody>
+                        {table.getRowModel().rows?.length ? (
+                            table.getRowModel().rows.map(row => (
+                                <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
+                                    {row.getVisibleCells().map(cell => (
+                                        <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
+                                    ))}
+                                </TableRow>
+                            ))
+                        ) : (
+                            <TableRow>
+                                <TableCell className='h-24 text-center'>No results.</TableCell>
+                            </TableRow>
+                        )}
+                    </TableBody>
+                </Table>
+            </div>
+            <div className='flex items-center justify-end space-x-2 py-4'>
+                <div className='flex-1 text-sm text-muted-foreground'>
+                    {table.getFilteredSelectedRowModel().rows.length} of {table.getFilteredRowModel().rows.length} row(s) selected.
+                </div>
+                <div className='space-x-2'>
+                    <Button variant='outline' size='sm' onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()}>
+                        Previous
+                    </Button>
+                    <Button variant='outline' size='sm' onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>
+                        Next
+                    </Button>
+                </div>
+            </div>
         </div>
     )
 }

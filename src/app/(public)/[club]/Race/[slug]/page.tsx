@@ -1,6 +1,6 @@
 'use client'
 import { useEffect, useState } from 'react'
-import Layout from '@/components/ui/Layout'
+import Layout from '@/components/layout/Layout'
 
 import { useRouter } from 'next/navigation'
 import * as DB from '@/components/apiMethods'
@@ -9,7 +9,7 @@ import RaceTimer from '@/components/HRaceTimer'
 import FleetResultsTable from '@/components/tables/FleetHandicapResultsTable'
 import FleetHandicapResultsTable from '@/components/tables/FleetHandicapResultsTable'
 import FleetPursuitResultsTable from '@/components/tables/FleetPursuitResultsTable'
-import { title, subtitle } from '@/components/ui/home/primitaves'
+import { title, subtitle } from '@/components/layout/home/primitaves'
 
 type PageProps = { params: Promise<{ slug: string }> }
 

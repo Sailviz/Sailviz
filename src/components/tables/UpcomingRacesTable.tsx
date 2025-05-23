@@ -4,21 +4,6 @@ import dayjs from 'dayjs'
 import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, RowSelection, SortingState, useReactTable } from '@tanstack/react-table'
 import * as DB from '@/components/apiMethods'
 import Select, { CSSObjectWithLabel } from 'react-select'
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableColumn,
-    TableHeader,
-    TableRow,
-    Dropdown,
-    DropdownItem,
-    DropdownTrigger,
-    Button,
-    DropdownMenu,
-    Input,
-    Tooltip
-} from '@nextui-org/react'
 import { VerticalDotsIcon } from '@/components/icons/vertical-dots-icon'
 import { EyeIcon } from '@/components/icons/eye-icon'
 import { EditIcon } from '@/components/icons/edit-icon'
@@ -26,8 +11,11 @@ import { DeleteIcon } from '@/components/icons/delete-icon'
 import { useRouter } from 'next/navigation'
 import { useTheme } from 'next-themes'
 import * as Fetcher from '@/components/Fetchers'
-import { PageSkeleton } from '@/components/ui/PageSkeleton'
+import { PageSkeleton } from '@/components/layout/PageSkeleton'
 import { useSession } from 'next-auth/react'
+import { Tooltip } from '../ui/tooltip'
+import { Button } from '../ui/button'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
 
 const Time = ({ ...props }: any) => {
     const initialValue = props.getValue()
@@ -48,13 +36,9 @@ const Action = ({ ...props }: any) => {
 
     return (
         <>
-            <Tooltip content='View'>
-                <span className='text-lg text-default-400 cursor-pointer active:opacity-50'>
-                    <Button color='success' onClick={() => Router.push('/Race/' + props.row.original.id)}>
-                        Open
-                    </Button>
-                </span>
-            </Tooltip>
+            <Button color='success' onClick={() => Router.push('/Race/' + props.row.original.id)}>
+                Open
+            </Button>
         </>
     )
 }
@@ -109,14 +93,16 @@ const UpcomingRacesTable = () => {
         <div>
             <Table id={'seriesTable'} aria-label='Upcoming Races Table'>
                 <TableHeader>
-                    {table
-                        .getHeaderGroups()
-                        .flatMap(headerGroup => headerGroup.headers)
-                        .map(header => {
-                            return <TableColumn key={header.id}>{flexRender(header.column.columnDef.header, header.getContext())}</TableColumn>
-                        })}
+                    <TableRow>
+                        {table
+                            .getHeaderGroups()
+                            .flatMap(headerGroup => headerGroup.headers)
+                            .map(header => {
+                                return <TableHead key={header.id}>{flexRender(header.column.columnDef.header, header.getContext())}</TableHead>
+                            })}
+                    </TableRow>
                 </TableHeader>
-                <TableBody emptyContent={'No races Today.'}>
+                <TableBody>
                     {table.getRowModel().rows.map(row => (
                         <TableRow key={row.id}>
                             {row.getVisibleCells().map(cell => (

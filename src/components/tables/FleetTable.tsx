@@ -1,13 +1,17 @@
+'use client'
 import React, { ChangeEvent, MouseEventHandler, useEffect, useState } from 'react'
 import { createColumnHelper, flexRender, getCoreRowModel, RowSelection, useReactTable } from '@tanstack/react-table'
 import Select from 'react-select'
-import { Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Spinner, Tooltip } from '@nextui-org/react'
 import * as Fetcher from '@/components/Fetchers'
 import { EditIcon } from '@/components/icons/edit-icon'
 import { DeleteIcon } from '@/components/icons/delete-icon'
 import { AVAILABLE_PERMISSIONS, userHasPermission } from '@/components/helpers/users'
 import { useSession, signIn } from 'next-auth/react'
-
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
+import { Button } from '../ui/button'
+import { Input } from '../ui/input'
+import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from '../ui/dropdown-menu'
+import { ChevronDown } from 'lucide-react'
 const Boats = ({ ...props }: any) => {
     const initialValue = props.getValue()
     const [value, setValue] = React.useState<BoatDataType[]>(initialValue)
@@ -40,17 +44,9 @@ const Action = ({ ...props }: any) => {
         <div className='relative flex items-center gap-2'>
             {userHasPermission(props.user, AVAILABLE_PERMISSIONS.editFleets) ? (
                 <>
-                    <Tooltip content='Edit'>
-                        <span className='text-lg text-default-400 cursor-pointer active:opacity-50'>
-                            <EditIcon onClick={onEditClick} />
-                        </span>
-                    </Tooltip>
+                    <EditIcon onClick={onEditClick} />
 
-                    <Tooltip color='danger' content='Delete'>
-                        <span className='text-lg text-danger cursor-pointer active:opacity-50'>
-                            <DeleteIcon onClick={onDeleteClick} />
-                        </span>
-                    </Tooltip>
+                    <DeleteIcon onClick={onDeleteClick} />
                 </>
             ) : (
                 <></>
@@ -111,26 +107,37 @@ const FleetTable = (props: any) => {
         getCoreRowModel: getCoreRowModel()
     })
     return (
-        <div key={props.data}>
-            <Table isStriped id={'clubTable'} aria-label='fleets in series'>
-                <TableHeader>
-                    {table
-                        .getHeaderGroups()
-                        .flatMap(headerGroup => headerGroup.headers)
-                        .map(header => {
-                            return <TableColumn key={header.id}>{flexRender(header.column.columnDef.header, header.getContext())}</TableColumn>
-                        })}
-                </TableHeader>
-                <TableBody loadingContent={<Spinner />} loadingState={loadingState}>
-                    {table.getRowModel().rows.map(row => (
-                        <TableRow key={row.id}>
-                            {row.getVisibleCells().map(cell => (
-                                <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
-                            ))}
-                        </TableRow>
-                    ))}
-                </TableBody>
-            </Table>
+        <div className='w-full'>
+            <div className='rounded-md border'>
+                <Table>
+                    <TableHeader>
+                        {table.getHeaderGroups().map(headerGroup => (
+                            <TableRow key={headerGroup.id}>
+                                {headerGroup.headers.map(header => {
+                                    return (
+                                        <TableHead key={header.id}>{header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}</TableHead>
+                                    )
+                                })}
+                            </TableRow>
+                        ))}
+                    </TableHeader>
+                    <TableBody>
+                        {table.getRowModel().rows?.length ? (
+                            table.getRowModel().rows.map(row => (
+                                <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
+                                    {row.getVisibleCells().map(cell => (
+                                        <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
+                                    ))}
+                                </TableRow>
+                            ))
+                        ) : (
+                            <TableRow>
+                                <TableCell className='h-24 text-center'>No results.</TableCell>
+                            </TableRow>
+                        )}
+                    </TableBody>
+                </Table>
+            </div>
         </div>
     )
 }
