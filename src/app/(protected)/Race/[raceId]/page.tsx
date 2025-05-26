@@ -223,9 +223,9 @@ export default function Page(props: PageProps) {
                                 )
                             })}
                             <div className='w-1/4 mr-4 pb-4 pt-6'>
-                                {/* <Button color='warning' onClick={copyFromPrevious}>
+                                <Button color='warning' onClick={copyFromPrevious}>
                                     Copy from previous race
-                                </Button> */}
+                                </Button>
                             </div>
                         </div>
                     </div>

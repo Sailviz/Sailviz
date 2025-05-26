@@ -9,6 +9,7 @@ import * as Fetcher from '@/components/Fetchers'
 import useSWR from 'swr'
 import { EyeIcon } from '../icons/eye-icon'
 import { ChevronDown } from 'lucide-react'
+import { redirect, useRouter } from 'next/navigation'
 
 const Text = ({ ...props }) => {
     const value = props.getValue()
@@ -107,6 +108,7 @@ function Sort({ column, table }: { column: any; table: any }) {
 const columnHelper = createColumnHelper<ResultsDataType>()
 
 const FleetHandicapResultsTable = (props: any) => {
+    const Router = useRouter()
     const { fleet, fleetIsValidating, fleetIsError } = Fetcher.Fleet(props.fleetId)
     let data = fleet?.results
     if (data == undefined) {
@@ -117,7 +119,7 @@ const FleetHandicapResultsTable = (props: any) => {
     let [startTime, setStartTime] = useState(fleet?.startTime || 0)
 
     const showEditModal = (id: any) => {
-        props.showEditModal(id)
+        Router.push(`/editResult/${id}`)
     }
 
     const showViewModal = (id: any) => {

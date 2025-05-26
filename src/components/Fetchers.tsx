@@ -95,8 +95,43 @@ export function Race(raceId: string, results: boolean) {
     }
 }
 
+export function Result(resultId: string) {
+    const { data, error, isValidating, mutate } = useSWR(resultId != '' ? `/api/GetResultById?id=${resultId}` : null, fetcher, {
+        fallbackData: {
+            id: '',
+            raceId: '',
+            boat: {
+                id: '',
+                name: '',
+                clubId: '',
+                crew: 0,
+                py: 0,
+                pursuitStartTime: 0
+            } as BoatDataType,
+            Helm: '',
+            Crew: '',
+            SailNumber: '',
+            finishTime: 0,
+            CorrectedTime: 0,
+            laps: [{} as LapDataType],
+            numberLaps: 0,
+            PursuitPosition: 0,
+            HandicapPosition: 0
+        } as ResultsDataType
+    })
+
+    return {
+        result: data.result as ResultsDataType,
+        resultIsValidating: isValidating,
+        resultIsError: error,
+        mutateResult: mutate
+    }
+}
+
 export function Fleet(fleetId: string) {
-    const { data, error, isValidating } = useSWR(fleetId != undefined ? `/api/GetFleetById?id=${fleetId}` : null, fetcher, { refreshInterval: 10000 })
+    const { data, error, isValidating } = useSWR(fleetId != undefined ? `/api/GetFleetById?id=${fleetId}` : null, fetcher, {
+        refreshInterval: 10000
+    })
 
     return {
         fleet: data as FleetDataType,

@@ -22,15 +22,10 @@ async function findResult(id: any) {
     return result
 }
 
-export async function POST(request: NextRequest) {
-    const req = await request.json()
-    try {
-        assert.notStrictEqual(undefined, req.id)
-    } catch (bodyError) {
-        return NextResponse.json({ error: true, message: 'information missing' })
-    }
+export async function GET(request: NextRequest) {
+    const searchParams = request.nextUrl.searchParams
 
-    var id = req.id
+    var id = searchParams.get('id')
 
     var result = await findResult(id)
     if (result) {

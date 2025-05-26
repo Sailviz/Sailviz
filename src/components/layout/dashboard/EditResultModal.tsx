@@ -6,10 +6,11 @@ import * as DB from '@/components/apiMethods'
 import Select, { CSSObjectWithLabel } from 'react-select'
 import * as Fetcher from '@/components/Fetchers'
 import { mutate } from 'swr'
-import { DialogContent, DialogFooter, DialogHeader } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogFooter, DialogHeader } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
 import { Input } from '@/components/ui/input'
+import { useRouter } from 'next/navigation'
 
 const resultCodeOptions = [
     { label: 'None', value: '' },
@@ -20,25 +21,24 @@ const resultCodeOptions = [
     { label: 'Not Sailed Course', value: 'NSC' }
 ]
 
-export default function EditResultDialog({
-    isOpen,
+export default function EditResultModal({
     result,
-    fleet,
     raceType,
     advancedEdit,
     onSubmit,
-    onClose,
     onDelete
 }: {
-    isOpen: boolean
-    result: ResultsDataType | undefined
-    fleet: FleetDataType | undefined
+    result: ResultsDataType
     raceType: string
     advancedEdit: boolean
-    onSubmit: (resut: ResultsDataType) => void
+    onSubmit: (result: ResultsDataType) => void
     onDelete: (result: ResultsDataType) => void
-    onClose: () => void
 }) {
+    const Router = useRouter()
+    const [open, setOpen] = useState(true)
+
+    const { fleet, fleetIsError, fleetIsValidating } = Fetcher.Fleet(result.fleetId)
+
     const { theme, setTheme } = useTheme()
     const { boats, boatsIsError, boatsIsValidating } = Fetcher.Boats()
 
@@ -80,7 +80,8 @@ export default function EditResultDialog({
     }
 
     useEffect(() => {
-        if (result == undefined) {
+        console.log('EditResultModal useEffect', result, fleet)
+        if (result == undefined || fleet == undefined) {
             return
         }
         setHelm(result.Helm)
@@ -90,31 +91,37 @@ export default function EditResultDialog({
         setPursuitPosition(result.PursuitPosition)
         setSailNumber(result.SailNumber)
         setNumberLaps(result.numberLaps)
-        setBasicElapsed(new Date(Math.max(0, (result.finishTime - fleet!.startTime) * 1000)).toISOString().substring(11, 19))
+        setBasicElapsed(new Date(Math.max(0, (result.finishTime - fleet.startTime) * 1000)).toISOString().substring(11, 19))
         if (result.boat != null) {
             setBoatOption({ label: result.boat.name, value: result.boat })
         } else {
             setBoatOption({ label: '', value: {} as BoatDataType })
         }
         setResultCodeOption(result.resultCode == '' ? { label: 'None', value: '' } : { label: result.resultCode, value: result.resultCode })
-    }, [result])
+    }, [result, fleet])
 
     return (
-        <>
-            <DialogContent>
-                <DialogHeader className='flex flex-col gap-1 text-2xl'>Edit Result</DialogHeader>
+        <Dialog
+            open={open}
+            onOpenChange={open => {
+                setOpen(open)
+                if (!open) Router.back() // this catches the x button and clicking outside the modal, gets out of parallel route
+            }}
+        >
+            <DialogContent className='max-w-8/12' title='Edit Result'>
+                <DialogHeader className='flex flex-col gap-1 text-2xl w-96'>Edit Result</DialogHeader>
                 <div className='flex flex-col w-full'>
                     <div className='flex flex-row w-full'>
                         <div className='flex flex-col px-6 w-full'>
                             <p className='text-2xl font-bold'>Helm</p>
 
-                            {/* <Input type='text' value={helm} onValueChange={setHelm} fullWidth placeholder=' ' /> */}
+                            <Input type='text' value={helm} onChange={e => setHelm(e.target.value)} />
                         </div>
 
                         <div className='flex flex-col px-6 w-full'>
                             <p className='text-2xl font-bold'>Crew</p>
 
-                            {/* <Input type='text' value={crew} onValueChange={setCrew} placeholder=' ' /> */}
+                            <Input type='text' value={crew} onChange={e => setCrew(e.target.value)} placeholder=' ' />
                         </div>
 
                         <div className='flex flex-col px-6 w-full'>
@@ -176,7 +183,7 @@ export default function EditResultDialog({
                         <div className='flex flex-col px-6 w-full'>
                             <p className='text-2xl font-bold'>Sail Number</p>
 
-                            {/* <Input type='text' value={sailNumber} onValueChange={setSailNumber} fullWidth placeholder=' ' /> */}
+                            <Input type='text' value={sailNumber} onChange={e => setSailNumber(e.target.value)} placeholder=' ' />
                         </div>
                     </div>
                     {advancedEdit ? (
@@ -242,13 +249,13 @@ export default function EditResultDialog({
                                     <div className='flex flex-col px-6 w-1/4'>
                                         <p className='text-2xl font-bold'>Position</p>
 
-                                        {/* <Input type='number' value={handicapPosition.toString()} onValueChange={e => setHandicapPosition(parseInt(e))} /> */}
+                                        <Input type='number' value={handicapPosition.toString()} onChange={e => setHandicapPosition(parseInt(e.target.value))} />
                                     </div>
                                 ) : (
                                     <div className='flex flex-col px-6 w-1/4'>
                                         <p className='text-2xl font-bold'>Position</p>
 
-                                        {/* <Input type='number' value={pursuitPosition.toString()} onValueChange={e => setPursuitPosition(parseInt(e))} /> */}
+                                        <Input type='number' value={pursuitPosition.toString()} onChange={e => setPursuitPosition(parseInt(e.target.value))} />
                                     </div>
                                 )}
 
@@ -260,9 +267,9 @@ export default function EditResultDialog({
                                             type='number'
                                             id='NumberofLaps'
                                             defaultValue={numberLaps.toString()}
-                                            // onValueChange={value => {
-                                            //     setNumberLaps(parseInt(value))
-                                            // }}
+                                            onChange={e => {
+                                                setNumberLaps(parseInt(e.target.value))
+                                            }}
                                         />
                                     </div>
                                     {raceType == 'Handicap' ? (
@@ -273,9 +280,9 @@ export default function EditResultDialog({
                                                 type='time'
                                                 step={'1'}
                                                 defaultValue={basicElapsed}
-                                                // onValueChange={value => {
-                                                //     setBasicElapsed(value)
-                                                // }}
+                                                onChange={e => {
+                                                    setBasicElapsed(e.target.value)
+                                                }}
                                             />
                                         </div>
                                     ) : (
@@ -286,10 +293,10 @@ export default function EditResultDialog({
                             <div className='flex flex-row mt-2 px-6'>
                                 <Switch
                                     id={'AdvancedModeSwitch'}
-                                    // isSelected={lapsAdvancedMode}
-                                    // onValueChange={() => {
-                                    //     setLapsAdvancedMode(!lapsAdvancedMode)
-                                    // }}
+                                    checked={lapsAdvancedMode}
+                                    onClick={() => {
+                                        setLapsAdvancedMode(!lapsAdvancedMode)
+                                    }}
                                 />
 
                                 <label className='text-2xl font-bold' htmlFor={'AdvancedModeSwitch'}>
@@ -298,7 +305,7 @@ export default function EditResultDialog({
                             </div>
                             {lapsAdvancedMode ? (
                                 <div className='flex flex-row w-full flex-wrap' id='LapData' key={JSON.stringify(result!.laps)}>
-                                    {result!.laps.map((lap: LapDataType, index: number) => {
+                                    {result.laps.map((lap: LapDataType, index: number) => {
                                         return (
                                             <div className='flex flex-col px-6 w-min' key={lap.time + index}>
                                                 <p className='text-2xl font-bold p-2'>Lap {index + 1}</p>
@@ -330,6 +337,6 @@ export default function EditResultDialog({
                     </Button>
                 </DialogFooter>
             </DialogContent>
-        </>
+        </Dialog>
     )
 }
