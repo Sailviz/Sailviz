@@ -19,7 +19,6 @@ import { Button } from '../ui/button'
 import { Input } from '../ui/input'
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from '../ui/dropdown-menu'
 import { ChevronDown } from 'lucide-react'
-import { trpc } from '@/lib/trpc'
 
 const raceOptions = [
     { value: 'Pursuit', label: 'Pursuit' },
@@ -153,22 +152,20 @@ const Action = ({ ...props }: any) => {
 const columnHelper = createColumnHelper<RaceDataType>()
 
 const SeriesRaceTable = (props: any) => {
+    const { data: session, status } = useSession()
     const [seriesId, setSeriesId] = useState(props.id)
+    const {
+        data: series,
+        error: seriesIsError,
+        isValidating: seriesIsValidating
+    } = useSWR(`/api/GetSeriesById?id=${seriesId}`, Fetcher.fetcher, { keepPreviousData: true, suspense: true })
 
-    useEffect(() => {
-        trpc.series.query({ id: seriesId }).then(data => {
-            setData(data.races)
-        })
-    }, [seriesId])
+    let data = series.races
+    if (data == undefined) {
+        data = []
+    }
 
-    const { data: session, status } = useSession({
-        required: true,
-        onUnauthenticated() {
-            signIn()
-        }
-    })
-
-    const [data, setData] = useState<RaceDataType[]>([])
+    const loadingState = seriesIsValidating ? 'loading' : 'idle'
 
     const [sorting, setSorting] = useState<SortingState>([
         {
@@ -176,14 +173,6 @@ const SeriesRaceTable = (props: any) => {
             desc: false
         }
     ])
-
-    const updateData = (data: any) => {
-        props.removeRace(data)
-    }
-
-    const goToRace = (data: any) => {
-        props.goToRace(data)
-    }
 
     var table = useReactTable({
         data,
@@ -204,7 +193,7 @@ const SeriesRaceTable = (props: any) => {
             columnHelper.accessor('id', {
                 id: 'action',
                 header: 'Actions',
-                cell: props => <Action {...props} id={props.row.original.id} removeRace={updateData} user={session!.user} />
+                cell: props => <Action {...props} id={props.row.original.id} user={session!.user} />
             })
         ],
         state: {

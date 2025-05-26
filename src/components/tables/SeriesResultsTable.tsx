@@ -1,13 +1,9 @@
 'use client'
 import React, { ChangeEvent, useState, useEffect } from 'react'
 import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, useReactTable, SortingState } from '@tanstack/react-table'
-import { VerticalDotsIcon } from '@/components/icons/vertical-dots-icon'
+import * as DB from '@/components/apiMethods'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
-import { Button } from '../ui/button'
-import { Input } from '../ui/input'
-import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from '../ui/dropdown-menu'
-import { ChevronDown } from 'lucide-react'
-import { trpc } from '@/lib/trpc'
+
 //not a db type, only used here
 type SeriesResultsType = {
     Rank: number
@@ -63,7 +59,7 @@ const SeriesResultsTable = ({ seriesId }: { seriesId: string }) => {
 
     useEffect(() => {
         function fetchSeries() {
-            trpc.series.query({ id: seriesId }).then(data => {
+            DB.GetSeriesById(seriesId).then(data => {
                 setSeriesData(data)
             })
         }

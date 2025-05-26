@@ -1,7 +1,6 @@
 'use client'
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
-import { trpc } from '@/lib/trpc'
-import { Slash } from 'lucide-react'
+import * as DB from '@/components/apiMethods'
 import { usePathname } from 'next/navigation'
 import { Fragment, useEffect, useState } from 'react'
 
@@ -21,7 +20,7 @@ export function Breadcrumbs() {
 
         //Race page
         if (segments[0] == 'Race') {
-            trpc.race.query({ id: segments[1]! }).then(res => {
+            DB.getRaceById(segments[1]!, false).then(res => {
                 console.log(res)
                 setItems([
                     {

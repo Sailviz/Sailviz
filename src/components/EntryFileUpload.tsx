@@ -4,28 +4,18 @@ import { Button } from './ui/button'
 import { Input } from './ui/input'
 import Papa from 'papaparse'
 import ProgressModal from './layout/dashboard/ProgressModal'
-import { trpc } from '@/lib/trpc'
 import { getSession, useSession } from 'next-auth/react'
-
+import * as Fetcher from '@/components/Fetchers'
+import * as DB from '@/components/apiMethods'
 export function EntryFileUpload({ raceId }: { raceId: string }) {
     const [progressValue, setProgressValue] = useState(0)
     const [progressMax, setProgressMax] = useState(0)
     const [progressIndeterminate, setProgressIndeterminate] = useState(false)
     const [progressOpen, setProgressOpen] = useState(false)
-    const [race, setRace] = useState<RaceDataType | null>(null)
-    const [boats, setBoats] = useState<BoatDataType[]>([])
+    const { race, raceIsError, raceIsValidating, mutateRace } = Fetcher.Race(raceId, false)
+    const { boats, boatsIsError, boatsIsValidating } = Fetcher.Boats()
 
     const { data: session, status } = useSession()
-    useEffect(() => {
-        const fetchRace = async () => {
-            setRace(await trpc.race.query({ id: raceId }))
-        }
-        fetchRace()
-        const fetchBoats = async () => {
-            const boats = await trpc.boats.query({ clubId: session?.user.clubId! })
-            setBoats(boats)
-        }
-    }, [raceId])
 
     const entryFileUploadHandler = async (e: ChangeEvent<HTMLInputElement>) => {
         if (race == null) {
@@ -56,11 +46,11 @@ export function EntryFileUpload({ raceId }: { raceId: string }) {
                             alert("fleets aren't defined and there is more than one fleet in race")
                             return
                         } else {
-                            result = await trpc.createResult.mutate({ fleetId: race.fleets[0]!.id })
+                            result = await DB.createResult(race.fleets[0]!.id)
                         }
                     } else {
                         //fleet is defined
-                        result = await trpc.createResult.mutate({ fleetId: race.fleets.find(fleet => fleet.fleetSettings.name == line.Fleet)!.id })
+                        result = await DB.createResult(race.fleets.find(fleet => fleet.fleetSettings.name == line.Fleet)!.id)
                     }
                     result.Helm = line.Helm
                     result.Crew = line.Crew
@@ -74,7 +64,7 @@ export function EntryFileUpload({ raceId }: { raceId: string }) {
                     }
                     console.log(result)
                     //update with info
-                    await trpc.updateResult.mutate({ result: result })
+                    await DB.updateResult(result)
                 }
                 setProgressOpen(false)
             }

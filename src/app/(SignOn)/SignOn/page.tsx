@@ -6,7 +6,6 @@ import CreateResultModal from '@/components/layout/SignOn/CreateResultModal'
 import EditResultModal from '@/components/layout/SignOn/EditResultModal'
 import { mutate } from 'swr'
 import { auth } from '@/server/auth'
-import { api } from '@/trpc/server'
 
 export default async function Page() {
     const session = await auth()
@@ -17,7 +16,7 @@ export default async function Page() {
     // const { boats, boatsIsError, boatsIsValidating } = Fetcher.Boats()
     // const { todaysRaces, todaysRacesIsError, todaysRacesIsValidating } = Fetcher.GetTodaysRaceByClubId(club)
 
-    const todaysRaces = await api.todaysRaces({ clubId: session!.user.clubId })
+    const todaysRaces = await DB.getTodaysRaceByClubId(session?.user.clubId!)
 
     // const [activeResult, setActiveResult] = useState<ResultsDataType>()
 

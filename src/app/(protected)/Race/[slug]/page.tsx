@@ -12,12 +12,12 @@ import { AVAILABLE_PERMISSIONS, userHasPermission } from '@/components/helpers/u
 // import ViewResultModal from '@/components/ui/dashboard/viewResultModal'
 import { notFound, redirect } from 'next/navigation'
 import { auth } from '@/server/auth'
-import { api, HydrateClient } from '@/trpc/server'
 import { Breadcrumbs } from '@/components/breadcrumbs'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { EntryFileUpload } from '@/components/EntryFileUpload'
+import * as Fetcher from '@/components/Fetchers'
 
 type PageProps = { params: Promise<{ slug: string }> }
 
@@ -25,7 +25,7 @@ export default async function Page(props: PageProps) {
     const params = await props.params
     const session = await auth()
 
-    const race = await api.race({ id: params.slug })
+    const { race, raceIsError, raceIsValidating, mutateRace } = Fetcher.Race(params.slug, true)
     if (!race) {
         notFound()
     }

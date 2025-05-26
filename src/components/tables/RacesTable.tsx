@@ -15,7 +15,6 @@ import { Input } from '../ui/input'
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from '../ui/dropdown-menu'
 import { ChevronDown } from 'lucide-react'
 import Link from 'next/link'
-import { trpc } from '@/lib/trpc'
 
 const Time = ({ ...props }: any) => {
     const initialValue = props.getValue()
@@ -62,33 +61,24 @@ const columnHelper = createColumnHelper<RaceDataType>()
 const RacesTable = ({ date, historical }: { date: Date; historical: boolean }) => {
     const { data: session, status } = useSession()
     const [page, setPage] = useState(1)
+    const {
+        data: races,
+        error: racesIsError,
+        isValidating: racesIsValidating
+    } = useSWR(`/api/GetRacesByClubId?id=${session!.user.clubId}&page=${page}&date=${date}&historical=${historical}`, Fetcher.fetcher, {
+        keepPreviousData: true,
+        suspense: true
+    })
 
-    const [data, setData] = useState<RaceDataType[]>([])
-    var count: number = 0
-
-    useEffect(() => {
-        function fetchRaces() {
-            trpc.races
-                .query({
-                    clubId: session?.user.clubId!,
-                    page,
-                    date,
-                    historical
-                })
-                .then(response => {
-                    console.log(response)
-                    setData(response.races)
-                    count = response.count
-                })
-        }
-        fetchRaces()
-    }, [session, page, date, historical])
-
+    const data = races.races
+    const count = races?.count
     const rowsPerPage = 10
 
     const pages = useMemo(() => {
         return count ? Math.ceil(count / rowsPerPage) : 0
     }, [count, rowsPerPage])
+
+    const loadingState = racesIsValidating || data == undefined ? 'loading' : 'idle'
 
     var table = useReactTable({
         data,

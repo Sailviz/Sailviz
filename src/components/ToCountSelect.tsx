@@ -1,34 +1,23 @@
 'use client'
 import { ChangeEvent, useEffect, useState } from 'react'
-import { trpc } from '@/lib/trpc'
 import { getSession, useSession } from 'next-auth/react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select'
-
+import * as Fetcher from '@/components/Fetchers'
 export function ToCountSelect({ seriesId }: { seriesId: string }) {
-    const [series, setSeries] = useState<SeriesDataType | null>(null)
-    const { data: session, status } = useSession()
-    useEffect(() => {
-        const fetchSeries = async () => {
-            setSeries(await trpc.series.query({ id: seriesId }))
-        }
-        fetchSeries()
-    }, [seriesId])
+    const { series, seriesIsError, seriesIsValidating, mutateSeries } = Fetcher.Series(seriesId)
 
     const saveSeriesToCount = async (value: number) => {
         if (series === null) {
             return
         }
         console.log('Saving series to count:', value)
-        trpc.updateSeries.mutate({
-            ...series,
-            settings: {
-                ...series.settings,
-                numberToCount: value
-            }
-        })
+        let newSeriesData: SeriesDataType = window.structuredClone(series)
+        console.log(newSeriesData)
+        newSeriesData.settings['numberToCount'] = value
+        mutateSeries()
     }
 
-    if (series === null) {
+    if (seriesIsValidating) {
         return <div>Loading...</div>
     }
     console.log(series)
