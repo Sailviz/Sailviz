@@ -599,17 +599,17 @@ export default function Page(props: PageProps) {
                 </div>
                 <div className='flex w-full shrink flex-row justify-left'>
                     <div className='w-1/5 p-2'>
-                        <Button onClick={() => undo()} size='lg' color='warning'>
+                        <Button onClick={() => undo()} size='big' variant={'warning'}>
                             Undo Last Action
                         </Button>
                     </div>
                     <div className='w-1/5 p-2' id='RetireModeButton'>
                         {mode == modeType.Retire ? (
-                            <Button onClick={() => setMode(modeType.Lap)} size='lg' color={'primary'}>
+                            <Button onClick={() => setMode(modeType.Lap)} size='big' variant={'blue'}>
                                 Cancel Retirement
                             </Button>
                         ) : (
-                            <Button onClick={() => setMode(modeType.Retire)} size='lg' color={'primary'}>
+                            <Button onClick={() => setMode(modeType.Retire)} size='big' variant={'blue'}>
                                 Retire a Boat
                             </Button>
                         )}
@@ -631,7 +631,7 @@ export default function Page(props: PageProps) {
                             {race.fleets
                                 .flatMap(fleets => fleets.results)
                                 .map((result: ResultsDataType, index) => {
-                                    let fleetIndex = race.fleets.findIndex(fleet => fleet.id == result.fleetId)
+                                    console.log(result)
                                     return (
                                         <BoatCard
                                             key={result.id}

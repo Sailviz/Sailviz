@@ -100,7 +100,7 @@ export default function BoatCard({
                                 case modeType.Finish:
                                     return (
                                         <Button
-                                            color='primary'
+                                            variant={'blue'}
                                             className=' w-36 m-6 h-4/6 text-xl'
                                             onClick={e => {
                                                 setIsDisabled(true)
@@ -117,7 +117,7 @@ export default function BoatCard({
                                 case modeType.Retire:
                                     return (
                                         <Button
-                                            color='primary'
+                                            variant={'blue'}
                                             className=' w-36 m-6 h-4/6 text-xl'
                                             onClick={e => {
                                                 setIsDisabled(true)
@@ -134,7 +134,7 @@ export default function BoatCard({
                                 case modeType.Lap:
                                     return (
                                         <Button
-                                            color='primary'
+                                            variant={'blue'}
                                             className=' w-36 m-6 h-4/6 text-xl'
                                             onClick={e => {
                                                 setIsDisabled(true)
@@ -168,7 +168,7 @@ export default function BoatCard({
                         Laps: {result.laps.length} Finish: {secondsToTimeString(result.finishTime - fleet.startTime)}
                     </p>
                 </div>
-                <Button color='primary' className=' w-36 m-6 h-4/6 text-xl'>
+                <Button variant={'blue'} className=' w-36 m-6 h-4/6 text-xl'>
                     Finished
                 </Button>
             </div>

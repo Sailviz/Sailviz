@@ -83,7 +83,7 @@ export function Race(raceId: string, results: boolean) {
                     name: ''
                 }
             ],
-            fleets: [{}]
+            fleets: [{ results: [] as ResultsDataType[] }]
         } as RaceDataType
     })
 

@@ -19,5 +19,10 @@ export default function BackButton({ demoMode = false }) {
         await mutate('/api/club')
         Router.back()
     }
-    return <Button onClick={() => handleClick()}> Back </Button>
+    return (
+        <Button onClick={() => handleClick()} variant={'secondary'} className='w-24 h-8'>
+            {' '}
+            Back{' '}
+        </Button>
+    )
 }

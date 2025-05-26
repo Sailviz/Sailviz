@@ -629,7 +629,7 @@ export default function Page(props: PageProps) {
                                         switch (raceState[index]) {
                                             case raceStateType.reset:
                                                 return (
-                                                    <Button onClick={() => startRaceButton(fleet.id)} size='lg' color='success'>
+                                                    <Button onClick={() => startRaceButton(fleet.id)} size='big' variant={'green'}>
                                                         Start
                                                     </Button>
                                                 )
@@ -639,21 +639,21 @@ export default function Page(props: PageProps) {
                                                         onClick={e => {
                                                             confirm('are you sure you want to stop the race?') ? stopRace(fleet.id) : null
                                                         }}
-                                                        size='lg'
-                                                        color='danger'
+                                                        size='big'
+                                                        variant={'red'}
                                                     >
                                                         Stop
                                                     </Button>
                                                 )
                                             case raceStateType.stopped:
                                                 return (
-                                                    <Button onClick={() => resetRace(fleet.id)} size='lg' color='primary'>
+                                                    <Button onClick={() => resetRace(fleet.id)} size='big' variant={'blue'}>
                                                         Reset
                                                     </Button>
                                                 )
                                             case raceStateType.calculate:
                                                 return (
-                                                    <Button id='CalcResultsButton' onClick={calculateResults} size='lg' color='primary'>
+                                                    <Button id='CalcResultsButton' onClick={calculateResults} size='big' variant={'blue'}>
                                                         Calculate Results
                                                     </Button>
                                                 )
@@ -668,7 +668,7 @@ export default function Page(props: PageProps) {
                 </div>
                 <div className='flex w-full shrink flex-row justify-around'>
                     <div className='w-1/5 p-2'>
-                        <Button onClick={() => undo()} size='lg' color='warning'>
+                        <Button onClick={() => undo()} size='big' variant={'warning'}>
                             Undo Last Action
                         </Button>
                     </div>
@@ -676,31 +676,26 @@ export default function Page(props: PageProps) {
                         {mode == modeType.Retire ? (
                             <Button
                                 onClick={() => setMode(checkAnyFinished(race.fleets.flatMap(fleet => fleet.results)) ? modeType.Finish : modeType.Lap)}
-                                size='lg'
-                                color={'primary'}
+                                size='big'
+                                variant={'blue'}
                             >
                                 Cancel Retirement
                             </Button>
                         ) : (
-                            <Button onClick={() => setMode(modeType.Retire)} size='lg' color={'primary'}>
+                            <Button onClick={() => setMode(modeType.Retire)} size='big' variant={'blue'}>
                                 Retire a Boat
                             </Button>
                         )}
                     </div>
                     {mode == modeType.Lap ? (
                         <div className='w-1/5 p-2' id='FinishModeButton'>
-                            <Button onClick={() => setMode(modeType.Finish)} size='lg' color={'primary'}>
+                            <Button onClick={() => setMode(modeType.Finish)} size='big' variant={'blue'}>
                                 Finish Mode
                             </Button>
                         </div>
                     ) : (
                         <div className='w-1/5 p-2' id='LapModeButton'>
-                            <Button
-                                onClick={() => setMode(modeType.Lap)}
-                                size='lg'
-                                color={'primary'}
-                                // isDisabled={checkAnyFinished(race.fleets.flatMap(fleet => fleet.results))}
-                            >
+                            <Button onClick={() => setMode(modeType.Lap)} size='big' variant={'blue'} disabled={checkAnyFinished(race.fleets.flatMap(fleet => fleet.results))}>
                                 Lap Mode
                             </Button>
                         </div>
