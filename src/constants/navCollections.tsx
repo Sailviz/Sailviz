@@ -13,7 +13,7 @@ export const navCollections: NavCollection[] = [
         items: [
             {
                 title: 'Home',
-                url: '/dashboard',
+                url: '/Dashboard',
                 icon: <HomeIcon />,
                 isActive: true,
                 shortcut: ['d', 'd'],

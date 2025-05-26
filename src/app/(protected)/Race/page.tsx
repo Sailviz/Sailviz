@@ -4,8 +4,6 @@ import UpcomingRacesTable from '@/components/tables/UpcomingRacesTable'
 import { auth } from '@/server/auth'
 
 export default async function Page() {
-    const session = await auth()
-
     return (
         <div>
             <div className='p-6'>
@@ -18,11 +16,11 @@ export default async function Page() {
                 </div>
                 <div className='px-3'>
                     <p className='text-2xl font-bold p-6'>Upcoming</p>
-                    <RacesTable club={session?.user.clubId} date={new Date()} historical={false} />
+                    <RacesTable date={new Date()} historical={false} />
                 </div>
                 <div className='px-3'>
                     <p className='text-2xl font-bold p-6'>Recent</p>
-                    <RacesTable club={session?.user.clubId} date={new Date()} historical={true} />
+                    <RacesTable date={new Date()} historical={true} />
                 </div>
             </div>
         </div>

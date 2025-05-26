@@ -1,38 +1,44 @@
-import { NextAuthConfig } from 'next-auth/index'
+import { NextAuthConfig } from 'next-auth'
 import CredentialProvider from 'next-auth/providers/credentials'
-import GithubProvider from 'next-auth/providers/github'
+import GitHub from 'next-auth/providers/github'
 
 const authConfig = {
     providers: [
-        GithubProvider({}),
+        GitHub,
         CredentialProvider({
             credentials: {
-                username: {
-                    type: 'username'
+                email: {
+                    type: 'email'
                 },
                 password: {
                     type: 'password'
                 }
-            },
-            async authorize(credentials, req) {
-                const user = {
-                    id: '1',
-                    name: 'John'
-                }
-                if (user) {
-                    // Any object returned will be saved in `user` property of the JWT
-                    return user
-                } else {
-                    // If you return null then an error will be displayed advising the user to check their details.
-                    return null
-
-                    // You can also Reject this callback with an Error thus the user will be sent to the error page with the error message as a query parameter
-                }
             }
         })
     ],
+    session: {
+        strategy: 'jwt'
+    },
     pages: {
-        signIn: '/' //sigin page
+        signIn: '/login' //sigin page
+    },
+    callbacks: {
+        jwt({ token, user }) {
+            if (user) {
+                // User is available during sign-in
+                console.log('user', user)
+                token.name = user.name ?? 'Unknown'
+                token.id = user.id ?? 'unknown'
+            }
+            return token
+        },
+        session({ session, token }) {
+            if (token) {
+                // User is available during session
+                session.user.name = token.name
+            }
+            return session
+        }
     }
 } satisfies NextAuthConfig
 

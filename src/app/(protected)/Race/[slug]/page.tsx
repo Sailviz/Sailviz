@@ -15,6 +15,9 @@ import { auth } from '@/server/auth'
 import { api, HydrateClient } from '@/trpc/server'
 import { Breadcrumbs } from '@/components/breadcrumbs'
 import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
+import Link from 'next/link'
+import { EntryFileUpload } from '@/components/EntryFileUpload'
 
 type PageProps = { params: Promise<{ slug: string }> }
 
@@ -34,10 +37,6 @@ export default async function Page(props: PageProps) {
     // const progressModal = useDisclosure()
     // const editModal = useDisclosure()
     // const viewModal = useDisclosure()
-
-    // const [progressValue, setProgressValue] = useState(0)
-    // const [progressMax, setProgressMax] = useState(0)
-    // const [progressIndeterminate, setProgressIndeterminate] = useState(false)
 
     const createResult = async (helm: string, crew: string, boat: BoatDataType, sailNum: string, fleetId: string) => {
         //create a result for each fleet
@@ -159,61 +158,6 @@ export default async function Page(props: PageProps) {
         // mutateRace()
     }
 
-    const entryFileUploadHandler = async (e: ChangeEvent<HTMLInputElement>) => {
-        // progressModal.onOpen()
-        // setProgressIndeterminate(true)
-        // setProgressValue(0)
-        Papa.parse(e.target.files![0]!, {
-            header: true,
-            skipEmptyLines: true,
-            complete: async function (results: any) {
-                console.log(results)
-                // setProgressIndeterminate(false)
-                // setProgressMax(results.data.length)
-                let index = 0
-                for (const line of results.data) {
-                    // setProgressValue(++index)
-                    //check if all fields are present
-                    if (line.Helm == undefined || line.Crew == undefined || line.Boat == undefined || line.SailNumber == undefined) {
-                        alert('missing fields')
-                        // progressModal.onClose()
-                        return
-                    }
-                    let result: ResultsDataType = {} as ResultsDataType
-                    if (line.Fleet == undefined) {
-                        if (race.fleets.length > 1) {
-                            alert("fleets aren't defined and there is more than one fleet in race")
-                            return
-                        } else {
-                            result = await DB.createResult(race.fleets[0]!.id)
-                        }
-                    } else {
-                        //fleet is defined
-                        result = await DB.createResult(race.fleets.find(fleet => fleet.fleetSettings.name == line.Fleet)!.id)
-                    }
-                    result.Helm = line.Helm
-                    result.Crew = line.Crew
-                    result.SailNumber = line.SailNumber
-                    const boatName = line.Boat
-                    // let boat = boats.find(boat => boat.name.toUpperCase() == boatName.toUpperCase())
-                    // if (boat == undefined) {
-                    //     console.error('Boat ' + boatName + ' not found')
-                    // } else {
-                    //     result.boat = boat
-                    // }
-                    console.log(result)
-                    //update with info
-                    await DB.updateResult(result)
-                }
-                // mutate('/api/GetRaceById?id=' + race.id)
-                race.fleets.forEach(fleet => {
-                    // mutate('/api/GetFleetById?id=' + fleet.id)
-                })
-                // progressModal.onClose()
-            }
-        })
-    }
-
     const downloadResults = async () => {
         race.fleets.forEach(async fleet => {
             // by pointing the browser to the api endpoint, the browser will download the file
@@ -288,26 +232,19 @@ export default async function Page(props: PageProps) {
                     </div>
                     <div className='py-4 w-4/5'>
                         <div className='flex flex-wrap justify-center'>
-                            {/* <Button className='mx-1' onClick={() => openRacePanel()} color='success'>
-                                Race Mode
-                            </Button>
+                            <Link href={race.Type == 'Handicap' ? `/HRace/${race.id}` : `/PRace/${race.id}`}>
+                                <Button className='mx-1' variant={'green'}>
+                                    Race Mode
+                                </Button>
+                            </Link>
                             <Button className='mx-1'>Add Entry</Button>
-                            <Button isDisabled className='mx-1'>
+                            <Button disabled className='mx-1'>
                                 Calculate
                             </Button>
-                            <Button className='mx-1' onClick={() => printRaceSheet()}>
-                                Print Race Sheet
-                            </Button> */}
-                            {/* {userHasPermission(session!.user, AVAILABLE_PERMISSIONS.UploadEntires) ? (
-                                <>
-                                    <Button className='mx-1' onClick={() => document.getElementById('entryFileUpload')!.click()}>
-                                        Upload Entries
-                                    </Button>
-                                    <Input id='entryFileUpload' type='file' accept='.csv' onChange={e => entryFileUploadHandler(e)} className='hidden' />
-                                </>
-                            ) : (
-                                <></>
-                            )} */}
+                            <Link href={`/PrintPaperResults/${race.id}`}>
+                                <Button className='mx-1'>Print Race Sheet</Button>
+                            </Link>
+                            {userHasPermission(session!.user, AVAILABLE_PERMISSIONS.UploadEntires) ? <EntryFileUpload raceId={race.id} /> : <></>}
                             {/* {userHasPermission(session!.user, AVAILABLE_PERMISSIONS.DownloadResults) ? <Button onClick={downloadResults}>Download Results</Button> : <></>} */}
                         </div>
                     </div>

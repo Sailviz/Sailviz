@@ -15,6 +15,7 @@ import { Input } from '../ui/input'
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from '../ui/dropdown-menu'
 import { ChevronDown } from 'lucide-react'
 import Link from 'next/link'
+import { trpc } from '@/lib/trpc'
 
 const Time = ({ ...props }: any) => {
     const initialValue = props.getValue()
@@ -48,7 +49,7 @@ const Action = ({ ...props }: any) => {
     const Router = useRouter()
 
     return (
-        <Link href={`/Race/${props.row.original.id}`} className='text-default-900'>
+        <Link href={`/Race/${props.row.original.id}`} className='text-default-900 cursor-pointer'>
             <Button variant='outline' className='w-16 h-8 p-0'>
                 Open
             </Button>
@@ -56,30 +57,39 @@ const Action = ({ ...props }: any) => {
     )
 }
 
-const columnHelper = createColumnHelper<NextRaceDataType>()
+const columnHelper = createColumnHelper<RaceDataType>()
 
-const RacesTable = (props: any) => {
+const RacesTable = ({ date, historical }: { date: Date; historical: boolean }) => {
     const { data: session, status } = useSession()
     const [page, setPage] = useState(1)
-    const {
-        data: races,
-        error: racesIsError,
-        isValidating: racesIsValidating
-    } = useSWR(`/api/GetRacesByClubId?id=${session?.user.clubId}&page=${page}&date=${props.date}&historical=${props.historical}`, Fetcher.fetcher, {
-        keepPreviousData: true
-    })
 
-    const data = races!.races
-    const count = races?.count
+    const [data, setData] = useState<RaceDataType[]>([])
+    var count: number = 0
+
+    useEffect(() => {
+        function fetchRaces() {
+            trpc.races
+                .query({
+                    clubId: session?.user.clubId!,
+                    page,
+                    date,
+                    historical
+                })
+                .then(response => {
+                    console.log(response)
+                    setData(response.races)
+                    count = response.count
+                })
+        }
+        fetchRaces()
+    }, [session, page, date, historical])
+
     const rowsPerPage = 10
 
     const pages = useMemo(() => {
         return count ? Math.ceil(count / rowsPerPage) : 0
     }, [count, rowsPerPage])
 
-    const loadingState = racesIsValidating || data == undefined ? 'loading' : 'idle'
-
-    console.log(data)
     var table = useReactTable({
         data,
         columns: [
@@ -104,34 +114,9 @@ const RacesTable = (props: any) => {
         ],
         getCoreRowModel: getCoreRowModel()
     })
+
     return (
         <div className='w-full'>
-            <div className='flex items-center py-4'>
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant='outline' className='ml-auto'>
-                            Columns <ChevronDown />
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align='end'>
-                        {table
-                            .getAllColumns()
-                            .filter(column => column.getCanHide())
-                            .map(column => {
-                                return (
-                                    <DropdownMenuCheckboxItem
-                                        key={column.id}
-                                        className='capitalize'
-                                        checked={column.getIsVisible()}
-                                        onCheckedChange={value => column.toggleVisibility(!!value)}
-                                    >
-                                        {column.id}
-                                    </DropdownMenuCheckboxItem>
-                                )
-                            })}
-                    </DropdownMenuContent>
-                </DropdownMenu>
-            </div>
             <div className='rounded-md border'>
                 <Table>
                     <TableHeader>
@@ -163,9 +148,6 @@ const RacesTable = (props: any) => {
                 </Table>
             </div>
             <div className='flex items-center justify-end space-x-2 py-4'>
-                <div className='flex-1 text-sm text-muted-foreground'>
-                    {table.getFilteredSelectedRowModel().rows.length} of {table.getFilteredRowModel().rows.length} row(s) selected.
-                </div>
                 <div className='space-x-2'>
                     <Button variant='outline' size='sm' onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()}>
                         Previous

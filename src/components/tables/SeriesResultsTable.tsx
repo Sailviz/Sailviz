@@ -7,6 +7,7 @@ import { Button } from '../ui/button'
 import { Input } from '../ui/input'
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from '../ui/dropdown-menu'
 import { ChevronDown } from 'lucide-react'
+import { trpc } from '@/lib/trpc'
 //not a db type, only used here
 type SeriesResultsType = {
     Rank: number
@@ -57,13 +58,26 @@ function Sort({ column, table }: { column: any; table: any }) {
 
 const columnHelper = createColumnHelper<SeriesResultsType>()
 
-const SeriesResultsTable = (props: any) => {
-    let [seriesData, setSeriesData] = useState<SeriesDataType>(props.data)
+const SeriesResultsTable = ({ seriesId }: { seriesId: string }) => {
+    let [seriesData, setSeriesData] = useState<SeriesDataType>()
+
+    useEffect(() => {
+        function fetchSeries() {
+            trpc.series.query({ id: seriesId }).then(data => {
+                setSeriesData(data)
+            })
+        }
+        fetchSeries()
+    }, [seriesId])
 
     //calculate results table from data.
     let [data, setData] = useState<SeriesResultsType[]>([])
 
     const calcTable = () => {
+        if (seriesData == undefined) {
+            console.log('seriesData is undefined')
+            return
+        }
         let tempresults: SeriesResultsType[] = []
         //collate results from same person.
         seriesData.races.forEach(race => {
@@ -203,10 +217,11 @@ const SeriesResultsTable = (props: any) => {
     useEffect(() => {
         if (seriesData != undefined) {
             calcTable()
+            generateColumns()
         }
     }, [seriesData])
 
-    let columns: any = [
+    const [columns, setColumns] = useState([
         columnHelper.accessor('Rank', {
             header: 'Rank',
             cell: props => <Number {...props} />,
@@ -236,20 +251,30 @@ const SeriesResultsTable = (props: any) => {
             cell: props => <Text {...props} />,
             enableSorting: false
         })
-    ]
+    ])
 
-    seriesData.races.sort((a, b) => a.number - b.number)
+    const generateColumns = () => {
+        if (seriesData == undefined) {
+            console.log('seriesData is undefined')
+            return
+        }
 
-    //add column for each race in series
-    seriesData.races.forEach((race: RaceDataType, index: number) => {
-        const newColumn = columnHelper.accessor(data => data.racePositions[index], {
-            id: 'R' + race.number.toString(),
-            header: 'R' + race.number.toString(),
-            cell: props => <Result {...props} />,
-            enableSorting: false
+        seriesData.races.sort((a, b) => a.number - b.number)
+        var newColumns: any[] = []
+        //add column for each race in series
+        seriesData.races.forEach((race: RaceDataType, index: number) => {
+            const newColumn = columnHelper.accessor(data => data.racePositions[index], {
+                id: 'R' + race.number.toString(),
+                header: 'R' + race.number.toString(),
+                cell: props => <Result {...props} />,
+                enableSorting: false
+            })
+            newColumns.push(newColumn)
         })
-        columns.push(newColumn)
-    })
+
+        setColumns([...columns.slice(0, 5), ...newColumns, ...columns.slice(6, 6)]) //insert after Helm, Crew, Class, Sail Number
+        console.log('columns', columns)
+    }
 
     const totalColumn = columnHelper.accessor('Total', {
         header: 'Total',
@@ -286,32 +311,6 @@ const SeriesResultsTable = (props: any) => {
 
     return (
         <div className='w-full'>
-            <div className='flex items-center py-4'>
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant='outline' className='ml-auto'>
-                            Columns <ChevronDown />
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align='end'>
-                        {table
-                            .getAllColumns()
-                            .filter(column => column.getCanHide())
-                            .map(column => {
-                                return (
-                                    <DropdownMenuCheckboxItem
-                                        key={column.id}
-                                        className='capitalize'
-                                        checked={column.getIsVisible()}
-                                        onCheckedChange={value => column.toggleVisibility(!!value)}
-                                    >
-                                        {column.id}
-                                    </DropdownMenuCheckboxItem>
-                                )
-                            })}
-                    </DropdownMenuContent>
-                </DropdownMenu>
-            </div>
             <div className='rounded-md border'>
                 <Table>
                     <TableHeader>

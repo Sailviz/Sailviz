@@ -1,45 +1,65 @@
 'use client'
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
+import { trpc } from '@/lib/trpc'
 import { Slash } from 'lucide-react'
 import { usePathname } from 'next/navigation'
-import { Fragment } from 'react'
+import { Fragment, useEffect, useState } from 'react'
 
 type BreadcrumbItem = {
     title: string
     link: string
 }
 
-const routeMapping: Record<string, BreadcrumbItem[]> = {
-    '/Race': [{ title: 'Dashboard', link: '/dashboard' }],
-    '/dashboard/employee': [
-        { title: 'Dashboard', link: '/dashboard' },
-        { title: 'Employee', link: '/dashboard/employee' }
-    ],
-    '/dashboard/product': [
-        { title: 'Dashboard', link: '/dashboard' },
-        { title: 'Products', link: '/dashboard/product' }
-    ]
-}
-
 export function Breadcrumbs() {
     const pathname = usePathname()
     console.log('Breadcrumbs pathname:', pathname)
-    var items: BreadcrumbItem[]
-    if (routeMapping[pathname]) {
-        items = routeMapping[pathname]
-    } else {
+    const [items, setItems] = useState<BreadcrumbItem[]>([])
+
+    useEffect(() => {
         // If no exact match, fall back to generating breadcrumbs from the path
         const segments = pathname.split('/').filter(Boolean)
-        items = segments.map((segment, index) => {
-            const path = `/${segments.slice(0, index + 1).join('/')}`
-            return {
-                title: segment.charAt(0).toUpperCase() + segment.slice(1),
-                link: path
-            }
-        })
-    }
 
-    if (items.length === 0) return null
+        //Race page
+        if (segments[0] == 'Race') {
+            trpc.race.query({ id: segments[1]! }).then(res => {
+                console.log(res)
+                setItems([
+                    {
+                        title: res.series.name,
+                        link: `/Series/${res.series.id}`
+                    },
+                    {
+                        title: `Race ${res.number}`,
+                        link: ``
+                    }
+                ])
+            })
+        } else {
+            setItems(
+                segments.map((segment, index) => {
+                    const path = `/${segments.slice(0, index + 1).join('/')}`
+                    return {
+                        title: segment.charAt(0).toUpperCase() + segment.slice(1),
+                        link: path
+                    }
+                })
+            )
+        }
+        console.log('Breadcrumbs items:', items)
+    }, [pathname])
+    if (items.length === 0)
+        return (
+            <Breadcrumb>
+                <BreadcrumbList>
+                    <Fragment>
+                        <BreadcrumbItem className='hidden md:block'>
+                            {/* this is an invisible character to stop page moving when breadcrums is calculated */}
+                            <BreadcrumbLink>{'\u00A0'}</BreadcrumbLink>
+                        </BreadcrumbItem>
+                    </Fragment>
+                </BreadcrumbList>
+            </Breadcrumb>
+        )
 
     return (
         <Breadcrumb>
@@ -51,11 +71,7 @@ export function Breadcrumbs() {
                                 <BreadcrumbLink href={item.link}>{item.title}</BreadcrumbLink>
                             </BreadcrumbItem>
                         )}
-                        {index < items.length - 1 && (
-                            <BreadcrumbSeparator className='hidden md:block'>
-                                <Slash />
-                            </BreadcrumbSeparator>
-                        )}
+                        {index < items.length - 1 && <BreadcrumbSeparator className='hidden md:block'>&gt;</BreadcrumbSeparator>}
                         {index === items.length - 1 && <BreadcrumbPage>{item.title}</BreadcrumbPage>}
                     </Fragment>
                 ))}

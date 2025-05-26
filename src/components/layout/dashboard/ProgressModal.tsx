@@ -1,29 +1,15 @@
 'use client'
-import { DialogContent } from '@/components/ui/dialog'
+import { Dialog, DialogContent } from '@/components/ui/dialog'
 import { Progress } from '@/components/ui/progress'
 import { useTheme } from 'next-themes'
 import { ChangeEvent, useState } from 'react'
 
-export default function ProgressDialog({
-    isOpen,
-    onClose,
-    Value,
-    Max,
-    Indeterminate
-}: {
-    isOpen: boolean
-    onClose: () => void
-    Value: number
-    Max: number
-    Indeterminate: boolean
-}) {
+export default function ProgressDialog({ isOpen, Value, Max, Indeterminate }: { isOpen: boolean; Value: number; Max: number; Indeterminate: boolean }) {
     const [value, setValue] = useState(Value)
     const [maxValue, setMaxValue] = useState(Max)
     const [indeterminate, setIndeterminate] = useState(Indeterminate)
-
-    const { theme, setTheme } = useTheme()
     return (
-        <>
+        <Dialog>
             <DialogContent>
                 <div className='flex w-full content-center'>
                     <Progress
@@ -39,6 +25,6 @@ export default function ProgressDialog({
                     />
                 </div>
             </DialogContent>
-        </>
+        </Dialog>
     )
 }
