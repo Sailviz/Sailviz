@@ -1,5 +1,5 @@
 'use client'
-import React, { act, ChangeEvent, MouseEventHandler } from 'react'
+import React, { act, ChangeEvent, MouseEventHandler, use } from 'react'
 import * as DB from '@/components/apiMethods'
 import dayjs from 'dayjs'
 import Papa from 'papaparse'
@@ -21,13 +21,13 @@ import { EntryFileUpload } from '@/components/EntryFileUpload'
 import { useSession } from 'next-auth/react'
 import * as Fetcher from '@/components/Fetchers'
 
-type PageProps = { params: { slug: string } }
+type PageProps = { params: Promise<{ raceId: string }> }
 
 export default function Page(props: PageProps) {
-    const params = props.params
+    const { raceId } = use(props.params)
     const { data: session, status } = useSession()
 
-    const { race, raceIsError, raceIsValidating, mutateRace } = Fetcher.Race(params.slug, true)
+    const { race, raceIsError, raceIsValidating, mutateRace } = Fetcher.Race(raceId, true)
 
     //TODO implement timer on fetch
     // const { race, raceIsError, raceIsValidating, mutateRace } = Fetcher.Race(params.slug, true)

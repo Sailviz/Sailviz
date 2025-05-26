@@ -1,5 +1,5 @@
 'use client'
-import React, { ChangeEvent, MouseEventHandler, useEffect, useState } from 'react'
+import React, { ChangeEvent, MouseEventHandler, use, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import * as DB from '@/components/apiMethods'
 import RaceTimer from '@/components/HRaceTimer'
@@ -28,12 +28,11 @@ enum modeType {
     Finish
 }
 
-type PageProps = { params: Promise<{ slug: string }> }
+type PageProps = { params: Promise<{ raceId: string }> }
 
-export default async function Page(props: PageProps) {
+export default function Page(props: PageProps) {
+    const { raceId } = use(props.params)
     const Router = useRouter()
-
-    const params = await props.params
 
     const startLength = 315 //5 15secs in seconds
 
@@ -45,7 +44,7 @@ export default async function Page(props: PageProps) {
     })
     const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
 
-    const { race, raceIsError, raceIsValidating } = Fetcher.Race(params.slug, true)
+    const { race, raceIsError, raceIsValidating } = Fetcher.Race(raceId, true)
 
     // const retireModal = useDisclosure()
     // const flagModal = useDisclosure()

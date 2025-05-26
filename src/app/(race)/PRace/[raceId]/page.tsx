@@ -1,5 +1,5 @@
 'use client'
-import React, { ChangeEvent, MouseEventHandler, useEffect, useState } from 'react'
+import React, { ChangeEvent, MouseEventHandler, use, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import * as DB from '@/components/apiMethods'
 import PursuitTimer from '@/components/PRaceTimer'
@@ -11,7 +11,6 @@ import PursuitTable from '@/components/layout/race/PursuitTable'
 import RetireModal from '@/components/layout/dashboard/RetireModal'
 import BoatCard from '@/components/layout/race/BoatCard'
 import { result, set } from 'cypress/types/lodash'
-import { use } from 'chai'
 import FlagModal from '@/components/layout/dashboard/Flag Modal'
 import { useSession, signIn } from 'next-auth/react'
 import { Button } from '@/components/ui/button'
@@ -33,12 +32,11 @@ enum modeType {
 //pursuit races don't work with fleets, why would you?
 //race organisation if based off of the first fleet, all boats from any fleets are used.
 
-type PageProps = { params: Promise<{ slug: string }> }
+type PageProps = { params: Promise<{ raceId: string }> }
 
-export default async function Page(props: PageProps) {
+export default function Page(props: PageProps) {
+    const { raceId } = use(props.params)
     const Router = useRouter()
-
-    const params = await props.params
 
     const { data: session, status } = useSession({
         required: true,
@@ -57,7 +55,7 @@ export default async function Page(props: PageProps) {
     var [seriesName, setSeriesName] = useState('')
 
     const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
-    const { race, raceIsError, raceIsValidating, mutateRace } = Fetcher.Race(params.slug, true)
+    const { race, raceIsError, raceIsValidating, mutateRace } = Fetcher.Race(raceId, true)
 
     var [raceState, setRaceState] = useState<raceStateType>(raceStateType.reset)
     const [mode, setMode] = useState(modeType.NotStarted)

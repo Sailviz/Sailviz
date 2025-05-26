@@ -1,25 +1,25 @@
+'use client'
 import SeriesResultsTable from '@/components/tables/SeriesResultsTable'
 import SeriesRaceTable from '@/components/tables/SeriesRaceTable'
 import FleetTable from '@/components/tables/FleetTable'
 import * as Fetcher from '@/components/Fetchers'
 import EditFleetModal from '@/components/layout/dashboard/EditFleetSettingsModal'
 import { AVAILABLE_PERMISSIONS, userHasPermission } from '@/components/helpers/users'
-import { auth } from '@/server/auth'
 import { ToCountSelect } from '@/components/ToCountSelect'
 import { AddRaceButton } from '@/components/AddRaceButton'
+import { use } from 'react'
+import { useSession } from 'next-auth/react'
 
-type PageProps = { params: Promise<{ slug: string }> }
+type PageProps = { params: Promise<{ seriesId: string }> }
 
-export default async function Page(props: PageProps) {
-    const params = await props.params
-    const session = await auth()
+export default function Page(props: PageProps) {
+    const { seriesId } = use(props.params)
+    const { data: session, status } = useSession()
 
     // const series = await api.series({ id: params.slug })
     // const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
     // const { series, seriesIsError, seriesIsValidating, mutateSeries } = Fetcher.Series(params.slug)
     // const { boats, boatsIsError, boatsIsValidating } = Fetcher.Boats()
-
-    const seriesId = params.slug
 
     // var [activeRaceId, setActiveRaceId] = useState('')
     // var [activeFleetSettings, setActiveFleetSettings] = useState<FleetSettingsType>()
@@ -92,7 +92,7 @@ export default async function Page(props: PageProps) {
                 {userHasPermission(session!.user, AVAILABLE_PERMISSIONS.editRaces) ? <AddRaceButton seriesId={seriesId} /> : <> </>}
                 <p className='text-6xl font-extrabold p-6'>Fleets</p>
                 <div className='p-6'>
-                    <FleetTable seriesId={params.slug} />
+                    <FleetTable seriesId={seriesId} />
                 </div>
                 {userHasPermission(session!.user, AVAILABLE_PERMISSIONS.editFleets) ? (
                     <>
