@@ -1,5 +1,5 @@
 'use client'
-import React, { useEffect, useState } from 'react'
+import React, { act, useEffect, useState } from 'react'
 import Script from 'next/script'
 import * as DB from '@/components/apiMethods'
 import SeriesResultsTable from '@/components/tables/SeriesResultsTable'
@@ -337,7 +337,7 @@ export default async function Page(props: PageProps) {
                         return (
                             <div className='p-4'>
                                 <div className='text-xl font-extrabold px-6 pt-2'>{activeSeriesData.name}</div>
-                                <SeriesResultsTable data={activeSeriesData} editable={false} showTime={false} key={activeRaceData.id} />
+                                <SeriesResultsTable seriesId={activeSeriesData.id} />
                             </div>
                         )
                     case pageStateType.race:

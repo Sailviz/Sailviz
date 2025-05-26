@@ -56,7 +56,7 @@ export default async function Page(props: PageProps) {
             <div className='py-4'>
                 <div className={title({ color: 'blue' })}>{series.name}</div>
             </div>
-            <SeriesResultsTable data={series} editable={false} showTime={false} key={JSON.stringify(series)} />
+            <SeriesResultsTable seriesId={params.slug} />
         </div>
     )
 }

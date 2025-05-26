@@ -5,9 +5,12 @@ import * as Fetcher from '@/components/Fetchers'
 import EditFleetModal from '@/components/layout/dashboard/EditFleetSettingsModal'
 import { AVAILABLE_PERMISSIONS, userHasPermission } from '@/components/helpers/users'
 import { auth } from '@/server/auth'
+import { ToCountSelect } from '@/components/ToCountSelect'
 
-export default async function Page(props: { params: { slug: string } }) {
-    const params = props.params
+type PageProps = { params: Promise<{ slug: string }> }
+
+export default async function Page(props: PageProps) {
+    const params = await props.params
     const session = await auth()
 
     // const series = await api.series({ id: params.slug })
@@ -109,18 +112,7 @@ export default async function Page(props: { params: { slug: string } }) {
                             </p>
                         </div>
 
-                        <div className='flex flex-col px-6 w-2/4 '>
-                            {/* <Slider
-                                min={1}
-                                max={series.races.length}
-                                defaultValue={series.settings.numberToCount}
-                                // onChange={value => {
-                                // saveSeriesToCount(value)
-                                // mutateSeries()
-                                // }}
-                                // getValue={races => `${races} of ${series.races.length} races`}
-                            /> */}
-                        </div>
+                        <ToCountSelect seriesId={seriesId} />
                     </>
                 ) : (
                     <> </>

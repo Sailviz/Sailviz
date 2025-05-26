@@ -26,6 +26,15 @@ const resultSchema = z.object({
     boat: boatSchema
 })
 
+const seriesSchema = z.object({
+    id: z.string(),
+    name: z.string(),
+    clubId: z.string(),
+    settings: z.object({
+        numberToCount: z.number()
+    })
+})
+
 export const appRouter = createTRPCRouter({
     createOrg: publicProcedure.input(z.object({ name: z.string() })).mutation(async opts => {
         const { input } = opts
@@ -88,6 +97,19 @@ export const appRouter = createTRPCRouter({
             }
         })
         return series as unknown as SeriesDataType
+    }),
+    updateSeries: protectedProcedure.input(seriesSchema).mutation(async opts => {
+        const { input } = opts
+        console.log('Updating series:', input)
+        const series = await prisma.series.update({
+            where: {
+                id: input.id
+            },
+            data: {
+                settings: input.settings,
+                name: input.name
+            }
+        })
     }),
     todaysRaces: publicProcedure.input(z.object({ clubId: z.string() })).mutation(async opts => {
         const { input } = opts

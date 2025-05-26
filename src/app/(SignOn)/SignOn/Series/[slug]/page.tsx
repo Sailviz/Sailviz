@@ -35,7 +35,7 @@ export default async function Page(props: PageProps) {
                 </p>
             </div>
             <div className='h-5/6 p-6'>
-                <SeriesResultsTable key={JSON.stringify(series)} data={series} />
+                <SeriesResultsTable seriesId={params.slug} />
             </div>
         </div>
     )
