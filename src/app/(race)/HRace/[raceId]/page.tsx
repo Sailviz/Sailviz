@@ -46,7 +46,7 @@ export default function Page(props: PageProps) {
 
     const { race, raceIsError, raceIsValidating } = Fetcher.Race(raceId, true)
 
-    // const retireModal = useDisclosure()
+    const [retireModal, setRetireModal] = useState(false)
     // const flagModal = useDisclosure()
     const [flagStatus, setFlagStatus] = useState<boolean[]>([false, false])
     const [nextFlagStatus, setNextFlagStatus] = useState<boolean[]>([false, false])
@@ -321,7 +321,7 @@ export default function Page(props: PageProps) {
     }
 
     const showRetireModal = (resultId: String) => {
-        // retireModal.onOpen()
+        setRetireModal(true)
         let result: ResultDataType | undefined
         race.fleets.some(fleet => {
             result = fleet.results.find(result => result.id === resultId)
@@ -597,7 +597,7 @@ export default function Page(props: PageProps) {
 
     return (
         <>
-            {/* <RetireModal isOpen={retireModal.isOpen} onSubmit={retireBoat} onClose={retireModal.onClose} result={activeResult} /> */}
+            <RetireModal isOpen={retireModal} onSubmit={retireBoat} result={activeResult} onClose={() => setRetireModal(false)} />
             {/* <FlagModal isOpen={flagModal.isOpen} currentFlagStatus={flagStatus} nextFlagStatus={nextFlagStatus} onClose={flagModal.onClose} onSubmit={() => null} /> */}
             <audio id='Beep' src='/Beep-6.mp3'></audio>
             <audio id='Countdown' src='/Countdown.mp3'></audio>

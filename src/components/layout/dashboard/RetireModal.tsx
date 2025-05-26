@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button'
-import { DialogContent, DialogFooter, DialogHeader } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogFooter, DialogHeader } from '@/components/ui/dialog'
 import { useTheme } from 'next-themes'
 import { ChangeEvent, useState } from 'react'
 
@@ -24,7 +24,12 @@ export default function RetireDialog({
 }) {
     const { theme, setTheme } = useTheme()
     return (
-        <>
+        <Dialog
+            open={isOpen}
+            onOpenChange={open => {
+                if (!open) onClose() // this catches the x button and clicking outside the modal, gets out of parallel route
+            }}
+        >
             <DialogContent>
                 <DialogHeader className='flex flex-col gap-1'>Retire Boat</DialogHeader>
                 <div className='flex w-full flex-col'>
@@ -47,6 +52,6 @@ export default function RetireDialog({
                     </Button>
                 </DialogFooter>
             </DialogContent>
-        </>
+        </Dialog>
     )
 }

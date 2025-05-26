@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/button'
+import { Spinner } from '@/components/ui/spinner'
 import { useEffect, useRef, useState } from 'react'
 
 enum raceStateType {
@@ -59,9 +60,9 @@ export default function BoatCard({
                         {result.Helm} - {result.Crew}
                     </p>
                 </div>
-                {/* <Button color='danger' isDisabled={true} className=' w-36 m-6 h-4/6 text-xl'>
+                <Button color='danger' disabled={true} className=' w-36 m-6 h-4/6 text-xl'>
                     {text}
-                </Button> */}
+                </Button>
             </div>
         )
     } else if (result.finishTime == 0) {
@@ -92,7 +93,9 @@ export default function BoatCard({
                     )}
                 </div>
                 {isDisabled ? (
-                    <Button color='default' className=' w-36 m-6 h-4/6 text-xl'></Button> //isLoading={true}
+                    <Button variant={'outline'} className=' w-36 m-6 h-4/6 text-xl'>
+                        <Spinner />
+                    </Button>
                 ) : (
                     <>
                         {(() => {
