@@ -26,17 +26,6 @@ export default function Page(props: PageProps) {
 
     const { race, raceIsError, raceIsValidating, mutateRace } = Fetcher.Race(raceId, true)
 
-    const createResult = async (helm: string, crew: string, boat: BoatDataType, sailNum: string, fleetId: string) => {
-        //create a result for each fleet
-        let result = await DB.createResult(fleetId)
-        await DB.updateResult({ ...result, Helm: helm, Crew: crew, boat: boat, SailNumber: sailNum })
-
-        console.log(helm, crew, boat, sailNum, fleetId)
-        // createModal.onClose() //close modal
-
-        // mutate('/api/GetFleetById?id=' + fleetId)
-    }
-
     const printRaceSheet = async () => {
         Router.push('/PrintPaperResults/' + race.id)
     }
@@ -114,7 +103,6 @@ export default function Page(props: PageProps) {
 
     return (
         <div id='race' className='h-full w-full overflow-y-auto'>
-            {/* <CreateResultModal isOpen={createModal.isOpen} race={race} boats={boats} onSubmit={createResult} onClose={createModal.onClose} /> */}
             {/* <ViewResultModal isOpen={viewModal.isOpen} result={activeResult} fleet={activeFleet} onClose={viewModal.onClose} /> */}
             <div className='flex flex-wrap justify-center gap-4 w-full'>
                 <div className='flex flex-wrap px-4 divide-y divide-solid w-full justify-center'>
@@ -157,7 +145,9 @@ export default function Page(props: PageProps) {
                                     Race Mode
                                 </Button>
                             </Link>
-                            <Button className='mx-1'>Add Entry</Button>
+                            <Link href={`/createResult/${race.id}`}>
+                                <Button className='mx-1'>Add Entry</Button>
+                            </Link>
                             <Button disabled className='mx-1'>
                                 Calculate
                             </Button>

@@ -1,25 +1,24 @@
 'use client'
 import { Button } from '@/components/ui/button'
-import { DialogContent, DialogFooter, DialogHeader } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogFooter, DialogHeader } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Tabs } from '@/components/ui/tabs'
 import { useTheme } from 'next-themes'
+import { useRouter } from 'next/navigation'
 import { ChangeEvent, useEffect, useState } from 'react'
 import Select, { CSSObjectWithLabel } from 'react-select'
 
 export default function CreateResultDialog({
-    isOpen,
     race,
     boats,
-    onSubmit,
-    onClose
+    onSubmit
 }: {
-    isOpen: boolean
     race: RaceDataType
     boats: BoatDataType[]
     onSubmit: (helmValue: string, crewValue: string, boat: any, sailNum: string, fleetId: string) => void
-    onClose: () => void
 }) {
+    const Router = useRouter()
+    const [open, setOpen] = useState(true)
     const [helm, setHelm] = useState('')
     const [crew, setCrew] = useState('')
     const [sailNumber, setSailNumber] = useState('')
@@ -79,8 +78,14 @@ export default function CreateResultDialog({
     }
 
     return (
-        <>
-            <DialogContent>
+        <Dialog
+            open={open}
+            onOpenChange={open => {
+                setOpen(open)
+                if (!open) Router.back() // this catches the x button and clicking outside the modal, gets out of parallel route
+            }}
+        >
+            <DialogContent className='max-w-8/12' title='New Entry'>
                 <DialogHeader className='flex flex-col gap-1'>Create New Entry</DialogHeader>
                 <div className='flex w-full'>
                     <div className='flex flex-col px-6 w-full'>
@@ -205,6 +210,6 @@ export default function CreateResultDialog({
                     </Button>
                 </DialogFooter>
             </DialogContent>
-        </>
+        </Dialog>
     )
 }
