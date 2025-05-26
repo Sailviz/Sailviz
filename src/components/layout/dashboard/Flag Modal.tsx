@@ -1,4 +1,4 @@
-import { DialogContent, DialogHeader } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader } from '@/components/ui/dialog'
 import { useTheme } from 'next-themes'
 import Image from 'next/image'
 
@@ -10,18 +10,20 @@ export default function FlagDialog({
     isOpen,
     currentFlagStatus,
     nextFlagStatus,
-    onSubmit,
     onClose
 }: {
     isOpen: boolean
     currentFlagStatus: boolean[]
     nextFlagStatus: boolean[]
-    onSubmit: (resultCode: string) => void
     onClose: () => void
 }) {
-    const { theme, setTheme } = useTheme()
     return (
-        <>
+        <Dialog
+            open={isOpen}
+            onOpenChange={open => {
+                if (!open) onClose() // this catches the x button and clicking outside the modal, gets out of parallel route
+            }}
+        >
             <DialogContent>
                 <DialogHeader className='flex flex-col'>Flag Positions</DialogHeader>
                 <div className='flex flex-row w-full justify-around'>
@@ -93,6 +95,6 @@ export default function FlagDialog({
                     </div>
                 </div>
             </DialogContent>
-        </>
+        </Dialog>
     )
 }

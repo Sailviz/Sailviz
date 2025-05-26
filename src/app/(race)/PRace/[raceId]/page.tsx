@@ -45,11 +45,10 @@ export default function Page(props: PageProps) {
         }
     })
 
-    // const retireModal = useDisclosure()
-    // const flagModal = useDisclosure()
     const [flagStatus, setFlagStatus] = useState<boolean[]>([false, false])
     const [nextFlagStatus, setNextFlagStatus] = useState<boolean[]>([false, false])
     const [retireModal, setRetireModal] = useState(false)
+    const [flagModal, setFlagModal] = useState(false)
 
     const startLength = 315 //5 mins 15 seconds in seconds
 
@@ -533,7 +532,7 @@ export default function Page(props: PageProps) {
         <>
             <RetireModal isOpen={retireModal} onSubmit={retireBoat} result={activeResult} onClose={() => setRetireModal(false)} />
 
-            {/* <FlagModal isOpen={flagModal.isOpen} currentFlagStatus={flagStatus} nextFlagStatus={nextFlagStatus} onClose={flagModal.onClose} onSubmit={() => null} /> */}
+            <FlagModal isOpen={flagModal} currentFlagStatus={flagStatus} nextFlagStatus={nextFlagStatus} onClose={() => setFlagModal(false)} />
 
             <audio id='Beep' src='/Beep-6.mp3'></audio>
             <audio id='Countdown' src='/Countdown.mp3'></audio>

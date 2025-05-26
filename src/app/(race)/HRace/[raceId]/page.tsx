@@ -47,7 +47,7 @@ export default function Page(props: PageProps) {
     const { race, raceIsError, raceIsValidating } = Fetcher.Race(raceId, true)
 
     const [retireModal, setRetireModal] = useState(false)
-    // const flagModal = useDisclosure()
+    const [flagModal, setFlagModal] = useState(false)
     const [flagStatus, setFlagStatus] = useState<boolean[]>([false, false])
     const [nextFlagStatus, setNextFlagStatus] = useState<boolean[]>([false, false])
 
@@ -113,7 +113,7 @@ export default function Page(props: PageProps) {
             console.error('start time was: ' + localTime)
         }
 
-        // flagModal.onOpen()
+        setFlagModal(true)
         //set flag status to false
         setFlagStatus([false, false])
         setNextFlagStatus([true, false])
@@ -225,7 +225,7 @@ export default function Page(props: PageProps) {
             })
         setFlagStatus([false, false])
         setNextFlagStatus([false, false])
-        // flagModal.onClose()
+        setFlagModal(false)
         let sound = document.getElementById('Beep') as HTMLAudioElement
         sound!.currentTime = 0
         sound!.play()
@@ -598,7 +598,7 @@ export default function Page(props: PageProps) {
     return (
         <>
             <RetireModal isOpen={retireModal} onSubmit={retireBoat} result={activeResult} onClose={() => setRetireModal(false)} />
-            {/* <FlagModal isOpen={flagModal.isOpen} currentFlagStatus={flagStatus} nextFlagStatus={nextFlagStatus} onClose={flagModal.onClose} onSubmit={() => null} /> */}
+            <FlagModal isOpen={flagModal} currentFlagStatus={flagStatus} nextFlagStatus={nextFlagStatus} onClose={() => setFlagModal(false)} />
             <audio id='Beep' src='/Beep-6.mp3'></audio>
             <audio id='Countdown' src='/Countdown.mp3'></audio>
             <div className='w-full flex flex-col items-center justify-start panel-height'>
@@ -607,7 +607,7 @@ export default function Page(props: PageProps) {
                         return (
                             <div className='flex flex-row' key={'fleetBar' + index}>
                                 <div className='w-1/4 p-2 m-2 border-4 rounded-lg  text-lg font-medium'>
-                                    Event: {race.series.name} - {race.number} - {fleet.fleetSettings.name}
+                                    Event: {race?.series?.name} - {race?.number} - {fleet?.fleetSettings?.name}
                                 </div>
                                 <div className='w-1/4 p-2 m-2 border-4 rounded-lg text-lg font-medium'>
                                     Race Time:{' '}

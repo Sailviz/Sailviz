@@ -193,7 +193,11 @@ export default function CreateResultDialog({
                             <TabsList className='grid w-full grid-cols-2'>
                                 {/* show buttons for each fleet in a series */}
                                 {race.fleets.map((fleet: FleetDataType, index) => {
-                                    return <TabsTrigger value={fleet.id}>{fleet.fleetSettings.name}</TabsTrigger>
+                                    return (
+                                        <TabsTrigger key={fleet.id + 'fleet select'} value={fleet.id}>
+                                            {fleet.fleetSettings.name}
+                                        </TabsTrigger>
+                                    )
                                 })}
                             </TabsList>
                         </Tabs>
