@@ -1,3 +1,4 @@
+'use client'
 import React, { act, ChangeEvent, MouseEventHandler } from 'react'
 import * as DB from '@/components/apiMethods'
 import dayjs from 'dayjs'
@@ -17,18 +18,16 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { EntryFileUpload } from '@/components/EntryFileUpload'
+import { useSession } from 'next-auth/react'
 import * as Fetcher from '@/components/Fetchers'
 
-type PageProps = { params: Promise<{ slug: string }> }
+type PageProps = { params: { slug: string } }
 
-export default async function Page(props: PageProps) {
-    const params = await props.params
-    const session = await auth()
+export default function Page(props: PageProps) {
+    const params = props.params
+    const { data: session, status } = useSession()
 
     const { race, raceIsError, raceIsValidating, mutateRace } = Fetcher.Race(params.slug, true)
-    if (!race) {
-        notFound()
-    }
 
     //TODO implement timer on fetch
     // const { race, raceIsError, raceIsValidating, mutateRace } = Fetcher.Race(params.slug, true)
