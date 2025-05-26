@@ -62,7 +62,7 @@ const calculateHandicapResults = (fleet: FleetDataType) => {
     //most nuber of laps.
     const maxLaps = Math.max.apply(
         null,
-        fleet.results.map(function (o: ResultsDataType) {
+        fleet.results.map(function (o: ResultDataType) {
             return o.laps.length
         })
     )
@@ -113,7 +113,7 @@ const calculatePursuitResults = (fleet: FleetDataType) => {
     return fleet
 }
 
-const columnHelper = createColumnHelper<ResultsDataType>()
+const columnHelper = createColumnHelper<ResultDataType>()
 
 const LiveResultsTable = (props: any) => {
     let [fleet, setFleet] = useState<FleetDataType>(props.fleet)
@@ -121,7 +121,7 @@ const LiveResultsTable = (props: any) => {
     console.log(props.handicap)
     let [handicap, setHandicap] = useState<boolean>(props.handicap == 'Handicap' ? true : false)
 
-    let [results, setResults] = useState<ResultsDataType[]>(props.handicap == 'Handicap' ? calculateHandicapResults(fleet).results : calculatePursuitResults(fleet).results)
+    let [results, setResults] = useState<ResultDataType[]>(props.handicap == 'Handicap' ? calculateHandicapResults(fleet).results : calculatePursuitResults(fleet).results)
     let maxLaps = 0
     results.forEach((result, index) => {
         if (result.laps.length > maxLaps) {

@@ -1,17 +1,11 @@
 'use client'
-import React, { act, ChangeEvent, MouseEventHandler, use } from 'react'
+import React, { act, ChangeEvent, MouseEventHandler, use, useState } from 'react'
 import * as DB from '@/components/apiMethods'
 import dayjs from 'dayjs'
-import Papa from 'papaparse'
 import FleetHandicapResultsTable from '@/components/tables/FleetHandicapResultsTable'
 import FleetPursuitResultsTable from '@/components/tables/FleetPursuitResultsTable'
 import { AVAILABLE_PERMISSIONS, userHasPermission } from '@/components/helpers/users'
-// import CreateResultModal from '@/components/ui/dashboard/CreateResultModal'
-// import ProgressModal from '@/components/ui/dashboard/ProgressModal'
-// import EditResultModal from '@/components/ui/dashboard/EditResultModal'
-// import { mutate } from 'swr'
-// import ViewResultModal from '@/components/ui/dashboard/viewResultModal'
-import { notFound, redirect } from 'next/navigation'
+import { notFound, redirect, useRouter } from 'next/navigation'
 import { auth } from '@/server/auth'
 import { Breadcrumbs } from '@/components/breadcrumbs'
 import { Input } from '@/components/ui/input'
@@ -20,22 +14,17 @@ import Link from 'next/link'
 import { EntryFileUpload } from '@/components/EntryFileUpload'
 import { useSession } from 'next-auth/react'
 import * as Fetcher from '@/components/Fetchers'
+import ProgressModal from '@/components/layout/dashboard/ProgressModal'
 
 type PageProps = { params: Promise<{ raceId: string }> }
 
 export default function Page(props: PageProps) {
+    const Router = useRouter()
+
     const { raceId } = use(props.params)
     const { data: session, status } = useSession()
 
     const { race, raceIsError, raceIsValidating, mutateRace } = Fetcher.Race(raceId, true)
-
-    //TODO implement timer on fetch
-    // const { race, raceIsError, raceIsValidating, mutateRace } = Fetcher.Race(params.slug, true)
-
-    // const createModal = useDisclosure()
-    // const progressModal = useDisclosure()
-    // const editModal = useDisclosure()
-    // const viewModal = useDisclosure()
 
     const createResult = async (helm: string, crew: string, boat: BoatDataType, sailNum: string, fleetId: string) => {
         //create a result for each fleet
@@ -48,26 +37,8 @@ export default function Page(props: PageProps) {
         // mutate('/api/GetFleetById?id=' + fleetId)
     }
 
-    const updateResult = async (result: ResultsDataType) => {
-        // editModal.onClose()
-        await DB.updateResult(result)
-
-        //mutate all incase fleet was changed
-        race.fleets.forEach(fleet => {
-            //     // mutate('/api/GetFleetById?id=' + fleet.id)
-        })
-        // mutateRace()
-    }
-
-    const deleteResult = async (result: ResultsDataType) => {
-        await DB.DeleteResultById(result)
-        // mutate('/api/GetFleetById?id=' + result.fleetId)
-        console.log('deleted')
-        // editModal.onClose()
-    }
-
     const printRaceSheet = async () => {
-        redirect('/PrintPaperResults/' + race.id)
+        Router.push('/PrintPaperResults/' + race.id)
     }
 
     //Capitalise the first letter of each word, and maintain cursor pos.
@@ -85,29 +56,6 @@ export default function Page(props: PageProps) {
         let inputElement = document.getElementById(e.target.id) as HTMLInputElement
         inputElement.value = calitalisedSentence
         inputElement.selectionStart = cursorPos
-    }
-
-    const openRacePanel = async () => {
-        if (race.Type == 'Handicap') {
-            redirect('/HRace/' + race.id)
-        } else {
-            redirect('/PRace/' + race.id)
-        }
-    }
-
-    const showEditModal = async (resultId: string) => {
-        let result = race.fleets.flatMap(fleet => fleet.results).find(result => result.id == resultId)
-        if (result == undefined) {
-            console.error('Could not find result with id: ' + resultId)
-            return
-        }
-        console.log(result)
-        result.laps.sort((a, b) => a.time - b.time)
-        // setActiveResult(result)
-
-        // setActiveFleet(race.fleets.filter(fleet => fleet.id == result?.fleetId)[0]!)
-
-        // editModal.onOpen()
     }
 
     const showViewModal = async (resultId: string) => {
@@ -164,36 +112,9 @@ export default function Page(props: PageProps) {
         })
     }
 
-    // useEffect(() => {
-    //     const fetchName = async () => {
-    //         setSeriesName(await DB.GetSeriesById(race.seriesId).then(series => series.name))
-    //     }
-    //     if (race != undefined) {
-    //         fetchName()
-    //     }
-    // }, [race])
-
     return (
         <div id='race' className='h-full w-full overflow-y-auto'>
             {/* <CreateResultModal isOpen={createModal.isOpen} race={race} boats={boats} onSubmit={createResult} onClose={createModal.onClose} /> */}
-            {/* <ProgressModal
-                key={progressValue}
-                isOpen={progressModal.isOpen}
-                Value={progressValue}
-                Max={progressMax}
-                Indeterminate={progressIndeterminate}
-                onClose={progressModal.onClose}
-            /> */}
-            {/* <EditResultModal
-                advancedEdit={userHasPermission(session.user, AVAILABLE_PERMISSIONS.advancedResultEdit)}
-                isOpen={editModal.isOpen}
-                fleet={activeFleet}
-                raceType={race.Type}
-                result={activeResult}
-                onSubmit={updateResult}
-                onDelete={deleteResult}
-                onClose={editModal.onClose}
-            /> */}
             {/* <ViewResultModal isOpen={viewModal.isOpen} result={activeResult} fleet={activeFleet} onClose={viewModal.onClose} /> */}
             <div className='flex flex-wrap justify-center gap-4 w-full'>
                 <div className='flex flex-wrap px-4 divide-y divide-solid w-full justify-center'>
@@ -216,7 +137,7 @@ export default function Page(props: PageProps) {
                                                 type='text'
                                                 id={displayName}
                                                 defaultValue={name as unknown as string} //seems to be a bug, so explicitly cast
-                                                // onBlur={saveRaceSettings}
+                                                onBlur={saveRaceSettings}
                                             />
                                         </div>
                                     </div>
@@ -244,7 +165,7 @@ export default function Page(props: PageProps) {
                                 <Button className='mx-1'>Print Race Sheet</Button>
                             </Link>
                             {userHasPermission(session!.user, AVAILABLE_PERMISSIONS.UploadEntires) ? <EntryFileUpload raceId={race.id} /> : <></>}
-                            {/* {userHasPermission(session!.user, AVAILABLE_PERMISSIONS.DownloadResults) ? <Button onClick={downloadResults}>Download Results</Button> : <></>} */}
+                            {userHasPermission(session!.user, AVAILABLE_PERMISSIONS.DownloadResults) ? <Button onClick={downloadResults}>Download Results</Button> : <></>}
                         </div>
                     </div>
                     <div className='py-4 w-full'>

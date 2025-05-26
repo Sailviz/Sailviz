@@ -20,7 +20,7 @@ export default function RetireDialog({
     isOpen: boolean
     onSubmit: (resultCode: string) => void
     onClose: () => void
-    result: ResultsDataType
+    result: ResultDataType
 }) {
     const { theme, setTheme } = useTheme()
     return (

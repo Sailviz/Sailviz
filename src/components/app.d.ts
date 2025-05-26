@@ -37,7 +37,7 @@ type FleetSettingsType = {
     fleets: FleetDataType[]
 }
 
-type ResultsDataType = {
+type ResultDataType = {
     id: string
     fleetId: string
     raceId: string
@@ -133,7 +133,7 @@ type FleetDataType = {
     raceId: String
     startTime: number
     fleetSettings: FleetSettingsType
-    results: ResultsDataType[]
+    results: ResultDataType[]
 }
 
 type AuthedUserDataType = {

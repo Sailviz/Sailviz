@@ -55,7 +55,7 @@ export default async function Page(props: PageProps) {
                         HandicapPosition: 0,
                         resultCode: '',
                         fleetId: ''
-                    } as ResultsDataType
+                    } as ResultDataType
                 ]
             }
         ],

@@ -54,7 +54,7 @@ export default function Page(props: PageProps) {
     var [lastAction, setLastAction] = useState<{ type: string; resultId: string }>({ type: '', resultId: '' })
 
     const [raceState, setRaceState] = useState<raceStateType[]>([])
-    const [activeResult, setActiveResult] = useState<ResultsDataType>({
+    const [activeResult, setActiveResult] = useState<ResultDataType>({
         id: '',
         raceId: '',
         Helm: '',
@@ -231,7 +231,7 @@ export default function Page(props: PageProps) {
         sound!.play()
     }
 
-    const dynamicSort = async (results: ResultsDataType[]) => {
+    const dynamicSort = async (results: ResultDataType[]) => {
         results.sort((a, b) => {
             //if done a lap, predicted is sum of lap times + last lap.
             //if no lap done, predicted is py.
@@ -265,7 +265,7 @@ export default function Page(props: PageProps) {
         })
     }
 
-    const sortByLastLap = (results: ResultsDataType[]) => {
+    const sortByLastLap = (results: ResultDataType[]) => {
         results.sort((a, b) => {
             //get last lap time, not including last lap.
             let aIndex = a.finishTime != 0 ? 2 : 1
@@ -322,7 +322,7 @@ export default function Page(props: PageProps) {
 
     const showRetireModal = (resultId: String) => {
         // retireModal.onOpen()
-        let result: ResultsDataType | undefined
+        let result: ResultDataType | undefined
         race.fleets.some(fleet => {
             result = fleet.results.find(result => result.id === resultId)
             return result !== undefined
@@ -348,7 +348,7 @@ export default function Page(props: PageProps) {
     }
 
     const lapBoat = async (resultId: string) => {
-        let result: ResultsDataType | undefined
+        let result: ResultDataType | undefined
         race.fleets.some(fleet => {
             result = fleet.results.find(result => result.id === resultId)
             return result !== undefined
@@ -395,7 +395,7 @@ export default function Page(props: PageProps) {
         race.fleets.forEach(fleet => {
             const maxLaps = Math.max.apply(
                 null,
-                fleet.results.map(function (o: ResultsDataType) {
+                fleet.results.map(function (o: ResultDataType) {
                     return o.laps.length
                 })
             )
@@ -505,7 +505,7 @@ export default function Page(props: PageProps) {
         return allFinished
     }
 
-    const checkAnyFinished = (results: ResultsDataType[]) => {
+    const checkAnyFinished = (results: ResultDataType[]) => {
         //check if any boats in fleet have finished
         let anyFinished = false
         results.forEach(data => {
@@ -705,7 +705,7 @@ export default function Page(props: PageProps) {
                     <div className='flex flex-row justify-around flex-wrap' id='EntrantCards'>
                         {race.fleets
                             .flatMap(fleets => fleets.results)
-                            .map((result: ResultsDataType, index) => {
+                            .map((result: ResultDataType, index) => {
                                 let fleetIndex = race.fleets.findIndex(fleet => fleet.id == result.fleetId)
                                 return (
                                     <BoatCard

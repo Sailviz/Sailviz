@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import assert from 'assert'
 import { isRequestAuthorised } from '@/components/helpers/auth'
 
-async function updateResult(result: ResultsDataType) {
+async function updateResult(result: ResultDataType) {
     var res = await prisma.result.update({
         where: {
             id: result.id
@@ -24,7 +24,7 @@ async function updateResult(result: ResultsDataType) {
     return res
 }
 
-async function updateBoat(result: ResultsDataType) {
+async function updateBoat(result: ResultDataType) {
     var res = await prisma.result.update({
         where: {
             id: result.id

@@ -27,7 +27,7 @@ export default async function Page(props: PageProps) {
 
     // const viewModal = useDisclosure()
 
-    var [activeResult, setActiveResult] = useState<ResultsDataType>()
+    var [activeResult, setActiveResult] = useState<ResultDataType>()
     var [activeFleet, setActiveFleet] = useState<FleetDataType>()
 
     const openViewModal = (resultId: string) => {

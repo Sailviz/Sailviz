@@ -10,37 +10,36 @@ import * as DB from '@/components/apiMethods'
 export function EntryFileUpload({ raceId }: { raceId: string }) {
     const [progressValue, setProgressValue] = useState(0)
     const [progressMax, setProgressMax] = useState(0)
-    const [progressIndeterminate, setProgressIndeterminate] = useState(false)
     const [progressOpen, setProgressOpen] = useState(false)
     const { race, raceIsError, raceIsValidating, mutateRace } = Fetcher.Race(raceId, false)
     const { boats, boatsIsError, boatsIsValidating } = Fetcher.Boats()
-
-    const { data: session, status } = useSession()
 
     const entryFileUploadHandler = async (e: ChangeEvent<HTMLInputElement>) => {
         if (race == null) {
             return
         }
+        if (e.target.files == null || e.target.files.length == 0) {
+            return
+        }
         setProgressOpen(true)
-        setProgressIndeterminate(true)
         setProgressValue(0)
         Papa.parse(e.target.files![0]!, {
             header: true,
             skipEmptyLines: true,
             complete: async function (results: any) {
                 console.log(results)
-                // setProgressIndeterminate(false)
-                // setProgressMax(results.data.length)
+                setProgressMax(results.data.length)
                 let index = 0
                 for (const line of results.data) {
-                    // setProgressValue(++index)
+                    setProgressValue(++index)
                     //check if all fields are present
                     if (line.Helm == undefined || line.Crew == undefined || line.Boat == undefined || line.SailNumber == undefined) {
                         alert('missing fields')
-                        // progressModal.onClose()
+                        setProgressOpen(false)
+
                         return
                     }
-                    let result: ResultsDataType = {} as ResultsDataType
+                    let result: ResultDataType = {} as ResultDataType
                     if (line.Fleet == undefined) {
                         if (race.fleets.length > 1) {
                             alert("fleets aren't defined and there is more than one fleet in race")
@@ -73,7 +72,7 @@ export function EntryFileUpload({ raceId }: { raceId: string }) {
 
     return (
         <>
-            <ProgressModal key={progressValue} isOpen={progressOpen} Value={progressValue} Max={progressMax} Indeterminate={progressIndeterminate} />
+            <ProgressModal key={progressValue} isOpen={progressOpen} Value={progressValue} Max={progressMax} />
             <Button className='mx-1' onClick={() => document.getElementById('entryFileUpload')!.click()}>
                 Upload Entries
             </Button>

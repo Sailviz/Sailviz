@@ -105,7 +105,7 @@ function Sort({ column, table }: { column: any; table: any }) {
     )
 }
 
-const columnHelper = createColumnHelper<ResultsDataType>()
+const columnHelper = createColumnHelper<ResultDataType>()
 
 const FleetHandicapResultsTable = (props: any) => {
     const Router = useRouter()

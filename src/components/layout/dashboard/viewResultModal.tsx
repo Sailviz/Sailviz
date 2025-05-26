@@ -26,7 +26,7 @@ export default function EditResultDialog({
     onClose
 }: {
     isOpen: boolean
-    result: ResultsDataType | undefined
+    result: ResultDataType | undefined
     fleet: FleetDataType | undefined
     onClose: () => void
 }) {

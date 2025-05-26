@@ -1,24 +1,17 @@
-import React, { forwardRef, useState } from 'react';
+import React, { forwardRef, useState } from 'react'
 import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, useReactTable, SortingState, ColumnDef } from '@tanstack/react-table'
-
 
 const Text = ({ ...props }) => {
     const value = props.getValue()
 
-    return (
-        <div className=' text-center'>
-            {value}
-        </div>
-    );
-};
+    return <div className=' text-center'>{value}</div>
+}
 
 const Time = ({ ...props }) => {
     const value = props.getValue()
 
     if (value == 999999) {
-        return <div>
-            &nbsp;
-        </div>
+        return <div>&nbsp;</div>
     }
     const minutes = Math.floor(value / 60)
     const seconds = value % 60
@@ -27,61 +20,58 @@ const Time = ({ ...props }) => {
         <div className=' text-center'>
             {minutes < 10 ? `0${minutes}` : minutes}:{seconds < 10 ? `0${seconds}` : seconds}
         </div>
-    );
-};
+    )
+}
 
 const Empty = ({ ...props }) => {
-    return (
-        <div />
-    );
-};
+    return <div />
+}
 
+const columnHelper = createColumnHelper<ResultDataType>()
 
-const columnHelper = createColumnHelper<ResultsDataType>()
-
-
-const PursuitPaperResultsTable = forwardRef((props: { results: ResultsDataType[] }, ref: any) => {
-    let [results, setResults] = useState<ResultsDataType[]>(props.results)
+const PursuitPaperResultsTable = forwardRef((props: { results: ResultDataType[] }, ref: any) => {
+    let [results, setResults] = useState<ResultDataType[]>(props.results)
 
     //create 3 empty lines on sheet
-    results.push({} as ResultsDataType)
-    results.push({} as ResultsDataType)
-    results.push({} as ResultsDataType)
+    results.push({} as ResultDataType)
+    results.push({} as ResultDataType)
+    results.push({} as ResultDataType)
 
     //sets sorting to position by default
-    const [sorting, setSorting] = useState<SortingState>([{
-        id: "startTime",
-        desc: false,
-    }]);
+    const [sorting, setSorting] = useState<SortingState>([
+        {
+            id: 'startTime',
+            desc: false
+        }
+    ])
 
-    let columns: ColumnDef<ResultsDataType, any>[] = [
-        columnHelper.accessor("Helm", {
-            header: "Helm",
+    let columns: ColumnDef<ResultDataType, any>[] = [
+        columnHelper.accessor('Helm', {
+            header: 'Helm',
             cell: props => <Text {...props} />,
             enableSorting: false
         }),
-        columnHelper.accessor("Crew", {
-            header: "Crew",
+        columnHelper.accessor('Crew', {
+            header: 'Crew',
             cell: props => <Text {...props} />,
             enableSorting: false
         }),
-        columnHelper.accessor((data) => data.boat?.name, {
-            header: "Class",
-            id: "Class",
+        columnHelper.accessor(data => data.boat?.name, {
+            header: 'Class',
+            id: 'Class',
             cell: props => <Text {...props} />,
             enableSorting: false
         }),
-        columnHelper.accessor((data) => data.SailNumber, {
-            header: "Sail Number",
+        columnHelper.accessor(data => data.SailNumber, {
+            header: 'Sail Number',
             cell: props => <Text {...props} />,
             enableSorting: false
-        }),
-    ];
+        })
+    ]
 
-
-    const startTime = columnHelper.accessor((data) => (data.boat?.pursuitStartTime || 999999), {
-        header: "Start Time",
-        id: "startTime",
+    const startTime = columnHelper.accessor(data => data.boat?.pursuitStartTime || 999999, {
+        header: 'Start Time',
+        id: 'startTime',
         cell: props => <Time {...props} />,
         enableSorting: true
     })
@@ -98,24 +88,22 @@ const PursuitPaperResultsTable = forwardRef((props: { results: ResultsDataType[]
         columns.push(newColumn)
     }
 
-
     const Position = columnHelper.display({
-        header: "Position",
+        header: 'Position',
         cell: props => <Empty {...props} />,
         enableSorting: false
     })
     columns.push(Position)
 
-
     let table = useReactTable({
         data: results,
         columns,
         state: {
-            sorting,
+            sorting
         },
         onSortingChange: setSorting,
         getCoreRowModel: getCoreRowModel(),
-        getSortedRowModel: getSortedRowModel(),
+        getSortedRowModel: getSortedRowModel()
     })
     return (
         <div key={JSON.stringify(props.results)} className='block max-w-full' ref={ref}>
@@ -125,12 +113,7 @@ const PursuitPaperResultsTable = forwardRef((props: { results: ResultsDataType[]
                         <tr key={headerGroup.id}>
                             {headerGroup.headers.map(header => (
                                 <th key={header.id} className='border-2 p-2 text-sm border-black' style={{ width: header.getSize() }}>
-                                    {header.isPlaceholder
-                                        ? null
-                                        : flexRender(
-                                            header.column.columnDef.header,
-                                            header.getContext()
-                                        )}
+                                    {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
                                 </th>
                             ))}
                         </tr>

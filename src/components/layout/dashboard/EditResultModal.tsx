@@ -28,15 +28,15 @@ export default function EditResultModal({
     onSubmit,
     onDelete
 }: {
-    result: ResultsDataType
+    result: ResultDataType
     raceType: string
     advancedEdit: boolean
-    onSubmit: (result: ResultsDataType) => void
-    onDelete: (result: ResultsDataType) => void
+    onSubmit: (result: ResultDataType) => void
+    onDelete: (result: ResultDataType) => void
 }) {
     const Router = useRouter()
     const [open, setOpen] = useState(true)
-
+    console.log('EditResultModal', result)
     const { fleet, fleetIsError, fleetIsValidating } = Fetcher.Fleet(result.fleetId)
 
     const { theme, setTheme } = useTheme()

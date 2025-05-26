@@ -25,7 +25,7 @@ export default function PursuitCard({
     lapBoat,
     showRetireModal
 }: {
-    result: ResultsDataType
+    result: ResultDataType
     raceState: raceStateType
     lapBoat: (id: string) => void
     showRetireModal: (id: string) => void

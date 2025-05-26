@@ -83,7 +83,7 @@ export function Race(raceId: string, results: boolean) {
                     name: ''
                 }
             ],
-            fleets: [{ results: [] as ResultsDataType[] }]
+            fleets: [{ results: [] as ResultDataType[] }]
         } as RaceDataType
     })
 
@@ -99,6 +99,7 @@ export function Result(resultId: string) {
     const { data, error, isValidating, mutate } = useSWR(resultId != '' ? `/api/GetResultById?id=${resultId}` : null, fetcher, {
         fallbackData: {
             id: '',
+            fleetId: '',
             raceId: '',
             boat: {
                 id: '',
@@ -117,11 +118,11 @@ export function Result(resultId: string) {
             numberLaps: 0,
             PursuitPosition: 0,
             HandicapPosition: 0
-        } as ResultsDataType
+        } as ResultDataType
     })
 
     return {
-        result: data.result as ResultsDataType,
+        result: data.result as ResultDataType,
         resultIsValidating: isValidating,
         resultIsError: error,
         mutateResult: mutate

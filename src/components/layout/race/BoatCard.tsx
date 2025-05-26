@@ -31,7 +31,7 @@ export default function BoatCard({
     finishBoat,
     showRetireModal
 }: {
-    result: ResultsDataType
+    result: ResultDataType
     fleet: FleetDataType
     pursuit: boolean
     mode: modeType

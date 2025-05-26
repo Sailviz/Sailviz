@@ -62,7 +62,7 @@ export default function Page(props: PageProps) {
 
     var [lastAction, setLastAction] = useState<{ type: string; resultId: string }>({ type: '', resultId: '' })
 
-    const [activeResult, setActiveResult] = useState<ResultsDataType>({} as ResultsDataType)
+    const [activeResult, setActiveResult] = useState<ResultDataType>({} as ResultDataType)
 
     const [tableView, setTableView] = useState(false)
 
@@ -292,7 +292,7 @@ export default function Page(props: PageProps) {
     const moveDown = async (id: string) => {
         //move selected boat up and boat above it down
         let toMoveDown = race.fleets.flatMap(fleet => fleet.results).find(result => result.id === id)
-        let toMoveUp: ResultsDataType | undefined = race.fleets.flatMap(fleet => fleet.results).find(result => result.PursuitPosition == toMoveDown!.PursuitPosition + 1)
+        let toMoveUp: ResultDataType | undefined = race.fleets.flatMap(fleet => fleet.results).find(result => result.PursuitPosition == toMoveDown!.PursuitPosition + 1)
         if (toMoveDown == undefined) {
             console.error('no boat to move down')
             return
@@ -314,7 +314,7 @@ export default function Page(props: PageProps) {
     const dynamicSort = async (data: RaceDataType) => {
         // there is just one fleet so grab the first one
         let start = race.fleets[0]!.startTime
-        data.fleets[0]!.results.sort((a: ResultsDataType, b: ResultsDataType) => {
+        data.fleets[0]!.results.sort((a: ResultDataType, b: ResultDataType) => {
             //if done a lap, predicted is sum of lap times + last lap.
             //if no lap done, predicted is py.
             let aPredicted =
@@ -398,7 +398,7 @@ export default function Page(props: PageProps) {
 
         //set provisional positions
 
-        race.fleets[0]!.results.sort((a: ResultsDataType, b: ResultsDataType) => {
+        race.fleets[0]!.results.sort((a: ResultDataType, b: ResultDataType) => {
             //sort by nubmer of laps then last lap time
             if (a.numberLaps != b.numberLaps) {
                 return b.numberLaps - a.numberLaps
@@ -443,7 +443,7 @@ export default function Page(props: PageProps) {
 
     const showRetireModal = (resultId: String) => {
         // retireModal.onOpen()
-        let result: ResultsDataType | undefined
+        let result: ResultDataType | undefined
         race.fleets.some(fleet => {
             result = fleet.results.find(result => result.id === resultId)
             return result !== undefined
@@ -630,7 +630,7 @@ export default function Page(props: PageProps) {
                         <div className='flex flex-row justify-around flex-wrap' id='EntrantCards'>
                             {race.fleets
                                 .flatMap(fleets => fleets.results)
-                                .map((result: ResultsDataType, index) => {
+                                .map((result: ResultDataType, index) => {
                                     console.log(result)
                                     return (
                                         <BoatCard

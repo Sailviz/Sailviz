@@ -67,7 +67,7 @@ function Sort({ column, table }: { column: any; table: any }) {
     )
 }
 
-const columnHelper = createColumnHelper<ResultsDataType>()
+const columnHelper = createColumnHelper<ResultDataType>()
 
 const FleetPursuitResultsTable = (props: any) => {
     const { fleet, fleetIsValidating, fleetIsError } = Fetcher.Fleet(props.fleetId)

@@ -11,15 +11,15 @@ const Empty = ({ ...props }) => {
     return <div />
 }
 
-const columnHelper = createColumnHelper<ResultsDataType>()
+const columnHelper = createColumnHelper<ResultDataType>()
 
-const HandicapPaperResultsTable = forwardRef((props: { results: ResultsDataType[] }, ref: any) => {
-    let [results, setResults] = useState<ResultsDataType[]>(props.results)
+const HandicapPaperResultsTable = forwardRef((props: { results: ResultDataType[] }, ref: any) => {
+    let [results, setResults] = useState<ResultDataType[]>(props.results)
 
     //create 3 empty lines on sheet
-    results.push({} as ResultsDataType)
-    results.push({} as ResultsDataType)
-    results.push({} as ResultsDataType)
+    results.push({} as ResultDataType)
+    results.push({} as ResultDataType)
+    results.push({} as ResultDataType)
 
     //sets sorting to position by default
     const [sorting, setSorting] = useState<SortingState>([

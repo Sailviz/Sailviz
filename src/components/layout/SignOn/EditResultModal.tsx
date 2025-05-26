@@ -19,11 +19,11 @@ export default function EditResultModal({
 }: {
     isOpen: boolean
     raceId: string
-    result: ResultsDataType | undefined
+    result: ResultDataType | undefined
     boats: BoatDataType[]
-    onSubmit: (result: ResultsDataType) => void
+    onSubmit: (result: ResultDataType) => void
     onClose: () => void
-    onDelete: (result: ResultsDataType) => void
+    onDelete: (result: ResultDataType) => void
 }) {
     const { race, raceIsError, raceIsValidating, mutateRace } = Fetcher.Race(raceId, true)
 

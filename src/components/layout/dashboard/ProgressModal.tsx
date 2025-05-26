@@ -2,27 +2,25 @@
 import { Dialog, DialogContent } from '@/components/ui/dialog'
 import { Progress } from '@/components/ui/progress'
 import { useTheme } from 'next-themes'
-import { ChangeEvent, useState } from 'react'
+import { ChangeEvent, useEffect, useState } from 'react'
 
-export default function ProgressDialog({ isOpen, Value, Max, Indeterminate }: { isOpen: boolean; Value: number; Max: number; Indeterminate: boolean }) {
-    const [value, setValue] = useState(Value)
-    const [maxValue, setMaxValue] = useState(Max)
-    const [indeterminate, setIndeterminate] = useState(Indeterminate)
+export default function ProgressDialog({ isOpen, Value, Max }: { isOpen: boolean; Value: number; Max: number }) {
+    const [value, setValue] = useState(0)
+
+    useEffect(() => {
+        setValue((Value / Max) * 100)
+    }, [Value, Max])
     return (
-        <Dialog>
+        <Dialog open={isOpen} key={'progress-dialog'}>
             <DialogContent>
-                <div className='flex w-full content-center'>
+                <div className='flex flex-col w-full content-center'>
                     <Progress
-                        aria-label='Downloading...'
-                        // size='md'
+                        aria-label='Loading...'
                         value={value}
-                        // maxValue={maxValue}
-                        color='success'
-                        // showValueLabel={true}
                         className='max-w-md'
-                        // isIndeterminate={indeterminate}
                         // label={`${value} of ${maxValue}`}
                     />
+                    {Value} of {Max}
                 </div>
             </DialogContent>
         </Dialog>

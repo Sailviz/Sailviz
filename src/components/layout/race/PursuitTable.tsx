@@ -30,7 +30,7 @@ const StartTime = ({ seconds }: { seconds: number }) => {
     return <div>{new Date(seconds * 1000).toISOString().substr(14, 5)}</div>
 }
 
-const Position = ({ text, result }: { text: string; result: ResultsDataType }) => {
+const Position = ({ text, result }: { text: string; result: ResultDataType }) => {
     if (result.resultCode != '') {
         text = result.resultCode
     }
@@ -45,7 +45,7 @@ const Class = ({ boat }: { boat: BoatDataType }) => {
     return <div>{boat.name}</div>
 }
 
-const Sort = ({ result, max, moveUp, moveDown }: { result: ResultsDataType; max: number; moveUp: (id: string) => Promise<void>; moveDown: (id: string) => Promise<void> }) => {
+const Sort = ({ result, max, moveUp, moveDown }: { result: ResultDataType; max: number; moveUp: (id: string) => Promise<void>; moveDown: (id: string) => Promise<void> }) => {
     const [upLoading, setUpLoading] = useState(false)
     const [downLoading, setDownLoading] = useState(false)
     return (
@@ -98,7 +98,7 @@ const Action = ({
     }
 }
 
-const columnHelper = createColumnHelper<ResultsDataType>()
+const columnHelper = createColumnHelper<ResultDataType>()
 
 const PursuitTable = ({
     fleetId,

@@ -212,7 +212,7 @@ export async function getNextRaceByClubId(clubId: string): Promise<NextRaceDataT
         })
 }
 
-export async function GetResultById(resultId: string): Promise<ResultsDataType> {
+export async function GetResultById(resultId: string): Promise<ResultDataType> {
     const body = {
         id: resultId
     }
@@ -434,7 +434,7 @@ export async function setBoats(clubId: string, data: BoatDataType[]): Promise<Cl
         })
 }
 
-export async function createResult(fleetId: string): Promise<ResultsDataType> {
+export async function createResult(fleetId: string): Promise<ResultDataType> {
     const body = {
         fleetId: fleetId
     }
@@ -452,7 +452,7 @@ export async function createResult(fleetId: string): Promise<ResultsDataType> {
     })
 }
 
-export async function DeleteResultById(result: ResultsDataType): Promise<ResultsDataType> {
+export async function DeleteResultById(result: ResultDataType): Promise<ResultDataType> {
     const body = {
         resultId: result.id
     }
@@ -470,7 +470,7 @@ export async function DeleteResultById(result: ResultsDataType): Promise<Results
     })
 }
 
-export async function updateResult(result: ResultsDataType): Promise<RaceDataType> {
+export async function updateResult(result: ResultDataType): Promise<RaceDataType> {
     const body = {
         result: result
     }

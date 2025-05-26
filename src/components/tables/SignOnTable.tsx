@@ -12,7 +12,7 @@ import { Input } from '../ui/input'
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from '../ui/dropdown-menu'
 import { ChevronDown } from 'lucide-react'
 import Link from 'next/link'
-const columnHelper = createColumnHelper<ResultsDataType>()
+const columnHelper = createColumnHelper<ResultDataType>()
 
 const SignOnTable = (props: any) => {
     const { data: session, status } = useSession({
@@ -22,7 +22,7 @@ const SignOnTable = (props: any) => {
         }
     })
     const { race, raceIsError, raceIsValidating } = Fetcher.Race(props.raceId, true)
-    let [data, setData] = useState<ResultsDataType[]>([])
+    let [data, setData] = useState<ResultDataType[]>([])
     let clubId = props.clubId
     let options: object[] = []
 
