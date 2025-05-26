@@ -3,7 +3,7 @@ import { createCallerFactory, createTRPCRouter, protectedProcedure, publicProced
 import { TRPCError } from '@trpc/server'
 import { z } from 'zod'
 import dayjs from 'dayjs'
-import { createResult, updateResult } from '@/components/apiMethods'
+import { createRace, createResult, updateResult } from '@/components/apiMethods'
 
 const boatSchema = z.object({
     id: z.string(),
@@ -185,6 +185,90 @@ export const appRouter = createTRPCRouter({
             }
         })
         return { races: races as RaceDataType[], count: count }
+    }),
+    createRace: protectedProcedure.input(z.object({ seriesId: z.string() })).mutation(async opts => {
+        const { input, ctx } = opts
+        if (!ctx.session) {
+            throw new TRPCError({ code: 'UNAUTHORIZED', message: 'You must be logged in to create a race.' })
+        }
+
+        var clubId = await prisma.series
+            .findUnique({
+                where: {
+                    id: input.seriesId
+                },
+                select: {
+                    clubId: true
+                }
+            })
+            .then(series => series?.clubId)
+
+        var clubdata = await prisma.club.findUnique({
+            where: {
+                id: clubId
+            }
+        })
+        if (!clubdata) {
+            throw new TRPCError({ code: 'NOT_FOUND', message: 'Club not found.' })
+        }
+        let club = { ...clubdata } as ClubDataType
+        let duties = club.settings!.duties.reduce((obj, key, index) => {
+            obj[key] = ''
+            return obj
+        }, {} as { [key: string]: any })
+
+        var races: RaceDataType[] = (await prisma.race.findMany({
+            where: {
+                seriesId: input.seriesId
+            },
+            orderBy: {
+                number: 'asc'
+            }
+        })) as RaceDataType[]
+        var number = 1
+        //this numbers the race with the lowest number that is not being used.
+        while (races.some(object => object.number === number)) {
+            number++
+        }
+        var race = await prisma.race.create({
+            data: {
+                number: number,
+                Time: dayjs(new Date()).format('YYYY-MM-DD HH:ss'),
+                Type: 'Handicap',
+                Duties: duties,
+                series: {
+                    connect: {
+                        id: input.seriesId
+                    }
+                }
+            }
+        })
+
+        var fleets = await prisma.fleetSettings.findMany({
+            where: {
+                seriesId: input.seriesId
+            }
+        })
+        // create fleet for each fleet setting
+        fleets.forEach(async fleet => {
+            await prisma.fleet.create({
+                data: {
+                    startTime: 0,
+                    fleetSettings: {
+                        connect: {
+                            id: fleet.id
+                        }
+                    },
+                    race: {
+                        connect: {
+                            id: race.id
+                        }
+                    }
+                }
+            })
+        })
+
+        return race as RaceDataType
     }),
     boats: publicProcedure.input(z.object({ clubId: z.string() })).query(async opts => {
         const { input } = opts

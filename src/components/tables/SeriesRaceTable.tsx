@@ -1,5 +1,5 @@
 'use client'
-import React, { ChangeEvent, useState } from 'react'
+import React, { ChangeEvent, useEffect, useState } from 'react'
 import dayjs from 'dayjs'
 import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, RowSelection, SortingState, useReactTable } from '@tanstack/react-table'
 import * as DB from '@/components/apiMethods'
@@ -19,6 +19,7 @@ import { Button } from '../ui/button'
 import { Input } from '../ui/input'
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from '../ui/dropdown-menu'
 import { ChevronDown } from 'lucide-react'
+import { trpc } from '@/lib/trpc'
 
 const raceOptions = [
     { value: 'Pursuit', label: 'Pursuit' },
@@ -135,7 +136,7 @@ const Action = ({ ...props }: any) => {
     }
     return (
         <div className='relative flex items-center gap-2'>
-            <EyeIcon onClick={() => Router.push('/Race/' + props.row.original.id)} />
+            <EyeIcon className={'cursor-pointer'} onClick={() => Router.push('/Race/' + props.row.original.id)} />
 
             {userHasPermission(props.user, AVAILABLE_PERMISSIONS.editRaces) ? (
                 <>
@@ -153,11 +154,12 @@ const columnHelper = createColumnHelper<RaceDataType>()
 
 const SeriesRaceTable = (props: any) => {
     const [seriesId, setSeriesId] = useState(props.id)
-    const {
-        data: series,
-        error: seriesIsError,
-        isValidating: seriesIsValidating
-    } = useSWR(`/api/GetSeriesById?id=${seriesId}`, Fetcher.fetcher, { keepPreviousData: true, suspense: true })
+
+    useEffect(() => {
+        trpc.series.query({ id: seriesId }).then(data => {
+            setData(data.races)
+        })
+    }, [seriesId])
 
     const { data: session, status } = useSession({
         required: true,
@@ -166,12 +168,7 @@ const SeriesRaceTable = (props: any) => {
         }
     })
 
-    let data = series.races
-    if (data == undefined) {
-        data = []
-    }
-
-    const loadingState = seriesIsValidating ? 'loading' : 'idle'
+    const [data, setData] = useState<RaceDataType[]>([])
 
     const [sorting, setSorting] = useState<SortingState>([
         {

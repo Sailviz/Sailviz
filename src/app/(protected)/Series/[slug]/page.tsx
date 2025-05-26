@@ -6,6 +6,7 @@ import EditFleetModal from '@/components/layout/dashboard/EditFleetSettingsModal
 import { AVAILABLE_PERMISSIONS, userHasPermission } from '@/components/helpers/users'
 import { auth } from '@/server/auth'
 import { ToCountSelect } from '@/components/ToCountSelect'
+import { AddRaceButton } from '@/components/AddRaceButton'
 
 type PageProps = { params: Promise<{ slug: string }> }
 
@@ -88,18 +89,7 @@ export default async function Page(props: PageProps) {
                 <div className='p-6'>
                     <SeriesRaceTable id={seriesId} />
                 </div>
-                {userHasPermission(session!.user, AVAILABLE_PERMISSIONS.editRaces) ? (
-                    <div className='p-6'>
-                        <p
-                            id='seriesAddRace'
-                            className='cursor-pointer text-white bg-blue-600 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0'
-                        >
-                            Add Race
-                        </p>
-                    </div>
-                ) : (
-                    <> </>
-                )}
+                {userHasPermission(session!.user, AVAILABLE_PERMISSIONS.editRaces) ? <AddRaceButton seriesId={seriesId} /> : <> </>}
                 <p className='text-6xl font-extrabold p-6'>Fleets</p>
                 <div className='p-6'>
                     <FleetTable seriesId={params.slug} />
