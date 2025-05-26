@@ -49,6 +49,7 @@ export default function Page(props: PageProps) {
     // const flagModal = useDisclosure()
     const [flagStatus, setFlagStatus] = useState<boolean[]>([false, false])
     const [nextFlagStatus, setNextFlagStatus] = useState<boolean[]>([false, false])
+    const [retireModal, setRetireModal] = useState(false)
 
     const startLength = 315 //5 mins 15 seconds in seconds
 
@@ -237,7 +238,7 @@ export default function Page(props: PageProps) {
 
         setLastAction({ type: 'retire', resultId: tempdata.id })
 
-        // retireModal.onClose()
+        setRetireModal(false)
         let optimisticData: RaceDataType = window.structuredClone(race)
         //update optimistic data with new lap
         optimisticData.fleets.forEach((fleet: FleetDataType) => {
@@ -442,7 +443,7 @@ export default function Page(props: PageProps) {
     }
 
     const showRetireModal = (resultId: String) => {
-        // retireModal.onOpen()
+        setRetireModal(true)
         let result: ResultDataType | undefined
         race.fleets.some(fleet => {
             result = fleet.results.find(result => result.id === resultId)
@@ -530,7 +531,8 @@ export default function Page(props: PageProps) {
 
     return (
         <>
-            {/* <RetireModal isOpen={retireModal.isOpen} onSubmit={retireBoat} onClose={retireModal.onClose} result={activeResult} /> */}
+            <RetireModal isOpen={retireModal} onSubmit={retireBoat} result={activeResult} onClose={() => setRetireModal(false)} />
+
             {/* <FlagModal isOpen={flagModal.isOpen} currentFlagStatus={flagStatus} nextFlagStatus={nextFlagStatus} onClose={flagModal.onClose} onSubmit={() => null} /> */}
 
             <audio id='Beep' src='/Beep-6.mp3'></audio>

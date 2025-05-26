@@ -34,7 +34,7 @@ export default function RetireDialog({
                 <DialogHeader className='flex flex-col gap-1'>Retire Boat</DialogHeader>
                 <div className='flex w-full flex-col'>
                     <span className='text-xl font-extrabold flex justify-center mb-8 text-center'>
-                        {result.boat.name} : {result.SailNumber} <br /> {result.Helm}{' '}
+                        {result?.boat?.name} : {result.SailNumber} <br /> {result.Helm}{' '}
                     </span>
                     {resultCodes.map(resultCode => {
                         return (
