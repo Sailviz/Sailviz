@@ -21,9 +21,7 @@ export default function Page(props: PageProps) {
         await DB.updateResult({ ...result, Helm: helm, Crew: crew, boat: boat, SailNumber: sailNum })
 
         console.log(helm, crew, boat, sailNum, fleetId)
-        // createModal.onClose() //close modal
-
-        // mutate('/api/GetFleetById?id=' + fleetId)
+        Router.back()
     }
 
     if (race == undefined) {

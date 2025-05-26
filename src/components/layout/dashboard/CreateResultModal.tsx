@@ -2,7 +2,8 @@
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogFooter, DialogHeader } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
-import { Tabs } from '@/components/ui/tabs'
+import { Tabs, TabsList } from '@/components/ui/tabs'
+import { TabsTrigger } from '@radix-ui/react-tabs'
 import { useTheme } from 'next-themes'
 import { useRouter } from 'next/navigation'
 import { ChangeEvent, useEffect, useState } from 'react'
@@ -26,7 +27,7 @@ export default function CreateResultDialog({
     const { theme, setTheme } = useTheme()
 
     //array of fleets, dimensionally equal to selectedRaces
-    const [selectedFleet, setSelectedFleet] = useState<string>('')
+    const [selectedFleet, setSelectedFleet] = useState<string>(race.fleets[0]!.id)
     const [selectedBoat, setSelectedBoat] = useState({ label: '', value: {} as BoatDataType })
 
     const [helmError, setHelmError] = useState(false)
@@ -186,12 +187,15 @@ export default function CreateResultDialog({
                             // selectedKey={selectedFleet}
                             color='primary'
                             //insert the selected fleet into the selectedFleets array at the index of the race
-                            // onSelectionChange={key => setSelectedFleet(key.toString())}
+                            onChange={key => setSelectedFleet(key.toString())}
+                            defaultValue={selectedFleet}
                         >
-                            {/* show buttons for each fleet in a series */}
-                            {race.fleets.map((fleet: FleetDataType, index) => {
-                                return <div key={fleet.id} title={fleet.fleetSettings.name}></div>
-                            })}
+                            <TabsList className='grid w-full grid-cols-2'>
+                                {/* show buttons for each fleet in a series */}
+                                {race.fleets.map((fleet: FleetDataType, index) => {
+                                    return <TabsTrigger value={fleet.id}>{fleet.fleetSettings.name}</TabsTrigger>
+                                })}
+                            </TabsList>
                         </Tabs>
 
                         {race.Type == 'Pursuit' ? (
