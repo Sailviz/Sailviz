@@ -3,27 +3,17 @@ import { ChangeEvent, useEffect, useState } from 'react'
 import Select from 'react-select'
 import * as Fetcher from '@/components/Fetchers'
 import { PERMISSIONS } from '@/components/helpers/users'
-import { DialogContent, DialogFooter, DialogHeader } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogFooter, DialogHeader } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { useRouter } from 'next/navigation'
 
-export default function EditUserDialog({
-    isOpen,
-    role,
-    onSubmit,
-    onClose
-}: {
-    isOpen: boolean
-    role: RoleDataType | undefined
-    onSubmit: (role: RoleDataType) => void
-    onClose: () => void
-}) {
-    const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
-
+export default function EditUserDialog({ role, onSubmit }: { role: RoleDataType | undefined; onSubmit: (role: RoleDataType) => void }) {
+    const Router = useRouter()
     const [name, setName] = useState('')
     const [permissions, setPermissions] = useState<PermissionType[]>([])
 
-    const { theme, setTheme } = useTheme()
+    const [open, setOpen] = useState(true)
 
     useEffect(() => {
         if (role === undefined) return
@@ -32,14 +22,20 @@ export default function EditUserDialog({
     }, [role])
 
     return (
-        <>
-            <DialogContent>
+        <Dialog
+            open={open}
+            onOpenChange={open => {
+                setOpen(open)
+                if (!open) Router.back() // this catches the x button and clicking outside the modal, gets out of parallel route
+            }}
+        >
+            <DialogContent className='max-w-8/12'>
                 <DialogHeader className='flex flex-col gap-1'>Edit Role</DialogHeader>
                 <div className='flex w-full'>
                     <div className='flex flex-col px-6 w-1/4'>
                         <p className='hidden' id='EditResultId'></p>
                         <p className='text-2xl font-bold'>Name</p>
-                        {/* <Input type='text' value={name} onValueChange={setName} /> */}
+                        <Input type='text' value={name} onChange={e => setName(e.target.value)} />
                     </div>
                     <div className='flex flex-col px-6 w-3/4'>
                         <p className='text-2xl font-bold'>Permissions</p>
@@ -58,14 +54,11 @@ export default function EditUserDialog({
                     </div>
                 </div>
                 <DialogFooter>
-                    <Button color='danger' onClick={onClose}>
-                        Close
-                    </Button>
                     <Button color='primary' onClick={() => onSubmit({ ...role!, name: name, permissions: { allowed: permissions } })}>
                         Save
                     </Button>
                 </DialogFooter>
             </DialogContent>
-        </>
+        </Dialog>
     )
 }

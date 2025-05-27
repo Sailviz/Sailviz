@@ -152,6 +152,17 @@ export function Boats() {
     }
 }
 
+export function Boat(boatId: string) {
+    const { data, error, isValidating, mutate } = useSWR(boatId != undefined ? `/api/GetBoatById?boatId=${boatId}` : null, fetcher)
+
+    return {
+        boat: data?.boat as BoatDataType,
+        boatIsValidating: isValidating,
+        boatIsError: error,
+        mutateBoats: mutate
+    }
+}
+
 export function Trackers() {
     const { data, error, isValidating } = useSWR('/api/Trackable/GetTrackers', fetcher)
 
@@ -188,6 +199,17 @@ export function Users(club: ClubDataType) {
     }
 }
 
+export function User(id: string) {
+    let body = { id: id }
+    const { data, error, isValidating } = useSWR(id != '' ? '/api/GetUserById' : null, url => advancedFetcher(url!, body))
+
+    return {
+        user: data?.user as UserDataType,
+        userIsValidating: isValidating,
+        userIsError: error
+    }
+}
+
 export function Roles(club: ClubDataType) {
     let body = { clubId: club?.id }
     const { data, error, isValidating } = useSWR(club && club.id != '' ? '/api/GetRolesByClubId' : null, url => advancedFetcher(url!, body))
@@ -196,6 +218,17 @@ export function Roles(club: ClubDataType) {
         roles: data?.roles as RoleDataType[],
         rolesIsValidating: isValidating,
         rolesIsError: error
+    }
+}
+
+export function Role(id: string) {
+    let body = { id: id }
+    const { data, error, isValidating } = useSWR(id != '' ? `/api/GetRoleById?id=${id}` : null, url => advancedFetcher(url!, body))
+
+    return {
+        role: data?.role as RoleDataType,
+        roleIsValidating: isValidating,
+        roleIsError: error
     }
 }
 

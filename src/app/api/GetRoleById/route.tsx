@@ -2,18 +2,12 @@ import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 import assert from 'assert'
 
-async function getUser(id: string) {
-    var result = await prisma.user.findFirst({
+async function getRole(id: string) {
+    var result = await prisma.role.findUnique({
         where: {
             id: id
-        },
-        include: {
-            roles: true
         }
     })
-    if (result == null) {
-        return
-    }
     return result
 }
 
@@ -24,12 +18,11 @@ export async function POST(request: NextRequest) {
     } catch (bodyError) {
         return NextResponse.json({ error: true, message: 'information missing' })
     }
-    var id = req.id
-    console.log(id)
-    var user = await getUser(id)
-    if (user) {
-        return NextResponse.json({ error: false, user: user })
+    var roleId = req.id
+    const role = await getRole(roleId)
+    if (role) {
+        return NextResponse.json({ error: false, role: role })
     } else {
-        return NextResponse.json({ error: true, message: 'Could not find user' })
+        return NextResponse.json({ error: true, message: 'Could not find roles' })
     }
 }

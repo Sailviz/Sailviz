@@ -12,17 +12,15 @@ async function findBoat(boatId: any) {
     return result
 }
 
-export async function POST(request: NextRequest) {
-    const req = await request.json()
+export async function GET(request: NextRequest) {
+    const searchParams = request.nextUrl.searchParams
+
+    var boatId = searchParams.get('boatId')
     // check if we have all data.
     // The website stops this, but just in case
-    try {
-        assert.notStrictEqual(undefined, req.boatId)
-    } catch (e) {
-        return NextResponse.json({ error: true, message: 'information missing' })
+    if (boatId == null) {
+        return NextResponse.json({ error: "can't find race" }, { status: 400 })
     }
-
-    var boatId = req.boatId
     var boat = await findBoat(boatId)
     if (boat) {
         return NextResponse.json({ error: false, boat: boat })

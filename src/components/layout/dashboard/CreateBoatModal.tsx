@@ -1,20 +1,28 @@
 import { useTheme } from 'next-themes'
 import { ChangeEvent, useEffect, useState } from 'react'
-import { DialogContent, DialogFooter, DialogHeader } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogFooter, DialogHeader } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { useRouter } from 'next/navigation'
 
-export default function CreateBoatDialog({ isOpen, onSubmit, onClose }: { isOpen: boolean; onSubmit: (boat: BoatDataType) => void; onClose: () => void }) {
+export default function CreateBoatDialog({ onSubmit }: { onSubmit: (boat: BoatDataType) => void }) {
+    const Router = useRouter()
     const [boatName, setBoatName] = useState('')
     const [PY, setPY] = useState(0)
     const [Crew, setCrew] = useState(0)
     const [pursuitStartTime, setPursuitStartTime] = useState(0)
 
-    const { theme, setTheme } = useTheme()
+    const [open, setOpen] = useState(true)
 
     return (
-        <>
-            <DialogContent>
+        <Dialog
+            open={open}
+            onOpenChange={open => {
+                setOpen(open)
+                if (!open) Router.back() // this catches the x button and clicking outside the modal, gets out of parallel route
+            }}
+        >
+            <DialogContent className='max-w-8/12'>
                 <DialogHeader className='flex flex-col gap-1'>Edit Boat</DialogHeader>
                 <div className='flex w-full'>
                     <div className='flex flex-col px-6 w-full'>
@@ -42,14 +50,11 @@ export default function CreateBoatDialog({ isOpen, onSubmit, onClose }: { isOpen
                     </div>
                 </div>
                 <DialogFooter>
-                    <Button color='danger' onClick={onClose}>
-                        Cancel
-                    </Button>
                     <Button color='primary' onClick={() => onSubmit({ name: boatName, py: PY, crew: Crew, pursuitStartTime: pursuitStartTime } as BoatDataType)}>
                         Create
                     </Button>
                 </DialogFooter>
             </DialogContent>
-        </>
+        </Dialog>
     )
 }

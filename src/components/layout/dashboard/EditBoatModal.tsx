@@ -1,24 +1,18 @@
 import { Button } from '@/components/ui/button'
-import { DialogContent, DialogFooter, DialogHeader } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogFooter, DialogHeader } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { useTheme } from 'next-themes'
+import { useRouter } from 'next/navigation'
 import { ChangeEvent, useEffect, useState } from 'react'
 
-export default function EditBoatDialog({
-    isOpen,
-    boat,
-    onSubmit,
-    onClose
-}: {
-    isOpen: boolean
-    boat: BoatDataType | undefined
-    onSubmit: (boat: BoatDataType) => void
-    onClose: () => void
-}) {
+export default function EditBoatDialog({ boat, onSubmit }: { boat: BoatDataType | undefined; onSubmit: (boat: BoatDataType) => void }) {
+    const Router = useRouter()
     const [boatName, setBoatName] = useState('')
     const [PY, setPY] = useState(0)
     const [Crew, setCrew] = useState(0)
     const [pursuitStartTime, setPursuitStartTime] = useState(0)
+
+    const [open, setOpen] = useState(true)
 
     const { theme, setTheme } = useTheme()
 
@@ -31,8 +25,14 @@ export default function EditBoatDialog({
     }, [boat])
 
     return (
-        <>
-            <DialogContent>
+        <Dialog
+            open={open}
+            onOpenChange={open => {
+                setOpen(open)
+                if (!open) Router.back() // this catches the x button and clicking outside the modal, gets out of parallel route
+            }}
+        >
+            <DialogContent className='max-w-8/12'>
                 <DialogHeader className='flex flex-col gap-1'>Edit Boat</DialogHeader>
                 <div className='flex w-full'>
                     <div className='flex flex-col px-6 w-full'>
@@ -60,14 +60,9 @@ export default function EditBoatDialog({
                     </div>
                 </div>
                 <DialogFooter>
-                    <Button color='danger' onClick={onClose}>
-                        Cancel
-                    </Button>
-                    <Button color='primary' onClick={() => onSubmit({ ...boat!, name: boatName, py: PY, crew: Crew, pursuitStartTime: pursuitStartTime })}>
-                        Save
-                    </Button>
+                    <Button onClick={() => onSubmit({ ...boat!, name: boatName, py: PY, crew: Crew, pursuitStartTime: pursuitStartTime })}>Save</Button>
                 </DialogFooter>
             </DialogContent>
-        </>
+        </Dialog>
     )
 }

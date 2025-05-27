@@ -55,11 +55,6 @@ export default function Page() {
                 </div>
                 <p className='text-2xl font-bold p-6'>Duties</p>
                 <Table>
-                    <TableHeader>
-                        {[{ key: 'main', label: 'nope' }].map(column => (
-                            <TableHead key={column.key}>{column.label}</TableHead>
-                        ))}
-                    </TableHeader>
                     <TableBody>
                         {club.settings.duties.map((row: string, index: number) => (
                             <TableRow key={row}>

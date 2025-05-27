@@ -12,6 +12,7 @@ import { Button } from '../ui/button'
 import { Input } from '../ui/input'
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from '../ui/dropdown-menu'
 import { ChevronDown } from 'lucide-react'
+import Link from 'next/link'
 
 const columnHelper = createColumnHelper<BoatDataType>()
 
@@ -69,13 +70,12 @@ const Action = ({ ...props }: any) => {
         }
     }
 
-    const onEditClick = () => {
-        props.editBoat(props.row.original)
-    }
     if (userHasPermission(props.user, AVAILABLE_PERMISSIONS.editBoats)) {
         return (
             <div className='relative flex items-center gap-2'>
-                <EditIcon onClick={onEditClick} />
+                <Link href={`/editBoat/${props.row.original.id}`} className='cursor-pointer'>
+                    <EditIcon />
+                </Link>
 
                 <DeleteIcon onClick={onDeleteClick} />
             </div>
@@ -96,16 +96,8 @@ const BoatTable = (props: any) => {
 
     const data = boats || []
 
-    const editBoat = (boat: BoatDataType) => {
-        props.editBoat(boat)
-    }
-
     const deleteBoat = (id: any) => {
         props.deleteBoat(id)
-    }
-
-    const createBoat = () => {
-        props.createBoat()
     }
 
     const loadingState = boatsIsValidating || data?.length === 0 ? 'loading' : 'idle'
@@ -139,7 +131,7 @@ const BoatTable = (props: any) => {
                 id: 'action',
                 enableColumnFilter: false,
                 header: 'Actions',
-                cell: props => <Action {...props} id={props.row.original.id} deleteBoat={deleteBoat} editBoat={editBoat} user={session!.user} />
+                cell: props => <Action {...props} id={props.row.original.id} deleteBoat={deleteBoat} user={session!.user} />
             })
         ],
         getCoreRowModel: getCoreRowModel(),
@@ -148,32 +140,6 @@ const BoatTable = (props: any) => {
 
     return (
         <div className='w-full'>
-            <div className='flex items-center py-4'>
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant='outline' className='ml-auto'>
-                            Columns <ChevronDown />
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align='end'>
-                        {table
-                            .getAllColumns()
-                            .filter(column => column.getCanHide())
-                            .map(column => {
-                                return (
-                                    <DropdownMenuCheckboxItem
-                                        key={column.id}
-                                        className='capitalize'
-                                        checked={column.getIsVisible()}
-                                        onCheckedChange={value => column.toggleVisibility(!!value)}
-                                    >
-                                        {column.id}
-                                    </DropdownMenuCheckboxItem>
-                                )
-                            })}
-                    </DropdownMenuContent>
-                </DropdownMenu>
-            </div>
             <div className='rounded-md border'>
                 <Table>
                     <TableHeader>
@@ -205,17 +171,7 @@ const BoatTable = (props: any) => {
                 </Table>
             </div>
             <div className='flex items-center justify-end space-x-2 py-4'>
-                <div className='flex-1 text-sm text-muted-foreground'>
-                    {table.getFilteredSelectedRowModel().rows.length} of {table.getFilteredRowModel().rows.length} row(s) selected.
-                </div>
-                <div className='space-x-2'>
-                    <Button variant='outline' size='sm' onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()}>
-                        Previous
-                    </Button>
-                    <Button variant='outline' size='sm' onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>
-                        Next
-                    </Button>
-                </div>
+                <div className='flex-1 text-sm text-muted-foreground'>{table.getFilteredRowModel().rows.length} Boats.</div>
             </div>
         </div>
     )

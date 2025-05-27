@@ -93,19 +93,14 @@ export default function Page() {
                         editUserModal.onClose()
                     }}
                 /> */}
-                {/* <EditRoleModal
-                    isOpen={editRoleModal.isOpen}
-                    role={activeRole}
-                    onSubmit={updateRole}
-                    onClose={() => {
-                        editRoleModal.onClose()
-                    }}
-                /> */}
+
                 <div className='p-6'>
+                    Users
                     <UsersTable edit={showUserEditModal} deleteUser={deleteUser} />
                     {userHasPermission(session.user, AVAILABLE_PERMISSIONS.editUsers) ? <Button onClick={createUser}>Create User</Button> : <></>}
                 </div>
                 <div className='p-6'>
+                    Roles
                     <RoleTable edit={showRoleEditModal} deleteRole={deleteRole} />
                     {userHasPermission(session.user, AVAILABLE_PERMISSIONS.editRoles) ? <Button onClick={createRole}>Create Role</Button> : <></>}
                 </div>

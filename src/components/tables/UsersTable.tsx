@@ -12,10 +12,6 @@ import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMe
 import { ChevronDown } from 'lucide-react'
 import Link from 'next/link'
 const Action = ({ ...props }: any) => {
-    const onEditClick = () => {
-        props.edit(props.row.original)
-    }
-
     const onDeleteClick = () => {
         if (confirm('are you sure you want to do this?')) {
             props.deleteUser(props.row.original)
@@ -24,7 +20,9 @@ const Action = ({ ...props }: any) => {
     if (userHasPermission(props.user, AVAILABLE_PERMISSIONS.editUsers)) {
         return (
             <div className='relative flex items-center gap-2'>
-                <EditIcon onClick={onEditClick} />
+                <Link href={`/editUser/${props.row.original.id}`} className='cursor-pointer'>
+                    <EditIcon />
+                </Link>
                 <DeleteIcon onClick={onDeleteClick} />
             </div>
         )
@@ -52,10 +50,6 @@ const UsersTable = (props: any) => {
         }
     ])
 
-    const edit = (data: any) => {
-        props.edit(data)
-    }
-
     const deleteUser = (data: any) => {
         props.deleteUser(data)
     }
@@ -78,7 +72,7 @@ const UsersTable = (props: any) => {
             columnHelper.accessor('id', {
                 id: 'Edit',
                 header: 'Action',
-                cell: props => <Action {...props} id={props.row.original.id} edit={edit} deleteUser={deleteUser} user={session!.user} />
+                cell: props => <Action {...props} id={props.row.original.id} deleteUser={deleteUser} user={session!.user} />
             })
         ],
         state: {
@@ -89,8 +83,8 @@ const UsersTable = (props: any) => {
         getSortedRowModel: getSortedRowModel()
     })
     return (
-        <div>
-            <Table id={'seriesTable'} aria-label='Upcoming Races Table'>
+        <div className='rounded-md border w-full'>
+            <Table aria-label='Upcoming Races Table'>
                 <TableHeader>
                     <TableRow>
                         {table

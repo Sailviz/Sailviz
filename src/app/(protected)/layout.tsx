@@ -14,8 +14,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <AppSidebar navCollections={navCollections} />
             <SidebarInset>
                 {/* page main content */}
-                {/* 64px = header height */}
-                <ScrollArea className='h-[calc(100dvh-64px)]'>
+                <ScrollArea className='h-full'>
                     <div className='flex flex-1 p-4 md:px-6'>{children}</div>
                 </ScrollArea>
                 {/* page main content ends */}

@@ -8,12 +8,11 @@ import * as Fetcher from '@/components/Fetchers'
 import { AVAILABLE_PERMISSIONS, userHasPermission } from '@/components/helpers/users'
 import { useSession, signIn } from 'next-auth/react'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
+import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 
 const Action = ({ ...props }: any) => {
-    const onEditClick = () => {
-        props.edit(props.row.original)
-    }
-
+    console.log(props.row.original)
     const onDeleteClick = () => {
         if (confirm('are you sure you want to do this?')) {
             props.deleteRole(props.row.original)
@@ -22,8 +21,9 @@ const Action = ({ ...props }: any) => {
     if (userHasPermission(props.user, AVAILABLE_PERMISSIONS.editRoles)) {
         return (
             <div className='relative flex items-center gap-2'>
-                <EditIcon onClick={onEditClick} />
-
+                <Link className='cursor-pointer' href={`/editRole/${props.row.original.id}`}>
+                    <EditIcon />
+                </Link>
                 <DeleteIcon onClick={onDeleteClick} />
             </div>
         )
@@ -35,12 +35,8 @@ const Action = ({ ...props }: any) => {
 const columnHelper = createColumnHelper<RoleDataType>()
 
 const UsersTable = (props: any) => {
-    const { data: session, status } = useSession({
-        required: true,
-        onUnauthenticated() {
-            signIn()
-        }
-    })
+    const Router = useRouter()
+    const { data: session, status } = useSession()
     const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
     const { roles, rolesIsError, rolesIsValidating } = Fetcher.Roles(club)
 
@@ -51,10 +47,6 @@ const UsersTable = (props: any) => {
         }
     ])
 
-    const edit = (data: any) => {
-        props.edit(data)
-    }
-
     const deleteRole = (data: any) => {
         props.deleteRole(data)
     }
@@ -63,8 +55,6 @@ const UsersTable = (props: any) => {
     if (data == undefined) {
         data = []
     }
-
-    const loadingState = rolesIsValidating ? 'loading' : 'idle'
 
     var table = useReactTable({
         data,
@@ -77,7 +67,7 @@ const UsersTable = (props: any) => {
             columnHelper.accessor('id', {
                 id: 'edit',
                 header: 'Action',
-                cell: props => <Action {...props} id={props.row.original.id} edit={edit} deleteRole={deleteRole} user={session!.user} />
+                cell: props => <Action {...props} id={props.row.original.id} deleteRole={deleteRole} user={session!.user} />
             })
         ],
         state: {
@@ -110,7 +100,7 @@ const UsersTable = (props: any) => {
                         ))
                     ) : (
                         <TableRow>
-                            <TableCell className='h-24 text-center'>No results.</TableCell>
+                            <TableCell className='h-24 text-center'>No Roles.</TableCell>
                         </TableRow>
                     )}
                 </TableBody>
