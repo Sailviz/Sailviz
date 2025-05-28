@@ -141,6 +141,18 @@ export function Fleet(fleetId: string) {
     }
 }
 
+export function FleetSettings(fleetId: string) {
+    const { data, error, isValidating } = useSWR(fleetId != undefined ? `/api/GetFleetSettingsById?id=${fleetId}` : null, fetcher, {
+        refreshInterval: 10000
+    })
+
+    return {
+        fleetSettings: data as FleetSettingsType,
+        fleetSettingsIsValidating: isValidating,
+        fleetSettingsIsError: error
+    }
+}
+
 export function Boats() {
     const { data, error, isValidating, mutate } = useSWR('/api/GetBoats', fetcher)
 
