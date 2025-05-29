@@ -13,20 +13,25 @@ import FlagModal from '@/components/layout/dashboard/Flag Modal'
 import { useSession, signIn } from 'next-auth/react'
 import { Button } from '@/components/ui/button'
 import RaceTimer from '@/components/layout/race/raceTimer'
+import { DropdownMenu, DropdownMenuItem } from '@/components/ui/dropdown-menu'
+import { DropdownMenuContent, DropdownMenuTrigger } from '@radix-ui/react-dropdown-menu'
+import { CaretDownIcon } from '@radix-ui/react-icons'
+import FleetSelectDialog from '@/components/layout/dashboard/FleetSelectModal'
 
+// these options are the same across all fleets
 enum raceStateType {
-    countdown,
     running,
     stopped,
     reset,
-    calculate
+    calculate,
+    retire
 }
 
-enum modeType {
-    Retire,
+// these options are specific to each fleet
+enum raceModeType {
     Lap,
-    NotStarted,
-    Finish
+    Finish,
+    None
 }
 
 type PageProps = { params: Promise<{ raceId: string }> }
@@ -47,13 +52,17 @@ export default function Page(props: PageProps) {
     const { startSequence, startSequenceIsError, startSequenceIsValidating, mutateStartSequence } = Fetcher.GetStartSequence(race?.seriesId)
 
     const [retireModal, setRetireModal] = useState(false)
+    const [fleetSelectModal, setFleetSelectModal] = useState(false)
+    const [selectMode, setSelectMode] = useState<raceModeType>(raceModeType.None)
     const [flagModal, setFlagModal] = useState(false)
     const [flagStatus, setFlagStatus] = useState<boolean[]>([false, false])
     const [nextFlagStatus, setNextFlagStatus] = useState<boolean[]>([false, false])
 
     var [lastAction, setLastAction] = useState<{ type: string; resultId: string }>({ type: '', resultId: '' })
 
-    const [raceState, setRaceState] = useState<raceStateType[]>([])
+    const [raceState, setRaceState] = useState<raceStateType>(raceStateType.reset)
+    const [lastRaceState, setLastRaceState] = useState<raceStateType>(raceStateType.reset)
+    const [raceMode, setRaceMode] = useState<raceModeType[]>([])
     const [activeResult, setActiveResult] = useState<ResultDataType>({
         id: '',
         raceId: '',
@@ -84,13 +93,11 @@ export default function Page(props: PageProps) {
         fleetId: ''
     })
 
-    const [mode, setMode] = useState(modeType.NotStarted)
-
-    const startRaceButton = async (fleetId: string) => {
+    const startRaceButton = async () => {
         //use time for button
-        let localTime = Math.floor(new Date().getTime() / 1000 + startSequence.reduce((max, step) => (step.time > max ? step.time : max), 0))
+        let lastStartTime = Math.floor(new Date().getTime() / 1000 + startSequence.reduce((max, step) => (step.time > max ? step.time : max), 0))
         //start the timer
-        fetch('https://' + club.settings.clockIP + '/set?startTime=' + (localTime - club.settings.clockOffset).toString(), {
+        fetch('https://' + club.settings.clockIP + '/set?startTime=' + (lastStartTime - club.settings.clockOffset).toString(), {
             signal: controller.signal,
             mode: 'no-cors'
         }).catch(err => {
@@ -98,33 +105,28 @@ export default function Page(props: PageProps) {
             console.log(err)
         })
 
-        //Update database
-        let fleet = race.fleets.find(fleet => fleet.id == fleetId)
-        if (fleet == undefined) {
-            console.error('fleet not found')
-            return
-        }
-        fleet.startTime = localTime
-        try {
+        race.fleets.forEach(async fleet => {
+            //find start time in start sequence
+            let startTimeStep = startSequence.find(step => step.fleetStart == fleet.id)
+            if (startTimeStep == undefined) {
+                console.error('No start time found for fleet: ' + fleet.id)
+                return
+            }
+            fleet.startTime = lastStartTime - startTimeStep.time
             await DB.updateFleetById(fleet)
-        } catch (err) {
-            console.error(err)
-            console.error('error updating fleet')
-            console.error('start time was: ' + localTime)
-        }
+        })
 
         setFlagModal(true)
         //set flag status to false
         setFlagStatus([false, false])
         setNextFlagStatus([true, false])
         //send to DB
-        startRace(fleetId)
+        startRace()
     }
 
-    const startRace = async (fleetId: string) => {
-        let index = race.fleets.findIndex(fleet => fleet.id == fleetId)
-        //modify racestate at index to match fleet index
-        setRaceState([...raceState.slice(0, index), raceStateType.running, ...raceState.slice(index + 1)])
+    const startRace = async () => {
+        //modify racestate to running for all fleets
+        setRaceState(raceStateType.running)
 
         let sound = document.getElementById('Beep') as HTMLAudioElement
         sound!.currentTime = 0
@@ -170,7 +172,16 @@ export default function Page(props: PageProps) {
 
     const handleSequenceEnd = () => {
         setFlagModal(false)
-        setMode(modeType.Lap)
+    }
+
+    const handleFleetStart = (fleetId: string) => {
+        //set fleet running
+        let index = race.fleets.findIndex(fleet => fleet.id == fleetId)
+        if (index == -1) {
+            console.error('Fleet not found: ' + fleetId)
+            return
+        }
+        setRaceState(raceStateType.running)
     }
 
     const dynamicSort = async (results: ResultDataType[]) => {
@@ -233,33 +244,26 @@ export default function Page(props: PageProps) {
         return results
     }
 
-    const stopRace = async (fleetId: string) => {
-        let index = race.fleets.findIndex(fleet => fleet.id == fleetId)
-        //modify racestate at index to match fleet index
-        setRaceState([...raceState.slice(0, index), raceStateType.stopped, ...raceState.slice(index + 1)])
+    const stopRace = async () => {
+        setRaceState(raceStateType.stopped)
         fetch('https://' + club.settings.clockIP + '/reset', { signal: controller.signal, mode: 'no-cors' }).catch(function (err) {
             console.log('Clock not connected: ', err)
         })
     }
 
-    const resetRace = async (fleetId: string) => {
-        let fleet = race.fleets.find(fleet => fleet.id == fleetId)
-        if (fleet == undefined) {
-            console.error('fleet not found')
-            return
-        }
+    const resetRace = async () => {
         //add are you sure here
         fetch('https://' + club.settings.clockIP + '/reset', { signal: controller.signal, mode: 'no-cors' }).catch(function (err) {
             console.log('Clock not connected: ', err)
         })
 
-        let index = race.fleets.findIndex(fleet => fleet.id == fleetId)
-        //modify racestate at index to match fleet index
-        setRaceState([...raceState.slice(0, index), raceStateType.reset, ...raceState.slice(index + 1)])
+        setRaceState(raceStateType.reset)
 
         //Update database
-        fleet.startTime = 0
-        await DB.updateFleetById(fleet)
+        race.fleets.forEach(async fleet => {
+            fleet.startTime = 0
+            await DB.updateFleetById(fleet)
+        })
     }
 
     const showRetireModal = (resultId: String) => {
@@ -286,7 +290,7 @@ export default function Page(props: PageProps) {
         //mutate race
 
         //change back to lap mode
-        setMode(modeType.Lap)
+        setRetireModal(false)
     }
 
     const lapBoat = async (resultId: string) => {
@@ -435,9 +439,8 @@ export default function Page(props: PageProps) {
         mutate(`/api/GetRaceById?id=${race.id}&results=true`)
     }
 
-    const checkAllFinished = (fleet: FleetDataType) => {
+    const checkAllFinished = (results: ResultDataType[]) => {
         //check if all boats in fleet have finished
-        let results = fleet.results
         let allFinished = true
         results.forEach(data => {
             if (data.finishTime == 0 && data.resultCode == '') {
@@ -493,44 +496,75 @@ export default function Page(props: PageProps) {
         //mutate race
     }
 
+    const finishModeClick = () => {
+        //no point asking which fleet if there is only one fleet
+        if (race.fleets.length == 1) {
+            setRaceMode([...raceMode.slice(0, 0), raceModeType.Finish, ...raceMode.slice(1)])
+        } else {
+            setSelectMode(raceModeType.Finish)
+            setFleetSelectModal(true)
+        }
+    }
+
+    const lapModeClick = () => {
+        if (race.fleets.length == 1) {
+            setRaceMode([...raceMode.slice(0, 0), raceModeType.Lap, ...raceMode.slice(1)])
+        } else {
+            setSelectMode(raceModeType.Lap)
+            setFleetSelectModal(true)
+        }
+    }
+
+    const setFleetMode = (fleetId: string, mode: raceModeType) => {
+        let index = race.fleets.findIndex(fleet => fleet.id == fleetId)
+        if (index == -1) {
+            console.error('Fleet not found: ' + fleetId)
+            return
+        }
+        setRaceMode([...raceMode.slice(0, index), mode, ...raceMode.slice(index + 1)])
+        setFleetSelectModal(false)
+    }
+
     const controller = new AbortController()
 
-    useEffect(() => {
-        if (mode == modeType.Finish) {
-            sortByLastLap(race.fleets.flatMap(fleet => fleet.results))
-        } else if (mode == modeType.Lap) {
-            //this doesn't work on first load as the results are not loaded yet
-            dynamicSort(race.fleets.flatMap(fleet => fleet.results))
-        }
-    }, [mode])
+    // useEffect(() => {
+    //     if (mode == modeType.Finish) {
+    //         sortByLastLap(race.fleets.flatMap(fleet => fleet.results))
+    //     } else if (mode == modeType.Lap) {
+    //         //this doesn't work on first load as the results are not loaded yet
+    //         dynamicSort(race.fleets.flatMap(fleet => fleet.results))
+    //     }
+    // }, [mode])
 
     //on page
     useEffect(() => {
         if (race == undefined) return
 
-        setRaceState(
-            race.fleets.map(fleet => {
-                return raceStateType.reset
-            })
-        )
+        setRaceState(raceStateType.reset)
 
-        race.fleets.forEach((fleet, index) => {
-            if (checkAllFinished(fleet)) {
-                setRaceState([...raceState.slice(0, index), raceStateType.calculate, ...raceState.slice(index + 1)])
-            } else if (fleet.startTime != 0) {
-                setRaceState([...raceState.slice(0, index), raceStateType.running, ...raceState.slice(index + 1)])
+        //check for all fleets finished?
+        if (checkAllFinished(race.fleets.flatMap(fleet => fleet.results))) {
+            setRaceState(raceStateType.calculate)
+        } else if (race.fleets.some(fleet => fleet.startTime != 0)) {
+            setRaceState(raceStateType.running)
+        }
+
+        // check individual fleet states
+        race.fleets.forEach(fleet => {
+            let index = race.fleets.findIndex(f => f.id == fleet.id)
+            if (checkAnyFinished(fleet.results)) {
+                // if any boat in the fleet has finished, the fleet must be in finish mode
+                setRaceMode([...raceMode.slice(0, index), raceModeType.Finish, ...raceMode.slice(index + 1)])
+            } else {
+                if (race.fleets[0]!.startTime != 0) {
+                    // if the fleet has started, but no boat has finished it must be in lap mode
+                    setRaceMode([...raceMode.slice(0, index), raceModeType.Lap, ...raceMode.slice(index + 1)])
+                } else {
+                    // if the fleet has not started, it must be in none (blank) mode
+                    setRaceMode([...raceMode.slice(0, index), raceModeType.None, ...raceMode.slice(index + 1)])
+                }
             }
         })
-
-        if (checkAnyFinished(race.fleets.flatMap(fleet => fleet.results))) {
-            setMode(modeType.Finish)
-        } else {
-            if (race.fleets[0]!.startTime < Math.floor(new Date().getTime() / 1000)) {
-                setMode(modeType.Lap)
-            } else {
-                setMode(modeType.NotStarted)
-            }
-        }
     }, [race])
 
     if (raceIsError || race == undefined || clubIsError || club == undefined || session == undefined || startSequenceIsError || startSequence == undefined) {
@@ -540,20 +574,19 @@ export default function Page(props: PageProps) {
     return (
         <>
             <RetireModal isOpen={retireModal} onSubmit={retireBoat} result={activeResult} onClose={() => setRetireModal(false)} />
+            <FleetSelectDialog mode={selectMode} isOpen={fleetSelectModal} onSubmit={setFleetMode} onClose={() => setFleetSelectModal(false)} fleets={race.fleets} />
             <FlagModal isOpen={flagModal} currentFlagStatus={flagStatus} nextFlagStatus={nextFlagStatus} onClose={() => setFlagModal(false)} />
             <audio id='Beep' src='/Beep-6.mp3'></audio>
             <audio id='Countdown' src='/Countdown.mp3'></audio>
             <div className='w-full flex flex-col items-center justify-start panel-height'>
                 <div className='flex w-full flex-col justify-around' key={JSON.stringify(raceState)}>
-                    {race.fleets.map((fleet, index) => {
-                        return (
-                            <div className='flex flex-row' key={'fleetBar' + index}>
-                                <div className='w-1/4 p-2 m-2 border-4 rounded-lg  text-lg font-medium'>
-                                    Event: {race?.series?.name} - {race?.number} - {fleet?.fleetSettings?.name}
-                                </div>
-                                <div className='w-1/4 p-2 m-2 border-4 rounded-lg text-lg font-medium'>
-                                    Race Time:{' '}
-                                    {/* <RaceTimer
+                    <div className='flex flex-row'>
+                        <div className='w-1/4 p-2 m-2 border-4 rounded-lg  text-lg font-medium'>
+                            Event: {race?.series?.name} - {race?.number}
+                        </div>
+                        <div className='w-1/4 p-2 m-2 border-4 rounded-lg text-lg font-medium'>
+                            Race Time:{' '}
+                            {/* <RaceTimer
                                         key={'fleetTimer' + index}
                                         fleetId={fleet.id}
                                         startTime={fleet.startTime}
@@ -565,58 +598,57 @@ export default function Page(props: PageProps) {
                                         onWarning={handleWarning}
                                         reset={raceState[index] == raceStateType.reset}
                                     /> */}
-                                    <RaceTimer
-                                        sequence={startSequence}
-                                        startTime={fleet.startTime}
-                                        onFlagChange={handleFlagChange}
-                                        onHoot={handleHoot}
-                                        timerActive={raceState[index] == raceStateType.running}
-                                        reset={raceState[index] == raceStateType.reset}
-                                        onSequenceEnd={handleSequenceEnd}
-                                        onWarning={handleWarning}
-                                    />
-                                </div>
-                                <div className='p-2 w-1/4' id='RaceStateButton'>
-                                    {(() => {
-                                        switch (raceState[index]) {
-                                            case raceStateType.reset:
-                                                return (
-                                                    <Button onClick={() => startRaceButton(fleet.id)} size='big' variant={'green'}>
-                                                        Start
-                                                    </Button>
-                                                )
-                                            case raceStateType.running:
-                                                return (
-                                                    <Button
-                                                        onClick={e => {
-                                                            confirm('are you sure you want to stop the race?') ? stopRace(fleet.id) : null
-                                                        }}
-                                                        size='big'
-                                                        variant={'red'}
-                                                    >
-                                                        Stop
-                                                    </Button>
-                                                )
-                                            case raceStateType.stopped:
-                                                return (
-                                                    <Button onClick={() => resetRace(fleet.id)} size='big' variant={'blue'}>
-                                                        Reset
-                                                    </Button>
-                                                )
-                                            case raceStateType.calculate:
-                                                return (
-                                                    <Button id='CalcResultsButton' onClick={calculateResults} size='big' variant={'blue'}>
-                                                        Calculate Results
-                                                    </Button>
-                                                )
-                                            default:
-                                                return <p> unknown race state</p>
-                                        }
-                                    })()}
-                                </div>
-                            </div>
-                        )
-                    })}
+                            <RaceTimer
+                                sequence={startSequence}
+                                // start time is the max start time of all fleets, so that the timer starts at the latest start time.
+                                startTime={race.fleets.reduce((max, step) => (step.startTime > max ? step.startTime : max), 0)}
+                                onFlagChange={handleFlagChange}
+                                onHoot={handleHoot}
+                                timerActive={raceState == raceStateType.running}
+                                reset={raceState == raceStateType.reset}
+                                onSequenceEnd={handleSequenceEnd}
+                                onWarning={handleWarning}
+                            />
+                        </div>
+                        <div className='p-2 w-1/4' id='RaceStateButton'>
+                            {(() => {
+                                switch (raceState) {
+                                    case raceStateType.reset:
+                                        return (
+                                            <Button onClick={() => startRaceButton()} size='big' variant={'green'}>
+                                                Start
+                                            </Button>
+                                        )
+                                    case raceStateType.running:
+                                        return (
+                                            <Button
+                                                onClick={e => {
+                                                    confirm('are you sure you want to stop the race?') ? stopRace() : null
+                                                }}
+                                                size='big'
+                                                variant={'red'}
+                                            >
+                                                Stop
+                                            </Button>
+                                        )
+                                    case raceStateType.stopped:
+                                        return (
+                                            <Button onClick={() => resetRace()} size='big' variant={'blue'}>
+                                                Reset
+                                            </Button>
+                                        )
+                                    case raceStateType.calculate:
+                                        return (
+                                            <Button id='CalcResultsButton' onClick={calculateResults} size='big' variant={'blue'}>
+                                                Calculate Results
+                                            </Button>
+                                        )
+                                    default:
+                                        return <p> unknown race state</p>
+                                }
+                            })()}
+                        </div>
+                    </div>
                 </div>
                 <div className='flex w-full shrink flex-row justify-around'>
                     <div className='w-1/5 p-2'>
@@ -625,33 +657,33 @@ export default function Page(props: PageProps) {
                         </Button>
                     </div>
                     <div className='w-1/5 p-2' id='RetireModeButton'>
-                        {mode == modeType.Retire ? (
-                            <Button
-                                onClick={() => setMode(checkAnyFinished(race.fleets.flatMap(fleet => fleet.results)) ? modeType.Finish : modeType.Lap)}
-                                size='big'
-                                variant={'blue'}
-                            >
+                        {raceState == raceStateType.retire ? (
+                            <Button onClick={() => setRaceState(lastRaceState)} size='big' variant={'blue'}>
                                 Cancel Retirement
                             </Button>
                         ) : (
-                            <Button onClick={() => setMode(modeType.Retire)} size='big' variant={'blue'}>
+                            <Button
+                                onClick={() => {
+                                    setLastRaceState(raceState)
+                                    setRaceState(raceStateType.retire)
+                                }}
+                                size='big'
+                                variant={'blue'}
+                            >
                                 Retire a Boat
                             </Button>
                         )}
                     </div>
-                    {mode == modeType.Lap ? (
-                        <div className='w-1/5 p-2' id='FinishModeButton'>
-                            <Button onClick={() => setMode(modeType.Finish)} size='big' variant={'blue'}>
-                                Finish Mode
-                            </Button>
-                        </div>
-                    ) : (
-                        <div className='w-1/5 p-2' id='LapModeButton'>
-                            <Button onClick={() => setMode(modeType.Lap)} size='big' variant={'blue'} disabled={checkAnyFinished(race.fleets.flatMap(fleet => fleet.results))}>
-                                Lap Mode
-                            </Button>
-                        </div>
-                    )}
+                    <div className='w-1/5 p-2' id='LapModeButton'>
+                        <Button onClick={lapModeClick} size='big' variant={'blue'} disabled={checkAnyFinished(race.fleets.flatMap(fleet => fleet.results))}>
+                            Lap Mode
+                        </Button>
+                    </div>
+                    <div className='w-1/5 p-2' id='FinishModeButton'>
+                        <Button onClick={finishModeClick} size='big' variant={'blue'}>
+                            Finish Mode
+                        </Button>
+                    </div>
                 </div>
                 <div className='overflow-auto'>
                     <div className='flex flex-row justify-around flex-wrap' id='EntrantCards'>
@@ -665,7 +697,8 @@ export default function Page(props: PageProps) {
                                         result={result}
                                         fleet={race.fleets.find(fleet => fleet.id == result.fleetId)!}
                                         pursuit={false}
-                                        mode={mode}
+                                        mode={raceMode[fleetIndex]!}
+                                        raceState={raceState}
                                         lapBoat={lapBoat}
                                         finishBoat={finishBoat}
                                         showRetireModal={showRetireModal}

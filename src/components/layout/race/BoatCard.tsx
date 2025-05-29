@@ -2,19 +2,20 @@ import { Button } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
 import { useEffect, useRef, useState } from 'react'
 
+// these options are the same across all fleets
 enum raceStateType {
-    countdown,
     running,
     stopped,
     reset,
-    calculate
+    calculate,
+    retire
 }
 
-enum modeType {
-    Retire,
+// these options are specific to each fleet
+enum raceModeType {
     Lap,
-    NotStarted,
-    Finish
+    Finish,
+    None
 }
 
 const secondsToTimeString = (seconds: number) => {
@@ -28,6 +29,7 @@ export default function BoatCard({
     fleet,
     pursuit,
     mode,
+    raceState,
     lapBoat,
     finishBoat,
     showRetireModal
@@ -35,7 +37,8 @@ export default function BoatCard({
     result: ResultDataType
     fleet: FleetDataType
     pursuit: boolean
-    mode: modeType
+    mode: raceModeType
+    raceState: raceStateType
     lapBoat: (id: string) => void
     finishBoat: (id: string) => void
     showRetireModal: (id: string) => void
@@ -99,8 +102,26 @@ export default function BoatCard({
                 ) : (
                     <>
                         {(() => {
+                            if (raceState == raceStateType.retire) {
+                                return (
+                                    <Button
+                                        variant={'blue'}
+                                        className=' w-36 m-6 h-4/6 text-xl'
+                                        onClick={e => {
+                                            setIsDisabled(true)
+                                            timeoutRef.current = setTimeout(() => {
+                                                setIsDisabled(false)
+                                                timeoutRef.current = null
+                                            }, 15000)
+                                            showRetireModal(result.id)
+                                        }}
+                                    >
+                                        Retire
+                                    </Button>
+                                )
+                            }
                             switch (mode) {
-                                case modeType.Finish:
+                                case raceModeType.Finish:
                                     return (
                                         <Button
                                             variant={'blue'}
@@ -117,24 +138,7 @@ export default function BoatCard({
                                             Finish
                                         </Button>
                                     )
-                                case modeType.Retire:
-                                    return (
-                                        <Button
-                                            variant={'blue'}
-                                            className=' w-36 m-6 h-4/6 text-xl'
-                                            onClick={e => {
-                                                setIsDisabled(true)
-                                                timeoutRef.current = setTimeout(() => {
-                                                    setIsDisabled(false)
-                                                    timeoutRef.current = null
-                                                }, 15000)
-                                                showRetireModal(result.id)
-                                            }}
-                                        >
-                                            Retire
-                                        </Button>
-                                    )
-                                case modeType.Lap:
+                                case raceModeType.Lap:
                                     return (
                                         <Button
                                             variant={'blue'}

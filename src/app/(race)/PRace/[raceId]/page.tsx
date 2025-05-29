@@ -629,7 +629,7 @@ export default function Page(props: PageProps) {
                 ) : (
                     <div className='overflow-auto'>
                         <div className='flex flex-row justify-around flex-wrap' id='EntrantCards'>
-                            {race.fleets
+                            {/* {race.fleets
                                 .flatMap(fleets => fleets.results)
                                 .map((result: ResultDataType, index) => {
                                     console.log(result)
@@ -645,7 +645,7 @@ export default function Page(props: PageProps) {
                                             showRetireModal={showRetireModal}
                                         />
                                     )
-                                })}
+                                })} */}
                         </div>
                     </div>
                 )}
