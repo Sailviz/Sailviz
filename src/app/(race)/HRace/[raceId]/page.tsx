@@ -2,7 +2,7 @@
 import React, { ChangeEvent, MouseEventHandler, use, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import * as DB from '@/components/apiMethods'
-import RaceTimer from '@/components/HRaceTimer'
+// import RaceTimer from '@/components/HRaceTimer'
 
 import * as Fetcher from '@/components/Fetchers'
 import RetireModal from '@/components/layout/dashboard/RetireModal'
@@ -12,6 +12,7 @@ import { mutate } from 'swr'
 import FlagModal from '@/components/layout/dashboard/Flag Modal'
 import { useSession, signIn } from 'next-auth/react'
 import { Button } from '@/components/ui/button'
+import RaceTimer from '@/components/layout/race/raceTimer'
 
 enum raceStateType {
     countdown,
@@ -34,8 +35,6 @@ export default function Page(props: PageProps) {
     const { raceId } = use(props.params)
     const Router = useRouter()
 
-    const startLength = 315 //5 15secs in seconds
-
     const { data: session, status } = useSession({
         required: true,
         onUnauthenticated() {
@@ -45,6 +44,7 @@ export default function Page(props: PageProps) {
     const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
 
     const { race, raceIsError, raceIsValidating } = Fetcher.Race(raceId, true)
+    const { startSequence, startSequenceIsError, startSequenceIsValidating, mutateStartSequence } = Fetcher.GetStartSequence(race?.seriesId)
 
     const [retireModal, setRetireModal] = useState(false)
     const [flagModal, setFlagModal] = useState(false)
@@ -88,7 +88,7 @@ export default function Page(props: PageProps) {
 
     const startRaceButton = async (fleetId: string) => {
         //use time for button
-        let localTime = Math.floor(new Date().getTime() / 1000 + startLength)
+        let localTime = Math.floor(new Date().getTime() / 1000 + startSequence.reduce((max, step) => (step.time > max ? step.time : max), 0))
         //start the timer
         fetch('https://' + club.settings.clockIP + '/set?startTime=' + (localTime - club.settings.clockOffset).toString(), {
             signal: controller.signal,
@@ -131,6 +131,29 @@ export default function Page(props: PageProps) {
         sound!.play()
     }
 
+    const handleFlagChange = (flags: FlagStatusType[], next: FlagStatusType[]) => {
+        console.log(`Flag changed to: ${flags.map(flag => `${flag.flag}:${flag.status}`).join(', ')}`)
+        setFlagStatus([flags[0]!.status, flags[1]!.status])
+        setNextFlagStatus([next[0]!.status, next[1]!.status])
+    }
+
+    const handleHoot = (time: number) => {
+        //sound horn
+        fetch('https://' + club.settings.hornIP + `/hoot?startTime=${time}`, {
+            signal: controller.signal,
+            headers: new Headers({ 'content-type': 'text/plain' })
+        })
+            .then(response => {})
+            .catch(err => {
+                console.log('horn not connected')
+                console.log(err)
+            })
+
+        let sound = document.getElementById('Beep') as HTMLAudioElement
+        sound!.currentTime = 0
+        sound!.play()
+    }
+
     const handleWarning = () => {
         console.log('Warning')
 
@@ -145,90 +168,9 @@ export default function Page(props: PageProps) {
         })
     }
 
-    const handleFiveMinutes = () => {
-        console.log('5 minutes left')
-
-        //sound horn
-        fetch('https://' + club.settings.hornIP + '/hoot?startTime=300', {
-            signal: controller.signal,
-            headers: new Headers({ 'content-type': 'text/plain' })
-        })
-            .then(response => {})
-            .catch(err => {
-                console.log('horn not connected')
-                console.log(err)
-            })
-        setFlagStatus([true, false])
-        setNextFlagStatus([true, true])
-
-        let sound = document.getElementById('Beep') as HTMLAudioElement
-        sound!.currentTime = 0
-        sound!.play()
-    }
-
-    const handleFourMinutes = () => {
-        console.log('4 minutes left')
-
-        //sound horn
-        fetch('https://' + club.settings.hornIP + '/hoot?startTime=300', {
-            signal: controller.signal,
-            headers: new Headers({ 'content-type': 'text/plain' })
-        })
-            .then(response => {})
-            .catch(err => {
-                console.log('horn not connected')
-                console.log(err)
-            })
-        setFlagStatus([true, true])
-        setNextFlagStatus([true, false])
-
-        let sound = document.getElementById('Beep') as HTMLAudioElement
-        sound!.currentTime = 0
-        sound!.play()
-    }
-
-    const handleOneMinute = () => {
-        console.log('1 minute left')
-
-        //sound horn
-        fetch('https://' + club.settings.hornIP + '/hoot?startTime=500', {
-            signal: controller.signal,
-            headers: new Headers({ 'content-type': 'text/plain' })
-        })
-            .then(response => {})
-            .catch(err => {
-                console.log('horn not connected')
-                console.log(err)
-            })
-        setFlagStatus([true, false])
-        setNextFlagStatus([false, false])
-
-        let sound = document.getElementById('Beep') as HTMLAudioElement
-        sound!.currentTime = 0
-        sound!.play()
-    }
-
-    const handleGo = (fleetId: string) => {
-        let index = race.fleets.findIndex(fleet => fleet.id == fleetId)
-        console.log('GO!')
-        setRaceState([...raceState.slice(0, index), raceStateType.running, ...raceState.slice(index + 1)])
-        setMode(modeType.Lap)
-        //sound horn
-        fetch('https://' + club.settings.hornIP + '/hoot?startTime=300', {
-            signal: controller.signal,
-            headers: new Headers({ 'content-type': 'text/plain' })
-        })
-            .then(response => {})
-            .catch(err => {
-                console.log('horn not connected')
-                console.log(err)
-            })
-        setFlagStatus([false, false])
-        setNextFlagStatus([false, false])
+    const handleSequenceEnd = () => {
         setFlagModal(false)
-        let sound = document.getElementById('Beep') as HTMLAudioElement
-        sound!.currentTime = 0
-        sound!.play()
+        setMode(modeType.Lap)
     }
 
     const dynamicSort = async (results: ResultDataType[]) => {
@@ -591,7 +533,7 @@ export default function Page(props: PageProps) {
         }
     }, [race])
 
-    if (raceIsError || race == undefined || clubIsError || club == undefined || session == undefined) {
+    if (raceIsError || race == undefined || clubIsError || club == undefined || session == undefined || startSequenceIsError || startSequence == undefined) {
         return <PageSkeleton />
     }
 
@@ -611,7 +553,7 @@ export default function Page(props: PageProps) {
                                 </div>
                                 <div className='w-1/4 p-2 m-2 border-4 rounded-lg text-lg font-medium'>
                                     Race Time:{' '}
-                                    <RaceTimer
+                                    {/* <RaceTimer
                                         key={'fleetTimer' + index}
                                         fleetId={fleet.id}
                                         startTime={fleet.startTime}
@@ -622,6 +564,16 @@ export default function Page(props: PageProps) {
                                         onGo={handleGo}
                                         onWarning={handleWarning}
                                         reset={raceState[index] == raceStateType.reset}
+                                    /> */}
+                                    <RaceTimer
+                                        sequence={startSequence}
+                                        startTime={fleet.startTime}
+                                        onFlagChange={handleFlagChange}
+                                        onHoot={handleHoot}
+                                        timerActive={raceState[index] == raceStateType.running}
+                                        reset={raceState[index] == raceStateType.reset}
+                                        onSequenceEnd={handleSequenceEnd}
+                                        onWarning={handleWarning}
                                     />
                                 </div>
                                 <div className='p-2 w-1/4' id='RaceStateButton'>
