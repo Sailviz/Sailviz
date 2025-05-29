@@ -128,7 +128,7 @@ export default function Page() {
                         <Button className='mx-1' color='primary' onClick={() => document.getElementById('boatFileUpload')!.click()}>
                             Upload Boat Data
                         </Button>
-                        <Input id='boatFileUpload' type='file' accept='.csv' className='hidden' />
+                        <Input id='boatFileUpload' type='file' accept='.csv' className='hidden' onChange={e => boatFileUploadHandler(e)} />
                         <Button className='mx-1' color='primary' onClick={downloadBoats}>
                             Download Boat Data
                         </Button>

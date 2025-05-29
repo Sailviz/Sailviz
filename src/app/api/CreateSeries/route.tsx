@@ -44,6 +44,7 @@ export async function POST(request: NextRequest) {
     }
 
     var clubId = req.clubId
+    console.log('Creating Series for clubId: ' + clubId)
 
     let authorised = await isRequestAuthorised(clubId, 'club')
     if (!authorised) {

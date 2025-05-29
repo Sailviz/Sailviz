@@ -71,15 +71,30 @@ model Club {
 }
 
 model Series {
-  id            String          @id @unique @default(uuid())
-  name          String
-  clubId        String
-  settings      Json
-  fleetSettings FleetSettings[]
-  races         Race[]
-  club          Club            @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  id             String          @id @unique @default(uuid())
+  name           String
+  clubId         String
+  settings       Json
+  fleetSettings  FleetSettings[]
+  races          Race[]
+  club           Club            @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  startSequences StartSequence[]
 
   @@index([clubId])
+}
+
+model StartSequence {
+  id         String @id @unique @default(uuid())
+  series     Series @relation(fields: [seriesId], references: [id])
+  seriesId   String
+  time       Int
+  name       String
+  hoot       Int
+  fleetStart String
+  flagStatus Json
+  order      Int
+
+  // @@unique([seriesId, order]) // Ensures unique order numbers per race //this is commented out to allow multiple actions at the same time
 }
 
 model Race {

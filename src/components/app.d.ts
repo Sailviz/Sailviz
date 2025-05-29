@@ -54,6 +54,21 @@ type ResultDataType = {
     resultCode: string
 }
 
+type StartSequenceStep = {
+    id?: string // Optional for new steps
+    time: number
+    name: string // e.g., 'start', 'horn', 'clock'
+    hoot: number
+    order: number // Order of the step in the sequence
+    fleetStart: string
+    flagStatus: FlagStatusType[]
+}
+
+type FlagStatusType = {
+    flag: string
+    status: boolean
+}
+
 type LapDataType = {
     id: string
     resultId: string

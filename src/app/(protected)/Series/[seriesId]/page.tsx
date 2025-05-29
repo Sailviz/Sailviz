@@ -11,6 +11,7 @@ import { use, useState } from 'react'
 import { useSession } from 'next-auth/react'
 import * as DB from '@/components/apiMethods'
 import { Button } from '@/components/ui/button'
+import StartSequenceManager from '@/components/StartSequenceManager'
 type PageProps = { params: Promise<{ seriesId: string }> }
 
 export default function Page(props: PageProps) {
@@ -18,6 +19,8 @@ export default function Page(props: PageProps) {
     const { data: session, status } = useSession()
 
     const [editFleet, setEditFleet] = useState(false)
+
+    const { startSequence, startSequenceIsError, startSequenceIsValidating, mutateStartSequence } = Fetcher.GetStartSequence(seriesId)
 
     // const createRace = async () => {
     //     var race = await DB.createRace(club.id, series.id)
@@ -66,6 +69,8 @@ export default function Page(props: PageProps) {
                     <SeriesRaceTable id={seriesId} />
                 </div>
                 {userHasPermission(session!.user, AVAILABLE_PERMISSIONS.editRaces) ? <AddRaceButton seriesId={seriesId} /> : <> </>}
+                <StartSequenceManager initialSequence={startSequence} seriesId={seriesId} key={startSequence?.length} />
+
                 <p className='text-6xl font-extrabold p-6'>Fleets</p>
                 <div className='p-6'>
                     <FleetTable seriesId={seriesId} />

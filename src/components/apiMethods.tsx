@@ -788,3 +788,22 @@ export async function deleteRole(role: RoleDataType): Promise<RoleDataType[]> {
         }
     })
 }
+
+export async function updateStartSequenceById(seriesId: string, startSequence: StartSequenceStep[]): Promise<boolean> {
+    const body = {
+        seriesId: seriesId,
+        startSequence: startSequence
+    }
+    return await fetch(`${server}/api/UpdateStartSequenceById`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+    }).then(async res => {
+        if (res.ok) {
+            let data = await res.json()
+            return data.status === 200
+        } else {
+            return false
+        }
+    })
+}

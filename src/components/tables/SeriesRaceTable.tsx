@@ -158,7 +158,7 @@ const SeriesRaceTable = (props: any) => {
         data: series,
         error: seriesIsError,
         isValidating: seriesIsValidating
-    } = useSWR(`/api/GetSeriesById?id=${seriesId}`, Fetcher.fetcher, { keepPreviousData: true, suspense: true })
+    } = useSWR(`/api/GetSeriesById?id=${seriesId}`, Fetcher.fetcher, { fallbackData: {} as SeriesDataType })
 
     let data = series.races
     if (data == undefined) {

@@ -286,3 +286,21 @@ export function GetFleetSettingsBySeriesId(seriesId: string) {
         fleetSettingsIsError: error
     }
 }
+
+export function GetStartSequence(seriesId: string) {
+    let body = { seriesId: seriesId }
+    const {
+        data,
+        error,
+        isValidating,
+        mutate: mutateStartSequence
+    } = useSWR(seriesId != '' ? `/api/GetStartSequenceById` : null, url => advancedFetcher(url!, body), { refreshInterval: 10000, fallbackData: [] as StartSequenceStep[] })
+
+    console.log(data)
+    return {
+        startSequence: data.sequence as StartSequenceStep[],
+        startSequenceIsValidating: isValidating,
+        startSequenceIsError: error,
+        mutateStartSequence
+    }
+}
