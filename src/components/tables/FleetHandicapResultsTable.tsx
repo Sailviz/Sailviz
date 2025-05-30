@@ -231,7 +231,7 @@ const FleetHandicapResultsTable = (props: any) => {
         <div className='w-full'>
             <div className='flex items-center py-4'>
                 <h1>
-                    {fleet.fleetSettings.name}: {data.length} boats entered
+                    {fleet?.fleetSettings?.name}: {data.length} boats entered
                 </h1>
             </div>
             <div className='rounded-md border'>

@@ -425,8 +425,6 @@ export default function Page(props: PageProps) {
         sound!.currentTime = 0
         sound!.play()
 
-        await DB.CreateLap(resultId, time)
-
         let result = race.fleets.flatMap(fleet => fleet.results).find(result => result.id === resultId)
 
         if (result == undefined) {
@@ -436,11 +434,35 @@ export default function Page(props: PageProps) {
         //save state for undo
         setLastAction({ type: 'finish', resultId: resultId })
 
-        //send to DB
-        await DB.updateResult({ ...result, finishTime: time })
-
+        let optimisticData: RaceDataType = window.structuredClone(race)
+        //update optimistic data with new lap
+        optimisticData.fleets.forEach((fleet: FleetDataType) => {
+            fleet.results.forEach(res => {
+                if (res.id == resultId) {
+                    res.finishTime = time
+                    res.laps.push({ resultId: resultId, time: time, id: '' })
+                }
+            })
+        })
+        console.log(optimisticData)
         //mutate race
-        mutate(`/api/GetRaceById?id=${race.id}&results=true`)
+        mutate(
+            `/api/GetRaceById?id=${race.id}&results=true`,
+            async update => {
+                await DB.CreateLap(resultId, time)
+
+                await DB.updateResult({ ...result, finishTime: time })
+                return await DB.getRaceById(race.id, true)
+            },
+            { optimisticData: optimisticData, rollbackOnError: false, revalidate: false }
+        )
+        //if more than one fleet, we need to force dynamic sort
+        if (raceMode.length > 1) {
+            dynamicSort(optimisticData.fleets.flatMap(fleet => fleet.results))
+        } else {
+            //if only one fleet, we can sort by last lap
+            sortByLastLap(optimisticData.fleets.flatMap(fleet => fleet.results))
+        }
     }
 
     const checkAllFinished = (results: ResultDataType[]) => {
@@ -692,7 +714,7 @@ export default function Page(props: PageProps) {
                         )}
                     </div>
                     <div className='w-1/5 p-2' id='LapModeButton'>
-                        <Button onClick={lapModeClick} size='big' variant={'blue'} disabled={checkAnyFinished(race.fleets.flatMap(fleet => fleet.results))}>
+                        <Button onClick={lapModeClick} size='big' variant={'blue'}>
                             Lap Mode
                         </Button>
                     </div>
