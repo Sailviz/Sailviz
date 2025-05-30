@@ -48,7 +48,7 @@ const Action = ({ ...props }: any) => {
     const Router = useRouter()
 
     return (
-        <Link href={`/Race/${props.row.original.id}`} className='text-default-900 cursor-pointer'>
+        <Link href={`${props.viewHref}${props.row.original.id}`} className='text-default-900 cursor-pointer'>
             <Button variant='outline' className='w-16 h-8 p-0'>
                 Open
             </Button>
@@ -58,7 +58,7 @@ const Action = ({ ...props }: any) => {
 
 const columnHelper = createColumnHelper<RaceDataType>()
 
-const RacesTable = ({ date, historical }: { date: Date; historical: boolean }) => {
+const RacesTable = ({ date, historical, viewHref }: { date: Date; historical: boolean; viewHref: string }) => {
     const { data: session, status } = useSession()
     const [page, setPage] = useState(1)
     const {
@@ -99,7 +99,7 @@ const RacesTable = ({ date, historical }: { date: Date; historical: boolean }) =
             columnHelper.accessor('id', {
                 id: 'action',
                 header: 'Actions',
-                cell: props => <Action {...props} id={props.row.original.id} />
+                cell: props => <Action {...props} id={props.row.original.id} viewHref={viewHref} />
             })
         ],
         getCoreRowModel: getCoreRowModel()

@@ -22,7 +22,7 @@ const Action = ({ ...props }: any) => {
     }
     return (
         <div className='relative flex items-center gap-2'>
-            <Link href={`/Series/${props.row.original.id}`} className='cursor-pointer'>
+            <Link href={`${props.viewHref}${props.row.original.id}`} className='cursor-pointer'>
                 <EyeIcon onClick={() => props.viewSeries(props.row.original.id)} />
             </Link>
 
@@ -40,16 +40,12 @@ const Action = ({ ...props }: any) => {
 
 const columnHelper = createColumnHelper<SeriesDataType>()
 
-const ClubTable = () => {
+const ClubTable = ({ viewHref }: { viewHref: string }) => {
     const { data: session, status } = useSession()
     const [data, setData] = useState<SeriesDataType[]>([])
     const loadingState = data?.length === 0 ? 'loading' : 'idle'
 
     const Router = useRouter()
-
-    const viewSeries = (seriesId: string) => {
-        Router.push('/Series/' + seriesId)
-    }
 
     const deleteSeries = async (seriesId: string) => {
         await DB.deleteSeriesById(seriesId)
@@ -87,9 +83,7 @@ const ClubTable = () => {
             columnHelper.accessor('id', {
                 id: 'Remove',
                 header: 'Actions',
-                cell: props => (
-                    <Action {...props} id={props.row.original.id} deleteSeries={deleteSeries} viewSeries={viewSeries} editSeries={editSeries} user={session!.user} />
-                )
+                cell: props => <Action {...props} id={props.row.original.id} deleteSeries={deleteSeries} viewHref={viewHref} editSeries={editSeries} user={session!.user} />
             })
         ],
         getCoreRowModel: getCoreRowModel()

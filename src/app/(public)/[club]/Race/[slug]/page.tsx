@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { use, useEffect, useState } from 'react'
 import Layout from '@/components/layout/Layout'
 
 import { useRouter } from 'next/navigation'
@@ -13,10 +13,10 @@ import { title, subtitle } from '@/components/layout/home/primitaves'
 
 type PageProps = { params: Promise<{ slug: string }> }
 
-export default async function Page(props: PageProps) {
+export default function Page(props: PageProps) {
     const Router = useRouter()
 
-    const params = await props.params
+    const params = use(props.params)
 
     var [race, setRace] = useState<RaceDataType>({
         id: '',

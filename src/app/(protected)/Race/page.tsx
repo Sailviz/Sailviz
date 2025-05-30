@@ -16,11 +16,11 @@ export default async function Page() {
                 </div>
                 <div className='px-3'>
                     <p className='text-2xl font-bold p-6'>Upcoming</p>
-                    <RacesTable date={new Date()} historical={false} />
+                    <RacesTable date={new Date()} historical={false} viewHref='/Race/' />
                 </div>
                 <div className='px-3'>
                     <p className='text-2xl font-bold p-6'>Recent</p>
-                    <RacesTable date={new Date()} historical={true} />
+                    <RacesTable date={new Date()} historical={true} viewHref='/Race/' />
                 </div>
             </div>
         </div>

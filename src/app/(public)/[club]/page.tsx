@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { use, useEffect, useState } from 'react'
 import Layout from '../../../components/layout/Layout'
 import { useRouter } from 'next/navigation'
 import * as DB from '../../../components/apiMethods'
@@ -17,24 +17,23 @@ import cookie from 'js-cookie'
 
 type PageProps = { params: Promise<{ club: string }> }
 
-export default async function Page(props: PageProps) {
+export default function Page(props: PageProps) {
     const router = useRouter()
 
-    const params = await props.params
+    const { club: clubName } = use(props.params)
+    const [club, setClub] = useState<ClubDataType>()
 
-    var [club, setClub] = useState<ClubDataType>()
     var [series, setSeries] = useState<SeriesDataType[]>([])
 
     const viewSeries = (seriesId: string) => {
-        router.push(params.club + '/Series/' + seriesId)
+        router.push(clubName + '/Series/' + seriesId)
     }
 
     const viewRace = (raceId: string) => {
-        router.push(params.club + '/Race/' + raceId)
+        router.push(clubName + '/Race/' + raceId)
     }
 
     useEffect(() => {
-        let clubName = params.club
         DB.getClubByName(clubName).then(data => {
             if (data) {
                 setClub(data)
@@ -66,11 +65,11 @@ export default async function Page(props: PageProps) {
             <div className='py-4'>
                 <div className={title({ color: 'blue' })}>Recent Races:</div>
             </div>
-            <RacesTable date={new Date()} historical={true} />
+            <RacesTable date={new Date()} historical={true} viewHref={`/${clubName}/Race/`} />
             <div className='py-4'>
                 <div className={title({ color: 'violet' })}>Series:</div>
             </div>
-            <ClubTable />
+            <ClubTable viewHref={`/${clubName}/Series/`} />
         </div>
     )
 }

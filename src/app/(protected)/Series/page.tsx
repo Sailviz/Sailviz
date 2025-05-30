@@ -33,7 +33,7 @@ export default async function Page() {
                 <></>
             )}
             <div className='p-6'>
-                <ClubTable />
+                <ClubTable viewHref='/Series/' />
             </div>
         </div>
     )
