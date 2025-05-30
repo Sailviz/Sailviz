@@ -107,12 +107,13 @@ export default function Page(props: PageProps) {
 
         race.fleets.forEach(async fleet => {
             //find start time in start sequence
-            let startTimeStep = startSequence.find(step => step.fleetStart == fleet.id)
+            let startTimeStep = startSequence.find(step => step.fleetStart == fleet.fleetSettings.id)
             if (startTimeStep == undefined) {
                 console.error('No start time found for fleet: ' + fleet.id)
                 return
             }
             fleet.startTime = lastStartTime - startTimeStep.time
+            console.log('Setting start time for fleet ' + fleet.id + ' to ' + fleet.startTime)
             await DB.updateFleetById(fleet)
         })
 
@@ -133,10 +134,12 @@ export default function Page(props: PageProps) {
         sound!.play()
     }
 
-    const handleFlagChange = (flags: FlagStatusType[], next: FlagStatusType[]) => {
+    const handleFlagChange = (flags: FlagStatusType[], next?: FlagStatusType[]) => {
         console.log(`Flag changed to: ${flags.map(flag => `${flag.flag}:${flag.status}`).join(', ')}`)
         setFlagStatus([flags[0]!.status, flags[1]!.status])
-        setNextFlagStatus([next[0]!.status, next[1]!.status])
+        if (next) {
+            setNextFlagStatus([next[0]!.status, next[1]!.status])
+        }
     }
 
     const handleHoot = (time: number) => {
@@ -174,14 +177,14 @@ export default function Page(props: PageProps) {
         setFlagModal(false)
     }
 
-    const handleFleetStart = (fleetId: string) => {
+    const handleFleetStart = (fleetSettingsId: string) => {
         //set fleet running
-        let index = race.fleets.findIndex(fleet => fleet.id == fleetId)
+        let index = race.fleets.findIndex(fleet => fleet.fleetSettings.id == fleetSettingsId)
         if (index == -1) {
-            console.error('Fleet not found: ' + fleetId)
+            console.error('Fleet not found with settings: ' + fleetSettingsId)
             return
         }
-        setRaceState(raceStateType.running)
+        setRaceMode([...raceMode.slice(0, index), raceModeType.Lap, ...raceMode.slice(index + 1)])
     }
 
     const dynamicSort = async (results: ResultDataType[]) => {
@@ -291,6 +294,7 @@ export default function Page(props: PageProps) {
 
         //change back to lap mode
         setRetireModal(false)
+        setRaceState(lastRaceState)
     }
 
     const lapBoat = async (resultId: string) => {
@@ -599,6 +603,7 @@ export default function Page(props: PageProps) {
                                         reset={raceState[index] == raceStateType.reset}
                                     /> */}
                             <RaceTimer
+                                key={race.fleets.reduce((max, step) => (step.startTime > max ? step.startTime : max), 0)}
                                 sequence={startSequence}
                                 // start time is the max start time of all fleets, so that the timer starts at the latest start time.
                                 startTime={race.fleets.reduce((max, step) => (step.startTime > max ? step.startTime : max), 0)}
@@ -608,6 +613,7 @@ export default function Page(props: PageProps) {
                                 reset={raceState == raceStateType.reset}
                                 onSequenceEnd={handleSequenceEnd}
                                 onWarning={handleWarning}
+                                onFleetStart={handleFleetStart}
                             />
                         </div>
                         <div className='p-2 w-1/4' id='RaceStateButton'>
