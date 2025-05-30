@@ -24,16 +24,13 @@ async function findRace(clubId: string) {
         orderBy: {
             Time: 'asc'
         },
-        select: {
-            id: true,
-            number: true,
-            Time: true,
-            series: {
-                select: {
-                    name: true,
-                    id: true
+        include: {
+            fleets: {
+                include: {
+                    fleetSettings: true
                 }
-            }
+            },
+            series: true
         }
     })
     return result

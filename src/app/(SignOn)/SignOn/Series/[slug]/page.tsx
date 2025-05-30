@@ -5,13 +5,14 @@ import * as Fetcher from '@/components/Fetchers'
 import { PageSkeleton } from '@/components/layout/PageSkeleton'
 import { title } from '@/components/layout/home/primitaves'
 import { useSession, signIn } from 'next-auth/react'
+import { use } from 'react'
 
 type PageProps = { params: Promise<{ slug: string }> }
 
-export default async function Page(props: PageProps) {
+export default function Page(props: PageProps) {
     const Router = useRouter()
 
-    const params = await props.params
+    const params = use(props.params)
     const { data: session, status } = useSession({
         required: true,
         onUnauthenticated() {

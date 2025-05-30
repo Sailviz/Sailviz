@@ -3,38 +3,38 @@ import { ChangeEvent, useEffect, useState } from 'react'
 import Select, { CSSObjectWithLabel } from 'react-select'
 import * as Fetcher from '@/components/Fetchers'
 import { PageSkeleton } from '@/components/layout/PageSkeleton'
-import { DialogContent, DialogFooter, DialogHeader } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogFooter, DialogHeader } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import { Tabs } from '@/components/ui/tabs'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Input } from '@/components/ui/input'
+import { useRouter } from 'next/navigation'
 
 export default function EditResultModal({
-    isOpen,
-    raceId,
     result,
     boats,
+    race,
     onSubmit,
-    onClose,
     onDelete
 }: {
-    isOpen: boolean
-    raceId: string
-    result: ResultDataType | undefined
+    result: ResultDataType
     boats: BoatDataType[]
+    race: RaceDataType
     onSubmit: (result: ResultDataType) => void
-    onClose: () => void
     onDelete: (result: ResultDataType) => void
 }) {
-    const { race, raceIsError, raceIsValidating, mutateRace } = Fetcher.Race(raceId, true)
+    const Router = useRouter()
+    const [open, setOpen] = useState(true)
 
-    const [helm, setHelm] = useState('')
-    const [crew, setCrew] = useState('')
-    const [sailNumber, setSailNumber] = useState('')
+    // const { race, raceIsError, raceIsValidating } = Fetcher.Race(result.fleetId, false)
+
+    const [helm, setHelm] = useState(result.Helm)
+    const [crew, setCrew] = useState(result.Crew)
+    const [sailNumber, setSailNumber] = useState(result.SailNumber)
 
     const { theme, setTheme } = useTheme()
 
-    const [selectedFleet, setSelectedFleet] = useState<string>()
-    const [selectedBoat, setSelectedBoat] = useState({ label: '', value: {} as BoatDataType })
+    const [selectedFleet, setSelectedFleet] = useState<string>(result.fleetId)
+    const [selectedBoat, setSelectedBoat] = useState({ label: result.boat.name, value: result.boat })
 
     const [helmError, setHelmError] = useState(false)
     const [boatError, setBoatError] = useState(false)
@@ -81,25 +81,19 @@ export default function EditResultModal({
         onSubmit({ ...result!, Helm: helm, Crew: crew, boat: selectedBoat.value, SailNumber: sailNumber, fleetId: selectedFleet! })
     }
 
-    useEffect(() => {
-        if (result == undefined) {
-            return
-        }
-        console.log(result)
-        setHelm(result.Helm)
-        setCrew(result.Crew)
-        setSailNumber(result.SailNumber)
-        if (result.boat != null) {
-            setSelectedBoat({ label: result.boat.name, value: result.boat })
-        } else {
-            setSelectedBoat({ label: '', value: {} as BoatDataType })
-        }
-        setSelectedFleet(result.fleetId)
-    }, [result])
+    if (race.id == '') {
+        return <div>Loading</div>
+    }
 
     return (
-        <>
-            <DialogContent>
+        <Dialog
+            open={open}
+            onOpenChange={open => {
+                setOpen(open)
+                if (!open) Router.back() // this catches the x button and clicking outside the modal, gets out of parallel route
+            }}
+        >
+            <DialogContent className='max-w-8/12'>
                 <DialogHeader className='flex flex-col gap-1'>Edit Entry</DialogHeader>
                 <div className='flex w-full'>
                     <div className='flex flex-col px-6 w-full'>
@@ -196,17 +190,26 @@ export default function EditResultModal({
                         <div className='flex flex-row'>
                             <Tabs
                                 aria-label='Options'
-                                // selectedKey={selectedFleet}
+                                className='px-3'
+                                defaultValue={selectedFleet}
                                 color='primary'
-                                // onSelectionChange={key => {
-                                //     setSelectedFleet(key.toString())
-                                // }}
+                                // enable fleet selection if race is selected.
+                                // disabled={selectedRaces.findIndex(r => r == race.id) == -1 ? true : false}
+                                //insert the selected fleet into the selectedFleets array at the index of the race
+                                onValueChange={value => {
+                                    setSelectedFleet(value.toString())
+                                }}
                             >
-                                <>
-                                    {race.fleets.map((fleet: FleetDataType) => {
-                                        return <div key={fleet.id} title={fleet.fleetSettings.name}></div>
+                                {/* show buttons for each fleet in a series */}
+                                <TabsList>
+                                    {race.fleets.map((fleet: FleetDataType, index) => {
+                                        return (
+                                            <TabsTrigger key={fleet.id + 'select'} value={fleet.id}>
+                                                {fleet?.fleetSettings?.name}
+                                            </TabsTrigger>
+                                        )
                                     })}
-                                </>
+                                </TabsList>
                             </Tabs>
 
                             {race.Type == 'Pursuit' ? (
@@ -226,14 +229,11 @@ export default function EditResultModal({
                     <Button color='danger' onClick={() => onDelete(result!)}>
                         Remove
                     </Button>
-                    <Button color='danger' onClick={onClose}>
-                        Close
-                    </Button>
                     <Button color='primary' onClick={() => Submit()}>
                         Save
                     </Button>
                 </DialogFooter>
             </DialogContent>
-        </>
+        </Dialog>
     )
 }

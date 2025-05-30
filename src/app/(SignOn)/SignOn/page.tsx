@@ -1,86 +1,20 @@
-import * as DB from '@/components/apiMethods'
+'use client'
 import SignOnTable from '@/components/tables/SignOnTable'
 import * as Fetcher from '@/components/Fetchers'
-import { PageSkeleton } from '@/components/layout/PageSkeleton'
-import CreateResultModal from '@/components/layout/SignOn/CreateResultModal'
-import EditResultModal from '@/components/layout/SignOn/EditResultModal'
-import { mutate } from 'swr'
-import { auth } from '@/server/auth'
+import { Button } from '@/components/ui/button'
+import { useSession } from 'next-auth/react'
+import Link from 'next/link'
 
-export default async function Page() {
-    const session = await auth()
-    // const createModal = useDisclosure()
-    // const editModal = useDisclosure()
+export default function Page() {
+    const { data: session, status } = useSession()
 
-    // const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
-    // const { boats, boatsIsError, boatsIsValidating } = Fetcher.Boats()
-    // const { todaysRaces, todaysRacesIsError, todaysRacesIsValidating } = Fetcher.GetTodaysRaceByClubId(club)
-
-    const todaysRaces = await DB.getTodaysRaceByClubId(session?.user.clubId!)
-
-    // const [activeResult, setActiveResult] = useState<ResultsDataType>()
-
-    // const createResult = async (fleetId: string, helm: string, crew: string, boat: BoatDataType, sailNum: string) => {
-    //     console.log(fleetId, helm, crew, boat, sailNum)
-    //     createModal.onClose()
-    //     let entry = await DB.createResult(fleetId)
-
-    //     entry.Helm = helm
-    //     entry.Crew = crew
-    //     entry.boat = boat
-    //     entry.SailNumber = sailNum
-
-    //     //then update it with the info
-    //     await DB.updateResult(entry)
-
-    //     //force a refresh of the data
-    //     todaysRaces.forEach(race => {
-    //         mutate('/api/GetRaceById?id=' + race.id + '&results=true')
-    //     })
-    // }
-
-    // const updateResult = async (result: ResultsDataType) => {
-    //     await DB.updateResult(result)
-    //     editModal.onClose()
-
-    //     //force a refresh of the data
-    //     todaysRaces.forEach(race => {
-    //         mutate('/api/GetRaceById?id=' + race.id + '&results=true')
-    //     })
-    // }
-
-    // const deleteResult = async (result: ResultsDataType) => {
-    //     if (!confirm('Are you sure you want to delete this entry')) return
-    //     editModal.onClose()
-    //     await DB.DeleteResultById(result)
-
-    //     //force a refresh of the data
-    //     todaysRaces.forEach(race => {
-    //         mutate('/api/GetRaceById?id=' + race.id + '&results=true')
-    //     })
-    // }
-
-    // const showEditModal = async (result: ResultsDataType) => {
-    //     setActiveResult(result)
-    //     editModal.onOpen()
-    // }
+    const { todaysRaces, todaysRacesIsError, todaysRacesIsValidating } = Fetcher.GetTodaysRaceByClubId(session?.club!)
 
     return (
-        <div>
-            {/* <CreateResultModal isOpen={createModal.isOpen} todaysRaces={todaysRaces} boats={boats} onSubmit={createResult} onClose={createModal.onClose} /> */}
-            {/* <EditResultModal
-                isOpen={editModal.isOpen}
-                raceId={activeResult ? activeResult.raceId : ''}
-                result={activeResult}
-                boats={boats}
-                onSubmit={updateResult}
-                onDelete={deleteResult}
-                onClose={editModal.onClose}
-            /> */}
-
-            {todaysRaces.length > 0 ? (
+        <div className='h-full overflow-y-hidden'>
+            {todaysRaces?.length > 0 ? (
                 <div className='w-full'>
-                    <div className='overflow-x-scroll whitespace-nowrap relative'>
+                    <div className='overflow-x-scroll flex flex-row max-h-[94vh]'>
                         {todaysRaces.map((race, index) => {
                             console.log(race)
                             return (
@@ -93,10 +27,12 @@ export default async function Page() {
                             )
                         })}
                     </div>
-                    <div className='mx-4 my-3 text-center'>
-                        {/* <Button onClick={createModal.onOpen} color='success' fullWidth size='lg' aria-label='add entry'>
-                            Add Entry
-                        </Button> */}
+                    <div className='mt-2 text-center max-h-[5vh] overflow-hidden'>
+                        <Link href={'/SignOn/createResult'}>
+                            <Button variant={'green'} size={'big'} aria-label='add entry'>
+                                Add Entry
+                            </Button>
+                        </Link>
                     </div>
                 </div>
             ) : (

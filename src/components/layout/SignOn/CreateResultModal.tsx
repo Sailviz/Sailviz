@@ -3,26 +3,24 @@ import { useTheme } from 'next-themes'
 import { ChangeEvent, useEffect, useState } from 'react'
 import Select, { CSSObjectWithLabel } from 'react-select'
 import * as DB from '@/components/apiMethods'
-import { DialogContent, DialogFooter, DialogHeader } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogFooter, DialogHeader } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
-import { Tabs } from '@/components/ui/tabs'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Button } from '@/components/ui/button'
+import { useRouter } from 'next/navigation'
 
 export default function CreateResultModal({
-    isOpen,
-    todaysRaces,
+    races,
     boats,
-    onSubmit,
-    onClose
+    onSubmit
 }: {
-    isOpen: boolean
-    todaysRaces: NextRaceDataType[]
+    races: RaceDataType[]
     boats: BoatDataType[]
-    onSubmit: (fleetId: string, helmValue: string, crewValue: string, boat: any, sailNum: string) => void
-    onClose: () => void
+    onSubmit: (fleetId: string, helm: string, crew: string, boat: BoatDataType, sailNum: string) => void
 }) {
-    let [races, setRaces] = useState<RaceDataType[]>([])
+    const Router = useRouter()
+    const [open, setOpen] = useState(true)
 
     const [helm, setHelm] = useState('')
     const [crew, setCrew] = useState('')
@@ -57,7 +55,7 @@ export default function CreateResultModal({
     const updateRaceSelection = (race: RaceDataType, value: boolean) => {
         if (value) {
             console.log(race)
-            setSelectedRaces([...selectedRaces, race.id])
+            setSelectedRaces([...new Set([...selectedRaces, race.id])])
             let arr = selectedFleets.slice()
             //add the first fleet in
             arr.splice(selectedRaces.length, 1, race.fleets[0]!.id)
@@ -103,170 +101,167 @@ export default function CreateResultModal({
         }
     }
 
-    const clearFields = async () => {
-        console.log('clearing fields')
-        setHelm('')
-        setCrew('')
-        setSailNumber('')
-        setSelectedRaces([])
-        setSelectedFleets([])
-        setSelectedBoat({ label: '', value: {} as BoatDataType })
-        submitDisabled = false
-        const fetchedRaces = await Promise.all(todaysRaces.map(race => DB.getRaceById(race.id)))
-        setRaces(fetchedRaces)
-    }
-
-    useEffect(() => {
-        clearFields()
-    }, [isOpen])
-
     return (
-        <>
-            <DialogContent>
+        <Dialog
+            open={open}
+            onOpenChange={open => {
+                setOpen(open)
+                if (!open) Router.back() // this catches the x button and clicking outside the modal, gets out of parallel route
+            }}
+        >
+            <DialogContent className='max-w-8/12'>
                 <DialogHeader className='flex flex-col gap-1'>Create New Entry</DialogHeader>
-                <DialogContent>
-                    <div className='flex w-full'>
-                        <div className='flex flex-col px-6 w-full'>
-                            <p className='text-2xl font-bold'>Helm</p>
+                <div className='flex w-full'>
+                    <div className='flex flex-col px-6 w-full'>
+                        <p className='text-2xl font-bold'>Helm</p>
 
-                            <Input
-                                id='helm'
-                                type='text'
-                                value={helm}
-                                onChange={e => {
-                                    setHelmError(false)
-                                    CapitaliseInput(e)
-                                }}
-                                placeholder='J Bloggs'
-                                autoComplete='off'
-                            />
-                        </div>
-                        <div className='flex flex-col px-6 w-full'>
-                            <p className='text-2xl font-bold'>Crew</p>
-                            <Input id='crew' type='text' value={crew} onChange={CapitaliseInput} autoComplete='off' />
-                        </div>
-                        <div className='flex flex-col px-6 w-full'>
-                            <p className='text-2xl font-bold'>Class</p>
-                            <Select
-                                id='Class'
-                                className=' w-56 h-full text-3xl'
-                                options={options}
-                                value={selectedBoat}
-                                onChange={choice => {
-                                    setBoatError(false)
-                                    setSelectedBoat(choice!)
-                                }}
-                                styles={{
-                                    control: (provided, state) =>
-                                        ({
-                                            ...provided,
-                                            border: boatError ? '2px solid #f31260' : 'none',
-                                            padding: '0.5rem',
-                                            fontSize: '1rem',
-                                            borderRadius: '0.5rem',
-                                            color: 'white',
-                                            backgroundColor: theme == 'dark' ? '#27272a' : '#f4f4f5',
-                                            '&:hover': {
-                                                backgroundColor: theme == 'dark' ? '#3f3f46' : '#e4e4e7'
-                                            }
-                                        } as CSSObjectWithLabel),
-                                    option: (provided, state) =>
-                                        ({
-                                            ...provided,
-                                            color: theme == 'dark' ? 'white' : 'black',
-                                            backgroundColor: theme == 'dark' ? (state.isSelected ? '#27272a' : '#18181b') : state.isSelected ? '#f4f4f5' : 'white',
-                                            '&:hover': {
-                                                backgroundColor: theme == 'dark' ? '#3f3f46' : '#d4d4d8'
-                                            }
-                                        } as CSSObjectWithLabel),
-                                    menu: (provided, state) =>
-                                        ({
-                                            ...provided,
-                                            backgroundColor: theme == 'dark' ? '#18181b' : 'white',
-                                            border: theme == 'dark' ? '2px solid #3f3f46' : '2px solid #d4d4d8',
-                                            fontSize: '1rem'
-                                        } as CSSObjectWithLabel),
-                                    input: (provided, state) =>
-                                        ({
-                                            ...provided,
-                                            color: theme == 'dark' ? 'white' : 'black'
-                                        } as CSSObjectWithLabel),
-                                    singleValue: (provided, state) =>
-                                        ({
-                                            ...provided,
-                                            color: theme == 'dark' ? 'white' : 'black'
-                                        } as CSSObjectWithLabel)
-                                }}
-                            />
-                        </div>
-                        <div className='flex flex-col px-6 w-full'>
-                            <p className='text-2xl font-bold'>Sail Number</p>
-                            <Input
-                                type='text'
-                                id='SailNum'
-                                autoComplete='off'
-                                onChange={e => {
-                                    setSailNumError(false)
-                                    setSailNumber(e.target.value)
-                                }}
-                            />
-                        </div>
+                        <Input
+                            id='helm'
+                            type='text'
+                            value={helm}
+                            onChange={e => {
+                                setHelmError(false)
+                                CapitaliseInput(e)
+                            }}
+                            placeholder='J Bloggs'
+                            autoComplete='off'
+                        />
                     </div>
+                    <div className='flex flex-col px-6 w-full'>
+                        <p className='text-2xl font-bold'>Crew</p>
+                        <Input id='crew' type='text' value={crew} onChange={CapitaliseInput} autoComplete='off' />
+                    </div>
+                    <div className='flex flex-col px-6 w-full'>
+                        <p className='text-2xl font-bold'>Class</p>
+                        <Select
+                            id='Class'
+                            className=' w-56 h-full text-3xl'
+                            options={options}
+                            value={selectedBoat}
+                            onChange={choice => {
+                                setBoatError(false)
+                                setSelectedBoat(choice!)
+                            }}
+                            styles={{
+                                control: (provided, state) =>
+                                    ({
+                                        ...provided,
+                                        border: boatError ? '2px solid #f31260' : 'none',
+                                        padding: '0.5rem',
+                                        fontSize: '1rem',
+                                        borderRadius: '0.5rem',
+                                        color: 'white',
+                                        backgroundColor: theme == 'dark' ? '#27272a' : '#f4f4f5',
+                                        '&:hover': {
+                                            backgroundColor: theme == 'dark' ? '#3f3f46' : '#e4e4e7'
+                                        }
+                                    } as CSSObjectWithLabel),
+                                option: (provided, state) =>
+                                    ({
+                                        ...provided,
+                                        color: theme == 'dark' ? 'white' : 'black',
+                                        backgroundColor: theme == 'dark' ? (state.isSelected ? '#27272a' : '#18181b') : state.isSelected ? '#f4f4f5' : 'white',
+                                        '&:hover': {
+                                            backgroundColor: theme == 'dark' ? '#3f3f46' : '#d4d4d8'
+                                        }
+                                    } as CSSObjectWithLabel),
+                                menu: (provided, state) =>
+                                    ({
+                                        ...provided,
+                                        backgroundColor: theme == 'dark' ? '#18181b' : 'white',
+                                        border: theme == 'dark' ? '2px solid #3f3f46' : '2px solid #d4d4d8',
+                                        fontSize: '1rem'
+                                    } as CSSObjectWithLabel),
+                                input: (provided, state) =>
+                                    ({
+                                        ...provided,
+                                        color: theme == 'dark' ? 'white' : 'black'
+                                    } as CSSObjectWithLabel),
+                                singleValue: (provided, state) =>
+                                    ({
+                                        ...provided,
+                                        color: theme == 'dark' ? 'white' : 'black'
+                                    } as CSSObjectWithLabel)
+                            }}
+                        />
+                    </div>
+                    <div className='flex flex-col px-6 w-full'>
+                        <p className='text-2xl font-bold'>Sail Number</p>
+                        <Input
+                            type='text'
+                            id='SailNum'
+                            autoComplete='off'
+                            onChange={e => {
+                                setSailNumError(false)
+                                setSailNumber(e.target.value)
+                            }}
+                        />
+                    </div>
+                </div>
 
-                    <div className='text-4xl font-extrabold p-6'>Select Races</div>
-                    {races.map((race, index) => {
-                        if (race.fleets.some(fleet => fleet.startTime != 0)) {
-                            //a fleet in the race has started so don't allow entry
-                            return <></>
-                        }
+                <div className='text-4xl font-extrabold p-6'>Select Races</div>
+                {races.map((race, index) => {
+                    if (race.fleets.some(fleet => fleet.startTime != 0)) {
+                        //a fleet in the race has started so don't allow entry
+                        return <></>
+                    }
 
-                        return (
-                            <div className='mx-6 mb-10' key={race.id}>
-                                <div className='flex flex-row'>
-                                    <Switch
-                                        id={race.id + 'Switch'}
-                                        // onValueChange={value => {
-                                        //     updateRaceSelection(race, value)
-                                        // }}
-                                        color='success'
-                                    >
-                                        {race.series.name} {race.number}
-                                    </Switch>
-                                    <Tabs
-                                        aria-label='Options'
-                                        className='px-3'
-                                        // selectedKey={selectedFleets[index]}
-                                        color='primary'
-                                        // enable fleet selection if race is selected.
-                                        // isDisabled={selectedRaces.findIndex(r => r == race.id) == -1 ? true : false}
-                                        //insert the selected fleet into the selectedFleets array at the index of the race
-                                        // onSelectionChange={(key) => { console.log(key.toString()); let arr = selectedFleets.slice(); arr.splice(index, 1, key.toString()); setSelectedFleets(arr) }}
-                                    >
-                                        {/* show buttons for each fleet in a series */}
+                    return (
+                        <div className='mx-6 mb-10' key={race.id}>
+                            <div className='flex flex-row'>
+                                {race.series.name} {race.number}
+                                <Switch
+                                    id={race.id + 'Switch'}
+                                    onCheckedChange={value => {
+                                        updateRaceSelection(race, value)
+                                    }}
+                                    color='success'
+                                />
+                                <Tabs
+                                    aria-label='Options'
+                                    className='px-3'
+                                    defaultValue={selectedFleets[index]}
+                                    color='primary'
+                                    // enable fleet selection if race is selected.
+                                    // disabled={selectedRaces.findIndex(r => r == race.id) == -1 ? true : false}
+                                    //insert the selected fleet into the selectedFleets array at the index of the race
+                                    onValueChange={key => {
+                                        console.log(key.toString())
+                                        // remove fleets associated with this race
+                                        let arr = selectedFleets.filter(value => !race.fleets.flatMap(fleet => fleet.id).includes(value))
+                                        arr.push(key.toString())
+                                        setSelectedFleets(arr)
+                                    }}
+                                >
+                                    {/* show buttons for each fleet in a series */}
+                                    <TabsList>
                                         {race.fleets.map((fleet: FleetDataType, index) => {
-                                            return <div key={fleet.id} title={fleet.fleetSettings.name}></div>
+                                            return (
+                                                <TabsTrigger key={fleet.id + 'select'} value={fleet.id}>
+                                                    {fleet.fleetSettings.name}
+                                                </TabsTrigger>
+                                            )
                                         })}
-                                    </Tabs>
-
-                                    {race.Type == 'Pursuit' ? (
-                                        <div className='pl-6 py-auto text-2xl font-bold text-gray-700'>
-                                            Start Time: {String(Math.floor((selectedBoat.value.pursuitStartTime || 0) / 60)).padStart(2, '0')}:
-                                            {String((selectedBoat.value.pursuitStartTime || 0) % 60).padStart(2, '0')}
-                                        </div>
-                                    ) : (
-                                        <></>
-                                    )}
-                                </div>
+                                    </TabsList>
+                                </Tabs>
+                                {race.Type == 'Pursuit' ? (
+                                    <div className='pl-6 py-auto text-2xl font-bold text-gray-700'>
+                                        Start Time: {String(Math.floor((selectedBoat.value.pursuitStartTime || 0) / 60)).padStart(2, '0')}:
+                                        {String((selectedBoat.value.pursuitStartTime || 0) % 60).padStart(2, '0')}
+                                    </div>
+                                ) : (
+                                    <></>
+                                )}
                             </div>
-                        )
-                    })}
-                </DialogContent>
+                        </div>
+                    )
+                })}
                 <DialogFooter>
                     <Button color='success' onClick={Submit}>
                         Submit
                     </Button>
                 </DialogFooter>
             </DialogContent>
-        </>
+        </Dialog>
     )
 }

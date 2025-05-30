@@ -100,7 +100,6 @@ export function Result(resultId: string) {
         fallbackData: {
             id: '',
             fleetId: '',
-            raceId: '',
             boat: {
                 id: '',
                 name: '',
@@ -271,7 +270,7 @@ export function GetTodaysRaceByClubId(club: ClubDataType) {
     const { data, error, isValidating } = useSWR(club && club.id ? '/api/GetTodaysRaceByClubId' : null, url => advancedFetcher(url!, body))
 
     return {
-        todaysRaces: data?.races as NextRaceDataType[],
+        todaysRaces: data?.races as RaceDataType[],
         todaysRacesIsValidating: isValidating,
         todaysRacesIsError: error
     }

@@ -106,7 +106,6 @@ const providers: Provider[] = [
 
 export const providerMap = providers
     .filter(provider => {
-        console.log('provider', provider)
         if ((provider.options?.id || '') === 'autoLogin') {
             return false
         }

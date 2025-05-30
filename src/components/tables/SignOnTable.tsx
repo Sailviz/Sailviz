@@ -65,27 +65,19 @@ const SignOnTable = (props: any) => {
     }
 
     const Action = ({ ...props }: any) => {
-        const onEditClick = () => {
-            props.showEditModal(props.row.original)
-        }
         if (userHasPermission(props.user, AVAILABLE_PERMISSIONS.editResults)) {
             return (
-                <div className='relative flex items-center gap-2'>
-                    <span className='text-lg text-default-400 cursor-pointer active:opacity-50'>
-                        <EditIcon onClick={onEditClick} />
-                    </span>
-                </div>
+                <Link href={`/SignOn/editResult/${race.id}/${props.row.original.id}`}>
+                    <div className='relative flex items-center gap-2'>
+                        <span className='text-lg text-default-400 cursor-pointer active:opacity-50'>
+                            <EditIcon />
+                        </span>
+                    </div>
+                </Link>
             )
         } else {
             return <> </>
         }
-    }
-    const deleteResult = (id: any) => {
-        props.deleteResult(id)
-    }
-
-    const showEditModal = (id: any) => {
-        props.showEditModal(id)
     }
 
     const [sorting, setSorting] = useState<SortingState>([])
@@ -126,7 +118,7 @@ const SignOnTable = (props: any) => {
             columnHelper.display({
                 id: 'Edit',
                 header: 'Edit',
-                cell: props => <Action {...props} deleteResult={deleteResult} showEditModal={showEditModal} user={session!.user} />
+                cell: props => <Action {...props} user={session!.user} />
             })
         ],
         state: {
@@ -137,33 +129,7 @@ const SignOnTable = (props: any) => {
         getSortedRowModel: getSortedRowModel()
     })
     return (
-        <div className='w-full'>
-            <div className='flex items-center py-4'>
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant='outline' className='ml-auto'>
-                            Columns <ChevronDown />
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align='end'>
-                        {table
-                            .getAllColumns()
-                            .filter(column => column.getCanHide())
-                            .map(column => {
-                                return (
-                                    <DropdownMenuCheckboxItem
-                                        key={column.id}
-                                        className='capitalize'
-                                        checked={column.getIsVisible()}
-                                        onCheckedChange={value => column.toggleVisibility(!!value)}
-                                    >
-                                        {column.id}
-                                    </DropdownMenuCheckboxItem>
-                                )
-                            })}
-                    </DropdownMenuContent>
-                </DropdownMenu>
-            </div>
+        <div className='w-full max-h-[73vh] overflow-scroll'>
             <div className='rounded-md border'>
                 <Table>
                     <TableHeader>
