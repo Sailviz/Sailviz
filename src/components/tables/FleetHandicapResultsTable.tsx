@@ -230,7 +230,9 @@ const FleetHandicapResultsTable = (props: any) => {
     return (
         <div className='w-full'>
             <div className='flex items-center py-4'>
-                <h1>{data.length} boats entered</h1>
+                <h1>
+                    {fleet.fleetSettings.name}: {data.length} boats entered
+                </h1>
             </div>
             <div className='rounded-md border'>
                 <Table>
