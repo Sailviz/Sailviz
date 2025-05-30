@@ -540,6 +540,17 @@ export default function Page(props: PageProps) {
     //     }
     // }, [mode])
 
+    useEffect(() => {
+        //sort by last lap when finish mode with single fleet
+        //if there is more than one fleet, we don't sort by last lap as it would get confusing
+        if (raceMode.length == 1 && raceMode[0] == raceModeType.Finish) {
+            sortByLastLap(race.fleets.flatMap(fleet => fleet.results))
+        } else if (raceMode.length == 1 && raceMode[0] == raceModeType.Lap) {
+            //this doesn't work on first load as the results are not loaded yet
+            dynamicSort(race.fleets.flatMap(fleet => fleet.results))
+        }
+    }, [raceMode])
+
     //on page
     useEffect(() => {
         if (race == undefined) return
