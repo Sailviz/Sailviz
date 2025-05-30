@@ -65,7 +65,6 @@ export default function Page(props: PageProps) {
     const [raceMode, setRaceMode] = useState<raceModeType[]>([])
     const [activeResult, setActiveResult] = useState<ResultDataType>({
         id: '',
-        raceId: '',
         Helm: '',
         Crew: '',
         boat: {

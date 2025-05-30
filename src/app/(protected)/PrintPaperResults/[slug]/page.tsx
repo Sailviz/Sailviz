@@ -34,7 +34,6 @@ export default async function Page(props: PageProps) {
                 results: [
                     {
                         id: '',
-                        raceId: '',
                         Helm: '',
                         Crew: '',
                         boat: {

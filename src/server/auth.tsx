@@ -122,8 +122,6 @@ export const providerMap = providers
         }
     })
 
-console.log('providerMap', providerMap)
-
 export const { handlers, auth, signIn, signOut } = NextAuth({
     providers,
     pages: {
