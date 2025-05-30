@@ -104,14 +104,26 @@ const providers: Provider[] = [
     GitHub
 ]
 
-export const providerMap = providers.map(provider => {
-    if (typeof provider === 'function') {
-        const providerData = provider()
-        return { id: providerData.id, name: providerData.name }
-    } else {
-        return { id: provider.id, name: provider.name }
-    }
-})
+export const providerMap = providers
+    .filter(provider => {
+        console.log('provider', provider)
+        if ((provider.options?.id || '') === 'autoLogin') {
+            return false
+        }
+        return true
+    })
+    .map(provider => {
+        //remvove autoLogin provider from the list
+
+        if (typeof provider === 'function') {
+            const providerData = provider()
+            return { id: providerData.id, name: providerData.name }
+        } else {
+            return { id: provider.id, name: provider.name }
+        }
+    })
+
+console.log('providerMap', providerMap)
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
     providers,
