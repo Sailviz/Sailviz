@@ -11,14 +11,15 @@ enum raceStateType {
     running,
     stopped,
     reset,
-    calculate
+    calculate,
+    retire
 }
 
-enum modeType {
-    Retire,
+// these options are specific to each fleet
+enum raceModeType {
     Lap,
-    NotStarted,
-    Finish
+    Finish,
+    None
 }
 
 const Text = ({ text }: { text: string }) => {
@@ -77,17 +78,17 @@ const Sort = ({ result, max, moveUp, moveDown }: { result: ResultDataType; max: 
 }
 
 const Action = ({
-    raceMode,
+    raceState,
     resultId,
     lapBoat,
     showRetireModal
 }: {
-    raceMode: modeType
+    raceState: raceStateType
     resultId: string
     lapBoat: (id: string) => void
     showRetireModal: (id: string) => void
 }) => {
-    if (raceMode == modeType.Retire) {
+    if (raceState == raceStateType.retire) {
         return (
             <Button color='danger' variant='ghost' onClick={() => showRetireModal(resultId)}>
                 Retire
@@ -111,7 +112,7 @@ const PursuitTable = ({
 }: {
     fleetId: string
     raceState: raceStateType
-    raceMode: modeType
+    raceMode: raceModeType
     lapBoat: (id: string) => void
     showRetireModal: (id: string) => void
     moveUp: (id: string) => Promise<void>
@@ -170,7 +171,7 @@ const PursuitTable = ({
         }),
         columnHelper.accessor('id', {
             header: 'Action',
-            cell: props => <Action raceMode={raceMode} lapBoat={lapBoat} showRetireModal={showRetireModal} resultId={props.getValue()} />
+            cell: props => <Action raceState={raceState} lapBoat={lapBoat} showRetireModal={showRetireModal} resultId={props.getValue()} />
         })
     ]
     const loadingState = fleetIsValidating || data?.length === 0 ? 'loading' : 'idle'

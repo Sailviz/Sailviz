@@ -19,14 +19,15 @@ enum raceStateType {
     running,
     stopped,
     reset,
-    calculate
+    calculate,
+    retire
 }
 
-enum modeType {
-    Retire,
+// these options are specific to each fleet
+enum raceModeType {
     Lap,
-    NotStarted,
-    Finish
+    Finish,
+    None
 }
 
 //pursuit races don't work with fleets, why would you?
@@ -58,7 +59,9 @@ export default function Page(props: PageProps) {
     const { race, raceIsError, raceIsValidating, mutateRace } = Fetcher.Race(raceId, true)
 
     var [raceState, setRaceState] = useState<raceStateType>(raceStateType.reset)
-    const [mode, setMode] = useState(modeType.NotStarted)
+    const [lastRaceState, setLastRaceState] = useState<raceStateType>(raceStateType.reset)
+
+    const [mode, setMode] = useState(raceModeType.None)
 
     var [lastAction, setLastAction] = useState<{ type: string; resultId: string }>({ type: '', resultId: '' })
 
@@ -85,7 +88,7 @@ export default function Page(props: PageProps) {
             fleet.startTime = localTime
             await DB.updateFleetById(fleet)
         })
-        // flagModal.onOpen()
+        setFlagModal(true)
         //set flag status to false
         setFlagStatus([false, false])
         setNextFlagStatus([true, false])
@@ -181,7 +184,7 @@ export default function Page(props: PageProps) {
         console.log('GO!')
         setFlagStatus([false, false])
         setNextFlagStatus([false, false])
-        // flagModal.onClose()
+        setFlagModal(false)
 
         //sound horn
         fetch('https://' + club.settings.hornIP + '/hoot?startTime=300', {
@@ -198,7 +201,8 @@ export default function Page(props: PageProps) {
         sound!.currentTime = 0
         sound!.play()
 
-        setMode(modeType.Lap)
+        setRaceState(raceStateType.running)
+        setMode(raceModeType.Lap)
     }
 
     const stopRace = async () => {
@@ -264,7 +268,7 @@ export default function Page(props: PageProps) {
 
         //set mode back to lap
 
-        setMode(modeType.Lap)
+        setMode(raceModeType.Lap)
     }
 
     const moveUp = async (id: string) => {
@@ -490,6 +494,7 @@ export default function Page(props: PageProps) {
     useEffect(() => {
         const loadRace = async () => {
             //check state of race and set ui accordingly
+            console.log(race)
             if (race.fleets[0]!.startTime == 0) {
                 setRaceState(raceStateType.reset)
             } else if (race.fleets[0]!.startTime + club.settings.pursuitLength * 60 < Math.floor(new Date().getTime() / 1000)) {
@@ -497,7 +502,7 @@ export default function Page(props: PageProps) {
                 setTableView(true)
             } else {
                 setRaceState(raceStateType.running)
-                setMode(modeType.Lap)
+                setMode(raceModeType.Lap)
             }
 
             if (seriesName == '') {
@@ -508,7 +513,7 @@ export default function Page(props: PageProps) {
                 )
             }
         }
-        if (race != undefined && firstLoad) {
+        if (race != undefined && firstLoad && !raceIsValidating) {
             loadRace()
             dynamicSort(race)
             setFirstLoad(false)
@@ -605,12 +610,19 @@ export default function Page(props: PageProps) {
                         </Button>
                     </div>
                     <div className='w-1/5 p-2' id='RetireModeButton'>
-                        {mode == modeType.Retire ? (
-                            <Button onClick={() => setMode(modeType.Lap)} size='big' variant={'blue'}>
+                        {raceState == raceStateType.retire ? (
+                            <Button onClick={() => setRaceState(lastRaceState)} size='big' variant={'blue'}>
                                 Cancel Retirement
                             </Button>
                         ) : (
-                            <Button onClick={() => setMode(modeType.Retire)} size='big' variant={'blue'}>
+                            <Button
+                                onClick={() => {
+                                    setLastRaceState(raceState)
+                                    setRaceState(raceStateType.retire)
+                                }}
+                                size='big'
+                                variant={'blue'}
+                            >
                                 Retire a Boat
                             </Button>
                         )}
@@ -629,10 +641,9 @@ export default function Page(props: PageProps) {
                 ) : (
                     <div className='overflow-auto'>
                         <div className='flex flex-row justify-around flex-wrap' id='EntrantCards'>
-                            {/* {race.fleets
+                            {race.fleets
                                 .flatMap(fleets => fleets.results)
                                 .map((result: ResultDataType, index) => {
-                                    console.log(result)
                                     return (
                                         <BoatCard
                                             key={result.id}
@@ -640,12 +651,13 @@ export default function Page(props: PageProps) {
                                             fleet={race.fleets.find(fleet => fleet.id == result.fleetId)!}
                                             pursuit={true}
                                             mode={mode}
+                                            raceState={raceState}
                                             lapBoat={lapBoat}
                                             finishBoat={() => null}
                                             showRetireModal={showRetireModal}
                                         />
                                     )
-                                })} */}
+                                })}
                         </div>
                     </div>
                 )}
