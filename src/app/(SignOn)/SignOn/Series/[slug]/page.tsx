@@ -1,6 +1,6 @@
 'use client'
 import { useRouter } from 'next/navigation'
-import SeriesResultsTable from '@/components/tables/SeriesResultsTable'
+import SeriesResultsTable from '@/components/tables/FleetSeriesResultsTable'
 import * as Fetcher from '@/components/Fetchers'
 import { PageSkeleton } from '@/components/layout/PageSkeleton'
 import { title } from '@/components/layout/home/primitaves'
@@ -36,7 +36,14 @@ export default function Page(props: PageProps) {
                 </p>
             </div>
             <div className='h-5/6 p-6'>
-                <SeriesResultsTable seriesId={params.slug} />
+                {series?.fleetSettings.map((fleetSettings, index) => {
+                    return (
+                        <>
+                            <div>{fleetSettings.name}</div>
+                            <SeriesResultsTable seriesId={series.id} fleetSettingsId={fleetSettings?.id} />
+                        </>
+                    )
+                })}
             </div>
         </div>
     )

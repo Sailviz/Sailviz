@@ -4,7 +4,7 @@ import Layout from '@/components/layout/Layout'
 
 import { useRouter } from 'next/navigation'
 import * as DB from '@/components/apiMethods'
-import SeriesResultsTable from '@/components/tables/SeriesResultsTable'
+import SeriesResultsTable from '@/components/tables/FleetSeriesResultsTable'
 import { title, subtitle } from '@/components/layout/home/primitaves'
 
 type PageProps = { params: Promise<{ slug: string; club: string }> }
@@ -56,7 +56,14 @@ export default function Page(props: PageProps) {
             <div className='py-4'>
                 <div className={title({ color: 'blue' })}>{series.name}</div>
             </div>
-            <SeriesResultsTable seriesId={params.slug} />
+            {series?.fleetSettings.map((fleetSettings, index) => {
+                return (
+                    <>
+                        <div>{fleetSettings.name}</div>
+                        <SeriesResultsTable seriesId={series.id} fleetSettingsId={fleetSettings?.id} />
+                    </>
+                )
+            })}
         </div>
     )
 }

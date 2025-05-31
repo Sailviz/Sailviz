@@ -3,7 +3,7 @@ import React, { ChangeEvent, useState, useEffect } from 'react'
 import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, useReactTable, SortingState } from '@tanstack/react-table'
 import * as DB from '@/components/apiMethods'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
-
+import * as Fetcher from '@/components/Fetchers'
 //not a db type, only used here
 type SeriesResultsType = {
     Rank: number
@@ -54,8 +54,8 @@ function Sort({ column, table }: { column: any; table: any }) {
 
 const columnHelper = createColumnHelper<SeriesResultsType>()
 
-const SeriesResultsTable = ({ seriesId }: { seriesId: string }) => {
-    let [seriesData, setSeriesData] = useState<SeriesDataType>()
+const FleetSeriesResultsTable = ({ seriesId, fleetSettingsId }: { seriesId: string; fleetSettingsId: string }) => {
+    let [seriesData, setSeriesData] = useState<SeriesDataType | undefined>(undefined)
 
     useEffect(() => {
         function fetchSeries() {
@@ -75,36 +75,36 @@ const SeriesResultsTable = ({ seriesId }: { seriesId: string }) => {
             return
         }
         let tempresults: SeriesResultsType[] = []
+        console.log('seriesData', seriesData)
         //collate results from same person.
         seriesData.races.forEach(race => {
-            race.fleets
-                .flatMap(fleet => fleet.results)
-                .forEach(result => {
-                    //if new racer, add to tempresults
-                    let index = tempresults.findIndex(function (t) {
-                        return t.Helm == result.Helm && t.Boat?.id == result.boat?.id
-                    })
-                    if (index == -1) {
-                        index = tempresults.push({
-                            //sets index to index of newly pushed element
-                            Rank: 0,
-                            Helm: result.Helm,
-                            Crew: result.Crew,
-                            Boat: result.boat,
-                            SailNumber: result.SailNumber,
-                            Total: 0,
-                            Net: 0,
-                            racePositions: Array(seriesData.races.length).fill({ position: 0, discarded: false })
-                        })
-                        index -= 1
-                    }
-                    //add result to tempresults
-                    if (tempresults[index]) {
-                        tempresults[index]!.racePositions.splice(race.number - 1, 1, { race: race.number, position: result.HandicapPosition, discarded: false })
-                    } else {
-                        console.log('something went wrong')
-                    }
+            let fleet = race.fleets.find(fleet => fleet.fleetSettings.id == fleetSettingsId)!.results
+            fleet.forEach(result => {
+                //if new racer, add to tempresults
+                let index = tempresults.findIndex(function (t) {
+                    return t.Helm == result.Helm && t.Boat?.id == result.boat?.id
                 })
+                if (index == -1) {
+                    index = tempresults.push({
+                        //sets index to index of newly pushed element
+                        Rank: 0,
+                        Helm: result.Helm,
+                        Crew: result.Crew,
+                        Boat: result.boat,
+                        SailNumber: result.SailNumber,
+                        Total: 0,
+                        Net: 0,
+                        racePositions: Array(seriesData.races.length).fill({ position: 0, discarded: false })
+                    })
+                    index -= 1
+                }
+                //add result to tempresults
+                if (tempresults[index]) {
+                    tempresults[index]!.racePositions.splice(race.number - 1, 1, { race: race.number, position: result.HandicapPosition, discarded: false })
+                } else {
+                    console.log('something went wrong')
+                }
+            })
         })
 
         //give duty team their average score if they have raced in the series
@@ -341,4 +341,4 @@ const SeriesResultsTable = ({ seriesId }: { seriesId: string }) => {
     )
 }
 
-export default SeriesResultsTable
+export default FleetSeriesResultsTable

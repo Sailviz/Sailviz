@@ -1,5 +1,5 @@
 'use client'
-import SeriesResultsTable from '@/components/tables/SeriesResultsTable'
+import SeriesResultsTable from '@/components/tables/FleetSeriesResultsTable'
 import SeriesRaceTable from '@/components/tables/SeriesRaceTable'
 import FleetTable from '@/components/tables/FleetTable'
 import * as Fetcher from '@/components/Fetchers'
@@ -21,6 +21,7 @@ export default function Page(props: PageProps) {
     const [editFleet, setEditFleet] = useState(false)
 
     const { startSequence, startSequenceIsError, startSequenceIsValidating, mutateStartSequence } = Fetcher.GetStartSequence(seriesId)
+    const { series, seriesIsError, seriesIsValidating, mutateSeries } = Fetcher.Series(seriesId)
 
     // const createRace = async () => {
     //     var race = await DB.createRace(club.id, series.id)
@@ -85,7 +86,14 @@ export default function Page(props: PageProps) {
                     <> </>
                 )}
                 <div className='mb-6'>
-                    <SeriesResultsTable seriesId={seriesId} />
+                    {series?.fleetSettings.map((fleetSettings, index) => {
+                        return (
+                            <>
+                                <div>{fleetSettings.name}</div>
+                                <SeriesResultsTable seriesId={seriesId} fleetSettingsId={fleetSettings?.id} />
+                            </>
+                        )
+                    })}
                 </div>
             </div>
         </>

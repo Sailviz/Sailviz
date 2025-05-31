@@ -2,7 +2,7 @@
 import React, { act, useEffect, useState } from 'react'
 import Script from 'next/script'
 import * as DB from '@/components/apiMethods'
-import SeriesResultsTable from '@/components/tables/SeriesResultsTable'
+import SeriesResultsTable from '@/components/tables/FleetSeriesResultsTable'
 import RaceTimer from '@/components/HRaceTimer'
 import LiveFleetResultsTable from '@/components/tables/LiveFleetResultsTable'
 import { animateScroll, Events } from 'react-scroll'
@@ -337,7 +337,7 @@ export default async function Page(props: PageProps) {
                         return (
                             <div className='p-4'>
                                 <div className='text-xl font-extrabold px-6 pt-2'>{activeSeriesData.name}</div>
-                                <SeriesResultsTable seriesId={activeSeriesData.id} />
+                                <SeriesResultsTable seriesId={activeSeriesData.id} fleetSettingsId={''} />
                             </div>
                         )
                     case pageStateType.race:

@@ -17,7 +17,8 @@ async function findSeries(seriesId: any) {
                                 include: {
                                     boat: true
                                 }
-                            }
+                            },
+                            fleetSettings: true
                         }
                     }
                 }
