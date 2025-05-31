@@ -128,9 +128,12 @@ const Type = ({ ...props }: any) => {
 const Action = ({ ...props }: any) => {
     const Router = useRouter()
 
-    const onDeleteClick = () => {
+    const onDeleteClick = async () => {
         if (confirm('are you sure you want to do this?')) {
-            props.removeRace(props.id)
+            let result = await DB.deleteRaceById(props.row.original.id)
+            if (!result) {
+                return
+            } // failed to delete race
         }
     }
     return (

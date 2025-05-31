@@ -77,7 +77,13 @@ const StartSequenceManager = ({ initialSequence, seriesId }: { initialSequence: 
                 <div key={index} className='flex items-center gap-2 mb-2'>
                     <input type='number' value={step.time} onChange={e => updateStep(index, 'time', parseInt(e.target.value))} className='border p-1 w-16' />
                     <input type='text' value={step.name} onChange={e => updateStep(index, 'name', e.target.value)} className='border p-1 flex-grow' />
-                    <input type='number' value={step.hoot} onBlur={e => updateStep(index, 'hoot', parseInt(e.target.value))} className='border p-1 w-16' placeholder='Hoot' />
+                    <input
+                        type='number'
+                        value={step.hoot}
+                        onChange={e => updateStep(index, 'hoot', parseInt(e.target.value))}
+                        className='border p-1 w-16'
+                        placeholder='Hoot'
+                    />
                     <select value={step.fleetStart} onChange={e => updateStep(index, 'fleetStart', e.target.value)} className='border p-1'>
                         <option value=''>Select Fleet</option>
                         {series?.fleetSettings?.map((fleet: any) => (
