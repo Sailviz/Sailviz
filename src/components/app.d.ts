@@ -116,6 +116,16 @@ type ClubDataType = {
     settings: ClubSettingsType
     series: SeriesDataType[]
     boats: BoatDataType[]
+    stripe: Stripe
+}
+
+type Stripe = {
+    customerId: string
+    subscriptionId: string
+    productId: string
+    planName: string
+    subscriptionStatus: string
+    updatedAt: string
 }
 
 type UserDataType = {

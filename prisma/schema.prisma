@@ -58,16 +58,29 @@ model Boat {
 }
 
 model Club {
-  id          String    @id @unique @default(uuid())
-  name        String    @unique
-  settings    Json
-  displayName String?
-  boats       Boat[]
-  Buoy        Buoy[]
-  roles       Role[]
-  series      Series[]
-  Trackers    Tracker[]
-  users       User[]
+  id               String    @id @unique @default(uuid())
+  name             String    @unique
+  settings         Json
+  displayName      String?
+  boats            Boat[]
+  Buoy             Buoy[]
+  roles            Role[]
+  series           Series[]
+  Trackers         Tracker[]
+  users            User[]
+  stripe           Stripe?   @relation(fields: [stripeCustomerId], references: [customerId])
+  stripeCustomerId String?
+}
+
+model Stripe {
+  customerId String @id @unique
+
+  subscriptionId     String?
+  productId          String?
+  planName           String?
+  subscriptionStatus String?
+  updatedAt          String?
+  Club               Club[]
 }
 
 model Series {
