@@ -43,6 +43,11 @@ export default function FleetSelectDialog({
                             </div>
                         )
                     })}
+                    <div key={'all'} className='flex mb-2 justify-center'>
+                        <Button onClick={() => fleets.forEach(fleet => onSubmit(fleet.id, mode))} size='lg' color='primary'>
+                            All Fleets
+                        </Button>
+                    </div>
                 </div>
                 <DialogFooter>
                     <Button color='danger' onClick={onClose}>
