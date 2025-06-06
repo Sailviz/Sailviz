@@ -1,6 +1,5 @@
 'use client'
-import { useEffect, useState } from 'react'
-import Layout from '@/components/layout/Layout'
+import { use, useEffect, useState } from 'react'
 
 import { useRouter } from 'next/navigation'
 import * as DB from '@/components/apiMethods'
@@ -14,12 +13,12 @@ enum pageModes {
 
 type PageProps = { params: Promise<{ club: string }> }
 
-export default async function Page(props: PageProps) {
+export default function Page(props: PageProps) {
     const Router = useRouter()
 
-    const params = await props.params
+    const { club: club } = use(props.params)
 
-    var [clubId, setClubId] = useState<string>('invalid')
+    var [clubId, setClubId] = useState<string>(club)
     var [races, setRaces] = useState<RaceDataType[]>([
         {
             id: '',
@@ -68,7 +67,7 @@ export default async function Page(props: PageProps) {
     }
 
     useEffect(() => {
-        let clubName = params.club
+        let clubName = club
         if (clubName) {
             DB.getClubByName(clubName.toString()).then(data => {
                 if (data) {
@@ -179,7 +178,7 @@ export default async function Page(props: PageProps) {
                             <div>
                                 <p className='text-6xl font-extrabold text-gray-700 p-6'>
                                     {' '}
-                                    {params.club} <br /> No Races Currently Active
+                                    {club} <br /> No Races Currently Active
                                 </p>
                             </div>
                         )
