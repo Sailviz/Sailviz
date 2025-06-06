@@ -3,6 +3,7 @@ import { ChangeEvent, useEffect, useState } from 'react'
 import { getSession, useSession } from 'next-auth/react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select'
 import * as Fetcher from '@/components/Fetchers'
+import * as DB from '@/components/apiMethods'
 export function ToCountSelect({ seriesId }: { seriesId: string }) {
     const { series, seriesIsError, seriesIsValidating, mutateSeries } = Fetcher.Series(seriesId)
 
@@ -14,6 +15,7 @@ export function ToCountSelect({ seriesId }: { seriesId: string }) {
         let newSeriesData: SeriesDataType = window.structuredClone(series)
         console.log(newSeriesData)
         newSeriesData.settings['numberToCount'] = value
+        await DB.updateSeries(newSeriesData)
         mutateSeries()
     }
 
@@ -29,7 +31,7 @@ export function ToCountSelect({ seriesId }: { seriesId: string }) {
                     console.log('Selected value:', value)
                     saveSeriesToCount(parseInt(value))
                 }}
-                defaultValue={series?.settings?.numberToCount?.toString() || '0'}
+                value={series?.settings?.numberToCount?.toString() || '0'}
             >
                 <SelectTrigger className='w-full'>
                     <SelectValue placeholder='Select a fleet' />

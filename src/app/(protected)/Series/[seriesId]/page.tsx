@@ -70,7 +70,6 @@ export default function Page(props: PageProps) {
                     <SeriesRaceTable id={seriesId} />
                 </div>
                 {userHasPermission(session!.user, AVAILABLE_PERMISSIONS.editRaces) ? <AddRaceButton seriesId={seriesId} /> : <> </>}
-                <StartSequenceManager initialSequence={startSequence} seriesId={seriesId} key={startSequence?.length} />
 
                 <p className='text-6xl font-extrabold p-6'>Fleets</p>
                 <div className='p-6'>
@@ -78,6 +77,7 @@ export default function Page(props: PageProps) {
                 </div>
                 {userHasPermission(session!.user, AVAILABLE_PERMISSIONS.editFleets) ? (
                     <>
+                        <StartSequenceManager initialSequence={startSequence} seriesId={seriesId} key={startSequence?.length} />
                         <Button onClick={createFleetSettings}>Add Fleet</Button>
 
                         <ToCountSelect seriesId={seriesId} />
