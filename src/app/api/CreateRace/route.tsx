@@ -79,13 +79,18 @@ export async function POST(request: NextRequest) {
     var clubdata = await prisma.club.findUnique({
         where: {
             id: clubId
+        },
+        include: {
+            stripe: true,
+            series: true,
+            boats: true
         }
     })
     if (!clubdata) {
         return NextResponse.json({ error: true, message: 'Could not find club' })
     }
-    let club = { ...clubdata } as ClubDataType
-    let duties = club.settings!.duties.reduce((obj, key, index) => {
+    let clubSettings = clubdata.settings as ClubSettingsType
+    let duties = clubSettings!.duties.reduce((obj, key, index) => {
         obj[key] = ''
         return obj
     }, {} as { [key: string]: any })
