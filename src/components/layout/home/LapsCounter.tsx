@@ -30,7 +30,7 @@ export default function LapsCounter() {
         }
     }
 
-    var { data, error, isValidating } = useSWR('/api/GetGlobalLaps', Fetcher.fetcher, { refreshInterval: 10000 })
+    var { data, error, isValidating } = useSWR('/api/GetGlobalLaps', Fetcher.fetcher)
     if (data == undefined) {
         data = 0
     }

@@ -35,9 +35,13 @@ const providers: Provider[] = [
             const result = await loginSchema.parseAsync(credentials)
 
             const { username, password } = result
+            console.log('Login credentials:', result)
 
             // check to see if user exists
             const user = await prisma.user.findUnique({
+                omit: {
+                    password: false
+                },
                 where: {
                     username: username
                 },
@@ -45,6 +49,11 @@ const providers: Provider[] = [
                     roles: true
                 }
             })
+            console.log('User found:', user)
+            // if user does not exist
+            if (!user) {
+                throw new Error('No user found')
+            }
 
             const club = await prisma.club.findUnique({
                 where: {
@@ -54,6 +63,7 @@ const providers: Provider[] = [
 
             // if no user was found
             if (!user || !user?.password) {
+                console.error('No user found or password is missing')
                 throw new Error('No user found')
             }
 

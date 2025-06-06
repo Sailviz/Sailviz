@@ -27,7 +27,13 @@ export function RegisterForm() {
                         'use server'
                         if (provider.id === 'credentials') {
                             //register a new user
-                            Register(formData)
+                            if (await Register(formData)) {
+                                await signIn(provider.id, {
+                                    redirectTo: '/Dashboard',
+                                    password: formData.get('password') as string,
+                                    username: formData.get('username') as string
+                                })
+                            }
                         } else {
                             await signIn(provider.id, { callbackUrl: '/Dashboard' })
                         }
@@ -51,17 +57,8 @@ export function RegisterForm() {
                                 <Button type='submit' className='w-full'>
                                     <span>Create Account</span>
                                 </Button>
-                                <div className='relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border'>
-                                    <span className='relative z-10 bg-background px-2 text-muted-foreground'>Or</span>
-                                </div>
                             </div>
                         </>
-                    )}
-                    {provider.id !== 'credentials' && (
-                        <Button type='submit' className='w-full' variant='outline'>
-                            <DynamicIcon name={provider.name.toLowerCase() as IconName} />
-                            <span>Continue with {provider.name}</span>
-                        </Button>
                     )}
                 </form>
             ))}

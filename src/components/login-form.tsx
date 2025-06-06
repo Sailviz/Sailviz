@@ -2,6 +2,7 @@ import { signIn, providerMap } from '@/server/auth'
 import { DynamicIcon, IconName } from 'lucide-react/dynamic'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { redirect } from 'next/navigation'
 
 export function LoginForm({ justCredentials }: { justCredentials: boolean }) {
     return (
@@ -14,7 +15,7 @@ export function LoginForm({ justCredentials }: { justCredentials: boolean }) {
                     <h1 className='text-xl font-bold'>Welcome to SailViz.</h1>
                     <div className='text-center text-sm'>
                         Don&apos;t have an account?{' '}
-                        <a href='/Signup' className='underline underline-offset-4'>
+                        <a href='/Register' className='underline underline-offset-4'>
                             Sign up
                         </a>
                     </div>
@@ -26,11 +27,19 @@ export function LoginForm({ justCredentials }: { justCredentials: boolean }) {
                     action={async formData => {
                         'use server'
                         if (provider.id === 'credentials') {
-                            await signIn(provider.id, {
-                                redirectTo: '/Dashboard',
-                                password: formData.get('password'),
-                                username: formData.get('username')
-                            })
+                            try {
+                                await signIn(provider.id, {
+                                    redirectTo: '/Dashboard',
+                                    password: formData.get('password'),
+                                    username: formData.get('username')
+                                })
+                            } catch (error) {
+                                if (error == 'NEXT_REDIRECT') {
+                                    redirect('/Dashboard')
+                                } else {
+                                    console.error('Login failed:', error)
+                                }
+                            }
                         } else {
                             await signIn(provider.id, { callbackUrl: '/Dashboard' })
                         }
