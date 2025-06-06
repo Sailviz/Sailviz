@@ -4,7 +4,7 @@ import { auth } from '@/server/auth'
 import prisma from '../prisma'
 import { server } from '@/components/URL'
 
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'key not available', {
     apiVersion: '2025-05-28.basil'
 })
 
