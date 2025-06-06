@@ -3,7 +3,6 @@ import React, { ChangeEvent, useEffect, useState } from 'react'
 import dayjs from 'dayjs'
 import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, RowSelection, SortingState, useReactTable } from '@tanstack/react-table'
 import * as DB from '@/components/apiMethods'
-import Select, { CSSObjectWithLabel } from 'react-select'
 import { VerticalDotsIcon } from '@/components/icons/vertical-dots-icon'
 import { EyeIcon } from '@/components/icons/eye-icon'
 import { EditIcon } from '@/components/icons/edit-icon'
@@ -19,6 +18,7 @@ import { Button } from '../ui/button'
 import { Input } from '../ui/input'
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from '../ui/dropdown-menu'
 import { ChevronDown } from 'lucide-react'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select'
 
 const raceOptions = [
     { value: 'Pursuit', label: 'Pursuit' },
@@ -77,50 +77,23 @@ const Type = ({ ...props }: any) => {
     return (
         <>
             <Select
-                defaultValue={{ value: value, label: value }}
-                key={value}
-                onChange={e => {
-                    setValue(e?.value)
-                    onBlur(e?.value)
+                value={value}
+                onValueChange={(value: string) => {
+                    setValue(value)
+                    onBlur(value)
                 }}
-                className='w-full'
-                options={raceOptions}
-                styles={{
-                    control: (provided, state) =>
-                        ({
-                            ...provided,
-                            border: 'none',
-                            padding: '0.5rem',
-                            fontSize: '1rem',
-                            borderRadius: '0.5rem',
-                            color: 'white',
-                            backgroundColor: theme == 'dark' ? '#27272a' : '#f4f4f5',
-                            '&:hover': {
-                                backgroundColor: theme == 'dark' ? '#3f3f46' : '#e4e4e7'
-                            }
-                        } as CSSObjectWithLabel),
-                    option: (provided, state) =>
-                        ({
-                            ...provided,
-                            color: theme == 'dark' ? 'white' : 'black',
-                            backgroundColor: theme == 'dark' ? (state.isSelected ? '#27272a' : '#18181b') : state.isSelected ? '#f4f4f5' : 'white',
-                            '&:hover': {
-                                backgroundColor: theme == 'dark' ? '#3f3f46' : '#d4d4d8'
-                            }
-                        } as CSSObjectWithLabel),
-                    menu: (provided, state) =>
-                        ({
-                            ...provided,
-                            backgroundColor: theme == 'dark' ? '#18181b' : 'white',
-                            border: theme == 'dark' ? '2px solid #3f3f46' : '2px solid #d4d4d8'
-                        } as CSSObjectWithLabel),
-                    singleValue: (provided, state) =>
-                        ({
-                            ...provided,
-                            color: theme == 'dark' ? 'white' : 'black'
-                        } as CSSObjectWithLabel)
-                }}
-            />
+            >
+                <SelectTrigger className='w-full'>
+                    <SelectValue placeholder='Select Type' />
+                </SelectTrigger>
+                <SelectContent>
+                    {raceOptions.map(option => (
+                        <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                        </SelectItem>
+                    ))}
+                </SelectContent>
+            </Select>
         </>
     )
 }
