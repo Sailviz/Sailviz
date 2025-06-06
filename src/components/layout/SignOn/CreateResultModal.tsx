@@ -56,10 +56,8 @@ export default function CreateResultModal({
         if (value) {
             console.log(race)
             setSelectedRaces([...new Set([...selectedRaces, race.id])])
-            let arr = selectedFleets.slice()
-            //add the first fleet in
-            arr.splice(selectedRaces.length, 1, race.fleets[0]!.id)
-            setSelectedFleets(arr)
+            //add the first fleet of race to pre-select it
+            setSelectedFleets([...new Set([...selectedFleets, race.fleets[0]!.id])])
         } else {
             setSelectedRaces(selectedRaces.filter(value => value != race.id))
             //remove all fleets from the selected fleets that are in this race
@@ -220,10 +218,8 @@ export default function CreateResultModal({
                                 <Tabs
                                     aria-label='Options'
                                     className='px-3'
-                                    defaultValue={selectedFleets[index]}
+                                    value={selectedFleets.find(fleetId => race.fleets.flatMap(fleet => fleet.id).includes(fleetId))}
                                     color='primary'
-                                    // enable fleet selection if race is selected.
-                                    // disabled={selectedRaces.findIndex(r => r == race.id) == -1 ? true : false}
                                     //insert the selected fleet into the selectedFleets array at the index of the race
                                     onValueChange={key => {
                                         console.log(key.toString())
@@ -237,7 +233,12 @@ export default function CreateResultModal({
                                     <TabsList>
                                         {race.fleets.map((fleet: FleetDataType, index) => {
                                             return (
-                                                <TabsTrigger key={fleet.id + 'select'} value={fleet.id}>
+                                                <TabsTrigger
+                                                    key={fleet.id + 'select'}
+                                                    value={fleet.id}
+                                                    disabled={selectedRaces.findIndex(r => r == race.id) == -1 ? true : false}
+                                                    className='data-[state=active]:bg-green-500'
+                                                >
                                                     {fleet.fleetSettings.name}
                                                 </TabsTrigger>
                                             )
