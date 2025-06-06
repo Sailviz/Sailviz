@@ -3,11 +3,17 @@ import { Button } from './ui/button'
 import * as DB from './apiMethods'
 import * as Fetcher from './Fetchers'
 import { Select } from './ui/select'
+import { Input } from './ui/input'
+import { Inder } from 'next/font/google'
 const StartSequenceManager = ({ initialSequence, seriesId }: { initialSequence: StartSequenceStep[]; seriesId: string }) => {
     const { series, seriesIsError, seriesIsValidating } = Fetcher.Series(seriesId)
     const [sequence, setSequence] = useState<StartSequenceStep[]>(initialSequence)
 
     const updateStep = (index: number, key: keyof StartSequenceStep, value: string | number | object) => {
+        setSequence(prev => prev.map((step, i) => (i === index ? { ...step, [key]: value } : step)))
+    }
+
+    const updateStepOrder = (index: number, key: keyof StartSequenceStep, value: string | number | object) => {
         setSequence(prev => prev.map((step, i) => (i === index ? { ...step, [key]: value } : step)))
         //ensure sequence order is ordered by time
         setSequence(prev => {
@@ -136,7 +142,13 @@ const StartSequenceManager = ({ initialSequence, seriesId }: { initialSequence: 
 
             {sequence?.map((step, index) => (
                 <div key={index} className='flex items-center gap-2 mb-2'>
-                    <input type='number' value={step.time} onChange={e => updateStep(index, 'time', parseInt(e.target.value))} className='border p-1 w-16' />
+                    <Input
+                        type='number'
+                        value={step.time}
+                        onChange={e => updateStep(index, 'time', parseInt(e.target.value))}
+                        onBlur={e => updateStepOrder(index, 'time', parseInt(e.target.value))}
+                        className='border p-1 w-16'
+                    />
                     <input type='text' value={step.name} onChange={e => updateStep(index, 'name', e.target.value)} className='border p-1 flex-grow' />
                     <input
                         type='number'
