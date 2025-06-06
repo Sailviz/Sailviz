@@ -540,14 +540,19 @@ export default function Page(props: PageProps) {
         }
     }
 
-    const setFleetMode = (fleetId: string, mode: raceModeType) => {
-        let index = race.fleets.findIndex(fleet => fleet.id == fleetId)
-        if (index == -1) {
-            console.error('Fleet not found: ' + fleetId)
-            return
-        }
-        setRaceMode([...raceMode.slice(0, index), mode, ...raceMode.slice(index + 1)])
-        setFleetSelectModal(false)
+    const setFleetMode = (fleetId: string[], mode: raceModeType) => {
+        console.log(fleetId)
+        var tempRaceMode = [...raceMode]
+        fleetId.forEach(id => {
+            let index = race.fleets.findIndex(fleet => fleet.id == id)
+            if (index == -1) {
+                console.error('Fleet not found: ' + id)
+                return
+            }
+            setFleetSelectModal(false)
+            tempRaceMode = [...tempRaceMode.slice(0, index), mode, ...tempRaceMode.slice(index + 1)]
+        })
+        setRaceMode(tempRaceMode)
     }
 
     const controller = new AbortController()

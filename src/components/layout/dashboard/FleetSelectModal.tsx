@@ -20,7 +20,7 @@ export default function FleetSelectDialog({
     isOpen: boolean
     mode: raceModeType
     fleets: FleetDataType[]
-    onSubmit: (fleetId: string, mode: raceModeType) => void
+    onSubmit: (fleetId: string[], mode: raceModeType) => void
     onClose: () => void
 }) {
     return (
@@ -37,14 +37,23 @@ export default function FleetSelectDialog({
                     {fleets.map(fleet => {
                         return (
                             <div key={fleet.id} className='flex mb-2 justify-center'>
-                                <Button onClick={() => onSubmit(fleet.id, mode)} size='lg' color='primary'>
+                                <Button onClick={() => onSubmit([fleet.id], mode)} size='lg' color='primary'>
                                     {fleet.fleetSettings.name}
                                 </Button>
                             </div>
                         )
                     })}
                     <div key={'all'} className='flex mb-2 justify-center'>
-                        <Button onClick={() => fleets.forEach(fleet => onSubmit(fleet.id, mode))} size='lg' color='primary'>
+                        <Button
+                            onClick={() =>
+                                onSubmit(
+                                    fleets.flatMap(fleet => fleet.id),
+                                    mode
+                                )
+                            }
+                            size='lg'
+                            color='primary'
+                        >
                             All Fleets
                         </Button>
                     </div>
