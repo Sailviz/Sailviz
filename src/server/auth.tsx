@@ -58,6 +58,9 @@ const providers: Provider[] = [
             const club = await prisma.club.findUnique({
                 where: {
                     id: user?.clubId
+                },
+                include: {
+                    stripe: true
                 }
             })
 
@@ -107,6 +110,9 @@ const providers: Provider[] = [
             const club = await prisma.club.findUnique({
                 where: {
                     id: user?.clubId
+                },
+                include: {
+                    stripe: true
                 }
             })
             return { user: user, club: club }

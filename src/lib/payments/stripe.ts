@@ -2,6 +2,7 @@ import Stripe from 'stripe'
 import { redirect } from 'next/navigation'
 import { auth } from '@/server/auth'
 import prisma from '../prisma'
+import { server } from '@/components/URL'
 
 export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
     apiVersion: '2025-05-28.basil'
@@ -14,6 +15,8 @@ export async function createCheckoutSession({ club, priceId }: { club: ClubDataT
         redirect(`/sign-up?redirect=checkout&priceId=${priceId}`)
     }
 
+    console.log(club, priceId)
+
     const stripeSession = await stripe.checkout.sessions.create({
         payment_method_types: ['card'],
         line_items: [
@@ -23,14 +26,11 @@ export async function createCheckoutSession({ club, priceId }: { club: ClubDataT
             }
         ],
         mode: 'subscription',
-        success_url: `${process.env.BASE_URL}/api/stripe/checkout?session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: `${process.env.BASE_URL}/pricing`,
+        success_url: `${server}/api/stripe/checkout?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${server}/Dashboard/Subscription`,
         customer: club.stripe.customerId || undefined,
-        client_reference_id: sessionStorage.user.id.toString(),
-        allow_promotion_codes: true,
-        subscription_data: {
-            trial_period_days: 14
-        }
+        client_reference_id: session.user.id,
+        allow_promotion_codes: true
     })
 
     redirect(stripeSession.url!)
@@ -38,7 +38,7 @@ export async function createCheckoutSession({ club, priceId }: { club: ClubDataT
 
 export async function createCustomerPortalSession(club: ClubDataType) {
     if (!club.stripe.customerId || !club.stripe.productId) {
-        redirect('/pricing')
+        redirect('/Dashboard/Subscription')
     }
 
     let configuration: Stripe.BillingPortal.Configuration
@@ -93,7 +93,7 @@ export async function createCustomerPortalSession(club: ClubDataType) {
 
     return stripe.billingPortal.sessions.create({
         customer: club.stripe.customerId,
-        return_url: `${process.env.BASE_URL}/dashboard`,
+        return_url: `${server}/Dashboard/Subscription`,
         configuration: configuration.id
     })
 }

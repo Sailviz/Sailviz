@@ -1,44 +1,46 @@
 import { checkoutAction } from '@/lib/payments/actions'
 import { Check } from 'lucide-react'
-import { getStripePrices, getStripeProducts } from '@/lib/payments/stripe'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
+import { useState } from 'react'
+import { Select } from '@/components/ui/select'
+import { Switch } from '@/components/ui/switch'
 
-// Prices are fresh for one hour max
-export const revalidate = 3600
-
-export default async function PricingPage() {
-    const [prices, products] = await Promise.all([getStripePrices(), getStripeProducts()])
-    const basePlan = products.find(product => product.name === 'SailViz')
-    const proPlan = products.find(product => product.name === 'SailViz Pro')
-
-    const basePrice = prices.find(price => price.productId === basePlan?.id)
-    const proPrice = prices.find(price => price.productId === proPlan?.id)
-
+export default function PricingPage() {
+    const [monthly, setMonthly] = useState(true)
     return (
-        <main className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12'>
+        <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12'>
+            <div className='flex flex-row items-center justify-center mb-8'>
+                <div className='text-lg font-bold'>Annually</div>
+                <Switch
+                    checked={monthly}
+                    onCheckedChange={checked => {
+                        setMonthly(checked)
+                    }}
+                    className='m-4'
+                >
+                    <span className='text-sm text-gray-600'>Monthly</span>
+                    <span className='ml-2 text-sm text-gray-600'>Yearly</span>
+                </Switch>
+                <div className='text-lg font-bold'>Monthly</div>
+            </div>
             <div className='grid md:grid-cols-2 gap-8 max-w-xl mx-auto'>
                 <PricingCard
-                    name={basePlan?.name || 'Base'}
-                    price={basePrice?.unitAmount || 800}
-                    interval={basePrice?.interval || 'month'}
+                    name={'SailViz'}
+                    price={monthly ? 30 : 330}
+                    interval={monthly ? 'month' : 'year'}
                     features={['Unlimited Races', 'Unlimited Racers', 'Email Support']}
-                    priceId={basePrice?.id}
+                    priceId={monthly ? 'price_1RWlKP02rrqm9SsNwEEvRUMu' : 'price_1RX3nv02rrqm9SsN8D8hJPdg'}
                 />
                 <PricingCard
-                    name={proPlan?.name || 'Pro'}
-                    price={proPrice?.unitAmount || 1200}
-                    interval={proPrice?.interval || 'month'}
+                    name={'SailViz Pro'}
+                    price={monthly ? 50 : 550}
+                    interval={monthly ? 'month' : 'year'}
                     features={['Everything in Base, and:', 'Multiple Fleets', 'Live Results']}
-                    priceId={proPrice?.id}
+                    priceId={monthly ? 'price_1RX5Cb02rrqm9SsNxUCifUrq' : 'price_1RX5D602rrqm9SsNadC6XPNn'}
                 />
             </div>
-            <div className='mt-12 text-center'>
-                <Link href='/Register'>
-                    <Button size={'lg'}> Start Now</Button>
-                </Link>
-            </div>
-        </main>
+        </div>
     )
 }
 
@@ -47,7 +49,7 @@ function PricingCard({ name, price, interval, features, priceId }: { name: strin
         <div className='pt-6'>
             <h2 className='text-2xl font-medium text-gray-900 mb-2'>{name}</h2>
             <p className='text-4xl font-medium text-gray-900 mb-6'>
-                ${price / 100} <span className='text-xl font-normal text-gray-600'>per club / {interval}</span>
+                £{price} <span className='text-xl font-normal text-gray-600'>per club / {interval}</span>
             </p>
             <ul className='space-y-4 mb-8'>
                 {features.map((feature, index) => (
@@ -57,6 +59,10 @@ function PricingCard({ name, price, interval, features, priceId }: { name: strin
                     </li>
                 ))}
             </ul>
+            <form action={checkoutAction}>
+                <input type='hidden' name='priceId' value={priceId} />
+                <Button> Start Now </Button>
+            </form>
         </div>
     )
 }

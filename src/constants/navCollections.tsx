@@ -106,6 +106,14 @@ export const navCollections: NavCollection[] = [
                         items: []
                     },
                     {
+                        title: 'Subscription',
+                        shortcut: ['l', 'l'],
+                        url: '/Dashboard/Subscription',
+                        icon: <HomeIcon />,
+                        isActive: false,
+                        items: []
+                    },
+                    {
                         title: 'Trackable',
                         shortcut: ['l', 'l'],
                         url: '/Dashboard/Trackable',

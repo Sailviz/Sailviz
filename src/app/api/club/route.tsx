@@ -6,6 +6,9 @@ async function getClub(id: string) {
     var result = await prisma.club.findUnique({
         where: {
             id: id
+        },
+        include: {
+            stripe: true
         }
     })
     if (result == null) {

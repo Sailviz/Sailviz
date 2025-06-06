@@ -17,6 +17,9 @@ function withTeam<T>(action: ActionWithTeamFunction<T>) {
         const club = (await prisma.club.findFirst({
             where: {
                 id: session.user.clubId
+            },
+            include: {
+                stripe: true
             }
         })) as ClubDataType | null
         if (!club) {
@@ -32,7 +35,7 @@ export const checkoutAction = withTeam(async (formData, club) => {
     await createCheckoutSession({ club: club, priceId })
 })
 
-export const customerPortalAction = async (_: any, club: ClubDataType) => {
+export const customerPortalAction = withTeam(async (_: any, club: ClubDataType) => {
     const portalSession = await createCustomerPortalSession(club)
     redirect(portalSession.url)
-}
+})
