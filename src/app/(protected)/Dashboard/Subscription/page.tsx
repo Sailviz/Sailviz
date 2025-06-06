@@ -47,7 +47,7 @@ export default function Page() {
                     </div>
                 </CardContent>
             </Card>
-            {club.stripe.subscriptionStatus !== 'active' && <PricingPage />}
+            {club.stripe?.subscriptionStatus !== 'active' && <PricingPage />}
         </div>
     )
 }

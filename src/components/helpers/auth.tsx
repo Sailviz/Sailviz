@@ -17,6 +17,19 @@ export async function isRequestAuthorised(id: string, table: string) {
 export async function isRequestOwnData(id: string, clubId: string, table: string) {
     let club
     switch (table) {
+        case 'startSequence':
+            club = await prisma.startSequence
+                .findFirst({
+                    where: {
+                        id: id
+                    }
+                })
+                .series()
+                .club()
+            if (club?.id == clubId) {
+                return true
+            }
+            break
         case 'boat':
             club = await prisma.boat
                 .findFirst({

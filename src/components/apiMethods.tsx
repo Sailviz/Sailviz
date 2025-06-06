@@ -807,3 +807,21 @@ export async function updateStartSequenceById(seriesId: string, startSequence: S
         }
     })
 }
+
+export async function deleteStartSequenceById(id: string): Promise<boolean> {
+    const body = {
+        id: id
+    }
+    return await fetch(`${server}/api/DeleteStartSequenceById`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+    }).then(async res => {
+        if (res.ok) {
+            let data = await res.json()
+            return data.status === 200
+        } else {
+            return false
+        }
+    })
+}

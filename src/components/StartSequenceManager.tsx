@@ -56,11 +56,72 @@ const StartSequenceManager = ({ initialSequence, seriesId }: { initialSequence: 
 
     const deleteStep = (index: number) => {
         setSequence(prev => prev.filter((_, i) => i !== index))
+        DB.deleteStartSequenceById(sequence[index]!.id!)
     }
 
     const save = async () => {
         console.log('Saving sequence:', sequence)
         DB.updateStartSequenceById(seriesId, sequence)
+    }
+
+    const setDefaultSequence = () => {
+        setSequence([
+            {
+                time: 335,
+                name: 'warning',
+                order: 0,
+                hoot: 0,
+                flagStatus: [
+                    { flag: 'h', status: false },
+                    { flag: 'p', status: false }
+                ],
+                fleetStart: ''
+            },
+            {
+                time: 320,
+                name: '5 minutes',
+                order: 1,
+                hoot: 500,
+                flagStatus: [
+                    { flag: 'h', status: true },
+                    { flag: 'p', status: false }
+                ],
+                fleetStart: ''
+            },
+            {
+                time: 240,
+                name: '4 minutes',
+                order: 2,
+                hoot: 500,
+                flagStatus: [
+                    { flag: 'h', status: true },
+                    { flag: 'p', status: true }
+                ],
+                fleetStart: ''
+            },
+            {
+                time: 60,
+                name: '1 minute',
+                order: 3,
+                hoot: 500,
+                flagStatus: [
+                    { flag: 'h', status: true },
+                    { flag: 'p', status: false }
+                ],
+                fleetStart: ''
+            },
+            {
+                time: 0,
+                name: 'Start',
+                order: 4,
+                hoot: 500,
+                flagStatus: [
+                    { flag: 'h', status: false },
+                    { flag: 'p', status: false }
+                ],
+                fleetStart: series.fleetSettings[0]?.id || ''
+            }
+        ])
     }
 
     useEffect(() => {
@@ -122,6 +183,9 @@ const StartSequenceManager = ({ initialSequence, seriesId }: { initialSequence: 
             </Button>
             <Button onClick={save} variant={'blue'} className='mx-4'>
                 Save
+            </Button>
+            <Button onClick={setDefaultSequence} variant={'blue'} className='mx-4'>
+                Set Default Sequence
             </Button>
         </div>
     )

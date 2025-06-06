@@ -8,10 +8,10 @@ export default function HomeNav() {
     return (
         <header className='w-full z-40 sticky top-0 left-0 bg-background'>
             <div className='container relative mx-auto min-h-20 flex gap-4 flex-row  lg:grid lg:grid-cols-3 items-center'>
-                <div className='justify-start items-center gap-4 lg:flex hidden flex-row'>
+                <Link href={'/'} className='justify-start items-center gap-4 lg:flex hidden flex-row'>
                     <SailVizIcon />
                     <p className='font-bold text-inherit'>SailViz</p>
-                </div>
+                </Link>
                 <div className='justify-start items-center gap-4 lg:flex hidden flex-row'>
                     <NavigationMenu className='flex justify-start items-start'>
                         <NavigationMenuList className='flex justify-start gap-4 flex-row'>
