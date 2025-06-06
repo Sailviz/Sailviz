@@ -81,7 +81,7 @@ const StartSequenceManager = ({ initialSequence, seriesId }: { initialSequence: 
                 time: 320,
                 name: '5 minutes',
                 order: 1,
-                hoot: 500,
+                hoot: 300,
                 flagStatus: [
                     { flag: 'h', status: true },
                     { flag: 'p', status: false }
@@ -92,7 +92,7 @@ const StartSequenceManager = ({ initialSequence, seriesId }: { initialSequence: 
                 time: 240,
                 name: '4 minutes',
                 order: 2,
-                hoot: 500,
+                hoot: 300,
                 flagStatus: [
                     { flag: 'h', status: true },
                     { flag: 'p', status: true }
@@ -114,7 +114,7 @@ const StartSequenceManager = ({ initialSequence, seriesId }: { initialSequence: 
                 time: 0,
                 name: 'Start',
                 order: 4,
-                hoot: 500,
+                hoot: 300,
                 flagStatus: [
                     { flag: 'h', status: false },
                     { flag: 'p', status: false }
