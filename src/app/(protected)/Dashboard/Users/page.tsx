@@ -85,15 +85,6 @@ export default function Page() {
     if (userHasPermission(session.user, AVAILABLE_PERMISSIONS.viewUsers)) {
         return (
             <>
-                {/* <EditUserModal
-                    isOpen={editUserModal.isOpen}
-                    user={activeUser}
-                    onSubmit={updateUser}
-                    onClose={() => {
-                        editUserModal.onClose()
-                    }}
-                /> */}
-
                 <div className='p-6'>
                     Users
                     <UsersTable edit={showUserEditModal} deleteUser={deleteUser} />

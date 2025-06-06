@@ -1,5 +1,5 @@
 'use client'
-import React, { ChangeEvent, useState } from 'react'
+import React, { ChangeEvent, useEffect, useState } from 'react'
 import dayjs from 'dayjs'
 import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, RowSelection, SortingState, useReactTable } from '@tanstack/react-table'
 import * as DB from '@/components/apiMethods'
@@ -56,10 +56,14 @@ const UpcomingRacesTable = () => {
             desc: false
         }
     ])
-    var data = todaysRaces
-    if (todaysRacesIsValidating) {
-        data = []
-    }
+    let [data, setData] = useState<NextRaceDataType[]>([])
+
+    useEffect(() => {
+        if (todaysRaces && !todaysRacesIsError && !todaysRacesIsValidating) {
+            setData(todaysRaces)
+        }
+    }, [todaysRaces, todaysRacesIsError, todaysRacesIsValidating])
+
     var table = useReactTable({
         data,
         columns: [

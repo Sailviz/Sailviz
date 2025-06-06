@@ -65,7 +65,7 @@ const RacesTable = ({ date, historical, viewHref }: { date: Date; historical: bo
         data: races,
         error: racesIsError,
         isValidating: racesIsValidating
-    } = useSWR(`/api/GetRacesByClubId?id=${session!.user.clubId}&page=${page}&date=${date}&historical=${historical}`, Fetcher.fetcher, {
+    } = useSWR(`/api/GetRacesByClubId?id=${session?.user?.clubId || ''}&page=${page}&date=${date}&historical=${historical}`, Fetcher.fetcher, {
         keepPreviousData: true,
         suspense: true
     })

@@ -123,7 +123,7 @@ export const navCollections: NavCollection[] = [
         items: [
             {
                 title: 'Log Out',
-                url: '/',
+                url: '/Logout',
                 icon: <SignOutIcon />,
                 shortcut: ['e', 'e'],
                 isActive: false,

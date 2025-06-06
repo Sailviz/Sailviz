@@ -70,7 +70,16 @@ export default async function SignOnLayout({ children }: { children: React.React
           }
         : {
               title: '',
-              items: []
+              items: [
+                  {
+                      title: 'Log Out',
+                      url: '/Logout',
+                      icon: <SignOutIcon />,
+                      shortcut: ['e', 'e'],
+                      isActive: false,
+                      items: [] // No child items
+                  }
+              ]
           }
 
     const todaysRacesItems: NavItem[] = todaysRaces.map(race => ({

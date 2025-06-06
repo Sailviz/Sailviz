@@ -3,6 +3,7 @@ import { DynamicIcon, IconName } from 'lucide-react/dynamic'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { redirect } from 'next/navigation'
+import { isRedirectError } from 'next/dist/client/components/redirect-error'
 
 export function LoginForm({ justCredentials }: { justCredentials: boolean }) {
     return (
@@ -34,11 +35,10 @@ export function LoginForm({ justCredentials }: { justCredentials: boolean }) {
                                     username: formData.get('username')
                                 })
                             } catch (error) {
-                                if (error == 'NEXT_REDIRECT') {
-                                    redirect('/Dashboard')
-                                } else {
-                                    console.error('Login failed:', error)
+                                if (isRedirectError(error)) {
+                                    throw error
                                 }
+                                console.error('Login failed:', error)
                             }
                         } else {
                             await signIn(provider.id, { callbackUrl: '/Dashboard' })
