@@ -67,7 +67,7 @@ const StartSequenceManager = ({ initialSequence, seriesId }: { initialSequence: 
     const setDefaultSequence = () => {
         setSequence([
             {
-                time: 335,
+                time: 315,
                 name: 'warning',
                 order: 0,
                 hoot: 0,
@@ -78,7 +78,7 @@ const StartSequenceManager = ({ initialSequence, seriesId }: { initialSequence: 
                 fleetStart: ''
             },
             {
-                time: 320,
+                time: 300,
                 name: '5 minutes',
                 order: 1,
                 hoot: 300,
