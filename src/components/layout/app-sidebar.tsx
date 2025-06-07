@@ -62,7 +62,7 @@ export default function AppSidebar({ navCollections }: { navCollections: NavColl
             <SidebarContent className='overflow-x-hidden'>
                 {navCollections.map((collection, index) => {
                     return (
-                        <SidebarGroup key={collection.title}>
+                        <SidebarGroup key={collection.title + index}>
                             <SidebarGroupLabel>{collection.title}</SidebarGroupLabel>
                             <SidebarMenu>
                                 {collection.items.map(item => {
