@@ -35,7 +35,6 @@ export default function Page(props: PageProps) {
                 updateResult(result)
             }}
             result={result}
-            raceType={''}
             advancedEdit={true}
             onDelete={onDeleteResult}
         />
