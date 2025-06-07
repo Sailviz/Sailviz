@@ -82,7 +82,7 @@ const FleetSeriesResultsTable = ({ seriesId, fleetSettingsId }: { seriesId: stri
             fleet.forEach(result => {
                 //if new racer, add to tempresults
                 let index = tempresults.findIndex(function (t) {
-                    return t.Helm == result.Helm && t.Boat?.id == result.boat?.id
+                    return t.Helm == result.Helm && t.Boat?.id == result.boat?.id && t.SailNumber == result.SailNumber
                 })
                 if (index == -1) {
                     index = tempresults.push({
