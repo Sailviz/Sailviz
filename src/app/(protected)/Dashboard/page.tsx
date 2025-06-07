@@ -19,7 +19,7 @@ export default async function Page() {
     if (session == null) {
         redirect(authConfig.pages.signIn)
     }
-
+    console.log('Session:', session)
     return (
         <div>
             <div className='p-6'>

@@ -65,7 +65,7 @@ export default function Page(props: PageProps) {
         <>
             {/* <EditFleetModal isOpen={editFleetSettingsModal.isOpen} fleetSettings={activeFleetSettings} onSubmit={editFleetSettings} onClose={editFleetSettingsModal.onClose} /> */}
             <div id='series' className='w-full'>
-                <p className='text-6xl font-extrabold p-6'>series name</p>
+                <p className='text-6xl font-extrabold p-6'>{series?.name}</p>
                 <div className='p-6'>
                     <SeriesRaceTable id={seriesId} />
                 </div>
