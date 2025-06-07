@@ -9,8 +9,7 @@ async function updateFleetSettings(fleet: FleetSettingsType) {
             id: fleet.id
         },
         data: {
-            name: fleet.name,
-            startDelay: fleet.startDelay
+            name: fleet.name
         }
     })
     return result

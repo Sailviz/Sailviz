@@ -86,10 +86,6 @@ const FleetTable = (props: any) => {
                 id: 'name',
                 cell: info => info.getValue()
             }),
-            columnHelper.accessor('startDelay', {
-                id: 'start Delay',
-                cell: info => info.getValue()
-            }),
             columnHelper.accessor('boats', {
                 id: 'boats',
                 cell: props => <Boats {...props} />

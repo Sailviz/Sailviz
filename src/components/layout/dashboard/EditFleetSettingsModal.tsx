@@ -15,7 +15,6 @@ export default function EditFleetSettingsDialog({ fleetSettings, onSubmit }: { f
     const { boats, boatsIsError, boatsIsValidating } = Fetcher.Boats()
 
     const [name, setName] = useState('')
-    const [startDelay, setStartDelay] = useState(0)
     const [selectedBoats, setSelectedBoats] = useState([{ label: '', value: {} as BoatDataType }])
     const [options, setOptions] = useState([{ label: '', value: {} as BoatDataType }])
 
@@ -25,7 +24,6 @@ export default function EditFleetSettingsDialog({ fleetSettings, onSubmit }: { f
         if (fleetSettings == undefined) return
         console.log(fleetSettings)
         setName(fleetSettings.name)
-        setStartDelay(fleetSettings.startDelay)
         setSelectedBoats(fleetSettings.boats.map(x => ({ value: x, label: x.name })))
     }, [fleetSettings])
 
@@ -52,10 +50,6 @@ export default function EditFleetSettingsDialog({ fleetSettings, onSubmit }: { f
                         <p className='text-2xl font-bold'>Name</p>
                         <Input type='text' value={name} onChange={e => setName(e.target.value)} />
                     </div>
-                    <div className='flex flex-col px-6 w-full'>
-                        <p className='text-2xl font-bold'>Start Delay</p>
-                        <Input type='number' value={startDelay.toString()} onChange={e => setStartDelay(parseInt(e.target.value))} />
-                    </div>
                 </div>
                 <div>
                     <p className='text-6xl font-extrabold p-6'>Boats</p>
@@ -75,10 +69,7 @@ export default function EditFleetSettingsDialog({ fleetSettings, onSubmit }: { f
                     </div>
                 </div>
                 <DialogFooter>
-                    <Button
-                        color='primary'
-                        onClick={() => onSubmit({ ...fleetSettings!, name: name, startDelay: startDelay, boats: selectedBoats.flatMap(boats => boats.value) })}
-                    >
+                    <Button color='primary' onClick={() => onSubmit({ ...fleetSettings!, name: name, boats: selectedBoats.flatMap(boats => boats.value) })}>
                         Save
                     </Button>
                 </DialogFooter>

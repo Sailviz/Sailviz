@@ -22,7 +22,6 @@ async function attachFleetSettings(seriesId: string) {
     var res = await prisma.fleetSettings.create({
         data: {
             name: 'Main Fleet',
-            startDelay: 0,
             series: {
                 connect: {
                     id: seriesId

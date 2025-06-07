@@ -33,7 +33,6 @@ type FleetSettingsType = {
     id: string
     name: string
     boats: BoatDataType[]
-    startDelay: number
     fleets: FleetDataType[]
 }
 

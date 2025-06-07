@@ -20,7 +20,6 @@ async function createFleetSettings(seriesId: string) {
     var res = await prisma.fleetSettings.create({
         data: {
             name: 'Fleet',
-            startDelay: 0,
             series: {
                 connect: {
                     id: seriesId

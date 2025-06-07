@@ -124,13 +124,12 @@ model Race {
 }
 
 model FleetSettings {
-  id         String  @id @unique @default(uuid())
-  seriesId   String
-  startDelay Int
-  name       String
-  fleets     Fleet[]
-  series     Series  @relation(fields: [seriesId], references: [id], onDelete: Cascade)
-  boats      Boat[]  @relation("BoatToFleetSettings")
+  id       String  @id @unique @default(uuid())
+  seriesId String
+  name     String
+  fleets   Fleet[]
+  series   Series  @relation(fields: [seriesId], references: [id], onDelete: Cascade)
+  boats    Boat[]  @relation("BoatToFleetSettings")
 
   @@index([seriesId])
 }
