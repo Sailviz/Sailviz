@@ -6,14 +6,7 @@ import { useSession, signOut } from 'next-auth/react'
 export default function BackButton({ demoMode = false }) {
     const Router = useRouter()
     const handleClick = async () => {
-        if (demoMode) {
-            signOut({
-                callbackUrl: '/',
-                redirect: true
-            })
-        } else {
-            Router.back()
-        }
+        Router.back()
     }
     return (
         <Button onClick={() => handleClick()} variant={'secondary'} className='w-24 h-8'>

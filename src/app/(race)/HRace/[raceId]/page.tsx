@@ -40,12 +40,7 @@ export default function Page(props: PageProps) {
     const { raceId } = use(props.params)
     const Router = useRouter()
 
-    const { data: session, status } = useSession({
-        required: true,
-        onUnauthenticated() {
-            signIn()
-        }
-    })
+    const { data: session, status } = useSession()
     const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
 
     const { race, raceIsError, raceIsValidating } = Fetcher.Race(raceId, true)

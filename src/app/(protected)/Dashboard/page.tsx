@@ -42,7 +42,7 @@ export default async function Page() {
                             </Link>
                         </div>
                         <div className='p-6 pt-1'>
-                            <Link href='/SignOn'>
+                            <Link href='/Demo'>
                                 <Button>Practice Mode</Button>
                             </Link>
                         </div>

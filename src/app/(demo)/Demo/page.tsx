@@ -4,9 +4,11 @@ import { useRouter } from 'next/navigation'
 import * as DB from '@/components/apiMethods'
 import cookie from 'js-cookie'
 import * as Fetcher from '@/components/Fetchers'
+import { useSession } from 'next-auth/react'
 
 export default function Page() {
     const Router = useRouter()
+    const { data: session, status } = useSession()
 
     const { GlobalConfig, GlobalConfigIsError, GlobalConfigIsValidating } = Fetcher.UseGlobalConfig()
 
@@ -40,7 +42,10 @@ export default function Page() {
         console.log(GlobalConfig)
         const run = async () => {
             //auth ourself
-            await sendLoginRequest(GlobalConfig.demoUUID)
+            console.log(session)
+            if (Object.keys(session!).length === 0) {
+                await sendLoginRequest(GlobalConfig.demoUUID)
+            }
             //create a new race for the demo
             let newRace = await DB.createRace(GlobalConfig.demoClubId, GlobalConfig.demoSeriesId)
             newRace = await DB.getRaceById(newRace.id, true)
@@ -62,6 +67,9 @@ export default function Page() {
             console.log('created demo race')
             // Redirect to another page
             Router.replace(`/Demo/Race/${newRace.id}`)
+        }
+        if (GlobalConfig == undefined || GlobalConfigIsValidating) {
+            return
         }
         run()
     }, [GlobalConfig])

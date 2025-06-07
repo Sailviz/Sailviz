@@ -2,15 +2,23 @@ const jwt = require('jsonwebtoken')
 const jwtSecret = process.env.jwtSecret
 import prisma from '@/lib/prisma'
 import { auth } from '@/server/auth'
-
+import * as Fetcher from '@/components/Fetchers'
 export async function isRequestAuthorised(id: string, table: string) {
     const session = await auth()
     var clubId = session?.user.clubId
     if (clubId == null) {
         return false
     }
+    const GlobalConfig = await prisma.globalConfig.findFirst({
+        where: {
+            active: true
+        }
+    })
 
     let ownData = await isRequestOwnData(id, clubId, table)
+    if (!ownData) {
+        ownData = await isRequestOwnData(id, GlobalConfig!.demoClubId, table)
+    }
     return ownData
 }
 
