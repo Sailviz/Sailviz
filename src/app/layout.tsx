@@ -1,0 +1,32 @@
+import { Metadata } from 'next'
+import clsx from 'clsx'
+import { fontSans } from 'config/fonts'
+import { Providers } from '@/components/providers'
+import { auth } from '@/server/auth'
+import { Session } from 'next-auth'
+
+import '@/styles/globals.css'
+export const metadata: Metadata = {
+    title: 'SailViz',
+    description: 'Sailing race system for clubs and regattas'
+}
+export default async function Layout({
+    children, // will be a page or nested layout
+    modal
+}: {
+    children: React.ReactNode
+    modal: React.ReactNode
+}) {
+    const session = await auth()
+    const fallbackSession = {} as Session // Provide a default or mock Session object
+    return (
+        <html lang='en'>
+            <body className={clsx('font-sans antialiased', fontSans.className)}>
+                <Providers session={session ?? fallbackSession}>
+                    {modal}
+                    {children}
+                </Providers>
+            </body>
+        </html>
+    )
+}

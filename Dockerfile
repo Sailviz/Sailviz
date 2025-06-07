@@ -4,6 +4,8 @@ ENV jwtSecret ${jwtSecret}
 
 ENV NEXT_PUBLIC_SENTRY_DSN ${NEXT_PUBLIC_SENTRY_DSN}
 
+ENV SKIP_ENV_VALIDATION=1
+
 # Create app directory
 RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
