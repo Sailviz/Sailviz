@@ -29,6 +29,8 @@ const Time = ({ ...props }: any) => {
     const [value, setValue] = React.useState(new Date((initialValue - props.startTime) * 1000).toISOString().substring(11, 19))
     if (initialValue == -1) {
         return <p className='p-2 m-2 text-center w-full'>Retired</p>
+    } else if (initialValue == 0) {
+        return <p className='p-2 m-2 text-center w-full'>-</p>
     } else {
         return <p> {value}</p>
     }

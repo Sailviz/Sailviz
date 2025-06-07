@@ -445,7 +445,7 @@ export default function Page(props: PageProps) {
         }
     }
 
-    const showRetireModal = (resultId: String) => {
+    const showRetireModal = (resultId: string) => {
         setRetireModal(true)
         let result: ResultDataType | undefined
         race.fleets.some(fleet => {

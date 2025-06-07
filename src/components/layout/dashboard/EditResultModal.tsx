@@ -23,13 +23,11 @@ const resultCodeOptions = [
 
 export default function EditResultModal({
     result,
-    raceType,
     advancedEdit,
     onSubmit,
     onDelete
 }: {
     result: ResultDataType
-    raceType: string
     advancedEdit: boolean
     onSubmit: (result: ResultDataType) => void
     onDelete: (result: ResultDataType) => void
@@ -42,7 +40,9 @@ export default function EditResultModal({
     const { theme, setTheme } = useTheme()
     const { boats, boatsIsError, boatsIsValidating } = Fetcher.Boats()
 
-    const [lapsAdvancedMode, setLapsAdvancedMode] = useState(false)
+    const [raceType, setRaceType] = useState('Handicap')
+
+    const [viewLaps, setViewLaps] = useState(false)
     const [resultCodeOption, setResultCodeOption] = useState({ label: '', value: '' })
     const [boatOption, setBoatOption] = useState({ label: '', value: {} as BoatDataType })
     const [numberLaps, setNumberLaps] = useState(0)
@@ -64,7 +64,9 @@ export default function EditResultModal({
 
     const submit = async () => {
         let finishTime = basicElapsed.split(':').reduce((acc, time) => 60 * acc + +time, 0) + fleet!.startTime
-
+        if (basicElapsed == '00:00:00') {
+            finishTime = 0 // if no time is set make finish time 0, effectively setting the boat to have not finished
+        }
         onSubmit({
             ...result!,
             Helm: helm,
@@ -84,6 +86,10 @@ export default function EditResultModal({
         if (result == undefined || fleet == undefined) {
             return
         }
+        const getRaceType = async () => {
+            setRaceType(await DB.getRaceById(fleet.raceId).then(race => race.Type))
+        }
+        getRaceType()
         setHelm(result.Helm)
         setCrew(result.Crew)
         setBoat(result.boat)
@@ -280,7 +286,7 @@ export default function EditResultModal({
                                                 type='time'
                                                 step={'1'}
                                                 defaultValue={basicElapsed}
-                                                onChange={e => {
+                                                onBlur={e => {
                                                     setBasicElapsed(e.target.value)
                                                 }}
                                             />
@@ -293,9 +299,9 @@ export default function EditResultModal({
                             <div className='flex flex-row mt-2 px-6'>
                                 <Switch
                                     id={'AdvancedModeSwitch'}
-                                    checked={lapsAdvancedMode}
+                                    checked={viewLaps}
                                     onClick={() => {
-                                        setLapsAdvancedMode(!lapsAdvancedMode)
+                                        setViewLaps(!viewLaps)
                                     }}
                                 />
 
@@ -303,7 +309,7 @@ export default function EditResultModal({
                                     View Lap Data
                                 </label>
                             </div>
-                            {lapsAdvancedMode ? (
+                            {viewLaps ? (
                                 <div className='flex flex-row w-full flex-wrap' id='LapData' key={JSON.stringify(result!.laps)}>
                                     {result.laps.map((lap: LapDataType, index: number) => {
                                         return (

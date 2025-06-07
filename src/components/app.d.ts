@@ -154,7 +154,7 @@ type PermissionType = {
 
 type FleetDataType = {
     id: string
-    raceId: String
+    raceId: string
     startTime: number
     fleetSettings: FleetSettingsType
     results: ResultDataType[]
