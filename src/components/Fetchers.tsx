@@ -129,9 +129,7 @@ export function Result(resultId: string) {
 }
 
 export function Fleet(fleetId: string) {
-    const { data, error, isValidating } = useSWR(fleetId != undefined ? `/api/GetFleetById?id=${fleetId}` : null, fetcher, {
-        refreshInterval: 10000
-    })
+    const { data, error, isValidating } = useSWR(fleetId != undefined ? `/api/GetFleetById?id=${fleetId}` : null, fetcher)
 
     return {
         fleet: data as FleetDataType,
@@ -141,9 +139,7 @@ export function Fleet(fleetId: string) {
 }
 
 export function FleetSettings(fleetId: string) {
-    const { data, error, isValidating } = useSWR(fleetId != undefined ? `/api/GetFleetSettingsById?id=${fleetId}` : null, fetcher, {
-        refreshInterval: 10000
-    })
+    const { data, error, isValidating } = useSWR(fleetId != undefined ? `/api/GetFleetSettingsById?id=${fleetId}` : null, fetcher)
 
     return {
         fleetSettings: data as FleetSettingsType,
@@ -277,7 +273,7 @@ export function GetTodaysRaceByClubId(club: ClubDataType) {
 }
 
 export function GetFleetSettingsBySeriesId(seriesId: string) {
-    const { data, error, isValidating } = useSWR(seriesId != '' ? `/api/GetFleetSettingsBySeriesId?id=${seriesId}` : null, fetcher, { refreshInterval: 10000 })
+    const { data, error, isValidating } = useSWR(seriesId != '' ? `/api/GetFleetSettingsBySeriesId?id=${seriesId}` : null, fetcher)
     console.log(data)
     return {
         fleetSettings: data as FleetSettingsType[],
@@ -293,7 +289,7 @@ export function GetStartSequence(seriesId: string) {
         error,
         isValidating,
         mutate: mutateStartSequence
-    } = useSWR(seriesId != '' ? `/api/GetStartSequenceById` : null, url => advancedFetcher(url!, body), { refreshInterval: 10000, fallbackData: [] as StartSequenceStep[] })
+    } = useSWR(seriesId != '' ? `/api/GetStartSequenceById` : null, url => advancedFetcher(url!, body), { fallbackData: [] as StartSequenceStep[] })
 
     console.log(data)
     return {

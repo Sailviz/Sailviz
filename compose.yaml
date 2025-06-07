@@ -1,35 +1,36 @@
 services:
-  front:
-    image: ghcr.io/alex40144/sailviz:main
-    depends_on:
-      mysql:
-        condition: service_healthy
-    ports:
-      - 4080:3000
-    environment:
-      DATABASE_USER: ${DATABASE_USER}
-      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
-      jwtSecret: ${jwtSecret}
-      DATABASE_HOST: ${DATABASE_HOST}
-      DATABASE_URL: mysql://${DATABASE_USER}:${DATABASE_PASSWORD}@${DATABASE_HOST}/srm
-      PORT: 3000
+    front:
+        image: ghcr.io/alex40144/sailviz:main
+        depends_on:
+            mysql:
+                condition: service_healthy
+        ports:
+            - 4080:3000
+        environment:
+            DATABASE_USER: ${DATABASE_USER}
+            DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+            jwtSecret: ${jwtSecret}
+            DATABASE_HOST: ${DATABASE_HOST}
+            STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
+            DATABASE_URL: mysql://${DATABASE_USER}:${DATABASE_PASSWORD}@${DATABASE_HOST}/srm
+            PORT: 3000
 
-  mysql:
-    image: mysql:8.0
-    volumes:
-      - sql:/var/lib/mysql
-    ports:
-      - 3306:3306
-    command: --default-authentication-plugin=mysql_native_password
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      timeout: 20s
-      retries: 10
-    environment:
-      MYSQL_USER: ${DATABASE_USER}
-      MYSQL_PASSWORD: ${DATABASE_PASSWORD}
-      MYSQL_ROOT_PASSWORD: ${DATABASE_ROOT_PASSWORD}
-      MYSQL_DATABASE: srm
+    mysql:
+        image: mysql:8.0
+        volumes:
+            - sql:/var/lib/mysql
+        ports:
+            - 3306:3306
+        command: --default-authentication-plugin=mysql_native_password
+        healthcheck:
+            test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost']
+            timeout: 20s
+            retries: 10
+        environment:
+            MYSQL_USER: ${DATABASE_USER}
+            MYSQL_PASSWORD: ${DATABASE_PASSWORD}
+            MYSQL_ROOT_PASSWORD: ${DATABASE_ROOT_PASSWORD}
+            MYSQL_DATABASE: srm
 
 volumes:
-  sql:
+    sql:
