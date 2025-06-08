@@ -20,7 +20,7 @@ const authConfig = {
         strategy: 'jwt'
     },
     pages: {
-        signIn: '/login' //sigin page
+        signIn: '/Login' //sigin page
     },
     callbacks: {
         jwt({ token, user }) {
