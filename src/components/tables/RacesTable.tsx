@@ -59,13 +59,13 @@ const Action = ({ ...props }: any) => {
 
 const columnHelper = createColumnHelper<RaceDataType>()
 
-const RacesTable = ({ date, historical, viewHref, session }: { date: Date; historical: boolean; viewHref: string; session: Session }) => {
+const RacesTable = ({ date, historical, viewHref, clubId }: { date: Date; historical: boolean; viewHref: string; clubId: string }) => {
     const [page, setPage] = useState(1)
     const {
         data: races,
         error: racesIsError,
         isValidating: racesIsValidating
-    } = useSWR(`/api/GetRacesByClubId?id=${session?.user?.clubId || ''}&page=${page}&date=${date}&historical=${historical}`, Fetcher.fetcher)
+    } = useSWR(`/api/GetRacesByClubId?id=${clubId || ''}&page=${page}&date=${date}&historical=${historical}`, Fetcher.fetcher)
 
     const [data, setData] = useState<RaceDataType[]>([])
     const [count, setCount] = useState(0)

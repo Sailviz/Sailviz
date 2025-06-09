@@ -45,7 +45,7 @@ export default async function Page(props: PageProps) {
 
     const [club, setClub] = useState<ClubDataType>({ id: params.slug } as ClubDataType)
 
-    const { todaysRaces, todaysRacesIsError, todaysRacesIsValidating } = Fetcher.GetTodaysRaceByClubId(club)
+    const { todaysRaces, todaysRacesIsError, todaysRacesIsValidating } = Fetcher.GetTodaysRaceByClubId(club.id)
 
     const [pagestate, setPageState] = useState<pageStateType>(pageStateType.info)
     var [activeRaceData, setActiveRaceData] = useState<RaceDataType>({} as RaceDataType)

@@ -22,11 +22,11 @@ export default async function Page() {
                 </div>
                 <div className='px-3'>
                     <p className='text-2xl font-bold p-6'>Upcoming</p>
-                    <RacesTable session={session} date={new Date()} historical={false} viewHref='/Race/' />
+                    <RacesTable clubId={session.club.id} date={new Date()} historical={false} viewHref='/Race/' />
                 </div>
                 <div className='px-3'>
                     <p className='text-2xl font-bold p-6'>Recent</p>
-                    <RacesTable session={session} date={new Date()} historical={true} viewHref='/Race/' />
+                    <RacesTable clubId={session.club.id} date={new Date()} historical={true} viewHref='/Race/' />
                 </div>
             </div>
         </div>
