@@ -15,6 +15,7 @@ import { Input } from '../ui/input'
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from '../ui/dropdown-menu'
 import { ChevronDown } from 'lucide-react'
 import Link from 'next/link'
+import { Session } from 'next-auth'
 
 const Time = ({ ...props }: any) => {
     const initialValue = props.getValue()
@@ -58,20 +59,16 @@ const Action = ({ ...props }: any) => {
 
 const columnHelper = createColumnHelper<RaceDataType>()
 
-const RacesTable = ({ date, historical, viewHref }: { date: Date; historical: boolean; viewHref: string }) => {
-    const { data: session, status } = useSession()
+const RacesTable = ({ date, historical, viewHref, session }: { date: Date; historical: boolean; viewHref: string; session: Session }) => {
     const [page, setPage] = useState(1)
     const {
         data: races,
         error: racesIsError,
         isValidating: racesIsValidating
-    } = useSWR(`/api/GetRacesByClubId?id=${session?.user?.clubId || ''}&page=${page}&date=${date}&historical=${historical}`, Fetcher.fetcher, {
-        keepPreviousData: true,
-        suspense: true
-    })
+    } = useSWR(`/api/GetRacesByClubId?id=${session?.user?.clubId || ''}&page=${page}&date=${date}&historical=${historical}`, Fetcher.fetcher)
 
-    const data = races.races
-    const count = races?.count
+    const [data, setData] = useState<RaceDataType[]>([])
+    const [count, setCount] = useState(0)
     const rowsPerPage = 10
 
     const pages = useMemo(() => {
@@ -79,6 +76,14 @@ const RacesTable = ({ date, historical, viewHref }: { date: Date; historical: bo
     }, [count, rowsPerPage])
 
     const loadingState = racesIsValidating || data == undefined ? 'loading' : 'idle'
+
+    useEffect(() => {
+        console.log(races)
+        if (races) {
+            setData(races.races)
+            setCount(races.count)
+        }
+    }, [races])
 
     var table = useReactTable({
         data,

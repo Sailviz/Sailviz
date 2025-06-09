@@ -11,16 +11,16 @@ export const ThemeProvider = (props: ThemeProviderProps): React.JSX.Element => {
     return NextThemesProvider(props) as React.JSX.Element
 }
 
-export function Providers({ children, session }: { children: React.ReactNode; session: Session }) {
+export function Providers({ children, session }: { children: React.ReactNode; session: Session | null }) {
     return (
-        <ErrorBoundary>
-            <PlausibleProvider domain='sailviz.com' customDomain='https://stats.sailviz.com' selfHosted enabled>
-                <SessionProvider session={session}>
+        <SessionProvider>
+            <ErrorBoundary>
+                <PlausibleProvider domain='sailviz.com' customDomain='https://stats.sailviz.com' selfHosted enabled>
                     <ThemeProvider attribute='class' defaultTheme='light'>
                         {children}
                     </ThemeProvider>
-                </SessionProvider>
-            </PlausibleProvider>
-        </ErrorBoundary>
+                </PlausibleProvider>
+            </ErrorBoundary>
+        </SessionProvider>
     )
 }

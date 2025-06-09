@@ -16,6 +16,8 @@ import { useSession } from 'next-auth/react'
 import { Tooltip } from '../ui/tooltip'
 import { Button } from '../ui/button'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
+import { auth } from '@/lib/auth'
+import { Session } from 'next-auth'
 
 const Time = ({ ...props }: any) => {
     const initialValue = props.getValue()
@@ -45,24 +47,25 @@ const Action = ({ ...props }: any) => {
 
 const columnHelper = createColumnHelper<NextRaceDataType>()
 
-const UpcomingRacesTable = () => {
-    const { data: session, status } = useSession()
+const UpcomingRacesTable = ({ session }: { session: Session }) => {
+    const clubId = session?.club?.id
 
-    const { todaysRaces, todaysRacesIsError, todaysRacesIsValidating } = Fetcher.GetTodaysRaceByClubId(session?.club!)
-    const { theme, setTheme } = useTheme()
-    const [sorting, setSorting] = useState<SortingState>([
-        {
-            id: 'number',
-            desc: false
-        }
-    ])
-    let [data, setData] = useState<NextRaceDataType[]>([])
+    // Only call fetcher when clubId is defined
+    const { todaysRaces, todaysRacesIsError, todaysRacesIsValidating } = Fetcher.GetTodaysRaceByClubId(clubId)
+
+    const [sorting, setSorting] = useState<SortingState>([{ id: 'number', desc: false }])
+    const [data, setData] = useState<NextRaceDataType[]>([])
 
     useEffect(() => {
         if (todaysRaces && !todaysRacesIsError && !todaysRacesIsValidating) {
             setData(todaysRaces)
         }
     }, [todaysRaces, todaysRacesIsError, todaysRacesIsValidating])
+
+    // Show loading until session and clubId are ready
+    if (!clubId) {
+        return <div>Loading...</div>
+    }
 
     var table = useReactTable({
         data,

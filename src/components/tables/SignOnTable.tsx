@@ -12,18 +12,12 @@ import { Input } from '../ui/input'
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from '../ui/dropdown-menu'
 import { ChevronDown } from 'lucide-react'
 import Link from 'next/link'
+import { Session } from 'next-auth'
 const columnHelper = createColumnHelper<ResultDataType>()
 
-const SignOnTable = (props: any) => {
-    const { data: session, status } = useSession({
-        required: true,
-        onUnauthenticated() {
-            signIn()
-        }
-    })
-    const { race, raceIsError, raceIsValidating } = Fetcher.Race(props.raceId, true)
+const SignOnTable = ({ session, raceId }: { session: Session; raceId: string }) => {
+    const { race, raceIsError, raceIsValidating } = Fetcher.Race(raceId, true)
     let [data, setData] = useState<ResultDataType[]>([])
-    let clubId = props.clubId
     let options: object[] = []
 
     const Text = ({ ...props }) => {
@@ -107,7 +101,7 @@ const SignOnTable = (props: any) => {
                 header: 'Class',
                 id: 'Class',
                 size: 300,
-                cell: props => <Class {...props} clubId={clubId} options={options} />,
+                cell: props => <Class {...props} options={options} />,
                 enableSorting: false
             }),
             columnHelper.accessor('SailNumber', {

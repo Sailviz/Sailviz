@@ -30,7 +30,7 @@ export default async function Page() {
                     <div>
                         <p className='text-2xl font-bold p-6 pb-1'>Today&apos;s Races</p>
                         <div className='p-6 pt-1'>
-                            <UpcomingRacesTable />
+                            <UpcomingRacesTable session={session} />
                         </div>
                     </div>
 

@@ -9,16 +9,10 @@ import { Switch } from '@/components/ui/switch'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Button } from '@/components/ui/button'
 import { useRouter } from 'next/navigation'
-
-export default function CreateResultModal({
-    races,
-    boats,
-    onSubmit
-}: {
-    races: RaceDataType[]
-    boats: BoatDataType[]
-    onSubmit: (fleetId: string, helm: string, crew: string, boat: BoatDataType, sailNum: string) => void
-}) {
+import * as Fetcher from '@/components/Fetchers'
+import { Session } from 'next-auth'
+import { use } from 'chai'
+export default function CreateResultModal({ session, todaysRaces, boats }: { session: Session; todaysRaces: RaceDataType[]; boats: BoatDataType[] }) {
     const Router = useRouter()
     const [open, setOpen] = useState(true)
 
@@ -39,9 +33,13 @@ export default function CreateResultModal({
     const [sailNumError, setSailNumError] = useState(false)
 
     let options: { label: string; value: BoatDataType }[] = []
-    boats.forEach((boat: BoatDataType) => {
-        options.push({ value: boat as BoatDataType, label: boat.name })
-    })
+
+    //set the first boat as the selected boat
+    if (boats && boats.length > 0) {
+        boats.forEach((boat: BoatDataType) => {
+            options.push({ value: boat as BoatDataType, label: boat.name })
+        })
+    }
 
     const CapitaliseInput = (e: ChangeEvent<HTMLInputElement>) => {
         const sentence = e.target.value.split(' ')
@@ -95,9 +93,23 @@ export default function CreateResultModal({
         //call submit for each fleet selected
         for (let i = 0; i < selectedFleets.length; i++) {
             console.log(i)
-            onSubmit(selectedFleets[i]!, helm, crew, selectedBoat.value, sailNumber)
+            createResult(selectedFleets[i]!, helm, crew, selectedBoat.value, sailNumber)
         }
     }
+
+    const createResult = async (fleetId: string, helm: string, crew: string, boat: BoatDataType, sailNum: string) => {
+        console.log('createResult', fleetId, helm, crew, boat, sailNum)
+        //create a result for each fleet
+        let result = await DB.createResult(fleetId)
+        await DB.updateResult({ ...result, Helm: helm, Crew: crew, boat: boat, SailNumber: sailNum })
+
+        console.log(helm, crew, boat, sailNum, fleetId)
+        Router.back()
+    }
+
+    useEffect(() => {
+        console.log(todaysRaces)
+    }, [todaysRaces])
 
     return (
         <Dialog
@@ -198,14 +210,14 @@ export default function CreateResultModal({
                 </div>
 
                 <div className='text-4xl font-extrabold p-6'>Select Races</div>
-                {races.map((race, index) => {
+                {todaysRaces.map((race, index) => {
                     if (race.fleets.some(fleet => fleet.startTime != 0)) {
                         //a fleet in the race has started so don't allow entry
-                        return <></>
+                        return <div key={race.id + 'finished'}></div>
                     }
 
                     return (
-                        <div className='mx-6 mb-10' key={race.id}>
+                        <div className='mx-6 mb-10' key={race.id + 'select'}>
                             <div className='flex flex-row'>
                                 {race.series.name} {race.number}
                                 <Switch

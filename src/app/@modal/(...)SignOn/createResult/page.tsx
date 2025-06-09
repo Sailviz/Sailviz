@@ -1,34 +1,56 @@
-'use client'
-import { useRouter } from 'next/navigation'
-import * as DB from '@/components/apiMethods'
-import { use } from 'react'
-import * as Fetcher from '@/components/Fetchers'
+import { redirect } from 'next/navigation'
 import CreateResultModal from '@/components/layout/SignOn/CreateResultModal'
-import { useSession } from 'next-auth/react'
-type PageProps = { params: Promise<{ raceId: string }> }
+import { auth } from '@/server/auth'
+import authConfig from '@/lib/auth.config'
+import prisma from '@/lib/prisma'
+import dayjs from 'dayjs'
 
-export default function Page(props: PageProps) {
-    const { data: session, status } = useSession()
-    const Router = useRouter()
-    const { raceId } = use(props.params)
+export default async function Page() {
+    const session = await auth()
 
-    const { todaysRaces, todaysRacesIsError, todaysRacesIsValidating } = Fetcher.GetTodaysRaceByClubId(session?.club!)
-    const { boats, boatsIsError, boatsIsValidating } = Fetcher.Boats()
-
-    const createResult = async (fleetId: string, helm: string, crew: string, boat: BoatDataType, sailNum: string) => {
-        console.log('createResult', fleetId, helm, crew, boat, sailNum)
-        //create a result for each fleet
-        let result = await DB.createResult(fleetId)
-        await DB.updateResult({ ...result, Helm: helm, Crew: crew, boat: boat, SailNumber: sailNum })
-
-        console.log(helm, crew, boat, sailNum, fleetId)
-        Router.back()
+    if (session == null) {
+        redirect(authConfig.pages.signIn)
     }
 
-    if (todaysRaces == undefined) {
-        return <div>Loading...</div>
-    }
+    const todaysRaces = (await prisma.race.findMany({
+        where: {
+            AND: [
+                {
+                    Time: {
+                        gte: dayjs().set('hour', 0).set('minute', 0).set('second', 0).format('YYYY-MM-DD HH:ss'),
+                        lte: dayjs().set('hour', 24).set('minute', 0).set('second', 0).format('YYYY-MM-DD HH:ss')
+                    }
+                },
+                {
+                    series: {
+                        clubId: session.club.id
+                    }
+                }
+            ]
+        },
+        orderBy: {
+            Time: 'asc'
+        },
+        include: {
+            fleets: {
+                include: {
+                    fleetSettings: true
+                }
+            },
+            series: true
+        }
+    })) as unknown as RaceDataType[]
 
-    console.log('todaysRaces', todaysRaces)
-    return <CreateResultModal races={todaysRaces} boats={boats} onSubmit={createResult} />
+    const boats = await prisma.boat.findMany({
+        where: {
+            clubId: session.club.id
+        },
+        orderBy: {
+            name: 'asc'
+        }
+    })
+
+    console.log(todaysRaces)
+
+    return <CreateResultModal session={session} todaysRaces={todaysRaces} boats={boats} />
 }
