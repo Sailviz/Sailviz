@@ -63,9 +63,6 @@ const UpcomingRacesTable = ({ session }: { session: Session }) => {
     }, [todaysRaces, todaysRacesIsError, todaysRacesIsValidating])
 
     // Show loading until session and clubId are ready
-    if (!clubId) {
-        return <div>Loading...</div>
-    }
 
     var table = useReactTable({
         data,
