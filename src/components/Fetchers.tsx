@@ -289,7 +289,6 @@ export function GetStartSequence(seriesId: string) {
         mutate: mutateStartSequence
     } = useSWR(seriesId != '' ? `/api/GetStartSequenceById` : null, url => advancedFetcher(url!, body), { fallbackData: [] as StartSequenceStep[] })
 
-    console.log(data)
     return {
         startSequence: data.sequence as StartSequenceStep[],
         startSequenceIsValidating: isValidating,

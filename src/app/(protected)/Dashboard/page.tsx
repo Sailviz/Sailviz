@@ -13,8 +13,6 @@ import Link from 'next/link'
 import HornTestButton from '@/components/layout/home/HornTestButton'
 
 export default async function Page() {
-    // const createModal = useDisclosure()
-
     const session = await auth()
     if (session == null) {
         redirect(authConfig.pages.signIn)

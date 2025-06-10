@@ -48,10 +48,7 @@ const Action = ({ ...props }: any) => {
 const columnHelper = createColumnHelper<NextRaceDataType>()
 
 const UpcomingRacesTable = ({ session }: { session: Session }) => {
-    const clubId = session?.club?.id
-
-    // Only call fetcher when clubId is defined
-    const { todaysRaces, todaysRacesIsError, todaysRacesIsValidating } = Fetcher.GetTodaysRaceByClubId(clubId)
+    const { todaysRaces, todaysRacesIsError, todaysRacesIsValidating } = Fetcher.GetTodaysRaceByClubId(session.club.id)
 
     const [sorting, setSorting] = useState<SortingState>([{ id: 'number', desc: false }])
     const [data, setData] = useState<NextRaceDataType[]>([])
@@ -61,8 +58,6 @@ const UpcomingRacesTable = ({ session }: { session: Session }) => {
             setData(todaysRaces)
         }
     }, [todaysRaces, todaysRacesIsError, todaysRacesIsValidating])
-
-    // Show loading until session and clubId are ready
 
     var table = useReactTable({
         data,
