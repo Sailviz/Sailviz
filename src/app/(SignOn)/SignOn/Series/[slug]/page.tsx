@@ -4,7 +4,6 @@ import SeriesResultsTable from '@/components/tables/FleetSeriesResultsTable'
 import * as Fetcher from '@/components/Fetchers'
 import { PageSkeleton } from '@/components/layout/PageSkeleton'
 import { title } from '@/components/layout/home/primitaves'
-import { useSession, signIn } from 'next-auth/react'
 import { use } from 'react'
 
 type PageProps = { params: Promise<{ slug: string }> }
@@ -13,17 +12,12 @@ export default function Page(props: PageProps) {
     const Router = useRouter()
 
     const params = use(props.params)
-    const { data: session, status } = useSession({
-        required: true,
-        onUnauthenticated() {
-            signIn()
-        }
-    })
+
     const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
     const { series, seriesIsError, seriesIsValidating } = Fetcher.Series(params.slug)
 
     console.log(series)
-    if (clubIsValidating || seriesIsError || series == undefined || club == undefined || session == undefined) {
+    if (clubIsValidating || seriesIsError || series == undefined || club == undefined) {
         return <PageSkeleton />
     }
     return (

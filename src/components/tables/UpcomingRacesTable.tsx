@@ -12,12 +12,9 @@ import { useRouter } from 'next/navigation'
 import { useTheme } from 'next-themes'
 import * as Fetcher from '@/components/Fetchers'
 import { PageSkeleton } from '@/components/layout/PageSkeleton'
-import { useSession } from 'next-auth/react'
-import { Tooltip } from '../ui/tooltip'
 import { Button } from '../ui/button'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
-import { auth } from '@/lib/auth'
-import { Session } from 'next-auth'
+import { useSession } from '@/lib/auth-client'
 
 const Time = ({ ...props }: any) => {
     const initialValue = props.getValue()
@@ -47,7 +44,17 @@ const Action = ({ ...props }: any) => {
 
 const columnHelper = createColumnHelper<NextRaceDataType>()
 
-const UpcomingRacesTable = ({ session }: { session: Session }) => {
+const UpcomingRacesTable = () => {
+    const {
+        data: session,
+        isPending, //loading state
+        error, //error object
+        refetch //refetch the session
+    } = useSession()
+    console.log('Session:', session)
+    if (isPending || !session || !session.club) {
+        return <PageSkeleton />
+    }
     const { todaysRaces, todaysRacesIsError, todaysRacesIsValidating } = Fetcher.GetTodaysRaceByClubId(session.club.id)
 
     const [sorting, setSorting] = useState<SortingState>([{ id: 'number', desc: false }])

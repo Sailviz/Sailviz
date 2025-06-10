@@ -3,7 +3,7 @@
 import CreateSeriesModal from '@/components/layout/dashboard/CreateSeriesModal'
 import { useRouter } from 'next/navigation'
 import * as DB from '@/components/apiMethods'
-import { useSession } from 'next-auth/react'
+
 export default function Page() {
     const { data: session, status } = useSession()
     const Router = useRouter()

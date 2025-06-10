@@ -4,13 +4,13 @@ import { createColumnHelper, flexRender, getCoreRowModel, useReactTable, getFilt
 import { EyeIcon } from '@/components/icons/eye-icon'
 import { SearchIcon } from '@/components/icons/search-icon'
 import * as Fetcher from '@/components/Fetchers'
-import { useSession, signIn } from 'next-auth/react'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from '../ui/dropdown-menu'
 import { ChevronDown } from 'lucide-react'
 import Link from 'next/link'
+import { useSession } from '@/lib/auth-client'
 
 const columnHelper = createColumnHelper<TrackerDataType>()
 
@@ -51,12 +51,12 @@ const Action = ({ ...props }: any) => {
 }
 
 const TrackerTable = (props: any) => {
-    const { data: session, status } = useSession({
-        required: true,
-        onUnauthenticated() {
-            signIn()
-        }
-    })
+    const {
+        data: session,
+        isPending, //loading state
+        error, //error object
+        refetch //refetch the session
+    } = useSession()
     const { trackers, trackersIsError, trackersIsValidating } = Fetcher.Trackers()
 
     const data = trackers || []

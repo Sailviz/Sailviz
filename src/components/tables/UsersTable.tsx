@@ -4,13 +4,13 @@ import { EditIcon } from '@/components/icons/edit-icon'
 import { DeleteIcon } from '@/components/icons/delete-icon'
 import * as Fetcher from '@/components/Fetchers'
 import { AVAILABLE_PERMISSIONS, userHasPermission } from '@/components/helpers/users'
-import { useSession, signIn } from 'next-auth/react'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from '../ui/dropdown-menu'
 import { ChevronDown } from 'lucide-react'
 import Link from 'next/link'
+import { useSession } from '@/lib/auth-client'
 const Action = ({ ...props }: any) => {
     const onDeleteClick = () => {
         if (confirm('are you sure you want to do this?')) {
@@ -34,12 +34,12 @@ const Action = ({ ...props }: any) => {
 const columnHelper = createColumnHelper<UserDataType>()
 
 const UsersTable = (props: any) => {
-    const { data: session, status } = useSession({
-        required: true,
-        onUnauthenticated() {
-            signIn()
-        }
-    })
+    const {
+        data: session,
+        isPending, //loading state
+        error, //error object
+        refetch //refetch the session
+    } = useSession()
     const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
     const { users, usersIsError, usersIsValidating } = Fetcher.Users(club)
 

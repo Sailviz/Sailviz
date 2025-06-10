@@ -12,7 +12,7 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { EntryFileUpload } from '@/components/EntryFileUpload'
-import { useSession } from 'next-auth/react'
+
 import * as Fetcher from '@/components/Fetchers'
 import ProgressModal from '@/components/layout/dashboard/ProgressModal'
 

@@ -5,19 +5,21 @@ import UpcomingRacesTable from '@/components/tables/UpcomingRacesTable'
 import { PageSkeleton } from '@/components/layout/PageSkeleton'
 import CreateEventModal from '@/components/layout/dashboard/CreateEventModal'
 import { title } from '../../../components/layout/home/primitaves'
-import { useSession } from 'next-auth/react'
-import { auth } from '@/server/auth'
-import authConfig from '@/lib/auth.config'
+
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import HornTestButton from '@/components/layout/home/HornTestButton'
-
+import { headers } from 'next/headers'
+import { auth } from '@/lib/auth'
 export default async function Page() {
-    const session = await auth()
-    if (session == null) {
-        redirect(authConfig.pages.signIn)
-    }
+    const session = await auth.api.getSession({
+        headers: await headers() // you need to pass the headers object.
+    })
     console.log('Session:', session)
+    if (!session || !session.club) {
+        // If the user is not authenticated, redirect to the login page
+        return <PageSkeleton />
+    }
     return (
         <div>
             <div className='p-6'>
@@ -28,7 +30,7 @@ export default async function Page() {
                     <div>
                         <p className='text-2xl font-bold p-6 pb-1'>Today&apos;s Races</p>
                         <div className='p-6 pt-1'>
-                            <UpcomingRacesTable session={session} />
+                            <UpcomingRacesTable />
                         </div>
                     </div>
 

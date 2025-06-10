@@ -1,6 +1,5 @@
 'use client'
 import { ChangeEvent, useEffect, useState } from 'react'
-import { getSession, useSession } from 'next-auth/react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select'
 import * as Fetcher from '@/components/Fetchers'
 import * as DB from '@/components/apiMethods'

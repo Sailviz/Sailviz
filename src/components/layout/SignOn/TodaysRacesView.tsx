@@ -1,5 +1,5 @@
 'use client'
-import { Session } from 'next-auth'
+
 import { useRouter } from 'next/navigation'
 import * as Fetcher from '@/components/Fetchers'
 import SignOnTable from '@/components/tables/SignOnTable'

@@ -17,19 +17,26 @@ model globalConfig {
 }
 
 model User {
-  displayName String
-  id          String    @id @unique @default(uuid())
-  username    String    @unique
-  password    String?
-  clubId      String
-  uuid        String?   @unique
-  startPage   String
-  accounts    Account[]
-  sessions    Session[]
-  club        Club      @relation(fields: [clubId], references: [id])
-  roles       Role[]    @relation("RoleToUser")
+  id        String  @id @unique @default(uuid())
+  username  String  @unique
+  uuid      String? @unique
+  startPage String
 
-  @@index([clubId])
+  name            String    @db.Text
+  email           String
+  emailVerified   Boolean
+  image           String?   @db.Text
+  createdAt       DateTime
+  updatedAt       DateTime
+  displayUsername String?   @db.Text
+  sessions        Session[]
+  accounts        Account[]
+  clubId          String
+  club            Club      @relation(fields: [clubId], references: [id])
+  roles           Role[]    @relation("RoleToUser")
+
+  @@unique([email])
+  @@map("user")
 }
 
 model Role {
@@ -67,9 +74,10 @@ model Club {
   roles            Role[]
   series           Series[]
   Trackers         Tracker[]
-  users            User[]
   stripe           Stripe?   @relation(fields: [stripeCustomerId], references: [customerId])
   stripeCustomerId String?
+  users            User[]
+  userId           String?   @unique
 }
 
 model Stripe {
@@ -200,32 +208,47 @@ model Buoy {
   @@index([clubId])
 }
 
-model Account {
-  id                       String  @id @default(cuid())
-  userId                   String
-  type                     String
-  provider                 String
-  providerAccountId        String
-  refresh_token            String? @db.Text
-  access_token             String?
-  expires_at               Int?
-  token_type               String?
-  scope                    String?
-  id_token                 String?
-  session_state            String?
-  refresh_token_expires_in Int?
-  user                     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String
+  createdAt DateTime
+  updatedAt DateTime
+  ipAddress String?  @db.Text
+  userAgent String?  @db.Text
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([provider, providerAccountId])
-  @@index([userId], map: "Account_userId_fkey")
+  @@unique([token])
+  @@map("session")
 }
 
-model Session {
-  id           String   @id @default(cuid())
-  sessionToken String   @unique
-  userId       String
-  expires      DateTime
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+model Account {
+  id                    String    @id
+  accountId             String    @db.Text
+  providerId            String    @db.Text
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?   @db.Text
+  refreshToken          String?   @db.Text
+  idToken               String?   @db.Text
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?   @db.Text
+  password              String?   @db.Text
+  createdAt             DateTime
+  updatedAt             DateTime
 
-  @@index([userId], map: "Session_userId_fkey")
+  @@map("account")
+}
+
+model Verification {
+  id         String    @id
+  identifier String    @db.Text
+  value      String    @db.Text
+  expiresAt  DateTime
+  createdAt  DateTime?
+  updatedAt  DateTime?
+
+  @@map("verification")
 }

@@ -8,7 +8,7 @@ import { AVAILABLE_PERMISSIONS, userHasPermission } from '@/components/helpers/u
 import { ToCountSelect } from '@/components/ToCountSelect'
 import { AddRaceButton } from '@/components/AddRaceButton'
 import { use, useState } from 'react'
-import { useSession } from 'next-auth/react'
+
 import * as DB from '@/components/apiMethods'
 import { Button } from '@/components/ui/button'
 import StartSequenceManager from '@/components/StartSequenceManager'

@@ -10,14 +10,18 @@ import EditBoatModal from '@/components/layout/dashboard/EditBoatModal'
 import { userHasPermission, AVAILABLE_PERMISSIONS } from '@/components/helpers/users'
 import { title } from '@/components/layout/home/primitaves'
 import CreateBoatModal from '@/components/layout/dashboard/CreateBoatModal'
-import { useSession, signIn } from 'next-auth/react'
-import { auth } from '@/server/auth'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import Link from 'next/link'
+import { useSession } from '@/lib/auth-client'
 
 export default function Page() {
-    const { data: session, status } = useSession()
+    const {
+        data: session,
+        isPending, //loading state
+        error, //error object
+        refetch //refetch the session
+    } = useSession()
 
     const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
     const { boats, boatsIsError, boatsIsValidating, mutateBoats: mutateBoats } = Fetcher.Boats()

@@ -6,13 +6,13 @@ import * as Fetcher from '@/components/Fetchers'
 import { EditIcon } from '@/components/icons/edit-icon'
 import { DeleteIcon } from '@/components/icons/delete-icon'
 import { AVAILABLE_PERMISSIONS, userHasPermission } from '@/components/helpers/users'
-import { useSession, signIn } from 'next-auth/react'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from '../ui/dropdown-menu'
 import { ChevronDown } from 'lucide-react'
 import Link from 'next/link'
+import { useSession } from '@/lib/auth-client'
 const Boats = ({ ...props }: any) => {
     const initialValue = props.getValue()
     const [value, setValue] = React.useState<BoatDataType[]>(initialValue)
@@ -60,12 +60,12 @@ const columnHelper = createColumnHelper<FleetSettingsType>()
 
 const FleetTable = (props: any) => {
     const { fleetSettings, fleetSettingsIsError, fleetSettingsIsValidating } = Fetcher.GetFleetSettingsBySeriesId(props.seriesId)
-    const { data: session, status } = useSession({
-        required: true,
-        onUnauthenticated() {
-            signIn()
-        }
-    })
+    const {
+        data: session,
+        isPending, //loading state
+        error, //error object
+        refetch //refetch the session
+    } = useSession()
     console.log(props.data)
 
     const remove = (data: any) => {

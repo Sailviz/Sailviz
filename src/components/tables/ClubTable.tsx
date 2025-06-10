@@ -5,11 +5,11 @@ import { EyeIcon } from '@/components/icons/eye-icon'
 import { EditIcon } from '@/components/icons/edit-icon'
 import { DeleteIcon } from '@/components/icons/delete-icon'
 import { AVAILABLE_PERMISSIONS, userHasPermission } from '@/components/helpers/users'
-import { useSession, signIn } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import * as DB from '@/components/apiMethods'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
 import Link from 'next/link'
+import { useSession } from '@/lib/auth-client'
 
 const Action = ({ ...props }: any) => {
     const onDeleteClick = () => {
@@ -41,7 +41,12 @@ const Action = ({ ...props }: any) => {
 const columnHelper = createColumnHelper<SeriesDataType>()
 
 const ClubTable = ({ viewHref }: { viewHref: string }) => {
-    const { data: session, status } = useSession()
+    const {
+        data: session,
+        isPending, //loading state
+        error, //error object
+        refetch //refetch the session
+    } = useSession()
     const [data, setData] = useState<SeriesDataType[]>([])
     const loadingState = data?.length === 0 ? 'loading' : 'idle'
 

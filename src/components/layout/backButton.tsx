@@ -1,7 +1,6 @@
 'use client'
 import { useRouter } from 'next/navigation'
 import { Button } from '../ui/button'
-import { useSession, signOut } from 'next-auth/react'
 
 export default function BackButton({ demoMode = false }) {
     const Router = useRouter()

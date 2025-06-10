@@ -4,7 +4,6 @@ import { Button } from './ui/button'
 import { Input } from './ui/input'
 import Papa from 'papaparse'
 import ProgressModal from './layout/dashboard/ProgressModal'
-import { getSession, useSession } from 'next-auth/react'
 import * as Fetcher from '@/components/Fetchers'
 import * as DB from '@/components/apiMethods'
 export function EntryFileUpload({ raceId }: { raceId: string }) {

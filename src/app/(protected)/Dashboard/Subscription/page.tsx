@@ -1,22 +1,15 @@
 'use client'
 import * as Fetcher from '@/components/Fetchers'
 import { PageSkeleton } from '@/components/layout/PageSkeleton'
-import { useSession, signIn } from 'next-auth/react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { customerPortalAction } from '@/lib/payments/actions'
 import PricingPage from '@/app/(public)/Pricing/page'
 
 export default function Page() {
-    const { data: session, status } = useSession({
-        required: true,
-        onUnauthenticated() {
-            signIn()
-        }
-    })
     const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
 
-    if (clubIsValidating || clubIsError || session == undefined) {
+    if (clubIsValidating || clubIsError) {
         return <PageSkeleton />
     }
     console.log('Club:', club)

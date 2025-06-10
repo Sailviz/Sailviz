@@ -1,6 +1,6 @@
 'use client'
 import CreateEventModal from '@/components/layout/dashboard/CreateEventModal'
-import { useSession } from 'next-auth/react'
+
 import * as DB from '@/components/apiMethods'
 import { useRouter } from 'next/navigation'
 

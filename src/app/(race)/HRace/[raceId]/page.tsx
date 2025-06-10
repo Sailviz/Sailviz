@@ -10,13 +10,13 @@ import BoatCard from '@/components/layout/race/BoatCard'
 import { PageSkeleton } from '@/components/layout/PageSkeleton'
 import { mutate } from 'swr'
 import FlagModal from '@/components/layout/dashboard/Flag Modal'
-import { useSession, signIn } from 'next-auth/react'
 import { Button } from '@/components/ui/button'
 import RaceTimer from '@/components/layout/race/raceTimer'
 import { DropdownMenu, DropdownMenuItem } from '@/components/ui/dropdown-menu'
 import { DropdownMenuContent, DropdownMenuTrigger } from '@radix-ui/react-dropdown-menu'
 import { CaretDownIcon } from '@radix-ui/react-icons'
 import FleetSelectDialog from '@/components/layout/dashboard/FleetSelectModal'
+import { useSession } from '@/lib/auth-client'
 
 // these options are the same across all fleets
 enum raceStateType {
@@ -40,7 +40,12 @@ export default function Page(props: PageProps) {
     const { raceId } = use(props.params)
     const Router = useRouter()
 
-    const { data: session, status } = useSession()
+    const {
+        data: session,
+        isPending, //loading state
+        error, //error object
+        refetch //refetch the session
+    } = useSession()
     const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
 
     const { race, raceIsError, raceIsValidating } = Fetcher.Race(raceId, true)

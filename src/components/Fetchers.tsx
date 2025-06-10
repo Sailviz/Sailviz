@@ -1,7 +1,7 @@
 'use client'
 import useSWR, { mutate } from 'swr'
 import * as Sentry from '@sentry/react'
-import { useSession } from 'next-auth/react'
+
 import dayjs from 'dayjs'
 
 export async function fetcher(url: string) {

@@ -15,7 +15,6 @@ async function updateUser(user: UserDataType, password: string) {
             id: user.id
         },
         data: {
-            displayName: user.displayName,
             username: user.username,
             roles: {
                 set: user.roles.map(role => ({ id: role.id }))

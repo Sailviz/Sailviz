@@ -7,7 +7,6 @@ import { use } from 'react'
 import * as Fetcher from '@/components/Fetchers'
 import CreateResultModal from '@/components/layout/dashboard/CreateResultModal'
 import CreateBoatDialog from '@/components/layout/dashboard/CreateBoatModal'
-import { useSession } from 'next-auth/react'
 
 export default function Page() {
     const Router = useRouter()

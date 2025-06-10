@@ -7,7 +7,6 @@ import * as Fetcher from '@/components/Fetchers'
 import { PageSkeleton } from '@/components/layout/PageSkeleton'
 import { title } from '@/components/layout/home/primitaves'
 import ViewResultModal from '@/components/layout/dashboard/viewResultModal'
-import { useSession, signIn } from 'next-auth/react'
 
 type PageProps = { params: Promise<{ slug: string }> }
 
@@ -15,12 +14,7 @@ export default function Page(props: PageProps) {
     const Router = useRouter()
 
     const params = use(props.params)
-    const { data: session, status } = useSession({
-        required: true,
-        onUnauthenticated() {
-            signIn()
-        }
-    })
+
     const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
     const { boats, boatsIsError, boatsIsValidating } = Fetcher.Boats()
     const { race, raceIsError, raceIsValidating } = Fetcher.Race(params.slug, true)
@@ -43,7 +37,7 @@ export default function Page(props: PageProps) {
         // viewModal.onOpen()
     }
 
-    if (clubIsValidating || raceIsValidating || session == undefined || club == undefined) {
+    if (clubIsValidating || raceIsValidating || club == undefined) {
         return <PageSkeleton />
     }
     return (

@@ -4,11 +4,16 @@ import { useRouter } from 'next/navigation'
 import * as DB from '@/components/apiMethods'
 import cookie from 'js-cookie'
 import * as Fetcher from '@/components/Fetchers'
-import { useSession } from 'next-auth/react'
+import { useSession } from '@/lib/auth-client'
 
 export default function Page() {
     const Router = useRouter()
-    const { data: session, status } = useSession()
+    const {
+        data: session,
+        isPending, //loading state
+        error, //error object
+        refetch //refetch the session
+    } = useSession()
 
     const { GlobalConfig, GlobalConfigIsError, GlobalConfigIsValidating } = Fetcher.UseGlobalConfig()
 
