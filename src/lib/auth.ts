@@ -11,7 +11,7 @@ export const auth = betterAuth({
             const dbUser = (await prisma.user.findUnique({
                 where: { id: user.id },
                 include: {
-                    // add other fields as needed
+                    roles: true
                 }
             })) as UserDataType | null
             if (!dbUser) {

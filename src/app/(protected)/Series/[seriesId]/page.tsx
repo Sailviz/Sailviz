@@ -1,4 +1,3 @@
-'use client'
 import SeriesResultsTable from '@/components/tables/FleetSeriesResultsTable'
 import SeriesRaceTable from '@/components/tables/SeriesRaceTable'
 import FleetTable from '@/components/tables/FleetTable'
@@ -7,21 +6,40 @@ import EditFleetModal from '@/components/layout/dashboard/EditFleetSettingsModal
 import { AVAILABLE_PERMISSIONS, userHasPermission } from '@/components/helpers/users'
 import { ToCountSelect } from '@/components/ToCountSelect'
 import { AddRaceButton } from '@/components/AddRaceButton'
-import { use, useState } from 'react'
+import { use } from 'react'
 
 import * as DB from '@/components/apiMethods'
 import { Button } from '@/components/ui/button'
 import StartSequenceManager from '@/components/StartSequenceManager'
+import { auth } from '@/lib/auth'
+import { headers } from 'next/headers'
+import { PageSkeleton } from '@/components/layout/PageSkeleton'
+import prisma from '@/lib/prisma'
 type PageProps = { params: Promise<{ seriesId: string }> }
 
-export default function Page(props: PageProps) {
+export default async function Page(props: PageProps) {
     const { seriesId } = use(props.params)
-    const { data: session, status } = useSession()
+    const session = await auth.api.getSession({
+        headers: await headers() // you need to pass the headers object.
+    })
+    console.log('Session:', session)
+    if (!session || !session.club) {
+        // If the user is not authenticated, redirect to the login page
+        return <PageSkeleton />
+    }
 
-    const [editFleet, setEditFleet] = useState(false)
+    const startSequence = (await prisma.startSequence.findMany({
+        where: { seriesId: seriesId },
+        orderBy: { order: 'asc' }
+    })) as unknown as StartSequenceStep[]
 
-    const { startSequence, startSequenceIsError, startSequenceIsValidating, mutateStartSequence } = Fetcher.GetStartSequence(seriesId)
-    const { series, seriesIsError, seriesIsValidating, mutateSeries } = Fetcher.Series(seriesId)
+    const series = await prisma.series.findUnique({
+        where: { id: seriesId },
+        include: {
+            fleetSettings: true,
+            club: true
+        }
+    })
 
     // const createRace = async () => {
     //     var race = await DB.createRace(club.id, series.id)
@@ -37,9 +55,9 @@ export default function Page(props: PageProps) {
     //     mutateSeries()
     // }
 
-    const createFleetSettings = async () => {
-        await DB.createFleetSettings(seriesId)
-    }
+    // const createFleetSettings = async () => {
+    //     await DB.createFleetSettings(seriesId)
+    // }
 
     // const deleteFleetSettings = async (fleetId: string) => {
     //     await DB.DeleteFleetSettingsById(fleetId)
@@ -78,7 +96,7 @@ export default function Page(props: PageProps) {
                 {userHasPermission(session!.user, AVAILABLE_PERMISSIONS.editFleets) ? (
                     <>
                         <StartSequenceManager initialSequence={startSequence} seriesId={seriesId} key={startSequence?.length} />
-                        <Button onClick={createFleetSettings}>Add Fleet</Button>
+                        {/* <Button onClick={createFleetSettings}>Add Fleet</Button> */}
 
                         <ToCountSelect seriesId={seriesId} />
                     </>

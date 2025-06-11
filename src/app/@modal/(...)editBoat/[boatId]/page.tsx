@@ -9,12 +9,18 @@ import CreateResultModal from '@/components/layout/dashboard/CreateResultModal'
 import CreateBoatDialog from '@/components/layout/dashboard/CreateBoatModal'
 
 import EditBoatDialog from '@/components/layout/dashboard/EditBoatModal'
+import { useSession } from '@/lib/auth-client'
 type PageProps = { params: Promise<{ boatId: string }> }
 
 export default function Page(props: PageProps) {
     const Router = useRouter()
     const { boatId } = use(props.params)
-    const { data: session, status } = useSession()
+    const {
+        data: session,
+        isPending, //loading state
+        error, //error object
+        refetch //refetch the session
+    } = useSession()
 
     const { boat, boatIsError, boatIsValidating, mutateBoats } = Fetcher.Boat(boatId)
 

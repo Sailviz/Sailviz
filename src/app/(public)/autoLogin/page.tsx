@@ -8,6 +8,7 @@ export default function Page() {
     const Router = useRouter()
 
     const sendLoginRequest = async (uuid: string) => {
+        // @ts-ignore not sure why this is needed, but it is
         const res = await client.myPlugin.authByUuid({ uuid, fetchOptions: { method: 'POST' } })
         console.log(res)
         Router.push(res.data.user.startPage || '/')

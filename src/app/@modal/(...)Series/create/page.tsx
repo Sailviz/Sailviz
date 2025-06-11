@@ -3,9 +3,15 @@
 import CreateSeriesModal from '@/components/layout/dashboard/CreateSeriesModal'
 import { useRouter } from 'next/navigation'
 import * as DB from '@/components/apiMethods'
+import { useSession } from '@/lib/auth-client'
 
 export default function Page() {
-    const { data: session, status } = useSession()
+    const {
+        data: session,
+        isPending, //loading state
+        error, //error object
+        refetch //refetch the session
+    } = useSession()
     const Router = useRouter()
 
     const createSeries = async (seriesName: string) => {

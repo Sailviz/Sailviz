@@ -111,6 +111,11 @@ export default function Page() {
         await DB.deleteBoatById(boat.id)
     }
 
+    if (session == null) {
+        // If the user is not authenticated, redirect to the login page
+        return <PageSkeleton />
+    }
+
     return (
         <div className='flex flex-col h-full'>
             {/* <EditBoatModal
@@ -127,7 +132,7 @@ export default function Page() {
                 <h1 className={title({ color: 'blue' })}>Boats</h1>
             </div>
             <div className='p-6'>
-                {userHasPermission(session!.user, AVAILABLE_PERMISSIONS.editBoats) ? (
+                {userHasPermission(session.user, AVAILABLE_PERMISSIONS.editBoats) ? (
                     <div className='flex flex-row p-6 justify-around'>
                         <Button className='mx-1' color='primary' onClick={() => document.getElementById('boatFileUpload')!.click()}>
                             Upload Boat Data

@@ -11,6 +11,8 @@ import Link from 'next/link'
 import HornTestButton from '@/components/layout/home/HornTestButton'
 import { headers } from 'next/headers'
 import { auth } from '@/lib/auth'
+import prisma from '@/lib/prisma'
+import dayjs from 'dayjs'
 export default async function Page() {
     const session = await auth.api.getSession({
         headers: await headers() // you need to pass the headers object.
@@ -20,6 +22,34 @@ export default async function Page() {
         // If the user is not authenticated, redirect to the login page
         return <PageSkeleton />
     }
+    const todaysRaces = (await prisma.race.findMany({
+        where: {
+            AND: [
+                {
+                    Time: {
+                        gte: dayjs().set('hour', 0).set('minute', 0).set('second', 0).format('YYYY-MM-DD HH:ss'),
+                        lte: dayjs().set('hour', 24).set('minute', 0).set('second', 0).format('YYYY-MM-DD HH:ss')
+                    }
+                },
+                {
+                    series: {
+                        clubId: session.club.id
+                    }
+                }
+            ]
+        },
+        orderBy: {
+            Time: 'asc'
+        },
+        include: {
+            fleets: {
+                include: {
+                    fleetSettings: true
+                }
+            },
+            series: true
+        }
+    })) as unknown as RaceDataType[]
     return (
         <div>
             <div className='p-6'>
@@ -30,7 +60,7 @@ export default async function Page() {
                     <div>
                         <p className='text-2xl font-bold p-6 pb-1'>Today&apos;s Races</p>
                         <div className='p-6 pt-1'>
-                            <UpcomingRacesTable />
+                            <UpcomingRacesTable todaysRaces={todaysRaces} />
                         </div>
                     </div>
 

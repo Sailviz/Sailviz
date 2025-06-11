@@ -16,8 +16,11 @@ async function createUser(clubId: string) {
     var user = await prisma.user.create({
         data: {
             username: '',
-            displayName: '',
-            password: null,
+            name: '',
+            email: '',
+            emailVerified: false,
+            createdAt: new Date(),
+            updatedAt: new Date(),
             clubId: clubId,
             roles: {},
             startPage: 'Dashboard'
