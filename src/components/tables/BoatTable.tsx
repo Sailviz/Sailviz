@@ -6,13 +6,13 @@ import { DeleteIcon } from '@/components/icons/delete-icon'
 import { SearchIcon } from '@/components/icons/search-icon'
 import * as Fetcher from '@/components/Fetchers'
 import { AVAILABLE_PERMISSIONS, userHasPermission } from '@/components/helpers/users'
-import { useSession, signIn } from 'next-auth/react'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from '../ui/dropdown-menu'
 import { ChevronDown } from 'lucide-react'
 import Link from 'next/link'
+import { useSession } from '@/lib/auth-client'
 
 const columnHelper = createColumnHelper<BoatDataType>()
 
@@ -87,12 +87,12 @@ const Action = ({ ...props }: any) => {
 
 const BoatTable = (props: any) => {
     const { boats, boatsIsError, boatsIsValidating } = Fetcher.Boats()
-    const { data: session, status } = useSession({
-        required: true,
-        onUnauthenticated() {
-            signIn()
-        }
-    })
+    const {
+        data: session,
+        isPending, //loading state
+        error, //error object
+        refetch //refetch the session
+    } = useSession()
 
     const data = boats || []
 

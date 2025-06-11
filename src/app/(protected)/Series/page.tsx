@@ -6,15 +6,20 @@ import { AVAILABLE_PERMISSIONS, userHasPermission } from '@/components/helpers/u
 import { title } from '@/components/layout/home/primitaves'
 import EditSeriesModal from '@/components/layout/dashboard/EditSeriesModal'
 import { redirect } from 'next/navigation'
-import authConfig from '@/lib/auth.config'
-import { auth } from '@/server/auth'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
+import { auth } from '@/lib/auth'
+import { headers } from 'next/headers'
+import { PageSkeleton } from '@/components/layout/PageSkeleton'
 
 export default async function Page() {
-    const session = await auth()
-    if (session == null) {
-        redirect(authConfig.pages.signIn)
+    const session = await auth.api.getSession({
+        headers: await headers() // you need to pass the headers object.
+    })
+    console.log('Session:', session)
+    if (!session || !session.club) {
+        // If the user is not authenticated, redirect to the login page
+        return <PageSkeleton />
     }
 
     return (

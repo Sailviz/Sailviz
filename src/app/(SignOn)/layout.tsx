@@ -9,19 +9,23 @@ import { SettingsIcon } from '@/components/icons/settings-icon'
 import { SignOnIcon } from '@/components/icons/sign-on'
 import { SignOutIcon } from '@/components/icons/sign-out'
 import type { Metadata } from 'next'
-import { auth } from '@/server/auth'
 import { AVAILABLE_PERMISSIONS, userHasPermission } from '@/components/helpers/users'
 import prisma from '@/lib/prisma'
 import dayjs from 'dayjs'
 import { race } from 'cypress/types/bluebird'
 import { Series } from '@/components/Fetchers'
+import { headers } from 'next/headers'
+import { auth } from '@/lib/auth'
 
 export const metadata: Metadata = {
     title: 'SailViz',
     description: 'Sailing race system for clubs and regattas'
 }
 export default async function SignOnLayout({ children }: { children: React.ReactNode }) {
-    const session = await auth()
+    const session = await auth.api.getSession({
+        headers: await headers() // you need to pass the headers object.
+    })
+    console.log('Session:', session)
     const todaysRaces = await prisma.race.findMany({
         where: {
             AND: [

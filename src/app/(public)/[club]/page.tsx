@@ -9,7 +9,6 @@ import ClubTable from '@/components/tables/ClubTable'
 import { PageSkeleton } from '@/components/layout/PageSkeleton'
 import { title, subtitle } from '@/components/layout/home/primitaves'
 import cookie from 'js-cookie'
-import { getSession } from 'next-auth/react'
 
 //club page should contain:
 //list of current series

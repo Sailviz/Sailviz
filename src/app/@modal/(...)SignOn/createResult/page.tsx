@@ -1,15 +1,18 @@
 import { redirect } from 'next/navigation'
 import CreateResultModal from '@/components/layout/SignOn/CreateResultModal'
-import { auth } from '@/server/auth'
-import authConfig from '@/lib/auth.config'
 import prisma from '@/lib/prisma'
 import dayjs from 'dayjs'
+import { headers } from 'next/headers'
+import { auth } from '@/lib/auth'
+import { PageSkeleton } from '@/components/layout/PageSkeleton'
 
 export default async function Page() {
-    const session = await auth()
-
-    if (session == null) {
-        redirect(authConfig.pages.signIn)
+    const session = await auth.api.getSession({
+        headers: await headers() // you need to pass the headers object.
+    })
+    if (!session || !session.club) {
+        // If the user is not authenticated, redirect to the login page
+        return <PageSkeleton />
     }
 
     const todaysRaces = (await prisma.race.findMany({
@@ -52,5 +55,5 @@ export default async function Page() {
 
     console.log(todaysRaces)
 
-    return <CreateResultModal session={session} todaysRaces={todaysRaces} boats={boats} />
+    return <CreateResultModal todaysRaces={todaysRaces} boats={boats} />
 }

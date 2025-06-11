@@ -1,10 +1,13 @@
 const jwt = require('jsonwebtoken')
 const jwtSecret = process.env.jwtSecret
 import prisma from '@/lib/prisma'
-import { auth } from '@/server/auth'
 import * as Fetcher from '@/components/Fetchers'
+import { auth } from '@/lib/auth'
+import { headers } from 'next/headers'
 export async function isRequestAuthorised(id: string, table: string) {
-    const session = await auth()
+    const session = await auth.api.getSession({
+        headers: await headers() // you need to pass the headers object.
+    })
     var clubId = session?.user.clubId
     if (clubId == null) {
         return false

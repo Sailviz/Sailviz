@@ -12,8 +12,8 @@ import RetireModal from '@/components/layout/dashboard/RetireModal'
 import BoatCard from '@/components/layout/race/BoatCard'
 import { result, set } from 'cypress/types/lodash'
 import FlagModal from '@/components/layout/dashboard/Flag Modal'
-import { useSession, signIn } from 'next-auth/react'
 import { Button } from '@/components/ui/button'
+import { useSession } from '@/lib/auth-client'
 
 enum raceStateType {
     running,
@@ -39,12 +39,12 @@ export default function Page(props: PageProps) {
     const { raceId } = use(props.params)
     const Router = useRouter()
 
-    const { data: session, status } = useSession({
-        required: true,
-        onUnauthenticated() {
-            signIn()
-        }
-    })
+    const {
+        data: session,
+        isPending, //loading state
+        error, //error object
+        refetch //refetch the session
+    } = useSession()
 
     const [flagStatus, setFlagStatus] = useState<boolean[]>([false, false])
     const [nextFlagStatus, setNextFlagStatus] = useState<boolean[]>([false, false])

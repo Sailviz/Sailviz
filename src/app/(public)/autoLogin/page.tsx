@@ -1,37 +1,17 @@
 'use client'
-import cookie from 'js-cookie'
 import React, { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-
+import { client } from '@/lib/auth-client'
+import { method } from 'cypress/types/bluebird'
 export default function Page() {
     const searchParams = useSearchParams()
     const Router = useRouter()
 
     const sendLoginRequest = async (uuid: string) => {
-        //get csrf token from next-auth
-        const csrfRes = await fetch('/api/auth/csrf')
-        if (!csrfRes.ok) {
-            console.error('Failed to fetch CSRF token:', csrfRes.statusText)
-            return
-        }
-        const { csrfToken } = await csrfRes.json()
-        //send manual login request to next-auth
-        const res = await fetch('/api/auth/callback/autoLogin', {
-            method: 'POST',
-            redirect: 'follow',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ uuid, csrfToken, callbackUrl: '/Dashboard' })
-        })
-        if (res.ok) {
-            console.log(res)
-            Router.push(res.url)
-        } else {
-            console.error('Login failed:', res.statusText)
-            // Handle login failure (e.g., show an error message)
-            alert('Login failed. Please try again.')
-        }
+        // @ts-ignore not sure why this is needed, but it is
+        const res = await client.myPlugin.authByUuid({ uuid, fetchOptions: { method: 'POST' } })
+        console.log(res)
+        Router.push(res.data.user.startPage || '/')
     }
 
     useEffect(() => {

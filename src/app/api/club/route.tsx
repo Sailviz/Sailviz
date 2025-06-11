@@ -1,5 +1,6 @@
+import { auth } from '@/lib/auth'
 import prisma from '@/lib/prisma'
-import { auth } from '@/server/auth'
+import { headers } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
 
 async function getClub(id: string) {
@@ -18,7 +19,9 @@ async function getClub(id: string) {
 }
 
 export async function GET(request: NextRequest) {
-    const session = await auth()
+    const session = await auth.api.getSession({
+        headers: await headers() // you need to pass the headers object.
+    })
     var clubId = session?.user.clubId
     if (clubId == null) {
         return NextResponse.json({ error: 'information missing' }, { status: 400 })

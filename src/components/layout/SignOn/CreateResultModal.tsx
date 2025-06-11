@@ -10,9 +10,8 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Button } from '@/components/ui/button'
 import { useRouter } from 'next/navigation'
 import * as Fetcher from '@/components/Fetchers'
-import { Session } from 'next-auth'
 import { use } from 'chai'
-export default function CreateResultModal({ session, todaysRaces, boats }: { session: Session; todaysRaces: RaceDataType[]; boats: BoatDataType[] }) {
+export default function CreateResultModal({ todaysRaces, boats }: { todaysRaces: RaceDataType[]; boats: BoatDataType[] }) {
     const Router = useRouter()
     const [open, setOpen] = useState(true)
 

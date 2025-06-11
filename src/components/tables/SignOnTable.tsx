@@ -5,17 +5,22 @@ import { EditIcon } from '@/components/icons/edit-icon'
 import * as Fetcher from '@/components/Fetchers'
 import { AVAILABLE_PERMISSIONS, userHasPermission } from '@/components/helpers/users'
 import { PageSkeleton } from '@/components/layout/PageSkeleton'
-import { useSession, signIn } from 'next-auth/react'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from '../ui/dropdown-menu'
 import { ChevronDown } from 'lucide-react'
 import Link from 'next/link'
-import { Session } from 'next-auth'
+import { useSession } from '@/lib/auth-client'
 const columnHelper = createColumnHelper<ResultDataType>()
 
-const SignOnTable = ({ session, raceId }: { session: Session; raceId: string }) => {
+const SignOnTable = ({ raceId }: { raceId: string }) => {
+    const {
+        data: session,
+        isPending, //loading state
+        error, //error object
+        refetch //refetch the session
+    } = useSession()
     const { race, raceIsError, raceIsValidating } = Fetcher.Race(raceId, true)
     let [data, setData] = useState<ResultDataType[]>([])
     let options: object[] = []

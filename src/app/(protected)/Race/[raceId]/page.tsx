@@ -6,15 +6,16 @@ import FleetHandicapResultsTable from '@/components/tables/FleetHandicapResultsT
 import FleetPursuitResultsTable from '@/components/tables/FleetPursuitResultsTable'
 import { AVAILABLE_PERMISSIONS, userHasPermission } from '@/components/helpers/users'
 import { notFound, redirect, useRouter } from 'next/navigation'
-import { auth } from '@/server/auth'
 import { Breadcrumbs } from '@/components/breadcrumbs'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { EntryFileUpload } from '@/components/EntryFileUpload'
-import { useSession } from 'next-auth/react'
+
 import * as Fetcher from '@/components/Fetchers'
 import ProgressModal from '@/components/layout/dashboard/ProgressModal'
+import { useSession } from '@/lib/auth-client'
+import { PageSkeleton } from '@/components/layout/PageSkeleton'
 
 type PageProps = { params: Promise<{ raceId: string }> }
 
@@ -22,7 +23,12 @@ export default function Page(props: PageProps) {
     const Router = useRouter()
 
     const { raceId } = use(props.params)
-    const { data: session, status } = useSession()
+    const {
+        data: session,
+        isPending, //loading state
+        error, //error object
+        refetch //refetch the session
+    } = useSession()
 
     const { race, raceIsError, raceIsValidating, mutateRace } = Fetcher.Race(raceId, true)
 
@@ -101,6 +107,10 @@ export default function Page(props: PageProps) {
         })
     }
 
+    if (session == undefined || isPending || race == undefined) {
+        return <PageSkeleton />
+    }
+
     return (
         <div id='race' className='h-full w-full overflow-y-auto'>
             {/* <ViewResultModal isOpen={viewModal.isOpen} result={activeResult} fleet={activeFleet} onClose={viewModal.onClose} /> */}
@@ -154,8 +164,8 @@ export default function Page(props: PageProps) {
                             <Link href={`/PrintPaperResults/${race.id}`}>
                                 <Button className='mx-1'>Print Race Sheet</Button>
                             </Link>
-                            {userHasPermission(session!.user, AVAILABLE_PERMISSIONS.UploadEntires) ? <EntryFileUpload raceId={race.id} /> : <></>}
-                            {userHasPermission(session!.user, AVAILABLE_PERMISSIONS.DownloadResults) ? <Button onClick={downloadResults}>Download Results</Button> : <></>}
+                            {userHasPermission(session.user, AVAILABLE_PERMISSIONS.UploadEntires) ? <EntryFileUpload raceId={race.id} /> : <></>}
+                            {userHasPermission(session.user, AVAILABLE_PERMISSIONS.DownloadResults) ? <Button onClick={downloadResults}>Download Results</Button> : <></>}
                         </div>
                     </div>
                     <div className='py-4 w-full'>

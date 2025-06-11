@@ -7,16 +7,16 @@ import TrackerTable from '@/components/tables/TrackerTable'
 import TrackerStatusModal from '@/components/layout/dashboard/TrackerStatusModal'
 import * as Trackable from '@/components/trackable'
 import { useState } from 'react'
-import { useSession, signIn } from 'next-auth/react'
 import { Button } from '@/components/ui/button'
+import { useSession } from '@/lib/auth-client'
 
 export default function Page() {
-    const { data: session, status } = useSession({
-        required: true,
-        onUnauthenticated() {
-            signIn()
-        }
-    })
+    const {
+        data: session,
+        isPending, //loading state
+        error, //error object
+        refetch //refetch the session
+    } = useSession()
     const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
 
     // const statusModal = useDisclosure()

@@ -1,15 +1,18 @@
 import Stripe from 'stripe'
 import { redirect } from 'next/navigation'
-import { auth } from '@/server/auth'
 import prisma from '../prisma'
 import { server } from '@/components/URL'
+import { auth } from '../auth'
+import { headers } from 'next/headers'
 
 export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'key not available', {
     apiVersion: '2025-05-28.basil'
 })
 
 export async function createCheckoutSession({ club, priceId }: { club: ClubDataType | null; priceId: string }) {
-    const session = await auth()
+    const session = await auth.api.getSession({
+        headers: await headers() // you need to pass the headers object.
+    })
 
     if (!club || !session) {
         redirect(`/sign-up?redirect=checkout&priceId=${priceId}`)

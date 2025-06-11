@@ -1,6 +1,6 @@
 'use client'
 import { Button } from '@/components/ui/button'
-import { DialogContent, DialogFooter, DialogHeader } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogFooter, DialogHeader } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { useTheme } from 'next-themes'
 import { ChangeEvent, useEffect, useState } from 'react'
@@ -12,7 +12,7 @@ export default function CreateEventDialog({ isOpen, onSubmit, onClose }: { isOpe
     const { theme, setTheme } = useTheme()
 
     return (
-        <>
+        <Dialog>
             <DialogContent>
                 <DialogHeader className='flex flex-col gap-1'>Create New Event</DialogHeader>
                 <div className='flex w-full'>
@@ -41,6 +41,6 @@ export default function CreateEventDialog({ isOpen, onSubmit, onClose }: { isOpe
                     </Button>
                 </DialogFooter>
             </DialogContent>
-        </>
+        </Dialog>
     )
 }

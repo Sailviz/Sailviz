@@ -6,10 +6,10 @@ import { EditIcon } from '@/components/icons/edit-icon'
 import { DeleteIcon } from '@/components/icons/delete-icon'
 import * as Fetcher from '@/components/Fetchers'
 import { AVAILABLE_PERMISSIONS, userHasPermission } from '@/components/helpers/users'
-import { useSession, signIn } from 'next-auth/react'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { useSession } from '@/lib/auth-client'
 
 const Action = ({ ...props }: any) => {
     console.log(props.row.original)
@@ -36,7 +36,12 @@ const columnHelper = createColumnHelper<RoleDataType>()
 
 const UsersTable = (props: any) => {
     const Router = useRouter()
-    const { data: session, status } = useSession()
+    const {
+        data: session,
+        isPending, //loading state
+        error, //error object
+        refetch //refetch the session
+    } = useSession()
     const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
     const { roles, rolesIsError, rolesIsValidating } = Fetcher.Roles(club)
 

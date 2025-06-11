@@ -1,6 +1,5 @@
 'use client'
 // Update the import path below to the correct relative path if necessary
-import EditResultModal from '@/components/layout/dashboard/EditResultModal'
 import { useRouter } from 'next/navigation'
 import * as DB from '@/components/apiMethods'
 import { use } from 'react'
@@ -24,7 +23,8 @@ export default function Page(props: PageProps) {
         Router.back()
     }
 
-    if (race == undefined) {
+    console.log(race, boats)
+    if (race == undefined || boats == undefined) {
         return <div>Loading...</div>
     }
 

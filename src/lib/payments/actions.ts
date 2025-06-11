@@ -2,14 +2,17 @@
 
 import { redirect } from 'next/navigation'
 import { createCheckoutSession, createCustomerPortalSession } from './stripe'
-import { auth } from '@/server/auth'
 import prisma from '../prisma'
+import { auth } from '../auth'
+import { headers } from 'next/headers'
 
 type ActionWithTeamFunction<T> = (formData: FormData, club: ClubDataType) => Promise<T>
 
 function withTeam<T>(action: ActionWithTeamFunction<T>) {
     return async (formData: FormData): Promise<T> => {
-        const session = await auth()
+        const session = await auth.api.getSession({
+            headers: await headers() // you need to pass the headers object.
+        })
         console.log('Session:', session)
         if (!session) {
             redirect('/Login')

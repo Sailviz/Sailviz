@@ -12,13 +12,13 @@ import { useTheme } from 'next-themes'
 import useSWR from 'swr'
 import * as Fetcher from '@/components/Fetchers'
 import { AVAILABLE_PERMISSIONS, userHasPermission } from '@/components/helpers/users'
-import { useSession, signIn } from 'next-auth/react'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from '../ui/dropdown-menu'
 import { ChevronDown } from 'lucide-react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select'
+import { useSession } from '@/lib/auth-client'
 
 const raceOptions = [
     { value: 'Pursuit', label: 'Pursuit' },
@@ -128,7 +128,12 @@ const Action = ({ ...props }: any) => {
 const columnHelper = createColumnHelper<RaceDataType>()
 
 const SeriesRaceTable = (props: any) => {
-    const { data: session, status } = useSession()
+    const {
+        data: session,
+        isPending, //loading state
+        error, //error object
+        refetch //refetch the session
+    } = useSession()
     const [seriesId, setSeriesId] = useState(props.id)
     const {
         data: series,

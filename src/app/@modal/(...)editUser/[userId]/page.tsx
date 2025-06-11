@@ -7,15 +7,21 @@ import { use } from 'react'
 import * as Fetcher from '@/components/Fetchers'
 import CreateResultModal from '@/components/layout/dashboard/CreateResultModal'
 import CreateBoatDialog from '@/components/layout/dashboard/CreateBoatModal'
-import { useSession } from 'next-auth/react'
+
 import EditBoatDialog from '@/components/layout/dashboard/EditBoatModal'
 import EditUserDialog from '@/components/layout/dashboard/EditUserModal'
+import { useSession } from '@/lib/auth-client'
 type PageProps = { params: Promise<{ userId: string }> }
 
 export default function Page(props: PageProps) {
     const Router = useRouter()
     const { userId } = use(props.params)
-    const { data: session, status } = useSession()
+    const {
+        data: session,
+        isPending, //loading state
+        error, //error object
+        refetch //refetch the session
+    } = useSession()
 
     const { user, userIsError, userIsValidating } = Fetcher.User(userId)
 

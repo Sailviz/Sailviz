@@ -1,6 +1,7 @@
+import { auth } from '@/lib/auth'
 import prisma from '@/lib/prisma'
+import { headers } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
-import { auth } from '@/server/auth'
 
 async function findBoats(clubId: string) {
     var result = await prisma.boat.findMany({
@@ -15,7 +16,9 @@ async function findBoats(clubId: string) {
 }
 
 export async function GET(request: NextRequest) {
-    var session = await auth()
+    const session = await auth.api.getSession({
+        headers: await headers() // you need to pass the headers object.
+    })
 
     var clubId = session?.user.clubId
 

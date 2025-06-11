@@ -7,19 +7,19 @@ import { PageSkeleton } from '@/components/layout/PageSkeleton'
 import { AVAILABLE_PERMISSIONS, userHasPermission } from '@/components/helpers/users'
 import { mutate } from 'swr'
 import { EditIcon } from '@/components/icons/edit-icon'
-import { useSession, signIn } from 'next-auth/react'
 import { Input } from '@/components/ui/input'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Button } from '@/components/ui/button'
+import { useSession } from '@/lib/auth-client'
 
 export default function Page() {
     const Router = useRouter()
-    const { data: session, status } = useSession({
-        required: true,
-        onUnauthenticated() {
-            signIn()
-        }
-    })
+    const {
+        data: session,
+        isPending, //loading state
+        error, //error object
+        refetch //refetch the session
+    } = useSession()
     const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
 
     const savePursuitLength = async (pursuitLength: string) => {

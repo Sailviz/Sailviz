@@ -9,7 +9,6 @@ import FleetPursuitResultsTable from '@/components/tables/FleetPursuitResultsTab
 import * as Fetcher from '@/components/Fetchers'
 import { PageSkeleton } from '@/components/layout/PageSkeleton'
 import BackButton from '@/components/layout/backButton'
-import { useSession, signIn } from 'next-auth/react'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Breadcrumbs } from '@/components/breadcrumbs'
 import { Input } from '@/components/ui/input'
@@ -23,12 +22,6 @@ export default function Page(props: PageProps) {
 
     const { slug } = use(props.params)
 
-    const { data: session, status } = useSession({
-        required: true,
-        onUnauthenticated() {
-            signIn()
-        }
-    })
     const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
     const { boats, boatsIsError, boatsIsValidating } = Fetcher.Boats()
     const { GlobalConfig, GlobalConfigIsError, GlobalConfigIsValidating } = Fetcher.UseGlobalConfig()

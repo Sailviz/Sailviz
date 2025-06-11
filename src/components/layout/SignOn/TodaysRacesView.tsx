@@ -1,21 +1,13 @@
 'use client'
-import { Session } from 'next-auth'
+
 import { useRouter } from 'next/navigation'
 import * as Fetcher from '@/components/Fetchers'
 import SignOnTable from '@/components/tables/SignOnTable'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-export default function TodaysRacesView({ session }: { session: Session }) {
+export default function TodaysRacesView({ todaysRaces }: { todaysRaces: RaceDataType[] }) {
     const Router = useRouter()
-    const { todaysRaces, todaysRacesIsError, todaysRacesIsValidating } = Fetcher.GetTodaysRaceByClubId(session?.club?.id)
 
-    if (todaysRacesIsError || todaysRacesIsValidating || !todaysRaces) {
-        return (
-            <div>
-                <p className='text-6xl font-extrabol p-6'>Loading</p>
-            </div>
-        )
-    }
     if (todaysRaces?.length <= 0) {
         return (
             <div>
@@ -34,7 +26,7 @@ export default function TodaysRacesView({ session }: { session: Session }) {
                                 <div className='text-4xl font-extrabol p-6'>
                                     {race.series.name}: {race.number} at {race.Time.slice(10, 16)}
                                 </div>
-                                <SignOnTable session={session} raceId={race.id} />
+                                <SignOnTable raceId={race.id} />
                             </div>
                         )
                     })}

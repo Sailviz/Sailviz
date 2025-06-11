@@ -1,7 +1,7 @@
 'use client'
 import useSWR, { mutate } from 'swr'
 import * as Sentry from '@sentry/react'
-import { useSession } from 'next-auth/react'
+
 import dayjs from 'dayjs'
 
 export async function fetcher(url: string) {
@@ -71,21 +71,7 @@ export function Series(seriesId: string) {
  * @returns
  */
 export function Race(raceId: string, results: boolean) {
-    const { data, error, isValidating, mutate } = useSWR(raceId != '' ? `/api/GetRaceById?id=${raceId}&results=${results}` : null, fetcher, {
-        fallbackData: {
-            id: '',
-            number: 0,
-            Type: '',
-            Time: dayjs(new Date()).format('YYYY-MM-DDTHH:mm:ss'),
-            Duties: [
-                {
-                    displayName: '',
-                    name: ''
-                }
-            ],
-            fleets: [{ results: [] as ResultDataType[] }]
-        } as RaceDataType
-    })
+    const { data, error, isValidating, mutate } = useSWR(raceId != '' ? `/api/GetRaceById?id=${raceId}&results=${results}` : null, fetcher)
 
     return {
         race: data as RaceDataType,

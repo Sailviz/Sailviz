@@ -10,14 +10,18 @@ import EditBoatModal from '@/components/layout/dashboard/EditBoatModal'
 import { userHasPermission, AVAILABLE_PERMISSIONS } from '@/components/helpers/users'
 import { title } from '@/components/layout/home/primitaves'
 import CreateBoatModal from '@/components/layout/dashboard/CreateBoatModal'
-import { useSession, signIn } from 'next-auth/react'
-import { auth } from '@/server/auth'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import Link from 'next/link'
+import { useSession } from '@/lib/auth-client'
 
 export default function Page() {
-    const { data: session, status } = useSession()
+    const {
+        data: session,
+        isPending, //loading state
+        error, //error object
+        refetch //refetch the session
+    } = useSession()
 
     const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
     const { boats, boatsIsError, boatsIsValidating, mutateBoats: mutateBoats } = Fetcher.Boats()
@@ -107,6 +111,11 @@ export default function Page() {
         await DB.deleteBoatById(boat.id)
     }
 
+    if (session == null) {
+        // If the user is not authenticated, redirect to the login page
+        return <PageSkeleton />
+    }
+
     return (
         <div className='flex flex-col h-full'>
             {/* <EditBoatModal
@@ -123,7 +132,7 @@ export default function Page() {
                 <h1 className={title({ color: 'blue' })}>Boats</h1>
             </div>
             <div className='p-6'>
-                {userHasPermission(session!.user, AVAILABLE_PERMISSIONS.editBoats) ? (
+                {userHasPermission(session.user, AVAILABLE_PERMISSIONS.editBoats) ? (
                     <div className='flex flex-row p-6 justify-around'>
                         <Button className='mx-1' color='primary' onClick={() => document.getElementById('boatFileUpload')!.click()}>
                             Upload Boat Data
