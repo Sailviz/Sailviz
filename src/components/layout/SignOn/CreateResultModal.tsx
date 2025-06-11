@@ -11,7 +11,9 @@ import { Button } from '@/components/ui/button'
 import { useRouter } from 'next/navigation'
 import * as Fetcher from '@/components/Fetchers'
 import { use } from 'chai'
+import { mutate } from 'swr'
 export default function CreateResultModal({ todaysRaces, boats }: { todaysRaces: RaceDataType[]; boats: BoatDataType[] }) {
+    // const { mutateTodaysRaces } = Fetcher.GetTodaysRaceByClubId()
     const Router = useRouter()
     const [open, setOpen] = useState(true)
 
@@ -63,7 +65,7 @@ export default function CreateResultModal({ todaysRaces, boats }: { todaysRaces:
         }
     }
 
-    const Submit = () => {
+    const Submit = async () => {
         //don't process submission if it's disabled
         if (submitDisabled == true) return
 
@@ -92,8 +94,12 @@ export default function CreateResultModal({ todaysRaces, boats }: { todaysRaces:
         //call submit for each fleet selected
         for (let i = 0; i < selectedFleets.length; i++) {
             console.log(i)
-            createResult(selectedFleets[i]!, helm, crew, selectedBoat.value, sailNumber)
+            await createResult(selectedFleets[i]!, helm, crew, selectedBoat.value, sailNumber)
         }
+        todaysRaces.forEach(race => {
+            mutate(`/api/GetRaceById?id=${race.id}&results=true`)
+        })
+        Router.back()
     }
 
     const createResult = async (fleetId: string, helm: string, crew: string, boat: BoatDataType, sailNum: string) => {
@@ -103,7 +109,6 @@ export default function CreateResultModal({ todaysRaces, boats }: { todaysRaces:
         await DB.updateResult({ ...result, Helm: helm, Crew: crew, boat: boat, SailNumber: sailNum })
 
         console.log(helm, crew, boat, sailNum, fleetId)
-        Router.back()
     }
 
     useEffect(() => {

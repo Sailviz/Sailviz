@@ -248,11 +248,15 @@ export function GetSeriesById(seriesId: string) {
 }
 
 export function GetTodaysRaceByClubId(clubId?: string) {
-    const { data, error, isValidating } = useSWR('/api/GetTodaysRaceByClubId', url => advancedFetcher(url, { clubId }), { suspense: true, fallbackData: { fleets: [] } })
+    const { data, error, isValidating } = useSWR(clubId ? '/api/GetTodaysRaceByClubId' : null, url => advancedFetcher(url, { clubId }), {
+        suspense: true,
+        fallbackData: { fleets: [] }
+    })
     return {
         todaysRaces: data?.races as RaceDataType[],
         todaysRacesIsValidating: isValidating,
-        todaysRacesIsError: error
+        todaysRacesIsError: error,
+        mutateTodaysRaces: mutate
     }
 }
 

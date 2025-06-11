@@ -5,9 +5,21 @@ import * as Fetcher from '@/components/Fetchers'
 import SignOnTable from '@/components/tables/SignOnTable'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-export default function TodaysRacesView({ todaysRaces }: { todaysRaces: RaceDataType[] }) {
-    const Router = useRouter()
+import { useSession } from '@/lib/auth-client'
+import { PageSkeleton } from '../PageSkeleton'
+export default function TodaysRacesView() {
+    const {
+        data: session,
+        isPending, //loading state
+        error, //error object
+        refetch //refetch the session
+    } = useSession()
 
+    const { todaysRaces, todaysRacesIsError, todaysRacesIsValidating, mutateTodaysRaces } = Fetcher.GetTodaysRaceByClubId(session?.club?.id)
+    const Router = useRouter()
+    if (todaysRaces === undefined) {
+        return <PageSkeleton />
+    }
     if (todaysRaces?.length <= 0) {
         return (
             <div>
