@@ -57,7 +57,8 @@ export const auth = betterAuth({
         provider: 'mysql' // or "mysql", "postgresql", ...etc
     }),
     emailAndPassword: {
-        enabled: true
+        enabled: true,
+        minPasswordLength: 4
     },
     socialProviders: {
         github: {
