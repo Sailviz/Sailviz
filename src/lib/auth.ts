@@ -2,6 +2,7 @@ import { betterAuth } from 'better-auth'
 import { prismaAdapter } from 'better-auth/adapters/prisma'
 import prisma from './prisma'
 import { customSession, username } from 'better-auth/plugins'
+import { myPluginClient } from './client-plugin'
 
 export const auth = betterAuth({
     plugins: [
@@ -27,7 +28,8 @@ export const auth = betterAuth({
                 user: dbUser,
                 session
             }
-        })
+        }),
+        myPluginClient()
     ],
     user: {
         additionalFields: {
@@ -43,6 +45,12 @@ export const auth = betterAuth({
                 defaultValue: 'Dashboard',
                 input: false
             }
+        }
+    },
+    session: {
+        cookieCache: {
+            enabled: true,
+            maxAge: 5 * 60 // Cache duration in seconds
         }
     },
     database: prismaAdapter(prisma, {
