@@ -64,7 +64,7 @@ const UsersTable = (props: any) => {
     var table = useReactTable({
         data,
         columns: [
-            columnHelper.accessor('displayName', {
+            columnHelper.accessor('username', {
                 id: 'number',
                 cell: info => info.getValue(),
                 enableSorting: true

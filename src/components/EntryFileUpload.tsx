@@ -67,6 +67,7 @@ export function EntryFileUpload({ raceId }: { raceId: string }) {
                 setProgressOpen(false)
             }
         })
+        mutateRace()
     }
 
     return (

@@ -15,10 +15,11 @@ import { auth } from '@/lib/auth'
 import { headers } from 'next/headers'
 import { PageSkeleton } from '@/components/layout/PageSkeleton'
 import prisma from '@/lib/prisma'
+
 type PageProps = { params: Promise<{ seriesId: string }> }
 
 export default async function Page(props: PageProps) {
-    const { seriesId } = use(props.params)
+    const { seriesId } = await props.params
     const session = await auth.api.getSession({
         headers: await headers() // you need to pass the headers object.
     })

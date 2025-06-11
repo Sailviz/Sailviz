@@ -50,7 +50,7 @@ export const auth = betterAuth({
     session: {
         cookieCache: {
             enabled: true,
-            maxAge: 5 * 60 // Cache duration in seconds
+            maxAge: 60 * 60 * 24 // Cache duration in seconds
         }
     },
     database: prismaAdapter(prisma, {
