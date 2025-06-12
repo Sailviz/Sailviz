@@ -10,6 +10,7 @@ import CreateBoatDialog from '@/components/layout/dashboard/CreateBoatModal'
 
 import EditBoatDialog from '@/components/layout/dashboard/EditBoatModal'
 import { useSession } from '@/lib/auth-client'
+import { mutate } from 'swr'
 type PageProps = { params: Promise<{ boatId: string }> }
 
 export default function Page(props: PageProps) {
@@ -26,6 +27,7 @@ export default function Page(props: PageProps) {
 
     const editBoat = async (boat: BoatDataType) => {
         await DB.updateBoatById(boat)
+        mutate('/api/GetBoats')
         Router.back()
     }
 

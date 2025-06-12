@@ -92,7 +92,7 @@ const FleetTable = (props: any) => {
             }),
             columnHelper.accessor('id', {
                 id: 'Edit',
-                cell: props => <Action {...props} id={props.row.original.id} remove={remove} user={session!.user} />
+                cell: props => <Action {...props} id={props.row.original.id} remove={remove} user={session?.user} />
             })
         ],
         getCoreRowModel: getCoreRowModel()

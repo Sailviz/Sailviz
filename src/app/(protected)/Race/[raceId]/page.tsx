@@ -53,28 +53,6 @@ export default function Page(props: PageProps) {
         inputElement.selectionStart = cursorPos
     }
 
-    const showViewModal = async (resultId: string) => {
-        let result = race.fleets.flatMap(fleet => fleet.results).find(result => result.id == resultId)
-        if (result == undefined) {
-            console.error('Could not find result with id: ' + resultId)
-            return
-        }
-        console.log(result)
-        result.laps.sort((a, b) => a.time - b.time)
-        // setActiveResult(result)
-
-        // setActiveFleet(race.fleets.filter(fleet => fleet.id == result?.fleetId)[0]!)
-
-        // viewModal.onOpen()
-    }
-
-    const saveRaceType = async (newValue: any) => {
-        console.log(newValue)
-
-        await DB.updateRaceById({ ...race, Type: newValue.value })
-        // mutate('/api/GetRaceById?id=' + race.id)
-    }
-
     const copyFromPrevious = async () => {
         let today = await DB.getTodaysRaceByClubId(session?.user.clubId!)
         //sort by time, oldest first
@@ -97,7 +75,7 @@ export default function Page(props: PageProps) {
         //update DB
         console.log(newDuties)
         await DB.updateRaceById({ ...race, Duties: newDuties })
-        // mutateRace()
+        mutateRace()
     }
 
     const downloadResults = async () => {

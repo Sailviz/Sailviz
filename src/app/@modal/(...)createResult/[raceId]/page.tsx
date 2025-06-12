@@ -5,6 +5,7 @@ import * as DB from '@/components/apiMethods'
 import { use } from 'react'
 import * as Fetcher from '@/components/Fetchers'
 import CreateResultModal from '@/components/layout/dashboard/CreateResultModal'
+import { mutate } from 'swr'
 type PageProps = { params: Promise<{ raceId: string }> }
 
 export default function Page(props: PageProps) {
@@ -20,6 +21,8 @@ export default function Page(props: PageProps) {
         await DB.updateResult({ ...result, Helm: helm, Crew: crew, boat: boat, SailNumber: sailNum })
 
         console.log(helm, crew, boat, sailNum, fleetId)
+        mutate(`/api/GetRaceById?id=${raceId}&results=true`)
+
         Router.back()
     }
 

@@ -88,13 +88,13 @@ export default async function Page(props: PageProps) {
                 <div className='p-6'>
                     <SeriesRaceTable id={seriesId} />
                 </div>
-                {userHasPermission(session!.user, AVAILABLE_PERMISSIONS.editRaces) ? <AddRaceButton seriesId={seriesId} /> : <> </>}
+                {userHasPermission(session?.user, AVAILABLE_PERMISSIONS.editRaces) ? <AddRaceButton seriesId={seriesId} /> : <> </>}
 
                 <p className='text-6xl font-extrabold p-6'>Fleets</p>
                 <div className='p-6'>
                     <FleetTable seriesId={seriesId} />
                 </div>
-                {userHasPermission(session!.user, AVAILABLE_PERMISSIONS.editFleets) ? (
+                {userHasPermission(session?.user, AVAILABLE_PERMISSIONS.editFleets) ? (
                     <>
                         <StartSequenceManager initialSequence={startSequence} seriesId={seriesId} key={startSequence?.length} />
                         {/* <Button onClick={createFleetSettings}>Add Fleet</Button> */}
@@ -107,10 +107,10 @@ export default async function Page(props: PageProps) {
                 <div className='mb-6'>
                     {series?.fleetSettings.map((fleetSettings, index) => {
                         return (
-                            <>
+                            <div key={fleetSettings.id + index} className='mb-6'>
                                 <div>{fleetSettings.name}</div>
                                 <SeriesResultsTable seriesId={seriesId} fleetSettingsId={fleetSettings?.id} />
-                            </>
+                            </div>
                         )
                     })}
                 </div>
