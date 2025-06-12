@@ -28,13 +28,5 @@ export default function Page() {
         // mutate('/api/GetTodaysRaceByClubId')
     }
 
-    return (
-        <CreateEventModal
-            isOpen={true}
-            onSubmit={createEvent}
-            onClose={() => {
-                Router.back()
-            }}
-        />
-    )
+    return <CreateEventModal onSubmit={createEvent} />
 }
