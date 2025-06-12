@@ -31,8 +31,8 @@ model User {
   displayUsername String?   @db.Text
   sessions        Session[]
   accounts        Account[]
-  clubId          String
-  club            Club      @relation(fields: [clubId], references: [id])
+  clubId          String?
+  club            Club?     @relation(fields: [clubId], references: [id])
   roles           Role[]    @relation("RoleToUser")
 
   @@unique([email])

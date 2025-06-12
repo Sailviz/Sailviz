@@ -12,10 +12,9 @@ import { useRouter } from 'next/navigation'
 import * as Fetcher from '@/components/Fetchers'
 import { use } from 'chai'
 import { mutate } from 'swr'
-export default function CreateResultModal({ todaysRaces, boats }: { todaysRaces: RaceDataType[]; boats: BoatDataType[] }) {
+export default function CreateResultModal({ todaysRaces, boats, open, onClose }: { todaysRaces: RaceDataType[]; boats: BoatDataType[]; open: boolean; onClose: () => void }) {
     // const { mutateTodaysRaces } = Fetcher.GetTodaysRaceByClubId()
     const Router = useRouter()
-    const [open, setOpen] = useState(true)
 
     const [helm, setHelm] = useState('')
     const [crew, setCrew] = useState('')
@@ -99,7 +98,7 @@ export default function CreateResultModal({ todaysRaces, boats }: { todaysRaces:
         todaysRaces.forEach(race => {
             mutate(`/api/GetRaceById?id=${race.id}&results=true`)
         })
-        Router.back()
+        onClose()
     }
 
     const createResult = async (fleetId: string, helm: string, crew: string, boat: BoatDataType, sailNum: string) => {
@@ -116,13 +115,7 @@ export default function CreateResultModal({ todaysRaces, boats }: { todaysRaces:
     }, [todaysRaces])
 
     return (
-        <Dialog
-            open={open}
-            onOpenChange={open => {
-                setOpen(open)
-                if (!open) Router.back() // this catches the x button and clicking outside the modal, gets out of parallel route
-            }}
-        >
+        <Dialog open={open}>
             <DialogContent className='max-w-8/12'>
                 <DialogHeader className='flex flex-col gap-1'>Create New Entry</DialogHeader>
                 <div className='flex w-full'>

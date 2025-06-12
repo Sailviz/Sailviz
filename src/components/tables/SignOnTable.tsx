@@ -128,7 +128,7 @@ const SignOnTable = ({ raceId }: { raceId: string }) => {
         getSortedRowModel: getSortedRowModel()
     })
     return (
-        <div className='w-full max-h-[73vh] overflow-scroll'>
+        <div className='w-full max-h-[73vh] overflow-auto'>
             <div className='rounded-md border'>
                 <Table>
                     <TableHeader>
