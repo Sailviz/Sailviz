@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import * as DB from '@/components/apiMethods'
 import { use } from 'react'
 import * as Fetcher from '@/components/Fetchers'
+import { mutate } from 'swr'
 type PageProps = { params: Promise<{ raceId: string; resultId: string }> }
 
 export default function Page(props: PageProps) {
@@ -17,6 +18,7 @@ export default function Page(props: PageProps) {
 
     const updateResult = async (result: ResultDataType): Promise<void> => {
         await DB.updateResult(result)
+        mutate(`/api/GetRaceById?id=${race.id}&results=true`)
         Router.back()
     }
 

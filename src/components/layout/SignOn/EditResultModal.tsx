@@ -25,15 +25,13 @@ export default function EditResultModal({
     const Router = useRouter()
     const [open, setOpen] = useState(true)
 
-    // const { race, raceIsError, raceIsValidating } = Fetcher.Race(result.fleetId, false)
-
     const [helm, setHelm] = useState(result.Helm)
     const [crew, setCrew] = useState(result.Crew)
     const [sailNumber, setSailNumber] = useState(result.SailNumber)
 
     const { theme, setTheme } = useTheme()
 
-    const [selectedFleet, setSelectedFleet] = useState<string>(result.fleetId)
+    const [selectedFleet, setSelectedFleet] = useState<string>(result.fleet.id)
     const [selectedBoat, setSelectedBoat] = useState({ label: result.boat.name, value: result.boat })
 
     const [helmError, setHelmError] = useState(false)
@@ -78,7 +76,7 @@ export default function EditResultModal({
 
         if (error) return
 
-        onSubmit({ ...result!, Helm: helm, Crew: crew, boat: selectedBoat.value, SailNumber: sailNumber, fleetId: selectedFleet! })
+        onSubmit({ ...result!, Helm: helm, Crew: crew, boat: selectedBoat.value, SailNumber: sailNumber, fleet: { ...result.fleet, id: selectedFleet! } })
     }
 
     if (race.id == '') {

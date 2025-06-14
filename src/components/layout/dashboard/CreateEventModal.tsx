@@ -2,17 +2,24 @@
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogFooter, DialogHeader } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
-import { useTheme } from 'next-themes'
+import { useRouter } from 'next/navigation'
 import { ChangeEvent, useEffect, useState } from 'react'
 
-export default function CreateEventDialog({ isOpen, onSubmit, onClose }: { isOpen: boolean; onSubmit: (name: string, numberOfRaces: number) => void; onClose: () => void }) {
+export default function CreateEventDialog({ onSubmit }: { onSubmit: (name: string, numberOfRaces: number) => void }) {
+    const Router = useRouter()
     const [name, setName] = useState('')
     const [numberOfRaces, setNumberOfRaces] = useState(0)
 
-    const { theme, setTheme } = useTheme()
+    const [open, setOpen] = useState(true)
 
     return (
-        <Dialog>
+        <Dialog
+            open={open}
+            onOpenChange={open => {
+                setOpen(open)
+                if (!open) Router.back() // this catches the x button and clicking outside the modal, gets out of parallel route
+            }}
+        >
             <DialogContent>
                 <DialogHeader className='flex flex-col gap-1'>Create New Event</DialogHeader>
                 <div className='flex w-full'>
@@ -33,9 +40,6 @@ export default function CreateEventDialog({ isOpen, onSubmit, onClose }: { isOpe
                     </div>
                 </div>
                 <DialogFooter>
-                    <Button color='danger' onClick={onClose}>
-                        Close
-                    </Button>
                     <Button color='primary' onClick={() => onSubmit(name, numberOfRaces)}>
                         Create
                     </Button>

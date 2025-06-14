@@ -115,8 +115,7 @@ const Action = ({ ...props }: any) => {
 
             {userHasPermission(props.user, AVAILABLE_PERMISSIONS.editRaces) ? (
                 <>
-                    <EditIcon />
-                    <DeleteIcon onClick={onDeleteClick} />
+                    <DeleteIcon onClick={onDeleteClick} className={'cursor-pointer text-red-500'} />
                 </>
             ) : (
                 <></>

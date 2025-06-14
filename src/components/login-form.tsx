@@ -14,6 +14,28 @@ export function LoginForm({ justCredentials }: { justCredentials: boolean }) {
     const [username, setUsername] = useState('')
     const [password, setPassword] = useState('')
     const [loading, setLoading] = useState(false)
+
+    const handleSubmit = async () => {
+        await signIn
+            .username({
+                username,
+                password,
+                fetchOptions: {
+                    redirect: 'manual' // Prevent automatic redirection
+                }
+            })
+            .then(async ({ data, error }) => {
+                console.log('SignIn response:', data, error)
+                const { data: session } = await getSession()
+                console.log('Session with custom fields:', session)
+                if (session === null) {
+                    alert('Login failed. Please check your username and password.')
+                    return
+                }
+                console.log('Session:', session)
+                Router.push('/' + session.user.startPage)
+            })
+    }
     return (
         <div className='flex flex-col gap-6'>
             <div className='flex flex-col gap-6'>
@@ -48,22 +70,7 @@ export function LoginForm({ justCredentials }: { justCredentials: boolean }) {
                         Password
                         <Input id='password' name='password' type='password' required value={password} onChange={e => setPassword(e.target.value)} />
                     </div>
-                    <Button
-                        type='submit'
-                        className='w-full'
-                        disabled={loading}
-                        onClick={async () => {
-                            await signIn.username({ username, password }).then(async ({ data, error }) => {
-                                const { data: session } = await getSession()
-                                console.log('Session with custom fields:', session)
-                                if (session === null) {
-                                    alert('Login failed. Please check your username and password.')
-                                    return
-                                }
-                                Router.push('/' + session.user.startPage)
-                            })
-                        }}
-                    >
+                    <Button type='submit' className='w-full' disabled={loading} onClick={handleSubmit}>
                         {loading ? <Loader2 size={16} className='animate-spin' /> : 'Login'}
                     </Button>
                     <div className='relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border'>

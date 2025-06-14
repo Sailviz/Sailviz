@@ -16,7 +16,8 @@ async function findResult(id: any) {
                 orderBy: {
                     time: 'asc'
                 }
-            }
+            },
+            fleet: true
         }
     })
     return result

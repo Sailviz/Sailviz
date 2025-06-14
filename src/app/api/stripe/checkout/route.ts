@@ -60,7 +60,7 @@ export async function GET(request: NextRequest) {
 
         const club = await prisma.club.findFirst({
             where: {
-                id: user.clubId
+                id: user.clubId!
             }
         })
 

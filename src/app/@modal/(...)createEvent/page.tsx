@@ -7,15 +7,12 @@ import { use } from 'react'
 import * as Fetcher from '@/components/Fetchers'
 import CreateResultModal from '@/components/layout/dashboard/CreateResultModal'
 import CreateBoatDialog from '@/components/layout/dashboard/CreateBoatModal'
-
-import EditBoatDialog from '@/components/layout/dashboard/EditBoatModal'
 import { useSession } from '@/lib/auth-client'
 import { mutate } from 'swr'
-type PageProps = { params: Promise<{ boatId: string }> }
+import CreateEventDialog from '@/components/layout/dashboard/CreateEventModal'
 
-export default function Page(props: PageProps) {
+export default function Page() {
     const Router = useRouter()
-    const { boatId } = use(props.params)
     const {
         data: session,
         isPending, //loading state
@@ -23,17 +20,23 @@ export default function Page(props: PageProps) {
         refetch //refetch the session
     } = useSession()
 
-    const { boat, boatIsError, boatIsValidating, mutateBoats } = Fetcher.Boat(boatId)
-
-    const editBoat = async (boat: BoatDataType) => {
-        await DB.updateBoatById(boat)
+    const createBoat = async (boat: BoatDataType) => {
+        await DB.createBoat(boat.name, boat.crew, boat.py, boat.pursuitStartTime, session!.user.clubId)
         mutate('/api/GetBoats')
         Router.back()
     }
 
-    if (boat == undefined) {
-        return <div>Loading...</div>
+    const createEvent = async (name: string, numberOfRaces: number) => {
+        if (!session?.club) {
+            throw new Error('No club found in session')
+        }
+        const series = await DB.createSeries(session.club.id, name)
+        for (let i = 0; i < numberOfRaces; i++) {
+            await DB.createRace(session.club.id, series.id)
+        }
+        mutate('/api/GetTodaysRaceByClubId')
+        Router.back()
     }
 
-    return <EditBoatDialog boat={boat} onSubmit={editBoat} />
+    return <CreateEventDialog onSubmit={createEvent} />
 }

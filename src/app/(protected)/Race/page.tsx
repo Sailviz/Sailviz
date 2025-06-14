@@ -17,34 +17,7 @@ export default async function Page() {
         // If the user is not authenticated, redirect to the login page
         return <PageSkeleton />
     }
-    const todaysRaces = (await prisma.race.findMany({
-        where: {
-            AND: [
-                {
-                    Time: {
-                        gte: dayjs().set('hour', 0).set('minute', 0).set('second', 0).format('YYYY-MM-DD HH:ss'),
-                        lte: dayjs().set('hour', 24).set('minute', 0).set('second', 0).format('YYYY-MM-DD HH:ss')
-                    }
-                },
-                {
-                    series: {
-                        clubId: session.club.id
-                    }
-                }
-            ]
-        },
-        orderBy: {
-            Time: 'asc'
-        },
-        include: {
-            fleets: {
-                include: {
-                    fleetSettings: true
-                }
-            },
-            series: true
-        }
-    })) as unknown as RaceDataType[]
+
     return (
         <div>
             <div className='p-6'>
@@ -53,7 +26,7 @@ export default async function Page() {
             <div className='flex flex-row'>
                 <div className='px-3'>
                     <p className='text-2xl font-bold p-6'>Today</p>
-                    <UpcomingRacesTable todaysRaces={todaysRaces} />
+                    <UpcomingRacesTable />
                 </div>
                 <div className='px-3'>
                     <p className='text-2xl font-bold p-6'>Upcoming</p>

@@ -5,9 +5,25 @@ import * as Fetcher from '@/components/Fetchers'
 import SignOnTable from '@/components/tables/SignOnTable'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-export default function TodaysRacesView({ todaysRaces }: { todaysRaces: RaceDataType[] }) {
-    const Router = useRouter()
+import { useSession } from '@/lib/auth-client'
+import { PageSkeleton } from '../PageSkeleton'
+import CreateResultModal from './CreateResultModal'
+import { useState } from 'react'
+export default function TodaysRacesView() {
+    const {
+        data: session,
+        isPending, //loading state
+        error, //error object
+        refetch //refetch the session
+    } = useSession()
 
+    const { todaysRaces, todaysRacesIsError, todaysRacesIsValidating, mutateTodaysRaces } = Fetcher.GetTodaysRaceByClubId(session?.club?.id)
+    const { boats, boatsIsError, boatsIsValidating } = Fetcher.Boats()
+
+    const [createModal, setCreateModal] = useState(false)
+    if (todaysRaces === undefined) {
+        return <PageSkeleton />
+    }
     if (todaysRaces?.length <= 0) {
         return (
             <div>
@@ -17,6 +33,7 @@ export default function TodaysRacesView({ todaysRaces }: { todaysRaces: RaceData
     }
     return (
         <>
+            <CreateResultModal todaysRaces={todaysRaces} boats={boats} open={createModal} onClose={() => setCreateModal(false)} />
             <div className='w-full'>
                 <div className='overflow-x-scroll flex flex-row max-h-[94vh]'>
                     {todaysRaces.map((race, index) => {
@@ -32,11 +49,9 @@ export default function TodaysRacesView({ todaysRaces }: { todaysRaces: RaceData
                     })}
                 </div>
                 <div className='mt-2 text-center max-h-[5vh] overflow-hidden'>
-                    <Link href={'/SignOn/createResult'}>
-                        <Button variant={'green'} size={'big'} aria-label='add entry'>
-                            Add Entry
-                        </Button>
-                    </Link>
+                    <Button variant={'green'} size={'big'} aria-label='add entry' onClick={() => setCreateModal(true)}>
+                        Add Entry
+                    </Button>
                 </div>
             </div>
         </>
