@@ -89,7 +89,7 @@ export default function Page(props: PageProps) {
         PursuitPosition: 0,
         HandicapPosition: 0,
         resultCode: '',
-        fleet: {} as FleetDataType
+        fleetId: ''
     })
 
     const startRaceButton = async () => {
@@ -190,7 +190,7 @@ export default function Page(props: PageProps) {
         results.sort((a, b) => {
             //if done a lap, predicted is sum of lap times + last lap.
             //if no lap done, predicted is py.
-            let start = race.fleets.find(fleet => fleet.id == a.fleet.id)?.startTime || 0
+            let start = race.fleets.find(fleet => fleet.id == a.fleetId)?.startTime || 0
             let aPredicted = a.laps.length > 0 ? a.laps[a.laps.length - 1]!.time + a.laps[a.laps.length - 1]!.time - (a.laps[a.laps.length - 2]?.time || start) : a.boat.py
             let bPredicted = b.laps.length > 0 ? b.laps[b.laps.length - 1]!.time + b.laps[b.laps.length - 1]!.time - (b.laps[b.laps.length - 2]?.time || start) : b.boat.py
             //force resultcodes to the end
@@ -733,12 +733,13 @@ export default function Page(props: PageProps) {
                         {race.fleets
                             .flatMap(fleets => fleets.results)
                             .map((result: ResultDataType, index) => {
-                                let fleetIndex = race.fleets.findIndex(fleet => fleet.id == result.fleet.id)
+                                console.log(race.fleets, result)
+                                let fleetIndex = race.fleets.findIndex(fleet => fleet.id == result.fleetId)
                                 return (
                                     <BoatCard
                                         key={result.id}
                                         result={result}
-                                        fleet={race.fleets.find(fleet => fleet.id == result.fleet.id)!}
+                                        fleet={race.fleets.find(fleet => fleet.id == result.fleetId)!}
                                         pursuit={false}
                                         mode={raceMode[fleetIndex]!}
                                         raceState={raceState}

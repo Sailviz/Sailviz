@@ -54,7 +54,7 @@ export default function Page(props: PageProps) {
                         PursuitPosition: 0,
                         HandicapPosition: 0,
                         resultCode: '',
-                        fleet: {} as FleetDataType
+                        fleetId: ''
                     } as ResultDataType
                 ]
             }

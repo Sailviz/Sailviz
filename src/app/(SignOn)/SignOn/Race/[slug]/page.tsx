@@ -33,7 +33,7 @@ export default function Page(props: PageProps) {
         console.log(result)
         result.laps.sort((a, b) => a.time - b.time)
         setActiveResult(result)
-        setActiveFleet(race.fleets.filter(fleet => fleet.id == result?.fleet.id)[0]!)
+        setActiveFleet(race.fleets.filter(fleet => fleet.id == result?.fleetId)[0]!)
         // viewModal.onOpen()
     }
 

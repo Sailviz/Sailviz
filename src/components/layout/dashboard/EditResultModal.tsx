@@ -35,7 +35,7 @@ export default function EditResultModal({
     const Router = useRouter()
     const [open, setOpen] = useState(true)
     console.log('EditResultModal', result)
-    const { fleet, fleetIsError, fleetIsValidating } = Fetcher.Fleet(result.fleet.id)
+    const { fleet, fleetIsError, fleetIsValidating } = Fetcher.Fleet(result.fleetId)
 
     const { theme, setTheme } = useTheme()
     const { boats, boatsIsError, boatsIsValidating } = Fetcher.Boats()

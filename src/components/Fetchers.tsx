@@ -84,7 +84,7 @@ export function Result(resultId: string) {
     const { data, error, isValidating, mutate } = useSWR(resultId != '' ? `/api/GetResultById?id=${resultId}` : null, fetcher, {
         fallbackData: {
             id: '',
-            fleet: {} as FleetDataType,
+            fleetId: '',
             boat: {
                 id: '',
                 name: '',

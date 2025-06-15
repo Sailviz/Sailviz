@@ -31,7 +31,7 @@ export default function EditResultModal({
 
     const { theme, setTheme } = useTheme()
 
-    const [selectedFleet, setSelectedFleet] = useState<string>(result.fleet.id)
+    const [selectedFleet, setSelectedFleet] = useState<string>(result.fleetId)
     const [selectedBoat, setSelectedBoat] = useState({ label: result.boat.name, value: result.boat })
 
     const [helmError, setHelmError] = useState(false)
@@ -76,7 +76,7 @@ export default function EditResultModal({
 
         if (error) return
 
-        onSubmit({ ...result!, Helm: helm, Crew: crew, boat: selectedBoat.value, SailNumber: sailNumber, fleet: { ...result.fleet, id: selectedFleet! } })
+        onSubmit({ ...result!, Helm: helm, Crew: crew, boat: selectedBoat.value, SailNumber: sailNumber, fleetId: selectedFleet })
     }
 
     if (race.id == '') {

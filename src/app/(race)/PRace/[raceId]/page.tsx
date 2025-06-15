@@ -648,7 +648,7 @@ export default function Page(props: PageProps) {
                                         <BoatCard
                                             key={result.id}
                                             result={result}
-                                            fleet={race.fleets.find(fleet => fleet.id == result.fleet.id)!}
+                                            fleet={race.fleets.find(fleet => fleet.id == result.fleetId)!}
                                             pursuit={true}
                                             mode={mode}
                                             raceState={raceState}

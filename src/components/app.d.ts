@@ -38,7 +38,7 @@ type FleetSettingsType = {
 
 type ResultDataType = {
     id: string
-    fleet: FleetDataType
+    fleetId: string
     Helm: string
     Crew: string
     boat: BoatDataType

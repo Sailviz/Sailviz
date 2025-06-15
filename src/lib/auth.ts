@@ -17,7 +17,7 @@ export const auth = betterAuth({
             if (!dbUser) {
                 throw new Error('User not found')
             }
-            console.log(user, session)
+
             const club = (await prisma.club.findFirst({
                 where: {
                     id: dbUser.clubId

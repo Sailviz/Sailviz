@@ -565,6 +565,20 @@ export async function updateFleetById(fleet: FleetDataType): Promise<FleetDataTy
     })
 }
 
+export async function getFleetById(fleetId: string): Promise<FleetDataType> {
+    return await fetch(`${server}/api/GetFleetById?id=${fleetId}`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
+    }).then(async res => {
+        if (res.ok) {
+            let data = await res.json()
+            return data
+        } else {
+            return undefined
+        }
+    })
+}
+
 export async function updateFleetSettingsById(fleet: FleetSettingsType): Promise<FleetSettingsType> {
     const body = {
         fleet: fleet

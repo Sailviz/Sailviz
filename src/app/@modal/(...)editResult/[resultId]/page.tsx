@@ -15,13 +15,15 @@ export default function Page(props: PageProps) {
     const { result, resultIsError, resultIsValidating } = Fetcher.Result(resultId)
     const updateResult = async (result: ResultDataType): Promise<void> => {
         await DB.updateResult(result)
-        mutate(`/api/GetRaceById?id=${result.fleet.raceId}&results=true`)
+        const fleet = await DB.getFleetById(result.fleetId)
+        mutate(`/api/GetRaceById?id=${fleet.raceId}&results=true`)
         Router.back()
     }
 
     const onDeleteResult = async (result: ResultDataType): Promise<void> => {
         await DB.DeleteResultById(result)
-        mutate(`/api/GetRaceById?id=${result.fleet.raceId}&results=true`)
+        const fleet = await DB.getFleetById(result.fleetId)
+        mutate(`/api/GetRaceById?id=${fleet.raceId}&results=true`)
 
         Router.back()
     }
