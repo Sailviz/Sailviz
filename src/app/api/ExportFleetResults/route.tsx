@@ -69,8 +69,8 @@ export async function GET(request: NextRequest) {
         var time = new Date((result.finishTime - fleet.startTime) * 1000).toISOString().substring(11, 19)
         var values =
             fleet.race.Type == 'Handicap'
-                ? [result.Helm, result.Crew, result.boat.name, result.SailNumber, result.laps.length, result.finishTime == -1 ? '' : time, result.resultCode]
-                : [result.Helm, result.Crew, result.boat.name, result.SailNumber, result.laps.length, result.PursuitPosition, result.resultCode]
+                ? [result.Helm, result.Crew, result.boat.name, result.SailNumber, result.numberLaps, result.finishTime == -1 ? '' : time, result.resultCode]
+                : [result.Helm, result.Crew, result.boat.name, result.SailNumber, result.numberLaps, result.PursuitPosition, result.resultCode]
         //join values with comma
         csvRows.push(values.join(','))
     })
