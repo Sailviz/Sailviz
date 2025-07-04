@@ -4,6 +4,7 @@ import CreateSeriesModal from '@/components/layout/dashboard/CreateSeriesModal'
 import { useRouter } from 'next/navigation'
 import * as DB from '@/components/apiMethods'
 import { useSession } from '@/lib/auth-client'
+import { mutate } from 'swr'
 
 export default function Page() {
     const {
@@ -19,6 +20,7 @@ export default function Page() {
         // For example:
         await DB.createSeries(session?.user?.clubId!, seriesName)
         // After creating the series, you might want to redirect or update the UI
+        mutate('/api/GetSeriesByClubId') // This will revalidate the series data
         Router.back()
     }
     return (
