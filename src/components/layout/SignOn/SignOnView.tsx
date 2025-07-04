@@ -1,15 +1,11 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
 import * as Fetcher from '@/components/Fetchers'
 import SignOnTable from '@/components/tables/SignOnTable'
-import Link from 'next/link'
-import { Button } from '@/components/ui/button'
 import { useSession } from '@/lib/auth-client'
 import { PageSkeleton } from '../PageSkeleton'
 import CreateResultModal from './CreateResultModal'
-import { useState } from 'react'
-export default function TodaysRacesView() {
+export default function SignOnView() {
     const {
         data: session,
         isPending, //loading state
@@ -20,7 +16,6 @@ export default function TodaysRacesView() {
     const { todaysRaces, todaysRacesIsError, todaysRacesIsValidating, mutateTodaysRaces } = Fetcher.GetTodaysRaceByClubId(session?.club?.id)
     const { boats, boatsIsError, boatsIsValidating } = Fetcher.Boats()
 
-    const [createModal, setCreateModal] = useState(false)
     if (todaysRaces === undefined) {
         return <PageSkeleton />
     }
@@ -33,7 +28,6 @@ export default function TodaysRacesView() {
     }
     return (
         <>
-            <CreateResultModal todaysRaces={todaysRaces} boats={boats} open={createModal} onClose={() => setCreateModal(false)} />
             <div className='w-full'>
                 <div className='overflow-x-scroll flex flex-row max-h-[94vh]'>
                     {todaysRaces.map((race, index) => {
@@ -49,9 +43,7 @@ export default function TodaysRacesView() {
                     })}
                 </div>
                 <div className='mt-2 text-center max-h-[5vh] overflow-hidden'>
-                    <Button variant={'green'} size={'big'} aria-label='add entry' onClick={() => setCreateModal(true)}>
-                        Add Entry
-                    </Button>
+                    <CreateResultModal todaysRaces={todaysRaces} boats={boats} />
                 </div>
             </div>
         </>

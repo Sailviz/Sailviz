@@ -3,7 +3,7 @@ import { useTheme } from 'next-themes'
 import { ChangeEvent, useEffect, useState } from 'react'
 import Select, { CSSObjectWithLabel } from 'react-select'
 import * as DB from '@/components/apiMethods'
-import { Dialog, DialogContent, DialogFooter, DialogHeader } from '@/components/ui/dialog'
+import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTrigger } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -12,10 +12,8 @@ import { useRouter } from 'next/navigation'
 import * as Fetcher from '@/components/Fetchers'
 import { use } from 'chai'
 import { mutate } from 'swr'
-export default function CreateResultModal({ todaysRaces, boats, open, onClose }: { todaysRaces: RaceDataType[]; boats: BoatDataType[]; open: boolean; onClose: () => void }) {
-    // const { mutateTodaysRaces } = Fetcher.GetTodaysRaceByClubId()
-    const Router = useRouter()
-
+export default function CreateResultModal({ todaysRaces, boats }: { todaysRaces: RaceDataType[]; boats: BoatDataType[] }) {
+    const [open, setOpen] = useState(false)
     const [helm, setHelm] = useState('')
     const [crew, setCrew] = useState('')
     const [sailNumber, setSailNumber] = useState('')
@@ -98,7 +96,8 @@ export default function CreateResultModal({ todaysRaces, boats, open, onClose }:
         todaysRaces.forEach(race => {
             mutate(`/api/GetRaceById?id=${race.id}&results=true`)
         })
-        onClose()
+
+        setOpen(false)
     }
 
     const createResult = async (fleetId: string, helm: string, crew: string, boat: BoatDataType, sailNum: string) => {
@@ -110,12 +109,34 @@ export default function CreateResultModal({ todaysRaces, boats, open, onClose }:
         console.log(helm, crew, boat, sailNum, fleetId)
     }
 
+    const clearFields = async () => {
+        console.log('clearing fields')
+        setHelm('')
+        setCrew('')
+        setSailNumber('')
+        setSelectedRaces([])
+        setSelectedFleets([])
+        setSelectedBoat({ label: '', value: {} as BoatDataType })
+        submitDisabled = false
+    }
+
     useEffect(() => {
         console.log(todaysRaces)
     }, [todaysRaces])
 
     return (
-        <Dialog open={open}>
+        <Dialog
+            open={open}
+            onOpenChange={e => {
+                clearFields()
+                setOpen(e)
+            }}
+        >
+            <DialogTrigger asChild>
+                <Button variant={'green'} size={'big'} aria-label='add entry'>
+                    Add Entry
+                </Button>
+            </DialogTrigger>
             <DialogContent className='max-w-8/12'>
                 <DialogHeader className='flex flex-col gap-1'>Create New Entry</DialogHeader>
                 <div className='flex w-full'>
