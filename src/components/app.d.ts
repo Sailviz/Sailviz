@@ -130,7 +130,8 @@ type Stripe = {
 type UserDataType = {
     id: string
     displayName: string
-    username: string
+    name: string
+    admin: boolean
     roles: RoleDataType[]
     clubId: string
     startPage: string

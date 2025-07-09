@@ -123,6 +123,16 @@ export function Fleet(fleetId: string) {
     }
 }
 
+export function Clubs() {
+    const { data, error, isValidating } = useSWR(`/api/GetClubs`, fetcher)
+
+    return {
+        clubs: data.clubs as ClubDataType[],
+        clubsIsValidating: isValidating,
+        clubsIsError: error
+    }
+}
+
 export function FleetSettings(fleetId: string) {
     const { data, error, isValidating } = useSWR(fleetId != undefined ? `/api/GetFleetSettingsById?id=${fleetId}` : null, fetcher)
 
