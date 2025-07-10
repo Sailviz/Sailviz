@@ -147,7 +147,7 @@ export const AdminNavCollections: NavCollection[] = [
         items: [
             {
                 title: 'Home',
-                url: '/Dashboard',
+                url: '/admin/Dashboard',
                 icon: <HomeIcon />,
                 isActive: true,
                 shortcut: ['d', 'd'],
