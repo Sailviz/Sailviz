@@ -25,8 +25,9 @@ export default function Page(props: PageProps) {
 
     const { user, userIsError, userIsValidating } = Fetcher.User(userId)
 
-    const editUser = async (user: UserDataType, password: string) => {
-        await DB.updateUser(user, password)
+    const editUser = async (user: UserDataType) => {
+        console.log('Editing user:', user)
+        await DB.updateUser(user)
         Router.back()
     }
 

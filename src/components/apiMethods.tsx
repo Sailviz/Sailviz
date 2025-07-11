@@ -694,7 +694,7 @@ export function hasPermission() {
     console.log('hasPermission')
 }
 
-export async function createUser(clubId: string): Promise<UserDataType[]> {
+export async function createUser(clubId: string): Promise<UserDataType> {
     const body = {
         clubId: clubId
     }
@@ -712,10 +712,9 @@ export async function createUser(clubId: string): Promise<UserDataType[]> {
     })
 }
 
-export async function updateUser(user: UserDataType, password: string): Promise<UserDataType[]> {
+export async function updateUser(user: UserDataType): Promise<UserDataType> {
     const body = {
-        user: user,
-        password: password
+        user: user
     }
     return await fetch(`${server}/api/UpdateUserById`, {
         method: 'POST',
@@ -836,6 +835,24 @@ export async function deleteStartSequenceById(id: string): Promise<boolean> {
             return data.status === 200
         } else {
             return false
+        }
+    })
+}
+
+export async function createClub(clubName: string): Promise<ClubDataType> {
+    const body = {
+        clubName: clubName
+    }
+    return await fetch(`${server}/api/CreateClub`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+    }).then(async res => {
+        if (res.ok) {
+            let data = await res.json()
+            return data.Club
+        } else {
+            return undefined
         }
     })
 }

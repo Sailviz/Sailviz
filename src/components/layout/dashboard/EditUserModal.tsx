@@ -24,8 +24,8 @@ export default function EditUserDialog({ user, onSubmit }: { user: UserDataType 
 
     useEffect(() => {
         if (user === undefined) return
-        setDisplayName(user.displayName)
-        setName(user.name)
+        setDisplayName(user.displayUsername)
+        setName(user.username)
         setRoles(user.roles)
         setStartPage(user.startPage)
     }, [user])
@@ -46,7 +46,7 @@ export default function EditUserDialog({ user, onSubmit }: { user: UserDataType 
                         <Input type='text' value={displayName} onChange={e => setDisplayName(e.target.value)} />
                     </div>
                     <div className='flex flex-col px-6 w-full'>
-                        <p className='text-2xl font-bold text-gray-700'>name</p>
+                        <p className='text-2xl font-bold text-gray-700'>UserName</p>
                         <Input type='text' value={name} onChange={e => setName(e.target.value)} />
                     </div>
                     <div className='flex flex-col px-6 w-full'>
@@ -80,7 +80,7 @@ export default function EditUserDialog({ user, onSubmit }: { user: UserDataType 
                     </div>
                 </div>
                 <DialogFooter>
-                    <Button color='primary' onClick={() => onSubmit({ ...user!, displayName: displayName, name: name, roles: roles, startPage: startPage }, password)}>
+                    <Button color='primary' onClick={() => onSubmit({ ...user!, displayUsername: displayName, username: name, roles: roles, startPage: startPage }, password)}>
                         Save
                     </Button>
                 </DialogFooter>

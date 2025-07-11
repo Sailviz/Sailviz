@@ -129,8 +129,8 @@ type Stripe = {
 
 type UserDataType = {
     id: string
-    displayName: string
-    name: string
+    displayUsername: string
+    username: string
     admin: boolean
     roles: RoleDataType[]
     clubId: string

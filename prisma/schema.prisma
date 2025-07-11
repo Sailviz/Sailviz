@@ -18,10 +18,11 @@ model globalConfig {
 
 model User {
   id              String    @id @unique @default(uuid())
+  username        String    @default("")
   uuid            String?   @unique
   startPage       String
   admin           Boolean   @default(false)
-  name            String    @db.Text
+  name            String    @default("")
   email           String
   emailVerified   Boolean
   image           String?   @db.Text

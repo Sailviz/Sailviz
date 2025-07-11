@@ -5,7 +5,6 @@ import * as Sentry from '@sentry/react'
 import dayjs from 'dayjs'
 
 export async function fetcher(url: string) {
-    console.log('Fetching:', url)
     const res = await fetch(url)
     if (!res.ok) {
         throw new Error('An error occurred while fetching the data.')
@@ -124,10 +123,7 @@ export function Fleet(fleetId: string) {
 }
 
 export function Clubs() {
-    console.log('Fetching clubs...')
     const { data, error, isValidating } = useSWR(`/api/GetClubs`, fetcher)
-    console.log('Clubs fetched:', data)
-    console.log(error, isValidating)
     return {
         clubs: data as ClubDataType[],
         clubsIsValidating: isValidating,
@@ -211,6 +207,15 @@ export function User(id: string) {
         user: data?.user as UserDataType,
         userIsValidating: isValidating,
         userIsError: error
+    }
+}
+
+export function GetClubById(clubId: string) {
+    const { data, error, isValidating } = useSWR(clubId != '' ? `/api/GetClubById?clubId=${clubId}` : null, fetcher)
+    return {
+        club: data?.club as ClubDataType,
+        clubIsValidating: isValidating,
+        clubIsError: error
     }
 }
 

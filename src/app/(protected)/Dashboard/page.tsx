@@ -18,6 +18,7 @@ export default async function Page() {
         headers: await headers() // you need to pass the headers object.
     })
     console.log('Session:', session)
+    console.log('Session Club:', session?.club)
     if (!session || !session.club) {
         // If the user is not authenticated, redirect to the login page
         return <PageSkeleton />

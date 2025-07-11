@@ -40,7 +40,7 @@ export default function Page() {
 
     const updateUser = async (user: UserDataType, password: string) => {
         // editUserModal.onClose()
-        await DB.updateUser(user, password)
+        await DB.updateUser(user)
         mutate('/api/GetUsersByClubId')
     }
 

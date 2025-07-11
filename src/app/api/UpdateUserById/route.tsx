@@ -8,18 +8,19 @@ const saltRounds = 10
 
 //this only updates the settings part of the club record
 
-async function updateUser(user: UserDataType, password: string) {
-    var hash = await bcrypt.hash(password, saltRounds)
+async function updateUser(user: UserDataType) {
     var result = await prisma.user.update({
         where: {
             id: user.id
         },
         data: {
-            name: user.name,
+            clubId: user.clubId,
+            username: user.username,
+            startPage: user.startPage,
+            displayUsername: user.displayUsername,
             roles: {
                 set: user.roles.map(role => ({ id: role.id }))
-            },
-            ...(password != '' ? { password: hash } : {})
+            }
         }
     })
     return result
@@ -35,11 +36,10 @@ export async function POST(request: NextRequest) {
     }
 
     var user: UserDataType = req.user
-    var password: string = req.password
 
     await isRequestOwnData(user.id, '', 'club')
 
-    var updatedUser = await updateUser(user, password)
+    var updatedUser = await updateUser(user)
     if (updatedUser) {
         return NextResponse.json({ res: updatedUser }, { status: 200 })
     }

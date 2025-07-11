@@ -8,6 +8,11 @@ export async function isRequestAuthorised(id: string, table: string) {
     const session = await auth.api.getSession({
         headers: await headers() // you need to pass the headers object.
     })
+
+    //bypass if admin
+    if (session?.user.admin) {
+        return true
+    }
     var clubId = session?.user.clubId
     if (clubId == null) {
         return false

@@ -12,6 +12,7 @@ import Link from 'next/link'
 import { useSession } from '@/lib/auth-client'
 import * as Fetcher from '@/components/Fetchers'
 import { mutate } from 'swr'
+import { Button } from '../ui/button'
 
 const Action = ({ ...props }: any) => {
     const onDeleteClick = () => {
@@ -24,18 +25,10 @@ const Action = ({ ...props }: any) => {
     }
     return (
         <div className='relative flex items-center gap-2'>
-            <Link href={`${props.viewHref}${props.row.original.id}`} className='cursor-pointer'>
-                <EyeIcon onClick={() => props.viewSeries(props.row.original.id)} />
-            </Link>
-
-            {userHasPermission(props.user, AVAILABLE_PERMISSIONS.editSeries) ? (
-                <>
-                    <EditIcon onClick={onEditClick} className='cursor-pointer' />
-                    <DeleteIcon onClick={onDeleteClick} className='cursor-pointer' />
-                </>
-            ) : (
-                <></>
-            )}
+            <Button variant={'outline'} onClick={() => props.viewClub(props.row.original.id)}>
+                <EyeIcon />
+                View
+            </Button>
         </div>
     )
 }
@@ -56,12 +49,22 @@ const TableOfClubs = () => {
 
     const data = clubs || []
 
+    const viewClub = (id: string) => {
+        console.log('Viewing club with ID:', id)
+        Router.push(`/admin/clubs/${id}`)
+    }
+
     var table = useReactTable({
         data,
         columns: [
             columnHelper.accessor('name', {
                 header: 'Club Name',
                 cell: info => info.getValue()
+            }),
+            columnHelper.display({
+                id: 'Edit',
+                header: 'Edit',
+                cell: props => <Action {...props} viewClub={viewClub} user={session!.user} />
             })
         ],
         getCoreRowModel: getCoreRowModel()

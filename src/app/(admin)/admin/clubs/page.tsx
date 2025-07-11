@@ -12,6 +12,8 @@ import { auth } from '@/lib/auth'
 import { headers } from 'next/headers'
 import { PageSkeleton } from '@/components/layout/PageSkeleton'
 import TableOfClubs from '@/components/tables/TableOfClubs'
+import CreateClubDialog from '@/components/layout/dashboard/CreateClubModal'
+import CreateClubModal from '@/components/layout/dashboard/CreateClubModal'
 
 export default async function Page() {
     const session = await auth.api.getSession({
@@ -25,14 +27,11 @@ export default async function Page() {
 
     return (
         <div>
-            {/* <EditSeriesModal seriesId={''} isOpen={editModal.isOpen} onSubmit={editSeries} onClose={editModal.onClose} /> */}
             <div className='p-6'>
                 <h1 className={title({ color: 'blue' })}>Clubs</h1>
             </div>
             <div className='p-6'>
-                <Link href='/Series/create'>
-                    <Button>Create New Club</Button>
-                </Link>
+                <CreateClubModal />
             </div>
             <div className='p-6'>
                 <TableOfClubs />

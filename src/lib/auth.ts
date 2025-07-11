@@ -1,7 +1,7 @@
 import { betterAuth } from 'better-auth'
 import { prismaAdapter } from 'better-auth/adapters/prisma'
 import prisma from './prisma'
-import { customSession, username } from 'better-auth/plugins'
+import { createAuthMiddleware, customSession, username } from 'better-auth/plugins'
 import { myPluginClient } from './client-plugin'
 
 export const auth = betterAuth({

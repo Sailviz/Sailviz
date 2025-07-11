@@ -9,7 +9,6 @@ async function getClubs() {
 
 export async function GET(request: NextRequest) {
     var clubs = await getClubs()
-    console.log('Clubs:', clubs)
     if (clubs) {
         return NextResponse.json(clubs)
     } else {
