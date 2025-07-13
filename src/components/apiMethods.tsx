@@ -856,3 +856,21 @@ export async function createClub(clubName: string): Promise<ClubDataType> {
         }
     })
 }
+
+export async function updateGlobalConfig(config: GlobalConfigType): Promise<Boolean> {
+    const body = {
+        config: config
+    }
+    return await fetch(`${server}/api/UpdateGlobalConfig`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+    }).then(async res => {
+        if (res.ok) {
+            let data = await res.json()
+            return data.status === 200
+        } else {
+            return false
+        }
+    })
+}

@@ -4,6 +4,17 @@ import prisma from '@/lib/prisma'
 import * as Fetcher from '@/components/Fetchers'
 import { auth } from '@/lib/auth'
 import { headers } from 'next/headers'
+
+export async function isRequestAdmin() {
+    const session = await auth.api.getSession({
+        headers: await headers() // you need to pass the headers object.
+    })
+
+    if (session?.user.admin) {
+        return true
+    }
+    return false
+}
 export async function isRequestAuthorised(id: string, table: string) {
     const session = await auth.api.getSession({
         headers: await headers() // you need to pass the headers object.
