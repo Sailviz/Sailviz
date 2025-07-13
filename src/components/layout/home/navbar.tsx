@@ -35,7 +35,7 @@ export default function HomeNav() {
                     <Link href={'/Login'}>
                         <Button variant='outline'>Sign in</Button>
                     </Link>
-                    <Link href={'/register'}>
+                    <Link href={'/Register'}>
                         <Button>Get started</Button>
                     </Link>
                 </div>
