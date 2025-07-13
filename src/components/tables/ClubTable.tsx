@@ -10,6 +10,8 @@ import * as DB from '@/components/apiMethods'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
 import Link from 'next/link'
 import { useSession } from '@/lib/auth-client'
+import * as Fetcher from '@/components/Fetchers'
+import { mutate } from 'swr'
 
 const Action = ({ ...props }: any) => {
     const onDeleteClick = () => {
@@ -28,8 +30,8 @@ const Action = ({ ...props }: any) => {
 
             {userHasPermission(props.user, AVAILABLE_PERMISSIONS.editSeries) ? (
                 <>
-                    <EditIcon onClick={onEditClick} />
-                    <DeleteIcon onClick={onDeleteClick} />
+                    <EditIcon onClick={onEditClick} className='cursor-pointer' />
+                    <DeleteIcon onClick={onDeleteClick} className='cursor-pointer' />
                 </>
             ) : (
                 <></>
@@ -47,28 +49,21 @@ const ClubTable = ({ viewHref }: { viewHref: string }) => {
         error, //error object
         refetch //refetch the session
     } = useSession()
-    const [data, setData] = useState<SeriesDataType[]>([])
-    const loadingState = data?.length === 0 ? 'loading' : 'idle'
+    const { series, seriesIsError, seriesIsValidating } = Fetcher.GetSeriesByClubId(session?.club!)
+    // const [data, setData] = useState<SeriesDataType[]>([])
 
     const Router = useRouter()
 
     const deleteSeries = async (seriesId: string) => {
         await DB.deleteSeriesById(seriesId)
+        mutate('/api/GetSeriesByClubId') // This will revalidate the series data
     }
 
     const editSeries = async (series: SeriesDataType) => {
         await DB.updateSeries(series)
     }
 
-    useEffect(() => {
-        const fetchData = async () => {
-            if (session) {
-                const series = await DB.GetSeriesByClubId(session.user.clubId)
-                setData(series)
-            }
-        }
-        fetchData()
-    }, [session])
+    const data = series || []
 
     var table = useReactTable({
         data,

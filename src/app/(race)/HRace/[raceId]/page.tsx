@@ -522,21 +522,25 @@ export default function Page(props: PageProps) {
     }
 
     const finishModeClick = () => {
-        //no point asking which fleet if there is only one fleet
-        if (race.fleets.length == 1) {
-            setRaceMode([...raceMode.slice(0, 0), raceModeType.Finish, ...raceMode.slice(1)])
-        } else {
-            setSelectMode(raceModeType.Finish)
-            setFleetSelectModal(true)
+        if (raceState == raceStateType.running) {
+            if (race.fleets.length == 1) {
+                setRaceMode([...raceMode.slice(0, 0), raceModeType.Finish, ...raceMode.slice(1)])
+            } else {
+                setSelectMode(raceModeType.Finish)
+                setFleetSelectModal(true)
+            }
         }
     }
 
     const lapModeClick = () => {
-        if (race.fleets.length == 1) {
-            setRaceMode([...raceMode.slice(0, 0), raceModeType.Lap, ...raceMode.slice(1)])
-        } else {
-            setSelectMode(raceModeType.Lap)
-            setFleetSelectModal(true)
+        //check if race is running
+        if (raceState == raceStateType.running) {
+            if (race.fleets.length == 1) {
+                setRaceMode([...raceMode.slice(0, 0), raceModeType.Lap, ...raceMode.slice(1)])
+            } else {
+                setSelectMode(raceModeType.Lap)
+                setFleetSelectModal(true)
+            }
         }
     }
 
@@ -684,6 +688,12 @@ export default function Page(props: PageProps) {
                                         return (
                                             <Button id='CalcResultsButton' onClick={calculateResults} size='big' variant={'blue'}>
                                                 Calculate Results
+                                            </Button>
+                                        )
+                                    case raceStateType.retire:
+                                        return (
+                                            <Button size='big' variant={'secondary'}>
+                                                Retire Mode
                                             </Button>
                                         )
                                     default:
