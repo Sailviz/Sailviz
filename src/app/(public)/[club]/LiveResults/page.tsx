@@ -16,9 +16,10 @@ type PageProps = { params: Promise<{ club: string }> }
 export default function Page(props: PageProps) {
     const Router = useRouter()
 
-    const { club: club } = use(props.params)
+    const { club: clubName } = use(props.params)
+    const [club, setClub] = useState<ClubDataType | undefined>(undefined)
 
-    var [clubId, setClubId] = useState<string>(club)
+    var [clubId, setClubId] = useState<string>('')
     var [races, setRaces] = useState<RaceDataType[]>([
         {
             id: '',
@@ -67,7 +68,6 @@ export default function Page(props: PageProps) {
     }
 
     useEffect(() => {
-        let clubName = club
         if (clubName) {
             DB.getClubByName(clubName.toString()).then(data => {
                 if (data) {
@@ -81,11 +81,6 @@ export default function Page(props: PageProps) {
 
     useEffect(() => {
         if (clubId != '') {
-            //catch if not fully updated
-            if (clubId == 'invalid') {
-                return
-            }
-
             const fetchTodaysRaces = async () => {
                 var data = await DB.getTodaysRaceByClubId(clubId)
                 if (data) {
@@ -104,10 +99,18 @@ export default function Page(props: PageProps) {
                     console.log('could not find todays race')
                 }
             }
-            fetchTodaysRaces()
-        } else {
-            console.log('user not signed in')
-            Router.push('/')
+
+            const fetchClub = async () => {
+                const club = await DB.GetClubById(clubId)
+                setClub(club)
+                if (club.stripe.planName != 'Sailviz Pro') {
+                    console.log('Club does not have Sailviz Pro subscription')
+                } else {
+                    console.log('Club has Sailviz Pro subscription')
+                    fetchTodaysRaces()
+                }
+            }
+            fetchClub()
         }
     }, [clubId])
 
@@ -176,10 +179,13 @@ export default function Page(props: PageProps) {
                     default: //includes notLive state
                         return (
                             <div>
-                                <p className='text-6xl font-extrabold text-gray-700 p-6'>
-                                    {' '}
-                                    {club} <br /> No Races Currently Active
-                                </p>
+                                <p className='text-6xl font-extrabold text-gray-700 p-6'>{club?.name}</p>
+                                {/* this backwards case is so that the upgrade message isn't shown during page load. */}
+                                {club?.stripe.planName != 'SailViz' ? (
+                                    <p className='text-2xl font-extrabold text-gray-700 p-6'>No Races Currently Active</p>
+                                ) : (
+                                    <p className='text-2xl font-extrabold text-gray-700 p-6'>Upgrade to Sailviz Pro to enable Live Results</p>
+                                )}
                             </div>
                         )
                 }

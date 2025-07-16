@@ -74,13 +74,9 @@ export async function GetSeriesById(seriesId: string): Promise<SeriesDataType> {
 }
 
 export async function GetClubById(id: string): Promise<ClubDataType> {
-    const body = {
-        id: id
-    }
-    return await fetch(`${server}/api/GetClubById`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
+    return await fetch(`${server}/api/GetClubById?clubId=${id}`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
     })
         .then(res => res.json())
         .then(data => {
