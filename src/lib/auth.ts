@@ -28,6 +28,9 @@ export const auth = betterAuth({
             const club = (await prisma.club.findFirst({
                 where: {
                     id: dbUser.clubId
+                },
+                include: {
+                    stripe: true
                 }
             })) as ClubDataType | null
             return {
