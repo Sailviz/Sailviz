@@ -3,7 +3,11 @@ import prisma from '@/lib/prisma'
 import assert from 'assert'
 
 async function getClubs() {
-    var result = await prisma.club.findMany()
+    var result = await prisma.club.findMany({
+        include: {
+            stripe: true
+        }
+    })
     return result
 }
 

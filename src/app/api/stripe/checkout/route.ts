@@ -87,7 +87,7 @@ export async function GET(request: NextRequest) {
         })
 
         // await setSession(user)
-        return NextResponse.redirect(new URL('/dashboard', request.url))
+        return NextResponse.redirect(new URL('/Dashboard', request.url))
     } catch (error) {
         console.error('Error handling successful checkout:', error)
         return NextResponse.redirect(new URL('/error', request.url))

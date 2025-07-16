@@ -49,6 +49,8 @@ const TableOfClubs = () => {
 
     const data = clubs || []
 
+    console.log('Clubs:', data)
+
     const viewClub = (id: string) => {
         console.log('Viewing club with ID:', id)
         Router.push(`/admin/clubs/${id}`)
@@ -59,6 +61,10 @@ const TableOfClubs = () => {
         columns: [
             columnHelper.accessor('name', {
                 header: 'Club Name',
+                cell: info => info.getValue()
+            }),
+            columnHelper.accessor(data => data.stripe?.customerId || '', {
+                header: 'Stripe Customer ID',
                 cell: info => info.getValue()
             }),
             columnHelper.display({
