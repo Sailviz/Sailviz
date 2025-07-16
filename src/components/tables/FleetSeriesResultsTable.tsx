@@ -32,7 +32,17 @@ const Result = ({ ...props }: any) => {
     const initialValue = props.getValue()
     const [value, setValue] = React.useState(initialValue.position)
     const [discarded, setDiscarded] = React.useState(initialValue.discarded)
-    return <div className={discarded ? 'line-through' : ''}>{Math.round(value)}</div>
+    if (discarded) {
+        return <div className='line-through text-center'>{Math.round(value)}</div>
+    } else if (value == 1) {
+        return <div className='text-white bg-yellow-400 text-center'>{Math.round(value)}</div>
+    } else if (value == 2) {
+        return <div className='text-white bg-gray-600 text-center'>{Math.round(value)}</div>
+    } else if (value == 3) {
+        return <div className='text-white bg-yellow-800 text-center'>{Math.round(value)}</div>
+    } else {
+        return <div className='text-center'>{Math.round(value)}</div>
+    }
 }
 
 function Sort({ column, table }: { column: any; table: any }) {
@@ -55,29 +65,20 @@ function Sort({ column, table }: { column: any; table: any }) {
 const columnHelper = createColumnHelper<SeriesResultsType>()
 
 const FleetSeriesResultsTable = ({ seriesId, fleetSettingsId }: { seriesId: string; fleetSettingsId: string }) => {
-    let [seriesData, setSeriesData] = useState<SeriesDataType | undefined>(undefined)
-
-    useEffect(() => {
-        function fetchSeries() {
-            DB.GetSeriesById(seriesId).then(data => {
-                setSeriesData(data)
-            })
-        }
-        fetchSeries()
-    }, [seriesId])
+    const { series, seriesIsError, seriesIsValidating } = Fetcher.GetSeriesById(seriesId)
 
     //calculate results table from data.
     let [data, setData] = useState<SeriesResultsType[]>([])
 
     const calcTable = () => {
-        if (seriesData == undefined) {
+        if (series == undefined) {
             console.log('seriesData is undefined')
             return
         }
         let tempresults: SeriesResultsType[] = []
-        console.log('seriesData', seriesData)
+        console.log('seriesData', series)
         //collate results from same person.
-        seriesData.races.forEach(race => {
+        series.races.forEach(race => {
             let fleet = race.fleets.find(fleet => fleet.fleetSettings.id == fleetSettingsId)!.results
             fleet.forEach(result => {
                 //if new racer, add to tempresults
@@ -94,7 +95,7 @@ const FleetSeriesResultsTable = ({ seriesId, fleetSettingsId }: { seriesId: stri
                         SailNumber: result.SailNumber,
                         Total: 0,
                         Net: 0,
-                        racePositions: Array(seriesData.races.length).fill({ position: 0, discarded: false })
+                        racePositions: Array(series.races.length).fill({ position: 0, discarded: false })
                     })
                     index -= 1
                 }
@@ -108,7 +109,7 @@ const FleetSeriesResultsTable = ({ seriesId, fleetSettingsId }: { seriesId: stri
         })
 
         //give duty team their average score if they have raced in the series
-        seriesData.races.forEach(race => {
+        series.races.forEach(race => {
             //loop through duty team on each race.
             Object.entries(race.Duties).map(([displayName, name]) => {
                 let index = tempresults.findIndex(function (t) {
@@ -149,7 +150,7 @@ const FleetSeriesResultsTable = ({ seriesId, fleetSettingsId }: { seriesId: stri
             sortedResult.racePositions.sort((a, b) => a.position - b.position)
             let Net = 0
             let modifiedResult = sortedResult.racePositions.map((position, index) => {
-                if (index < seriesData.settings.numberToCount) {
+                if (index < series.settings.numberToCount) {
                     Net += position.position
                     return { ...position, discarded: false } // Ensure discarded is false for counted positions
                 } else {
@@ -211,11 +212,11 @@ const FleetSeriesResultsTable = ({ seriesId, fleetSettingsId }: { seriesId: stri
     }
 
     useEffect(() => {
-        if (seriesData != undefined) {
+        if (series != undefined) {
             calcTable()
             generateColumns()
         }
-    }, [seriesData])
+    }, [series])
 
     const [columns, setColumns] = useState([
         columnHelper.accessor('Rank', {
@@ -250,18 +251,26 @@ const FleetSeriesResultsTable = ({ seriesId, fleetSettingsId }: { seriesId: stri
     ])
 
     const generateColumns = () => {
-        if (seriesData == undefined) {
+        if (series == undefined) {
             console.log('seriesData is undefined')
             return
         }
 
-        seriesData.races.sort((a, b) => a.number - b.number)
+        series.races.sort((a, b) => a.number - b.number)
         var newColumns: any[] = []
         //add column for each race in series
-        seriesData.races.forEach((race: RaceDataType, index: number) => {
+        series.races.forEach((race: RaceDataType, index: number) => {
             const newColumn = columnHelper.accessor(data => data.racePositions[index], {
                 id: 'R' + race.number.toString(),
-                header: 'R' + race.number.toString(),
+                header: () => (
+                    <div
+                        style={{
+                            textAlign: 'center'
+                        }}
+                    >
+                        R{race.number.toString()}
+                    </div>
+                ),
                 cell: props => <Result {...props} />,
                 enableSorting: false
             })
