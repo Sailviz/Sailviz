@@ -253,13 +253,13 @@ export function GetSeriesByClubId(club: ClubDataType) {
 }
 
 export function GetSeriesById(seriesId: string) {
-    let body = { seriesId: seriesId }
-    const { data, error, isValidating } = useSWR('/api/GetSeriesById', url => advancedFetcher(url!, body))
+    const { data, error, isValidating, mutate } = useSWR(`/api/GetSeriesById?id=${seriesId}`, fetcher)
 
     return {
-        series: data?.series as SeriesDataType,
+        series: data as SeriesDataType,
         seriesIsValidating: isValidating,
-        seriesIsError: error
+        seriesIsError: error,
+        mutateSeries: mutate
     }
 }
 

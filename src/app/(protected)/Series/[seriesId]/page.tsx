@@ -1,3 +1,4 @@
+'use client'
 import SeriesResultsTable from '@/components/tables/FleetSeriesResultsTable'
 import SeriesRaceTable from '@/components/tables/SeriesRaceTable'
 import FleetTable from '@/components/tables/FleetTable'
@@ -11,36 +12,37 @@ import { use } from 'react'
 import * as DB from '@/components/apiMethods'
 import { Button } from '@/components/ui/button'
 import StartSequenceManager from '@/components/StartSequenceManager'
-import { auth } from '@/lib/auth'
-import { headers } from 'next/headers'
 import { PageSkeleton } from '@/components/layout/PageSkeleton'
 import prisma from '@/lib/prisma'
+import { useSession } from '@/lib/auth-client'
 
 type PageProps = { params: Promise<{ seriesId: string }> }
 
-export default async function Page(props: PageProps) {
-    const { seriesId } = await props.params
-    const session = await auth.api.getSession({
-        headers: await headers() // you need to pass the headers object.
-    })
+export default function Page(props: PageProps) {
+    const {
+        data: session,
+        isPending, //loading state
+        error, //error object
+        refetch //refetch the session
+    } = useSession()
+    const { seriesId } = use(props.params)
     console.log('Session:', session)
-    if (!session || !session.club) {
-        // If the user is not authenticated, redirect to the login page
-        return <PageSkeleton />
-    }
 
-    const startSequence = (await prisma.startSequence.findMany({
-        where: { seriesId: seriesId },
-        orderBy: { order: 'asc' }
-    })) as unknown as StartSequenceStep[]
+    const { series, seriesIsError, seriesIsValidating } = Fetcher.GetSeriesById(seriesId)
+    const { startSequence, startSequenceIsError, startSequenceIsValidating } = Fetcher.GetStartSequence(seriesId)
 
-    const series = await prisma.series.findUnique({
-        where: { id: seriesId },
-        include: {
-            fleetSettings: true,
-            club: true
-        }
-    })
+    // const startSequence = prisma.startSequence.findMany({
+    //     where: { seriesId: seriesId },
+    //     orderBy: { order: 'asc' }
+    // }) as unknown as StartSequenceStep[]
+
+    // const series = prisma.series.findUnique({
+    //     where: { id: seriesId },
+    //     include: {
+    //         fleetSettings: true,
+    //         club: true
+    //     }
+    // })
 
     // const createRace = async () => {
     //     var race = await DB.createRace(club.id, series.id)
@@ -56,9 +58,12 @@ export default async function Page(props: PageProps) {
     //     mutateSeries()
     // }
 
-    // const createFleetSettings = async () => {
-    //     await DB.createFleetSettings(seriesId)
-    // }
+    const createFleetSettings = async () => {
+        //only create fleet settings if the club has pro subscription
+        if (session?.club?.stripe.planName == 'Sailviz Pro') {
+            await DB.createFleetSettings(seriesId)
+        }
+    }
 
     // const deleteFleetSettings = async (fleetId: string) => {
     //     await DB.DeleteFleetSettingsById(fleetId)
@@ -74,12 +79,21 @@ export default async function Page(props: PageProps) {
 
     //     mutateSeries()
     // }
+    const updateFleet = async (fleet: FleetSettingsType): Promise<void> => {
+        await DB.updateFleetSettingsById(fleet)
+    }
 
     // const showFleetSettingsModal = async (fleetSettings: FleetSettingsType) => {
     //     setActiveFleetSettings(fleetSettings)
     //     editFleetSettingsModal.onOpen()
     // }
 
+    if (!session || !session.club || series == undefined) {
+        console.log('Series', series)
+        // If the user is not authenticated, redirect to the login page
+        return <PageSkeleton />
+    }
+    console.log('Series:', series)
     return (
         <>
             {/* <EditFleetModal isOpen={editFleetSettingsModal.isOpen} fleetSettings={activeFleetSettings} onSubmit={editFleetSettings} onClose={editFleetSettingsModal.onClose} /> */}
@@ -96,8 +110,10 @@ export default async function Page(props: PageProps) {
                 </div>
                 {userHasPermission(session?.user, AVAILABLE_PERMISSIONS.editFleets) ? (
                     <>
+                        <Button onClick={createFleetSettings} disabled={session?.club?.stripe.planName != 'SailViz Pro'}>
+                            Add Fleet
+                        </Button>
                         <StartSequenceManager initialSequence={startSequence} seriesId={seriesId} key={startSequence?.length} />
-                        {/* <Button onClick={createFleetSettings}>Add Fleet</Button> */}
 
                         <ToCountSelect seriesId={seriesId} />
                     </>
@@ -105,7 +121,7 @@ export default async function Page(props: PageProps) {
                     <> </>
                 )}
                 <div className='mb-6'>
-                    {series?.fleetSettings.map((fleetSettings, index) => {
+                    {series.fleetSettings.map((fleetSettings, index) => {
                         return (
                             <div key={fleetSettings.id + index} className='mb-6'>
                                 <div>{fleetSettings.name}</div>

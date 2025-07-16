@@ -4,7 +4,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import * as Fetcher from '@/components/Fetchers'
 import * as DB from '@/components/apiMethods'
 export function ToCountSelect({ seriesId }: { seriesId: string }) {
-    const { series, seriesIsError, seriesIsValidating, mutateSeries } = Fetcher.Series(seriesId)
+    const { series, seriesIsError, seriesIsValidating, mutateSeries } = Fetcher.GetSeriesById(seriesId)
 
     const saveSeriesToCount = async (value: number) => {
         if (series === null) {

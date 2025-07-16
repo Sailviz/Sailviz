@@ -13,6 +13,7 @@ import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMe
 import { ChevronDown } from 'lucide-react'
 import Link from 'next/link'
 import { useSession } from '@/lib/auth-client'
+import EditFleetSettingsDialog from '../layout/dashboard/EditFleetSettingsModal'
 const Boats = ({ ...props }: any) => {
     const initialValue = props.getValue()
     const [value, setValue] = React.useState<BoatDataType[]>(initialValue)
@@ -41,9 +42,7 @@ const Action = ({ ...props }: any) => {
         <div className='relative flex items-center gap-2'>
             {userHasPermission(props.user, AVAILABLE_PERMISSIONS.editFleets) ? (
                 <>
-                    <Link href={`/editFleet/${props.id}`}>
-                        <EditIcon />
-                    </Link>
+                    <EditFleetSettingsDialog fleetSettings={props.row.original} seriesId={props.seriesId} />
 
                     <DeleteIcon onClick={onDeleteClick} />
                 </>
@@ -67,6 +66,8 @@ const FleetTable = (props: any) => {
         refetch //refetch the session
     } = useSession()
     console.log(props.data)
+
+    const seriesId = props.seriesId
 
     const remove = (data: any) => {
         props.remove(data)
@@ -92,7 +93,7 @@ const FleetTable = (props: any) => {
             }),
             columnHelper.accessor('id', {
                 id: 'Edit',
-                cell: props => <Action {...props} id={props.row.original.id} remove={remove} user={session?.user} />
+                cell: props => <Action {...props} id={props.row.original.id} seriesId={seriesId} remove={remove} user={session?.user} />
             })
         ],
         getCoreRowModel: getCoreRowModel()

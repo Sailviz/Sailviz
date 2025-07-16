@@ -7,9 +7,11 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader } from '@/components/
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useRouter } from 'next/navigation'
-import { use } from 'chai'
+import { DialogTrigger } from '@radix-ui/react-dialog'
+import * as DB from '@/components/apiMethods'
+import { mutate } from 'swr'
 
-export default function EditFleetSettingsDialog({ fleetSettings, onSubmit }: { fleetSettings: FleetSettingsType; onSubmit: (fleetSettings: FleetSettingsType) => void }) {
+export default function EditFleetSettingsDialog({ fleetSettings, seriesId }: { fleetSettings: FleetSettingsType; seriesId: string }) {
     const Router = useRouter()
     const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
     const { boats, boatsIsError, boatsIsValidating } = Fetcher.Boats()
@@ -18,7 +20,14 @@ export default function EditFleetSettingsDialog({ fleetSettings, onSubmit }: { f
     const [selectedBoats, setSelectedBoats] = useState([{ label: '', value: {} as BoatDataType }])
     const [options, setOptions] = useState([{ label: '', value: {} as BoatDataType }])
 
-    const [open, setOpen] = useState(true)
+    const [open, setOpen] = useState(false)
+
+    const onSubmit = async (fleetSettings: FleetSettingsType) => {
+        await DB.updateFleetSettingsById(fleetSettings)
+        console.log(seriesId)
+        mutate(`/api/GetFleetSettingsBySeriesId?id=${seriesId}`)
+        setOpen(false)
+    }
 
     useEffect(() => {
         if (fleetSettings == undefined) return
@@ -40,9 +49,13 @@ export default function EditFleetSettingsDialog({ fleetSettings, onSubmit }: { f
             open={open}
             onOpenChange={open => {
                 setOpen(open)
-                if (!open) Router.back() // this catches the x button and clicking outside the modal, gets out of parallel route
             }}
         >
+            <DialogTrigger asChild>
+                <Button aria-label='edit fleet' color='secondary'>
+                    Edit Fleet
+                </Button>
+            </DialogTrigger>
             <DialogContent className='max-w-8/12'>
                 <DialogHeader className='flex flex-col gap-1'>Edit Fleet</DialogHeader>
                 <div className='flex w-full'>
