@@ -1,22 +1,14 @@
 'use client'
-import React, { ChangeEvent, useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import dayjs from 'dayjs'
-import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, RowSelection, SortingState, useReactTable } from '@tanstack/react-table'
+import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, SortingState, useReactTable } from '@tanstack/react-table'
 import * as DB from '@/components/apiMethods'
-import { VerticalDotsIcon } from '@/components/icons/vertical-dots-icon'
-import { EyeIcon } from '@/components/icons/eye-icon'
-import { EditIcon } from '@/components/icons/edit-icon'
-import { DeleteIcon } from '@/components/icons/delete-icon'
 import { useRouter } from 'next/navigation'
-import { useTheme } from 'next-themes'
-import useSWR from 'swr'
 import * as Fetcher from '@/components/Fetchers'
 import { AVAILABLE_PERMISSIONS, userHasPermission } from '@/components/helpers/users'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
-import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from '../ui/dropdown-menu'
-import { ChevronDown } from 'lucide-react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select'
 import { useSession } from '@/lib/auth-client'
 
@@ -25,25 +17,23 @@ const raceOptions = [
     { value: 'Handicap', label: 'Handicap' }
 ]
 
-const Time = ({ ...props }: any) => {
-    const initialValue = props.getValue()
+const Time = ({ initialValue, race }: { initialValue: any; race: RaceDataType }) => {
     const [value, setValue] = React.useState(initialValue)
 
     const onBlur = () => {
         console.log(value)
-        var raceData: RaceDataType = props.row.original
-        console.log(raceData.id)
         var time = value.replace('T', ' ')
         var day = dayjs(time)
         if (day.isValid()) {
-            raceData.Time = time
-            DB.updateRaceById(raceData)
+            race.Time = time
+            DB.updateRaceById(race)
         }
     }
 
     React.useEffect(() => {
         setValue(initialValue)
     }, [initialValue])
+
     return (
         <>
             <Input
@@ -58,22 +48,18 @@ const Time = ({ ...props }: any) => {
     )
 }
 
-const Type = ({ ...props }: any) => {
-    const { theme, setTheme } = useTheme()
-    const initialValue = props.getValue()
+const Type = ({ initialValue, race }: { initialValue: any; race: RaceDataType }) => {
     const [value, setValue] = React.useState(initialValue)
 
     const onBlur = (type: string) => {
-        var raceData: RaceDataType = props.row.original
-        console.log(raceData.id)
-
-        raceData.Type = type
-        DB.updateRaceById(raceData)
+        race.Type = type
+        DB.updateRaceById(race)
     }
 
     React.useEffect(() => {
         setValue(initialValue)
     }, [initialValue])
+
     return (
         <>
             <Select
@@ -112,11 +98,13 @@ const Action = ({ id, mutateSeries, user }: { id: string; mutateSeries: any; use
     }
     return (
         <div className='relative flex items-center gap-2'>
-            <EyeIcon className={'cursor-pointer'} onClick={() => Router.push('/Race/' + id)} />
+            <Button onClick={() => Router.push('/Race/' + id)}>View</Button>
 
             {userHasPermission(user, AVAILABLE_PERMISSIONS.editRaces) ? (
                 <>
-                    <DeleteIcon onClick={onDeleteClick} className={'cursor-pointer text-red-500'} />
+                    <Button onClick={onDeleteClick} variant={'outline'}>
+                        Remove
+                    </Button>
                 </>
             ) : (
                 <></>
@@ -127,22 +115,19 @@ const Action = ({ id, mutateSeries, user }: { id: string; mutateSeries: any; use
 
 const columnHelper = createColumnHelper<RaceDataType>()
 
-const SeriesRaceTable = (props: any) => {
+const SeriesRaceTable = ({ seriesId }: { seriesId: string }) => {
     const {
         data: session,
         isPending, //loading state
         error, //error object
         refetch //refetch the session
     } = useSession()
-    const [seriesId, setSeriesId] = useState(props.id)
     const { series, seriesIsError, seriesIsValidating, mutateSeries } = Fetcher.Series(seriesId)
 
     let data = series.races
     if (data == undefined) {
         data = []
     }
-
-    const loadingState = seriesIsValidating ? 'loading' : 'idle'
 
     const [sorting, setSorting] = useState<SortingState>([
         {
@@ -161,11 +146,11 @@ const SeriesRaceTable = (props: any) => {
             }),
             columnHelper.accessor('Time', {
                 id: 'Number of Races',
-                cell: props => <Time {...props} />
+                cell: props => <Time initialValue={props.getValue()} race={props.row.original} />
             }),
             columnHelper.accessor('Type', {
                 id: 'Type',
-                cell: props => <Type {...props} />
+                cell: props => <Type initialValue={props.getValue()} race={props.row.original} />
             }),
             columnHelper.accessor('id', {
                 id: 'action',

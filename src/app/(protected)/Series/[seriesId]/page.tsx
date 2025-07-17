@@ -100,7 +100,7 @@ export default function Page(props: PageProps) {
             <div id='series' className='w-full'>
                 <p className='text-6xl font-extrabold p-6'>{series?.name}</p>
                 <div className='p-6'>
-                    <SeriesRaceTable id={seriesId} />
+                    <SeriesRaceTable seriesId={seriesId} />
                 </div>
                 {userHasPermission(session?.user, AVAILABLE_PERMISSIONS.editRaces) ? <AddRaceButton seriesId={seriesId} /> : <> </>}
 
