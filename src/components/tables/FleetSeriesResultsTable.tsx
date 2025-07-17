@@ -1,7 +1,6 @@
 'use client'
-import React, { ChangeEvent, useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, useReactTable, SortingState } from '@tanstack/react-table'
-import * as DB from '@/components/apiMethods'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
 import * as Fetcher from '@/components/Fetchers'
 //not a db type, only used here
@@ -16,50 +15,26 @@ type SeriesResultsType = {
     racePositions: { race: number; position: number; discarded: boolean }[]
 }
 
-const Text = ({ ...props }) => {
-    const value = props.getValue()
+const Text = ({ text }: { text: string }) => {
+    return <div>{text}</div>
+}
 
+const Number = ({ value }: { value: number }) => {
     return <div>{value}</div>
 }
 
-const Number = ({ ...props }: any) => {
-    const initialValue = props.getValue()
-    const [value, setValue] = React.useState(initialValue)
-    return <div>{Math.round(value)}</div>
-}
-
-const Result = ({ ...props }: any) => {
-    const initialValue = props.getValue()
-    const [value, setValue] = React.useState(initialValue.position)
-    const [discarded, setDiscarded] = React.useState(initialValue.discarded)
+const Result = ({ position, discarded }: { position: number; discarded: boolean }) => {
     if (discarded) {
-        return <div className='line-through text-center'>{Math.round(value)}</div>
-    } else if (value == 1) {
-        return <div className='text-white bg-yellow-400 text-center'>{Math.round(value)}</div>
-    } else if (value == 2) {
-        return <div className='text-white bg-gray-600 text-center'>{Math.round(value)}</div>
-    } else if (value == 3) {
-        return <div className='text-white bg-yellow-800 text-center'>{Math.round(value)}</div>
+        return <div className='line-through text-center'>{position}</div>
+    } else if (position == 1) {
+        return <div className='text-white bg-yellow-400 text-center'>{position}</div>
+    } else if (position == 2) {
+        return <div className='text-white bg-gray-600 text-center'>{position}</div>
+    } else if (position == 3) {
+        return <div className='text-white bg-yellow-800 text-center'>{position}</div>
     } else {
-        return <div className='text-center'>{Math.round(value)}</div>
+        return <div className='text-center'>{position}</div>
     }
-}
-
-function Sort({ column, table }: { column: any; table: any }) {
-    const firstValue = table.getPreFilteredRowModel().flatRows[0]?.getValue(column.id)
-
-    const columnFilterValue = column.getFilterValue()
-
-    return (
-        <div className='flex flex-row justify-center'>
-            <p onClick={e => column.toggleSorting(true)} className='cursor-pointer'>
-                ▲
-            </p>
-            <p onClick={e => column.toggleSorting(false)} className='cursor-pointer'>
-                ▼
-            </p>
-        </div>
-    )
 }
 
 const columnHelper = createColumnHelper<SeriesResultsType>()
@@ -105,7 +80,11 @@ const FleetSeriesResultsTable = ({ seriesId, fleetSettingsId }: { seriesId: stri
                 }
                 //add result to tempresults
                 if (tempresults[index]) {
-                    tempresults[index]!.racePositions.splice(race.number - 1, 1, { race: race.number, position: result.HandicapPosition, discarded: false })
+                    tempresults[index]!.racePositions.splice(race.number - 1, 1, {
+                        race: race.number,
+                        position: result.HandicapPosition == 0 ? result.PursuitPosition : result.PursuitPosition,
+                        discarded: false
+                    })
                 } else {
                     console.log('something went wrong')
                 }
@@ -225,31 +204,31 @@ const FleetSeriesResultsTable = ({ seriesId, fleetSettingsId }: { seriesId: stri
     const [columns, setColumns] = useState([
         columnHelper.accessor('Rank', {
             header: 'Rank',
-            cell: props => <Number {...props} />,
+            cell: props => <Number value={props.getValue()} />,
             enableSorting: true
         }),
         columnHelper.accessor('Helm', {
             header: 'Helm',
             size: 300,
-            cell: props => <Text {...props} />,
+            cell: props => <Text text={props.getValue()} />,
             enableSorting: false
         }),
         columnHelper.accessor('Crew', {
             header: 'Crew',
             size: 300,
-            cell: props => <Text {...props} />,
+            cell: props => <Text text={props.getValue()} />,
             enableSorting: false
         }),
         columnHelper.accessor(data => data.Boat?.name, {
             header: 'Class',
             size: 300,
             id: 'Class',
-            cell: props => <Text {...props} />,
+            cell: props => <Text text={props.getValue()} />,
             enableSorting: false
         }),
         columnHelper.accessor(data => data.SailNumber, {
             header: 'Sail Number',
-            cell: props => <Text {...props} />,
+            cell: props => <Text text={props.getValue()} />,
             enableSorting: false
         })
     ])
@@ -275,7 +254,7 @@ const FleetSeriesResultsTable = ({ seriesId, fleetSettingsId }: { seriesId: stri
                         R{race.number.toString()}
                     </div>
                 ),
-                cell: props => <Result {...props} />,
+                cell: props => <Result position={props.getValue()!.position} discarded={props.getValue()!.discarded} />,
                 enableSorting: false
             })
             newColumns.push(newColumn)
@@ -287,13 +266,13 @@ const FleetSeriesResultsTable = ({ seriesId, fleetSettingsId }: { seriesId: stri
 
     const totalColumn = columnHelper.accessor('Total', {
         header: 'Total',
-        cell: props => <Number {...props} />,
+        cell: props => <Number value={props.getValue()} />,
         enableSorting: true
     })
 
     const netColumn = columnHelper.accessor('Net', {
         header: 'Net',
-        cell: props => <Number {...props} disabled={true} />,
+        cell: props => <Number value={props.getValue()} />,
         enableSorting: true
     })
 
