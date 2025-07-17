@@ -79,7 +79,11 @@ const FleetSeriesResultsTable = ({ seriesId, fleetSettingsId }: { seriesId: stri
         console.log('seriesData', series)
         //collate results from same person.
         series.races.forEach(race => {
-            let fleet = race.fleets.find(fleet => fleet.fleetSettings.id == fleetSettingsId)!.results
+            let fleet = race.fleets.find(fleet => fleet.fleetSettings.id == fleetSettingsId)?.results
+            if (fleet == undefined) {
+                console.log('fleet is undefined')
+                return
+            }
             fleet.forEach(result => {
                 //if new racer, add to tempresults
                 let index = tempresults.findIndex(function (t) {
