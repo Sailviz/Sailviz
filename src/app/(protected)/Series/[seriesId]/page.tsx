@@ -28,7 +28,7 @@ export default function Page(props: PageProps) {
     const { seriesId } = use(props.params)
     console.log('Session:', session)
 
-    const { series, seriesIsError, seriesIsValidating } = Fetcher.GetSeriesById(seriesId)
+    const { series, seriesIsError, seriesIsValidating } = Fetcher.Series(seriesId)
     const { startSequence, startSequenceIsError, startSequenceIsValidating } = Fetcher.GetStartSequence(seriesId)
 
     // const startSequence = prisma.startSequence.findMany({

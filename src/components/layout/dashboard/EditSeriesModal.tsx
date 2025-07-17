@@ -18,7 +18,7 @@ export default function EditSeriesDialog({
     onClose: () => void
 }) {
     const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
-    const { series, seriesIsError, seriesIsValidating } = Fetcher.GetSeriesById(seriesId)
+    const { series, seriesIsError, seriesIsValidating } = Fetcher.Series(seriesId)
     const [seriesName, setSeriesName] = useState(series.name)
 
     const { theme, setTheme } = useTheme()

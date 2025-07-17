@@ -65,7 +65,7 @@ function Sort({ column, table }: { column: any; table: any }) {
 const columnHelper = createColumnHelper<SeriesResultsType>()
 
 const FleetSeriesResultsTable = ({ seriesId, fleetSettingsId }: { seriesId: string; fleetSettingsId: string }) => {
-    const { series, seriesIsError, seriesIsValidating } = Fetcher.GetSeriesById(seriesId)
+    const { series, seriesIsError, seriesIsValidating } = Fetcher.Series(seriesId)
 
     //calculate results table from data.
     let [data, setData] = useState<SeriesResultsType[]>([])

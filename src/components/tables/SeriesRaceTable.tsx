@@ -98,22 +98,23 @@ const Type = ({ ...props }: any) => {
     )
 }
 
-const Action = ({ ...props }: any) => {
+const Action = ({ id, mutateSeries, user }: { id: string; mutateSeries: any; user: UserDataType }) => {
     const Router = useRouter()
 
     const onDeleteClick = async () => {
         if (confirm('are you sure you want to do this?')) {
-            let result = await DB.deleteRaceById(props.row.original.id)
+            let result = await DB.deleteRaceById(id)
             if (!result) {
                 return
-            } // failed to delete race
+            }
+            mutateSeries()
         }
     }
     return (
         <div className='relative flex items-center gap-2'>
-            <EyeIcon className={'cursor-pointer'} onClick={() => Router.push('/Race/' + props.row.original.id)} />
+            <EyeIcon className={'cursor-pointer'} onClick={() => Router.push('/Race/' + id)} />
 
-            {userHasPermission(props.user, AVAILABLE_PERMISSIONS.editRaces) ? (
+            {userHasPermission(user, AVAILABLE_PERMISSIONS.editRaces) ? (
                 <>
                     <DeleteIcon onClick={onDeleteClick} className={'cursor-pointer text-red-500'} />
                 </>
@@ -134,11 +135,7 @@ const SeriesRaceTable = (props: any) => {
         refetch //refetch the session
     } = useSession()
     const [seriesId, setSeriesId] = useState(props.id)
-    const {
-        data: series,
-        error: seriesIsError,
-        isValidating: seriesIsValidating
-    } = useSWR(`/api/GetSeriesById?id=${seriesId}`, Fetcher.fetcher, { fallbackData: {} as SeriesDataType })
+    const { series, seriesIsError, seriesIsValidating, mutateSeries } = Fetcher.Series(seriesId)
 
     let data = series.races
     if (data == undefined) {
@@ -173,7 +170,7 @@ const SeriesRaceTable = (props: any) => {
             columnHelper.accessor('id', {
                 id: 'action',
                 header: 'Actions',
-                cell: props => <Action {...props} id={props.row.original.id} user={session!.user} />
+                cell: props => <Action id={props.row.original.id} user={session!.user} mutateSeries={mutateSeries} />
             })
         ],
         state: {
