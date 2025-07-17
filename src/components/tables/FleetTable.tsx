@@ -1,19 +1,15 @@
 'use client'
-import React, { ChangeEvent, MouseEventHandler, useEffect, useState } from 'react'
+import React from 'react'
 import { createColumnHelper, flexRender, getCoreRowModel, RowSelection, useReactTable } from '@tanstack/react-table'
 import Select from 'react-select'
 import * as Fetcher from '@/components/Fetchers'
-import { EditIcon } from '@/components/icons/edit-icon'
-import { DeleteIcon } from '@/components/icons/delete-icon'
 import { AVAILABLE_PERMISSIONS, userHasPermission } from '@/components/helpers/users'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
-import { Button } from '../ui/button'
-import { Input } from '../ui/input'
-import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from '../ui/dropdown-menu'
-import { ChevronDown } from 'lucide-react'
-import Link from 'next/link'
+import * as DB from '@/components/apiMethods'
 import { useSession } from '@/lib/auth-client'
 import EditFleetSettingsDialog from '../layout/dashboard/EditFleetSettingsModal'
+import { Button } from '../ui/button'
+import { Badge } from '../ui/badge'
 const Boats = ({ ...props }: any) => {
     const initialValue = props.getValue()
     const [value, setValue] = React.useState<BoatDataType[]>(initialValue)
@@ -27,24 +23,36 @@ const Boats = ({ ...props }: any) => {
 
     return (
         <div className='w-full p-2 mx-0 my-2'>
-            <Select styles={customStyles} id='editClass' className=' w-full h-full text-3xl' value={boats} isMulti={true} isClearable={false} isDisabled={true} />
+            {/* <Select styles={customStyles} id='editClass' className=' w-full h-full text-3xl' value={boats} isMulti={true} isClearable={false} isDisabled={true} /> */}
+            {boats.map(boat => (
+                <Badge className='bg-blue-500 text-white dark:bg-blue-700 m-2' key={boat.label}>
+                    {boat.label}
+                </Badge>
+            ))}
         </div>
     )
 }
 
-const Action = ({ ...props }: any) => {
-    const onDeleteClick = () => {
+const Action = ({ user, fleetSettings, seriesId, mutate }: { user: UserDataType; fleetSettings: FleetSettingsType; seriesId: string; mutate: any }) => {
+    const onDeleteClick = async () => {
         if (confirm('are you sure you want to do this?')) {
-            props.remove(props.row.original.id)
+            let res = await DB.DeleteFleetSettingsById(fleetSettings.id)
+            if (res) {
+                console.log('Fleet settings deleted successfully')
+                mutate() // Refresh the fleet settings
+            } else {
+                console.error('Failed to delete fleet settings')
+            }
         }
     }
     return (
         <div className='relative flex items-center gap-2'>
-            {userHasPermission(props.user, AVAILABLE_PERMISSIONS.editFleets) ? (
+            {userHasPermission(user, AVAILABLE_PERMISSIONS.editFleets) ? (
                 <>
-                    <EditFleetSettingsDialog fleetSettings={props.row.original} seriesId={props.seriesId} />
-
-                    <DeleteIcon onClick={onDeleteClick} />
+                    <EditFleetSettingsDialog fleetSettings={fleetSettings} seriesId={seriesId} />
+                    <Button onClick={onDeleteClick} variant={'outline'}>
+                        Remove
+                    </Button>
                 </>
             ) : (
                 <></>
@@ -57,28 +65,19 @@ const customStyles = { multiValueRemove: (base: any) => ({ ...base, display: 'no
 
 const columnHelper = createColumnHelper<FleetSettingsType>()
 
-const FleetTable = (props: any) => {
-    const { fleetSettings, fleetSettingsIsError, fleetSettingsIsValidating } = Fetcher.GetFleetSettingsBySeriesId(props.seriesId)
+const FleetTable = ({ seriesId }: { seriesId: string }) => {
+    const { fleetSettings, fleetSettingsIsError, fleetSettingsIsValidating, mutateFleetSettings } = Fetcher.GetFleetSettingsBySeriesId(seriesId)
     const {
         data: session,
         isPending, //loading state
         error, //error object
         refetch //refetch the session
     } = useSession()
-    console.log(props.data)
-
-    const seriesId = props.seriesId
-
-    const remove = (data: any) => {
-        props.remove(data)
-    }
 
     var data = fleetSettings
     if (data == undefined) {
         data = []
     }
-
-    const loadingState = fleetSettingsIsValidating ? 'loading' : 'idle'
 
     var table = useReactTable({
         data,
@@ -93,7 +92,8 @@ const FleetTable = (props: any) => {
             }),
             columnHelper.accessor('id', {
                 id: 'Edit',
-                cell: props => <Action {...props} id={props.row.original.id} seriesId={seriesId} remove={remove} user={session?.user} />
+                header: 'Actions',
+                cell: props => <Action fleetSettings={props.row.original} seriesId={seriesId} user={session!.user} mutate={mutateFleetSettings} />
             })
         ],
         getCoreRowModel: getCoreRowModel()
