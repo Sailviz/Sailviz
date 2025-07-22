@@ -57,6 +57,7 @@ export default function Page(props: PageProps) {
 
     const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
     const { race, raceIsError, raceIsValidating, mutateRace } = Fetcher.Race(raceId, true)
+    const { series, seriesIsError, seriesIsValidating } = Fetcher.Series(race?.seriesId)
 
     var [raceState, setRaceState] = useState<raceStateType>(raceStateType.reset)
     const [lastRaceState, setLastRaceState] = useState<raceStateType>(raceStateType.reset)
@@ -438,13 +439,6 @@ export default function Page(props: PageProps) {
         Router.push('/Race/' + race.id)
     }
 
-    const ontimeupdate = async (time: { minutes: number; seconds: number; countingUp: boolean }) => {
-        //to catch race being finished on page load
-        if (time.minutes > club.settings.pursuitLength && time.countingUp == true) {
-            setRaceState(raceStateType.calculate)
-        }
-    }
-
     const showRetireModal = (resultId: string) => {
         setRetireModal(true)
         let result: ResultDataType | undefined
@@ -553,14 +547,13 @@ export default function Page(props: PageProps) {
                             Race Time:{' '}
                             <PursuitTimer
                                 startTime={race.fleets[0]!.startTime}
-                                endTime={club?.settings.pursuitLength}
+                                endTime={series?.settings.pursuitLength}
                                 timerActive={raceState == raceStateType.running}
                                 onFiveMinutes={handleFiveMinutes}
                                 onFourMinutes={handleFourMinutes}
                                 onOneMinute={handleOneMinute}
                                 onGo={handleGo}
                                 onEnd={endRace}
-                                onTimeUpdate={ontimeupdate}
                                 onWarning={handleWarning}
                                 reset={raceState == raceStateType.reset}
                             />

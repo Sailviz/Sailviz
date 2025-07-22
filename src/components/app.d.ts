@@ -20,11 +20,16 @@ type DutyDataType = {
     name: string
 }
 
+type SeriesSettingsType = {
+    numberToCount: number
+    pursuitLength: number
+}
+
 type SeriesDataType = {
     id: string
     name: string
     clubId: string
-    settings: SettingsType
+    settings: SeriesSettingsType
     races: RaceDataType[]
     fleetSettings: FleetSettingsType[]
 }

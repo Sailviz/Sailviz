@@ -15,6 +15,7 @@ import StartSequenceManager from '@/components/StartSequenceManager'
 import { PageSkeleton } from '@/components/layout/PageSkeleton'
 import prisma from '@/lib/prisma'
 import { useSession } from '@/lib/auth-client'
+import { SeriesPursuitLength } from '@/components/seriesPursuitLength'
 
 type PageProps = { params: Promise<{ seriesId: string }> }
 
@@ -116,6 +117,7 @@ export default function Page(props: PageProps) {
                         <StartSequenceManager initialSequence={startSequence} seriesId={seriesId} key={startSequence?.length} />
 
                         <ToCountSelect seriesId={seriesId} />
+                        <SeriesPursuitLength seriesId={seriesId} />
                     </>
                 ) : (
                     <> </>

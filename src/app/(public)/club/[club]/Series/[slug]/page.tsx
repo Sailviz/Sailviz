@@ -21,7 +21,8 @@ export default function Page(props: PageProps) {
         name: '',
         clubId: '',
         settings: {
-            numberToCount: 0
+            numberToCount: 0,
+            pursuitLength: 0
         },
         races: [],
         fleetSettings: [
