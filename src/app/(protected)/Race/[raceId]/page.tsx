@@ -16,12 +16,11 @@ import * as Fetcher from '@/components/Fetchers'
 import ProgressModal from '@/components/layout/dashboard/ProgressModal'
 import { useSession } from '@/lib/auth-client'
 import { PageSkeleton } from '@/components/layout/PageSkeleton'
+import CreateResultModal from '@/components/layout/dashboard/CreateResultModal'
 
 type PageProps = { params: Promise<{ raceId: string }> }
 
 export default function Page(props: PageProps) {
-    const Router = useRouter()
-
     const { raceId } = use(props.params)
     const {
         data: session,
@@ -31,10 +30,7 @@ export default function Page(props: PageProps) {
     } = useSession()
 
     const { race, raceIsError, raceIsValidating, mutateRace } = Fetcher.Race(raceId, true)
-
-    const printRaceSheet = async () => {
-        Router.push('/PrintPaperResults/' + race.id)
-    }
+    const { boats, boatsIsError, boatsIsValidating } = Fetcher.Boats()
 
     //Capitalise the first letter of each word, and maintain cursor pos.
     const saveRaceSettings = (e: any) => {
@@ -85,7 +81,7 @@ export default function Page(props: PageProps) {
         })
     }
 
-    if (session == undefined || isPending || race == undefined) {
+    if (session == undefined || isPending || race == undefined || boats == undefined) {
         return <PageSkeleton />
     }
 
@@ -133,9 +129,7 @@ export default function Page(props: PageProps) {
                                     Race Mode
                                 </Button>
                             </Link>
-                            <Link href={`/createResult/${race.id}`}>
-                                <Button className='mx-1'>Add Entry</Button>
-                            </Link>
+                            <CreateResultModal race={race} boats={boats} />
                             <Button disabled className='mx-1'>
                                 Calculate
                             </Button>
@@ -159,13 +153,7 @@ export default function Page(props: PageProps) {
                                             raceId={race.id}
                                         />
                                     ) : (
-                                        <FleetPursuitResultsTable
-                                            showTime={true}
-                                            editable={userHasPermission(session!.user, AVAILABLE_PERMISSIONS.editResults)}
-                                            fleetId={fleet.id}
-                                            key={JSON.stringify(race)}
-                                            raceId={race.id}
-                                        />
+                                        <FleetPursuitResultsTable editable={userHasPermission(session!.user, AVAILABLE_PERMISSIONS.editResults)} fleetId={fleet.id} />
                                     )}
                                 </div>
                             )

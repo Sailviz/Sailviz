@@ -69,7 +69,7 @@ export function Series(seriesId: string) {
  * @returns
  */
 export function Race(raceId: string, results: boolean) {
-    const { data, error, isValidating, mutate } = useSWR(raceId != '' ? `/api/GetRaceById?id=${raceId}&results=${results}` : null, fetcher)
+    const { data, error, isValidating, mutate } = useSWR(raceId != '' ? `/api/GetRaceById?id=${raceId}&results=${results}` : null, fetcher, { refreshInterval: 5000 })
 
     return {
         race: data as RaceDataType,
@@ -113,12 +113,13 @@ export function Result(resultId: string) {
 }
 
 export function Fleet(fleetId: string) {
-    const { data, error, isValidating } = useSWR(fleetId != undefined ? `/api/GetFleetById?id=${fleetId}` : null, fetcher)
+    const { data, error, isValidating, mutate } = useSWR(fleetId != undefined ? `/api/GetFleetById?id=${fleetId}` : null, fetcher)
 
     return {
         fleet: data as FleetDataType,
         fleetIsValidating: isValidating,
-        fleetIsError: error
+        fleetIsError: error,
+        mutateFleet: mutate
     }
 }
 
