@@ -1,11 +1,10 @@
 'use client'
-import React, { act, ChangeEvent, MouseEventHandler, use, useState } from 'react'
+import React, { use } from 'react'
 import * as DB from '@/components/apiMethods'
 import dayjs from 'dayjs'
 import FleetHandicapResultsTable from '@/components/tables/FleetHandicapResultsTable'
 import FleetPursuitResultsTable from '@/components/tables/FleetPursuitResultsTable'
 import { AVAILABLE_PERMISSIONS, userHasPermission } from '@/components/helpers/users'
-import { notFound, redirect, useRouter } from 'next/navigation'
 import { Breadcrumbs } from '@/components/breadcrumbs'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -13,7 +12,6 @@ import Link from 'next/link'
 import { EntryFileUpload } from '@/components/EntryFileUpload'
 
 import * as Fetcher from '@/components/Fetchers'
-import ProgressModal from '@/components/layout/dashboard/ProgressModal'
 import { useSession } from '@/lib/auth-client'
 import { PageSkeleton } from '@/components/layout/PageSkeleton'
 import CreateResultModal from '@/components/layout/dashboard/CreateResultModal'
@@ -149,8 +147,6 @@ export default function Page(props: PageProps) {
                                             showTime={true}
                                             editable={userHasPermission(session!.user, AVAILABLE_PERMISSIONS.editResults)}
                                             fleetId={fleet.id}
-                                            key={JSON.stringify(race)}
-                                            raceId={race.id}
                                         />
                                     ) : (
                                         <FleetPursuitResultsTable editable={userHasPermission(session!.user, AVAILABLE_PERMISSIONS.editResults)} fleetId={fleet.id} />

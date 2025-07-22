@@ -52,30 +52,9 @@ export default function Page(props: PageProps) {
                         <div key={'fleetResults' + index} className='h-screen'>
                             <div className='p-6 h-5/6'>
                                 {race.Type == 'Handicap' ? (
-                                    <FleetHandicapResultsTable
-                                        showTime={true}
-                                        editable={false}
-                                        fleetId={fleet.id}
-                                        startTime={fleet.startTime}
-                                        key={JSON.stringify(race)}
-                                        deleteResult={null}
-                                        updateResult={null}
-                                        raceId={race.id}
-                                        showEditModal={null}
-                                        showViewModal={openViewModal}
-                                    />
+                                    <FleetHandicapResultsTable showTime={true} editable={false} fleetId={fleet.id} />
                                 ) : (
-                                    <FleetPursuitResultsTable
-                                        showTime={true}
-                                        editable={false}
-                                        fleetId={fleet.id}
-                                        startTime={fleet.startTime}
-                                        key={JSON.stringify(race)}
-                                        deleteResult={null}
-                                        updateResult={null}
-                                        raceId={race.id}
-                                        showEditModal={null}
-                                    />
+                                    <FleetPursuitResultsTable editable={false} fleetId={fleet.id} />
                                 )}
                             </div>
                         </div>
