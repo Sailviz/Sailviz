@@ -1,25 +1,47 @@
 'use client'
 import { Button } from '@/components/ui/button'
-import { Dialog, DialogContent, DialogFooter, DialogHeader } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTrigger } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
-import { useRouter } from 'next/navigation'
-import { ChangeEvent, useEffect, useState } from 'react'
+import { useState } from 'react'
+import * as DB from '@/components/apiMethods'
+import { mutate } from 'swr'
+import { useSession } from '@/lib/auth-client'
 
-export default function CreateEventDialog({ onSubmit }: { onSubmit: (name: string, numberOfRaces: number) => void }) {
-    const Router = useRouter()
+export default function CreateEventDialog() {
+    const {
+        data: session,
+        isPending, //loading state
+        error, //error object
+        refetch //refetch the session
+    } = useSession()
+
     const [name, setName] = useState('')
     const [numberOfRaces, setNumberOfRaces] = useState(0)
 
-    const [open, setOpen] = useState(true)
+    const [open, setOpen] = useState(false)
+
+    const createEvent = async (name: string, numberOfRaces: number) => {
+        if (!session?.club) {
+            throw new Error('No club found in session')
+        }
+        const series = await DB.createSeries(session.club.id, name)
+        for (let i = 0; i < numberOfRaces; i++) {
+            await DB.createRace(session.club.id, series.id)
+        }
+        mutate('/api/GetTodaysRaceByClubId')
+        setOpen(false)
+    }
 
     return (
         <Dialog
             open={open}
             onOpenChange={open => {
                 setOpen(open)
-                if (!open) Router.back() // this catches the x button and clicking outside the modal, gets out of parallel route
             }}
         >
+            <DialogTrigger asChild aria-label='new event'>
+                <Button>Create New Event</Button>
+            </DialogTrigger>
             <DialogContent>
                 <DialogHeader className='flex flex-col gap-1'>Create New Event</DialogHeader>
                 <div className='flex w-full'>
@@ -29,7 +51,7 @@ export default function CreateEventDialog({ onSubmit }: { onSubmit: (name: strin
                         <Input id='name' type='text' value={name} onChange={e => setName(e.target.value)} autoComplete='off' />
                     </div>
                     <div className='flex flex-col px-6 w-full'>
-                        <p className='text-2xl font-bold'>Number Of Races</p>
+                        <p className='text-2xl font-bold whitespace-nowrap'>Number Of Races</p>
                         <Input
                             id='numberOfRaces'
                             type='number'
@@ -40,7 +62,7 @@ export default function CreateEventDialog({ onSubmit }: { onSubmit: (name: strin
                     </div>
                 </div>
                 <DialogFooter>
-                    <Button color='primary' onClick={() => onSubmit(name, numberOfRaces)}>
+                    <Button color='primary' onClick={() => createEvent(name, numberOfRaces)}>
                         Create
                     </Button>
                 </DialogFooter>
