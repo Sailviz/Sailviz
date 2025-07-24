@@ -154,13 +154,12 @@ export function Boats() {
 }
 
 export function Boat(boatId: string) {
-    const { data, error, isValidating, mutate } = useSWR(boatId != undefined ? `/api/GetBoatById?boatId=${boatId}` : null, fetcher)
+    const { data, error, isValidating } = useSWR(boatId != undefined ? `/api/GetBoatById?boatId=${boatId}` : null, fetcher)
 
     return {
         boat: data?.boat as BoatDataType,
         boatIsValidating: isValidating,
-        boatIsError: error,
-        mutateBoats: mutate
+        boatIsError: error
     }
 }
 

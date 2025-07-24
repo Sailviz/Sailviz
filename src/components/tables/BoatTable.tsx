@@ -1,137 +1,70 @@
 'use client'
-import React, { ChangeEvent, useState } from 'react'
+import React, { useState } from 'react'
 import { createColumnHelper, flexRender, getCoreRowModel, useReactTable, getFilteredRowModel } from '@tanstack/react-table'
 import { EditIcon } from '@/components/icons/edit-icon'
 import { DeleteIcon } from '@/components/icons/delete-icon'
-import { SearchIcon } from '@/components/icons/search-icon'
 import * as Fetcher from '@/components/Fetchers'
 import { AVAILABLE_PERMISSIONS, userHasPermission } from '@/components/helpers/users'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
-import { Button } from '../ui/button'
 import { Input } from '../ui/input'
-import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from '../ui/dropdown-menu'
-import { ChevronDown } from 'lucide-react'
 import Link from 'next/link'
 import { useSession } from '@/lib/auth-client'
+import * as DB from '@/components/apiMethods'
+import { Button } from '../ui/button'
+import EditBoatDialog from '../layout/dashboard/EditBoatModal'
+import { useRouter } from 'next/navigation'
 
 const columnHelper = createColumnHelper<BoatDataType>()
 
-const Number = ({ ...props }: any) => {
-    const initialValue = props.getValue()
-    const [value, setValue] = React.useState(initialValue)
-
-    return <div className=''>{value}</div>
+const Text = ({ value }: { value: string }) => {
+    return <div>{value}</div>
 }
 
-const Text = ({ ...props }) => {
-    const initialValue = props.getValue()
-    const [value, setValue] = React.useState(initialValue)
-
-    return <div className=''>{value}</div>
-}
-
-const StartTime = ({ ...props }: any) => {
-    const initialValue: number = props.getValue()
+const StartTime = ({ value }: { value: number }) => {
     //change to minutes:seconds
-    const time = new Date(Math.abs(initialValue) * 1000).toISOString().substr(14, 5)
-    const [value, setValue] = React.useState(time)
-    if (initialValue >= 0) {
-        return <div className=''>+{value}</div>
+    const time = new Date(Math.abs(value) * 1000).toISOString().substr(14, 5)
+    if (value >= 0) {
+        return <div>+{time}</div>
     } else {
-        return <div className=''>-{value}</div>
+        return <div>-{time}</div>
     }
 }
 
-function Filter({ column, table }: { column: any; table: any }) {
-    const columnFilterValue = column.getFilterValue()
-
-    return (
-        <Input
-            className='w-full'
-            placeholder='Search by name...'
-            // startContent={<SearchIcon />}
-            value={column.getFilterValue()}
-            // onClear={() => column.setFilterValue('')}
-            // onValueChange={value => column.setFilterValue(value)}
-            //so that you can type a space, otherwise it will be blocked
-            onKeyDown={(e: any) => {
-                if (e.key === ' ') {
-                    e.stopPropagation()
-                }
-            }}
-        />
-    )
-}
-
-const Action = ({ ...props }: any) => {
-    const onDeleteClick = () => {
-        if (confirm('are you sure you want to do this?')) {
-            props.deleteBoat(props.row.original)
-        }
-    }
-
-    if (userHasPermission(props.user, AVAILABLE_PERMISSIONS.editBoats)) {
-        return (
-            <div className='relative flex items-center gap-2'>
-                <Link href={`/editBoat/${props.row.original.id}`} className='cursor-pointer'>
-                    <EditIcon />
-                </Link>
-
-                <DeleteIcon onClick={onDeleteClick} />
-            </div>
-        )
-    } else {
-        return <> </>
-    }
-}
-
-const BoatTable = (props: any) => {
-    const { boats, boatsIsError, boatsIsValidating } = Fetcher.Boats()
-    const {
-        data: session,
-        isPending, //loading state
-        error, //error object
-        refetch //refetch the session
-    } = useSession()
+const BoatTable = () => {
+    const Router = useRouter()
+    const { boats, boatsIsError, boatsIsValidating, mutateBoats } = Fetcher.Boats()
 
     const data = boats || []
 
-    const deleteBoat = (id: any) => {
-        props.deleteBoat(id)
+    const onRowClick = (row: any) => {
+        console.log(row)
+        Router.push(`/editBoat/${row.original.id}`, { scroll: false })
     }
-
-    const loadingState = boatsIsValidating || data?.length === 0 ? 'loading' : 'idle'
 
     var table = useReactTable({
         data,
         columns: [
             columnHelper.accessor('name', {
                 header: 'Boat',
-                cell: props => <Text {...props} />,
+                cell: props => <Text value={props.getValue()} />,
                 enableColumnFilter: true
             }),
             columnHelper.accessor('crew', {
                 header: 'Crew',
-                cell: props => <Number {...props} />,
+                cell: props => <Text value={props.getValue()} />,
                 enableColumnFilter: false
             }),
             columnHelper.accessor('py', {
                 id: 'py',
                 header: 'PY',
-                cell: props => <Number {...props} />,
+                cell: props => <Text value={props.getValue().toString()} />,
                 enableColumnFilter: false
             }),
             columnHelper.accessor('pursuitStartTime', {
                 id: 'pursuitStartTime',
                 header: () => <span>Pursuit Start Time</span>,
-                cell: props => <StartTime {...props} />,
+                cell: props => <StartTime value={props.getValue()} />,
                 enableColumnFilter: false
-            }),
-            columnHelper.accessor('id', {
-                id: 'action',
-                enableColumnFilter: false,
-                header: 'Actions',
-                cell: props => <Action {...props} id={props.row.original.id} deleteBoat={deleteBoat} user={session!.user} />
             })
         ],
         getCoreRowModel: getCoreRowModel(),
@@ -156,7 +89,7 @@ const BoatTable = (props: any) => {
                     <TableBody>
                         {table.getRowModel().rows?.length ? (
                             table.getRowModel().rows.map(row => (
-                                <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
+                                <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'} onClick={() => onRowClick(row)} className='cursor-pointer'>
                                     {row.getVisibleCells().map(cell => (
                                         <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
                                     ))}

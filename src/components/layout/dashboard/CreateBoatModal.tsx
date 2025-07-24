@@ -1,27 +1,42 @@
 import { useTheme } from 'next-themes'
 import { ChangeEvent, useEffect, useState } from 'react'
-import { Dialog, DialogContent, DialogFooter, DialogHeader } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTrigger } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useRouter } from 'next/navigation'
+import * as DB from '@/components/apiMethods'
+import { mutate } from 'swr'
+import { useSession } from '@/lib/auth-client'
+export default function CreateBoatDialog() {
+    const {
+        data: session,
+        isPending, //loading state
+        error, //error object
+        refetch //refetch the session
+    } = useSession()
 
-export default function CreateBoatDialog({ onSubmit }: { onSubmit: (boat: BoatDataType) => void }) {
-    const Router = useRouter()
     const [boatName, setBoatName] = useState('')
     const [PY, setPY] = useState(0)
     const [Crew, setCrew] = useState(0)
     const [pursuitStartTime, setPursuitStartTime] = useState(0)
 
-    const [open, setOpen] = useState(true)
+    const [open, setOpen] = useState(false)
+
+    const createBoat = async (boat: BoatDataType) => {
+        await DB.createBoat(boat.name, boat.crew, boat.py, boat.pursuitStartTime, session!.user.clubId)
+        mutate('/api/GetBoats')
+    }
 
     return (
         <Dialog
             open={open}
             onOpenChange={open => {
                 setOpen(open)
-                if (!open) Router.back() // this catches the x button and clicking outside the modal, gets out of parallel route
             }}
         >
+            <DialogTrigger asChild aria-label='new boat'>
+                <Button>Create New Boat</Button>
+            </DialogTrigger>
             <DialogContent className='max-w-8/12'>
                 <DialogHeader className='flex flex-col gap-1'>Edit Boat</DialogHeader>
                 <div className='flex w-full'>
@@ -50,7 +65,7 @@ export default function CreateBoatDialog({ onSubmit }: { onSubmit: (boat: BoatDa
                     </div>
                 </div>
                 <DialogFooter>
-                    <Button color='primary' onClick={() => onSubmit({ name: boatName, py: PY, crew: Crew, pursuitStartTime: pursuitStartTime } as BoatDataType)}>
+                    <Button color='primary' onClick={() => createBoat({ name: boatName, py: PY, crew: Crew, pursuitStartTime: pursuitStartTime } as BoatDataType)}>
                         Create
                     </Button>
                 </DialogFooter>
