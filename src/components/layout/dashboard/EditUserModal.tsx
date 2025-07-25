@@ -1,13 +1,13 @@
-import { useTheme } from 'next-themes'
-import { ChangeEvent, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import Select from 'react-select'
 import * as Fetcher from '@/components/Fetchers'
 import { Dialog, DialogContent, DialogFooter, DialogHeader } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useRouter } from 'next/navigation'
-
-export default function EditUserDialog({ user, onSubmit }: { user: UserDataType | undefined; onSubmit: (user: UserDataType, password: string) => void }) {
+import * as DB from '@/components/apiMethods'
+import { mutate } from 'swr'
+export default function EditUserDialog({ user }: { user: UserDataType }) {
     const Router = useRouter()
     const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
     const { roles: roleOptions, rolesIsError, rolesIsValidating } = Fetcher.Roles(club)
@@ -20,7 +20,18 @@ export default function EditUserDialog({ user, onSubmit }: { user: UserDataType 
     const [startPage, setStartPage] = useState('')
     const [password, setPassword] = useState('')
 
-    const { theme, setTheme } = useTheme()
+    const editUser = async (user: UserDataType, password: string) => {
+        await DB.updateUser(user)
+        Router.back()
+    }
+
+    const deleteUser = async (user: UserDataType) => {
+        if (confirm('Are you sure you want to delete this user?')) {
+            await DB.deleteUser(user)
+            mutate('/api/GetUsersByClubId')
+            Router.back()
+        }
+    }
 
     useEffect(() => {
         if (user === undefined) return
@@ -74,13 +85,16 @@ export default function EditUserDialog({ user, onSubmit }: { user: UserDataType 
                 </div>
                 <div>
                     <div className='flex flex-col px-6 w-1/4'>
-                        <p className='text-2xl font-bold text-gray-700'>Update Password</p>
+                        <p className='text-2xl font-bold text-gray-700'>Update Password (not functional)</p>
 
                         <Input type='password' onChange={e => setPassword(e.target.value)} />
                     </div>
                 </div>
                 <DialogFooter>
-                    <Button color='primary' onClick={() => onSubmit({ ...user!, displayUsername: displayName, username: name, roles: roles, startPage: startPage }, password)}>
+                    <Button variant={'red'} onClick={() => deleteUser(user!)}>
+                        Remove
+                    </Button>
+                    <Button color='primary' onClick={() => editUser({ ...user!, displayUsername: displayName, username: name, roles: roles, startPage: startPage }, password)}>
                         Save
                     </Button>
                 </DialogFooter>

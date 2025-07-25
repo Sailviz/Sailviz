@@ -1,7 +1,5 @@
 import React, { ChangeEvent, useState } from 'react'
-import dayjs from 'dayjs'
 import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, RowSelection, SortingState, useReactTable } from '@tanstack/react-table'
-
 import { EditIcon } from '@/components/icons/edit-icon'
 import { DeleteIcon } from '@/components/icons/delete-icon'
 import * as Fetcher from '@/components/Fetchers'
@@ -10,21 +8,17 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '.
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useSession } from '@/lib/auth-client'
+import * as DB from '@/components/apiMethods'
+import { mutate } from 'swr'
+import { Button } from '../ui/button'
 
-const Action = ({ ...props }: any) => {
-    console.log(props.row.original)
-    const onDeleteClick = () => {
-        if (confirm('are you sure you want to do this?')) {
-            props.deleteRole(props.row.original)
-        }
-    }
-    if (userHasPermission(props.user, AVAILABLE_PERMISSIONS.editRoles)) {
+const Action = ({ session, role }: { session: any; role: RoleDataType }) => {
+    if (userHasPermission(session.user, AVAILABLE_PERMISSIONS.editRoles)) {
         return (
             <div className='relative flex items-center gap-2'>
-                <Link className='cursor-pointer' href={`/editRole/${props.row.original.id}`}>
-                    <EditIcon />
+                <Link className='cursor-pointer' href={`/editRole/${role.id}`}>
+                    <Button>Edit</Button>
                 </Link>
-                <DeleteIcon onClick={onDeleteClick} />
             </div>
         )
     } else {
@@ -34,8 +28,7 @@ const Action = ({ ...props }: any) => {
 
 const columnHelper = createColumnHelper<RoleDataType>()
 
-const UsersTable = (props: any) => {
-    const Router = useRouter()
+const UsersTable = () => {
     const {
         data: session,
         isPending, //loading state
@@ -52,8 +45,9 @@ const UsersTable = (props: any) => {
         }
     ])
 
-    const deleteRole = (data: any) => {
-        props.deleteRole(data)
+    const deleteRole = async (role: RoleDataType) => {
+        await DB.deleteRole(role)
+        mutate('/api/GetRolesByClubId')
     }
 
     var data = roles
@@ -72,7 +66,7 @@ const UsersTable = (props: any) => {
             columnHelper.accessor('id', {
                 id: 'edit',
                 header: 'Action',
-                cell: props => <Action {...props} id={props.row.original.id} deleteRole={deleteRole} user={session!.user} />
+                cell: props => <Action role={props.row.original} session={session!} />
             })
         ],
         state: {

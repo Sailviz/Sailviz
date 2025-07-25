@@ -1,29 +1,23 @@
-import React, { ChangeEvent, useState } from 'react'
-import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, RowSelection, SortingState, useReactTable } from '@tanstack/react-table'
+import React, { useState } from 'react'
+import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, SortingState, useReactTable } from '@tanstack/react-table'
 import { EditIcon } from '@/components/icons/edit-icon'
 import { DeleteIcon } from '@/components/icons/delete-icon'
 import * as Fetcher from '@/components/Fetchers'
 import { AVAILABLE_PERMISSIONS, userHasPermission } from '@/components/helpers/users'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
-import { Button } from '../ui/button'
-import { Input } from '../ui/input'
-import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from '../ui/dropdown-menu'
-import { ChevronDown } from 'lucide-react'
 import Link from 'next/link'
 import { useSession } from '@/lib/auth-client'
-const Action = ({ ...props }: any) => {
-    const onDeleteClick = () => {
-        if (confirm('are you sure you want to do this?')) {
-            props.deleteUser(props.row.original)
-        }
-    }
-    if (userHasPermission(props.user, AVAILABLE_PERMISSIONS.editUsers)) {
+import * as DB from '@/components/apiMethods'
+import { mutate } from 'swr'
+import { Button } from '../ui/button'
+
+const Action = ({ user, session }: { user: UserDataType; session: any }) => {
+    if (userHasPermission(session.user, AVAILABLE_PERMISSIONS.editUsers)) {
         return (
             <div className='relative flex items-center gap-2'>
-                <Link href={`/editUser/${props.row.original.id}`} className='cursor-pointer'>
-                    <EditIcon />
+                <Link href={`/editUser/${user.id}`} className='cursor-pointer'>
+                    <Button>Edit</Button>
                 </Link>
-                <DeleteIcon onClick={onDeleteClick} />
             </div>
         )
     } else {
@@ -33,7 +27,7 @@ const Action = ({ ...props }: any) => {
 
 const columnHelper = createColumnHelper<UserDataType>()
 
-const UsersTable = (props: any) => {
+const UsersTable = () => {
     const {
         data: session,
         isPending, //loading state
@@ -50,16 +44,10 @@ const UsersTable = (props: any) => {
         }
     ])
 
-    const deleteUser = (data: any) => {
-        props.deleteUser(data)
-    }
-
     var data = users
     if (data == undefined) {
         data = []
     }
-
-    const loadingState = usersIsValidating ? 'loading' : 'idle'
 
     var table = useReactTable({
         data,
@@ -72,7 +60,7 @@ const UsersTable = (props: any) => {
             columnHelper.accessor('id', {
                 id: 'Edit',
                 header: 'Action',
-                cell: props => <Action {...props} id={props.row.original.id} deleteUser={deleteUser} user={session!.user} />
+                cell: props => <Action user={props.row.original} session={session!} />
             })
         ],
         state: {
