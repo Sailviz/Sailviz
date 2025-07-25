@@ -47,7 +47,7 @@ const Edit = ({ resultId }: { resultId: string }) => {
 const View = ({ resultId }: { resultId: string }) => {
     return (
         <Link href={`/viewResult/${resultId}`} scroll={false}>
-            <Button>Edit</Button>
+            <Button>View</Button>
         </Link>
     )
 }
@@ -89,7 +89,7 @@ const FleetHandicapResultsTable = ({ fleetId, editable, showTime }: { fleetId: s
             header: 'Class',
             id: 'Class',
             size: 300,
-            cell: props => <Text value={props.getValue().name} />,
+            cell: props => <Text value={props.getValue()?.name || ''} />,
             enableSorting: false
         }),
         columnHelper.accessor('SailNumber', {

@@ -21,8 +21,6 @@ export default function Page() {
         error, //error object
         refetch //refetch the session
     } = useSession()
-    // const editUserModal = useDisclosure()
-    // const editRoleModal = useDisclosure()
 
     const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
 

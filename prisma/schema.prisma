@@ -23,7 +23,7 @@ model User {
   startPage       String
   admin           Boolean   @default(false)
   name            String    @default("")
-  email           String
+  email           String?   @unique
   emailVerified   Boolean
   image           String?   @db.Text
   createdAt       DateTime
@@ -35,7 +35,6 @@ model User {
   club            Club?     @relation(fields: [clubId], references: [id])
   roles           Role[]    @relation("RoleToUser")
 
-  @@unique([email])
   @@map("user")
 }
 

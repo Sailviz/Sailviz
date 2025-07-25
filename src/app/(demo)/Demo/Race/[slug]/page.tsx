@@ -18,9 +18,6 @@ export default function Page(props: PageProps) {
 
     const { slug } = use(props.params)
 
-    const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
-    const { boats, boatsIsError, boatsIsValidating } = Fetcher.Boats()
-
     const { race, raceIsError, raceIsValidating, mutateRace } = Fetcher.Race(slug, true)
 
     const openRacePanel = async () => {
@@ -37,7 +34,7 @@ export default function Page(props: PageProps) {
         }
     }, [race])
 
-    if (clubIsValidating || club == undefined || boats == undefined || race == undefined) {
+    if (race == undefined) {
         return <PageSkeleton />
     }
     return (

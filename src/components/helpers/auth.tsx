@@ -24,21 +24,23 @@ export async function isRequestAuthorised(id: string, table: string) {
     if (session?.user.admin) {
         return true
     }
-    var clubId = session?.user.clubId
-    if (clubId == null) {
-        return false
-    }
+    //bypass if demo mode
     const GlobalConfig = await prisma.globalConfig.findFirst({
         where: {
             active: true
         }
     })
-
-    let ownData = await isRequestOwnData(id, clubId, table)
-    if (!ownData) {
-        ownData = await isRequestOwnData(id, GlobalConfig!.demoClubId, table)
+    const demo = await isRequestOwnData(id, GlobalConfig!.demoClubId, table)
+    if (demo) {
+        return true
     }
-    return ownData
+
+    var clubId = session?.user.clubId
+    if (clubId == null) {
+        return false
+    }
+
+    return await isRequestOwnData(id, clubId, table)
 }
 
 export async function isRequestOwnData(id: string, clubId: string, table: string) {

@@ -25,6 +25,14 @@ export default function CreateBoatDialog() {
     const createBoat = async (boat: BoatDataType) => {
         await DB.createBoat(boat.name, boat.crew, boat.py, boat.pursuitStartTime, session!.user.clubId)
         mutate('/api/GetBoats')
+        setOpen(false)
+    }
+
+    const clearFields = () => {
+        setBoatName('')
+        setPY(0)
+        setCrew(0)
+        setPursuitStartTime(0)
     }
 
     return (
@@ -32,6 +40,7 @@ export default function CreateBoatDialog() {
             open={open}
             onOpenChange={open => {
                 setOpen(open)
+                clearFields()
             }}
         >
             <DialogTrigger asChild aria-label='new boat'>
