@@ -537,13 +537,13 @@ export default function Page(props: PageProps) {
             <audio id='Countdown' src='/Countdown.mp3'></audio>
             <div className='w-full flex flex-col items-center justify-start panel-height overflow-auto'>
                 <div className='flex w-full flex-row justify-around'>
-                    <div className='w-1/4 p-2 m-2 border-4 rounded-lg bg-white text-lg font-medium'>
+                    <div className='w-1/4 p-2 m-2 border-4 rounded-lg  text-lg font-medium'>
                         Event: {seriesName} - {race.number}
                     </div>
                     {race.fleets.length < 1 ? (
                         <p>Waiting for boats to be added to fleets</p>
                     ) : (
-                        <div className='w-1/4 p-2 m-2 border-4 rounded-lg bg-white text-lg font-medium'>
+                        <div className='w-1/4 p-2 m-2 border-4 rounded-lg text-lg font-medium'>
                             Race Time:{' '}
                             <PursuitTimer
                                 startTime={race.fleets[0]!.startTime}
@@ -559,7 +559,7 @@ export default function Page(props: PageProps) {
                             />
                         </div>
                     )}
-                    <div className='w-1/4 p-2 m-2 border-4 rounded-lg bg-white text-lg font-medium'>Actual Time: {time}</div>
+                    <div className='w-1/4 p-2 m-2 border-4 rounded-lg text-lg font-medium'>Actual Time: {time}</div>
                     <div className='p-2 w-1/4'>
                         {(() => {
                             switch (raceState) {

@@ -52,13 +52,12 @@ const Sort = ({ result, max, moveUp, moveDown }: { result: ResultDataType; max: 
     return (
         <>
             <Button
-                size='lg'
                 className='mx-1 stroke-green-400 stroke-2 disabled:stroke-0'
                 onClick={async () => {
                     setUpLoading(true)
                     await moveUp(result.id)
                 }}
-                // isDisabled={result.PursuitPosition == 1}
+                disabled={result.PursuitPosition == 1}
             >
                 {upLoading ? <SmoothSpinner /> : <ChevronUpIcon transform='scale(-2)' />}
             </Button>
@@ -69,7 +68,7 @@ const Sort = ({ result, max, moveUp, moveDown }: { result: ResultDataType; max: 
                     setDownLoading(true)
                     await moveDown(result.id)
                 }}
-                // isDisabled={result.PursuitPosition == max}
+                disabled={result.PursuitPosition == max}
             >
                 {downLoading ? <SmoothSpinner /> : <ChevronDownIcon transform='scale(2)' />}
             </Button>
