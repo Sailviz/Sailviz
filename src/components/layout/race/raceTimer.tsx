@@ -19,7 +19,7 @@ const RaceTimer: React.FC<RaceTimerProps> = ({ sequence, startTime, onFlagChange
     // Initialize currentStep to the highest order in the sequence
     const [currentStep, setCurrentStep] = useState<StartSequenceStep>(sequence[1]!) // Assuming the first step is always the initial step
     const [warningCompleted, setWarningCompleted] = useState(false)
-    const [sequenceFinished, setSequenceFinished] = useState(true)
+    const [sequenceFinished, setSequenceFinished] = useState(false)
 
     const calculateTimeLeft = () => {
         let countingUp = false
@@ -42,15 +42,14 @@ const RaceTimer: React.FC<RaceTimerProps> = ({ sequence, startTime, onFlagChange
             //this is offset by 1 second to account for rounding issues
             const time = calculateTimeLeft()
 
-            setSequenceFinished(false)
             setTimeLeft(time)
             //warning signals
-            if (currentStep.time + 6 >= time.time && warningCompleted === false && !sequenceFinished) {
+            if (currentStep.time + 6 >= time.time && warningCompleted === false && time.countingUp == false && !sequenceFinished) {
                 onWarning()
                 setWarningCompleted(true)
             }
             // Check if any sequence step matches the current time
-            if (currentStep.time + 1 >= time.time && !sequenceFinished) {
+            if (currentStep.time + 1 >= time.time && time.countingUp == false && !sequenceFinished) {
                 if (currentStep.hoot > 0) {
                     onHoot(currentStep.hoot)
                 }
