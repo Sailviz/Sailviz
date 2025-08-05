@@ -406,7 +406,7 @@ export default function Page(props: PageProps) {
         race.fleets[0]!.results.sort((a: ResultDataType, b: ResultDataType) => {
             //sort by nubmer of laps then last lap time
             if (a.numberLaps != b.numberLaps) {
-                return b.numberLaps - a.numberLaps
+                return a.numberLaps - b.numberLaps
             } else {
                 return a.laps.slice(-1)[0]!.time - b.laps.slice(-1)[0]!.time
             }
