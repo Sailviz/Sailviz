@@ -6,6 +6,7 @@ import Papa from 'papaparse'
 import ProgressModal from './layout/dashboard/ProgressModal'
 import * as Fetcher from '@/components/Fetchers'
 import * as DB from '@/components/apiMethods'
+import { mutate } from 'swr'
 export function EntryFileUpload({ raceId }: { raceId: string }) {
     const [progressValue, setProgressValue] = useState(0)
     const [progressMax, setProgressMax] = useState(0)
@@ -67,7 +68,9 @@ export function EntryFileUpload({ raceId }: { raceId: string }) {
                 setProgressOpen(false)
             }
         })
-        mutateRace()
+        for (const fleet of race.fleets) {
+            mutate(`/api/GetFleetById?id=${fleet.id}`)
+        }
     }
 
     return (

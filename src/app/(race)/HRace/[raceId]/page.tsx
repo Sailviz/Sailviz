@@ -630,19 +630,7 @@ export default function Page(props: PageProps) {
                             Event: {race?.series?.name} - {race?.number}
                         </div>
                         <div className='w-1/4 p-2 m-2 border-4 rounded-lg text-lg font-medium'>
-                            Race Time:{' '}
-                            {/* <RaceTimer
-                                        key={'fleetTimer' + index}
-                                        fleetId={fleet.id}
-                                        startTime={fleet.startTime}
-                                        timerActive={raceState[index] == raceStateType.running}
-                                        onFiveMinutes={handleFiveMinutes}
-                                        onFourMinutes={handleFourMinutes}
-                                        onOneMinute={handleOneMinute}
-                                        onGo={handleGo}
-                                        onWarning={handleWarning}
-                                        reset={raceState[index] == raceStateType.reset}
-                                    /> */}
+                            Race Time:
                             <RaceTimer
                                 key={race.fleets.reduce((max, step) => (step.startTime > max ? step.startTime : max), 0)}
                                 sequence={startSequence}
@@ -686,7 +674,7 @@ export default function Page(props: PageProps) {
                                         )
                                     case raceStateType.calculate:
                                         return (
-                                            <Button id='CalcResultsButton' onClick={calculateResults} size='big' variant={'blue'}>
+                                            <Button id='CalcResultsButton' onClick={calculateResults} size='big' variant={'green'}>
                                                 Calculate Results
                                             </Button>
                                         )
@@ -743,7 +731,6 @@ export default function Page(props: PageProps) {
                         {race.fleets
                             .flatMap(fleets => fleets.results)
                             .map((result: ResultDataType, index) => {
-                                console.log(race.fleets, result)
                                 let fleetIndex = race.fleets.findIndex(fleet => fleet.id == result.fleetId)
                                 return (
                                     <BoatCard
