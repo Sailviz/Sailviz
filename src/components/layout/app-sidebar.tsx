@@ -1,15 +1,6 @@
 'use client'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuGroup,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger
-} from '@/components/ui/dropdown-menu'
+
 import {
     Sidebar,
     SidebarContent,
@@ -26,7 +17,7 @@ import {
     SidebarRail,
     useSidebar
 } from '@/components/ui/sidebar'
-import { BadgeCheck, Bell, ChevronRight, ChevronsUpDown, CreditCard, GalleryVerticalEnd, LogOut, LogOutIcon } from 'lucide-react'
+import { ChevronRight, ChevronsUpDown, CreditCard, GalleryVerticalEnd, LogOut, LogOutIcon } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import * as React from 'react'
