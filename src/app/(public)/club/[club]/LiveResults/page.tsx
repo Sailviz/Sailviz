@@ -103,7 +103,7 @@ export default function Page(props: PageProps) {
             const fetchClub = async () => {
                 const club = await DB.GetClubById(clubId)
                 setClub(club)
-                if (club.stripe.planName != 'Sailviz Pro') {
+                if (club.stripe.planName != 'SailViz Pro') {
                     console.log('Club does not have Sailviz Pro subscription')
                 } else {
                     console.log('Club has Sailviz Pro subscription')

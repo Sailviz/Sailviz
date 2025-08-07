@@ -1,37 +1,35 @@
 'use client'
-import React, { ChangeEvent, useEffect, useState } from 'react'
+import React from 'react'
 import { createColumnHelper, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table'
-import { EyeIcon } from '@/components/icons/eye-icon'
-import { EditIcon } from '@/components/icons/edit-icon'
-import { DeleteIcon } from '@/components/icons/delete-icon'
 import { AVAILABLE_PERMISSIONS, userHasPermission } from '@/components/helpers/users'
 import { useRouter } from 'next/navigation'
 import * as DB from '@/components/apiMethods'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
-import Link from 'next/link'
 import { useSession } from '@/lib/auth-client'
 import * as Fetcher from '@/components/Fetchers'
 import { mutate } from 'swr'
+import { Button } from '../ui/button'
 
-const Action = ({ ...props }: any) => {
-    const onDeleteClick = () => {
+const Action = ({ seriesId, viewHref, user }: { seriesId: string; viewHref: string; user: UserDataType }) => {
+    const Router = useRouter()
+
+    const onDeleteClick = async () => {
         if (confirm('are you sure you want to do this?')) {
-            props.deleteSeries(props.row.original.id)
+            await DB.deleteSeriesById(seriesId)
+            mutate('/api/GetSeriesByClubId') // This will revalidate the series data
         }
     }
-    const onEditClick = () => {
-        props.editSeries(props.row.original.id)
-    }
+
     return (
         <div className='relative flex items-center gap-2'>
-            <Link href={`${props.viewHref}${props.row.original.id}`} className='cursor-pointer'>
-                <EyeIcon onClick={() => props.viewSeries(props.row.original.id)} />
-            </Link>
+            <Button onClick={() => Router.push('/Series/' + seriesId)}>View</Button>
 
-            {userHasPermission(props.user, AVAILABLE_PERMISSIONS.editSeries) ? (
+            {userHasPermission(user, AVAILABLE_PERMISSIONS.editSeries) ? (
                 <>
-                    <EditIcon onClick={onEditClick} className='cursor-pointer' />
-                    <DeleteIcon onClick={onDeleteClick} className='cursor-pointer' />
+                    {/* <EditIcon onClick={onEditClick} className='cursor-pointer' /> */}
+                    <Button onClick={onDeleteClick} variant={'outline'}>
+                        Remove
+                    </Button>
                 </>
             ) : (
                 <></>
@@ -51,17 +49,6 @@ const ClubTable = ({ viewHref }: { viewHref: string }) => {
     } = useSession()
     const { series, seriesIsError, seriesIsValidating } = Fetcher.GetSeriesByClubId(session?.club!)
     // const [data, setData] = useState<SeriesDataType[]>([])
-
-    const Router = useRouter()
-
-    const deleteSeries = async (seriesId: string) => {
-        await DB.deleteSeriesById(seriesId)
-        mutate('/api/GetSeriesByClubId') // This will revalidate the series data
-    }
-
-    const editSeries = async (series: SeriesDataType) => {
-        await DB.updateSeries(series)
-    }
 
     const data = series || []
 
@@ -83,7 +70,7 @@ const ClubTable = ({ viewHref }: { viewHref: string }) => {
             columnHelper.accessor('id', {
                 id: 'Remove',
                 header: 'Actions',
-                cell: props => <Action {...props} id={props.row.original.id} deleteSeries={deleteSeries} viewHref={viewHref} editSeries={editSeries} user={session!.user} />
+                cell: props => <Action seriesId={props.row.original.id} viewHref={viewHref} user={session!.user} />
             })
         ],
         getCoreRowModel: getCoreRowModel()

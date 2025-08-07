@@ -61,7 +61,7 @@ export default function Page(props: PageProps) {
 
     const createFleetSettings = async () => {
         //only create fleet settings if the club has pro subscription
-        if (session?.club?.stripe.planName == 'Sailviz Pro') {
+        if (session?.club?.stripe.planName == 'SailViz Pro') {
             await DB.createFleetSettings(seriesId)
         }
     }
