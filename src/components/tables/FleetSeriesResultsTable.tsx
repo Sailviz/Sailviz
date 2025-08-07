@@ -82,7 +82,7 @@ const FleetSeriesResultsTable = ({ seriesId, fleetSettingsId }: { seriesId: stri
                 if (tempresults[index]) {
                     tempresults[index]!.racePositions.splice(race.number - 1, 1, {
                         race: race.number,
-                        position: result.HandicapPosition == 0 ? result.PursuitPosition : result.PursuitPosition,
+                        position: result.HandicapPosition == 0 ? result.PursuitPosition : result.HandicapPosition,
                         discarded: false
                     })
                 } else {

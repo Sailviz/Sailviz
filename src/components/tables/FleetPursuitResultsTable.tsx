@@ -15,7 +15,7 @@ const Class = ({ value }: { value: BoatDataType }) => {
 
 const Edit = ({ result }: { result: ResultDataType }) => {
     return (
-        <Link href={`/editResult/${result.id}`}>
+        <Link href={`/editResult/${result.id}`} scroll={false}>
             <Button className='mx-1'>Edit</Button>
         </Link>
     )
