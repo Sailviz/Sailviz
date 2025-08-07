@@ -350,27 +350,9 @@ export default async function Page(props: PageProps) {
                                                 {activeRaceData.series.name}: {activeRaceData.number} - {fleet.fleetSettings.name}
                                             </div>
                                             {activeRaceData.Type == 'Handicap' ? (
-                                                <FleetHandicapResultsTable
-                                                    showTime={true}
-                                                    editable={false}
-                                                    fleetId={fleet.id}
-                                                    key={JSON.stringify(activeRaceData)}
-                                                    deleteResult={null}
-                                                    updateResult={null}
-                                                    raceId={fleet.raceId}
-                                                    showEditModal={null}
-                                                />
+                                                <FleetHandicapResultsTable showTime={true} editable={false} fleetId={fleet.id} />
                                             ) : (
-                                                <FleetPursuitResultsTable
-                                                    showTime={true}
-                                                    editable={false}
-                                                    fleetId={fleet.id}
-                                                    key={JSON.stringify(activeRaceData)}
-                                                    deleteResult={null}
-                                                    updateResult={null}
-                                                    raceId={fleet.id}
-                                                    showEditModal={null}
-                                                />
+                                                <FleetPursuitResultsTable editable={false} fleetId={fleet.id} />
                                             )}
                                         </div>
                                     )

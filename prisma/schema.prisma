@@ -17,13 +17,13 @@ model globalConfig {
 }
 
 model User {
-  id        String  @id @unique @default(uuid())
-  username  String  @unique
-  uuid      String? @unique
-  startPage String
-
-  name            String    @db.Text
-  email           String
+  id              String    @id @unique @default(uuid())
+  username        String    @default("")
+  uuid            String?   @unique
+  startPage       String
+  admin           Boolean   @default(false)
+  name            String    @default("")
+  email           String?   @unique
   emailVerified   Boolean
   image           String?   @db.Text
   createdAt       DateTime
@@ -35,7 +35,6 @@ model User {
   club            Club?     @relation(fields: [clubId], references: [id])
   roles           Role[]    @relation("RoleToUser")
 
-  @@unique([email])
   @@map("user")
 }
 

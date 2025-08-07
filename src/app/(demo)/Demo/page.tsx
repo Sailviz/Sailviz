@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation'
 import * as DB from '@/components/apiMethods'
 import cookie from 'js-cookie'
 import * as Fetcher from '@/components/Fetchers'
-import { useSession } from '@/lib/auth-client'
+import { client, useSession } from '@/lib/auth-client'
 
 export default function Page() {
     const Router = useRouter()
@@ -18,29 +18,9 @@ export default function Page() {
     const { GlobalConfig, GlobalConfigIsError, GlobalConfigIsValidating } = Fetcher.UseGlobalConfig()
 
     const sendLoginRequest = async (uuid: string) => {
-        //get csrf token from next-auth
-        const csrfRes = await fetch('/api/auth/csrf')
-        if (!csrfRes.ok) {
-            console.error('Failed to fetch CSRF token:', csrfRes.statusText)
-            return
-        }
-        const { csrfToken } = await csrfRes.json()
-        //send manual login request to next-auth
-        const res = await fetch('/api/auth/callback/autoLogin', {
-            method: 'POST',
-            redirect: 'follow',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ uuid, csrfToken, callbackUrl: '/Dashboard' })
-        })
-        if (res.ok) {
-            console.log(res)
-        } else {
-            console.error('Login failed:', res.statusText)
-            // Handle login failure (e.g., show an error message)
-            alert('Login failed. Please try again.')
-        }
+        // @ts-ignore not sure why this is needed, but it is
+        const res = await client.myPlugin.authByUuid({ uuid, fetchOptions: { method: 'POST' } })
+        console.log(res)
     }
 
     useEffect(() => {
@@ -48,7 +28,7 @@ export default function Page() {
         const run = async () => {
             //auth ourself
             console.log(session)
-            if (Object.keys(session!).length === 0) {
+            if (session == null) {
                 await sendLoginRequest(GlobalConfig.demoUUID)
             }
             //create a new race for the demo

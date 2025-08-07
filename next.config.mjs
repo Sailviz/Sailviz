@@ -7,7 +7,10 @@ let nextConfig = {
     env: {
         SOCKET_URL: process.env.SOCKET_URL
     },
-    pageExtensions: ['js', 'jsx', 'md', 'mdx', 'ts', 'tsx']
+    pageExtensions: ['js', 'jsx', 'md', 'mdx', 'ts', 'tsx'],
+    experimental: {
+        mdxRs: true
+    }
 }
 
 nextConfig = withSentryConfig(
@@ -53,7 +56,7 @@ nextConfig = withSentryConfig(
 )
 
 const withMDX = createMDX({
-    // Add markdown plugins here, as desired
+    extension: /\.(md|mdx)$/
 })
 
 // Merge MDX config with Next.js config

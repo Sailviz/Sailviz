@@ -49,7 +49,7 @@ export default function Page() {
     if (userHasPermission(session.user, AVAILABLE_PERMISSIONS.editHardware))
         return (
             <div className='flex flex-col'>
-                <p className='text-2xl font-bold p-6'>Pursuit Race Length</p>
+                <p className='text-2xl font-bold p-6'>Default Pursuit Race Length</p>
                 <div className='flex flex-col px-6 w-full '>
                     <Input type='number' defaultValue={club.settings.pursuitLength.toString()} onChange={e => savePursuitLength(e.target.value)} />
                 </div>

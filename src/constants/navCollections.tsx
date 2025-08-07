@@ -140,3 +140,68 @@ export const navCollections: NavCollection[] = [
         ]
     }
 ]
+
+export const AdminNavCollections: NavCollection[] = [
+    {
+        title: '',
+        items: [
+            {
+                title: 'Home',
+                url: '/admin/Dashboard',
+                icon: <HomeIcon />,
+                isActive: true,
+                shortcut: ['d', 'd'],
+                items: [] // Empty array as there are no child items for Dashboard
+            }
+        ]
+    },
+    {
+        title: 'Main Menu',
+        items: [
+            {
+                title: 'Clubs',
+                url: '/admin/clubs',
+                icon: <RaceIcon />,
+                shortcut: ['p', 'p'],
+                isActive: false,
+                items: [] // No child items
+            }
+        ]
+    },
+    {
+        title: 'Admin',
+        items: [
+            {
+                title: 'Settings',
+                url: '#', // Placeholder as there is no direct link for the parent
+                icon: <SettingsIcon />,
+                isActive: false,
+
+                items: [
+                    {
+                        title: 'Demo',
+                        url: '/admin/settings/demo',
+                        icon: <HomeIcon />,
+                        shortcut: ['m', 'm'],
+                        isActive: false,
+                        items: []
+                    }
+                ],
+                shortcut: []
+            }
+        ]
+    },
+    {
+        title: '',
+        items: [
+            {
+                title: 'Log Out',
+                url: '/Logout',
+                icon: <SignOutIcon />,
+                shortcut: ['e', 'e'],
+                isActive: false,
+                items: [] // No child items
+            }
+        ]
+    }
+]

@@ -42,7 +42,10 @@ export const myPlugin = () => {
                     }
                     await setSessionCookie(ctx, {
                         session,
-                        user
+                        user: {
+                            ...user,
+                            email: user.email ?? '' //This accounts for users without an email
+                        }
                     })
                     return ctx.json({
                         message: 'Authenticated',

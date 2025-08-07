@@ -1,7 +1,6 @@
 'use client'
-import React, { ChangeEvent, useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, useReactTable, SortingState } from '@tanstack/react-table'
-import * as DB from '@/components/apiMethods'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
 import * as Fetcher from '@/components/Fetchers'
 //not a db type, only used here
@@ -16,69 +15,50 @@ type SeriesResultsType = {
     racePositions: { race: number; position: number; discarded: boolean }[]
 }
 
-const Text = ({ ...props }) => {
-    const value = props.getValue()
+const Text = ({ text }: { text: string }) => {
+    return <div>{text}</div>
+}
 
+const Number = ({ value }: { value: number }) => {
     return <div>{value}</div>
 }
 
-const Number = ({ ...props }: any) => {
-    const initialValue = props.getValue()
-    const [value, setValue] = React.useState(initialValue)
-    return <div>{Math.round(value)}</div>
-}
-
-const Result = ({ ...props }: any) => {
-    const initialValue = props.getValue()
-    const [value, setValue] = React.useState(initialValue.position)
-    const [discarded, setDiscarded] = React.useState(initialValue.discarded)
-    return <div className={discarded ? 'line-through' : ''}>{Math.round(value)}</div>
-}
-
-function Sort({ column, table }: { column: any; table: any }) {
-    const firstValue = table.getPreFilteredRowModel().flatRows[0]?.getValue(column.id)
-
-    const columnFilterValue = column.getFilterValue()
-
-    return (
-        <div className='flex flex-row justify-center'>
-            <p onClick={e => column.toggleSorting(true)} className='cursor-pointer'>
-                ▲
-            </p>
-            <p onClick={e => column.toggleSorting(false)} className='cursor-pointer'>
-                ▼
-            </p>
-        </div>
-    )
+const Result = ({ position, discarded }: { position: number; discarded: boolean }) => {
+    if (discarded) {
+        return <div className='line-through text-center'>{position}</div>
+    } else if (position == 1) {
+        return <div className='text-white bg-yellow-400 text-center'>{position}</div>
+    } else if (position == 2) {
+        return <div className='text-white bg-gray-600 text-center'>{position}</div>
+    } else if (position == 3) {
+        return <div className='text-white bg-yellow-800 text-center'>{position}</div>
+    } else {
+        return <div className='text-center'>{position}</div>
+    }
 }
 
 const columnHelper = createColumnHelper<SeriesResultsType>()
 
 const FleetSeriesResultsTable = ({ seriesId, fleetSettingsId }: { seriesId: string; fleetSettingsId: string }) => {
-    let [seriesData, setSeriesData] = useState<SeriesDataType | undefined>(undefined)
-
-    useEffect(() => {
-        function fetchSeries() {
-            DB.GetSeriesById(seriesId).then(data => {
-                setSeriesData(data)
-            })
-        }
-        fetchSeries()
-    }, [seriesId])
+    const { series, seriesIsError, seriesIsValidating } = Fetcher.Series(seriesId)
 
     //calculate results table from data.
     let [data, setData] = useState<SeriesResultsType[]>([])
 
     const calcTable = () => {
-        if (seriesData == undefined) {
+        if (series == undefined) {
             console.log('seriesData is undefined')
             return
         }
         let tempresults: SeriesResultsType[] = []
-        console.log('seriesData', seriesData)
+        console.log('seriesData', series)
         //collate results from same person.
-        seriesData.races.forEach(race => {
-            let fleet = race.fleets.find(fleet => fleet.fleetSettings.id == fleetSettingsId)!.results
+        series.races.forEach(race => {
+            let fleet = race.fleets.find(fleet => fleet.fleetSettings.id == fleetSettingsId)?.results
+            if (fleet == undefined) {
+                console.log('fleet is undefined')
+                return
+            }
             fleet.forEach(result => {
                 //if new racer, add to tempresults
                 let index = tempresults.findIndex(function (t) {
@@ -94,13 +74,17 @@ const FleetSeriesResultsTable = ({ seriesId, fleetSettingsId }: { seriesId: stri
                         SailNumber: result.SailNumber,
                         Total: 0,
                         Net: 0,
-                        racePositions: Array(seriesData.races.length).fill({ position: 0, discarded: false })
+                        racePositions: Array(series.races.length).fill({ position: 0, discarded: false })
                     })
                     index -= 1
                 }
                 //add result to tempresults
                 if (tempresults[index]) {
-                    tempresults[index]!.racePositions.splice(race.number - 1, 1, { race: race.number, position: result.HandicapPosition, discarded: false })
+                    tempresults[index]!.racePositions.splice(race.number - 1, 1, {
+                        race: race.number,
+                        position: result.HandicapPosition == 0 ? result.PursuitPosition : result.PursuitPosition,
+                        discarded: false
+                    })
                 } else {
                     console.log('something went wrong')
                 }
@@ -108,7 +92,7 @@ const FleetSeriesResultsTable = ({ seriesId, fleetSettingsId }: { seriesId: stri
         })
 
         //give duty team their average score if they have raced in the series
-        seriesData.races.forEach(race => {
+        series.races.forEach(race => {
             //loop through duty team on each race.
             Object.entries(race.Duties).map(([displayName, name]) => {
                 let index = tempresults.findIndex(function (t) {
@@ -149,7 +133,7 @@ const FleetSeriesResultsTable = ({ seriesId, fleetSettingsId }: { seriesId: stri
             sortedResult.racePositions.sort((a, b) => a.position - b.position)
             let Net = 0
             let modifiedResult = sortedResult.racePositions.map((position, index) => {
-                if (index < seriesData.settings.numberToCount) {
+                if (index < series.settings.numberToCount) {
                     Net += position.position
                     return { ...position, discarded: false } // Ensure discarded is false for counted positions
                 } else {
@@ -211,58 +195,66 @@ const FleetSeriesResultsTable = ({ seriesId, fleetSettingsId }: { seriesId: stri
     }
 
     useEffect(() => {
-        if (seriesData != undefined) {
+        if (series != undefined) {
             calcTable()
             generateColumns()
         }
-    }, [seriesData])
+    }, [series])
 
     const [columns, setColumns] = useState([
         columnHelper.accessor('Rank', {
             header: 'Rank',
-            cell: props => <Number {...props} />,
+            cell: props => <Number value={props.getValue()} />,
             enableSorting: true
         }),
         columnHelper.accessor('Helm', {
             header: 'Helm',
             size: 300,
-            cell: props => <Text {...props} />,
+            cell: props => <Text text={props.getValue()} />,
             enableSorting: false
         }),
         columnHelper.accessor('Crew', {
             header: 'Crew',
             size: 300,
-            cell: props => <Text {...props} />,
+            cell: props => <Text text={props.getValue()} />,
             enableSorting: false
         }),
         columnHelper.accessor(data => data.Boat?.name, {
             header: 'Class',
             size: 300,
             id: 'Class',
-            cell: props => <Text {...props} />,
+            cell: props => <Text text={props.getValue()} />,
             enableSorting: false
         }),
         columnHelper.accessor(data => data.SailNumber, {
             header: 'Sail Number',
-            cell: props => <Text {...props} />,
+            cell: props => <Text text={props.getValue()} />,
             enableSorting: false
         })
     ])
 
     const generateColumns = () => {
-        if (seriesData == undefined) {
+        if (series == undefined) {
             console.log('seriesData is undefined')
             return
         }
 
-        seriesData.races.sort((a, b) => a.number - b.number)
+        series.races.sort((a, b) => a.number - b.number)
         var newColumns: any[] = []
         //add column for each race in series
-        seriesData.races.forEach((race: RaceDataType, index: number) => {
+        series.races.forEach((race: RaceDataType, index: number) => {
             const newColumn = columnHelper.accessor(data => data.racePositions[index], {
                 id: 'R' + race.number.toString(),
-                header: 'R' + race.number.toString(),
-                cell: props => <Result {...props} />,
+                header: () => (
+                    <div
+                        style={{
+                            textAlign: 'center'
+                        }}
+                    >
+                        R{race.number.toString()}
+                    </div>
+                ),
+                cell: props => <Result position={props.getValue()!.position} discarded={props.getValue()!.discarded} />,
                 enableSorting: false
             })
             newColumns.push(newColumn)
@@ -274,13 +266,13 @@ const FleetSeriesResultsTable = ({ seriesId, fleetSettingsId }: { seriesId: stri
 
     const totalColumn = columnHelper.accessor('Total', {
         header: 'Total',
-        cell: props => <Number {...props} />,
+        cell: props => <Number value={props.getValue()} />,
         enableSorting: true
     })
 
     const netColumn = columnHelper.accessor('Net', {
         header: 'Net',
-        cell: props => <Number {...props} disabled={true} />,
+        cell: props => <Number value={props.getValue()} />,
         enableSorting: true
     })
 

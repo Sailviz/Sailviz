@@ -4,25 +4,43 @@ import prisma from '@/lib/prisma'
 import * as Fetcher from '@/components/Fetchers'
 import { auth } from '@/lib/auth'
 import { headers } from 'next/headers'
+
+export async function isRequestAdmin() {
+    const session = await auth.api.getSession({
+        headers: await headers() // you need to pass the headers object.
+    })
+
+    if (session?.user.admin) {
+        return true
+    }
+    return false
+}
 export async function isRequestAuthorised(id: string, table: string) {
     const session = await auth.api.getSession({
         headers: await headers() // you need to pass the headers object.
     })
-    var clubId = session?.user.clubId
-    if (clubId == null) {
-        return false
+
+    //bypass if admin
+    if (session?.user.admin) {
+        return true
     }
+    //bypass if demo mode
     const GlobalConfig = await prisma.globalConfig.findFirst({
         where: {
             active: true
         }
     })
-
-    let ownData = await isRequestOwnData(id, clubId, table)
-    if (!ownData) {
-        ownData = await isRequestOwnData(id, GlobalConfig!.demoClubId, table)
+    const demo = await isRequestOwnData(id, GlobalConfig!.demoClubId, table)
+    if (demo) {
+        return true
     }
-    return ownData
+
+    var clubId = session?.user.clubId
+    if (clubId == null) {
+        return false
+    }
+
+    return await isRequestOwnData(id, clubId, table)
 }
 
 export async function isRequestOwnData(id: string, clubId: string, table: string) {

@@ -25,6 +25,7 @@ export function ToCountSelect({ seriesId }: { seriesId: string }) {
 
     return (
         <div className='flex flex-col px-6 w-2/4 '>
+            Races to Count:
             <Select
                 onValueChange={value => {
                     console.log('Selected value:', value)

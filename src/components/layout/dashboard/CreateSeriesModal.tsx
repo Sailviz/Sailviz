@@ -1,23 +1,27 @@
+'use client'
 import { Button } from '@/components/ui/button'
-import { Dialog, DialogContent, DialogFooter, DialogHeader } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTrigger } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { redirect } from 'next/dist/server/api-utils'
-import { useRouter } from 'next/navigation'
 import { ChangeEvent, useState } from 'react'
 
-export default function CreateSeriesDialog({ onSubmit, onClose }: { onSubmit: (name: string) => void; onClose: () => void }) {
+export default function CreateSeriesDialog({ onSubmit, allowCreate }: { onSubmit: (name: string) => void; allowCreate?: boolean }) {
     const [seriesName, setSeriesName] = useState('')
-    const [open, setOpen] = useState(true)
-    const Router = useRouter()
+    const [open, setOpen] = useState(false)
+    console.log('Allow Create:', allowCreate)
     return (
         <>
             <Dialog
                 open={open}
                 onOpenChange={open => {
                     setOpen(open)
-                    if (!open) Router.back() // this catches the x button and clicking outside the modal, gets out of parallel route
                 }}
             >
+                <DialogTrigger asChild>
+                    <Button aria-label='new series' disabled={!allowCreate}>
+                        Create New Series
+                    </Button>
+                </DialogTrigger>
                 <DialogContent>
                     <DialogHeader className='flex flex-col gap-1'>Create Series</DialogHeader>
 
@@ -29,10 +33,13 @@ export default function CreateSeriesDialog({ onSubmit, onClose }: { onSubmit: (n
                         </div>
                     </div>
                     <DialogFooter>
-                        <Button color='danger' onClick={onClose}>
-                            Close
-                        </Button>
-                        <Button color='primary' onClick={() => onSubmit(seriesName)}>
+                        <Button
+                            color='primary'
+                            onClick={() => {
+                                onSubmit(seriesName)
+                                setOpen(false)
+                            }}
+                        >
                             Create
                         </Button>
                     </DialogFooter>

@@ -20,7 +20,7 @@ export class AVAILABLE_PERMISSIONS {
 
 export const PERMISSIONS: PermissionType[] = Object.values(AVAILABLE_PERMISSIONS)
 
-export function userHasPermission(user: UserDataType, permission: PermissionType) {
+export function userHasPermission(user: UserDataType | undefined, permission: PermissionType) {
     if (user == undefined) return false
     let match = false
     user.roles

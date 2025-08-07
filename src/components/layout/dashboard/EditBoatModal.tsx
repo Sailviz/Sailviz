@@ -1,11 +1,12 @@
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogFooter, DialogHeader } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
-import { useTheme } from 'next-themes'
 import { useRouter } from 'next/navigation'
-import { ChangeEvent, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
+import * as DB from '@/components/apiMethods'
+import { mutate } from 'swr'
 
-export default function EditBoatDialog({ boat, onSubmit }: { boat: BoatDataType | undefined; onSubmit: (boat: BoatDataType) => void }) {
+export default function EditBoatDialog({ boat }: { boat: BoatDataType }) {
     const Router = useRouter()
     const [boatName, setBoatName] = useState('')
     const [PY, setPY] = useState(0)
@@ -14,7 +15,19 @@ export default function EditBoatDialog({ boat, onSubmit }: { boat: BoatDataType 
 
     const [open, setOpen] = useState(true)
 
-    const { theme, setTheme } = useTheme()
+    const editBoat = async (boat: BoatDataType) => {
+        await DB.updateBoatById(boat)
+        mutate('/api/GetBoats')
+        Router.back()
+    }
+
+    const deleteBoat = (boatId: string) => async () => {
+        if (confirm('Are you sure you want to delete this boat?')) {
+            await DB.deleteBoatById(boatId)
+            mutate('/api/GetBoats')
+            Router.back()
+        }
+    }
 
     useEffect(() => {
         if (boat === undefined) return
@@ -60,7 +73,10 @@ export default function EditBoatDialog({ boat, onSubmit }: { boat: BoatDataType 
                     </div>
                 </div>
                 <DialogFooter>
-                    <Button onClick={() => onSubmit({ ...boat!, name: boatName, py: PY, crew: Crew, pursuitStartTime: pursuitStartTime })}>Save</Button>
+                    <Button variant={'red'} onClick={deleteBoat(boat.id)}>
+                        Delete
+                    </Button>
+                    <Button onClick={() => editBoat({ ...boat!, name: boatName, py: PY, crew: Crew, pursuitStartTime: pursuitStartTime })}>Save</Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>

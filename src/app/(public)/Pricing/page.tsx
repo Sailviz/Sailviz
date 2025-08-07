@@ -30,7 +30,7 @@ export default function PricingPage() {
                     name={'SailViz'}
                     price={monthly ? 30 : 330}
                     interval={monthly ? 'month' : 'year'}
-                    features={['Unlimited Races', 'Unlimited Racers', 'Email Support']}
+                    features={['Unlimited Races', 'Unlimited Entries', 'Email Support']}
                     priceId={monthly ? 'price_1RWlKP02rrqm9SsNwEEvRUMu' : 'price_1RX3nv02rrqm9SsN8D8hJPdg'}
                 />
                 <PricingCard

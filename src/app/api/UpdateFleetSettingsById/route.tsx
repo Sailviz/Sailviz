@@ -9,7 +9,14 @@ async function updateFleetSettings(fleet: FleetSettingsType) {
             id: fleet.id
         },
         data: {
-            name: fleet.name
+            name: fleet.name,
+            boats: {
+                set: [
+                    ...fleet.boats.map(boat => ({
+                        id: boat.id
+                    }))
+                ]
+            }
         }
     })
     return result

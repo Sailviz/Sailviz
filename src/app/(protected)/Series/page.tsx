@@ -1,22 +1,52 @@
+'use client'
 import ClubTable from '@/components/tables/ClubTable'
 import * as DB from '@/components/apiMethods'
 import { mutate } from 'swr'
 import CreateSeriesModal from '@/components/layout/dashboard/CreateSeriesModal'
 import { AVAILABLE_PERMISSIONS, userHasPermission } from '@/components/helpers/users'
 import { title } from '@/components/layout/home/primitaves'
-import EditSeriesModal from '@/components/layout/dashboard/EditSeriesModal'
-import { redirect } from 'next/navigation'
-import Link from 'next/link'
-import { Button } from '@/components/ui/button'
-import { auth } from '@/lib/auth'
-import { headers } from 'next/headers'
 import { PageSkeleton } from '@/components/layout/PageSkeleton'
+import { useSession } from '@/lib/auth-client'
+import { use } from 'chai'
+import { useEffect, useState } from 'react'
+import { set } from 'cypress/types/lodash'
 
-export default async function Page() {
-    const session = await auth.api.getSession({
-        headers: await headers() // you need to pass the headers object.
-    })
-    console.log('Session:', session)
+export default function Page() {
+    const {
+        data: session,
+        isPending, //loading state
+        error, //error object
+        refetch //refetch the session
+    } = useSession()
+
+    const [allowCreate, setAllowCreate] = useState(false)
+
+    const createSeries = async (seriesName: string) => {
+        // Here you would typically call an API to create the series
+        // For example:
+        await DB.createSeries(session?.user?.clubId!, seriesName)
+        // After creating the series, you might want to redirect or update the UI
+        mutate('/api/GetSeriesByClubId') // This will revalidate the series data
+    }
+
+    useEffect(() => {
+        const checkSubscription = async () => {
+            console.log('Session:', session)
+            if (session?.club?.stripe.subscriptionStatus !== 'active') {
+                //check how many series the user has
+                const series = await DB.GetSeriesByClubId(session?.user?.clubId!)
+                console.log('Series:', series)
+                setAllowCreate(series.length === 0)
+
+                // if not active, only allow a single series to be created
+            } else {
+                //if the user has an active subscription, allow them to create multiple series
+                setAllowCreate(true)
+            }
+        }
+        checkSubscription()
+    }, [session])
+
     if (!session || !session.club) {
         // If the user is not authenticated, redirect to the login page
         return <PageSkeleton />
@@ -24,15 +54,12 @@ export default async function Page() {
 
     return (
         <div>
-            {/* <EditSeriesModal seriesId={''} isOpen={editModal.isOpen} onSubmit={editSeries} onClose={editModal.onClose} /> */}
             <div className='p-6'>
                 <h1 className={title({ color: 'blue' })}>Series</h1>
             </div>
             {userHasPermission(session.user, AVAILABLE_PERMISSIONS.editSeries) ? (
                 <div className='p-6'>
-                    <Link href='/Series/create'>
-                        <Button>Create New Series</Button>
-                    </Link>
+                    <CreateSeriesModal onSubmit={createSeries} allowCreate={allowCreate} />
                 </div>
             ) : (
                 <></>

@@ -1,7 +1,8 @@
 'use client'
 import React from 'react'
-import * as Sentry from '@sentry/nextjs'
-
+import { Button } from './ui/button'
+import { useRouter } from 'next/navigation'
+import BackButton from './layout/backButton'
 class ErrorBoundary extends React.Component {
     constructor(props) {
         super(props)
@@ -27,9 +28,10 @@ class ErrorBoundary extends React.Component {
             return (
                 <div>
                     <div className='text-xl font-extrabold p-6'>Oops, there is an error!</div>
-                    <button type='button' className='p-4' onClick={() => this.setState({ hasError: false })}>
+                    <Button type='button' className='p-4' onClick={() => this.setState({ hasError: false })}>
                         Reload
-                    </button>
+                    </Button>
+                    <BackButton />
                     <div id='errorcode' className='p-4' />
                     <div id='errorinfo' className='p-4' />
                 </div>

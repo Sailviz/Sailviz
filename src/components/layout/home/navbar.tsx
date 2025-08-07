@@ -12,20 +12,20 @@ export default function HomeNav() {
                     <SailVizIcon />
                     <p className='font-bold text-inherit'>SailViz</p>
                 </Link>
-                <div className='justify-start items-center gap-4 lg:flex hidden flex-row'>
+                <div className='justify-center items-center gap-4 lg:flex hidden flex-row'>
                     <NavigationMenu className='flex justify-start items-start'>
                         <NavigationMenuList className='flex justify-start gap-4 flex-row'>
                             <NavigationMenuItem>
-                                <NavigationMenuLink href='#'>Features</NavigationMenuLink>
+                                <NavigationMenuLink href='/'>Home</NavigationMenuLink>
                             </NavigationMenuItem>
                             <NavigationMenuItem>
-                                <NavigationMenuLink href='#'>Clubs</NavigationMenuLink>
+                                <NavigationMenuLink href='/Clubs'>Clubs</NavigationMenuLink>
                             </NavigationMenuItem>
                             <NavigationMenuItem>
-                                <NavigationMenuLink href='#'>Pricing</NavigationMenuLink>
+                                <NavigationMenuLink href='/Pricing'>Pricing</NavigationMenuLink>
                             </NavigationMenuItem>
                             <NavigationMenuItem>
-                                <NavigationMenuLink href='#'>Events</NavigationMenuLink>
+                                <NavigationMenuLink href='/Events'>Events</NavigationMenuLink>
                             </NavigationMenuItem>
                         </NavigationMenuList>
                     </NavigationMenu>
@@ -35,7 +35,7 @@ export default function HomeNav() {
                     <Link href={'/Login'}>
                         <Button variant='outline'>Sign in</Button>
                     </Link>
-                    <Link href={'/register'}>
+                    <Link href={'/Register'}>
                         <Button>Get started</Button>
                     </Link>
                 </div>

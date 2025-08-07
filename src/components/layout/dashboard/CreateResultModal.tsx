@@ -1,30 +1,22 @@
 'use client'
 import { Button } from '@/components/ui/button'
-import { Dialog, DialogContent, DialogFooter, DialogHeader } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTrigger } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Tabs, TabsList } from '@/components/ui/tabs'
 import { TabsTrigger } from '@radix-ui/react-tabs'
 import { useTheme } from 'next-themes'
-import { useRouter } from 'next/navigation'
 import { ChangeEvent, useEffect, useState } from 'react'
 import Select, { CSSObjectWithLabel } from 'react-select'
-
-export default function CreateResultDialog({
-    race,
-    boats,
-    onSubmit
-}: {
-    race: RaceDataType
-    boats: BoatDataType[]
-    onSubmit: (helmValue: string, crewValue: string, boat: any, sailNum: string, fleetId: string) => void
-}) {
-    const Router = useRouter()
-    const [open, setOpen] = useState(true)
+import * as DB from '@/components/apiMethods'
+import * as Fetcher from '@/components/Fetchers'
+export default function CreateResultDialog({ race, boats }: { race: RaceDataType; boats: BoatDataType[] }) {
+    const [open, setOpen] = useState(false)
     const [helm, setHelm] = useState('')
     const [crew, setCrew] = useState('')
     const [sailNumber, setSailNumber] = useState('')
 
     const { theme, setTheme } = useTheme()
+    const { mutateFleet } = Fetcher.Fleet(race.fleets[0]!.id)
 
     //array of fleets, dimensionally equal to selectedRaces
     const [selectedFleet, setSelectedFleet] = useState<string>(race.fleets[0]!.id)
@@ -48,7 +40,7 @@ export default function CreateResultDialog({
         if (e.target.id == 'crew') setCrew(capitalisedSentence)
     }
 
-    const Submit = () => {
+    const Submit = async () => {
         //check if all fields are filled in
 
         let error = false
@@ -66,7 +58,15 @@ export default function CreateResultDialog({
         }
         if (error) return
 
-        onSubmit(helm, crew, selectedBoat.value, sailNumber, selectedFleet)
+        let result = await DB.createResult(selectedFleet)
+        if (result == null) {
+            console.error('Error creating result')
+            return
+        }
+        await DB.updateResult({ ...result, Helm: helm, Crew: crew, boat: selectedBoat.value, SailNumber: sailNumber })
+        setOpen(false)
+
+        mutateFleet()
     }
 
     const clearFields = () => {
@@ -82,10 +82,15 @@ export default function CreateResultDialog({
         <Dialog
             open={open}
             onOpenChange={open => {
+                if (!open) {
+                    clearFields()
+                }
                 setOpen(open)
-                if (!open) Router.back() // this catches the x button and clicking outside the modal, gets out of parallel route
             }}
         >
+            <DialogTrigger asChild>
+                <Button aria-label='add entry'>Add Entry</Button>
+            </DialogTrigger>
             <DialogContent className='max-w-8/12' title='New Entry'>
                 <DialogHeader className='flex flex-col gap-1'>Create New Entry</DialogHeader>
                 <div className='flex w-full'>

@@ -11,7 +11,6 @@ type BreadcrumbItem = {
 
 export function Breadcrumbs() {
     const pathname = usePathname()
-    console.log('Breadcrumbs pathname:', pathname)
     const [items, setItems] = useState<BreadcrumbItem[]>([])
 
     useEffect(() => {

@@ -81,6 +81,12 @@ export default function CreateResultModal({ todaysRaces, boats }: { todaysRaces:
             setSailNumError(true)
             error = true
         }
+        //check that at least one fleet is selected
+        console.log(selectedFleets.length)
+        if (selectedFleets.length <= 0) {
+            alert('Please select at least one race')
+            error = true
+        }
         // if not all filled in, enable submit button and return
         if (error) {
             submitDisabled = false
@@ -237,7 +243,9 @@ export default function CreateResultModal({ todaysRaces, boats }: { todaysRaces:
                     return (
                         <div className='mx-6 mb-10' key={race.id + 'select'}>
                             <div className='flex flex-row'>
-                                {race.series.name} {race.number}
+                                <div className='py-2 font-bold px-4'>
+                                    {race.series.name} {race.number}
+                                </div>
                                 <Switch
                                     id={race.id + 'Switch'}
                                     onCheckedChange={value => {

@@ -1,7 +1,7 @@
 import { betterAuth } from 'better-auth'
 import { prismaAdapter } from 'better-auth/adapters/prisma'
 import prisma from './prisma'
-import { customSession, username } from 'better-auth/plugins'
+import { createAuthMiddleware, customSession, username } from 'better-auth/plugins'
 import { myPluginClient } from './client-plugin'
 
 export const auth = betterAuth({
@@ -17,10 +17,20 @@ export const auth = betterAuth({
             if (!dbUser) {
                 throw new Error('User not found')
             }
-
+            // some users may not have a clubId, so we need to handle that
+            if (!dbUser.clubId) {
+                return {
+                    user: dbUser,
+                    session,
+                    club: null
+                }
+            }
             const club = (await prisma.club.findFirst({
                 where: {
                     id: dbUser.clubId
+                },
+                include: {
+                    stripe: true
                 }
             })) as ClubDataType | null
             return {

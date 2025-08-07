@@ -1,19 +1,15 @@
 'use client'
-import React, { act, ChangeEvent, MouseEventHandler, use, useEffect, useState } from 'react'
+import React, { use, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import * as DB from '@/components/apiMethods'
 import dayjs from 'dayjs'
-import Papa from 'papaparse'
 import FleetHandicapResultsTable from '@/components/tables/FleetHandicapResultsTable'
 import FleetPursuitResultsTable from '@/components/tables/FleetPursuitResultsTable'
 import * as Fetcher from '@/components/Fetchers'
 import { PageSkeleton } from '@/components/layout/PageSkeleton'
 import BackButton from '@/components/layout/backButton'
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Breadcrumbs } from '@/components/breadcrumbs'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { Label } from '@/components/ui/label'
 
 type PageProps = { params: Promise<{ slug: string }> }
 
@@ -21,10 +17,6 @@ export default function Page(props: PageProps) {
     const Router = useRouter()
 
     const { slug } = use(props.params)
-
-    const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
-    const { boats, boatsIsError, boatsIsValidating } = Fetcher.Boats()
-    const { GlobalConfig, GlobalConfigIsError, GlobalConfigIsValidating } = Fetcher.UseGlobalConfig()
 
     const { race, raceIsError, raceIsValidating, mutateRace } = Fetcher.Race(slug, true)
 
@@ -42,7 +34,7 @@ export default function Page(props: PageProps) {
         }
     }, [race])
 
-    if (clubIsValidating || club == undefined || boats == undefined || race == undefined) {
+    if (race == undefined) {
         return <PageSkeleton />
     }
     return (
@@ -81,29 +73,9 @@ export default function Page(props: PageProps) {
                                 return (
                                     <div key={'fleetResults' + index}>
                                         {race.Type == 'handicap' ? (
-                                            <FleetHandicapResultsTable
-                                                showTime={true}
-                                                editable={false}
-                                                fleetId={fleet.id}
-                                                key={JSON.stringify(race)}
-                                                deleteResult={null}
-                                                updateResult={null}
-                                                raceId={race.id}
-                                                showEditModal={null}
-                                                showViewModal={null}
-                                            />
+                                            <FleetHandicapResultsTable showTime={true} editable={false} fleetId={fleet.id} />
                                         ) : (
-                                            <FleetPursuitResultsTable
-                                                showTime={true}
-                                                editable={false}
-                                                fleetId={fleet.id}
-                                                key={JSON.stringify(race)}
-                                                deleteResult={null}
-                                                updateResult={null}
-                                                raceId={race.id}
-                                                showEditModal={null}
-                                                showViewModal={null}
-                                            />
+                                            <FleetPursuitResultsTable editable={false} fleetId={fleet.id} />
                                         )}
                                     </div>
                                 )

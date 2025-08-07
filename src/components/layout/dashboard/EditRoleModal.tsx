@@ -1,19 +1,34 @@
-import { useTheme } from 'next-themes'
 import { ChangeEvent, useEffect, useState } from 'react'
 import Select from 'react-select'
-import * as Fetcher from '@/components/Fetchers'
 import { PERMISSIONS } from '@/components/helpers/users'
-import { Dialog, DialogContent, DialogFooter, DialogHeader } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useRouter } from 'next/navigation'
+import * as DB from '@/components/apiMethods'
+import { mutate } from 'swr'
 
-export default function EditUserDialog({ role, onSubmit }: { role: RoleDataType | undefined; onSubmit: (role: RoleDataType) => void }) {
+export default function EditRoleModal({ role }: { role: RoleDataType }) {
     const Router = useRouter()
     const [name, setName] = useState('')
     const [permissions, setPermissions] = useState<PermissionType[]>([])
 
     const [open, setOpen] = useState(true)
+
+    const updateRole = async (role: RoleDataType) => {
+        await DB.updateRole(role)
+        mutate('/api/GetRolesByClubId')
+        Router.back()
+    }
+
+    const deleteRole = async (role: RoleDataType) => {
+        console.log('deleting role', role)
+        if (confirm('Are you sure you want to delete this role?')) {
+            await DB.deleteRole(role)
+            mutate('/api/GetRolesByClubId')
+            Router.back()
+        }
+    }
 
     useEffect(() => {
         if (role === undefined) return
@@ -30,7 +45,7 @@ export default function EditUserDialog({ role, onSubmit }: { role: RoleDataType 
             }}
         >
             <DialogContent className='max-w-8/12'>
-                <DialogHeader className='flex flex-col gap-1'>Edit Role</DialogHeader>
+                <DialogTitle className='flex flex-col gap-1'>Edit Role</DialogTitle>
                 <div className='flex w-full'>
                     <div className='flex flex-col px-6 w-1/4'>
                         <p className='hidden' id='EditResultId'></p>
@@ -54,7 +69,10 @@ export default function EditUserDialog({ role, onSubmit }: { role: RoleDataType 
                     </div>
                 </div>
                 <DialogFooter>
-                    <Button color='primary' onClick={() => onSubmit({ ...role!, name: name, permissions: { allowed: permissions } })}>
+                    <Button variant={'red'} onClick={() => deleteRole(role)}>
+                        Remove
+                    </Button>
+                    <Button color='primary' onClick={() => updateRole({ ...role!, name: name, permissions: { allowed: permissions } })}>
                         Save
                     </Button>
                 </DialogFooter>

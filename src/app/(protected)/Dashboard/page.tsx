@@ -13,11 +13,13 @@ import { headers } from 'next/headers'
 import { auth } from '@/lib/auth'
 import prisma from '@/lib/prisma'
 import dayjs from 'dayjs'
+import CreateEventDialog from '@/components/layout/dashboard/CreateEventModal'
 export default async function Page() {
     const session = await auth.api.getSession({
         headers: await headers() // you need to pass the headers object.
     })
     console.log('Session:', session)
+    console.log('Session Club:', session?.club)
     if (!session || !session.club) {
         // If the user is not authenticated, redirect to the login page
         return <PageSkeleton />
@@ -40,9 +42,7 @@ export default async function Page() {
                     <div>
                         <p className='text-2xl font-bold p-6 pb-1'>Quick Actions</p>
                         <div className='p-6 py-1'>
-                            <Link href='/createEvent'>
-                                <Button>Create New Event</Button>
-                            </Link>
+                            <CreateEventDialog />
                         </div>
                         <div className='p-6 pt-1'>
                             <Link href='/Demo'>

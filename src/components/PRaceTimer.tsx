@@ -1,33 +1,54 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react'
 
 let hootFlag = true
 let warningFlag = true
 
-const CountdownTimer = ({ startTime, endTime, timerActive, onFiveMinutes, onFourMinutes, onOneMinute, onGo, onEnd, onTimeUpdate, onWarning, reset }: { startTime: number, endTime: number | null, timerActive: boolean, onFiveMinutes: any, onFourMinutes: any, onOneMinute: any, onGo: any, onEnd: any, onTimeUpdate: any, onWarning: any, reset: boolean }) => {
-    const [timeLeft, setTimeLeft] = useState({ minutes: 5, seconds: 15, countingUp: false });
-
+const CountdownTimer = ({
+    startTime,
+    endTime,
+    timerActive,
+    onFiveMinutes,
+    onFourMinutes,
+    onOneMinute,
+    onGo,
+    onEnd,
+    onWarning,
+    reset
+}: {
+    startTime: number
+    endTime: number | null
+    timerActive: boolean
+    onFiveMinutes: any
+    onFourMinutes: any
+    onOneMinute: any
+    onGo: any
+    onEnd: any
+    onWarning: any
+    reset: boolean
+}) => {
+    const [timeLeft, setTimeLeft] = useState({ minutes: 5, seconds: 15, countingUp: false })
 
     const calculateTimeLeft = () => {
         let countingUp = false
-        let difference = startTime - (new Date().getTime() / 1000)
+        let difference = startTime - new Date().getTime() / 1000
         if (difference < 0) {
             difference = Math.abs(difference)
             countingUp = true
         }
         let time = {
-            minutes: Math.floor((difference / 60)),
-            seconds: Math.floor((difference) % 60),
+            minutes: Math.floor(difference / 60),
+            seconds: Math.floor(difference % 60),
             countingUp: countingUp
         }
 
-        return time;
+        return time
     }
 
     useEffect(() => {
         if (!timerActive) return
         const timer = setTimeout(() => {
-            const time = calculateTimeLeft();
-            setTimeLeft(time);
+            const time = calculateTimeLeft()
+            setTimeLeft(time)
             //full minute signals
             if (timeLeft.minutes == 0 && timeLeft.seconds == 0 && timeLeft.countingUp == false) {
                 if (onGo && hootFlag) {
@@ -47,8 +68,7 @@ const CountdownTimer = ({ startTime, endTime, timerActive, onFiveMinutes, onFour
                     hootFlag = false
                     warningFlag = true
                 }
-            }
-            else if (timeLeft.minutes == 5 && timeLeft.seconds == 0 && timeLeft.countingUp == false) {
+            } else if (timeLeft.minutes == 5 && timeLeft.seconds == 0 && timeLeft.countingUp == false) {
                 if (onFiveMinutes && hootFlag) {
                     onFiveMinutes()
                     hootFlag = false
@@ -65,9 +85,9 @@ const CountdownTimer = ({ startTime, endTime, timerActive, onFiveMinutes, onFour
                 }
             }
             //5 second warning for end race
-            if (timeLeft.minutes == (endTime! - 1) && timeLeft.seconds == 55 && timeLeft.countingUp == true) {
+            if (timeLeft.minutes == endTime! - 1 && timeLeft.seconds == 55 && timeLeft.countingUp == true) {
                 if (onWarning && warningFlag) {
-                    onWarning();
+                    onWarning()
                     warningFlag = false
                     hootFlag = true
                 }
@@ -75,47 +95,41 @@ const CountdownTimer = ({ startTime, endTime, timerActive, onFiveMinutes, onFour
             //5 second warnings
             if (timeLeft.minutes == 0 && timeLeft.seconds == 5 && timeLeft.countingUp == false) {
                 if (onWarning && warningFlag) {
-                    onWarning();
+                    onWarning()
                     warningFlag = false
                     hootFlag = true
                 }
             } else if (timeLeft.minutes == 1 && timeLeft.seconds == 5 && timeLeft.countingUp == false) {
                 if (onWarning && warningFlag) {
-                    onWarning();
+                    onWarning()
                     warningFlag = false
                     hootFlag = true
                 }
             } else if (timeLeft.minutes == 4 && timeLeft.seconds == 5 && timeLeft.countingUp == false) {
                 if (onWarning && warningFlag) {
-                    onWarning();
+                    onWarning()
                     warningFlag = false
                     hootFlag = true
                 }
             } else if (timeLeft.minutes == 5 && timeLeft.seconds == 5 && timeLeft.countingUp == false) {
                 if (onWarning && warningFlag) {
-                    onWarning();
+                    onWarning()
                     warningFlag = false
                     hootFlag = true
                 }
             }
-        }, 100);
+        }, 100)
 
-
-
-        return () => clearTimeout(timer);
-    }, [timerActive, timeLeft, startTime]);
+        return () => clearTimeout(timer)
+    }, [timerActive, timeLeft, startTime])
 
     useEffect(() => {
         if (reset) {
-            setTimeLeft({ minutes: 5, seconds: 15, countingUp: false });
+            setTimeLeft({ minutes: 5, seconds: 15, countingUp: false })
         }
-    }, [reset]);
+    }, [reset])
 
-    return (
-        <>
-            {`${timeLeft.countingUp ? '+' : '-'}${timeLeft.minutes.toString().padStart(2, "00")}:${timeLeft.seconds.toString().padStart(2, "00")}`}
-        </>
-    );
-};
+    return <>{`${timeLeft.countingUp ? '+' : '-'}${timeLeft.minutes.toString().padStart(2, '00')}:${timeLeft.seconds.toString().padStart(2, '00')}`}</>
+}
 
-export default CountdownTimer;
+export default CountdownTimer

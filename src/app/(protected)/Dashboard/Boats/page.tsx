@@ -14,6 +14,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import Link from 'next/link'
 import { useSession } from '@/lib/auth-client'
+import CreateBoatDialog from '@/components/layout/dashboard/CreateBoatModal'
 
 export default function Page() {
     const {
@@ -101,16 +102,6 @@ export default function Page() {
         a.click()
     }
 
-    const deleteBoat = async (boat: BoatDataType) => {
-        const tempdata = boats
-        tempdata.splice(
-            tempdata.findIndex((x: BoatDataType) => x.id === boat.id),
-            1
-        )
-        //mutate boats
-        await DB.deleteBoatById(boat.id)
-    }
-
     if (session == null) {
         // If the user is not authenticated, redirect to the login page
         return <PageSkeleton />
@@ -118,16 +109,6 @@ export default function Page() {
 
     return (
         <div className='flex flex-col h-full'>
-            {/* <EditBoatModal
-                isOpen={editModal.isOpen}
-                boat={editingBoat}
-                onSubmit={updateBoat}
-                onClose={() => {
-                    editModal.onClose()
-                    setEditingBoat(undefined)
-                }}
-            /> */}
-            {/* <CreateBoatModal isOpen={createModal.isOpen} onSubmit={createBoat} onClose={() => createModal.onClose()} /> */}
             <div className='p-6'>
                 <h1 className={title({ color: 'blue' })}>Boats</h1>
             </div>
@@ -141,11 +122,7 @@ export default function Page() {
                         <Button className='mx-1' color='primary' onClick={downloadBoats}>
                             Download Boat Data
                         </Button>
-                        <Link href={'/createBoat'}>
-                            <Button className='mx-1' color='primary'>
-                                Add Boat
-                            </Button>
-                        </Link>
+                        <CreateBoatDialog />
                     </div>
                 ) : (
                     <></>

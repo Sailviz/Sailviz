@@ -41,14 +41,15 @@ const RaceTimer: React.FC<RaceTimerProps> = ({ sequence, startTime, onFlagChange
         const timer = setTimeout(() => {
             //this is offset by 1 second to account for rounding issues
             const time = calculateTimeLeft()
+
             setTimeLeft(time)
             //warning signals
-            if (currentStep.time + 6 >= time.time && warningCompleted === false && !sequenceFinished) {
+            if (currentStep.time + 6 >= time.time && warningCompleted === false && time.countingUp == false && !sequenceFinished) {
                 onWarning()
                 setWarningCompleted(true)
             }
             // Check if any sequence step matches the current time
-            if (currentStep.time + 1 >= time.time && !sequenceFinished) {
+            if (currentStep.time + 1 >= time.time && time.countingUp == false && !sequenceFinished) {
                 if (currentStep.hoot > 0) {
                     onHoot(currentStep.hoot)
                 }

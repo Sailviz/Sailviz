@@ -16,14 +16,14 @@ export default function Page(props: PageProps) {
     const updateResult = async (result: ResultDataType): Promise<void> => {
         await DB.updateResult(result)
         const fleet = await DB.getFleetById(result.fleetId)
-        mutate(`/api/GetRaceById?id=${fleet.raceId}&results=true`)
+        mutate(`/api/GetFleetById?id=${fleet.id}`)
         Router.back()
     }
 
     const onDeleteResult = async (result: ResultDataType): Promise<void> => {
         await DB.DeleteResultById(result)
         const fleet = await DB.getFleetById(result.fleetId)
-        mutate(`/api/GetRaceById?id=${fleet.raceId}&results=true`)
+        mutate(`/api/GetFleetById?id=${fleet.id}`)
 
         Router.back()
     }

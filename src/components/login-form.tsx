@@ -36,6 +36,14 @@ export function LoginForm({ justCredentials }: { justCredentials: boolean }) {
                 Router.push('/' + session.user.startPage)
             })
     }
+
+    const handleGitHubLogin = async () => {
+        await signIn.social({
+            provider: 'github',
+            callbackURL: '/authsorter'
+        })
+    }
+
     return (
         <div className='flex flex-col gap-6'>
             <div className='flex flex-col gap-6'>
@@ -78,7 +86,7 @@ export function LoginForm({ justCredentials }: { justCredentials: boolean }) {
                     </div>
                 </div>
             </>
-            <Button type='submit' className='w-full' variant='outline'>
+            <Button onClick={handleGitHubLogin} className='w-full' variant='outline'>
                 <DynamicIcon name={'github' as IconName} />
                 <span>Continue with GitHub</span>
             </Button>

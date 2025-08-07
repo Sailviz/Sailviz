@@ -6,6 +6,9 @@ async function getClub(id: string) {
     var result = await prisma.club.findFirst({
         where: {
             id: id
+        },
+        include: {
+            stripe: true
         }
     })
     if (result == null) {
@@ -14,14 +17,14 @@ async function getClub(id: string) {
     return result
 }
 
-export async function POST(request: NextRequest) {
-    const req = await request.json()
+export async function GET(request: NextRequest) {
+    const searchParams = request.nextUrl.searchParams
+    var id = searchParams.get('clubId')
     try {
-        assert.notStrictEqual(undefined, req.id)
-    } catch (bodyError) {
-        return NextResponse.json({ error: true, message: 'information missing' })
+        assert(id, 'clubId is required')
+    } catch (error) {
+        return NextResponse.json({ error: true, message: 'clubId is required' }, { status: 400 })
     }
-    var id = req.id
     var club = await getClub(id)
     if (club) {
         return NextResponse.json({ error: false, club: club })

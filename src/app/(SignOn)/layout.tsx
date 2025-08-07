@@ -141,15 +141,15 @@ export default async function SignOnLayout({ children }: { children: React.React
                     shortcut: ['e', 'e'],
                     isActive: false,
                     items: todaysSeriesItems
-                },
-                {
-                    title: 'User Guide',
-                    url: '/SignOn/History',
-                    icon: <DocsIcon />,
-                    shortcut: ['e', 'e'],
-                    isActive: false,
-                    items: [] // No child items
                 }
+                // {
+                //     title: 'User Guide',
+                //     url: '/SignOn/Guide',
+                //     icon: <DocsIcon />,
+                //     shortcut: ['e', 'e'],
+                //     isActive: false,
+                //     items: [] // No child items
+                // }
             ]
         },
         backButton

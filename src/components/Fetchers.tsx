@@ -35,7 +35,6 @@ export async function advancedFetcher(url: string, data: object) {
 
 export function UseClub() {
     const { data, error, isValidating } = useSWR('/api/club', fetcher)
-
     return {
         club: data as ClubDataType,
         clubIsValidating: isValidating,
@@ -70,7 +69,7 @@ export function Series(seriesId: string) {
  * @returns
  */
 export function Race(raceId: string, results: boolean) {
-    const { data, error, isValidating, mutate } = useSWR(raceId != '' ? `/api/GetRaceById?id=${raceId}&results=${results}` : null, fetcher)
+    const { data, error, isValidating, mutate } = useSWR(raceId != '' ? `/api/GetRaceById?id=${raceId}&results=${results}` : null, fetcher, { refreshInterval: 5000 })
 
     return {
         race: data as RaceDataType,
@@ -114,12 +113,22 @@ export function Result(resultId: string) {
 }
 
 export function Fleet(fleetId: string) {
-    const { data, error, isValidating } = useSWR(fleetId != undefined ? `/api/GetFleetById?id=${fleetId}` : null, fetcher)
+    const { data, error, isValidating, mutate } = useSWR(fleetId != undefined ? `/api/GetFleetById?id=${fleetId}` : null, fetcher)
 
     return {
         fleet: data as FleetDataType,
         fleetIsValidating: isValidating,
-        fleetIsError: error
+        fleetIsError: error,
+        mutateFleet: mutate
+    }
+}
+
+export function Clubs() {
+    const { data, error, isValidating } = useSWR(`/api/GetClubs`, fetcher)
+    return {
+        clubs: data as ClubDataType[],
+        clubsIsValidating: isValidating,
+        clubsIsError: error
     }
 }
 
@@ -145,13 +154,12 @@ export function Boats() {
 }
 
 export function Boat(boatId: string) {
-    const { data, error, isValidating, mutate } = useSWR(boatId != undefined ? `/api/GetBoatById?boatId=${boatId}` : null, fetcher)
+    const { data, error, isValidating } = useSWR(boatId != undefined ? `/api/GetBoatById?boatId=${boatId}` : null, fetcher)
 
     return {
         boat: data?.boat as BoatDataType,
         boatIsValidating: isValidating,
-        boatIsError: error,
-        mutateBoats: mutate
+        boatIsError: error
     }
 }
 
@@ -202,6 +210,15 @@ export function User(id: string) {
     }
 }
 
+export function GetClubById(clubId: string) {
+    const { data, error, isValidating } = useSWR(clubId != '' ? `/api/GetClubById?clubId=${clubId}` : null, fetcher)
+    return {
+        club: data?.club as ClubDataType,
+        clubIsValidating: isValidating,
+        clubIsError: error
+    }
+}
+
 export function Roles(club: ClubDataType) {
     let body = { clubId: club?.id }
     const { data, error, isValidating } = useSWR(club && club.id != '' ? '/api/GetRolesByClubId' : null, url => advancedFetcher(url!, body))
@@ -235,17 +252,6 @@ export function GetSeriesByClubId(club: ClubDataType) {
     }
 }
 
-export function GetSeriesById(seriesId: string) {
-    let body = { seriesId: seriesId }
-    const { data, error, isValidating } = useSWR('/api/GetSeriesById', url => advancedFetcher(url!, body))
-
-    return {
-        series: data?.series as SeriesDataType,
-        seriesIsValidating: isValidating,
-        seriesIsError: error
-    }
-}
-
 export function GetTodaysRaceByClubId(clubId?: string) {
     const { data, error, isValidating } = useSWR(clubId ? '/api/GetTodaysRaceByClubId' : null, url => advancedFetcher(url, { clubId }), {
         suspense: true,
@@ -260,12 +266,12 @@ export function GetTodaysRaceByClubId(clubId?: string) {
 }
 
 export function GetFleetSettingsBySeriesId(seriesId: string) {
-    const { data, error, isValidating } = useSWR(seriesId != '' ? `/api/GetFleetSettingsBySeriesId?id=${seriesId}` : null, fetcher)
-    console.log(data)
+    const { data, error, isValidating, mutate } = useSWR(seriesId != '' ? `/api/GetFleetSettingsBySeriesId?id=${seriesId}` : null, fetcher)
     return {
         fleetSettings: data as FleetSettingsType[],
         fleetSettingsIsValidating: isValidating,
-        fleetSettingsIsError: error
+        fleetSettingsIsError: error,
+        mutateFleetSettings: mutate
     }
 }
 
