@@ -1,5 +1,5 @@
 'use client'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, useReactTable, SortingState } from '@tanstack/react-table'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
 import { Button } from '../ui/button'
@@ -68,6 +68,10 @@ const FleetHandicapResultsTable = ({ fleetId, editable, showTime }: { fleetId: s
             desc: false
         }
     ])
+
+    useEffect(() => {
+        setStartTime(fleet?.startTime || 0)
+    }, [fleet?.startTime])
 
     let columns = [
         columnHelper.accessor('HandicapPosition', {
