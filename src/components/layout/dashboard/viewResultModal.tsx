@@ -17,7 +17,6 @@ export default function EditResultDialog({ result, fleet }: { result: ResultData
                 if (!open) Router.back() // this catches the x button and clicking outside the modal, gets out of parallel route
             }}
         >
-            <DialogHeader className='flex flex-col gap-1'>View Result</DialogHeader>
             <DialogContent className='max-w-8/12'>
                 <div className='flex w-full flex-col'>
                     <div className='flex w-10/12'>
@@ -48,7 +47,7 @@ export default function EditResultDialog({ result, fleet }: { result: ResultData
                     </div>
                     <div>
                         <div className='flex flex-row'>
-                            <p className='text-6xl font-extrabold p-6'>Result Info</p>
+                            <p className='text-4xl font-extrabold p-6'>Lap Info</p>
                         </div>
                         <div className='flex flex-row w-full flex-wrap' id='LapData'>
                             {result.laps.map((lap: LapDataType, index: number) => {
