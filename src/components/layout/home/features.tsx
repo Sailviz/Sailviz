@@ -2,65 +2,66 @@ import { Check } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 
 export const Features = () => (
-    <div className='w-full'>
+    <div className='w-full bg-gray-100 py-20' id='features-section'>
         <div className='container mx-auto'>
-            <div className='flex gap-4 py-20 lg:py-40 flex-col items-start'>
-                <div className='flex gap-2 flex-col'>
-                    <h2 className='text-3xl md:text-5xl tracking-tighter lg:max-w-xl font-regular'>Features</h2>
+            <div className='flex gap-4 py-10 lg:py-20 flex-col items-center'>
+                <div className='flex gap-2 flex-col text-center'>
+                    <h2 className='text-4xl md:text-6xl tracking-tighter font-bold'>Why Choose SailViz?</h2>
+                    <p className='text-lg md:text-xl leading-relaxed tracking-tight text-muted-foreground max-w-3xl'>
+                        Discover the features that make SailViz the ultimate solution for sailing race management.
+                    </p>
                 </div>
-                <div className='flex gap-10 pt-12 flex-col w-full'>
-                    <div className='grid grid-cols-2 items-start lg:grid-cols-3 gap-10'>
-                        <div className='flex flex-row gap-6 w-full items-start'>
-                            <Check className='w-4 h-4 mt-2 text-primary' />
-                            <div className='flex flex-col gap-1'>
-                                <p>Automated Start Procedure</p>
-                                <p className='text-muted-foreground text-sm'>Customisable start Procedure with automated sound signals.</p>
-                            </div>
+                <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 pt-12 w-full'>
+                    <div className='flex flex-row gap-6 items-start'>
+                        <Check className='w-6 h-6 mt-2 text-blue-500' />
+                        <div className='flex flex-col gap-2'>
+                            <h3 className='text-xl font-semibold'>Automated Start Procedure</h3>
+                            <p className='text-muted-foreground text-base'>Customizable start sequences with automated sound signals to ensure precision.</p>
                         </div>
-                        <div className='flex flex-row gap-6 items-start'>
-                            <Check className='w-4 h-4 mt-2 text-primary' />
-                            <div className='flex flex-col gap-1'>
-                                <p>Touch Friendly Race Interface</p>
-                                <p className='text-muted-foreground text-sm'>Designed for touchscreen use.</p>
-                            </div>
+                    </div>
+                    <div className='flex flex-row gap-6 items-start'>
+                        <Check className='w-6 h-6 mt-2 text-blue-500' />
+                        <div className='flex flex-col gap-2'>
+                            <h3 className='text-xl font-semibold'>Touch-Friendly Interface</h3>
+                            <p className='text-muted-foreground text-base'>Designed for seamless use on touchscreens, making race management intuitive.</p>
                         </div>
-                        <div className='flex flex-row gap-6 items-start'>
-                            <Check className='w-4 h-4 mt-2 text-primary' />
-                            <div className='flex flex-col gap-1'>
-                                <p>Digital Race Entry</p>
-                                <p className='text-muted-foreground text-sm'>Ensure readability and accuracy in entry details.</p>
-                            </div>
+                    </div>
+                    <div className='flex flex-row gap-6 items-start'>
+                        <Check className='w-6 h-6 mt-2 text-blue-500' />
+                        <div className='flex flex-col gap-2'>
+                            <h3 className='text-xl font-semibold'>Digital Race Entry</h3>
+                            <p className='text-muted-foreground text-base'>Ensure accuracy and readability with digital entry forms.</p>
                         </div>
-                        <div className='flex flex-row gap-6 w-full items-start'>
-                            <Check className='w-4 h-4 mt-2 text-primary' />
-                            <div className='flex flex-col gap-1'>
-                                <div>
-                                    Live Results
-                                    <Badge className='bg-blue-500 text-white dark:bg-blue-600 ml-4' variant='outline'>
-                                        Pro
-                                    </Badge>
-                                </div>
-                                <p className='text-muted-foreground text-sm'>View corrected results in real-time.</p>
+                    </div>
+                    <div className='flex flex-row gap-6 items-start'>
+                        <Check className='w-6 h-6 mt-2 text-blue-500' />
+                        <div className='flex flex-col gap-2'>
+                            <div className='flex flex-row gap-3 items-start'>
+                                <h3 className='text-xl font-semibold'>Live Results</h3>
+                                <Badge className='bg-blue-500 text-white dark:bg-blue-600 my-auto' variant='outline'>
+                                    Pro
+                                </Badge>
                             </div>
+                            <p className='text-muted-foreground text-base'>View corrected results in real-time, keeping everyone informed.</p>
                         </div>
-                        <div className='flex flex-row gap-6 items-start'>
-                            <Check className='w-4 h-4 mt-2 text-primary' />
-                            <div className='flex flex-col gap-1'>
-                                <div>
-                                    Multiple Fleets
-                                    <Badge className='bg-blue-500 text-white dark:bg-blue-600 ml-4' variant='outline'>
-                                        Pro
-                                    </Badge>
-                                </div>
-                                <p className='text-muted-foreground text-sm'>Race with multiple fleets simultaneously.</p>
+                    </div>
+                    <div className='flex flex-row gap-6 items-start'>
+                        <Check className='w-6 h-6 mt-2 text-blue-500' />
+                        <div className='flex flex-col gap-2'>
+                            <div className='flex flex-row gap-3 items-start'>
+                                <h3 className='text-xl font-semibold'>Multiple Fleets</h3>
+                                <Badge className='bg-blue-500 text-white dark:bg-blue-600 my-auto' variant='outline'>
+                                    Pro
+                                </Badge>
                             </div>
+                            <p className='text-muted-foreground text-base'>Manage races with multiple fleets simultaneously for added flexibility.</p>
                         </div>
-                        <div className='flex flex-row gap-6 items-start'>
-                            <Check className='w-4 h-4 mt-2 text-primary' />
-                            <div className='flex flex-col gap-1'>
-                                <p>Trackable.uk Integration</p>
-                                <p className='text-muted-foreground text-sm'>Live boat position tracking with laps and timing.</p>
-                            </div>
+                    </div>
+                    <div className='flex flex-row gap-6 items-start'>
+                        <Check className='w-6 h-6 mt-2 text-blue-500' />
+                        <div className='flex flex-col gap-2'>
+                            <h3 className='text-xl font-semibold'>Trackable.uk Integration</h3>
+                            <p className='text-muted-foreground text-base'>Live boat position tracking with laps and timing for enhanced accuracy.</p>
                         </div>
                     </div>
                 </div>
