@@ -38,7 +38,7 @@ export default function Page() {
             const demoData = await DB.getRaceById(GlobalConfig.demoDataId, true)
             console.log(newRace)
             //update race data
-            await DB.updateRaceById({ ...demoData, id: newRace.id, Type: 'handicap', seriesId: GlobalConfig.demoSeriesId })
+            await DB.updateRaceById({ ...demoData, id: newRace.id, Type: 'Handicap', seriesId: GlobalConfig.demoSeriesId })
             //add results data
             await Promise.all(
                 demoData.fleets

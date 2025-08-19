@@ -22,7 +22,7 @@ export default function Page(props: PageProps) {
     const { race, raceIsError, raceIsValidating, mutateRace } = Fetcher.Race(slug, true)
 
     const openRacePanel = async () => {
-        if (race.Type == 'handicap') {
+        if (race.Type == 'Handicap') {
             Router.push('/HRace/' + race.id)
         } else {
             Router.push('/PRace/' + race.id)
@@ -83,7 +83,7 @@ export default function Page(props: PageProps) {
                             {race.fleets.map((fleet, index) => {
                                 return (
                                     <div key={'fleetResults' + index}>
-                                        {race.Type == 'handicap' ? (
+                                        {race.Type == 'Handicap' ? (
                                             <FleetHandicapResultsTable showTime={true} editable={false} fleetId={fleet.id} />
                                         ) : (
                                             <FleetPursuitResultsTable editable={false} fleetId={fleet.id} />
