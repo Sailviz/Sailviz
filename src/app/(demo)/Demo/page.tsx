@@ -45,7 +45,7 @@ export default function Page() {
                     .flatMap(fleet => fleet.results)
                     .map(result => {
                         return DB.createResult(newRace.fleets[0]!.id).then(newResult => {
-                            DB.updateResult({ ...newResult, Helm: result.Helm, Crew: result.Crew, boat: result.boat })
+                            DB.updateResult({ ...newResult, Helm: result.Helm, Crew: result.Crew, boat: result.boat, SailNumber: result.SailNumber })
                         })
                     })
             )
