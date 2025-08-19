@@ -10,6 +10,7 @@ import BackButton from '@/components/layout/backButton'
 import { Breadcrumbs } from '@/components/breadcrumbs'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
+import Link from 'next/link'
 
 type PageProps = { params: Promise<{ slug: string }> }
 
@@ -26,6 +27,13 @@ export default function Page(props: PageProps) {
         } else {
             Router.push('/PRace/' + race.id)
         }
+    }
+
+    const downloadResults = async () => {
+        race.fleets.forEach(async fleet => {
+            // by pointing the browser to the api endpoint, the browser will download the file
+            window.location.assign(`/api/ExportFleetResults?id=${fleet.id}`)
+        })
     }
 
     useEffect(() => {
@@ -61,11 +69,14 @@ export default function Page(props: PageProps) {
                                 <Button disabled className='mx-1'>
                                     Calculate
                                 </Button>
-                                <Button className='mx-1'>Print Race Sheet</Button>
+                                <Link href={`/PrintPaperResults/${race.id}`}>
+                                    <Button className='mx-1'>Print Race Sheet</Button>
+                                </Link>
 
-                                <Button className='mx-1'>Upload Entries</Button>
-                                <Input id='entryFileUpload' type='file' accept='.csv' className='hidden' />
-                                <Button>Download Results</Button>
+                                <Button className='mx-1' disabled>
+                                    Upload Entries
+                                </Button>
+                                <Button onClick={downloadResults}>Download Results</Button>
                             </div>
                         </div>
                         <div className='py-4 w-full'>
