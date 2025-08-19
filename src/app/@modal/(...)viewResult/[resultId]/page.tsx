@@ -1,6 +1,5 @@
 'use client'
 // Update the import path below to the correct relative path if necessary
-import { useRouter } from 'next/navigation'
 import { use } from 'react'
 import * as Fetcher from '@/components/Fetchers'
 import ViewResultModal from '@/components/layout/dashboard/viewResultModal'

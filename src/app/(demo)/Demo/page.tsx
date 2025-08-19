@@ -38,14 +38,14 @@ export default function Page() {
             const demoData = await DB.getRaceById(GlobalConfig.demoDataId, true)
             console.log(newRace)
             //update race data
-            await DB.updateRaceById({ ...demoData, id: newRace.id, Type: 'handicap', seriesId: GlobalConfig.demoSeriesId })
+            await DB.updateRaceById({ ...demoData, id: newRace.id, Type: 'Handicap', seriesId: GlobalConfig.demoSeriesId })
             //add results data
             await Promise.all(
                 demoData.fleets
                     .flatMap(fleet => fleet.results)
                     .map(result => {
                         return DB.createResult(newRace.fleets[0]!.id).then(newResult => {
-                            DB.updateResult({ ...newResult, Helm: result.Helm, Crew: result.Crew, boat: result.boat })
+                            DB.updateResult({ ...newResult, Helm: result.Helm, Crew: result.Crew, boat: result.boat, SailNumber: result.SailNumber })
                         })
                     })
             )
