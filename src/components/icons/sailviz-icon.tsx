@@ -1,10 +1,26 @@
 export const SailVizIcon = () => (
-    <svg fill="none" height="36" viewBox="0 0 32 32" width="36">
+    <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 500 500' width='36px' height='36px'>
         <path
-            clipRule="evenodd"
-            d="M17.6482 10.1305L15.8785 7.02583L7.02979 22.5499H10.5278L17.6482 10.1305ZM19.8798 14.0457L18.11 17.1983L19.394 19.4511H16.8453L15.1056 22.5499H24.7272L19.8798 14.0457Z"
-            fill="currentColor"
-            fillRule="evenodd"
+            d='M 0.499 103.635 L 220.34 438.376 L 0.499 438.376 L 0.499 103.635 Z'
+            style={{
+                stroke: 'rgb(0, 0, 0)'
+            }}
         />
+        <text
+            style={{
+                fontFamily: 'Alatsi',
+                fontSize: 28,
+                whiteSpace: 'pre'
+            }}
+            transform='matrix(28.286119, 0, 0, 16.961006, -7418.482643, -2665.076495)'
+            x={264.358}
+            y={182.815}
+        >
+            {'V'}
+        </text>
+        <defs>
+            <style>{'@import url(https://fonts.googleapis.com/css2?family=Alatsi%3Aital%2Cwght%400%2C400&display=swap);'}</style>
+            {/* Removed unsupported bx:export and bx:file elements */}
+        </defs>
     </svg>
-);
+)
