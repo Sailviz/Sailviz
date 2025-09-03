@@ -100,7 +100,7 @@ export default function Page(props: PageProps) {
                             {race.series.name} - Race {race.number} ({dayjs(race.Time).format('DD/MM/YYYY HH:mm')}) - {fleet.fleetSettings.name}
                         </p>
                         {race.Type == 'Handicap' ? (
-                            <HandicapPaperResultsTable results={race.fleets.flatMap(fleet => fleet.results)} key={JSON.stringify(race)} />
+                            <HandicapPaperResultsTable fleet={fleet} key={JSON.stringify(race)} />
                         ) : (
                             <PursuitPaperResultsTable results={race.fleets.flatMap(fleet => fleet.results)} key={JSON.stringify(race)} />
                         )}
