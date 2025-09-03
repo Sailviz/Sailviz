@@ -191,8 +191,14 @@ export default function Page(props: PageProps) {
             //if done a lap, predicted is sum of lap times + last lap.
             //if no lap done, predicted is py.
             let start = race.fleets.find(fleet => fleet.id == a.fleetId)?.startTime || 0
-            let aPredicted = a.laps.length > 0 ? a.laps[a.laps.length - 1]!.time + a.laps[a.laps.length - 1]!.time - (a.laps[a.laps.length - 2]?.time || start) : a.boat.py
-            let bPredicted = b.laps.length > 0 ? b.laps[b.laps.length - 1]!.time + b.laps[b.laps.length - 1]!.time - (b.laps[b.laps.length - 2]?.time || start) : b.boat.py
+            let aPredicted =
+                a.laps.length > 0
+                    ? a.laps[a.laps.length - 1]!.time + a.laps[a.laps.length - 1]!.time - (a.laps[a.laps.length - 2]?.time || start)
+                    : a.boat.py + parseInt(a.SailNumber) / 100000
+            let bPredicted =
+                b.laps.length > 0
+                    ? b.laps[b.laps.length - 1]!.time + b.laps[b.laps.length - 1]!.time - (b.laps[b.laps.length - 2]?.time || start)
+                    : b.boat.py + parseInt(b.SailNumber) / 100000
             //force resultcodes to the end
             if (a.resultCode != '') {
                 aPredicted = Number.MAX_SAFE_INTEGER
@@ -586,6 +592,7 @@ export default function Page(props: PageProps) {
         if (race == undefined) return
 
         setRaceState(raceStateType.reset)
+        dynamicSort(race.fleets.flatMap(fleet => fleet.results))
 
         //check for all fleets finished?
         if (checkAllFinished(race.fleets.flatMap(fleet => fleet.results))) {
