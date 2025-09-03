@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button'
-import { Dialog, DialogContent, DialogFooter, DialogHeader } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { useTheme } from 'next-themes'
 import { ChangeEvent, useState } from 'react'
 
@@ -22,7 +22,6 @@ export default function RetireDialog({
     onClose: () => void
     result: ResultDataType
 }) {
-    const { theme, setTheme } = useTheme()
     return (
         <Dialog
             open={isOpen}
@@ -31,7 +30,7 @@ export default function RetireDialog({
             }}
         >
             <DialogContent>
-                <DialogHeader className='flex flex-col gap-1'>Retire Boat</DialogHeader>
+                <DialogTitle className='flex flex-col gap-1'>Retire Boat</DialogTitle>
                 <div className='flex w-full flex-col'>
                     <span className='text-xl font-extrabold flex justify-center mb-8 text-center'>
                         {result?.boat?.name} : {result.SailNumber} <br /> {result.Helm}{' '}

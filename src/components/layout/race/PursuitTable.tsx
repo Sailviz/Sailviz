@@ -57,7 +57,7 @@ const Sort = ({ result, max, moveUp, moveDown }: { result: ResultDataType; max: 
                     setUpLoading(true)
                     await moveUp(result.id)
                 }}
-                disabled={result.PursuitPosition == 1}
+                disabled={result.PursuitPosition == 1 || result.resultCode != ''}
             >
                 {upLoading ? <SmoothSpinner /> : <ChevronUpIcon transform='scale(-2)' />}
             </Button>
@@ -68,7 +68,7 @@ const Sort = ({ result, max, moveUp, moveDown }: { result: ResultDataType; max: 
                     setDownLoading(true)
                     await moveDown(result.id)
                 }}
-                disabled={result.PursuitPosition == max}
+                disabled={result.PursuitPosition == max || result.resultCode != ''}
             >
                 {downLoading ? <SmoothSpinner /> : <ChevronDownIcon transform='scale(2)' />}
             </Button>
@@ -76,20 +76,10 @@ const Sort = ({ result, max, moveUp, moveDown }: { result: ResultDataType; max: 
     )
 }
 
-const Action = ({
-    raceState,
-    resultId,
-    lapBoat,
-    showRetireModal
-}: {
-    raceState: raceStateType
-    resultId: string
-    lapBoat: (id: string) => void
-    showRetireModal: (id: string) => void
-}) => {
+const Action = ({ raceState, result, showRetireModal }: { raceState: raceStateType; result: ResultDataType; showRetireModal: (id: string) => void }) => {
     if (raceState == raceStateType.retire) {
         return (
-            <Button color='danger' variant='ghost' onClick={() => showRetireModal(resultId)}>
+            <Button color='danger' onClick={() => showRetireModal(result.id)} disabled={result.resultCode != ''}>
                 Retire
             </Button>
         )
@@ -103,22 +93,18 @@ const columnHelper = createColumnHelper<ResultDataType>()
 const PursuitTable = ({
     fleetId,
     raceState,
-    raceMode,
-    lapBoat,
     showRetireModal,
     moveUp,
     moveDown
 }: {
     fleetId: string
     raceState: raceStateType
-    raceMode: raceModeType
-    lapBoat: (id: string) => void
     showRetireModal: (id: string) => void
     moveUp: (id: string) => Promise<void>
     moveDown: (id: string) => Promise<void>
 }) => {
     const { fleet, fleetIsValidating, fleetIsError } = Fetcher.Fleet(fleetId)
-    let data = fleet?.results
+    let data = fleet.results //.filter(result => result.resultCode == '')
     if (data == undefined) {
         data = []
     }
@@ -139,7 +125,8 @@ const PursuitTable = ({
         columnHelper.display({
             header: 'Adjust Position',
             id: 'Sort',
-            cell: props => <Sort result={props.row.original} moveUp={moveUp} moveDown={moveDown} max={data.length} />
+            // max is the number of boats without a result code
+            cell: props => <Sort result={props.row.original} moveUp={moveUp} moveDown={moveDown} max={data.filter(result => result.resultCode == '').length} />
         }),
         columnHelper.accessor('Helm', {
             header: 'Helm',
@@ -168,9 +155,9 @@ const PursuitTable = ({
             header: 'Laps',
             cell: props => <Laps laps={props.getValue()} />
         }),
-        columnHelper.accessor('id', {
+        columnHelper.accessor(result => result, {
             header: 'Action',
-            cell: props => <Action raceState={raceState} lapBoat={lapBoat} showRetireModal={showRetireModal} resultId={props.getValue()} />
+            cell: props => <Action raceState={raceState} showRetireModal={showRetireModal} result={props.getValue()} />
         })
     ]
     const loadingState = fleetIsValidating || data?.length === 0 ? 'loading' : 'idle'

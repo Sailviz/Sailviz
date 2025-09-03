@@ -40,7 +40,8 @@ const FleetPursuitResultsTable = ({ fleetId, editable }: { fleetId: string; edit
     let columns = [
         columnHelper.accessor('PursuitPosition', {
             header: 'Position',
-            cell: props => <Text value={props.getValue().toString()} />,
+            // If the resultCode is empty, display position, otherwise display resultCode
+            cell: props => <Text value={props.row.original.resultCode == '' ? props.getValue().toString() : props.row.original.resultCode} />,
             enableSorting: true
         }),
         columnHelper.accessor('Helm', {
