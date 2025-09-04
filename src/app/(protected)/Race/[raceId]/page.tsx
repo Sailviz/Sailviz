@@ -15,6 +15,11 @@ import * as Fetcher from '@/components/Fetchers'
 import { useSession } from '@/lib/auth-client'
 import { PageSkeleton } from '@/components/layout/PageSkeleton'
 import CreateResultModal from '@/components/layout/dashboard/CreateResultModal'
+import { calculateResults } from '@/components/helpers/race'
+import { mutate } from 'swr'
+import { Spinner } from '@/components/ui/spinner'
+import { SmoothSpinner } from '@/components/icons/smooth-spinner'
+import { set } from 'cypress/types/lodash'
 
 type PageProps = { params: Promise<{ raceId: string }> }
 
@@ -79,6 +84,13 @@ export default function Page(props: PageProps) {
         })
     }
 
+    const calculate = () => {
+        calculateResults(race)
+        for (const fleet of race.fleets) {
+            mutate(`/api/GetFleetById?id=${fleet.id}`)
+        }
+    }
+
     if (session == undefined || isPending || race == undefined || boats == undefined) {
         return <PageSkeleton />
     }
@@ -128,11 +140,16 @@ export default function Page(props: PageProps) {
                                 </Button>
                             </Link>
                             <CreateResultModal race={race} boats={boats} />
-                            <Button disabled className='mx-1'>
-                                Calculate
-                            </Button>
+                            {race.Type == 'Handicap' ? (
+                                <Button onClick={calculate} className='mx-1'>
+                                    Calculate
+                                </Button>
+                            ) : (
+                                <></>
+                            )}
+
                             <Link href={`/PrintPaperResults/${race.id}`}>
-                                <Button className='mx-1'>Print Race Sheet</Button>
+                                <Button>Print Race Sheet</Button>
                             </Link>
                             {userHasPermission(session.user, AVAILABLE_PERMISSIONS.UploadEntires) ? <EntryFileUpload raceId={race.id} /> : <></>}
                             {userHasPermission(session.user, AVAILABLE_PERMISSIONS.DownloadResults) ? <Button onClick={downloadResults}>Download Results</Button> : <></>}
