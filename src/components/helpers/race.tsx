@@ -1,9 +1,9 @@
 import * as DB from '@/components/apiMethods'
 
-export function calculateResults(race: RaceDataType) {
+export async function calculateResults(race: RaceDataType) {
     //most nuber of laps.
     console.log(race)
-    race.fleets.forEach(fleet => {
+    for (const fleet of race.fleets) {
         const maxLaps = Math.max.apply(
             null,
             fleet.results.map(function (o: ResultDataType) {
@@ -13,12 +13,12 @@ export function calculateResults(race: RaceDataType) {
         console.log(maxLaps)
         if (!(maxLaps >= 0)) {
             console.log('max laps not more than one')
-            return
+            continue
         }
         const resultsData = race.fleets.flatMap(fleet => fleet.results)
 
         //calculate corrected time
-        resultsData.forEach(result => {
+        for (const result of resultsData) {
             console.log(result)
             //if we don't have a number of laps, set it to the number of laps
             if (result.numberLaps == 0) {
@@ -26,13 +26,13 @@ export function calculateResults(race: RaceDataType) {
             }
             if (result.finishTime == 0) {
                 result.CorrectedTime = 0
-                return
+                continue
             }
             console.log(result.numberLaps)
             let seconds = result.finishTime - fleet.startTime
             result.CorrectedTime = (seconds * 1000 * (maxLaps / result.numberLaps)) / result.boat.py
             result.CorrectedTime = Math.round(result.CorrectedTime * 10) / 10
-        })
+        }
 
         //calculate finish position
 
@@ -63,10 +63,9 @@ export function calculateResults(race: RaceDataType) {
             }
         })
 
-        sortedResults.forEach(result => {
-            DB.updateResult(result)
-        })
+        // Await all DB updates
+        await Promise.all(sortedResults.map(result => DB.updateResult(result)))
 
         console.log(sortedResults)
-    })
+    }
 }
