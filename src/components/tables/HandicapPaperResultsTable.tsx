@@ -15,13 +15,13 @@ const Time = ({ time, startTime }: { time: number; startTime: number }) => {
     if (time == 0 || startTime == 0) {
         return <p className='p-2 m-2 text-center w-full'></p>
     }
-    const [value, setValue] = React.useState(new Date((time - startTime) * 1000).toISOString().substring(11, 19))
+    const text = new Date((time - startTime) * 1000).toISOString().substring(11, 19)
     if (time == -1) {
         return <p className='p-2 m-2 text-center w-full'>Retired</p>
     } else if (time == 0) {
         return <p className='p-2 m-2 text-center w-full'>-</p>
     } else {
-        return <p className='p-2 m-2 text-center w-full'> {value}</p>
+        return <p className='p-2 m-2 text-center w-full'> {text}</p>
     }
 }
 
