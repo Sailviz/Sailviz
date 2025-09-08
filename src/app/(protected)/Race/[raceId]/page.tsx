@@ -98,6 +98,7 @@ export default function Page(props: PageProps) {
     }
 
     useEffect(() => {
+        if (race == undefined) return
         //if any of the results have an  incorrect corrected time, then we need to tell user to recalculate
         race.fleets.forEach(fleet => {
             const maxLaps = Math.max.apply(
