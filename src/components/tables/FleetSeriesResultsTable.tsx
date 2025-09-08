@@ -12,7 +12,7 @@ type SeriesResultsType = {
     SailNumber: string
     Total: number
     Net: number
-    racePositions: { race: number; position: number; discarded: boolean }[]
+    racePositions: { race: number; position: number; discarded: boolean; resultCode: string }[]
 }
 
 const Text = ({ text }: { text: string }) => {
@@ -23,7 +23,26 @@ const Number = ({ value }: { value: number }) => {
     return <div>{value}</div>
 }
 
-const Result = ({ position, discarded }: { position: number; discarded: boolean }) => {
+const Result = ({ position, discarded, resultCode }: { position: number; discarded: boolean; resultCode: string }) => {
+    if (resultCode != '') {
+        if (discarded) {
+            return (
+                <div className='text-center line-through'>
+                    {position}
+                    <br />
+                    {resultCode}
+                </div>
+            )
+        } else {
+            return (
+                <div className='text-center'>
+                    {position}
+                    <br />
+                    {resultCode}
+                </div>
+            )
+        }
+    }
     if (discarded) {
         return <div className='line-through text-center'>{position}</div>
     } else if (position == 1) {
@@ -74,7 +93,7 @@ const FleetSeriesResultsTable = ({ seriesId, fleetSettingsId }: { seriesId: stri
                         SailNumber: result.SailNumber,
                         Total: 0,
                         Net: 0,
-                        racePositions: Array(series.races.length).fill({ position: 0, discarded: false })
+                        racePositions: Array(series.races.length).fill({ position: 0, discarded: false, resultCode: '' })
                     })
                     index -= 1
                 }
@@ -83,7 +102,8 @@ const FleetSeriesResultsTable = ({ seriesId, fleetSettingsId }: { seriesId: stri
                     tempresults[index]!.racePositions.splice(race.number - 1, 1, {
                         race: race.number,
                         position: result.HandicapPosition == 0 ? result.PursuitPosition : result.HandicapPosition,
-                        discarded: false
+                        discarded: false,
+                        resultCode: result.resultCode
                     })
                 } else {
                     console.log('something went wrong')
@@ -109,7 +129,7 @@ const FleetSeriesResultsTable = ({ seriesId, fleetSettingsId }: { seriesId: stri
                         }
                     })
                     let average = total / count
-                    tempresults[index]!.racePositions.splice(race.number - 1, 1, { race: race.number, position: average, discarded: false })
+                    tempresults[index]!.racePositions.splice(race.number - 1, 1, { race: race.number, position: average, discarded: false, resultCode: '' })
                 }
             })
         })
@@ -119,7 +139,7 @@ const FleetSeriesResultsTable = ({ seriesId, fleetSettingsId }: { seriesId: stri
             result.racePositions.forEach((position, j) => {
                 if (position.position == 0) {
                     //set to number of series entrants + 1
-                    tempresults[i]!.racePositions[j] = { race: j, position: tempresults.length + 1, discarded: false }
+                    tempresults[i]!.racePositions[j] = { race: j, position: tempresults.length + 1, discarded: false, resultCode: 'DNS' }
                 }
             })
         })
@@ -254,7 +274,7 @@ const FleetSeriesResultsTable = ({ seriesId, fleetSettingsId }: { seriesId: stri
                         R{race.number.toString()}
                     </div>
                 ),
-                cell: props => <Result position={props.getValue()!.position} discarded={props.getValue()!.discarded} />,
+                cell: props => <Result position={props.getValue()!.position} discarded={props.getValue()!.discarded} resultCode={props.getValue()!.resultCode} />,
                 enableSorting: false
             })
             newColumns.push(newColumn)
