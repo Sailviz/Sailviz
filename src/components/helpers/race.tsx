@@ -7,7 +7,7 @@ export async function calculateResults(race: RaceDataType) {
         const maxLaps = Math.max.apply(
             null,
             fleet.results.map(function (o: ResultDataType) {
-                return o.laps.length
+                return o.numberLaps
             })
         )
         console.log(maxLaps)

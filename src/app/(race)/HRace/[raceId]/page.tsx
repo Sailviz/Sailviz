@@ -379,6 +379,7 @@ export default function Page(props: PageProps) {
                 if (res.id == resultId) {
                     res.finishTime = time
                     res.laps.push({ resultId: resultId, time: time, id: '' })
+                    res.numberLaps = res.laps.length
                 }
             })
         })
