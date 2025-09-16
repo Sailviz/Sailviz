@@ -62,8 +62,6 @@ export default function Page(props: PageProps) {
     var [raceState, setRaceState] = useState<raceStateType>(raceStateType.reset)
     const [lastRaceState, setLastRaceState] = useState<raceStateType>(raceStateType.reset)
 
-    const [mode, setMode] = useState(raceModeType.None)
-
     var [lastAction, setLastAction] = useState<{ type: string; resultId: string }>({ type: '', resultId: '' })
 
     const [activeResult, setActiveResult] = useState<ResultDataType>({} as ResultDataType)
@@ -203,7 +201,6 @@ export default function Page(props: PageProps) {
         sound!.play()
 
         setRaceState(raceStateType.running)
-        setMode(raceModeType.Lap)
     }
 
     const stopRace = async () => {
@@ -239,6 +236,7 @@ export default function Page(props: PageProps) {
     const retireBoat = async (resultCode: string) => {
         let tempdata = activeResult
         tempdata.resultCode = resultCode
+        tempdata.PursuitPosition = race.fleets[0]!.results.length //move to end of pursuit order
 
         setLastAction({ type: 'retire', resultId: tempdata.id })
 
@@ -249,6 +247,7 @@ export default function Page(props: PageProps) {
             fleet.results.forEach(res => {
                 if (res.id == tempdata.id) {
                     res.resultCode = resultCode
+                    res.PursuitPosition = race.fleets[0]!.results.length //move to end of pursuit order
                 }
             })
         })
@@ -266,10 +265,20 @@ export default function Page(props: PageProps) {
         sound!.currentTime = 0
         sound!.play()
         dynamicSort(optimisticData)
+        if (lastRaceState == raceStateType.calculate) {
+            //if we were in calculate mode before retiring, we need to re adjust the pursuit positions
+            // shift everyone up to close the gap
+            optimisticData.fleets[0]!.results.filter(res => res.resultCode == '')
+                .sort((a, b) => a.PursuitPosition - b.PursuitPosition)
+                .forEach(async (res, index) => {
+                    res.PursuitPosition = index + 1
+                    await DB.updateResult(res)
+                })
 
-        //set mode back to lap
-
-        setMode(raceModeType.Lap)
+            // force mutate to reload data
+            mutate(`/api/GetFleetById?id=${race.fleets[0]!.id}`)
+        }
+        setRaceState(lastRaceState)
     }
 
     const moveUp = async (id: string) => {
@@ -404,6 +413,13 @@ export default function Page(props: PageProps) {
         //set provisional positions
 
         race.fleets[0]!.results.sort((a: ResultDataType, b: ResultDataType) => {
+            // push retired to the bottom
+            if (a.resultCode != '') {
+                return 1
+            }
+            if (b.resultCode != '') {
+                return -1
+            }
             //sort by nubmer of laps then last lap time
             if (a.numberLaps != b.numberLaps) {
                 return a.numberLaps - b.numberLaps
@@ -415,7 +431,12 @@ export default function Page(props: PageProps) {
         console.log(race.fleets[0]!.results)
 
         race.fleets[0]!.results.forEach(async (res, index) => {
-            res.PursuitPosition = index + 1
+            if (res.resultCode != '') {
+                console.log(res)
+                res.PursuitPosition = race.fleets[0]!.results.length
+            } else {
+                res.PursuitPosition = index + 1
+            }
             console.log(res.SailNumber + ' ' + res.PursuitPosition)
             await DB.updateResult(res)
         })
@@ -496,7 +517,6 @@ export default function Page(props: PageProps) {
                 setTableView(true)
             } else {
                 setRaceState(raceStateType.running)
-                setMode(raceModeType.Lap)
             }
 
             if (seriesName == '') {
@@ -581,6 +601,12 @@ export default function Page(props: PageProps) {
                                             Submit Results
                                         </p>
                                     )
+                                case raceStateType.retire:
+                                    return (
+                                        <p className='text-white bg-yellow-400 font-medium rounded-lg text-xl px-5 py-2.5 text-center'>
+                                            Retiring Boat - Select Boat to Retire
+                                        </p>
+                                    )
                                 default: //countdown and starting and allStarted
                                     return (
                                         <p
@@ -622,15 +648,7 @@ export default function Page(props: PageProps) {
                     </div>
                 </div>
                 {tableView ? (
-                    <PursuitTable
-                        fleetId={race.fleets[0]!.id}
-                        raceState={raceState}
-                        raceMode={mode}
-                        moveUp={moveUp}
-                        moveDown={moveDown}
-                        lapBoat={lapBoat}
-                        showRetireModal={showRetireModal}
-                    />
+                    <PursuitTable fleetId={race.fleets[0]!.id} raceState={raceState} moveUp={moveUp} moveDown={moveDown} showRetireModal={showRetireModal} />
                 ) : (
                     <div className='overflow-auto'>
                         <div className='flex flex-row justify-around flex-wrap' id='EntrantCards'>
@@ -643,7 +661,7 @@ export default function Page(props: PageProps) {
                                             result={result}
                                             fleet={race.fleets.find(fleet => fleet.id == result.fleetId)!}
                                             pursuit={true}
-                                            mode={mode}
+                                            mode={raceModeType.Lap} // always lap mode for pursuit
                                             raceState={raceState}
                                             lapBoat={lapBoat}
                                             finishBoat={() => null}

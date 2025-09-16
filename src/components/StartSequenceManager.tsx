@@ -6,6 +6,7 @@ import * as Fetcher from './Fetchers'
 import { Select } from './ui/select'
 import { Input } from './ui/input'
 import { Inder } from 'next/font/google'
+import { getFiveStartSequence } from './helpers/startSequence'
 const StartSequenceManager = ({ initialSequence, seriesId }: { initialSequence: StartSequenceStep[]; seriesId: string }) => {
     const { series, seriesIsError, seriesIsValidating } = Fetcher.Series(seriesId)
     const [sequence, setSequence] = useState<StartSequenceStep[]>(initialSequence)
@@ -72,63 +73,9 @@ const StartSequenceManager = ({ initialSequence, seriesId }: { initialSequence: 
     }
 
     const setDefaultSequence = () => {
-        setSequence([
-            {
-                time: 315,
-                name: 'warning',
-                order: 0,
-                hoot: 0,
-                flagStatus: [
-                    { flag: 'h', status: false },
-                    { flag: 'p', status: false }
-                ],
-                fleetStart: ''
-            },
-            {
-                time: 300,
-                name: '5 minutes',
-                order: 1,
-                hoot: 300,
-                flagStatus: [
-                    { flag: 'h', status: true },
-                    { flag: 'p', status: false }
-                ],
-                fleetStart: ''
-            },
-            {
-                time: 240,
-                name: '4 minutes',
-                order: 2,
-                hoot: 300,
-                flagStatus: [
-                    { flag: 'h', status: true },
-                    { flag: 'p', status: true }
-                ],
-                fleetStart: ''
-            },
-            {
-                time: 60,
-                name: '1 minute',
-                order: 3,
-                hoot: 500,
-                flagStatus: [
-                    { flag: 'h', status: true },
-                    { flag: 'p', status: false }
-                ],
-                fleetStart: ''
-            },
-            {
-                time: 0,
-                name: 'Start',
-                order: 4,
-                hoot: 300,
-                flagStatus: [
-                    { flag: 'h', status: false },
-                    { flag: 'p', status: false }
-                ],
-                fleetStart: series.fleetSettings[0]?.id || ''
-            }
-        ])
+        if (series?.fleetSettings[0] != undefined) {
+            setSequence(getFiveStartSequence(series.fleetSettings[0].id))
+        }
     }
 
     useEffect(() => {

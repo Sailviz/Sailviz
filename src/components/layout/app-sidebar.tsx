@@ -39,7 +39,7 @@ export default function AppSidebar({ navCollections }: { navCollections: NavColl
             <SidebarHeader>
                 <div className='flex justify-center'>
                     <div className='text-sidebar-accent-foreground flex gap-2 py-2'>
-                        <div className='bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg'>
+                        <div className=' flex aspect-square size-8 items-center justify-center rounded-lg'>
                             <SailVizIcon />
                         </div>
                         <div className='grid flex-1 text-left text-xlg leading-tight'>

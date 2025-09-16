@@ -1,5 +1,5 @@
 'use client'
-import React, { use } from 'react'
+import React, { use, useEffect } from 'react'
 import * as DB from '@/components/apiMethods'
 import dayjs from 'dayjs'
 import FleetHandicapResultsTable from '@/components/tables/FleetHandicapResultsTable'
@@ -15,6 +15,11 @@ import * as Fetcher from '@/components/Fetchers'
 import { useSession } from '@/lib/auth-client'
 import { PageSkeleton } from '@/components/layout/PageSkeleton'
 import CreateResultModal from '@/components/layout/dashboard/CreateResultModal'
+import { calculateResults } from '@/components/helpers/race'
+import { mutate } from 'swr'
+import { Spinner } from '@/components/ui/spinner'
+import { SmoothSpinner } from '@/components/icons/smooth-spinner'
+import { set } from 'cypress/types/lodash'
 
 type PageProps = { params: Promise<{ raceId: string }> }
 
@@ -29,6 +34,9 @@ export default function Page(props: PageProps) {
 
     const { race, raceIsError, raceIsValidating, mutateRace } = Fetcher.Race(raceId, true)
     const { boats, boatsIsError, boatsIsValidating } = Fetcher.Boats()
+
+    const [resultsUpdated, setResultsUpdated] = React.useState(true)
+    const [calculatingResults, setCalculatingResults] = React.useState(false)
 
     //Capitalise the first letter of each word, and maintain cursor pos.
     const saveRaceSettings = (e: any) => {
@@ -79,6 +87,39 @@ export default function Page(props: PageProps) {
         })
     }
 
+    const calculate = async () => {
+        setCalculatingResults(true)
+        await calculateResults(race)
+        for (const fleet of race.fleets) {
+            mutate(`/api/GetFleetById?id=${fleet.id}`)
+        }
+        setResultsUpdated(true)
+        setCalculatingResults(false)
+    }
+
+    useEffect(() => {
+        if (race == undefined) return
+        //if any of the results have an  incorrect corrected time, then we need to tell user to recalculate
+        race.fleets.forEach(fleet => {
+            const maxLaps = Math.max.apply(
+                null,
+                fleet.results.map(function (o: ResultDataType) {
+                    return o.laps.length
+                })
+            )
+            fleet.results.forEach(result => {
+                //calculate what the corrected time should be
+                let seconds = result.finishTime - fleet.startTime
+                let correctedTime = (seconds * 1000 * (maxLaps / result.numberLaps)) / result.boat.py
+                correctedTime = Math.round(correctedTime * 10) / 10
+                if (result.CorrectedTime != correctedTime) {
+                    setResultsUpdated(false)
+                    return
+                }
+            })
+        })
+    }, [race])
+
     if (session == undefined || isPending || race == undefined || boats == undefined) {
         return <PageSkeleton />
     }
@@ -128,11 +169,16 @@ export default function Page(props: PageProps) {
                                 </Button>
                             </Link>
                             <CreateResultModal race={race} boats={boats} />
-                            <Button disabled className='mx-1'>
-                                Calculate
-                            </Button>
+                            {race.Type == 'Handicap' ? (
+                                <Button onClick={calculate} className='mx-1 w-24' variant={resultsUpdated ? 'default' : 'green'}>
+                                    {calculatingResults ? <SmoothSpinner /> : 'Calculate'}
+                                </Button>
+                            ) : (
+                                <></>
+                            )}
+
                             <Link href={`/PrintPaperResults/${race.id}`}>
-                                <Button className='mx-1'>Print Race Sheet</Button>
+                                <Button>Print Race Sheet</Button>
                             </Link>
                             {userHasPermission(session.user, AVAILABLE_PERMISSIONS.UploadEntires) ? <EntryFileUpload raceId={race.id} /> : <></>}
                             {userHasPermission(session.user, AVAILABLE_PERMISSIONS.DownloadResults) ? <Button onClick={downloadResults}>Download Results</Button> : <></>}

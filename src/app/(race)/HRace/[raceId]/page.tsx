@@ -2,7 +2,7 @@
 import React, { ChangeEvent, MouseEventHandler, use, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import * as DB from '@/components/apiMethods'
-// import RaceTimer from '@/components/HRaceTimer'
+import { calculateResults } from '@/components/helpers/race'
 
 import * as Fetcher from '@/components/Fetchers'
 import RetireModal from '@/components/layout/dashboard/RetireModal'
@@ -191,8 +191,14 @@ export default function Page(props: PageProps) {
             //if done a lap, predicted is sum of lap times + last lap.
             //if no lap done, predicted is py.
             let start = race.fleets.find(fleet => fleet.id == a.fleetId)?.startTime || 0
-            let aPredicted = a.laps.length > 0 ? a.laps[a.laps.length - 1]!.time + a.laps[a.laps.length - 1]!.time - (a.laps[a.laps.length - 2]?.time || start) : a.boat.py
-            let bPredicted = b.laps.length > 0 ? b.laps[b.laps.length - 1]!.time + b.laps[b.laps.length - 1]!.time - (b.laps[b.laps.length - 2]?.time || start) : b.boat.py
+            let aPredicted =
+                a.laps.length > 0
+                    ? a.laps[a.laps.length - 1]!.time + a.laps[a.laps.length - 1]!.time - (a.laps[a.laps.length - 2]?.time || start)
+                    : a.boat.py + parseInt(a.SailNumber) / 100000
+            let bPredicted =
+                b.laps.length > 0
+                    ? b.laps[b.laps.length - 1]!.time + b.laps[b.laps.length - 1]!.time - (b.laps[b.laps.length - 2]?.time || start)
+                    : b.boat.py + parseInt(b.SailNumber) / 100000
             //force resultcodes to the end
             if (a.resultCode != '') {
                 aPredicted = Number.MAX_SAFE_INTEGER
@@ -338,75 +344,8 @@ export default function Page(props: PageProps) {
         dynamicSort(optimisticData.fleets.flatMap(fleet => fleet.results))
     }
 
-    const calculateResults = () => {
-        //most nuber of laps.
-        console.log(race)
-        race.fleets.forEach(fleet => {
-            const maxLaps = Math.max.apply(
-                null,
-                fleet.results.map(function (o: ResultDataType) {
-                    return o.laps.length
-                })
-            )
-            console.log(maxLaps)
-            if (!(maxLaps >= 0)) {
-                console.log('max laps not more than one')
-                return
-            }
-            const resultsData = race.fleets.flatMap(fleet => fleet.results)
-
-            //calculate corrected time
-            resultsData.forEach(result => {
-                console.log(result)
-                //if we don't have a number of laps, set it to the number of laps
-                if (result.numberLaps == 0) {
-                    result.numberLaps = result.laps.length
-                }
-                if (result.finishTime == 0) {
-                    result.CorrectedTime = 0
-                    return
-                }
-                console.log(result.numberLaps)
-                let seconds = result.finishTime - fleet.startTime
-                result.CorrectedTime = (seconds * 1000 * (maxLaps / result.numberLaps)) / result.boat.py
-                result.CorrectedTime = Math.round(result.CorrectedTime * 10) / 10
-            })
-
-            //calculate finish position
-
-            const sortedResults = fleet.results.sort((a, b) => {
-                if (a.resultCode != '') {
-                    return 1
-                }
-                if (b.resultCode != '') {
-                    return -1
-                }
-                if (a.CorrectedTime > b.CorrectedTime) {
-                    return 1
-                }
-                if (a.CorrectedTime < b.CorrectedTime) {
-                    return -1
-                }
-                return 0
-            })
-
-            console.log(sortedResults)
-
-            sortedResults.forEach((result, index) => {
-                if (result.resultCode != '') {
-                    console.log(result)
-                    result.HandicapPosition = fleet.results.length
-                } else {
-                    result.HandicapPosition = index + 1
-                }
-            })
-
-            sortedResults.forEach(result => {
-                DB.updateResult(result)
-            })
-
-            console.log(sortedResults)
-        })
+    const calculate = () => {
+        calculateResults(race)
         Router.push('/Race/' + race.id)
     }
 
@@ -440,6 +379,7 @@ export default function Page(props: PageProps) {
                 if (res.id == resultId) {
                     res.finishTime = time
                     res.laps.push({ resultId: resultId, time: time, id: '' })
+                    res.numberLaps = res.laps.length
                 }
             })
         })
@@ -586,6 +526,7 @@ export default function Page(props: PageProps) {
         if (race == undefined) return
 
         setRaceState(raceStateType.reset)
+        dynamicSort(race.fleets.flatMap(fleet => fleet.results))
 
         //check for all fleets finished?
         if (checkAllFinished(race.fleets.flatMap(fleet => fleet.results))) {
@@ -674,7 +615,7 @@ export default function Page(props: PageProps) {
                                         )
                                     case raceStateType.calculate:
                                         return (
-                                            <Button id='CalcResultsButton' onClick={calculateResults} size='big' variant={'green'}>
+                                            <Button id='CalcResultsButton' onClick={calculate} size='big' variant={'green'}>
                                                 Calculate Results
                                             </Button>
                                         )

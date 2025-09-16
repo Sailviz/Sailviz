@@ -17,6 +17,7 @@ export default function Page(props: PageProps) {
         await DB.updateResult(result)
         const fleet = await DB.getFleetById(result.fleetId)
         mutate(`/api/GetFleetById?id=${fleet.id}`)
+        mutate(`/api/GetRaceById?id=${fleet.raceId}&results=true`)
         Router.back()
     }
 
