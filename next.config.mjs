@@ -10,6 +10,10 @@ let nextConfig = {
     pageExtensions: ['js', 'jsx', 'md', 'mdx', 'ts', 'tsx'],
     experimental: {
         mdxRs: true
+    },
+    images: {
+        dangerouslyAllowSVG: true,
+        domains: ['placehold.co']
     }
 }
 

@@ -19,7 +19,7 @@ export default function HomeNav() {
                                 <NavigationMenuLink href='/'>Home</NavigationMenuLink>
                             </NavigationMenuItem>
                             <NavigationMenuItem>
-                                <NavigationMenuLink href='/Clubs'>Clubs</NavigationMenuLink>
+                                <NavigationMenuLink href='/club'>Clubs</NavigationMenuLink>
                             </NavigationMenuItem>
                             <NavigationMenuItem>
                                 <NavigationMenuLink href='/Pricing'>Pricing</NavigationMenuLink>

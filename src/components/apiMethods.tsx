@@ -870,3 +870,17 @@ export async function updateGlobalConfig(config: GlobalConfigType): Promise<Bool
         }
     })
 }
+
+export async function getClubs(): Promise<ClubDataType[]> {
+    return await fetch(`${server}/api/GetClubs`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
+    }).then(async res => {
+        if (res.ok) {
+            let data = await res.json()
+            return data
+        } else {
+            return false
+        }
+    })
+}
