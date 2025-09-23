@@ -32,10 +32,8 @@ export const env = createEnv({
         AUTH_SECRET: process.env.AUTH_SECRET,
         AUTH_GITHUB_ID: process.env.AUTH_GITHUB_ID,
         AUTH_GITHUB_SECRET: process.env.AUTH_GITHUB_SECRET,
-        DATABASE_URL: process.env.DATABASE_URL,
         NODE_ENV: process.env.NODE_ENV,
-        STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
-        DATABASE_URL: process.env.DATABASE_URL
+        STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY
     },
     /**
      * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially
