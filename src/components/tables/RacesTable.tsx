@@ -55,11 +55,11 @@ const Race = ({ ...props }: any) => {
     )
 }
 
-const Action = ({ ...props }: any) => {
+const Action = ({ viewHref, raceId }: { viewHref: string; raceId: string }) => {
     const Router = useRouter()
 
     return (
-        <Link href={`${props.viewHref}${props.row.original.id}`} className='text-default-900 cursor-pointer'>
+        <Link href={viewHref + raceId} className='text-default-900 cursor-pointer'>
             <Button variant='outline' className='w-16 h-8 p-0'>
                 View
             </Button>
@@ -129,7 +129,7 @@ const RacesTable = ({ date, historical, viewHref, clubId }: { date: Date; histor
             columnHelper.accessor('id', {
                 id: 'action',
                 header: '',
-                cell: props => <Action {...props} id={props.row.original.id} viewHref={viewHref} />
+                cell: props => <Action raceId={props.row.original.id} viewHref={viewHref} />
             })
         ],
         manualPagination: true,

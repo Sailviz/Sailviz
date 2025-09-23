@@ -65,7 +65,7 @@ export default function Page(props: PageProps) {
                     <div className='py-4'>
                         <div className={title({ color: 'blue' })}>Recent Races:</div>
                     </div>
-                    <RacesTable clubId={club.id} date={new Date()} historical={true} viewHref={`/${clubName}/Race/`} />
+                    <RacesTable clubId={club.id} date={new Date()} historical={true} viewHref={`/club/${clubName}/Race/`} />
                 </div>
                 <div className='flex-col w-1/2 px-4'>
                     <div className='py-4'>
