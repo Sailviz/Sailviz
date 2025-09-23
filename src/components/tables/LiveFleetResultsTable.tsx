@@ -169,7 +169,7 @@ const LiveResultsTable = (props: any) => {
     ]
 
     // add column for each lap
-    for (let i = maxLaps - 3; i < maxLaps; i++) {
+    for (let i = Math.max(maxLaps - 3, 0); i < maxLaps; i++) {
         const newColumn = columnHelper.accessor(data => data.laps[i]?.time, {
             header: 'LAP ' + (i + 1).toString(),
             cell: props => <Time {...props} disabled={true} startTime={startTime} />,
