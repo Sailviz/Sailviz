@@ -1,5 +1,5 @@
 import ClubCard from '@/components/layout/home/clubCard'
-
+import { server } from '@/components/URL'
 export const revalidate = 3600 // Revalidate the page every hour
 
 interface ClubDataType {
@@ -9,7 +9,7 @@ interface ClubDataType {
 }
 
 const Page = async () => {
-    const clubs = await fetch('https://localhost:3000/api/GetClubs', {
+    const clubs = await fetch(`${server}/api/GetClubs`, {
         next: { revalidate }
     }).then(res => {
         return res.json()
