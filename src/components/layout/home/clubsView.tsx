@@ -1,6 +1,3 @@
-import * as DB from '@/components/apiMethods'
-
-import { title, subtitle } from '@/components/layout/home/primitaves'
 import prisma from '@/lib/prisma'
 import ClubCard from './clubCard'
 

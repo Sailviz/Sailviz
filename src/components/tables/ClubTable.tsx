@@ -10,7 +10,7 @@ import * as Fetcher from '@/components/Fetchers'
 import { mutate } from 'swr'
 import { Button } from '../ui/button'
 
-const Action = ({ seriesId, viewHref, user }: { seriesId: string; viewHref: string; user: UserDataType }) => {
+const Action = ({ seriesId, viewHref, user }: { seriesId: string; viewHref: string; user?: UserDataType }) => {
     const Router = useRouter()
 
     const onDeleteClick = async () => {
@@ -22,7 +22,7 @@ const Action = ({ seriesId, viewHref, user }: { seriesId: string; viewHref: stri
 
     return (
         <div className='relative flex items-center gap-2'>
-            <Button onClick={() => Router.push('/Series/' + seriesId)}>View</Button>
+            <Button onClick={() => Router.push(viewHref + seriesId)}>View</Button>
 
             {userHasPermission(user, AVAILABLE_PERMISSIONS.editSeries) ? (
                 <>
@@ -40,14 +40,17 @@ const Action = ({ seriesId, viewHref, user }: { seriesId: string; viewHref: stri
 
 const columnHelper = createColumnHelper<SeriesDataType>()
 
-const ClubTable = ({ viewHref }: { viewHref: string }) => {
+const ClubTable = ({ viewHref, clubId }: { viewHref: string; clubId?: string }) => {
     const {
         data: session,
         isPending, //loading state
         error, //error object
         refetch //refetch the session
     } = useSession()
-    const { series, seriesIsError, seriesIsValidating } = Fetcher.GetSeriesByClubId(session?.club!)
+
+    // if a clubId is provided then use that, otherwise use the session club id
+    const clubIdToUse = clubId || session?.club!.id || ''
+    const { series, seriesIsError, seriesIsValidating } = Fetcher.GetSeriesByClubId(clubIdToUse)
     // const [data, setData] = useState<SeriesDataType[]>([])
 
     const data = series || []
@@ -63,14 +66,10 @@ const ClubTable = ({ viewHref }: { viewHref: string }) => {
                 id: 'Number of Races',
                 cell: info => info.getValue()
             }),
-            columnHelper.accessor(row => row.settings['numberToCount'], {
-                id: 'Races to Count',
-                cell: info => info.getValue()
-            }),
             columnHelper.accessor('id', {
                 id: 'Remove',
                 header: 'Actions',
-                cell: props => <Action seriesId={props.row.original.id} viewHref={viewHref} user={session!.user} />
+                cell: props => <Action seriesId={props.row.original.id} viewHref={viewHref} user={session?.user} />
             })
         ],
         getCoreRowModel: getCoreRowModel()
