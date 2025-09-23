@@ -58,18 +58,22 @@ export default function Page(props: PageProps) {
     }
 
     return (
-        <div className='flex flex-col px-6'>
-            <div className='py-4'>
-                <div className={title({ color: 'green' })}>{club.displayName}</div>
+        <div className='py-4'>
+            <div className={title({ color: 'green' })}>{club.displayName}</div>
+            <div className='flex flex-row px-6'>
+                <div className='flex-col w-1/2 px-4'>
+                    <div className='py-4'>
+                        <div className={title({ color: 'blue' })}>Recent Races:</div>
+                    </div>
+                    <RacesTable clubId={club.id} date={new Date()} historical={true} viewHref={`/${clubName}/Race/`} />
+                </div>
+                <div className='flex-col w-1/2 px-4'>
+                    <div className='py-4'>
+                        <div className={title({ color: 'violet' })}>Series:</div>
+                    </div>
+                    <ClubTable viewHref={`/club/${clubName}/Series/`} clubId={club.id} />
+                </div>
             </div>
-            <div className='py-4'>
-                <div className={title({ color: 'blue' })}>Recent Races:</div>
-            </div>
-            <RacesTable clubId={club.id} date={new Date()} historical={true} viewHref={`/${clubName}/Race/`} />
-            <div className='py-4'>
-                <div className={title({ color: 'violet' })}>Series:</div>
-            </div>
-            <ClubTable viewHref={`/club/${clubName}/Series/`} clubId={club.id} />
         </div>
     )
 }

@@ -22,7 +22,9 @@ const Action = ({ seriesId, viewHref, user }: { seriesId: string; viewHref: stri
 
     return (
         <div className='relative flex items-center gap-2'>
-            <Button onClick={() => Router.push(viewHref + seriesId)}>View</Button>
+            <Button className='w-16 h-8 p-0' onClick={() => Router.push(viewHref + seriesId)}>
+                View
+            </Button>
 
             {userHasPermission(user, AVAILABLE_PERMISSIONS.editSeries) ? (
                 <>
@@ -75,26 +77,31 @@ const ClubTable = ({ viewHref, clubId }: { viewHref: string; clubId?: string }) 
         getCoreRowModel: getCoreRowModel()
     })
     return (
-        <div>
-            <Table id={'clubTable'} aria-label='table of series'>
-                <TableHeader>
-                    {table
-                        .getHeaderGroups()
-                        .flatMap(headerGroup => headerGroup.headers)
-                        .map(header => {
-                            return <TableHead key={header.id}>{flexRender(header.column.columnDef.header, header.getContext())}</TableHead>
-                        })}
-                </TableHeader>
-                <TableBody>
-                    {table.getRowModel().rows.map(row => (
-                        <TableRow key={row.id}>
-                            {row.getVisibleCells().map(cell => (
-                                <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
-                            ))}
-                        </TableRow>
-                    ))}
-                </TableBody>
-            </Table>
+        <div className='w-full'>
+            <div className='rounded-md border'>
+                <Table>
+                    <TableHeader>
+                        {table.getHeaderGroups().map(headerGroup => (
+                            <TableRow key={headerGroup.id}>
+                                {headerGroup.headers.map(header => {
+                                    return (
+                                        <TableHead key={header.id}>{header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}</TableHead>
+                                    )
+                                })}
+                            </TableRow>
+                        ))}
+                    </TableHeader>
+                    <TableBody>
+                        {table.getRowModel().rows.map(row => (
+                            <TableRow key={row.id}>
+                                {row.getVisibleCells().map(cell => (
+                                    <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
+                                ))}
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+            </div>
         </div>
     )
 }
