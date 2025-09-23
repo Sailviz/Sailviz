@@ -9,6 +9,10 @@ import ClubTable from '@/components/tables/ClubTable'
 import { PageSkeleton } from '@/components/layout/PageSkeleton'
 import { title, subtitle } from '@/components/layout/home/primitaves'
 import cookie from 'js-cookie'
+import { Banner, BannerAction, BannerClose, BannerIcon, BannerTitle } from '@/components/ui/shadcn-io/banner'
+import { CircleAlert } from 'lucide-react'
+import { race } from 'cypress/types/bluebird'
+import Link from 'next/link'
 
 //club page should contain:
 //list of current series
@@ -23,24 +27,39 @@ export default function Page(props: PageProps) {
     const { club: clubName } = use(props.params)
     const [club, setClub] = useState<ClubDataType>()
 
-    var [series, setSeries] = useState<SeriesDataType[]>([])
+    const [showLiveBanner, setShowLiveBanner] = useState(false)
 
-    const viewSeries = (seriesId: string) => {
-        router.push(clubName + '/Series/' + seriesId)
+    const checkActive = (race: RaceDataType) => {
+        if (race.fleets.length == 0) {
+            console.error('no fleets found')
+        }
+
+        //if any fleets have been started
+        if (race.fleets.some(fleet => fleet.startTime != 0)) {
+            //race has started, check if all boats have finished
+            return !race.fleets
+                .flatMap(fleet => fleet.results)
+                .every(result => {
+                    if (result.finishTime != 0) {
+                        return true
+                    }
+                })
+        }
+        return false
     }
-
-    const viewRace = (raceId: string) => {
-        router.push(clubName + '/Race/' + raceId)
-    }
-
     useEffect(() => {
         DB.getClubByName(clubName).then(data => {
             if (data) {
                 setClub(data)
-                cookie.set('clubId', data.id, { expires: 2 })
-                DB.GetSeriesByClubId(data.id).then(seriesData => {
-                    if (seriesData) {
-                        setSeries(seriesData)
+                DB.getTodaysRaceByClubId(data.id).then(races => {
+                    if (races.length > 0) {
+                        for (let i = 0; i < races.length; i++) {
+                            DB.getRaceById(races[i]!.id).then(race => {
+                                if (checkActive(race)) {
+                                    setShowLiveBanner(true)
+                                }
+                            })
+                        }
                     }
                 })
             } else {
@@ -58,18 +77,26 @@ export default function Page(props: PageProps) {
     }
 
     return (
-        <div className='py-4'>
-            <div className={title({ color: 'green' })}>{club.displayName}</div>
-            <div className='flex flex-row px-6'>
+        <div className='p-4'>
+            <Banner className='mb-4 bg-red-600' visible={showLiveBanner} onClose={() => setShowLiveBanner(false)}>
+                <BannerIcon icon={CircleAlert} />
+                <BannerTitle>View Live Race</BannerTitle>
+                <Link href={'/club/' + clubName + '/LiveResults'}>
+                    <BannerAction variant='outline'>Watch Now</BannerAction>
+                </Link>
+                <BannerClose />
+            </Banner>
+            <div className={title({ color: 'blue' }) + ' px-4'}>{club.displayName}</div>
+            <div className='flex flex-row'>
                 <div className='flex-col w-1/2 px-4'>
                     <div className='py-4'>
-                        <div className={title({ color: 'blue' })}>Recent Races:</div>
+                        <div className={title({ color: 'blue' })}>Latest Races:</div>
                     </div>
                     <RacesTable clubId={club.id} date={new Date()} historical={true} viewHref={`/club/${clubName}/Race/`} />
                 </div>
                 <div className='flex-col w-1/2 px-4'>
                     <div className='py-4'>
-                        <div className={title({ color: 'violet' })}>Series:</div>
+                        <div className={title({ color: 'blue' })}>Latest Series:</div>
                     </div>
                     <ClubTable viewHref={`/club/${clubName}/Series/`} clubId={club.id} />
                 </div>
