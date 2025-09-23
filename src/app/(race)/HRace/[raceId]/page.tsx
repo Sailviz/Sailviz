@@ -344,8 +344,8 @@ export default function Page(props: PageProps) {
         dynamicSort(optimisticData.fleets.flatMap(fleet => fleet.results))
     }
 
-    const calculate = () => {
-        calculateResults(race)
+    const calculate = async () => {
+        await calculateResults(race)
         Router.push('/Race/' + race.id)
     }
 
