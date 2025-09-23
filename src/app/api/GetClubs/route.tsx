@@ -8,7 +8,8 @@ async function getClubs(includeStripe: boolean) {
     var result = await prisma.club.findMany({
         include: {
             stripe: includeStripe
-        }
+        },
+        orderBy: { displayName: 'asc' }
     })
     return result
 }
