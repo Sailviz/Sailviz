@@ -1,7 +1,17 @@
 'use client'
 import React, { useEffect, useMemo, useState } from 'react'
 import dayjs from 'dayjs'
-import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, RowSelection, SortingState, useReactTable } from '@tanstack/react-table'
+import {
+    createColumnHelper,
+    flexRender,
+    getCoreRowModel,
+    getPaginationRowModel,
+    getSortedRowModel,
+    PaginationState,
+    RowSelection,
+    SortingState,
+    useReactTable
+} from '@tanstack/react-table'
 
 import { EyeIcon } from '@/components/icons/eye-icon'
 import { useRouter } from 'next/navigation'
@@ -15,6 +25,7 @@ import { Input } from '../ui/input'
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from '../ui/dropdown-menu'
 import { ChevronDown } from 'lucide-react'
 import Link from 'next/link'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select'
 
 const Time = ({ ...props }: any) => {
     const initialValue = props.getValue()
@@ -44,13 +55,13 @@ const Race = ({ ...props }: any) => {
     )
 }
 
-const Action = ({ ...props }: any) => {
+const Action = ({ viewHref, raceId }: { viewHref: string; raceId: string }) => {
     const Router = useRouter()
 
     return (
-        <Link href={`${props.viewHref}${props.row.original.id}`} className='text-default-900 cursor-pointer'>
+        <Link href={viewHref + raceId} className='text-default-900 cursor-pointer'>
             <Button variant='outline' className='w-16 h-8 p-0'>
-                Open
+                View
             </Button>
         </Link>
     )
@@ -70,11 +81,26 @@ const RacesTable = ({ date, historical, viewHref, clubId }: { date: Date; histor
     const [count, setCount] = useState(0)
     const rowsPerPage = 10
 
-    const pages = useMemo(() => {
-        return count ? Math.ceil(count / rowsPerPage) : 0
+    const [pages, setPages] = useState(0)
+
+    useEffect(() => {
+        setPages(count ? Math.ceil(count / rowsPerPage) : 0)
     }, [count, rowsPerPage])
 
-    const loadingState = racesIsValidating || data == undefined ? 'loading' : 'idle'
+    const onPaginationChange = (updaterOrValue: PaginationState | ((old: PaginationState) => PaginationState)) => {
+        setPage(oldPage => {
+            let newPageIndex: number
+            if (typeof updaterOrValue === 'function') {
+                const newState = updaterOrValue({ pageIndex: oldPage - 1, pageSize: rowsPerPage })
+                newPageIndex = newState.pageIndex + 1
+            } else {
+                newPageIndex = updaterOrValue.pageIndex + 1
+            }
+            if (newPageIndex < 1) return 1
+            if (newPageIndex > pages) return pages
+            return newPageIndex
+        })
+    }
 
     useEffect(() => {
         console.log(races)
@@ -88,7 +114,7 @@ const RacesTable = ({ date, historical, viewHref, clubId }: { date: Date; histor
         data,
         columns: [
             columnHelper.accessor(data => data.series, {
-                id: 'Race',
+                id: 'Series',
                 cell: props => <Race {...props} />
             }),
             columnHelper.accessor('number', {
@@ -102,10 +128,13 @@ const RacesTable = ({ date, historical, viewHref, clubId }: { date: Date; histor
             }),
             columnHelper.accessor('id', {
                 id: 'action',
-                header: 'Actions',
-                cell: props => <Action {...props} id={props.row.original.id} viewHref={viewHref} />
+                header: '',
+                cell: props => <Action raceId={props.row.original.id} viewHref={viewHref} />
             })
         ],
+        manualPagination: true,
+        pageCount: pages,
+        onPaginationChange: onPaginationChange,
         getCoreRowModel: getCoreRowModel()
     })
 
@@ -142,11 +171,14 @@ const RacesTable = ({ date, historical, viewHref, clubId }: { date: Date; histor
                 </Table>
             </div>
             <div className='flex items-center justify-end space-x-2 py-4'>
+                <div className='flex w-[100px] items-center justify-center text-sm font-medium'>
+                    Page {page} of {pages}
+                </div>
                 <div className='space-x-2'>
-                    <Button variant='outline' size='sm' onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()}>
+                    <Button variant='outline' size='sm' onClick={() => table.previousPage()} disabled={page <= 1}>
                         Previous
                     </Button>
-                    <Button variant='outline' size='sm' onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>
+                    <Button variant='outline' size='sm' onClick={() => table.nextPage()} disabled={page >= pages}>
                         Next
                     </Button>
                 </div>

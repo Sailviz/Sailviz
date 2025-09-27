@@ -1,7 +1,6 @@
 'use client'
-import React from 'react'
 import dayjs from 'dayjs'
-import { server } from './URL'
+import { server } from '@/components/URL'
 
 export async function User(): Promise<UserDataType> {
     return await fetch(`${server}/api/user`, {
@@ -865,6 +864,20 @@ export async function updateGlobalConfig(config: GlobalConfigType): Promise<Bool
         if (res.ok) {
             let data = await res.json()
             return data.status === 200
+        } else {
+            return false
+        }
+    })
+}
+
+export async function getClubs(): Promise<ClubDataType[]> {
+    return await fetch(`${server}/api/GetClubs`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
+    }).then(async res => {
+        if (res.ok) {
+            let data = await res.json()
+            return data
         } else {
             return false
         }

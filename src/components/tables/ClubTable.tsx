@@ -10,7 +10,7 @@ import * as Fetcher from '@/components/Fetchers'
 import { mutate } from 'swr'
 import { Button } from '../ui/button'
 
-const Action = ({ seriesId, viewHref, user }: { seriesId: string; viewHref: string; user: UserDataType }) => {
+const Action = ({ seriesId, viewHref, user }: { seriesId: string; viewHref: string; user?: UserDataType }) => {
     const Router = useRouter()
 
     const onDeleteClick = async () => {
@@ -22,7 +22,9 @@ const Action = ({ seriesId, viewHref, user }: { seriesId: string; viewHref: stri
 
     return (
         <div className='relative flex items-center gap-2'>
-            <Button onClick={() => Router.push('/Series/' + seriesId)}>View</Button>
+            <Button className='w-16 h-8 p-0' onClick={() => Router.push(viewHref + seriesId)}>
+                View
+            </Button>
 
             {userHasPermission(user, AVAILABLE_PERMISSIONS.editSeries) ? (
                 <>
@@ -40,14 +42,17 @@ const Action = ({ seriesId, viewHref, user }: { seriesId: string; viewHref: stri
 
 const columnHelper = createColumnHelper<SeriesDataType>()
 
-const ClubTable = ({ viewHref }: { viewHref: string }) => {
+const ClubTable = ({ viewHref, clubId }: { viewHref: string; clubId?: string }) => {
     const {
         data: session,
         isPending, //loading state
         error, //error object
         refetch //refetch the session
     } = useSession()
-    const { series, seriesIsError, seriesIsValidating } = Fetcher.GetSeriesByClubId(session?.club!)
+
+    // if a clubId is provided then use that, otherwise use the session club id
+    const clubIdToUse = clubId || session?.club!.id || ''
+    const { series, seriesIsError, seriesIsValidating } = Fetcher.GetSeriesByClubId(clubIdToUse)
     // const [data, setData] = useState<SeriesDataType[]>([])
 
     const data = series || []
@@ -63,39 +68,40 @@ const ClubTable = ({ viewHref }: { viewHref: string }) => {
                 id: 'Number of Races',
                 cell: info => info.getValue()
             }),
-            columnHelper.accessor(row => row.settings['numberToCount'], {
-                id: 'Races to Count',
-                cell: info => info.getValue()
-            }),
             columnHelper.accessor('id', {
                 id: 'Remove',
                 header: 'Actions',
-                cell: props => <Action seriesId={props.row.original.id} viewHref={viewHref} user={session!.user} />
+                cell: props => <Action seriesId={props.row.original.id} viewHref={viewHref} user={session?.user} />
             })
         ],
         getCoreRowModel: getCoreRowModel()
     })
     return (
-        <div>
-            <Table id={'clubTable'} aria-label='table of series'>
-                <TableHeader>
-                    {table
-                        .getHeaderGroups()
-                        .flatMap(headerGroup => headerGroup.headers)
-                        .map(header => {
-                            return <TableHead key={header.id}>{flexRender(header.column.columnDef.header, header.getContext())}</TableHead>
-                        })}
-                </TableHeader>
-                <TableBody>
-                    {table.getRowModel().rows.map(row => (
-                        <TableRow key={row.id}>
-                            {row.getVisibleCells().map(cell => (
-                                <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
-                            ))}
-                        </TableRow>
-                    ))}
-                </TableBody>
-            </Table>
+        <div className='w-full'>
+            <div className='rounded-md border'>
+                <Table>
+                    <TableHeader>
+                        {table.getHeaderGroups().map(headerGroup => (
+                            <TableRow key={headerGroup.id}>
+                                {headerGroup.headers.map(header => {
+                                    return (
+                                        <TableHead key={header.id}>{header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}</TableHead>
+                                    )
+                                })}
+                            </TableRow>
+                        ))}
+                    </TableHeader>
+                    <TableBody>
+                        {table.getRowModel().rows.map(row => (
+                            <TableRow key={row.id}>
+                                {row.getVisibleCells().map(cell => (
+                                    <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
+                                ))}
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+            </div>
         </div>
     )
 }
