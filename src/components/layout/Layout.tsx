@@ -1,4 +1,4 @@
-import Link from 'next/link'
+import { Link } from '@tanstack/react-router'
 import Image from 'next/image'
 import { ThemeSwitcher } from '../ui/ThemeSwitcher'
 export const siteTitle = 'SailViz'
@@ -9,7 +9,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             <div className='flex flex-col h-full'>
                 <nav className='border-pink-500 px-4 sm:px-4 py-2.5 border-b-2 flex'>
                     <div className='container flex flex-wrap justify-between items-center mx-auto'>
-                        <Link href={'/'}>
+                        <Link to={'/'}>
                             <div className=' text-xl font-bold text-blue-600 p-1 cursor-pointer'>SailViz</div>
                         </Link>
                         <div className='hidden w-full md:block md:w-auto' id='navbar-default'>

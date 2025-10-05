@@ -1,6 +1,6 @@
 import { useTheme } from 'next-themes'
 import dayjs from 'dayjs'
-import { DialogContent, DialogHeader } from '@/components/ui/dialog'
+import { DialogContent, DialogHeader } from '@components/ui/dialog'
 
 export default function TrackerStatusDialog({ isOpen, tracker, onClose }: { isOpen: boolean; tracker: TrackerDataType | undefined; onClose?: () => void }) {
     const { theme, setTheme } = useTheme()

@@ -1,7 +1,7 @@
 'use client'
 import { MoveUpRight } from 'lucide-react'
 import useSWR from 'swr'
-import * as Fetcher from '@/components/Fetchers'
+import * as Fetcher from '@components/Fetchers'
 export function Stats() {
     var { data, error, isValidating } = useSWR('/api/GetGlobalLaps', Fetcher.fetcher)
     if (data == undefined) {

@@ -1,10 +1,10 @@
-import { DocsIcon } from '@/components/icons/docs-icon'
-import { HomeIcon } from '@/components/icons/home-icon'
-import { RaceIcon } from '@/components/icons/race-icon'
-import { SeriesIcon } from '@/components/icons/series-icon'
-import { SettingsIcon } from '@/components/icons/settings-icon'
-import { SignOnIcon } from '@/components/icons/sign-on'
-import { SignOutIcon } from '@/components/icons/sign-out'
+import { DocsIcon } from '@components/icons/docs-icon'
+import { HomeIcon } from '@components/icons/home-icon'
+import { RaceIcon } from '@components/icons/race-icon'
+import { SeriesIcon } from '@components/icons/series-icon'
+import { SettingsIcon } from '@components/icons/settings-icon'
+import { SignOnIcon } from '@components/icons/sign-on'
+import { SignOutIcon } from '@components/icons/sign-out'
 
 //Info: The following data is used for the sidebar navigation and Cmd K bar.
 export const navCollections: NavCollection[] = [

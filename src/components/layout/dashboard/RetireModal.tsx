@@ -1,5 +1,5 @@
-import { Button } from '@/components/ui/button'
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Button } from '@components/ui/button'
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@components/ui/dialog'
 import { useTheme } from 'next-themes'
 import { ChangeEvent, useState } from 'react'
 

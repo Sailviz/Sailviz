@@ -1,8 +1,8 @@
 'use client'
 import { ChangeEvent, useEffect, useState } from 'react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select'
-import * as Fetcher from '@/components/Fetchers'
-import * as DB from '@/components/apiMethods'
+import * as Fetcher from '@components/Fetchers'
+import * as DB from '@components/apiMethods'
 export function ToCountSelect({ seriesId }: { seriesId: string }) {
     const { series, seriesIsError, seriesIsValidating, mutateSeries } = Fetcher.Series(seriesId)
 

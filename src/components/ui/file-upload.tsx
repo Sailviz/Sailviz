@@ -1,6 +1,6 @@
 'use client'
 
-import { cn } from '@/lib/utils'
+import { cn } from '@lib/utils'
 import { Slot } from '@radix-ui/react-slot'
 import { FileArchiveIcon, FileAudioIcon, FileCodeIcon, FileCogIcon, FileIcon, FileTextIcon, FileVideoIcon } from 'lucide-react'
 import * as React from 'react'
@@ -829,10 +829,10 @@ const FileUploadItem = React.forwardRef<HTMLDivElement, FileUploadItemProps>((pr
     const statusText = fileState.error
         ? `Error: ${fileState.error}`
         : fileState.status === 'uploading'
-        ? `Uploading: ${fileState.progress}% complete`
-        : fileState.status === 'success'
-        ? 'Upload complete'
-        : 'Ready to upload'
+          ? `Uploading: ${fileState.progress}% complete`
+          : fileState.status === 'success'
+            ? 'Upload complete'
+            : 'Ready to upload'
 
     const ItemPrimitive = asChild ? Slot : 'div'
 

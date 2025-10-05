@@ -1,13 +1,13 @@
-import { Button } from '@/components/ui/button'
-import { Dialog, DialogContent, DialogFooter, DialogHeader } from '@/components/ui/dialog'
-import { Input } from '@/components/ui/input'
-import { useRouter } from 'next/navigation'
+import { Button } from '@components/ui/button'
+import { Dialog, DialogContent, DialogFooter, DialogHeader } from '@components/ui/dialog'
+import { Input } from '@components/ui/input'
+import { useNavigate } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
-import * as DB from '@/components/apiMethods'
+import * as DB from '@components/apiMethods'
 import { mutate } from 'swr'
 
 export default function EditBoatDialog({ boat }: { boat: BoatDataType }) {
-    const Router = useRouter()
+    const navigate = useNavigate()
     const [boatName, setBoatName] = useState('')
     const [PY, setPY] = useState(0)
     const [Crew, setCrew] = useState(0)

@@ -1,16 +1,16 @@
 'use client'
 import { DynamicIcon, IconName } from 'lucide-react/dynamic'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+import { Button } from '@components/ui/button'
+import { Input } from '@components/ui/input'
 import { redirect, useRouter } from 'next/navigation'
 import { isRedirectError } from 'next/dist/client/components/redirect-error'
 import { useState } from 'react'
-import { signIn } from '@/lib/auth-client'
+import { signIn } from '@lib/auth-client'
 import { Loader2 } from 'lucide-react'
-import { getSession } from '@/lib/auth-client'
+import { getSession } from '@lib/auth-client'
 
 export function LoginForm({ justCredentials }: { justCredentials: boolean }) {
-    const Router = useRouter()
+    const navigate = useNavigate()
     const [username, setUsername] = useState('')
     const [password, setPassword] = useState('')
     const [loading, setLoading] = useState(false)
@@ -33,7 +33,7 @@ export function LoginForm({ justCredentials }: { justCredentials: boolean }) {
                     return
                 }
                 console.log('Session:', session)
-                Router.push('/' + session.user.startPage)
+                navigate({ to: '/' + session.user.startPage })
             })
     }
 

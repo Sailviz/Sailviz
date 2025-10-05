@@ -1,5 +1,5 @@
 import { Check } from 'lucide-react'
-import { Badge } from '@/components/ui/badge'
+import { Badge } from '@components/ui/badge'
 
 export const Features = () => (
     <div className='w-full bg-gray-100 py-20' id='features-section'>

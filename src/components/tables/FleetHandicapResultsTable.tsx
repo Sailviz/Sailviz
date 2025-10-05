@@ -3,8 +3,8 @@ import React, { useEffect, useState } from 'react'
 import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, useReactTable, SortingState } from '@tanstack/react-table'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
 import { Button } from '../ui/button'
-import * as Fetcher from '@/components/Fetchers'
-import Link from 'next/link'
+import * as Fetcher from '@components/Fetchers'
+import { Link } from '@tanstack/react-router'
 
 const Text = ({ value }: { value: string }) => {
     return <div className=' text-center'>{value}</div>
@@ -38,7 +38,7 @@ const CorrectedTime = ({ ...props }) => {
 
 const Edit = ({ resultId }: { resultId: string }) => {
     return (
-        <Link href={`/editResult/${resultId}`} scroll={false}>
+        <Link to={`/editResult/${resultId}`} scroll={false}>
             <Button>Edit</Button>
         </Link>
     )
@@ -46,7 +46,7 @@ const Edit = ({ resultId }: { resultId: string }) => {
 
 const View = ({ resultId }: { resultId: string }) => {
     return (
-        <Link href={`/viewResult/${resultId}`} scroll={false}>
+        <Link to={`/viewResult/${resultId}`} scroll={false}>
             <Button>View</Button>
         </Link>
     )

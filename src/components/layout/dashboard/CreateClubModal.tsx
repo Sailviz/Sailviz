@@ -1,12 +1,12 @@
 'use client'
 import { useTheme } from 'next-themes'
 import { ChangeEvent, startTransition, useEffect, useState } from 'react'
-import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTrigger } from '@/components/ui/dialog'
-import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
+import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTrigger } from '@components/ui/dialog'
+import { Input } from '@components/ui/input'
+import { Button } from '@components/ui/button'
 import { mutate } from 'swr'
-import * as DB from '@/components/apiMethods'
-import { signUp } from '@/lib/auth-client'
+import * as DB from '@components/apiMethods'
+import { signUp } from '@lib/auth-client'
 export default function CreateClubModal() {
     const [clubName, setClubName] = useState('')
     const [adminName, setAdminName] = useState('')

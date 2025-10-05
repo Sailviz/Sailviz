@@ -1,18 +1,18 @@
 'use client'
 import React, { useState } from 'react'
 import { createColumnHelper, flexRender, getCoreRowModel, useReactTable, getFilteredRowModel } from '@tanstack/react-table'
-import { EditIcon } from '@/components/icons/edit-icon'
-import { DeleteIcon } from '@/components/icons/delete-icon'
-import * as Fetcher from '@/components/Fetchers'
-import { AVAILABLE_PERMISSIONS, userHasPermission } from '@/components/helpers/users'
+import { EditIcon } from '@components/icons/edit-icon'
+import { DeleteIcon } from '@components/icons/delete-icon'
+import * as Fetcher from '@components/Fetchers'
+import { AVAILABLE_PERMISSIONS, userHasPermission } from '@components/helpers/users'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
 import { Input } from '../ui/input'
-import Link from 'next/link'
-import { useSession } from '@/lib/auth-client'
-import * as DB from '@/components/apiMethods'
+import { Link } from '@tanstack/react-router'
+import { useSession } from '@lib/auth-client'
+import * as DB from '@components/apiMethods'
 import { Button } from '../ui/button'
 import EditBoatDialog from '../layout/dashboard/EditBoatModal'
-import { useRouter } from 'next/navigation'
+import { useNavigate } from '@tanstack/react-router'
 
 const columnHelper = createColumnHelper<BoatDataType>()
 
@@ -31,14 +31,14 @@ const StartTime = ({ value }: { value: number }) => {
 }
 
 const BoatTable = () => {
-    const Router = useRouter()
+    const navigate = useNavigate()
     const { boats, boatsIsError, boatsIsValidating, mutateBoats } = Fetcher.Boats()
 
     const data = boats || []
 
     const onRowClick = (row: any) => {
         console.log(row)
-        Router.push(`/editBoat/${row.original.id}`, { scroll: false })
+        navigate({ to: `/editBoat/${row.original.id}` }, { scroll: false })
     }
 
     var table = useReactTable({

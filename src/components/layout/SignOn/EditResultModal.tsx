@@ -1,13 +1,13 @@
 import { useTheme } from 'next-themes'
 import { ChangeEvent, useEffect, useState } from 'react'
 import Select, { CSSObjectWithLabel } from 'react-select'
-import * as Fetcher from '@/components/Fetchers'
-import { PageSkeleton } from '@/components/layout/PageSkeleton'
-import { Dialog, DialogContent, DialogFooter, DialogHeader } from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Input } from '@/components/ui/input'
-import { useRouter } from 'next/navigation'
+import * as Fetcher from '@components/Fetchers'
+import { PageSkeleton } from '@components/layout/PageSkeleton'
+import { Dialog, DialogContent, DialogFooter, DialogHeader } from '@components/ui/dialog'
+import { Button } from '@components/ui/button'
+import { Tabs, TabsList, TabsTrigger } from '@components/ui/tabs'
+import { Input } from '@components/ui/input'
+import { useNavigate } from '@tanstack/react-router'
 
 export default function EditResultModal({
     result,
@@ -22,7 +22,7 @@ export default function EditResultModal({
     onSubmit: (result: ResultDataType) => void
     onDelete: (result: ResultDataType) => void
 }) {
-    const Router = useRouter()
+    const navigate = useNavigate()
     const [open, setOpen] = useState(true)
 
     const [helm, setHelm] = useState(result.Helm)
@@ -135,7 +135,7 @@ export default function EditResultModal({
                                         '&:hover': {
                                             backgroundColor: theme == 'dark' ? '#3f3f46' : '#e4e4e7'
                                         }
-                                    } as CSSObjectWithLabel),
+                                    }) as CSSObjectWithLabel,
                                 option: (provided, state) =>
                                     ({
                                         ...provided,
@@ -144,24 +144,24 @@ export default function EditResultModal({
                                         '&:hover': {
                                             backgroundColor: theme == 'dark' ? '#3f3f46' : '#d4d4d8'
                                         }
-                                    } as CSSObjectWithLabel),
+                                    }) as CSSObjectWithLabel,
                                 menu: (provided, state) =>
                                     ({
                                         ...provided,
                                         backgroundColor: theme == 'dark' ? '#18181b' : 'white',
                                         border: theme == 'dark' ? '2px solid #3f3f46' : '2px solid #d4d4d8',
                                         fontSize: '1rem'
-                                    } as CSSObjectWithLabel),
+                                    }) as CSSObjectWithLabel,
                                 input: (provided, state) =>
                                     ({
                                         ...provided,
                                         color: theme == 'dark' ? 'white' : 'black'
-                                    } as CSSObjectWithLabel),
+                                    }) as CSSObjectWithLabel,
                                 singleValue: (provided, state) =>
                                     ({
                                         ...provided,
                                         color: theme == 'dark' ? 'white' : 'black'
-                                    } as CSSObjectWithLabel)
+                                    }) as CSSObjectWithLabel
                             }}
                         />
                     </div>

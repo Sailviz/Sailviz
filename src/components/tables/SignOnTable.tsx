@@ -1,17 +1,17 @@
 'use client'
 import React, { ChangeEvent, useState, useRef, useEffect } from 'react'
 import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, useReactTable, SortingState } from '@tanstack/react-table'
-import { EditIcon } from '@/components/icons/edit-icon'
-import * as Fetcher from '@/components/Fetchers'
-import { AVAILABLE_PERMISSIONS, userHasPermission } from '@/components/helpers/users'
-import { PageSkeleton } from '@/components/layout/PageSkeleton'
+import { EditIcon } from '@components/icons/edit-icon'
+import * as Fetcher from '@components/Fetchers'
+import { AVAILABLE_PERMISSIONS, userHasPermission } from '@components/helpers/users'
+import { PageSkeleton } from '@components/layout/PageSkeleton'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from '../ui/dropdown-menu'
 import { ChevronDown } from 'lucide-react'
-import Link from 'next/link'
-import { useSession } from '@/lib/auth-client'
+import { Link } from '@tanstack/react-router'
+import { useSession } from '@lib/auth-client'
 const columnHelper = createColumnHelper<ResultDataType>()
 
 const SignOnTable = ({ raceId }: { raceId: string }) => {
@@ -66,7 +66,7 @@ const SignOnTable = ({ raceId }: { raceId: string }) => {
     const Action = ({ ...props }: any) => {
         if (userHasPermission(props.user, AVAILABLE_PERMISSIONS.editResults)) {
             return (
-                <Link href={`/SignOn/editResult/${race.id}/${props.row.original.id}`}>
+                <Link to={`/SignOn/editResult/${race.id}/${props.row.original.id}`}>
                     <div className='relative flex items-center gap-2'>
                         <span className='text-lg text-default-400 cursor-pointer active:opacity-50'>
                             <EditIcon />

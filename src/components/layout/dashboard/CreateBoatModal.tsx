@@ -1,12 +1,12 @@
 import { useTheme } from 'next-themes'
 import { ChangeEvent, useEffect, useState } from 'react'
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTrigger } from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { useRouter } from 'next/navigation'
-import * as DB from '@/components/apiMethods'
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTrigger } from '@components/ui/dialog'
+import { Button } from '@components/ui/button'
+import { Input } from '@components/ui/input'
+import { useNavigate } from '@tanstack/react-router'
+import * as DB from '@components/apiMethods'
 import { mutate } from 'swr'
-import { useSession } from '@/lib/auth-client'
+import { useSession } from '@lib/auth-client'
 export default function CreateBoatDialog() {
     const {
         data: session,

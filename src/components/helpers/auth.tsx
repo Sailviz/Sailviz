@@ -1,8 +1,8 @@
 const jwt = require('jsonwebtoken')
 const jwtSecret = process.env.jwtSecret
-import prisma from '@/lib/prisma'
-import * as Fetcher from '@/components/Fetchers'
-import { auth } from '@/lib/auth'
+import prisma from '@lib/prisma'
+import * as Fetcher from '@components/Fetchers'
+import { auth } from '@lib/auth'
 import { headers } from 'next/headers'
 
 export async function isRequestAdmin() {

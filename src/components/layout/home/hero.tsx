@@ -1,10 +1,10 @@
 'use client'
 import { MoveDown, MoveRight, PhoneCall } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { useRouter } from 'next/navigation'
+import { Button } from '@components/ui/button'
+import { useNavigate } from '@tanstack/react-router'
 
 export function Hero() {
-    const router = useRouter()
+    const navigate = useNavigate()
 
     return (
         <div className='w-full bg-gradient-to-b from-blue-500 to-blue-700 text-white py-20'>
@@ -18,7 +18,7 @@ export function Hero() {
                         </p>
                     </div>
                     <div className='flex flex-row gap-3'>
-                        <Button size='lg' className='gap-2 bg-yellow-500 hover:bg-yellow-600' onClick={() => router.push('/Demo')}>
+                        <Button size='lg' className='gap-2 bg-yellow-500 hover:bg-yellow-600' onClick={() => navigate({ to: '/Demo' })}>
                             Try the Demo Now <MoveRight className='w-4 h-4' />
                         </Button>
                         <Button

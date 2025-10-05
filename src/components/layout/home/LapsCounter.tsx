@@ -1,6 +1,6 @@
 'use client'
 import useSWR from 'swr'
-import * as Fetcher from '@/components/Fetchers'
+import * as Fetcher from '@components/Fetchers'
 import { useEffect, useState } from 'react'
 
 type CardProps = {

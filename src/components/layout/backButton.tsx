@@ -1,9 +1,9 @@
 'use client'
-import { useRouter } from 'next/navigation'
+import { useNavigate } from '@tanstack/react-router'
 import { Button } from '../ui/button'
 
 export default function BackButton({ demoMode = false }) {
-    const Router = useRouter()
+    const navigate = useNavigate()
     const handleClick = async () => {
         Router.back()
     }

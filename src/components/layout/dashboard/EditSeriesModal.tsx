@@ -1,10 +1,10 @@
 'use client'
 import { useTheme } from 'next-themes'
 import { ChangeEvent, useState } from 'react'
-import * as Fetcher from '@/components/Fetchers'
-import { DialogContent, DialogFooter, DialogHeader } from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+import * as Fetcher from '@components/Fetchers'
+import { DialogContent, DialogFooter, DialogHeader } from '@components/ui/dialog'
+import { Button } from '@components/ui/button'
+import { Input } from '@components/ui/input'
 
 export default function EditSeriesDialog({
     isOpen,

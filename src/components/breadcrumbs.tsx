@@ -1,6 +1,6 @@
 'use client'
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
-import * as DB from '@/components/apiMethods'
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@components/ui/breadcrumb'
+import * as DB from '@components/apiMethods'
 import { usePathname } from 'next/navigation'
 import { Fragment, useEffect, useState } from 'react'
 
@@ -66,7 +66,7 @@ export function Breadcrumbs() {
                     <Fragment key={item.title}>
                         {index !== items.length - 1 && (
                             <BreadcrumbItem className='hidden md:block'>
-                                <BreadcrumbLink href={item.link}>{item.title}</BreadcrumbLink>
+                                <BreadcrumbLink to={item.link}>{item.title}</BreadcrumbLink>
                             </BreadcrumbItem>
                         )}
                         {index < items.length - 1 && <BreadcrumbSeparator className='hidden md:block'>&gt;</BreadcrumbSeparator>}

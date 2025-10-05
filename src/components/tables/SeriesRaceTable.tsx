@@ -2,15 +2,15 @@
 import React, { useState } from 'react'
 import dayjs from 'dayjs'
 import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, SortingState, useReactTable } from '@tanstack/react-table'
-import * as DB from '@/components/apiMethods'
-import { useRouter } from 'next/navigation'
-import * as Fetcher from '@/components/Fetchers'
-import { AVAILABLE_PERMISSIONS, userHasPermission } from '@/components/helpers/users'
+import * as DB from '@components/apiMethods'
+import { useNavigate } from '@tanstack/react-router'
+import * as Fetcher from '@components/Fetchers'
+import { AVAILABLE_PERMISSIONS, userHasPermission } from '@components/helpers/users'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select'
-import { useSession } from '@/lib/auth-client'
+import { useSession } from '@lib/auth-client'
 
 const raceOptions = [
     { value: 'Pursuit', label: 'Pursuit' },
@@ -85,7 +85,7 @@ const Type = ({ initialValue, race }: { initialValue: any; race: RaceDataType })
 }
 
 const Action = ({ id, mutateSeries, user }: { id: string; mutateSeries: any; user: UserDataType }) => {
-    const Router = useRouter()
+    const navigate = useNavigate()
 
     const onDeleteClick = async () => {
         if (confirm('are you sure you want to do this?')) {
@@ -98,7 +98,7 @@ const Action = ({ id, mutateSeries, user }: { id: string; mutateSeries: any; use
     }
     return (
         <div className='relative flex items-center gap-2'>
-            <Button onClick={() => Router.push('/Race/' + id)}>View</Button>
+            <Button onClick={() => navigate({ to: '/Race/' + id })}>View</Button>
 
             {userHasPermission(user, AVAILABLE_PERMISSIONS.editRaces) ? (
                 <>

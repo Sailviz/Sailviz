@@ -1,16 +1,16 @@
 'use client'
 import React, { ChangeEvent, useEffect, useState } from 'react'
 import { createColumnHelper, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table'
-import { EyeIcon } from '@/components/icons/eye-icon'
-import { EditIcon } from '@/components/icons/edit-icon'
-import { DeleteIcon } from '@/components/icons/delete-icon'
-import { AVAILABLE_PERMISSIONS, userHasPermission } from '@/components/helpers/users'
-import { useRouter } from 'next/navigation'
-import * as DB from '@/components/apiMethods'
+import { EyeIcon } from '@components/icons/eye-icon'
+import { EditIcon } from '@components/icons/edit-icon'
+import { DeleteIcon } from '@components/icons/delete-icon'
+import { AVAILABLE_PERMISSIONS, userHasPermission } from '@components/helpers/users'
+import { useNavigate } from '@tanstack/react-router'
+import * as DB from '@components/apiMethods'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
-import Link from 'next/link'
-import { useSession } from '@/lib/auth-client'
-import * as Fetcher from '@/components/Fetchers'
+import { Link } from '@tanstack/react-router'
+import { useSession } from '@lib/auth-client'
+import * as Fetcher from '@components/Fetchers'
 import { mutate } from 'swr'
 import { Button } from '../ui/button'
 
@@ -45,7 +45,7 @@ const TableOfClubs = () => {
     const { clubs, clubsIsError, clubsIsValidating } = Fetcher.Clubs()
     // const [data, setData] = useState<SeriesDataType[]>([])
 
-    const Router = useRouter()
+    const navigate = useNavigate()
 
     const data = clubs || []
 
@@ -53,7 +53,7 @@ const TableOfClubs = () => {
 
     const viewClub = (id: string) => {
         console.log('Viewing club with ID:', id)
-        Router.push(`/admin/clubs/${id}`)
+        navigate({ to: `/admin/clubs/${id}` })
     }
 
     var table = useReactTable({

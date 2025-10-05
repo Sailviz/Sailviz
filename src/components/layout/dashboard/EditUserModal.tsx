@@ -1,14 +1,14 @@
 import { useEffect, useState } from 'react'
 import Select from 'react-select'
-import * as Fetcher from '@/components/Fetchers'
-import { Dialog, DialogContent, DialogFooter, DialogHeader } from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { useRouter } from 'next/navigation'
-import * as DB from '@/components/apiMethods'
+import * as Fetcher from '@components/Fetchers'
+import { Dialog, DialogContent, DialogFooter, DialogHeader } from '@components/ui/dialog'
+import { Button } from '@components/ui/button'
+import { Input } from '@components/ui/input'
+import { useNavigate } from '@tanstack/react-router'
+import * as DB from '@components/apiMethods'
 import { mutate } from 'swr'
 export default function EditUserDialog({ user }: { user: UserDataType }) {
-    const Router = useRouter()
+    const navigate = useNavigate()
     const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
     const { roles: roleOptions, rolesIsError, rolesIsValidating } = Fetcher.Roles(club)
 

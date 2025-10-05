@@ -1,12 +1,12 @@
 'use client'
 import { useState } from 'react'
-import { DialogContent, DialogFooter, DialogHeader, Dialog } from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { useRouter } from 'next/navigation'
+import { DialogContent, DialogFooter, DialogHeader, Dialog } from '@components/ui/dialog'
+import { Button } from '@components/ui/button'
+import { Input } from '@components/ui/input'
+import { useNavigate } from '@tanstack/react-router'
 
 export default function EditResultDialog({ result, fleet }: { result: ResultDataType; fleet: FleetDataType }) {
-    const Router = useRouter()
+    const navigate = useNavigate()
     const [open, setOpen] = useState(true)
 
     return (

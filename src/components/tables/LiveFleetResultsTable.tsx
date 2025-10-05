@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, useReactTable, SortingState } from '@tanstack/react-table'
-import { VerticalDotsIcon } from '@/components/icons/vertical-dots-icon'
+import { VerticalDotsIcon } from '@components/icons/vertical-dots-icon'
 import { Button } from '../ui/button'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
 

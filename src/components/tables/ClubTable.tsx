@@ -1,17 +1,17 @@
 'use client'
 import React from 'react'
 import { createColumnHelper, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table'
-import { AVAILABLE_PERMISSIONS, userHasPermission } from '@/components/helpers/users'
-import { useRouter } from 'next/navigation'
-import * as DB from '@/components/apiMethods'
+import { AVAILABLE_PERMISSIONS, userHasPermission } from '@components/helpers/users'
+import { useNavigate } from '@tanstack/react-router'
+import * as DB from '@components/apiMethods'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
-import { useSession } from '@/lib/auth-client'
-import * as Fetcher from '@/components/Fetchers'
+import { useSession } from '@lib/auth-client'
+import * as Fetcher from '@components/Fetchers'
 import { mutate } from 'swr'
 import { Button } from '../ui/button'
 
 const Action = ({ seriesId, viewHref, user }: { seriesId: string; viewHref: string; user?: UserDataType }) => {
-    const Router = useRouter()
+    const navigate = useNavigate()
 
     const onDeleteClick = async () => {
         if (confirm('are you sure you want to do this?')) {
@@ -22,7 +22,7 @@ const Action = ({ seriesId, viewHref, user }: { seriesId: string; viewHref: stri
 
     return (
         <div className='relative flex items-center gap-2'>
-            <Button className='w-16 h-8 p-0' onClick={() => Router.push(viewHref + seriesId)}>
+            <Button className='w-16 h-8 p-0' onClick={() => navigate({ to: viewHref + seriesId })}>
                 View
             </Button>
 

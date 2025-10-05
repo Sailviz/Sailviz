@@ -1,10 +1,10 @@
 'use client'
 import React, { useState, useEffect } from 'react'
 import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, useReactTable, SortingState } from '@tanstack/react-table'
-import * as Fetcher from '@/components/Fetchers'
+import * as Fetcher from '@components/Fetchers'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
 import { Button } from '../ui/button'
-import Link from 'next/link'
+import { Link } from '@tanstack/react-router'
 
 const Text = ({ value }: { value: string }) => {
     return <div>{value}</div>
@@ -15,7 +15,7 @@ const Class = ({ value }: { value: BoatDataType }) => {
 
 const Edit = ({ result }: { result: ResultDataType }) => {
     return (
-        <Link href={`/editResult/${result.id}`} scroll={false}>
+        <Link to={`/editResult/${result.id}`} scroll={false}>
             <Button className='mx-1'>Edit</Button>
         </Link>
     )

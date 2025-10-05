@@ -2,19 +2,19 @@
 import React, { ChangeEvent, useEffect, useState } from 'react'
 import dayjs from 'dayjs'
 import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, RowSelection, SortingState, useReactTable } from '@tanstack/react-table'
-import * as DB from '@/components/apiMethods'
+import * as DB from '@components/apiMethods'
 import Select, { CSSObjectWithLabel } from 'react-select'
-import { VerticalDotsIcon } from '@/components/icons/vertical-dots-icon'
-import { EyeIcon } from '@/components/icons/eye-icon'
-import { EditIcon } from '@/components/icons/edit-icon'
-import { DeleteIcon } from '@/components/icons/delete-icon'
-import { useRouter } from 'next/navigation'
+import { VerticalDotsIcon } from '@components/icons/vertical-dots-icon'
+import { EyeIcon } from '@components/icons/eye-icon'
+import { EditIcon } from '@components/icons/edit-icon'
+import { DeleteIcon } from '@components/icons/delete-icon'
+import { useNavigate } from '@tanstack/react-router'
 import { useTheme } from 'next-themes'
-import * as Fetcher from '@/components/Fetchers'
-import { PageSkeleton } from '@/components/layout/PageSkeleton'
+import * as Fetcher from '@components/Fetchers'
+import { PageSkeleton } from '@components/layout/PageSkeleton'
 import { Button } from '../ui/button'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
-import { useSession } from '@/lib/auth-client'
+import { useSession } from '@lib/auth-client'
 
 const Time = ({ ...props }: any) => {
     const initialValue = props.getValue()
@@ -31,11 +31,11 @@ const Time = ({ ...props }: any) => {
 }
 
 const Action = ({ ...props }: any) => {
-    const Router = useRouter()
+    const navigate = useNavigate()
 
     return (
         <>
-            <Button color='success' onClick={() => Router.push('/Race/' + props.row.original.id)}>
+            <Button color='success' onClick={() => navigate({ to: '/Race/' + props.row.original.id })}>
                 Open
             </Button>
         </>

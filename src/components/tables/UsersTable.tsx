@@ -1,13 +1,13 @@
 import React, { useState } from 'react'
 import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, SortingState, useReactTable } from '@tanstack/react-table'
-import { EditIcon } from '@/components/icons/edit-icon'
-import { DeleteIcon } from '@/components/icons/delete-icon'
-import * as Fetcher from '@/components/Fetchers'
-import { AVAILABLE_PERMISSIONS, userHasPermission } from '@/components/helpers/users'
+import { EditIcon } from '@components/icons/edit-icon'
+import { DeleteIcon } from '@components/icons/delete-icon'
+import * as Fetcher from '@components/Fetchers'
+import { AVAILABLE_PERMISSIONS, userHasPermission } from '@components/helpers/users'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
-import Link from 'next/link'
-import { useSession } from '@/lib/auth-client'
-import * as DB from '@/components/apiMethods'
+import { Link } from '@tanstack/react-router'
+import { useSession } from '@lib/auth-client'
+import * as DB from '@components/apiMethods'
 import { mutate } from 'swr'
 import { Button } from '../ui/button'
 
@@ -15,7 +15,7 @@ const Action = ({ user, session }: { user: UserDataType; session: any }) => {
     if (userHasPermission(session.user, AVAILABLE_PERMISSIONS.editUsers)) {
         return (
             <div className='relative flex items-center gap-2'>
-                <Link href={`/editUser/${user.id}`} className='cursor-pointer'>
+                <Link to={`/editUser/${user.id}`} className='cursor-pointer'>
                     <Button>Edit</Button>
                 </Link>
             </div>

@@ -1,4 +1,4 @@
-import * as DB from '@/components/apiMethods'
+import * as DB from '@components/apiMethods'
 
 export async function calculateResults(race: RaceDataType) {
     //most nuber of laps.

@@ -1,5 +1,5 @@
 'use client'
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@components/ui/collapsible'
 
 import {
     Sidebar,
@@ -16,9 +16,9 @@ import {
     SidebarMenuSubItem,
     SidebarRail,
     useSidebar
-} from '@/components/ui/sidebar'
+} from '@components/ui/sidebar'
 import { ChevronRight, ChevronsUpDown, CreditCard, GalleryVerticalEnd, LogOut, LogOutIcon } from 'lucide-react'
-import Link from 'next/link'
+import { Link } from '@tanstack/react-router'
 import { usePathname } from 'next/navigation'
 import * as React from 'react'
 import { SailVizIcon } from '../icons/sailviz-icon'
@@ -71,7 +71,7 @@ export default function AppSidebar({ navCollections }: { navCollections: NavColl
                                                         {item.items?.map(subItem => (
                                                             <SidebarMenuSubItem key={subItem.title}>
                                                                 <SidebarMenuSubButton asChild isActive={pathname === subItem.url}>
-                                                                    <Link href={subItem.url}>
+                                                                    <Link to={subItem.url}>
                                                                         <span className='text-xl'>{subItem.title}</span>
                                                                     </Link>
                                                                 </SidebarMenuSubButton>
@@ -84,7 +84,7 @@ export default function AppSidebar({ navCollections }: { navCollections: NavColl
                                     ) : (
                                         <SidebarMenuItem key={item.title}>
                                             <SidebarMenuButton asChild tooltip={item.title} isActive={pathname === item.url} size='lg'>
-                                                <Link href={item.url}>
+                                                <Link to={item.url}>
                                                     {item.icon}
                                                     <span className='text-xl'>{item.title}</span>
                                                 </Link>

@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react'
 import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, useReactTable, SortingState, sortingFns, SortingFn, Row } from '@tanstack/react-table'
-import * as Fetcher from '@/components/Fetchers'
-import { ChevronDownIcon } from '@/components/icons/chevron-down-icon'
-import { ChevronUpIcon } from '@/components/icons/chevron-up-icon'
-import { SmoothSpinner } from '@/components/icons/smooth-spinner'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Button } from '@/components/ui/button'
+import * as Fetcher from '@components/Fetchers'
+import { ChevronDownIcon } from '@components/icons/chevron-down-icon'
+import { ChevronUpIcon } from '@components/icons/chevron-up-icon'
+import { SmoothSpinner } from '@components/icons/smooth-spinner'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@components/ui/table'
+import { Button } from '@components/ui/button'
 
 enum raceStateType {
     running,

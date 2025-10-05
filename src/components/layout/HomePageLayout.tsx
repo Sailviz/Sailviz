@@ -1,4 +1,4 @@
-import Link from 'next/link'
+import { Link } from '@tanstack/react-router'
 import { NavigationMenu, NavigationMenuContent, NavigationMenuItem } from '../ui/navigation-menu'
 import { Button } from '../ui/button'
 
@@ -20,7 +20,7 @@ export default function HomePageLayout({
                         </Link>
                     </NavigationMenuItem>
                     <NavigationMenuItem>
-                        <Link href='#' aria-current='page'>
+                        <Link to='#' aria-current='page'>
                             Customers
                         </Link>
                     </NavigationMenuItem>
@@ -32,7 +32,7 @@ export default function HomePageLayout({
                 </NavigationMenuContent>
                 <NavigationMenuContent>
                     <NavigationMenuItem className='hidden lg:flex'>
-                        <Link href='#'>Login</Link>
+                        <Link to='#'>Login</Link>
                     </NavigationMenuItem>
                     <NavigationMenuItem>
                         <Button color='primary'>Sign Up</Button>

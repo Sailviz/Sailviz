@@ -1,7 +1,7 @@
 'use client'
-import { Button } from '@/components/ui/button'
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTrigger } from '@/components/ui/dialog'
-import { Input } from '@/components/ui/input'
+import { Button } from '@components/ui/button'
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTrigger } from '@components/ui/dialog'
+import { Input } from '@components/ui/input'
 import { redirect } from 'next/dist/server/api-utils'
 import { ChangeEvent, useState } from 'react'
 

@@ -1,14 +1,14 @@
 'use client'
 import { DynamicIcon, IconName } from 'lucide-react/dynamic'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { signUp } from '@/lib/auth-client'
+import { Button } from '@components/ui/button'
+import { Input } from '@components/ui/input'
+import { signUp } from '@lib/auth-client'
 import { useState } from 'react'
-import * as DB from '@/components/apiMethods'
-import { useRouter } from 'next/navigation'
+import * as DB from '@components/apiMethods'
+import { useNavigate } from '@tanstack/react-router'
 
 export function RegisterForm() {
-    const router = useRouter()
+    const navigate = useNavigate()
     const [username, setUsername] = useState('')
     const [password, setPassword] = useState('')
     const [clubName, setClubName] = useState('')
@@ -61,7 +61,7 @@ export function RegisterForm() {
             ]
         } as UserDataType
         await DB.updateUser(user)
-        router.push('/Dashboard')
+        navigate({ to: '/Dashboard' })
     }
     return (
         <div className='flex flex-col gap-6'>

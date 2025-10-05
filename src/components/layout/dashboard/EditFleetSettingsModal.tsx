@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react'
 import Select from 'react-select'
-import * as Fetcher from '@/components/Fetchers'
-import { Dialog, DialogContent, DialogFooter, DialogTitle } from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+import * as Fetcher from '@components/Fetchers'
+import { Dialog, DialogContent, DialogFooter, DialogTitle } from '@components/ui/dialog'
+import { Button } from '@components/ui/button'
+import { Input } from '@components/ui/input'
 import { DialogTrigger } from '@radix-ui/react-dialog'
-import * as DB from '@/components/apiMethods'
+import * as DB from '@components/apiMethods'
 import { mutate } from 'swr'
 
 export default function EditFleetSettingsDialog({ fleetSettings, seriesId }: { fleetSettings: FleetSettingsType; seriesId: string }) {

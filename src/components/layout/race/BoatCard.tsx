@@ -1,5 +1,5 @@
-import { Button } from '@/components/ui/button'
-import { Spinner } from '@/components/ui/spinner'
+import { Button } from '@components/ui/button'
+import { Spinner } from '@components/ui/spinner'
 import { useEffect, useRef, useState } from 'react'
 
 // these options are the same across all fleets

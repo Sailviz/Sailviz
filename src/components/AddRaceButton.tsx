@@ -2,9 +2,9 @@
 import { ChangeEvent, useEffect, useState } from 'react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select'
 import { Button } from './ui/button'
-import * as DB from '@/components/apiMethods'
-import * as Fetcher from '@/components/Fetchers'
-import { useSession } from '@/lib/auth-client'
+import * as DB from '@components/apiMethods'
+import * as Fetcher from '@components/Fetchers'
+import { useSession } from '@lib/auth-client'
 
 export function AddRaceButton({ seriesId }: { seriesId: string }) {
     const {

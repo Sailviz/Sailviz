@@ -1,6 +1,6 @@
 'use client'
 import dayjs from 'dayjs'
-import { server } from '@/components/URL'
+import { server } from '@components/URL'
 
 export async function User(): Promise<UserDataType> {
     return await fetch(`${server}/api/user`, {

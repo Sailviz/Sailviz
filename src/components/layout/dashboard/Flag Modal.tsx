@@ -1,4 +1,4 @@
-import { Dialog, DialogContent, DialogHeader } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader } from '@components/ui/dialog'
 import { useTheme } from 'next-themes'
 import Image from 'next/image'
 

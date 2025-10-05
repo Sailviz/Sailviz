@@ -1,6 +1,5 @@
 'use client'
 import useSWR, { mutate } from 'swr'
-import * as Sentry from '@sentry/react'
 
 import dayjs from 'dayjs'
 

@@ -1,7 +1,7 @@
 'use client'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select'
-import * as Fetcher from '@/components/Fetchers'
-import * as DB from '@/components/apiMethods'
+import * as Fetcher from '@components/Fetchers'
+import * as DB from '@components/apiMethods'
 import { Input } from './ui/input'
 import { useState } from 'react'
 export function SeriesPursuitLength({ seriesId }: { seriesId: string }) {

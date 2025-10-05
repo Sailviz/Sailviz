@@ -1,16 +1,16 @@
 'use client'
 import React, { ChangeEvent, useState } from 'react'
 import { createColumnHelper, flexRender, getCoreRowModel, useReactTable, getFilteredRowModel } from '@tanstack/react-table'
-import { EyeIcon } from '@/components/icons/eye-icon'
-import { SearchIcon } from '@/components/icons/search-icon'
-import * as Fetcher from '@/components/Fetchers'
+import { EyeIcon } from '@components/icons/eye-icon'
+import { SearchIcon } from '@components/icons/search-icon'
+import * as Fetcher from '@components/Fetchers'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from '../ui/dropdown-menu'
 import { ChevronDown } from 'lucide-react'
-import Link from 'next/link'
-import { useSession } from '@/lib/auth-client'
+import { Link } from '@tanstack/react-router'
+import { useSession } from '@lib/auth-client'
 
 const columnHelper = createColumnHelper<TrackerDataType>()
 

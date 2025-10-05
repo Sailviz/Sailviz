@@ -1,4 +1,4 @@
-import Link from 'next/link'
+import { Link } from '@tanstack/react-router'
 
 export const Footer = () => {
     return (
@@ -12,10 +12,10 @@ export const Footer = () => {
                     </div>
                     <div className='flex flex-col gap-2'>
                         <h3 className='text-lg font-semibold'>Quick Links</h3>
-                        <Link href='/' className='text-sm text-gray-300 hover:text-white'>
+                        <Link to='/' className='text-sm text-gray-300 hover:text-white'>
                             Home
                         </Link>
-                        <Link href='/Pricing' className='text-sm text-gray-300 hover:text-white'>
+                        <Link to='/Pricing' className='text-sm text-gray-300 hover:text-white'>
                             Pricing
                         </Link>
                     </div>

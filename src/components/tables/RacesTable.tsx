@@ -13,10 +13,10 @@ import {
     useReactTable
 } from '@tanstack/react-table'
 
-import { EyeIcon } from '@/components/icons/eye-icon'
-import { useRouter } from 'next/navigation'
+import { EyeIcon } from '@components/icons/eye-icon'
+import { useNavigate } from '@tanstack/react-router'
 import { useTheme } from 'next-themes'
-import * as Fetcher from '@/components/Fetchers'
+import * as Fetcher from '@components/Fetchers'
 import useSWR, { mutate } from 'swr'
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
@@ -24,7 +24,7 @@ import { Button } from '../ui/button'
 import { Input } from '../ui/input'
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from '../ui/dropdown-menu'
 import { ChevronDown } from 'lucide-react'
-import Link from 'next/link'
+import { Link } from '@tanstack/react-router'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select'
 
 const Time = ({ ...props }: any) => {
@@ -56,10 +56,10 @@ const Race = ({ ...props }: any) => {
 }
 
 const Action = ({ viewHref, raceId }: { viewHref: string; raceId: string }) => {
-    const Router = useRouter()
+    const navigate = useNavigate()
 
     return (
-        <Link href={viewHref + raceId} className='text-default-900 cursor-pointer'>
+        <Link to={viewHref + raceId} className='text-default-900 cursor-pointer'>
             <Button variant='outline' className='w-16 h-8 p-0'>
                 View
             </Button>

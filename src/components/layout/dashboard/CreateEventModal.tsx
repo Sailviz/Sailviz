@@ -1,15 +1,15 @@
 'use client'
-import { Button } from '@/components/ui/button'
-import { Dialog, DialogContent, DialogFooter, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
-import { Input } from '@/components/ui/input'
+import { Button } from '@components/ui/button'
+import { Dialog, DialogContent, DialogFooter, DialogTitle, DialogTrigger } from '@components/ui/dialog'
+import { Input } from '@components/ui/input'
 import { useEffect, useState } from 'react'
-import * as DB from '@/components/apiMethods'
-import { useSession } from '@/lib/auth-client'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import * as DB from '@components/apiMethods'
+import { useSession } from '@lib/auth-client'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select'
 import dayjs from 'dayjs'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@components/ui/table'
 import { createColumnHelper, flexRender, getCoreRowModel, getFilteredRowModel, useReactTable } from '@tanstack/react-table'
-import { getFiveStartSequence, getThreeStartSequence } from '@/components/helpers/startSequence'
+import { getFiveStartSequence, getThreeStartSequence } from '@components/helpers/startSequence'
 
 type Race = {
     number: number

@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react'
 import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, useReactTable, SortingState } from '@tanstack/react-table'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
-import * as Fetcher from '@/components/Fetchers'
+import * as Fetcher from '@components/Fetchers'
 //not a db type, only used here
 type SeriesResultsType = {
     Rank: number

@@ -1,14 +1,14 @@
 'use client'
-import { Button } from '@/components/ui/button'
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTrigger } from '@/components/ui/dialog'
-import { Input } from '@/components/ui/input'
-import { Tabs, TabsList } from '@/components/ui/tabs'
+import { Button } from '@components/ui/button'
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTrigger } from '@components/ui/dialog'
+import { Input } from '@components/ui/input'
+import { Tabs, TabsList } from '@components/ui/tabs'
 import { TabsTrigger } from '@radix-ui/react-tabs'
 import { useTheme } from 'next-themes'
 import { ChangeEvent, useEffect, useState } from 'react'
 import Select, { CSSObjectWithLabel } from 'react-select'
-import * as DB from '@/components/apiMethods'
-import * as Fetcher from '@/components/Fetchers'
+import * as DB from '@components/apiMethods'
+import * as Fetcher from '@components/Fetchers'
 export default function CreateResultDialog({ race, boats }: { race: RaceDataType; boats: BoatDataType[] }) {
     const [open, setOpen] = useState(false)
     const [helm, setHelm] = useState('')
@@ -138,7 +138,7 @@ export default function CreateResultDialog({ race, boats }: { race: RaceDataType
                                         '&:hover': {
                                             backgroundColor: theme == 'dark' ? '#3f3f46' : '#e4e4e7'
                                         }
-                                    } as CSSObjectWithLabel),
+                                    }) as CSSObjectWithLabel,
                                 option: (provided, state) =>
                                     ({
                                         ...provided,
@@ -147,24 +147,24 @@ export default function CreateResultDialog({ race, boats }: { race: RaceDataType
                                         '&:hover': {
                                             backgroundColor: theme == 'dark' ? '#3f3f46' : '#d4d4d8'
                                         }
-                                    } as CSSObjectWithLabel),
+                                    }) as CSSObjectWithLabel,
                                 menu: (provided, state) =>
                                     ({
                                         ...provided,
                                         backgroundColor: theme == 'dark' ? '#18181b' : 'white',
                                         border: theme == 'dark' ? '2px solid #3f3f46' : '2px solid #d4d4d8',
                                         fontSize: '1rem'
-                                    } as CSSObjectWithLabel),
+                                    }) as CSSObjectWithLabel,
                                 input: (provided, state) =>
                                     ({
                                         ...provided,
                                         color: theme == 'dark' ? 'white' : 'black'
-                                    } as CSSObjectWithLabel),
+                                    }) as CSSObjectWithLabel,
                                 singleValue: (provided, state) =>
                                     ({
                                         ...provided,
                                         color: theme == 'dark' ? 'white' : 'black'
-                                    } as CSSObjectWithLabel)
+                                    }) as CSSObjectWithLabel
                             }}
                         />
                     </div>
