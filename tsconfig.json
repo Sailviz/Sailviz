@@ -1,7 +1,11 @@
 {
-  "files": [],
-  "references": [
-    { "path": "./tsconfig.app.json" },
-    { "path": "./tsconfig.node.json" }
-  ]
+  "compilerOptions": {
+    "module": "esnext", // or "nodenext"
+    "moduleResolution": "bundler", // or "node16" or "bundler
+    "baseUrl": ".",
+    "paths": {
+      "@sailviz/db": ["packages/db/src"],
+      "@sailviz/api/*": ["packages/api/src/*"]
+    }
+  }
 }
