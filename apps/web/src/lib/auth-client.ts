@@ -1,10 +1,8 @@
 import { customSessionClient, inferAdditionalFields, usernameClient } from 'better-auth/client/plugins'
-import { customSession } from 'better-auth/plugins'
 import { createAuthClient } from 'better-auth/react'
-import prisma from './prisma'
 import { auth } from './auth'
 import { myPluginClient } from './client-plugin'
-export const client = createAuthClient({
+export const authClient = createAuthClient({
     plugins: [
         usernameClient(),
         inferAdditionalFields({
@@ -24,4 +22,4 @@ export const client = createAuthClient({
     ]
 })
 
-export const { signUp, signIn, signOut, useSession, getSession } = client
+export const { signUp, signIn, signOut, useSession, getSession } = authClient

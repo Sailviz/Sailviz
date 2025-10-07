@@ -5,7 +5,8 @@
     "baseUrl": ".",
     "paths": {
       "@sailviz/db": ["packages/db/src"],
-      "@sailviz/api/*": ["packages/api/src/*"]
+      "@sailviz/api/*": ["packages/api/src/*"],
+      "@sailviz/auth": ["packages/auth/src"]
     }
   }
 }

@@ -1,5 +1,5 @@
-import { getClub } from "./routes/club.js";
-import { getGlobalLaps } from "./routes/globalLaps.js";
+import { getClub } from "./routes/club";
+import { getGlobalLaps } from "./routes/globalLaps";
 
 export const router = {
   club: {

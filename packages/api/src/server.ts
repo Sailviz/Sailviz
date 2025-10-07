@@ -2,7 +2,6 @@ import { createServer } from "node:http";
 import { RPCHandler } from "@orpc/server/node";
 import { CORSPlugin } from "@orpc/server/plugins";
 import { router } from "./router";
-import "dotenv/config";
 
 const handler = new RPCHandler(router, {
   plugins: [new CORSPlugin()],
@@ -10,7 +9,7 @@ const handler = new RPCHandler(router, {
 
 const server = createServer(async (req, res) => {
   const result = await handler.handle(req, res, {
-    context: { headers: req.headers },
+    context: {},
   });
 
   if (!result.matched) {
