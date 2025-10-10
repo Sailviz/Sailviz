@@ -1,5 +1,5 @@
 import { os } from "@orpc/server";
-import { getSession, Session } from "@sailviz/auth";
+import { getSession, Session } from "./session";
 
 export const withSession = os
   .$context<{ session?: Session; req: Request }>() // 👈 include req here

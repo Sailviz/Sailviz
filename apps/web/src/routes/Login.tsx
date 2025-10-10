@@ -1,11 +1,16 @@
 import { LoginForm } from '@components/login-form'
+import { createFileRoute } from '@tanstack/react-router'
 
-export default async function SignInPage() {
+function Login() {
     return (
         <div className='flex min-h-svh flex-col items-center justify-center gap-6 bg-background p-6 md:p-10'>
             <div className='w-full max-w-sm'>
-                <LoginForm justCredentials={false} />
+                <LoginForm />
             </div>
         </div>
     )
 }
+
+export const Route = createFileRoute('/Login')({
+    component: Login
+})

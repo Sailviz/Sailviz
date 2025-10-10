@@ -1,15 +1,12 @@
-'use client'
-import { DynamicIcon, IconName } from 'lucide-react/dynamic'
+import { DynamicIcon, type IconName } from 'lucide-react/dynamic'
 import { Button } from '@components/ui/button'
 import { Input } from '@components/ui/input'
-import { redirect, useRouter } from 'next/navigation'
-import { isRedirectError } from 'next/dist/client/components/redirect-error'
 import { useState } from 'react'
-import { signIn } from '@lib/auth-client'
+import { signIn, getSession } from '@sailviz/auth/client'
 import { Loader2 } from 'lucide-react'
-import { getSession } from '@lib/auth-client'
+import { useNavigate } from '@tanstack/react-router'
 
-export function LoginForm({ justCredentials }: { justCredentials: boolean }) {
+export function LoginForm() {
     const navigate = useNavigate()
     const [username, setUsername] = useState('')
     const [password, setPassword] = useState('')
