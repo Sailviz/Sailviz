@@ -3,3 +3,5 @@ node_modules/
 **/node_modules/
 .pnpm-store/
 /node_modules
+/node_modules
+/packages/api/node_modules
