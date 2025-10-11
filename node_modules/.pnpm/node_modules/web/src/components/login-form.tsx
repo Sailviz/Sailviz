@@ -26,7 +26,7 @@ export function LoginForm() {
                 const { data: session } = await getSession()
                 console.log('Session with custom fields:', session)
                 if (session === null) {
-                    alert('Login failed. Please check your username and password.')
+                    // alert('Login failed. Please check your username and password.')
                     return
                 }
                 console.log('Session:', session)

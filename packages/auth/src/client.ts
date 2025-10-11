@@ -6,6 +6,8 @@ import {
 import { createAuthClient } from "better-auth/react";
 import { myPluginClient } from "./client-plugin";
 export const client = createAuthClient({
+  baseURL: "http://localhost:3000",
+  basePath: "/api/auth/",
   plugins: [
     usernameClient(),
     inferAdditionalFields({

@@ -1,8 +1,9 @@
 {
   "name": "@sailviz/auth",
-  "main": "src/index.ts",
+  "main": "src/auth.ts",
   "exports": {
-    "./client": "./src/client.ts"
+    "./client": "./src/client.ts",
+    "./auth": "./src/auth.ts"
   },
   "types": "src/index.ts",
   "dependencies": {

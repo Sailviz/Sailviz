@@ -1,20 +1,29 @@
 import express from "express";
 import cors from "cors";
 import { RPCHandler } from "@orpc/server/node";
-import { router } from "./contract-implement";
-
+import { mainRouter } from "./contract-implement";
+import { toNodeHandler } from "better-auth/node";
+import { auth } from "../../../packages/auth/src/auth";
 const app = express();
 
-app.use(cors());
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true,
+  })
+);
+
+const mainHandler = new RPCHandler(mainRouter);
+
+app.all("/api/auth/*splat", toNodeHandler(auth));
+
 // parse JSON bodies (oRPC may expect JSON payloads)
 app.use(express.json());
-
-const handler = new RPCHandler(router);
-
 // use a catch-all to let the RPC handler inspect all requests
 app.all("{/*path}", async (req, res, next) => {
-  const { matched } = await handler.handle(req, res, {
-    context: {},
+  const { matched } = await mainHandler.handle(req, res, {
+    context: { headers: req.headers },
   });
 
   if (matched) {

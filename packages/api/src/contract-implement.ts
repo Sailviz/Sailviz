@@ -1,10 +1,9 @@
 import { implement, ORPCError } from "@orpc/server";
 import { ORPCcontract } from "./contract";
 import prisma from "@sailviz/db";
-
 const os = implement(ORPCcontract);
 
-export const hello = os.hello.handler(({ input }) => {
+const hello = os.hello.handler(({ input }) => {
   // input is optional in the contract; guard against undefined here.
   console.log("Input received:", input);
 
@@ -13,7 +12,7 @@ export const hello = os.hello.handler(({ input }) => {
   return { name, message: `Hello, ${name}!` };
 });
 
-export const getGlobalLaps = os.getGlobalLaps.handler(async ({ context }) => {
+const getGlobalLaps = os.getGlobalLaps.handler(async ({ context }) => {
   var laps = await prisma.lap.count({});
   console.log(laps);
   if (laps) {
@@ -21,10 +20,9 @@ export const getGlobalLaps = os.getGlobalLaps.handler(async ({ context }) => {
   } else {
     throw new ORPCError("BAD_REQUEST");
   }
-  return 42; // Example static return value
 });
 
-export const router = os.router({
+export const mainRouter = os.router({
   hello,
   getGlobalLaps,
 });
