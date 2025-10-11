@@ -1,23 +1,29 @@
-import { createServer } from "node:http";
+import express from "express";
+import cors from "cors";
 import { RPCHandler } from "@orpc/server/node";
-import { CORSPlugin } from "@orpc/server/plugins";
-import { router } from "./router";
+import { router } from "./contract-implement";
 
-const handler = new RPCHandler(router, {
-  plugins: [new CORSPlugin()],
-});
+const app = express();
 
-const server = createServer(async (req, res) => {
-  const result = await handler.handle(req, res, {
+app.use(cors());
+// parse JSON bodies (oRPC may expect JSON payloads)
+app.use(express.json());
+
+const handler = new RPCHandler(router);
+
+// use a catch-all to let the RPC handler inspect all requests
+app.all("{/*path}", async (req, res, next) => {
+  const { matched } = await handler.handle(req, res, {
     context: {},
   });
 
-  if (!result.matched) {
-    res.statusCode = 404;
-    res.end("No procedure matched");
+  if (matched) {
+    return;
   }
+
+  next();
 });
 
-server.listen(3000, "127.0.0.1", () => {
+app.listen(3000, () => {
   console.log("🚀 oRPC server listening on http://127.0.0.1:3000");
 });

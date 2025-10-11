@@ -1,11 +1,8 @@
 import { MoveUpRight } from 'lucide-react'
-import { orpc } from '@lib/orpc'
 import { useQuery } from '@tanstack/react-query'
+import { orpcClient } from '@liborpc'
 export function Stats() {
-    const { data: laps, isLoading } = useQuery({
-        queryKey: ['club'],
-        queryFn: () => orpc.globalLaps.get()
-    })
+    const { data: laps, isLoading } = useQuery(orpcClient.getGlobalLaps.queryOptions())
     console.log('Laps:', laps)
 
     // const { clubs, clubsIsError, clubsIsValidating } = Fetcher.Clubs()
