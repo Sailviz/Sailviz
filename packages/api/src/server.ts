@@ -6,6 +6,7 @@ import { toNodeHandler } from "better-auth/node";
 import { auth } from "@sailviz/auth/auth";
 import { onError, ORPCError } from "@orpc/server";
 import z from "zod";
+import { RequestHeadersPlugin } from "@orpc/server/plugins";
 const app = express();
 
 app.use(
@@ -16,7 +17,9 @@ app.use(
   })
 );
 
-const mainHandler = new RPCHandler(mainRouter);
+const mainHandler = new RPCHandler(mainRouter, {
+  plugins: [new RequestHeadersPlugin()],
+});
 
 app.all("/api/auth/*splat", toNodeHandler(auth));
 

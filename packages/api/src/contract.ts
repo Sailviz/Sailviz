@@ -29,4 +29,6 @@ export const ORPCcontract = {
   seriesbyClubId: oc
     .input(z.object({ clubId: z.string() }))
     .output(SeriesSchema.array()),
+  racebyId: oc.input(z.object({ raceId: z.string() })).output(RaceSchema),
+  boats: oc.output(z.array(z.any())), //need to define BoatSchema
 };

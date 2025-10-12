@@ -1,6 +1,6 @@
 'use client'
 import React, { useEffect, useState } from 'react'
-import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, useReactTable, SortingState } from '@tanstack/react-table'
+import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, useReactTable, type SortingState } from '@tanstack/react-table'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
 import { Button } from '../ui/button'
 import * as Fetcher from '@components/Fetchers'
@@ -38,7 +38,7 @@ const CorrectedTime = ({ ...props }) => {
 
 const Edit = ({ resultId }: { resultId: string }) => {
     return (
-        <Link to={`/editResult/${resultId}`} scroll={false}>
+        <Link to={`/editResult/${resultId}`}>
             <Button>Edit</Button>
         </Link>
     )
@@ -46,7 +46,7 @@ const Edit = ({ resultId }: { resultId: string }) => {
 
 const View = ({ resultId }: { resultId: string }) => {
     return (
-        <Link to={`/viewResult/${resultId}`} scroll={false}>
+        <Link to={`/viewResult/${resultId}`}>
             <Button>View</Button>
         </Link>
     )

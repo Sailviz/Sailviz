@@ -1,6 +1,6 @@
 'use client'
 import React, { ChangeEvent, useState, useRef, useEffect } from 'react'
-import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, useReactTable, SortingState } from '@tanstack/react-table'
+import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, useReactTable, type SortingState } from '@tanstack/react-table'
 import { EditIcon } from '@components/icons/edit-icon'
 import * as Fetcher from '@components/Fetchers'
 import { AVAILABLE_PERMISSIONS, userHasPermission } from '@components/helpers/users'

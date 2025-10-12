@@ -23,6 +23,7 @@ export const ResultSchema = z.object({
   PursuitPosition: z.number(),
   HandicapPosition: z.number(),
   resultCode: z.string(),
+  boat: z.any().optional(), //need to define BoatSchema
 });
 export type ResultType = z.infer<typeof ResultSchema>;
 
@@ -31,7 +32,7 @@ export const FleetSchema = z.object({
   raceId: z.string(),
   startTime: z.number(),
   fleetSettings: z.any(),
-  results: ResultSchema.array(),
+  results: z.array(ResultSchema).optional(),
 });
 export type FleetType = z.infer<typeof FleetSchema>;
 
@@ -50,7 +51,7 @@ export const RaceSchema = z.object({
   Time: z.string(),
   Duties: DutySchema,
   Type: z.string(),
-  fleets: z.array(z.any()),
+  fleets: z.array(FleetSchema).optional(),
   seriesId: z.string(),
   series: z.lazy(() => SeriesSchema.optional()),
 });

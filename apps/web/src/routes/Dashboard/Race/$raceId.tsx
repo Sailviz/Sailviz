@@ -1,5 +1,4 @@
-'use client'
-import React, { use, useEffect } from 'react'
+import React, { useEffect } from 'react'
 import * as DB from '@components/apiMethods'
 import dayjs from 'dayjs'
 import FleetHandicapResultsTable from '@components/tables/FleetHandicapResultsTable'
@@ -8,32 +7,24 @@ import { AVAILABLE_PERMISSIONS, userHasPermission } from '@components/helpers/us
 import { Breadcrumbs } from '@components/breadcrumbs'
 import { Input } from '@components/ui/input'
 import { Button } from '@components/ui/button'
-import { Link } from '@tanstack/react-router'
+import { createFileRoute, Link, useLoaderData } from '@tanstack/react-router'
 import { EntryFileUpload } from '@components/EntryFileUpload'
 
 import * as Fetcher from '@components/Fetchers'
-import { useSession } from '@sailviz/auth/client'
 import { PageSkeleton } from '@components/layout/PageSkeleton'
 import CreateResultModal from '@components/layout/dashboard/CreateResultModal'
 import { calculateResults } from '@components/helpers/race'
 import { mutate } from 'swr'
-import { Spinner } from '@components/ui/spinner'
 import { SmoothSpinner } from '@components/icons/smooth-spinner'
-import { set } from 'cypress/types/lodash'
+import { useQuery } from '@tanstack/react-query'
+import { orpcClient } from '@lib/orpc'
 
-type PageProps = { params: Promise<{ raceId: string }> }
+function Page() {
+    const { raceId } = Route.useParams()
+    const session = useLoaderData({ from: `__root__` })
 
-export default function Page(props: PageProps) {
-    const { raceId } = use(props.params)
-    const {
-        data: session,
-        isPending, //loading state
-        error, //error object
-        refetch //refetch the session
-    } = useSession()
-
-    const { race, raceIsError, raceIsValidating, mutateRace } = Fetcher.Race(raceId, true)
-    const { boats, boatsIsError, boatsIsValidating } = Fetcher.Boats()
+    const { data: race } = useQuery(orpcClient.racebyId.queryOptions({ input: { raceId: raceId! } }))
+    const { data: boats } = useQuery(orpcClient.boats.queryOptions())
 
     const [resultsUpdated, setResultsUpdated] = React.useState(true)
     const [calculatingResults, setCalculatingResults] = React.useState(false)
@@ -77,11 +68,11 @@ export default function Page(props: PageProps) {
         //update DB
         console.log(newDuties)
         await DB.updateRaceById({ ...race, Duties: newDuties })
-        mutateRace()
+        // mutateRace()
     }
 
     const downloadResults = async () => {
-        race.fleets.forEach(async fleet => {
+        race.fleets.forEach(async (fleet: any) => {
             // by pointing the browser to the api endpoint, the browser will download the file
             window.location.assign(`/api/ExportFleetResults?id=${fleet.id}`)
         })
@@ -99,15 +90,16 @@ export default function Page(props: PageProps) {
 
     useEffect(() => {
         if (race == undefined) return
+        console.log(race.fleets)
         //if any of the results have an  incorrect corrected time, then we need to tell user to recalculate
-        race.fleets.forEach(fleet => {
+        race.fleets.forEach((fleet: any) => {
             const maxLaps = Math.max.apply(
                 null,
                 fleet.results.map(function (o: ResultDataType) {
                     return o.laps.length
                 })
             )
-            fleet.results.forEach(result => {
+            fleet.results.forEach((result: any) => {
                 //calculate what the corrected time should be
                 let seconds = result.finishTime - fleet.startTime
                 let correctedTime = (seconds * 1000 * (maxLaps / result.numberLaps)) / result.boat.py
@@ -120,10 +112,10 @@ export default function Page(props: PageProps) {
         })
     }, [race])
 
-    if (session == undefined || isPending || race == undefined || boats == undefined) {
+    if (session == undefined || race == undefined || boats == undefined) {
         return <PageSkeleton />
     }
-
+    console.log(boats)
     return (
         <div id='race' className='h-full w-full overflow-y-auto'>
             {/* <ViewResultModal isOpen={viewModal.isOpen} result={activeResult} fleet={activeFleet} onClose={viewModal.onClose} /> */}
@@ -185,7 +177,7 @@ export default function Page(props: PageProps) {
                         </div>
                     </div>
                     <div className='py-4 w-full'>
-                        {race!.fleets.map((fleet, index) => {
+                        {race!.fleets.map((fleet: any, index: number) => {
                             return (
                                 <div key={'fleetResults' + index}>
                                     {race.Type == 'Handicap' ? (
@@ -206,3 +198,7 @@ export default function Page(props: PageProps) {
         </div>
     )
 }
+
+export const Route = createFileRoute('/Dashboard/Race/$raceId')({
+    component: Page
+})

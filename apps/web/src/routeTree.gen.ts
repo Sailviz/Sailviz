@@ -13,6 +13,7 @@ import { Route as LoginRouteImport } from './routes/Login'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DashboardIndexRouteImport } from './routes/Dashboard/index'
 import { Route as DashboardRaceIndexRouteImport } from './routes/Dashboard/Race/index'
+import { Route as DashboardRaceRaceIdRouteImport } from './routes/Dashboard/Race/$raceId'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/Login',
@@ -34,17 +35,24 @@ const DashboardRaceIndexRoute = DashboardRaceIndexRouteImport.update({
   path: '/Dashboard/Race/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DashboardRaceRaceIdRoute = DashboardRaceRaceIdRouteImport.update({
+  id: '/Dashboard/Race/$raceId',
+  path: '/Dashboard/Race/$raceId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/Login': typeof LoginRoute
   '/Dashboard': typeof DashboardIndexRoute
+  '/Dashboard/Race/$raceId': typeof DashboardRaceRaceIdRoute
   '/Dashboard/Race': typeof DashboardRaceIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/Login': typeof LoginRoute
   '/Dashboard': typeof DashboardIndexRoute
+  '/Dashboard/Race/$raceId': typeof DashboardRaceRaceIdRoute
   '/Dashboard/Race': typeof DashboardRaceIndexRoute
 }
 export interface FileRoutesById {
@@ -52,20 +60,38 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/Login': typeof LoginRoute
   '/Dashboard/': typeof DashboardIndexRoute
+  '/Dashboard/Race/$raceId': typeof DashboardRaceRaceIdRoute
   '/Dashboard/Race/': typeof DashboardRaceIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/Login' | '/Dashboard' | '/Dashboard/Race'
+  fullPaths:
+    | '/'
+    | '/Login'
+    | '/Dashboard'
+    | '/Dashboard/Race/$raceId'
+    | '/Dashboard/Race'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/Login' | '/Dashboard' | '/Dashboard/Race'
-  id: '__root__' | '/' | '/Login' | '/Dashboard/' | '/Dashboard/Race/'
+  to:
+    | '/'
+    | '/Login'
+    | '/Dashboard'
+    | '/Dashboard/Race/$raceId'
+    | '/Dashboard/Race'
+  id:
+    | '__root__'
+    | '/'
+    | '/Login'
+    | '/Dashboard/'
+    | '/Dashboard/Race/$raceId'
+    | '/Dashboard/Race/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   LoginRoute: typeof LoginRoute
   DashboardIndexRoute: typeof DashboardIndexRoute
+  DashboardRaceRaceIdRoute: typeof DashboardRaceRaceIdRoute
   DashboardRaceIndexRoute: typeof DashboardRaceIndexRoute
 }
 
@@ -99,6 +125,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardRaceIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/Dashboard/Race/$raceId': {
+      id: '/Dashboard/Race/$raceId'
+      path: '/Dashboard/Race/$raceId'
+      fullPath: '/Dashboard/Race/$raceId'
+      preLoaderRoute: typeof DashboardRaceRaceIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -106,6 +139,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   LoginRoute: LoginRoute,
   DashboardIndexRoute: DashboardIndexRoute,
+  DashboardRaceRaceIdRoute: DashboardRaceRaceIdRoute,
   DashboardRaceIndexRoute: DashboardRaceIndexRoute,
 }
 export const routeTree = rootRouteImport

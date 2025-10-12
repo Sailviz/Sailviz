@@ -1,6 +1,6 @@
 'use client'
 import React, { useState, useEffect } from 'react'
-import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, useReactTable, SortingState } from '@tanstack/react-table'
+import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, useReactTable, type SortingState } from '@tanstack/react-table'
 import * as Fetcher from '@components/Fetchers'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
 import { Button } from '../ui/button'
@@ -15,7 +15,7 @@ const Class = ({ value }: { value: BoatDataType }) => {
 
 const Edit = ({ result }: { result: ResultDataType }) => {
     return (
-        <Link to={`/editResult/${result.id}`} scroll={false}>
+        <Link to={`/editResult/${result.id}`}>
             <Button className='mx-1'>Edit</Button>
         </Link>
     )

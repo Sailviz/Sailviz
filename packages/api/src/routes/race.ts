@@ -60,10 +60,37 @@ export async function findRaces(
     },
     include: {
       series: true,
-      fleets: true,
+      fleets: {
+        include: {
+          fleetSettings: true,
+        },
+      },
     },
     orderBy: {
       Time: historical ? "desc" : "asc",
+    },
+  });
+  return result;
+}
+
+export async function findRace(id: string) {
+  var result = await prisma.race.findUnique({
+    where: {
+      id: id,
+    },
+    include: {
+      series: true,
+      fleets: {
+        include: {
+          results: {
+            include: {
+              laps: true,
+              boat: true,
+            },
+          },
+          fleetSettings: true,
+        },
+      },
     },
   });
   return result;

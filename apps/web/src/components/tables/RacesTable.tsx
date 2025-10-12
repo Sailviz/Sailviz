@@ -83,7 +83,6 @@ const RacesTable = ({ date, historical, viewHref, clubId }: { date: Date; histor
     }
 
     useEffect(() => {
-        console.log(races)
         if (races) {
             setData(races.races)
             setCount(races.count)
