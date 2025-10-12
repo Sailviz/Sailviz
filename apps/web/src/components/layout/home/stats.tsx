@@ -1,6 +1,6 @@
 import { MoveUpRight } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
-import { orpcClient } from '@liborpc'
+import { orpcClient } from '@lib/orpc'
 export function Stats() {
     const { data: laps, isLoading } = useQuery(orpcClient.getGlobalLaps.queryOptions())
     console.log('Laps:', laps)

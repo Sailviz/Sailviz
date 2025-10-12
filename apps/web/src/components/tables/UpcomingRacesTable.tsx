@@ -3,10 +3,10 @@ import React, { useEffect, useState } from 'react'
 import dayjs from 'dayjs'
 import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, type SortingState, useReactTable } from '@tanstack/react-table'
 import { useLoaderData, useNavigate } from '@tanstack/react-router'
-import * as Fetcher from '@components/Fetchers'
 import { Button } from '../ui/button'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
-import { useSession } from '@sailviz/auth/client'
+import { useQuery } from '@tanstack/react-query'
+import { orpcClient } from '@lib/orpc'
 
 const Time = ({ ...props }: any) => {
     const initialValue = props.getValue()
@@ -38,15 +38,10 @@ const columnHelper = createColumnHelper<NextRaceDataType>()
 
 const UpcomingRacesTable = () => {
     const session = useLoaderData({ from: `__root__` })
-    const { todaysRaces, todaysRacesIsError, todaysRacesIsValidating, mutateTodaysRaces } = Fetcher.GetTodaysRaceByClubId(session?.club?.id)
-    const [sorting, setSorting] = useState<SortingState>([{ id: 'number', desc: false }])
-    const [data, setData] = useState<NextRaceDataType[]>([])
+    // const { todaysRaces, todaysRacesIsError, todaysRacesIsValidating, mutateTodaysRaces } = Fetcher.GetTodaysRaceByClubId(session?.club?.id)
+    const { data: data, isLoading } = useQuery(orpcClient.todaysRaces.queryOptions({ input: { clubId: session?.club?.id! } }))
 
-    useEffect(() => {
-        if (todaysRaces) {
-            setData(todaysRaces)
-        }
-    }, [todaysRaces])
+    const [sorting, setSorting] = useState<SortingState>([{ id: 'number', desc: false }])
 
     var table = useReactTable({
         data,

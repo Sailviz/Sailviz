@@ -1,6 +1,7 @@
 import { implement, ORPCError } from "@orpc/server";
 import { ORPCcontract } from "./contract";
 import prisma from "@sailviz/db";
+import { findTodaysRace } from "./routes/todaysRaces";
 const os = implement(ORPCcontract);
 
 const hello = os.hello.handler(({ input }) => {
@@ -22,7 +23,18 @@ const getGlobalLaps = os.getGlobalLaps.handler(async ({ context }) => {
   }
 });
 
+const todaysRaces = os.todaysRaces.handler(async ({ input }) => {
+  const races = await findTodaysRace(input.clubId);
+  console.log(races);
+  if (races) {
+    return races;
+  } else {
+    throw new ORPCError("BAD_REQUEST");
+  }
+});
+
 export const mainRouter = os.router({
   hello,
   getGlobalLaps,
+  todaysRaces,
 });

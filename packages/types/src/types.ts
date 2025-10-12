@@ -1,3 +1,5 @@
+import z from "zod";
+
 export type RaceDataType = {
   id: string;
   number: number;
@@ -87,6 +89,18 @@ export type NextRaceDataType = {
     id: string;
   };
 };
+
+export const NextRaceSchema = z.object({
+  id: z.string(),
+  number: z.number(),
+  Time: z.string(),
+  series: z.object({
+    name: z.string(),
+    id: z.string(),
+  }),
+});
+
+export type NextRaceType = z.infer<typeof NextRaceSchema>;
 
 export type RaceSettingsType = {
   numberToCount: number;
