@@ -1,8 +1,6 @@
-'use client'
 import { Button } from '@components/ui/button'
-import { useSession } from '@sailviz/auth/client'
 
-import { Link, useLoaderData } from '@tanstack/react-router'
+import { useLoaderData } from '@tanstack/react-router'
 import { PageSkeleton } from '../PageSkeleton'
 
 export default function HornTestButton() {

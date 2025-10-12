@@ -41,3 +41,46 @@ export async function findTodaysRace(clubId: string) {
   });
   return result;
 }
+
+export async function findRaces(
+  seriesId: string[],
+  skip: number,
+  take: number,
+  date: string,
+  historical: boolean
+) {
+  var result = await prisma.race.findMany({
+    skip: skip,
+    take: take,
+    where: {
+      seriesId: {
+        in: seriesId,
+      },
+      ...(historical ? { Time: { lte: date } } : { Time: { gte: date } }),
+    },
+    include: {
+      series: true,
+      fleets: true,
+    },
+    orderBy: {
+      Time: historical ? "desc" : "asc",
+    },
+  });
+  return result;
+}
+
+export async function countRaces(
+  seriesId: string[],
+  date: string,
+  historical: boolean
+) {
+  var result = await prisma.race.count({
+    where: {
+      seriesId: {
+        in: seriesId,
+      },
+      ...(historical ? { Time: { lte: date } } : { Time: { gte: date } }),
+    },
+  });
+  return result;
+}

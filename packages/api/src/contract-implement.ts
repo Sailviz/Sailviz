@@ -1,7 +1,10 @@
 import { implement, ORPCError } from "@orpc/server";
 import { ORPCcontract } from "./contract";
 import prisma from "@sailviz/db";
-import { findTodaysRace } from "./routes/todaysRaces";
+import { countRaces, findRaces, findTodaysRace } from "./routes/race";
+import { findSeries } from "./routes/series";
+import z from "zod";
+import { RaceSchema } from "packages/types/src/types";
 const os = implement(ORPCcontract);
 
 const hello = os.hello.handler(({ input }) => {
@@ -33,8 +36,41 @@ const todaysRaces = os.todaysRaces.handler(async ({ input }) => {
   }
 });
 
+const racebyClubId = os.racebyClubId.handler(async ({ input }) => {
+  const series = await findSeries(input.clubId);
+
+  if (!series || series.length === 0) {
+    throw new ORPCError("NOT_FOUND");
+  }
+
+  const count = await countRaces(
+    series.map((s) => s.id),
+    input.date,
+    input.historical
+  );
+  const races = await findRaces(
+    series.map((s) => s.id),
+    input.page ?? 0,
+    100,
+    input.date,
+    input.historical ?? false
+  );
+  return { races, count };
+});
+
+const seriesbyClubId = os.seriesbyClubId.handler(async ({ input }) => {
+  const series = await findSeries(input.clubId);
+  if (series) {
+    return series;
+  } else {
+    throw new ORPCError("BAD_REQUEST");
+  }
+});
+
 export const mainRouter = os.router({
   hello,
   getGlobalLaps,
   todaysRaces,
+  racebyClubId,
+  seriesbyClubId,
 });

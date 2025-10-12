@@ -39,9 +39,16 @@ const columnHelper = createColumnHelper<NextRaceDataType>()
 const UpcomingRacesTable = () => {
     const session = useLoaderData({ from: `__root__` })
     // const { todaysRaces, todaysRacesIsError, todaysRacesIsValidating, mutateTodaysRaces } = Fetcher.GetTodaysRaceByClubId(session?.club?.id)
-    const { data: data, isLoading } = useQuery(orpcClient.todaysRaces.queryOptions({ input: { clubId: session?.club?.id! } }))
+    const { data: todaysRaces } = useQuery(orpcClient.todaysRaces.queryOptions({ input: { clubId: session?.club?.id! } }))
 
     const [sorting, setSorting] = useState<SortingState>([{ id: 'number', desc: false }])
+    const [data, setData] = useState<NextRaceDataType[]>([])
+
+    useEffect(() => {
+        if (todaysRaces) {
+            setData(todaysRaces)
+        }
+    }, [todaysRaces])
 
     var table = useReactTable({
         data,

@@ -26,7 +26,7 @@ export const navCollections: NavCollection[] = [
         items: [
             {
                 title: 'Races',
-                url: '/Race',
+                url: '/Dashboard/Race',
                 icon: <RaceIcon />,
                 shortcut: ['p', 'p'],
                 isActive: false,
@@ -34,7 +34,7 @@ export const navCollections: NavCollection[] = [
             },
             {
                 title: 'Series',
-                url: '/Series',
+                url: '/Dashboard/Series',
                 icon: <SeriesIcon />,
                 shortcut: ['e', 'e'],
                 isActive: false,
@@ -42,7 +42,7 @@ export const navCollections: NavCollection[] = [
             },
             {
                 title: 'User Guide',
-                url: '/Documentation',
+                url: '/Dashboard/Documentation',
                 icon: <DocsIcon />,
                 shortcut: ['e', 'e'],
                 isActive: false,

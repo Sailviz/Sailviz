@@ -1,31 +1,13 @@
 'use client'
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import dayjs from 'dayjs'
-import {
-    createColumnHelper,
-    flexRender,
-    getCoreRowModel,
-    getPaginationRowModel,
-    getSortedRowModel,
-    PaginationState,
-    RowSelection,
-    SortingState,
-    useReactTable
-} from '@tanstack/react-table'
-
-import { EyeIcon } from '@components/icons/eye-icon'
-import { useNavigate } from '@tanstack/react-router'
-import { useTheme } from 'next-themes'
-import * as Fetcher from '@components/Fetchers'
-import useSWR, { mutate } from 'swr'
+import { createColumnHelper, flexRender, getCoreRowModel, type PaginationState, useReactTable } from '@tanstack/react-table'
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
 import { Button } from '../ui/button'
-import { Input } from '../ui/input'
-import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from '../ui/dropdown-menu'
-import { ChevronDown } from 'lucide-react'
 import { Link } from '@tanstack/react-router'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select'
+import { useQuery } from '@tanstack/react-query'
+import { orpcClient } from '@lib/orpc'
 
 const Time = ({ ...props }: any) => {
     const initialValue = props.getValue()
@@ -44,7 +26,7 @@ const Time = ({ ...props }: any) => {
 const Race = ({ ...props }: any) => {
     const initialValue = props.getValue()
     const [value, setValue] = React.useState(initialValue)
-
+    console.log(initialValue)
     React.useEffect(() => {
         setValue(initialValue)
     }, [initialValue])
@@ -56,8 +38,6 @@ const Race = ({ ...props }: any) => {
 }
 
 const Action = ({ viewHref, raceId }: { viewHref: string; raceId: string }) => {
-    const navigate = useNavigate()
-
     return (
         <Link to={viewHref + raceId} className='text-default-900 cursor-pointer'>
             <Button variant='outline' className='w-16 h-8 p-0'>
@@ -71,12 +51,12 @@ const columnHelper = createColumnHelper<RaceDataType>()
 
 const RacesTable = ({ date, historical, viewHref, clubId }: { date: Date; historical: boolean; viewHref: string; clubId: string }) => {
     const [page, setPage] = useState(1)
-    const {
-        data: races,
-        error: racesIsError,
-        isValidating: racesIsValidating
-    } = useSWR(`/api/GetRacesByClubId?id=${clubId || ''}&page=${page}&date=${date}&historical=${historical}`, Fetcher.fetcher)
-
+    // const {
+    //     data: races,
+    //     error: racesIsError,
+    //     isValidating: racesIsValidating
+    // } = useSWR(`/api/GetRacesByClubId?id=${clubId || ''}&page=${page}&date=${date}&historical=${historical}`, Fetcher.fetcher)
+    const { data: races } = useQuery(orpcClient.racebyClubId.queryOptions({ input: { clubId: clubId!, date: date.toISOString(), historical: historical, page: page } }))
     const [data, setData] = useState<RaceDataType[]>([])
     const [count, setCount] = useState(0)
     const rowsPerPage = 10

@@ -1,17 +1,14 @@
 import RacesTable from '@components/tables/RacesTable'
 import { title } from '@components/layout/home/primitaves'
 import UpcomingRacesTable from '@components/tables/UpcomingRacesTable'
-import { redirect } from 'next/navigation'
-import { auth } from '@lib/auth'
-import { headers } from 'next/headers'
-import { PageSkeleton } from '@components/layout/PageSkeleton'
-import prisma from '@lib/prisma'
-import dayjs from 'dayjs'
 
-export default async function Page() {
-    const session = await auth.api.getSession({
-        headers: await headers() // you need to pass the headers object.
-    })
+import { PageSkeleton } from '@components/layout/PageSkeleton'
+
+import { createFileRoute, useLoaderData } from '@tanstack/react-router'
+
+export default function Page() {
+    const session = useLoaderData({ from: `__root__` })
+
     console.log('Session:', session)
     if (!session || !session.club) {
         // If the user is not authenticated, redirect to the login page
@@ -40,3 +37,7 @@ export default async function Page() {
         </div>
     )
 }
+
+export const Route = createFileRoute('/Dashboard/Race/')({
+    component: Page
+})

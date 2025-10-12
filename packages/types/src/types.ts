@@ -1,15 +1,60 @@
 import z from "zod";
 
-export type RaceDataType = {
-  id: string;
-  number: number;
-  Time: string;
-  Duties: DutyDataType[];
-  Type: string;
-  fleets: FleetDataType[];
-  seriesId: string;
-  series: SeriesDataType;
-};
+export const DutySchema = z.json();
+export type DutyType = z.infer<typeof DutySchema>;
+
+export const LapSchema = z.object({
+  id: z.string(),
+  resultId: z.string(),
+  time: z.number(),
+});
+export type LapType = z.infer<typeof LapSchema>;
+
+export const ResultSchema = z.object({
+  id: z.string(),
+  fleetId: z.string(),
+  Helm: z.string(),
+  Crew: z.string(),
+  SailNumber: z.string(),
+  finishTime: z.number(),
+  numberLaps: z.number(),
+  laps: LapSchema.array(),
+  CorrectedTime: z.number(),
+  PursuitPosition: z.number(),
+  HandicapPosition: z.number(),
+  resultCode: z.string(),
+});
+export type ResultType = z.infer<typeof ResultSchema>;
+
+export const FleetSchema = z.object({
+  id: z.string(),
+  raceId: z.string(),
+  startTime: z.number(),
+  fleetSettings: z.any(),
+  results: ResultSchema.array(),
+});
+export type FleetType = z.infer<typeof FleetSchema>;
+
+export const SeriesSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  clubId: z.string(),
+  settings: z.any(),
+  races: z.array(z.lazy(() => RaceSchema)).optional(),
+  fleetSettings: z.array(z.any()).optional(),
+});
+
+export const RaceSchema = z.object({
+  id: z.string(),
+  number: z.number(),
+  Time: z.string(),
+  Duties: DutySchema,
+  Type: z.string(),
+  fleets: z.array(z.any()),
+  seriesId: z.string(),
+  series: z.lazy(() => SeriesSchema.optional()),
+});
+export type RaceDataType = z.infer<typeof RaceSchema>;
 
 export type GlobalConfigType = {
   demoClubId: string;
@@ -17,46 +62,16 @@ export type GlobalConfigType = {
   demoDataId: string;
   demoUUID: string;
 };
-export type DutyDataType = {
-  displayName: string;
-  name: string;
-};
 
 export type SeriesSettingsType = {
   numberToCount: number;
   pursuitLength: number;
 };
 
-export type SeriesDataType = {
-  id: string;
-  name: string;
-  clubId: string;
-  settings: SeriesSettingsType;
-  races: RaceDataType[];
-  fleetSettings: FleetSettingsType[];
-};
-
 export type FleetSettingsType = {
   id: string;
   name: string;
   boats: BoatDataType[];
-  fleets: FleetDataType[];
-};
-
-export type ResultDataType = {
-  id: string;
-  fleetId: string;
-  Helm: string;
-  Crew: string;
-  boat: BoatDataType;
-  SailNumber: string;
-  finishTime: number;
-  numberLaps: number;
-  laps: LapDataType[];
-  CorrectedTime: number;
-  PursuitPosition: number;
-  HandicapPosition: number;
-  resultCode: string;
 };
 
 export type StartSequenceStep = {
@@ -72,22 +87,6 @@ export type StartSequenceStep = {
 export type FlagStatusType = {
   flag: string;
   status: boolean;
-};
-
-export type LapDataType = {
-  id: string;
-  resultId: string;
-  time: number;
-};
-
-export type NextRaceDataType = {
-  id: string;
-  number: number;
-  Time: string;
-  series: {
-    name: string;
-    id: string;
-  };
 };
 
 export const NextRaceSchema = z.object({
@@ -132,7 +131,7 @@ export type ClubDataType = {
   name: string;
   displayName: string;
   settings: ClubSettingsType;
-  series: SeriesDataType[];
+  // series: SeriesDataType[]; this is needed, just commented out because it hasn't been implemented yet
   boats: BoatDataType[];
   stripe: Stripe;
 };
@@ -169,14 +168,6 @@ export type RoleDataType = {
 export type PermissionType = {
   value: string;
   label: string;
-};
-
-export type FleetDataType = {
-  id: string;
-  raceId: string;
-  startTime: number;
-  fleetSettings: FleetSettingsType;
-  results: ResultDataType[];
 };
 
 export type AuthedUserDataType = {
