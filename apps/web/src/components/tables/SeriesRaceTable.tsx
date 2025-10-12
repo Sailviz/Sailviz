@@ -10,7 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '.
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select'
-import { useSession } from '@lib/auth-client'
+import { useSession } from '@sailviz/auth/client'
 
 const raceOptions = [
     { value: 'Pursuit', label: 'Pursuit' },

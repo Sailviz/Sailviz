@@ -4,12 +4,13 @@ import { Dialog, DialogContent, DialogFooter, DialogTitle, DialogTrigger } from 
 import { Input } from '@components/ui/input'
 import { useEffect, useState } from 'react'
 import * as DB from '@components/apiMethods'
-import { useSession } from '@lib/auth-client'
+import { useSession } from '@sailviz/auth/client'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select'
 import dayjs from 'dayjs'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@components/ui/table'
 import { createColumnHelper, flexRender, getCoreRowModel, getFilteredRowModel, useReactTable } from '@tanstack/react-table'
 import { getFiveStartSequence, getThreeStartSequence } from '@components/helpers/startSequence'
+import { useLoaderData } from '@tanstack/react-router'
 
 type Race = {
     number: number
@@ -133,12 +134,7 @@ const Action = ({ number, removeRace }: { number: number; removeRace: any }) => 
 const columnHelper = createColumnHelper<Race>()
 
 export default function CreateEventDialog() {
-    const {
-        data: session,
-        isPending, //loading state
-        error, //error object
-        refetch //refetch the session
-    } = useSession()
+    const session = useLoaderData({ from: `__root__` })
 
     const [races, setRaces] = useState<Race[]>([{ number: 1, time: dayjs().format('YYYY-MM-DD HH:mm'), type: 'Handicap' }])
     const [name, setName] = useState('New Series')
@@ -191,7 +187,7 @@ export default function CreateEventDialog() {
     const createEvent = async (events: Race[]) => {
         console.log('Creating event', events)
         //create series
-        const res = await DB.createSeries(session?.user.clubId!, name) // this adds a single fleet to the series by default
+        const res = await DB.createSeries(session?.user.cludId!, name) // this adds a single fleet to the series by default
         if (!res) {
             console.error('Failed to create series')
             return

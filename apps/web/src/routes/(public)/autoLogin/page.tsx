@@ -1,7 +1,7 @@
 'use client'
 import React, { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { client } from '@lib/auth-client'
+import { client } from '@sailviz/auth/client'
 import { method } from 'cypress/types/bluebird'
 import { useNavigate } from '@tanstack/react-router'
 export default function Page() {

@@ -1,25 +1,27 @@
-'use client'
 import React from 'react'
 import { Button } from './ui/button'
-import { useRouter } from 'next/navigation'
 import BackButton from './layout/backButton'
-class ErrorBoundary extends React.Component {
-    constructor(props) {
+type ErrorBoundaryState = {
+    hasError: boolean
+}
+
+class ErrorBoundary extends React.Component<React.PropsWithChildren<{}>, ErrorBoundaryState> {
+    constructor(props: React.PropsWithChildren<{}>) {
         super(props)
 
         // Define a state variable to track whether is an error or not
         this.state = { hasError: false }
     }
-    static getDerivedStateFromError(error) {
+    static getDerivedStateFromError() {
         // Update state so the next render will show the fallback UI
 
         return { hasError: true }
     }
-    componentDidCatch(error, errorInfo) {
+    componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
         // You can use your own error logging service here
         console.log({ error, errorInfo })
-        document.getElementById('errorcode').innerHTML = error.toString()
-        document.getElementById('errorinfo').innerHTML = errorInfo.errorInfo
+        document.getElementById('errorcode')!.innerHTML = error.toString()
+        document.getElementById('errorinfo')!.innerHTML = errorInfo.componentStack!
     }
     render() {
         // Check if the error is thrown

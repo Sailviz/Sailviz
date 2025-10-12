@@ -8,7 +8,7 @@ import { AVAILABLE_PERMISSIONS, userHasPermission } from '@components/helpers/us
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
 import { Input } from '../ui/input'
 import { Link } from '@tanstack/react-router'
-import { useSession } from '@lib/auth-client'
+import { useSession } from '@sailviz/auth/client'
 import * as DB from '@components/apiMethods'
 import { Button } from '../ui/button'
 import EditBoatDialog from '../layout/dashboard/EditBoatModal'

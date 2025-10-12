@@ -2,7 +2,7 @@
 import { title } from '@components/layout/home/primitaves'
 import { Button } from '@components/ui/button'
 import { Input } from '@components/ui/input'
-import { useSession } from '@lib/auth-client'
+import { useSession } from '@sailviz/auth/client'
 import { useEffect, useState } from 'react'
 import * as Fetcher from '@components/Fetchers'
 import * as DB from '@components/apiMethods'

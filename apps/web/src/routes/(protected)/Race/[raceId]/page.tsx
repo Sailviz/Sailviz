@@ -12,7 +12,7 @@ import { Link } from '@tanstack/react-router'
 import { EntryFileUpload } from '@components/EntryFileUpload'
 
 import * as Fetcher from '@components/Fetchers'
-import { useSession } from '@lib/auth-client'
+import { useSession } from '@sailviz/auth/client'
 import { PageSkeleton } from '@components/layout/PageSkeleton'
 import CreateResultModal from '@components/layout/dashboard/CreateResultModal'
 import { calculateResults } from '@components/helpers/race'

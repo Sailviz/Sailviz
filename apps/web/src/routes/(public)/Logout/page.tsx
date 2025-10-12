@@ -1,5 +1,5 @@
 'use client'
-import { getSession, signOut } from '@lib/auth-client'
+import { getSession, signOut } from '@sailviz/auth/client'
 import { redirect } from 'next/navigation'
 
 export default function LogoutPage() {

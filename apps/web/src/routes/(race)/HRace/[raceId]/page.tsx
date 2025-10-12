@@ -16,7 +16,7 @@ import { DropdownMenu, DropdownMenuItem } from '@components/ui/dropdown-menu'
 import { DropdownMenuContent, DropdownMenuTrigger } from '@radix-ui/react-dropdown-menu'
 import { CaretDownIcon } from '@radix-ui/react-icons'
 import FleetSelectDialog from '@components/layout/dashboard/FleetSelectModal'
-import { useSession } from '@lib/auth-client'
+import { useSession } from '@sailviz/auth/client'
 
 // these options are the same across all fleets
 enum raceStateType {

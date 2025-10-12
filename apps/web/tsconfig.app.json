@@ -7,7 +7,8 @@
             "@lib*": ["src/lib/*"],
             "@sailviz/auth": ["../../packages/auth/src"],
             "@sailviz/auth/*": ["../../packages/auth/src/*"],
-            "@sailviz/api/*": ["../../packages/api/src/*"]
+            "@sailviz/api/*": ["../../packages/api/src/*"],
+            "@hooks*": ["src/hooks/*"]
         },
         "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
         "target": "ES2022",

@@ -2,7 +2,7 @@
 
 import * as Fetcher from '@components/Fetchers'
 import SignOnTable from '@components/tables/SignOnTable'
-import { useSession } from '@lib/auth-client'
+import { useSession } from '@sailviz/auth/client'
 import { PageSkeleton } from '../PageSkeleton'
 import CreateResultModal from './CreateResultModal'
 export default function SignOnView() {

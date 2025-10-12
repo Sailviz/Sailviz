@@ -1,4 +1,3 @@
-'use client'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@components/ui/collapsible'
 
 import {
@@ -17,10 +16,8 @@ import {
     SidebarRail,
     useSidebar
 } from '@components/ui/sidebar'
-import { ChevronRight, ChevronsUpDown, CreditCard, GalleryVerticalEnd, LogOut, LogOutIcon } from 'lucide-react'
+import { ChevronRight, GalleryVerticalEnd } from 'lucide-react'
 import { Link } from '@tanstack/react-router'
-import { usePathname } from 'next/navigation'
-import * as React from 'react'
 import { SailVizIcon } from '../icons/sailviz-icon'
 import { ThemeSwitcher } from '../ui/ThemeSwitcher'
 
@@ -31,8 +28,8 @@ export const company = {
 }
 
 export default function AppSidebar({ navCollections }: { navCollections: NavCollection[] }) {
-    const pathname = usePathname()
-    const { state, isMobile } = useSidebar()
+    const pathname = window.location.pathname
+    // const { state, isMobile } = useSidebar()
 
     return (
         <Sidebar className='border-r-2'>

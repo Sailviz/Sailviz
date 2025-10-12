@@ -10,7 +10,7 @@ import { Input } from '../ui/input'
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from '../ui/dropdown-menu'
 import { ChevronDown } from 'lucide-react'
 import { Link } from '@tanstack/react-router'
-import { useSession } from '@lib/auth-client'
+import { useSession } from '@sailviz/auth/client'
 
 const columnHelper = createColumnHelper<TrackerDataType>()
 

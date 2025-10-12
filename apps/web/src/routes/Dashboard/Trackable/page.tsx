@@ -8,7 +8,7 @@ import TrackerStatusModal from '@components/layout/dashboard/TrackerStatusModal'
 import * as Trackable from '@components/trackable'
 import { useState } from 'react'
 import { Button } from '@components/ui/button'
-import { useSession } from '@lib/auth-client'
+import { useSession } from '@sailviz/auth/client'
 
 export default function Page() {
     const {

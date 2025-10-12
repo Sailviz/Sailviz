@@ -5,7 +5,7 @@ import { AVAILABLE_PERMISSIONS, userHasPermission } from '@components/helpers/us
 import { useNavigate } from '@tanstack/react-router'
 import * as DB from '@components/apiMethods'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
-import { useSession } from '@lib/auth-client'
+import { useSession } from '@sailviz/auth/client'
 import * as Fetcher from '@components/Fetchers'
 import { mutate } from 'swr'
 import { Button } from '../ui/button'

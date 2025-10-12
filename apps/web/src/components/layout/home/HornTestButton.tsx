@@ -1,18 +1,13 @@
 'use client'
 import { Button } from '@components/ui/button'
-import { useSession } from '@lib/auth-client'
+import { useSession } from '@sailviz/auth/client'
 
-import { Link } from '@tanstack/react-router'
+import { Link, useLoaderData } from '@tanstack/react-router'
 import { PageSkeleton } from '../PageSkeleton'
 
 export default function HornTestButton() {
     const controller = new AbortController()
-    const {
-        data: session,
-        isPending, //loading state
-        error, //error object
-        refetch //refetch the session
-    } = useSession()
+    const session = useLoaderData({ from: `__root__` })
     console.log('Session:', session)
     if (!session) {
         // If the user is not authenticated, redirect to the login page

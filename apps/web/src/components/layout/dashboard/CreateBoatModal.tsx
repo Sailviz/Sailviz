@@ -6,7 +6,7 @@ import { Input } from '@components/ui/input'
 import { useNavigate } from '@tanstack/react-router'
 import * as DB from '@components/apiMethods'
 import { mutate } from 'swr'
-import { useSession } from '@lib/auth-client'
+import { useSession } from '@sailviz/auth/client'
 export default function CreateBoatDialog() {
     const {
         data: session,

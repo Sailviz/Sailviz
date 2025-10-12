@@ -11,7 +11,7 @@ import { mutate } from 'swr'
 import EditRoleModal from '@components/layout/dashboard/EditRoleModal'
 import { AVAILABLE_PERMISSIONS, userHasPermission } from '@components/helpers/users'
 import { Button } from '@components/ui/button'
-import { useSession } from '@lib/auth-client'
+import { useSession } from '@sailviz/auth/client'
 
 export default function Page() {
     const navigate = useNavigate()

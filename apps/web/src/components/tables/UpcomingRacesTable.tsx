@@ -1,20 +1,12 @@
 'use client'
-import React, { ChangeEvent, useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import dayjs from 'dayjs'
-import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, RowSelection, SortingState, useReactTable } from '@tanstack/react-table'
-import * as DB from '@components/apiMethods'
-import Select, { CSSObjectWithLabel } from 'react-select'
-import { VerticalDotsIcon } from '@components/icons/vertical-dots-icon'
-import { EyeIcon } from '@components/icons/eye-icon'
-import { EditIcon } from '@components/icons/edit-icon'
-import { DeleteIcon } from '@components/icons/delete-icon'
-import { useNavigate } from '@tanstack/react-router'
-import { useTheme } from 'next-themes'
+import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, type SortingState, useReactTable } from '@tanstack/react-table'
+import { useLoaderData, useNavigate } from '@tanstack/react-router'
 import * as Fetcher from '@components/Fetchers'
-import { PageSkeleton } from '@components/layout/PageSkeleton'
 import { Button } from '../ui/button'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
-import { useSession } from '@lib/auth-client'
+import { useSession } from '@sailviz/auth/client'
 
 const Time = ({ ...props }: any) => {
     const initialValue = props.getValue()
@@ -45,12 +37,7 @@ const Action = ({ ...props }: any) => {
 const columnHelper = createColumnHelper<NextRaceDataType>()
 
 const UpcomingRacesTable = () => {
-    const {
-        data: session,
-        isPending, //loading state
-        error, //error object
-        refetch //refetch the session
-    } = useSession()
+    const session = useLoaderData({ from: `__root__` })
     const { todaysRaces, todaysRacesIsError, todaysRacesIsValidating, mutateTodaysRaces } = Fetcher.GetTodaysRaceByClubId(session?.club?.id)
     const [sorting, setSorting] = useState<SortingState>([{ id: 'number', desc: false }])
     const [data, setData] = useState<NextRaceDataType[]>([])

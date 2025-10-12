@@ -1,25 +1,16 @@
-import { redirect } from 'next/navigation'
-import * as DB from '@components/apiMethods'
-import * as Fetcher from '@components/Fetchers'
 import UpcomingRacesTable from '@components/tables/UpcomingRacesTable'
 import { PageSkeleton } from '@components/layout/PageSkeleton'
-import CreateEventModal from '@components/layout/dashboard/CreateEventModal'
-import { title } from '../../../components/layout/home/primitaves'
+import { title } from '@components/layout/home/primitaves'
 
 import { Button } from '@components/ui/button'
-import { Link } from '@tanstack/react-router'
+import { createFileRoute, Link, useLoaderData } from '@tanstack/react-router'
 import HornTestButton from '@components/layout/home/HornTestButton'
-import { headers } from 'next/headers'
-import { auth } from '@lib/auth'
-import prisma from '@lib/prisma'
-import dayjs from 'dayjs'
+
 import CreateEventDialog from '@components/layout/dashboard/CreateEventModal'
-export default async function Page() {
-    const session = await auth.api.getSession({
-        headers: await headers() // you need to pass the headers object.
-    })
-    console.log('Session:', session)
-    console.log('Session Club:', session?.club)
+
+function Page() {
+    const session = useLoaderData({ from: `__root__` })
+    console.log('Session in Dashboard:', session)
     if (!session || !session.club) {
         // If the user is not authenticated, redirect to the login page
         return <PageSkeleton />
@@ -58,3 +49,7 @@ export default async function Page() {
         </div>
     )
 }
+
+export const Route = createFileRoute('/Dashboard/')({
+    component: Page
+})

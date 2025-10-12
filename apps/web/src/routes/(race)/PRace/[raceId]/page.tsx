@@ -13,7 +13,7 @@ import BoatCard from '@components/layout/race/BoatCard'
 import { result, set } from 'cypress/types/lodash'
 import FlagModal from '@components/layout/dashboard/Flag Modal'
 import { Button } from '@components/ui/button'
-import { useSession } from '@lib/auth-client'
+import { useSession } from '@sailviz/auth/client'
 
 enum raceStateType {
     running,

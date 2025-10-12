@@ -1,6 +1,3 @@
-// app/components/ThemeSwitcher.tsx
-'use client'
-
 import { MoonIcon } from '@components/icons/moon-icon'
 import { SunIcon } from '@components/icons/sun-icon'
 import { useTheme } from 'next-themes'

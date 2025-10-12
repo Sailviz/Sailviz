@@ -4,7 +4,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Button } from './ui/button'
 import * as DB from '@components/apiMethods'
 import * as Fetcher from '@components/Fetchers'
-import { useSession } from '@lib/auth-client'
+import { useSession } from '@sailviz/auth/client'
 
 export function AddRaceButton({ seriesId }: { seriesId: string }) {
     const {

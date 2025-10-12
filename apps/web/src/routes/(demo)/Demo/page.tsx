@@ -4,7 +4,7 @@ import { useNavigate } from '@tanstack/react-router'
 import * as DB from '@components/apiMethods'
 import cookie from 'js-cookie'
 import * as Fetcher from '@components/Fetchers'
-import { client, useSession } from '@lib/auth-client'
+import { client, useSession } from '@sailviz/auth/client'
 
 export default function Page() {
     const navigate = useNavigate()

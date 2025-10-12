@@ -7,7 +7,7 @@ import { AVAILABLE_PERMISSIONS, userHasPermission } from '@components/helpers/us
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
 import { useNavigate } from '@tanstack/react-router'
 import { Link } from '@tanstack/react-router'
-import { useSession } from '@lib/auth-client'
+import { useSession } from '@sailviz/auth/client'
 import * as DB from '@components/apiMethods'
 import { mutate } from 'swr'
 import { Button } from '../ui/button'

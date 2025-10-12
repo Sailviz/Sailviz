@@ -45,12 +45,6 @@ export const auth = betterAuth({
   ],
   user: {
     additionalFields: {
-      clubId: {
-        type: "string",
-        required: true,
-        defaultValue: null,
-        input: false,
-      },
       startPage: {
         type: "string",
         required: true,
@@ -58,6 +52,12 @@ export const auth = betterAuth({
         input: false,
       },
     },
+  },
+  club: {
+    type: "json",
+    required: true,
+    defaultValue: null,
+    input: false,
   },
   session: {
     cookieCache: {

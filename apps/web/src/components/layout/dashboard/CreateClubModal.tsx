@@ -6,7 +6,7 @@ import { Input } from '@components/ui/input'
 import { Button } from '@components/ui/button'
 import { mutate } from 'swr'
 import * as DB from '@components/apiMethods'
-import { signUp } from '@lib/auth-client'
+import { signUp } from '@sailviz/auth/client'
 export default function CreateClubModal() {
     const [clubName, setClubName] = useState('')
     const [adminName, setAdminName] = useState('')

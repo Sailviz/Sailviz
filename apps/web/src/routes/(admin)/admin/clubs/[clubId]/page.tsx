@@ -1,7 +1,7 @@
 'use client'
 import { title } from '@components/layout/home/primitaves'
 import * as fetcher from '@components/Fetchers'
-import { useSession } from '@lib/auth-client'
+import { useSession } from '@sailviz/auth/client'
 import { use } from 'react'
 import { Card, CardContent } from '@components/ui/card'
 import { Button } from '@components/ui/button'

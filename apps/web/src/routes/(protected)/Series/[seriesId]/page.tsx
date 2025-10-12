@@ -14,7 +14,7 @@ import { Button } from '@components/ui/button'
 import StartSequenceManager from '@components/StartSequenceManager'
 import { PageSkeleton } from '@components/layout/PageSkeleton'
 import prisma from '@lib/prisma'
-import { useSession } from '@lib/auth-client'
+import { useSession } from '@sailviz/auth/client'
 import { SeriesPursuitLength } from '@components/seriesPursuitLength'
 
 type PageProps = { params: Promise<{ seriesId: string }> }

@@ -13,7 +13,7 @@ import CreateBoatModal from '@components/layout/dashboard/CreateBoatModal'
 import { Button } from '@components/ui/button'
 import { Input } from '@components/ui/input'
 import { Link } from '@tanstack/react-router'
-import { useSession } from '@lib/auth-client'
+import { useSession } from '@sailviz/auth/client'
 import CreateBoatDialog from '@components/layout/dashboard/CreateBoatModal'
 
 export default function Page() {

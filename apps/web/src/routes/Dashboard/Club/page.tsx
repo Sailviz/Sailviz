@@ -10,7 +10,7 @@ import { EditIcon } from '@components/icons/edit-icon'
 import { Input } from '@components/ui/input'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@components/ui/table'
 import { Button } from '@components/ui/button'
-import { useSession } from '@lib/auth-client'
+import { useSession } from '@sailviz/auth/client'
 
 export default function Page() {
     const navigate = useNavigate()

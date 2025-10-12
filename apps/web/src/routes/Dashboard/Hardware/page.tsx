@@ -8,7 +8,7 @@ import { AVAILABLE_PERMISSIONS, userHasPermission } from '@components/helpers/us
 import { title } from '../../../../components/layout/home/primitaves'
 import { Input } from '@components/ui/input'
 import { Button } from '@components/ui/button'
-import { useSession } from '@lib/auth-client'
+import { useSession } from '@sailviz/auth/client'
 
 export default function Page() {
     const navigate = useNavigate()
