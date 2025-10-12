@@ -15,7 +15,7 @@ export function Stats() {
                 <div className='grid grid-cols-1 lg:grid-cols-2 gap-10'>
                     <div className='flex gap-4 flex-col items-start'>
                         <div className='flex gap-2 flex-col'>
-                            <h2 className='text-4xl md:text-6xl tracking-tighter font-bold text-left'>Trusted by Sailing Enthusiasts Worldwide</h2>
+                            <h2 className='text-4xl md:text-6xl tracking-tighter font-bold text-left'>Trusted by Many</h2>
                             <p className='text-lg lg:max-w-sm leading-relaxed tracking-tight text-muted-foreground text-left'>
                                 Simplify race management with a platform designed to make your life easier. Join the growing community of clubs and sailors who trust SailViz.
                             </p>

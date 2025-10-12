@@ -1,0 +1,16 @@
+{
+  "name": "@sailviz/types",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/types.ts",
+  "exports": {
+    ".": "./src/types.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.18.1",
+  "dependencies": {
+    "zod": "^4.1.12"
+  }
+}

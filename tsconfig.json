@@ -6,8 +6,9 @@
     "paths": {
       "@sailviz/db": ["packages/db/src"],
       "@sailviz/api/*": ["packages/api/src/*"],
-      "@sailviz/auth": ["packages/auth/src"],
-      "@sailviz/shared/*": ["packages/shared/*"]
+      "@sailviz/auth/*": ["packages/auth/src/*"],
+      "@sailviz/shared/*": ["packages/shared/*"],
+      "@sailviz/types": ["packages/types/"]
     }
   }
 }

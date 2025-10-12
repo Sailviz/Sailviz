@@ -3,8 +3,10 @@ import { prismaAdapter } from "better-auth/adapters/prisma";
 import prisma from "@sailviz/db";
 import { customSession, username } from "better-auth/plugins";
 import { myPluginClient } from "./client-plugin";
+import type { UserDataType, ClubDataType } from "@sailviz/types";
 
 export const auth = betterAuth({
+  trustedOrigins: ["http://localhost:3000", "http://localhost:5173"],
   plugins: [
     username(),
     customSession(async ({ user, session }) => {
