@@ -1,8 +1,14 @@
 // contract.ts
 import { oc } from "@orpc/contract";
 import { date, z } from "zod";
-import { NextRaceSchema, RaceSchema, SeriesSchema } from "@sailviz/types";
+import {
+  FleetSchema,
+  NextRaceSchema,
+  RaceSchema,
+  SeriesSchema,
+} from "@sailviz/types";
 import { count } from "console";
+import { Fleet } from "packages/db/src/generated";
 const helloSchema = z.object({
   name: z.string(),
   message: z.string(),
@@ -31,4 +37,7 @@ export const ORPCcontract = {
     .output(SeriesSchema.array()),
   racebyId: oc.input(z.object({ raceId: z.string() })).output(RaceSchema),
   boats: oc.output(z.array(z.any())), //need to define BoatSchema
+  fleetbyId: oc
+    .input(z.object({ fleetId: z.string() }))
+    .output<typeof FleetSchema>(FleetSchema),
 };

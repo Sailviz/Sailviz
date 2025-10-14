@@ -9,8 +9,6 @@ import { Input } from '@components/ui/input'
 import { Button } from '@components/ui/button'
 import { createFileRoute, Link, useLoaderData } from '@tanstack/react-router'
 import { EntryFileUpload } from '@components/EntryFileUpload'
-
-import * as Fetcher from '@components/Fetchers'
 import { PageSkeleton } from '@components/layout/PageSkeleton'
 import CreateResultModal from '@components/layout/dashboard/CreateResultModal'
 import { calculateResults } from '@components/helpers/race'

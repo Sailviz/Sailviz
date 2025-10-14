@@ -6,6 +6,8 @@ import { findSeries } from "./routes/series";
 import { findBoats } from "./routes/boats";
 import { auth } from "@sailviz/auth/auth";
 import { RequestHeadersPluginContext } from "@orpc/server/plugins";
+import { findFleet } from "./routes/fleet";
+import { FleetType } from "packages/types/src/types";
 
 interface ORPCContext extends RequestHeadersPluginContext {
   req: Request;
@@ -111,6 +113,15 @@ const boats = os.boats.use(authMiddleware).handler(async ({ context }) => {
   }
 });
 
+const fleetbyId = os.fleetbyId.handler(async ({ input }) => {
+  const fleet = await findFleet(input.fleetId);
+  if (fleet) {
+    return fleet;
+  } else {
+    throw new ORPCError("NOT_FOUND");
+  }
+});
+
 export const mainRouter = os.router({
   hello,
   getGlobalLaps,
@@ -119,4 +130,5 @@ export const mainRouter = os.router({
   seriesbyClubId,
   racebyId,
   boats,
+  fleetbyId,
 });

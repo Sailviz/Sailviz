@@ -5,6 +5,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '.
 import { Button } from '../ui/button'
 import * as Fetcher from '@components/Fetchers'
 import { Link } from '@tanstack/react-router'
+import { useQuery } from '@tanstack/react-query'
+import { orpcClient } from '@liborpc'
 
 const Text = ({ value }: { value: string }) => {
     return <div className=' text-center'>{value}</div>
@@ -55,11 +57,12 @@ const View = ({ resultId }: { resultId: string }) => {
 const columnHelper = createColumnHelper<ResultDataType>()
 
 const FleetHandicapResultsTable = ({ fleetId, editable, showTime }: { fleetId: string; editable: boolean; showTime: boolean }) => {
-    const { fleet, fleetIsValidating, fleetIsError } = Fetcher.Fleet(fleetId)
+    const { data: fleet } = useQuery(orpcClient.fleetbyId.queryOptions({ input: { fleetId } }))
     let data = fleet?.results
     if (data == undefined) {
         data = []
     }
+
     let [startTime, setStartTime] = useState(fleet?.startTime || 0)
 
     const [sorting, setSorting] = useState<SortingState>([
@@ -140,8 +143,6 @@ const FleetHandicapResultsTable = ({ fleetId, editable, showTime }: { fleetId: s
     } else {
         columns.push(viewColumn)
     }
-
-    const loadingState = fleetIsValidating ? 'loading' : 'idle'
 
     let table = useReactTable({
         data,

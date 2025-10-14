@@ -5,6 +5,8 @@ import * as Fetcher from '@components/Fetchers'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
 import { Button } from '../ui/button'
 import { Link } from '@tanstack/react-router'
+import { useQuery } from '@tanstack/react-query'
+import { orpcClient } from '@liborpc'
 
 const Text = ({ value }: { value: string }) => {
     return <div>{value}</div>
@@ -24,7 +26,7 @@ const Edit = ({ result }: { result: ResultDataType }) => {
 const columnHelper = createColumnHelper<ResultDataType>()
 
 const FleetPursuitResultsTable = ({ fleetId, editable }: { fleetId: string; editable: boolean }) => {
-    const { fleet, fleetIsValidating, fleetIsError } = Fetcher.Fleet(fleetId)
+    const { data: fleet } = useQuery(orpcClient.fleetbyId.queryOptions({ input: { fleetId } }))
     let data = fleet?.results
     if (data == undefined) {
         data = []
