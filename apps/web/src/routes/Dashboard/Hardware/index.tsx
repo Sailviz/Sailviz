@@ -1,32 +1,28 @@
-'use client'
-import { ChangeEvent, MouseEventHandler, useEffect, useState } from 'react'
-import { useNavigate } from '@tanstack/react-router'
-import * as DB from '@components/apiMethods'
-import * as Fetcher from '@components/Fetchers'
+import { useEffect, useState } from 'react'
+import { createFileRoute, useLoaderData } from '@tanstack/react-router'
 import { PageSkeleton } from '@components/layout/PageSkeleton'
 import { AVAILABLE_PERMISSIONS, userHasPermission } from '@components/helpers/users'
-import { title } from '../../../../components/layout/home/primitaves'
+import { title } from '@components/layout/home/primitaves'
 import { Input } from '@components/ui/input'
 import { Button } from '@components/ui/button'
-import { useSession } from '@sailviz/auth/client'
+import { useMutation, useQuery } from '@tanstack/react-query'
+import { orpcClient } from '@lib/orpc'
+import { SaveButton } from '@components/ui/save-button'
 
 export default function Page() {
-    const navigate = useNavigate()
-    const {
-        data: session,
-        isPending, //loading state
-        error, //error object
-        refetch //refetch the session
-    } = useSession()
-    const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
+    const session = useLoaderData({ from: `__root__` })
+    const { data: club } = useQuery(orpcClient.club.session.queryOptions())
 
     const [clockIP, setClockIP] = useState('')
     const [clockOffset, setClockOffset] = useState('')
     const [hornIP, setHornIP] = useState('')
+    const clubMutation = useMutation(orpcClient.club.update.mutationOptions())
 
     const saveClubSettings = async () => {
-        console.log('ran')
-        await DB.UpdateClubById({ ...club, settings: { ...club.settings, clockIP: clockIP, clockOffset: parseInt(clockOffset), hornIP: hornIP } })
+        if (club == undefined) {
+            throw new Error('Club is undefined')
+        }
+        await clubMutation.mutateAsync({ ...club, settings: { ...club.settings, clockIP: clockIP, clockOffset: parseInt(clockOffset), hornIP: hornIP } })
     }
 
     useEffect(() => {
@@ -36,7 +32,7 @@ export default function Page() {
         setHornIP(club.settings.hornIP)
     }, [club])
 
-    if (clubIsValidating || clubIsError || club == undefined || session == undefined) {
+    if (club == undefined || session == undefined) {
         return <PageSkeleton />
     }
     if (userHasPermission(session.user, AVAILABLE_PERMISSIONS.editHardware))
@@ -72,9 +68,7 @@ export default function Page() {
                     </div>
                 </div>
                 <div className='flex flex-col p-6 w-full'>
-                    <Button onClick={saveClubSettings} color='primary'>
-                        Save
-                    </Button>
+                    <SaveButton onSave={saveClubSettings} />
                 </div>
             </div>
         )
@@ -85,3 +79,7 @@ export default function Page() {
             </div>
         )
 }
+
+export const Route = createFileRoute('/Dashboard/Hardware/')({
+    component: Page
+})

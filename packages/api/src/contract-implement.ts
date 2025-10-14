@@ -7,8 +7,7 @@ import { findBoat, findBoats, updateBoatById } from "./routes/boats";
 import { auth } from "@sailviz/auth/auth";
 import { RequestHeadersPluginContext } from "@orpc/server/plugins";
 import { findFleet } from "./routes/fleet";
-import { FleetType } from "packages/types/src/types";
-import { getClub } from "./routes/club";
+import { getClub, updateClubById } from "./routes/club";
 
 interface ORPCContext extends RequestHeadersPluginContext {
   req: Request;
@@ -163,6 +162,20 @@ const updateBoat = os.boat.update
     return updatedBoat;
   });
 
+const updateClub = os.club.update
+  .use(authMiddleware)
+  .handler(async ({ input, context }) => {
+    const session = context.session as any;
+    if (!session || !session.user) {
+      throw new ORPCError("UNAUTHORIZED", { message: "Login required" });
+    }
+    const updatedClub = updateClubById(input);
+    if (!updatedClub) {
+      throw new ORPCError("BAD_REQUEST", { message: "Could not update club" });
+    }
+    return updatedClub;
+  });
+
 export const mainRouter = os.router({
   hello,
   laps: {
@@ -181,6 +194,7 @@ export const mainRouter = os.router({
   },
   club: {
     session: club,
+    update: updateClub,
   },
   boat: {
     find: boat,

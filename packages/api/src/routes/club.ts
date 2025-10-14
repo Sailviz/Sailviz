@@ -6,3 +6,11 @@ export async function getClub(clubId: string) {
   });
   return club;
 }
+
+export async function updateClubById(input: any) {
+  const club = await prisma.club.update({
+    where: { id: input.id },
+    data: input,
+  });
+  return club;
+}

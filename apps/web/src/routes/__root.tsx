@@ -1,15 +1,15 @@
 import { createRouter, Outlet, RouterProvider, useRouterState } from '@tanstack/react-router'
 import { createRootRoute } from '@tanstack/react-router'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { SidebarInset, SidebarProvider } from '@componentsui/sidebar'
-import AppSidebar from '@componentslayout/app-sidebar'
-import { ScrollArea } from '@componentsui/scroll-area'
+import { SidebarInset, SidebarProvider } from '@components/ui/sidebar'
+import AppSidebar from '@components/layout/app-sidebar'
+import { ScrollArea } from '@components/ui/scroll-area'
 import { navCollections } from 'src/constants/navCollections'
 import Plausible from 'plausible-tracker'
-import ErrorBoundary from '@componentsErrorBoundary'
+import ErrorBoundary from '@components/ErrorBoundary'
 import { ThemeProvider as NextThemesProvider, type ThemeProviderProps } from 'next-themes'
 import { getSession } from '@sailviz/auth/client'
-import Header from '@componentslayout/header'
+import Header from '@components/layout/header'
 
 export const plausible = Plausible({
     domain: 'sailviz.com',

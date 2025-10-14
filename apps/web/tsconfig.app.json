@@ -3,8 +3,8 @@
     "compilerOptions": {
         "baseUrl": ".",
         "paths": {
-            "@components*": ["src/components/*"],
-            "@lib*": ["src/lib/*"],
+            "@components/*": ["src/components/*"],
+            "@lib/*": ["src/lib/*"],
             "@sailviz/auth/*": ["../../packages/auth/src/*"],
             "@sailviz/api/*": ["../../packages/api/src/*"],
             "@sailviz/types": ["../../packages/types/src/types"],

@@ -10,7 +10,7 @@ import { Input } from '@components/ui/input'
 import { createFileRoute, useLoaderData } from '@tanstack/react-router'
 import CreateBoatDialog from '@components/layout/dashboard/CreateBoatModal'
 import { useQuery } from '@tanstack/react-query'
-import { orpcClient } from '@liborpc'
+import { orpcClient } from '@lib/orpc'
 
 export default function Page() {
     const session = useLoaderData({ from: `__root__` })

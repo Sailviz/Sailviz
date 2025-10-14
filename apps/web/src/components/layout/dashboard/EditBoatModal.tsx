@@ -4,7 +4,7 @@ import { Input } from '@components/ui/input'
 import { useEffect, useState } from 'react'
 import * as DB from '@components/apiMethods'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { orpcClient } from '@liborpc'
+import { orpcClient } from '@lib/orpc'
 
 export default function EditBoatDialog({ boat, open, onClose }: { boat: BoatDataType | undefined; open: boolean; onClose?: () => void }) {
     const [boatName, setBoatName] = useState('')

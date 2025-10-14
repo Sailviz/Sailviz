@@ -5,7 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '.
 import { Button } from '@components/ui/button'
 import { Link } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
-import { orpcClient } from '@liborpc'
+import { orpcClient } from '@lib/orpc'
 import type { ResultType } from '@sailviz/types'
 
 const Text = ({ value }: { value: string }) => {
