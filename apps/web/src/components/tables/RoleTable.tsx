@@ -1,24 +1,19 @@
-import React, { ChangeEvent, useState } from 'react'
-import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, RowSelection, SortingState, useReactTable } from '@tanstack/react-table'
-import { EditIcon } from '@components/icons/edit-icon'
-import { DeleteIcon } from '@components/icons/delete-icon'
-import * as Fetcher from '@components/Fetchers'
+import { useState } from 'react'
+import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, type SortingState, useReactTable } from '@tanstack/react-table'
 import { AVAILABLE_PERMISSIONS, userHasPermission } from '@components/helpers/users'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
-import { useNavigate } from '@tanstack/react-router'
-import { Link } from '@tanstack/react-router'
-import { useSession } from '@sailviz/auth/client'
-import * as DB from '@components/apiMethods'
-import { mutate } from 'swr'
 import { Button } from '../ui/button'
+import type { RoleType } from '@sailviz/types'
+import { useLoaderData } from '@tanstack/react-router'
+import { useQuery } from '@tanstack/react-query'
+import { orpcClient } from '@lib/orpc'
+import EditRoleDialog from '@components/layout/dashboard/EditRoleModal'
 
-const Action = ({ session, role }: { session: any; role: RoleDataType }) => {
+const Action = ({ session, role, onClick }: { session: any; role: RoleDataType; onClick: (role: RoleType) => void }) => {
     if (userHasPermission(session.user, AVAILABLE_PERMISSIONS.editRoles)) {
         return (
             <div className='relative flex items-center gap-2'>
-                <Link className='cursor-pointer' href={`/editRole/${role.id}`}>
-                    <Button>Edit</Button>
-                </Link>
+                <Button onClick={() => onClick(role)}>Edit</Button>
             </div>
         )
     } else {
@@ -29,14 +24,13 @@ const Action = ({ session, role }: { session: any; role: RoleDataType }) => {
 const columnHelper = createColumnHelper<RoleDataType>()
 
 const UsersTable = () => {
-    const {
-        data: session,
-        isPending, //loading state
-        error, //error object
-        refetch //refetch the session
-    } = useSession()
-    const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
-    const { roles, rolesIsError, rolesIsValidating } = Fetcher.Roles(club)
+    const session = useLoaderData({ from: `__root__` })
+
+    const { data: club } = useQuery(orpcClient.club.session.queryOptions())
+    const { data: roles } = useQuery(orpcClient.role.club.queryOptions({ input: { clubId: club?.id || '' } }))
+
+    const [modalIsOpen, setModalIsOpen] = useState(false)
+    const [modalData, setModalData] = useState<RoleType | undefined>(undefined)
 
     const [sorting, setSorting] = useState<SortingState>([
         {
@@ -45,9 +39,9 @@ const UsersTable = () => {
         }
     ])
 
-    const deleteRole = async (role: RoleDataType) => {
-        await DB.deleteRole(role)
-        mutate('/api/GetRolesByClubId')
+    function onEdit(user: RoleType) {
+        setModalData(user)
+        setModalIsOpen(true)
     }
 
     var data = roles
@@ -66,7 +60,7 @@ const UsersTable = () => {
             columnHelper.accessor('id', {
                 id: 'edit',
                 header: 'Action',
-                cell: props => <Action role={props.row.original} session={session!} />
+                cell: props => <Action role={props.row.original} session={session!} onClick={onEdit} />
             })
         ],
         state: {
@@ -78,6 +72,7 @@ const UsersTable = () => {
     })
     return (
         <div className='rounded-md border w-full'>
+            <EditRoleDialog open={modalIsOpen} role={modalData!} onClose={() => setModalIsOpen(false)} />
             <Table>
                 <TableHeader>
                     {table.getHeaderGroups().map(headerGroup => (

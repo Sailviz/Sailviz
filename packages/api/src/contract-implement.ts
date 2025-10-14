@@ -8,6 +8,14 @@ import { auth } from "@sailviz/auth/auth";
 import { RequestHeadersPluginContext } from "@orpc/server/plugins";
 import { findFleet } from "./routes/fleet";
 import { getClub, updateClubById } from "./routes/club";
+import {
+  createUserInClub,
+  deleteUserById,
+  getUsersByClub,
+  updateUserById,
+} from "./routes/user";
+import { create } from "domain";
+import { createRoleInClub, getRolesByClub } from "./routes/role";
 
 interface ORPCContext extends RequestHeadersPluginContext {
   req: Request;
@@ -24,6 +32,9 @@ const authMiddleware = os
     // Use server-side auth API so cookie parsing is performed by the same
     // runtime that issued the session cookie.
     const session = await auth.api.getSession(req as unknown as Request);
+    if (!session || !session.user) {
+      throw new ORPCError("UNAUTHORIZED", { message: "Login required" });
+    }
     const result = await next({
       context: {
         ...context,
@@ -176,6 +187,104 @@ const updateClub = os.club.update
     return updatedClub;
   });
 
+const updateUser = os.user.update
+  .use(authMiddleware)
+  .handler(async ({ input, context }) => {
+    const session = context.session as any;
+    if (!session || !session.user) {
+      throw new ORPCError("UNAUTHORIZED", { message: "Login required" });
+    }
+    const updatedUser = await updateUserById(input);
+    if (!updatedUser) {
+      throw new ORPCError("BAD_REQUEST", { message: "Could not update user" });
+    }
+    return updatedUser;
+  });
+
+const createUser = os.user.create
+  .use(authMiddleware)
+  .handler(async ({ input, context }) => {
+    const session = context.session as any;
+    if (!session || !session.user) {
+      throw new ORPCError("UNAUTHORIZED", { message: "Login required" });
+    }
+    const newUser = await createUserInClub(input.clubId);
+    if (!newUser) {
+      throw new ORPCError("BAD_REQUEST", { message: "Could not create user" });
+    }
+    return newUser;
+  });
+
+const usersByClub = os.user.club
+  .use(authMiddleware)
+  .handler(async ({ context, input }) => {
+    const session = context.session as any;
+    if (!session || !session.user) {
+      throw new ORPCError("UNAUTHORIZED", { message: "Login required" });
+    }
+    const users = await getUsersByClub(input.clubId);
+    if (!users) {
+      throw new ORPCError("BAD_REQUEST", { message: "Could not get users" });
+    }
+    return users;
+  });
+
+const deleteUser = os.user.delete
+  .use(authMiddleware)
+  .handler(async ({ input, context }) => {
+    const session = context.session as any;
+    if (!session || !session.user) {
+      throw new ORPCError("UNAUTHORIZED", { message: "Login required" });
+    }
+    const deletedUser = await deleteUserById(input.id);
+    if (!deletedUser) {
+      throw new ORPCError("BAD_REQUEST", { message: "Could not delete user" });
+    }
+    return deletedUser;
+  });
+
+const createRole = os.role.create
+  .use(authMiddleware)
+  .handler(async ({ input, context }) => {
+    const session = context.session as any;
+    const newRole = await createRoleInClub(input.clubId);
+    if (!newRole) {
+      throw new ORPCError("BAD_REQUEST", { message: "Could not create role" });
+    }
+    // Ensure permissions is the correct type
+    //TODO: fix typing in prisma schema so this is not needed
+    return {
+      id: newRole.id,
+      name: newRole.name,
+      clubId: newRole.clubId,
+      permissions:
+        typeof newRole.permissions === "string"
+          ? JSON.parse(newRole.permissions)
+          : newRole.permissions,
+    };
+  });
+
+const rolesByClub = os.role.club
+  .use(authMiddleware)
+  .handler(async ({ context, input }) => {
+    const session = context.session as any;
+    const roles = await getRolesByClub(input.clubId);
+    if (!roles) {
+      throw new ORPCError("BAD_REQUEST", { message: "Could not get roles" });
+    }
+    // Ensure permissions is the correct type for each role
+    //TODO: fix typing in prisma schema so this is not needed
+    return roles.map((role) => ({
+      id: role.id,
+      name: role.name,
+      clubId: role.clubId,
+      permissions:
+        typeof role.permissions === "string"
+          ? JSON.parse(role.permissions)
+          : role.permissions,
+    }));
+  });
+
 export const mainRouter = os.router({
   hello,
   laps: {
@@ -200,5 +309,15 @@ export const mainRouter = os.router({
     find: boat,
     session: boats,
     update: updateBoat,
+  },
+  user: {
+    update: updateUser,
+    create: createUser,
+    club: usersByClub,
+    delete: deleteUser,
+  },
+  role: {
+    create: createRole,
+    club: rolesByClub,
   },
 });

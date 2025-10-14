@@ -5,7 +5,7 @@ import {
 } from "better-auth/client/plugins";
 import { createAuthClient } from "better-auth/react";
 import { myPluginClient } from "./client-plugin";
-import type { ClubDataType, UserDataType } from "@sailviz/types";
+import type { ClubType, UserType } from "@sailviz/types";
 
 export const client = createAuthClient({
   baseURL: "http://localhost:3000",
@@ -47,8 +47,8 @@ export const useSession = () => {
   return _useSession() as ReturnType<typeof _useSession> & {
     data:
       | (ReturnType<typeof _useSession>["data"] & {
-          club: ClubDataType | null;
-          user: UserDataType;
+          club: ClubType | null;
+          user: UserType;
         })
       | null;
   };

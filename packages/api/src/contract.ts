@@ -8,8 +8,11 @@ import {
   FleetSchema,
   NextRaceSchema,
   RaceSchema,
+  RoleSchema,
   SeriesSchema,
+  UserSchema,
 } from "@sailviz/types";
+import { create } from "domain";
 
 const helloSchema = z.object({
   name: z.string(),
@@ -59,5 +62,15 @@ export const ORPCcontract = {
         })
       )
       .output(z.object({ races: z.array(RaceSchema), count: z.number() })),
+  },
+  user: {
+    update: oc.input(UserSchema).output(UserSchema),
+    create: oc.input(z.object({ clubId: z.string() })).output(UserSchema),
+    club: oc.input(z.object({ clubId: z.string() })).output(UserSchema.array()),
+    delete: oc.input(UserSchema).output(UserSchema),
+  },
+  role: {
+    create: oc.input(z.object({ clubId: z.string() })).output(RoleSchema),
+    club: oc.input(z.object({ clubId: z.string() })).output(RoleSchema.array()),
   },
 };

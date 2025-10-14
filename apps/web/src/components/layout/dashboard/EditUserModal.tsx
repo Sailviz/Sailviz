@@ -1,35 +1,33 @@
 import { useEffect, useState } from 'react'
 import Select from 'react-select'
-import * as Fetcher from '@components/Fetchers'
-import { Dialog, DialogContent, DialogFooter, DialogHeader } from '@components/ui/dialog'
+import { Dialog, DialogContent, DialogFooter, DialogTitle } from '@components/ui/dialog'
 import { Button } from '@components/ui/button'
 import { Input } from '@components/ui/input'
-import { useNavigate } from '@tanstack/react-router'
-import * as DB from '@components/apiMethods'
-import { mutate } from 'swr'
-export default function EditUserDialog({ user }: { user: UserDataType }) {
-    const navigate = useNavigate()
-    const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
-    const { roles: roleOptions, rolesIsError, rolesIsValidating } = Fetcher.Roles(club)
+import type { RoleType, UserType } from '@sailviz/types'
+import { useMutation } from '@tanstack/react-query'
+import { orpcClient } from '@lib/orpc'
 
-    const [open, setOpen] = useState(true)
-
+export default function EditUserDialog({ user, clubRoles, open, onClose }: { user: UserType; clubRoles: RoleType[]; open: boolean; onClose?: () => void }) {
     const [displayName, setDisplayName] = useState('')
     const [name, setName] = useState('')
-    const [roles, setRoles] = useState<RoleDataType[]>([])
     const [startPage, setStartPage] = useState('')
     const [password, setPassword] = useState('')
+    const [roles, setRoles] = useState<RoleType[]>([])
 
-    const editUser = async (user: UserDataType, password: string) => {
-        await DB.updateUser(user)
-        Router.back()
+    const updateUserMutation = useMutation(orpcClient.user.update.mutationOptions())
+    const deleteUserMutation = useMutation(orpcClient.user.delete.mutationOptions())
+
+    const editUser = async (user: UserType) => {
+        await updateUserMutation.mutateAsync(user)
+        // mutate('/api/GetUsersByClubId')
+        onClose && onClose()
     }
 
-    const deleteUser = async (user: UserDataType) => {
+    const deleteUser = async (user: UserType) => {
         if (confirm('Are you sure you want to delete this user?')) {
-            await DB.deleteUser(user)
-            mutate('/api/GetUsersByClubId')
-            Router.back()
+            await deleteUserMutation.mutateAsync(user)
+            // mutate('/api/GetUsersByClubId')
+            onClose && onClose()
         }
     }
 
@@ -37,20 +35,14 @@ export default function EditUserDialog({ user }: { user: UserDataType }) {
         if (user === undefined) return
         setDisplayName(user.displayUsername)
         setName(user.username)
-        setRoles(user.roles)
+        setRoles(user.roles || [])
         setStartPage(user.startPage)
     }, [user])
 
     return (
-        <Dialog
-            open={open}
-            onOpenChange={open => {
-                setOpen(open)
-                if (!open) Router.back() // this catches the x button and clicking outside the modal, gets out of parallel route
-            }}
-        >
+        <Dialog open={open} onOpenChange={open ? onClose : undefined}>
             <DialogContent className='max-w-8/12'>
-                <DialogHeader className='flex flex-col gap-1'>Edit User</DialogHeader>
+                <DialogTitle className='flex flex-col gap-1'>Edit User</DialogTitle>
                 <div className='flex w-full'>
                     <div className='flex flex-col px-6 w-full'>
                         <p className='text-2xl font-bold text-gray-700'>Display Name</p>
@@ -67,9 +59,12 @@ export default function EditUserDialog({ user }: { user: UserDataType }) {
                                 id='editRoles'
                                 className=' w-56 h-full text-3xl'
                                 isMulti={true}
-                                options={roleOptions.map((x: RoleDataType) => {
-                                    return { value: x, label: x.name }
-                                })}
+                                options={
+                                    clubRoles &&
+                                    clubRoles.map((x: RoleDataType) => {
+                                        return { value: x, label: x.name }
+                                    })
+                                }
                                 onChange={e => setRoles(e.map((x: any) => x.value))}
                                 value={roles?.map((x: RoleDataType) => {
                                     return { value: x, label: x.name }
@@ -94,7 +89,7 @@ export default function EditUserDialog({ user }: { user: UserDataType }) {
                     <Button variant={'red'} onClick={() => deleteUser(user!)}>
                         Remove
                     </Button>
-                    <Button color='primary' onClick={() => editUser({ ...user!, displayUsername: displayName, username: name, roles: roles, startPage: startPage }, password)}>
+                    <Button color='primary' onClick={() => editUser({ ...user!, displayUsername: displayName, username: name, roles: roles, startPage: startPage })}>
                         Save
                     </Button>
                 </DialogFooter>

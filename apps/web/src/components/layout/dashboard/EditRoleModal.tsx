@@ -1,24 +1,19 @@
-import { ChangeEvent, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import Select from 'react-select'
 import { PERMISSIONS } from '@components/helpers/users'
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@components/ui/dialog'
+import { Dialog, DialogContent, DialogFooter, DialogTitle } from '@components/ui/dialog'
 import { Button } from '@components/ui/button'
 import { Input } from '@components/ui/input'
-import { useNavigate } from '@tanstack/react-router'
 import * as DB from '@components/apiMethods'
 import { mutate } from 'swr'
 
-export default function EditRoleModal({ role }: { role: RoleDataType }) {
-    const navigate = useNavigate()
+export default function EditRoleDialog({ role, open, onClose }: { role: RoleDataType; open: boolean; onClose?: () => void }) {
     const [name, setName] = useState('')
     const [permissions, setPermissions] = useState<PermissionType[]>([])
-
-    const [open, setOpen] = useState(true)
 
     const updateRole = async (role: RoleDataType) => {
         await DB.updateRole(role)
         mutate('/api/GetRolesByClubId')
-        Router.back()
     }
 
     const deleteRole = async (role: RoleDataType) => {
@@ -26,7 +21,6 @@ export default function EditRoleModal({ role }: { role: RoleDataType }) {
         if (confirm('Are you sure you want to delete this role?')) {
             await DB.deleteRole(role)
             mutate('/api/GetRolesByClubId')
-            Router.back()
         }
     }
 
@@ -37,13 +31,7 @@ export default function EditRoleModal({ role }: { role: RoleDataType }) {
     }, [role])
 
     return (
-        <Dialog
-            open={open}
-            onOpenChange={open => {
-                setOpen(open)
-                if (!open) Router.back() // this catches the x button and clicking outside the modal, gets out of parallel route
-            }}
-        >
+        <Dialog open={open} onOpenChange={open ? onClose : undefined}>
             <DialogContent className='max-w-8/12'>
                 <DialogTitle className='flex flex-col gap-1'>Edit Role</DialogTitle>
                 <div className='flex w-full'>

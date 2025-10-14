@@ -57,38 +57,43 @@ export const RaceSchema = z.object({
 });
 export type RaceType = z.infer<typeof RaceSchema>;
 
-export type GlobalConfigType = {
-  demoClubId: string;
-  demoSeriesId: string;
-  demoDataId: string;
-  demoUUID: string;
-};
+export const GlobalConfigSchema = z.object({
+  demoClubId: z.string(),
+  demoSeriesId: z.string(),
+  demoDataId: z.string(),
+  demoUUID: z.string(),
+});
+export type GlobalConfigInputType = z.infer<typeof GlobalConfigSchema>;
 
-export type SeriesSettingsType = {
-  numberToCount: number;
-  pursuitLength: number;
-};
+export const SeriesSettingsSchema = z.object({
+  numberToCount: z.number(),
+  pursuitLength: z.number(),
+});
+export type SeriesSettingsInputType = z.infer<typeof SeriesSettingsSchema>;
 
-export type FleetSettingsType = {
-  id: string;
-  name: string;
-  boats: BoatDataType[];
-};
+export const FleetSettingsType = z.object({
+  id: z.string(),
+  name: z.string(),
+  boats: z.array(z.any()),
+});
+export type FleetSettingsType = z.infer<typeof FleetSettingsType>;
 
-export type StartSequenceStep = {
-  id?: string; // Optional for new steps
-  time: number;
-  name: string; // e.g., 'start', 'horn', 'clock'
-  hoot: number;
-  order: number; // Order of the step in the sequence
-  fleetStart: string;
-  flagStatus: FlagStatusType[];
-};
+export const FlagStatusSchema = z.object({
+  flag: z.string(),
+  status: z.boolean(),
+});
+export type FlagStatusInputType = z.infer<typeof FlagStatusSchema>;
 
-export type FlagStatusType = {
-  flag: string;
-  status: boolean;
-};
+export const StartSequenceStepSchema = z.object({
+  id: z.string().optional(), // Optional for new steps
+  time: z.number(),
+  name: z.string(), // e.g., 'start', 'horn', 'clock'
+  hoot: z.number(),
+  order: z.number(), // Order of the step in the sequence
+  fleetStart: z.string(),
+  flagStatus: z.array(FlagStatusSchema),
+});
+export type StartSequenceStepType = z.infer<typeof StartSequenceStepSchema>;
 
 export const NextRaceSchema = z.object({
   id: z.string(),
@@ -150,35 +155,33 @@ export type Stripe = {
   updatedAt: string;
 };
 
-export type UserDataType = {
-  id: string;
-  displayUsername: string;
-  username: string;
-  admin: boolean;
-  roles: RoleDataType[];
-  clubId: string;
-  startPage: string;
-  uuid: string;
-};
+export const PermissionSchema = z.object({
+  value: z.string(),
+  label: z.string(),
+});
+export type Permission = z.infer<typeof PermissionSchema>;
 
-export type RoleDataType = {
-  id: string;
-  name: string;
-  clubId: string;
-  permissions: {
-    allowed: PermissionType[];
-  };
-};
+export const RoleSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  clubId: z.string(),
+  permissions: z.object({
+    allowed: z.array(PermissionSchema), // Array of permission objects
+  }),
+});
+export type RoleType = z.infer<typeof RoleSchema>;
 
-export type PermissionType = {
-  value: string;
-  label: string;
-};
-
-export type AuthedUserDataType = {
-  user: UserDataType;
-  token: string;
-};
+export const UserSchema = z.object({
+  id: z.string(),
+  displayUsername: z.string(),
+  username: z.string(),
+  admin: z.boolean(),
+  roles: z.array(RoleSchema).optional(),
+  clubId: z.string(),
+  startPage: z.string(),
+  uuid: z.string(),
+});
+export type UserType = z.infer<typeof UserSchema>;
 
 export type TrackerDataType = {
   trackerID: string;

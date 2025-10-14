@@ -31,8 +31,6 @@ const BoatTable = () => {
     const data = boats || []
 
     const onRowClick = (row: any) => {
-        console.log(row)
-        // navigate({ to: `/editBoat/${row.original.id}` })
         setModalData(row.original)
         setModalIsOpen(true)
     }

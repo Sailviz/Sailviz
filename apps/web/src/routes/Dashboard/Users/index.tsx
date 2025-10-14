@@ -1,8 +1,4 @@
-'use client'
-import { ChangeEvent, MouseEventHandler, useEffect, useState } from 'react'
-import { useNavigate } from '@tanstack/react-router'
-import * as DB from '@components/apiMethods'
-import * as Fetcher from '@components/Fetchers'
+import { useLoaderData, createFileRoute } from '@tanstack/react-router'
 import { PageSkeleton } from '@components/layout/PageSkeleton'
 import UsersTable from '@components/tables/UsersTable'
 import RoleTable from '@components/tables/RoleTable'
@@ -11,39 +7,43 @@ import { mutate } from 'swr'
 import EditRoleModal from '@components/layout/dashboard/EditRoleModal'
 import { AVAILABLE_PERMISSIONS, userHasPermission } from '@components/helpers/users'
 import { Button } from '@components/ui/button'
-import { useSession } from '@sailviz/auth/client'
+import { useMutation, useQuery } from '@tanstack/react-query'
+import { orpcClient } from '@lib/orpc'
 
 export default function Page() {
-    const navigate = useNavigate()
-    const {
-        data: session,
-        isPending, //loading state
-        error, //error object
-        refetch //refetch the session
-    } = useSession()
+    const session = useLoaderData({ from: `__root__` })
 
-    const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
+    const { data: club } = useQuery(orpcClient.club.session.queryOptions())
+
+    const userCreation = useMutation(orpcClient.user.create.mutationOptions())
+    const roleCreation = useMutation(orpcClient.role.create.mutationOptions())
 
     const createUser = async () => {
-        const user = await DB.createUser(club.id)
+        if (club == undefined) {
+            throw new Error('No club found')
+        }
+        const user = await userCreation.mutateAsync({ clubId: club.id })
         if (user) {
             mutate('/api/GetUsersByClubId')
         } else {
-            console.log('could not create user')
+            throw new Error('Could not create user')
         }
     }
 
     const createRole = async () => {
-        const role = await DB.createRole(club.id)
+        if (club == undefined) {
+            throw new Error('No club found')
+        }
+        const role = await roleCreation.mutateAsync({ clubId: club.id })
         console.log(role)
         if (role) {
             mutate('/api/GetRolesByClubId')
         } else {
-            console.log('could not create role')
+            throw new Error('Could not create role')
         }
     }
 
-    if (clubIsValidating || club == undefined || session == undefined) {
+    if (club == undefined || session == undefined) {
         return <PageSkeleton />
     }
 
@@ -70,3 +70,7 @@ export default function Page() {
         )
     }
 }
+
+export const Route = createFileRoute('/Dashboard/Users/')({
+    component: Page
+})
