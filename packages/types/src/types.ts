@@ -106,17 +106,20 @@ export type RaceSettingsType = {
   numberToCount: number;
 };
 
-export type ClubSettingsType = {
-  clockIP: string;
-  hornIP: string;
-  pursuitLength: number;
-  clockOffset: number;
-  duties: string[];
-  trackable: {
-    enabled: boolean;
-    orgID: string;
-  };
-};
+export const ClubSettingsSchema = z.object({
+  clockIP: z.string(),
+  hornIP: z.string(),
+  pursuitLength: z.number(),
+  clockOffset: z.number(),
+  duties: z.array(z.string()),
+  trackable: z.object({
+    enabled: z.boolean(),
+    orgID: z.string(),
+  }),
+});
+
+export type ClubSettingsType = z.infer<typeof ClubSettingsSchema>;
+
 export const BoatSchema = z.object({
   id: z.string(),
   name: z.string(),

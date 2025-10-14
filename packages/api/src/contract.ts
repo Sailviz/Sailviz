@@ -30,6 +30,7 @@ export const ORPCcontract = {
   },
   club: {
     session: oc.output<typeof ClubSchema>(ClubSchema),
+    update: oc.input(ClubSchema).output(ClubSchema),
   },
   fleet: {
     find: oc

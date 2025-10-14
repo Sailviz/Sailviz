@@ -1,40 +1,41 @@
-'use client'
-import { ChangeEvent, MouseEventHandler, useEffect, useState } from 'react'
-import { useNavigate } from '@tanstack/react-router'
-import * as DB from '@components/apiMethods'
-import * as Fetcher from '@components/Fetchers'
+import { useEffect } from 'react'
+import { useLoaderData, createFileRoute } from '@tanstack/react-router'
 import { PageSkeleton } from '@components/layout/PageSkeleton'
 import { AVAILABLE_PERMISSIONS, userHasPermission } from '@components/helpers/users'
-import { mutate } from 'swr'
-import { EditIcon } from '@components/icons/edit-icon'
 import { Input } from '@components/ui/input'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@components/ui/table'
+import { Table, TableBody, TableCell, TableRow } from '@components/ui/table'
 import { Button } from '@components/ui/button'
-import { useSession } from '@sailviz/auth/client'
+import { useMutation, useQuery } from '@tanstack/react-query'
+import { orpcClient } from '@liborpc'
 
 export default function Page() {
-    const navigate = useNavigate()
-    const {
-        data: session,
-        isPending, //loading state
-        error, //error object
-        refetch //refetch the session
-    } = useSession()
-    const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
+    const session = useLoaderData({ from: `__root__` })
+
+    const { data: club } = useQuery(orpcClient.club.session.queryOptions())
+
+    const clubMutation = useMutation(orpcClient.club.update.mutationOptions())
 
     const savePursuitLength = async (pursuitLength: string) => {
-        await DB.UpdateClubById({ ...club, settings: { ...club.settings, pursuitLength: parseInt(pursuitLength) } })
+        if (club == undefined) {
+            throw new Error('Club is undefined')
+        }
+        await clubMutation.mutateAsync({ ...club, settings: { ...club.settings, pursuitLength: parseInt(pursuitLength) } })
     }
 
     const addDuty = async () => {
-        await DB.UpdateClubById({ ...club, settings: { ...club.settings, duties: [...club.settings.duties, 'Duty'] } })
-        mutate('/api/club')
+        if (club == undefined) {
+            throw new Error('Club is undefined')
+        }
+        await clubMutation.mutateAsync({ ...club, settings: { ...club.settings, duties: [...club.settings.duties, 'Duty'] } })
     }
 
     const editDuty = async (index: number, value: string) => {
+        if (club == undefined) {
+            throw new Error('Club is undefined')
+        }
         let newDuties = club.settings.duties
         newDuties[index] = value
-        await DB.UpdateClubById({ ...club, settings: { ...club.settings, duties: newDuties } })
+        await clubMutation.mutateAsync({ ...club, settings: { ...club.settings, duties: newDuties } })
     }
 
     useEffect(() => {
@@ -43,7 +44,7 @@ export default function Page() {
         if (club.settings.pursuitLength == undefined) return
     }, [club])
 
-    if (clubIsValidating || clubIsError || club == undefined || session == undefined) {
+    if (club == undefined || session == undefined) {
         return <PageSkeleton />
     }
     if (userHasPermission(session.user, AVAILABLE_PERMISSIONS.editHardware))
@@ -85,3 +86,7 @@ export default function Page() {
             </div>
         )
 }
+
+export const Route = createFileRoute('/Dashboard/Club/')({
+    component: Page
+})
