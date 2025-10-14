@@ -1,31 +1,33 @@
 import { Button } from '@components/ui/button'
-import { Dialog, DialogContent, DialogFooter, DialogHeader } from '@components/ui/dialog'
+import { Dialog, DialogContent, DialogFooter, DialogTitle } from '@components/ui/dialog'
 import { Input } from '@components/ui/input'
-import { useNavigate } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 import * as DB from '@components/apiMethods'
-import { mutate } from 'swr'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { orpcClient } from '@liborpc'
 
-export default function EditBoatDialog({ boat }: { boat: BoatDataType }) {
-    const navigate = useNavigate()
+export default function EditBoatDialog({ boat, open, onClose }: { boat: BoatDataType | undefined; open: boolean; onClose?: () => void }) {
     const [boatName, setBoatName] = useState('')
     const [PY, setPY] = useState(0)
     const [Crew, setCrew] = useState(0)
     const [pursuitStartTime, setPursuitStartTime] = useState(0)
 
-    const [open, setOpen] = useState(true)
+    const mutation = useMutation(orpcClient.boat.update.mutationOptions())
+    const queryClient = useQueryClient()
 
     const editBoat = async (boat: BoatDataType) => {
-        await DB.updateBoatById(boat)
-        mutate('/api/GetBoats')
-        Router.back()
+        await mutation.mutateAsync(boat)
+        onClose && onClose()
+        queryClient.invalidateQueries({
+            queryKey: orpcClient.boat.session.key({ type: 'query' })
+        })
+        // mutate('/api/GetBoats')
     }
 
     const deleteBoat = (boatId: string) => async () => {
         if (confirm('Are you sure you want to delete this boat?')) {
             await DB.deleteBoatById(boatId)
-            mutate('/api/GetBoats')
-            Router.back()
+            // mutate('/api/GetBoats')
         }
     }
 
@@ -38,15 +40,9 @@ export default function EditBoatDialog({ boat }: { boat: BoatDataType }) {
     }, [boat])
 
     return (
-        <Dialog
-            open={open}
-            onOpenChange={open => {
-                setOpen(open)
-                if (!open) Router.back() // this catches the x button and clicking outside the modal, gets out of parallel route
-            }}
-        >
+        <Dialog open={open} onOpenChange={open ? onClose : undefined}>
             <DialogContent className='max-w-8/12'>
-                <DialogHeader className='flex flex-col gap-1'>Edit Boat</DialogHeader>
+                <DialogTitle className='flex flex-col gap-1'>Edit Boat</DialogTitle>
                 <div className='flex w-full'>
                     <div className='flex flex-col px-6 w-full'>
                         <p className='text-2xl font-bold'>Name</p>
@@ -73,7 +69,7 @@ export default function EditBoatDialog({ boat }: { boat: BoatDataType }) {
                     </div>
                 </div>
                 <DialogFooter>
-                    <Button variant={'red'} onClick={deleteBoat(boat.id)}>
+                    <Button variant={'red'} onClick={deleteBoat(boat?.id || '')}>
                         Delete
                     </Button>
                     <Button onClick={() => editBoat({ ...boat!, name: boatName, py: PY, crew: Crew, pursuitStartTime: pursuitStartTime })}>Save</Button>

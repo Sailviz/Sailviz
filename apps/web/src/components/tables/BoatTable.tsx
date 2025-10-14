@@ -1,20 +1,12 @@
-'use client'
-import React, { useState } from 'react'
 import { createColumnHelper, flexRender, getCoreRowModel, useReactTable, getFilteredRowModel } from '@tanstack/react-table'
-import { EditIcon } from '@components/icons/edit-icon'
-import { DeleteIcon } from '@components/icons/delete-icon'
-import * as Fetcher from '@components/Fetchers'
-import { AVAILABLE_PERMISSIONS, userHasPermission } from '@components/helpers/users'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
-import { Input } from '../ui/input'
-import { Link } from '@tanstack/react-router'
-import { useSession } from '@sailviz/auth/client'
-import * as DB from '@components/apiMethods'
-import { Button } from '../ui/button'
 import EditBoatDialog from '../layout/dashboard/EditBoatModal'
-import { useNavigate } from '@tanstack/react-router'
+import { useQuery } from '@tanstack/react-query'
+import { orpcClient } from '@lib/orpc'
+import { useState } from 'react'
+import type { BoatType } from '@sailviz/types'
 
-const columnHelper = createColumnHelper<BoatDataType>()
+const columnHelper = createColumnHelper<BoatType>()
 
 const Text = ({ value }: { value: string }) => {
     return <div>{value}</div>
@@ -31,14 +23,18 @@ const StartTime = ({ value }: { value: number }) => {
 }
 
 const BoatTable = () => {
-    const navigate = useNavigate()
-    const { boats, boatsIsError, boatsIsValidating, mutateBoats } = Fetcher.Boats()
+    const { data: boats } = useQuery(orpcClient.boat.session.queryOptions({ input: { boatId: '' } }))
+
+    const [modalIsOpen, setModalIsOpen] = useState(false)
+    const [modalData, setModalData] = useState<BoatDataType | undefined>(undefined)
 
     const data = boats || []
 
     const onRowClick = (row: any) => {
         console.log(row)
-        navigate({ to: `/editBoat/${row.original.id}` }, { scroll: false })
+        // navigate({ to: `/editBoat/${row.original.id}` })
+        setModalData(row.original)
+        setModalIsOpen(true)
     }
 
     var table = useReactTable({
@@ -73,6 +69,7 @@ const BoatTable = () => {
 
     return (
         <div className='w-full'>
+            <EditBoatDialog open={modalIsOpen} boat={modalData} onClose={() => setModalIsOpen(false)} />
             <div className='rounded-md border'>
                 <Table>
                     <TableHeader>

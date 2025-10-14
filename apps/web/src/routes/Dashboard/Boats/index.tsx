@@ -1,33 +1,27 @@
-'use client'
-import { ChangeEvent, MouseEventHandler, useState } from 'react'
+import { type ChangeEvent } from 'react'
 import * as DB from '@components/apiMethods'
-import * as Fetcher from '@components/Fetchers'
-
 import { PageSkeleton } from '@components/layout/PageSkeleton'
 import Papa from 'papaparse'
 import BoatTable from '@components/tables/BoatTable'
-import EditBoatModal from '@components/layout/dashboard/EditBoatModal'
 import { userHasPermission, AVAILABLE_PERMISSIONS } from '@components/helpers/users'
 import { title } from '@components/layout/home/primitaves'
-import CreateBoatModal from '@components/layout/dashboard/CreateBoatModal'
 import { Button } from '@components/ui/button'
 import { Input } from '@components/ui/input'
-import { Link } from '@tanstack/react-router'
-import { useSession } from '@sailviz/auth/client'
+import { createFileRoute, useLoaderData } from '@tanstack/react-router'
 import CreateBoatDialog from '@components/layout/dashboard/CreateBoatModal'
+import { useQuery } from '@tanstack/react-query'
+import { orpcClient } from '@liborpc'
 
 export default function Page() {
-    const {
-        data: session,
-        isPending, //loading state
-        error, //error object
-        refetch //refetch the session
-    } = useSession()
+    const session = useLoaderData({ from: `__root__` })
+    // const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
+    // const { boats, boatsIsError, boatsIsValidating, mutateBoats: mutateBoats } = Fetcher.Boats()
 
-    const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
-    const { boats, boatsIsError, boatsIsValidating, mutateBoats: mutateBoats } = Fetcher.Boats()
+    const { data: club } = useQuery(orpcClient.club.session.queryOptions())
+    const { data: boats } = useQuery(orpcClient.boat.session.queryOptions())
 
     const boatFileUploadHandler = async (e: ChangeEvent<HTMLInputElement>) => {
+        if (boats == undefined || club == undefined) return
         Papa.parse(e.target.files![0]!, {
             header: true,
             skipEmptyLines: true,
@@ -68,6 +62,7 @@ export default function Page() {
     }
 
     const downloadBoats = async () => {
+        if (boats == undefined || club == undefined) return
         var csvRows: string[] = []
         const headers = ['Name', 'Crew', 'PY', 'PursuitStartTime']
 
@@ -132,3 +127,6 @@ export default function Page() {
         </div>
     )
 }
+export const Route = createFileRoute('/Dashboard/Boats/')({
+    component: Page
+})

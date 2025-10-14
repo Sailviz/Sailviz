@@ -56,7 +56,7 @@ const RacesTable = ({ date, historical, viewHref, clubId }: { date: Date; histor
     //     error: racesIsError,
     //     isValidating: racesIsValidating
     // } = useSWR(`/api/GetRacesByClubId?id=${clubId || ''}&page=${page}&date=${date}&historical=${historical}`, Fetcher.fetcher)
-    const { data: races } = useQuery(orpcClient.racebyClubId.queryOptions({ input: { clubId: clubId!, date: date.toISOString(), historical: historical, page: page } }))
+    const { data: races } = useQuery(orpcClient.race.club.queryOptions({ input: { clubId: clubId!, date: date.toISOString(), historical: historical, page: page } }))
     const [data, setData] = useState<RaceDataType[]>([])
     const [count, setCount] = useState(0)
     const rowsPerPage = 10

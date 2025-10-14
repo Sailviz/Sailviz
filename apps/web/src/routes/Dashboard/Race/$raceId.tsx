@@ -16,20 +16,21 @@ import { mutate } from 'swr'
 import { SmoothSpinner } from '@components/icons/smooth-spinner'
 import { useQuery } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
+import type { RaceType } from '@sailviz/types'
 
 function Page() {
     const { raceId } = Route.useParams()
     const session = useLoaderData({ from: `__root__` })
 
-    const { data: race } = useQuery(orpcClient.racebyId.queryOptions({ input: { raceId: raceId! } }))
-    const { data: boats } = useQuery(orpcClient.boats.queryOptions())
+    const { data: race } = useQuery(orpcClient.race.find.queryOptions({ input: { raceId: raceId! } }))
+    const { data: boats } = useQuery(orpcClient.boat.session.queryOptions())
 
     const [resultsUpdated, setResultsUpdated] = React.useState(true)
     const [calculatingResults, setCalculatingResults] = React.useState(false)
 
     //Capitalise the first letter of each word, and maintain cursor pos.
     const saveRaceSettings = (e: any) => {
-        let newRaceData: RaceDataType = race
+        let newRaceData: RaceType = race
         const sentence = e.target.value.split(' ')
         const cursorPos = e.target.selectionStart
         const capitalizedWords = sentence.map((word: string) => word.charAt(0).toUpperCase() + word.slice(1))

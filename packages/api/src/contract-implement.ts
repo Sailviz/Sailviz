@@ -3,11 +3,12 @@ import { ORPCcontract } from "./contract";
 import prisma from "@sailviz/db";
 import { countRaces, findRace, findRaces, findTodaysRace } from "./routes/race";
 import { findSeries } from "./routes/series";
-import { findBoats } from "./routes/boats";
+import { findBoat, findBoats, updateBoatById } from "./routes/boats";
 import { auth } from "@sailviz/auth/auth";
 import { RequestHeadersPluginContext } from "@orpc/server/plugins";
 import { findFleet } from "./routes/fleet";
 import { FleetType } from "packages/types/src/types";
+import { getClub } from "./routes/club";
 
 interface ORPCContext extends RequestHeadersPluginContext {
   req: Request;
@@ -42,7 +43,7 @@ const hello = os.hello.handler(({ input }) => {
   return { name, message: `Hello, ${name}!` };
 });
 
-const getGlobalLaps = os.getGlobalLaps.handler(async ({ context }) => {
+const getGlobalLaps = os.laps.global.handler(async ({ context }) => {
   var laps = await prisma.lap.count({});
   console.log(laps);
   if (laps) {
@@ -52,7 +53,7 @@ const getGlobalLaps = os.getGlobalLaps.handler(async ({ context }) => {
   }
 });
 
-const todaysRaces = os.todaysRaces.handler(async ({ input }) => {
+const todaysRaces = os.race.today.handler(async ({ input }) => {
   const races = await findTodaysRace(input.clubId);
   console.log(races);
   if (races) {
@@ -62,7 +63,7 @@ const todaysRaces = os.todaysRaces.handler(async ({ input }) => {
   }
 });
 
-const racebyClubId = os.racebyClubId.handler(async ({ input }) => {
+const racebyClubId = os.race.club.handler(async ({ input }) => {
   const series = await findSeries(input.clubId);
 
   if (!series || series.length === 0) {
@@ -84,7 +85,7 @@ const racebyClubId = os.racebyClubId.handler(async ({ input }) => {
   return { races, count };
 });
 
-const seriesbyClubId = os.seriesbyClubId.handler(async ({ input }) => {
+const seriesbyClubId = os.series.club.handler(async ({ input }) => {
   const series = await findSeries(input.clubId);
   if (series) {
     return series;
@@ -93,7 +94,7 @@ const seriesbyClubId = os.seriesbyClubId.handler(async ({ input }) => {
   }
 });
 
-const racebyId = os.racebyId.handler(async ({ input }) => {
+const racebyId = os.race.find.handler(async ({ input }) => {
   const race = await findRace(input.raceId);
   if (race) {
     return race;
@@ -102,18 +103,29 @@ const racebyId = os.racebyId.handler(async ({ input }) => {
   }
 });
 
-const boats = os.boats.use(authMiddleware).handler(async ({ context }) => {
-  const session = context.session as any; // this is because the session type is not quite correct
-  const clubId = session.club.id;
-  const boatsList = await findBoats(clubId);
-  if (boatsList) {
-    return boatsList;
+const boats = os.boat.session
+  .use(authMiddleware)
+  .handler(async ({ context }) => {
+    const session = context.session as any; // this is because the session type is not quite correct
+    const clubId = session.club.id;
+    const boatsList = await findBoats(clubId);
+    if (boatsList) {
+      return boatsList;
+    } else {
+      throw new ORPCError("NOT_FOUND");
+    }
+  });
+
+const boat = os.boat.find.use(authMiddleware).handler(async ({ input }) => {
+  const boat = await findBoat(input.boatId);
+  if (boat) {
+    return boat;
   } else {
     throw new ORPCError("NOT_FOUND");
   }
 });
 
-const fleetbyId = os.fleetbyId.handler(async ({ input }) => {
+const fleetbyId = os.fleet.find.handler(async ({ input }) => {
   const fleet = await findFleet(input.fleetId);
   if (fleet) {
     return fleet;
@@ -122,13 +134,57 @@ const fleetbyId = os.fleetbyId.handler(async ({ input }) => {
   }
 });
 
+const club = os.club.session
+  .use(authMiddleware)
+  .handler(async ({ context }) => {
+    const session = context.session as any; // this is because the session type is not quite correct
+    if (!session || !session.user) {
+      throw new ORPCError("UNAUTHORIZED", { message: "Login required" });
+    }
+    const clubId = session.club.id;
+    const club = await getClub(clubId);
+    if (!club) {
+      throw new ORPCError("NOT_FOUND");
+    }
+    return club;
+  });
+
+const updateBoat = os.boat.update
+  .use(authMiddleware)
+  .handler(async ({ input, context }) => {
+    const session = context.session as any;
+    if (!session || !session.user) {
+      throw new ORPCError("UNAUTHORIZED", { message: "Login required" });
+    }
+    const updatedBoat = await updateBoatById(input);
+    if (!updatedBoat) {
+      throw new ORPCError("BAD_REQUEST", { message: "Could not update boat" });
+    }
+    return updatedBoat;
+  });
+
 export const mainRouter = os.router({
   hello,
-  getGlobalLaps,
-  todaysRaces,
-  racebyClubId,
-  seriesbyClubId,
-  racebyId,
-  boats,
-  fleetbyId,
+  laps: {
+    global: getGlobalLaps,
+  },
+  race: {
+    today: todaysRaces,
+    club: racebyClubId,
+    find: racebyId,
+  },
+  series: {
+    club: seriesbyClubId,
+  },
+  fleet: {
+    find: fleetbyId,
+  },
+  club: {
+    session: club,
+  },
+  boat: {
+    find: boat,
+    session: boats,
+    update: updateBoat,
+  },
 });

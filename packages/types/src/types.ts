@@ -55,7 +55,7 @@ export const RaceSchema = z.object({
   seriesId: z.string(),
   series: z.lazy(() => SeriesSchema.optional()),
 });
-export type RaceDataType = z.infer<typeof RaceSchema>;
+export type RaceType = z.infer<typeof RaceSchema>;
 
 export type GlobalConfigType = {
   demoClubId: string;
@@ -117,25 +117,26 @@ export type ClubSettingsType = {
     orgID: string;
   };
 };
+export const BoatSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  crew: z.number(),
+  py: z.number(),
+  pursuitStartTime: z.number(),
+  clubId: z.string(),
+});
+export type BoatType = z.infer<typeof BoatSchema>;
 
-export type BoatDataType = {
-  id: string;
-  name: string;
-  crew: number;
-  py: number;
-  pursuitStartTime: number;
-  clubId: string;
-};
-
-export type ClubDataType = {
-  id: string;
-  name: string;
-  displayName: string;
-  settings: ClubSettingsType;
-  // series: SeriesDataType[]; this is needed, just commented out because it hasn't been implemented yet
-  boats: BoatDataType[];
-  stripe: Stripe;
-};
+export const ClubSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  displayName: z.string(),
+  settings: z.any(),
+  // series: SeriesSchema.array(), this is needed, just commented out because it hasn't been implemented yet
+  boats: BoatSchema.array().optional(),
+  stripe: z.any().optional(),
+});
+export type ClubType = z.infer<typeof ClubSchema>;
 
 export type Stripe = {
   customerId: string;

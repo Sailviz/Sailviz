@@ -26,7 +26,7 @@ const Edit = ({ result }: { result: ResultType }) => {
 const columnHelper = createColumnHelper<ResultType>()
 
 const FleetPursuitResultsTable = ({ fleetId, editable }: { fleetId: string; editable: boolean }) => {
-    const { data: fleet } = useQuery(orpcClient.fleetbyId.queryOptions({ input: { fleetId } }))
+    const { data: fleet } = useQuery(orpcClient.fleet.find.queryOptions({ input: { fleetId } }))
     let data = fleet?.results
     if (data == undefined) {
         data = []
