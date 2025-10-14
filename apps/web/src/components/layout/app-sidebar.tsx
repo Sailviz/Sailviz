@@ -14,6 +14,7 @@ import {
     SidebarMenuSubButton,
     SidebarMenuSubItem,
     SidebarRail,
+    SidebarTrigger,
     useSidebar
 } from '@components/ui/sidebar'
 import { ChevronRight, GalleryVerticalEnd } from 'lucide-react'
@@ -29,7 +30,6 @@ export const company = {
 
 export default function AppSidebar({ navCollections }: { navCollections: NavCollection[] }) {
     const pathname = window.location.pathname
-    // const { state, isMobile } = useSidebar()
 
     return (
         <Sidebar className='border-r-2'>

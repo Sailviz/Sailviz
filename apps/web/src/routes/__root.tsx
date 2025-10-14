@@ -9,6 +9,7 @@ import Plausible from 'plausible-tracker'
 import ErrorBoundary from '@componentsErrorBoundary'
 import { ThemeProvider as NextThemesProvider, type ThemeProviderProps } from 'next-themes'
 import { getSession } from '@sailviz/auth/client'
+import Header from '@componentslayout/header'
 
 export const plausible = Plausible({
     domain: 'sailviz.com',
@@ -45,6 +46,7 @@ export const Route = createRootRoute({
                                 <AppSidebar navCollections={navCollections} />
                                 <SidebarInset>
                                     {/* page main content */}
+                                    <Header />
                                     <ScrollArea className='h-full'>
                                         <div className='flex flex-1 p-4 md:px-6'>
                                             <Outlet />
