@@ -1,21 +1,21 @@
 'use client'
-import React, { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, useReactTable, type SortingState } from '@tanstack/react-table'
-import * as Fetcher from '@components/Fetchers'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
 import { Button } from '../ui/button'
 import { Link } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { orpcClient } from '@liborpc'
+import type { BoatType, ResultType } from '@sailviz/types'
 
 const Text = ({ value }: { value: string }) => {
     return <div>{value}</div>
 }
-const Class = ({ value }: { value: BoatDataType }) => {
+const Class = ({ value }: { value: BoatType }) => {
     return <div>{value.name}</div>
 }
 
-const Edit = ({ result }: { result: ResultDataType }) => {
+const Edit = ({ result }: { result: ResultType }) => {
     return (
         <Link to={`/editResult/${result.id}`}>
             <Button className='mx-1'>Edit</Button>
@@ -23,7 +23,7 @@ const Edit = ({ result }: { result: ResultDataType }) => {
     )
 }
 
-const columnHelper = createColumnHelper<ResultDataType>()
+const columnHelper = createColumnHelper<ResultType>()
 
 const FleetPursuitResultsTable = ({ fleetId, editable }: { fleetId: string; editable: boolean }) => {
     const { data: fleet } = useQuery(orpcClient.fleetbyId.queryOptions({ input: { fleetId } }))
@@ -75,7 +75,7 @@ const FleetPursuitResultsTable = ({ fleetId, editable }: { fleetId: string; edit
         })
     ]
 
-    const editColumn = columnHelper.display({
+    const editColumn = columnHelper.accessor('id', {
         id: 'Edit',
         cell: props => <Edit result={props.row.original} />
     })

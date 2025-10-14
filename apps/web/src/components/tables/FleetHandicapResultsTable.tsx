@@ -2,11 +2,11 @@
 import React, { useEffect, useState } from 'react'
 import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, useReactTable, type SortingState } from '@tanstack/react-table'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
-import { Button } from '../ui/button'
-import * as Fetcher from '@components/Fetchers'
+import { Button } from '@components/ui/button'
 import { Link } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { orpcClient } from '@liborpc'
+import type { ResultType } from '@sailviz/types'
 
 const Text = ({ value }: { value: string }) => {
     return <div className=' text-center'>{value}</div>
@@ -54,7 +54,7 @@ const View = ({ resultId }: { resultId: string }) => {
     )
 }
 
-const columnHelper = createColumnHelper<ResultDataType>()
+const columnHelper = createColumnHelper<ResultType>()
 
 const FleetHandicapResultsTable = ({ fleetId, editable, showTime }: { fleetId: string; editable: boolean; showTime: boolean }) => {
     const { data: fleet } = useQuery(orpcClient.fleetbyId.queryOptions({ input: { fleetId } }))
@@ -128,12 +128,12 @@ const FleetHandicapResultsTable = ({ fleetId, editable, showTime }: { fleetId: s
         columns.splice(6, 0, correctedTimeColumn)
     }
 
-    const editColumn = columnHelper.display({
+    const editColumn = columnHelper.accessor('id', {
         id: 'Edit',
         cell: props => <Edit resultId={props.row.original.id} />
     })
 
-    const viewColumn = columnHelper.display({
+    const viewColumn = columnHelper.accessor('id', {
         id: 'Edit',
         cell: props => <View resultId={props.row.original.id} />
     })
