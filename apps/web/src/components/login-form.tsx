@@ -1,9 +1,8 @@
-import { DynamicIcon, type IconName } from 'lucide-react/dynamic'
 import { Button } from '@components/ui/button'
 import { Input } from '@components/ui/input'
 import { useState } from 'react'
 import { signIn, getSession } from '@sailviz/auth/client'
-import { Loader2 } from 'lucide-react'
+import { Github, Loader2 } from 'lucide-react'
 import { useNavigate } from '@tanstack/react-router'
 
 export function LoginForm() {
@@ -84,7 +83,7 @@ export function LoginForm() {
                 </div>
             </>
             <Button onClick={handleGitHubLogin} className='w-full' variant='outline'>
-                <DynamicIcon name={'github' as IconName} />
+                <Github />
                 <span>Continue with GitHub</span>
             </Button>
             {/* <div className='text-balance text-center text-xs text-muted-foreground [&_a]:underline [&_a]:underline-offset-4 hover:[&_a]:text-primary  '>

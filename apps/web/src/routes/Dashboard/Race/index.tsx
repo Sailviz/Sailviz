@@ -6,7 +6,7 @@ import { PageSkeleton } from '@components/layout/PageSkeleton'
 
 import { createFileRoute, useLoaderData } from '@tanstack/react-router'
 
-export default function Page() {
+function Page() {
     const session = useLoaderData({ from: `__root__` })
 
     console.log('Session:', session)
