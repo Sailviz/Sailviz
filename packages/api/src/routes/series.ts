@@ -11,19 +11,6 @@ export async function findClubSeries(clubId: string, includeRaces: boolean) {
       clubId: clubId,
     },
     include: {
-      races: includeRaces,
-      fleetSettings: true,
-    },
-  });
-  return result;
-}
-
-export async function findSeries(id: string, includeRaces: boolean) {
-  var result = await prisma.series.findUnique({
-    where: {
-      id: id,
-    },
-    include: {
       ...(includeRaces
         ? {
             races: {
@@ -37,6 +24,19 @@ export async function findSeries(id: string, includeRaces: boolean) {
             },
           }
         : {}),
+      fleetSettings: true,
+    },
+  });
+  return result;
+}
+
+export async function findSeries(id: string, includeRaces: boolean) {
+  var result = await prisma.series.findUnique({
+    where: {
+      id: id,
+    },
+    include: {
+      races: includeRaces,
       fleetSettings: true,
     },
   });
