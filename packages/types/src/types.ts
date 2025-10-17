@@ -40,9 +40,9 @@ export const SeriesSchema = z.object({
   id: z.string(),
   name: z.string(),
   clubId: z.string(),
-  settings: z.any(),
+  settings: z.any().optional(),
   races: z.array(z.lazy(() => RaceSchema)).optional(),
-  fleetSettings: z.array(z.any()),
+  fleetSettings: z.any().optional(),
 });
 export type SeriesType = z.infer<typeof SeriesSchema>;
 

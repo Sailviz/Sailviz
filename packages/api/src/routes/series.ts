@@ -24,7 +24,19 @@ export async function findSeries(id: string, includeRaces: boolean) {
       id: id,
     },
     include: {
-      races: includeRaces,
+      ...(includeRaces
+        ? {
+            races: {
+              include: {
+                fleets: {
+                  include: {
+                    fleetSettings: true,
+                  },
+                },
+              },
+            },
+          }
+        : {}),
       fleetSettings: true,
     },
   });
@@ -32,7 +44,10 @@ export async function findSeries(id: string, includeRaces: boolean) {
 }
 
 export const seriesbyClubId = os.series.club.handler(async ({ input }) => {
+  console.log(input);
   const series = await findClubSeries(input.clubId, input.includeRaces);
+  console.log(series);
+  console.log(series[1].races);
   if (series) {
     return series;
   } else {
@@ -89,6 +104,7 @@ export const getSeries = os.series.find.handler(async ({ input }) => {
     include: {
       fleetSettings: true,
       club: true,
+      races: true,
     },
   });
   if (series) {

@@ -49,9 +49,8 @@ const ClubTable = ({ viewHref, clubId }: { viewHref: string; clubId?: string }) 
     // if a clubId is provided then use that, otherwise use the session club id
     const clubIdToUse = clubId || session?.club!.id || ''
     const { data: series } = useQuery(orpcClient.series.club.queryOptions({ input: { clubId: clubIdToUse, includeRaces: true } }))
-
+    console.log('Series data:', series)
     const data = series || []
-    console.log(data)
     var table = useReactTable({
         data,
         columns: [
