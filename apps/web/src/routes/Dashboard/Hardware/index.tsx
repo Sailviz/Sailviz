@@ -6,7 +6,7 @@ import { title } from '@components/layout/home/primitaves'
 import { Input } from '@components/ui/input'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
-import { SaveButton } from '@components/ui/save-button'
+import { ActionButton } from '@components/ui/action-button'
 
 export default function Page() {
     const session = useLoaderData({ from: `__root__` })
@@ -67,7 +67,7 @@ export default function Page() {
                     </div>
                 </div>
                 <div className='flex flex-col p-6 w-full'>
-                    <SaveButton onSave={saveClubSettings} />
+                    <ActionButton action={saveClubSettings} before='Save' during='Saving...' after='Saved' />
                 </div>
             </div>
         )

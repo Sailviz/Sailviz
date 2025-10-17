@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { CheckIcon, LoaderIcon } from 'lucide-react'
 import { Button } from '@components/ui/button'
 
-export function SaveButton({ onSave }: { onSave: () => Promise<void> }) {
+export function ActionButton({ action, before, during, after }: { before: string; during: string; after: string; action: () => Promise<void> }) {
     const [isSaving, setIsSaving] = useState(false)
     const [isSaved, setIsSaved] = useState(false)
 
@@ -11,10 +11,10 @@ export function SaveButton({ onSave }: { onSave: () => Promise<void> }) {
         setIsSaved(false)
 
         try {
-            await onSave()
+            await action()
             setIsSaved(true)
         } catch (err) {
-            console.error('Save failed:', err)
+            console.error(before, ' failed:', err)
         } finally {
             setIsSaving(false)
             setTimeout(() => setIsSaved(false), 2000) // reset tick
@@ -24,7 +24,7 @@ export function SaveButton({ onSave }: { onSave: () => Promise<void> }) {
     return (
         <Button onClick={handleClick} disabled={isSaving}>
             {isSaving ? <LoaderIcon className='mr-2 h-4 w-4 animate-spin' /> : isSaved ? <CheckIcon className='mr-2 h-4 w-4 text-green-500' /> : null}
-            {isSaving ? 'Saving...' : isSaved ? 'Saved!' : 'Save'}
+            {isSaving ? during : isSaved ? after : before}
         </Button>
     )
 }

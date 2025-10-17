@@ -7,7 +7,7 @@ import { Table, TableBody, TableCell, TableRow } from '@components/ui/table'
 import { Button } from '@components/ui/button'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
-import { SaveButton } from '@components/ui/save-button'
+import { ActionButton } from '@components/ui/action-button'
 
 export default function Page() {
     const session = useLoaderData({ from: `__root__` })
@@ -61,7 +61,7 @@ export default function Page() {
                 <p className='text-2xl font-bold p-6'>Default Pursuit Race Length</p>
                 <div className='flex flex-col px-6 w-full '>
                     <Input type='number' value={pursuitLength} onChange={e => setPursuitLength(parseInt(e.target.value))} />
-                    <SaveButton onSave={() => savePursuitLength(pursuitLength)} />
+                    <ActionButton action={() => savePursuitLength(pursuitLength)} before='Save' during='Saving...' after='Saved' />
                 </div>
                 <p className='text-2xl font-bold p-6'>Duties</p>
                 <Table>

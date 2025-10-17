@@ -3,9 +3,9 @@ import { PageSkeleton } from '@components/layout/PageSkeleton'
 import UsersTable from '@components/tables/UsersTable'
 import RoleTable from '@components/tables/RoleTable'
 import { AVAILABLE_PERMISSIONS, userHasPermission } from '@components/helpers/users'
-import { Button } from '@components/ui/button'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
+import { ActionButton } from '@components/ui/action-button'
 
 export default function Page() {
     const session = useLoaderData({ from: `__root__` })
@@ -55,12 +55,20 @@ export default function Page() {
                 <div className='p-6'>
                     Users
                     <UsersTable />
-                    {userHasPermission(session.user, AVAILABLE_PERMISSIONS.editUsers) ? <Button onClick={createUser}>Create User</Button> : <></>}
+                    {userHasPermission(session.user, AVAILABLE_PERMISSIONS.editUsers) ? (
+                        <ActionButton before={'Create User'} during={'Creating'} after={'Created'} action={createUser} />
+                    ) : (
+                        <></>
+                    )}
                 </div>
                 <div className='p-6'>
                     Roles
                     <RoleTable />
-                    {userHasPermission(session.user, AVAILABLE_PERMISSIONS.editRoles) ? <Button onClick={createRole}>Create Role</Button> : <></>}
+                    {userHasPermission(session.user, AVAILABLE_PERMISSIONS.editRoles) ? (
+                        <ActionButton before={'Create Role'} during={'Creating'} after={'Created'} action={createRole} />
+                    ) : (
+                        <></>
+                    )}
                 </div>
             </>
         )
