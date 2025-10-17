@@ -3,7 +3,7 @@ import { Features } from '@components/layout/home/features'
 import { Stats } from '@components/layout/home/stats'
 import { Footer } from '@components/layout/home/footer'
 import { createFileRoute } from '@tanstack/react-router'
-import HomeNav from '@componentslayout/home/navbar'
+import HomeNav from '@components/layout/home/navbar'
 
 function HomePage() {
     return (

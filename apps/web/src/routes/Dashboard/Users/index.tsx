@@ -2,12 +2,9 @@ import { useLoaderData, createFileRoute } from '@tanstack/react-router'
 import { PageSkeleton } from '@components/layout/PageSkeleton'
 import UsersTable from '@components/tables/UsersTable'
 import RoleTable from '@components/tables/RoleTable'
-import EditUserModal from '@components/layout/dashboard/EditUserModal'
-import { mutate } from 'swr'
-import EditRoleModal from '@components/layout/dashboard/EditRoleModal'
 import { AVAILABLE_PERMISSIONS, userHasPermission } from '@components/helpers/users'
 import { Button } from '@components/ui/button'
-import { useMutation, useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
 
 export default function Page() {
@@ -17,6 +14,7 @@ export default function Page() {
 
     const userCreation = useMutation(orpcClient.user.create.mutationOptions())
     const roleCreation = useMutation(orpcClient.role.create.mutationOptions())
+    const queryClient = useQueryClient()
 
     const createUser = async () => {
         if (club == undefined) {
@@ -24,7 +22,9 @@ export default function Page() {
         }
         const user = await userCreation.mutateAsync({ clubId: club.id })
         if (user) {
-            mutate('/api/GetUsersByClubId')
+            queryClient.invalidateQueries({
+                queryKey: orpcClient.user.club.key({ type: 'query' })
+            })
         } else {
             throw new Error('Could not create user')
         }
@@ -37,7 +37,9 @@ export default function Page() {
         const role = await roleCreation.mutateAsync({ clubId: club.id })
         console.log(role)
         if (role) {
-            mutate('/api/GetRolesByClubId')
+            queryClient.invalidateQueries({
+                queryKey: orpcClient.role.club.key({ type: 'query' })
+            })
         } else {
             throw new Error('Could not create role')
         }

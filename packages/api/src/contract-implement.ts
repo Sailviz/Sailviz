@@ -15,7 +15,12 @@ import {
   updateUserById,
 } from "./routes/user";
 import { create } from "domain";
-import { createRoleInClub, getRolesByClub } from "./routes/role";
+import {
+  createRoleInClub,
+  deleteRoleById,
+  getRolesByClub,
+  updateRoleById,
+} from "./routes/role";
 
 interface ORPCContext extends RequestHeadersPluginContext {
   req: Request;
@@ -266,23 +271,41 @@ const createRole = os.role.create
 
 const rolesByClub = os.role.club
   .use(authMiddleware)
-  .handler(async ({ context, input }) => {
-    const session = context.session as any;
+  .handler(async ({ input }) => {
     const roles = await getRolesByClub(input.clubId);
     if (!roles) {
       throw new ORPCError("BAD_REQUEST", { message: "Could not get roles" });
     }
-    // Ensure permissions is the correct type for each role
-    //TODO: fix typing in prisma schema so this is not needed
-    return roles.map((role) => ({
-      id: role.id,
-      name: role.name,
-      clubId: role.clubId,
-      permissions:
-        typeof role.permissions === "string"
-          ? JSON.parse(role.permissions)
-          : role.permissions,
-    }));
+    console.log(roles);
+    return roles;
+  });
+
+const updateRole = os.role.update
+  .use(authMiddleware)
+  .handler(async ({ input, context }) => {
+    const session = context.session as any;
+    if (!session || !session.user) {
+      throw new ORPCError("UNAUTHORIZED", { message: "Login required" });
+    }
+    const updatedRole = await updateRoleById(input);
+    if (!updatedRole) {
+      throw new ORPCError("BAD_REQUEST", { message: "Could not update role" });
+    }
+    return updatedRole;
+  });
+
+const deleteRole = os.role.delete
+  .use(authMiddleware)
+  .handler(async ({ input, context }) => {
+    const session = context.session as any;
+    if (!session || !session.user) {
+      throw new ORPCError("UNAUTHORIZED", { message: "Login required" });
+    }
+    const deletedRole = await deleteRoleById(input);
+    if (!deletedRole) {
+      throw new ORPCError("BAD_REQUEST", { message: "Could not delete role" });
+    }
+    return deletedRole;
   });
 
 export const mainRouter = os.router({
@@ -319,5 +342,7 @@ export const mainRouter = os.router({
   role: {
     create: createRole,
     club: rolesByClub,
+    update: updateRole,
+    delete: deleteRole,
   },
 });

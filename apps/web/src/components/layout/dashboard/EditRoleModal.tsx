@@ -4,23 +4,34 @@ import { PERMISSIONS } from '@components/helpers/users'
 import { Dialog, DialogContent, DialogFooter, DialogTitle } from '@components/ui/dialog'
 import { Button } from '@components/ui/button'
 import { Input } from '@components/ui/input'
-import * as DB from '@components/apiMethods'
-import { mutate } from 'swr'
+import type { RoleType } from '@sailviz/types'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { orpcClient } from '@lib/orpc'
 
-export default function EditRoleDialog({ role, open, onClose }: { role: RoleDataType; open: boolean; onClose?: () => void }) {
+export default function EditRoleDialog({ role, open, onClose }: { role: RoleType; open: boolean; onClose?: () => void }) {
     const [name, setName] = useState('')
     const [permissions, setPermissions] = useState<PermissionType[]>([])
 
-    const updateRole = async (role: RoleDataType) => {
-        await DB.updateRole(role)
-        mutate('/api/GetRolesByClubId')
+    const updateRoleMutation = useMutation(orpcClient.role.update.mutationOptions())
+    const deleteRoleMutation = useMutation(orpcClient.role.delete.mutationOptions())
+    const queryClient = useQueryClient()
+
+    const updateRole = async (role: RoleType) => {
+        await updateRoleMutation.mutateAsync(role)
+        queryClient.invalidateQueries({
+            queryKey: orpcClient.role.club.key({ type: 'query' })
+        })
+        onClose && onClose()
     }
 
-    const deleteRole = async (role: RoleDataType) => {
+    const deleteRole = async (role: RoleType) => {
         console.log('deleting role', role)
         if (confirm('Are you sure you want to delete this role?')) {
-            await DB.deleteRole(role)
-            mutate('/api/GetRolesByClubId')
+            await deleteRoleMutation.mutateAsync(role)
+            queryClient.invalidateQueries({
+                queryKey: orpcClient.role.club.key({ type: 'query' })
+            })
+            onClose && onClose()
         }
     }
 

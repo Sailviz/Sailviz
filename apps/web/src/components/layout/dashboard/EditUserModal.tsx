@@ -4,7 +4,7 @@ import { Dialog, DialogContent, DialogFooter, DialogTitle } from '@components/ui
 import { Button } from '@components/ui/button'
 import { Input } from '@components/ui/input'
 import type { RoleType, UserType } from '@sailviz/types'
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
 
 export default function EditUserDialog({ user, clubRoles, open, onClose }: { user: UserType; clubRoles: RoleType[]; open: boolean; onClose?: () => void }) {
@@ -16,24 +16,29 @@ export default function EditUserDialog({ user, clubRoles, open, onClose }: { use
 
     const updateUserMutation = useMutation(orpcClient.user.update.mutationOptions())
     const deleteUserMutation = useMutation(orpcClient.user.delete.mutationOptions())
+    const queryClient = useQueryClient()
 
     const editUser = async (user: UserType) => {
         await updateUserMutation.mutateAsync(user)
-        // mutate('/api/GetUsersByClubId')
+        queryClient.invalidateQueries({
+            queryKey: orpcClient.user.club.key({ type: 'query' })
+        })
         onClose && onClose()
     }
 
     const deleteUser = async (user: UserType) => {
         if (confirm('Are you sure you want to delete this user?')) {
             await deleteUserMutation.mutateAsync(user)
-            // mutate('/api/GetUsersByClubId')
+            queryClient.invalidateQueries({
+                queryKey: orpcClient.user.club.key({ type: 'query' })
+            })
             onClose && onClose()
         }
     }
 
     useEffect(() => {
         if (user === undefined) return
-        setDisplayName(user.displayUsername)
+        setDisplayName(user.displayUsername || '')
         setName(user.username)
         setRoles(user.roles || [])
         setStartPage(user.startPage)
@@ -61,12 +66,12 @@ export default function EditUserDialog({ user, clubRoles, open, onClose }: { use
                                 isMulti={true}
                                 options={
                                     clubRoles &&
-                                    clubRoles.map((x: RoleDataType) => {
+                                    clubRoles.map((x: RoleType) => {
                                         return { value: x, label: x.name }
                                     })
                                 }
                                 onChange={e => setRoles(e.map((x: any) => x.value))}
-                                value={roles?.map((x: RoleDataType) => {
+                                value={roles?.map((x: RoleType) => {
                                     return { value: x, label: x.name }
                                 })}
                             />

@@ -1,4 +1,4 @@
-import z from "zod";
+import z, { uuid } from "zod";
 
 export const DutySchema = z.json();
 export type DutyType = z.infer<typeof DutySchema>;
@@ -165,21 +165,28 @@ export const RoleSchema = z.object({
   id: z.string(),
   name: z.string(),
   clubId: z.string(),
-  permissions: z.object({
-    allowed: z.array(PermissionSchema), // Array of permission objects
-  }),
+  permissions: z
+    .object({
+      allowed: z.array(PermissionSchema).optional(), // Array of permission objects
+    })
+    .optional(),
 });
 export type RoleType = z.infer<typeof RoleSchema>;
 
 export const UserSchema = z.object({
   id: z.string(),
-  displayUsername: z.string(),
   username: z.string(),
+  uuid: z.string().nullable(),
+  startPage: z.string(),
   admin: z.boolean(),
+  email: z.string().nullable(),
+  emailVerified: z.boolean(),
+  image: z.string().nullable(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+  displayUsername: z.string().nullable(),
   roles: z.array(RoleSchema).optional(),
   clubId: z.string(),
-  startPage: z.string(),
-  uuid: z.string(),
 });
 export type UserType = z.infer<typeof UserSchema>;
 

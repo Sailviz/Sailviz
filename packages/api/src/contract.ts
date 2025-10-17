@@ -66,11 +66,17 @@ export const ORPCcontract = {
   user: {
     update: oc.input(UserSchema).output(UserSchema),
     create: oc.input(z.object({ clubId: z.string() })).output(UserSchema),
-    club: oc.input(z.object({ clubId: z.string() })).output(UserSchema.array()),
+    club: oc
+      .input(z.object({ clubId: z.string() }))
+      .output(z.array(UserSchema)),
     delete: oc.input(UserSchema).output(UserSchema),
   },
   role: {
     create: oc.input(z.object({ clubId: z.string() })).output(RoleSchema),
-    club: oc.input(z.object({ clubId: z.string() })).output(RoleSchema.array()),
+    club: oc
+      .input(z.object({ clubId: z.string() }))
+      .output(z.array(RoleSchema)),
+    update: oc.input(RoleSchema).output(RoleSchema),
+    delete: oc.input(RoleSchema).output(RoleSchema),
   },
 };

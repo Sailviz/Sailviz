@@ -9,7 +9,7 @@ import { useQuery } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
 import EditRoleDialog from '@components/layout/dashboard/EditRoleModal'
 
-const Action = ({ session, role, onClick }: { session: any; role: RoleDataType; onClick: (role: RoleType) => void }) => {
+const Action = ({ session, role, onClick }: { session: any; role: RoleType; onClick: (role: RoleType) => void }) => {
     if (userHasPermission(session.user, AVAILABLE_PERMISSIONS.editRoles)) {
         return (
             <div className='relative flex items-center gap-2'>
@@ -21,7 +21,7 @@ const Action = ({ session, role, onClick }: { session: any; role: RoleDataType; 
     }
 }
 
-const columnHelper = createColumnHelper<RoleDataType>()
+const columnHelper = createColumnHelper<RoleType>()
 
 const UsersTable = () => {
     const session = useLoaderData({ from: `__root__` })
