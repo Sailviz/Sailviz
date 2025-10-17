@@ -1,6 +1,6 @@
 import z, { uuid } from "zod";
 
-export const DutySchema = z.json();
+export const DutySchema = z.any();
 export type DutyType = z.infer<typeof DutySchema>;
 
 export const LapSchema = z.object({
@@ -42,8 +42,9 @@ export const SeriesSchema = z.object({
   clubId: z.string(),
   settings: z.any(),
   races: z.array(z.lazy(() => RaceSchema)).optional(),
-  fleetSettings: z.array(z.any()).optional(),
+  fleetSettings: z.array(z.any()),
 });
+export type SeriesType = z.infer<typeof SeriesSchema>;
 
 export const RaceSchema = z.object({
   id: z.string(),
@@ -51,7 +52,7 @@ export const RaceSchema = z.object({
   Time: z.string(),
   Duties: DutySchema,
   Type: z.string(),
-  fleets: z.array(FleetSchema).optional(),
+  fleets: z.array(FleetSchema),
   seriesId: z.string(),
   series: z.lazy(() => SeriesSchema.optional()),
 });
@@ -139,8 +140,8 @@ export const ClubSchema = z.object({
   id: z.string(),
   name: z.string(),
   displayName: z.string(),
-  settings: z.any(),
-  // series: SeriesSchema.array(), this is needed, just commented out because it hasn't been implemented yet
+  settings: ClubSettingsSchema,
+  //series: z.array(SeriesSchema).optional(), //this is needed, just commented out because it hasn't been implemented yet
   boats: BoatSchema.array().optional(),
   stripe: z.any().optional(),
 });

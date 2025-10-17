@@ -1,12 +1,25 @@
 import { implement, ORPCError } from "@orpc/server";
 import { ORPCcontract } from "./contract";
 import prisma from "@sailviz/db";
-import { countRaces, findRace, findRaces, findTodaysRace } from "./routes/race";
-import { findSeries } from "./routes/series";
+import {
+  countRaces,
+  findRace,
+  findRaces,
+  findTodaysRace,
+  updateRace,
+} from "./routes/race";
+import {
+  createSeries,
+  deleteSeries,
+  findClubSeries,
+  findSeries,
+  getSeries,
+  seriesbyClubId,
+} from "./routes/series";
 import { findBoat, findBoats, updateBoatById } from "./routes/boats";
 import { auth } from "@sailviz/auth/auth";
 import { RequestHeadersPluginContext } from "@orpc/server/plugins";
-import { findFleet } from "./routes/fleet";
+import { createFleetSettings, findFleet } from "./routes/fleet";
 import { getClub, updateClubById } from "./routes/club";
 import {
   createUserInClub,
@@ -14,13 +27,18 @@ import {
   getUsersByClub,
   updateUserById,
 } from "./routes/user";
-import { create } from "domain";
 import {
   createRoleInClub,
   deleteRoleById,
   getRolesByClub,
   updateRoleById,
 } from "./routes/role";
+import {
+  deleteStartSequenceStep,
+  findStartSequence,
+} from "./routes/startSequence";
+import { RaceType } from "packages/types/src/types";
+import { createResult, updateResult } from "./routes/result";
 
 interface ORPCContext extends RequestHeadersPluginContext {
   req: Request;
@@ -79,7 +97,7 @@ const todaysRaces = os.race.today.handler(async ({ input }) => {
 });
 
 const racebyClubId = os.race.club.handler(async ({ input }) => {
-  const series = await findSeries(input.clubId);
+  const series = await findClubSeries(input.clubId, true);
 
   if (!series || series.length === 0) {
     throw new ORPCError("NOT_FOUND");
@@ -100,19 +118,10 @@ const racebyClubId = os.race.club.handler(async ({ input }) => {
   return { races, count };
 });
 
-const seriesbyClubId = os.series.club.handler(async ({ input }) => {
-  const series = await findSeries(input.clubId);
-  if (series) {
-    return series;
-  } else {
-    throw new ORPCError("BAD_REQUEST");
-  }
-});
-
 const racebyId = os.race.find.handler(async ({ input }) => {
   const race = await findRace(input.raceId);
   if (race) {
-    return race;
+    return race as RaceType;
   } else {
     throw new ORPCError("NOT_FOUND");
   }
@@ -313,16 +322,32 @@ export const mainRouter = os.router({
   laps: {
     global: getGlobalLaps,
   },
+  result: {
+    create: createResult,
+    update: updateResult,
+  },
+  startSequence: {
+    find: findStartSequence,
+    delete: deleteStartSequenceStep,
+    update: undefined,
+  },
   race: {
     today: todaysRaces,
     club: racebyClubId,
     find: racebyId,
+    update: updateRace,
   },
   series: {
+    find: getSeries,
     club: seriesbyClubId,
+    create: createSeries,
+    delete: deleteSeries,
   },
   fleet: {
     find: fleetbyId,
+    settings: {
+      create: createFleetSettings,
+    },
   },
   club: {
     session: club,

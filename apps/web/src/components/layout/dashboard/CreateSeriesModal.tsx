@@ -1,9 +1,7 @@
-'use client'
 import { Button } from '@components/ui/button'
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTrigger } from '@components/ui/dialog'
+import { Dialog, DialogContent, DialogFooter, DialogTitle, DialogTrigger } from '@components/ui/dialog'
 import { Input } from '@components/ui/input'
-import { redirect } from 'next/dist/server/api-utils'
-import { ChangeEvent, useState } from 'react'
+import { useState } from 'react'
 
 export default function CreateSeriesDialog({ onSubmit, allowCreate }: { onSubmit: (name: string) => void; allowCreate?: boolean }) {
     const [seriesName, setSeriesName] = useState('')
@@ -23,7 +21,7 @@ export default function CreateSeriesDialog({ onSubmit, allowCreate }: { onSubmit
                     </Button>
                 </DialogTrigger>
                 <DialogContent>
-                    <DialogHeader className='flex flex-col gap-1'>Create Series</DialogHeader>
+                    <DialogTitle className='flex flex-col gap-1'>Create Series</DialogTitle>
 
                     <div className='flex w-full'>
                         <div className='flex flex-col px-6 w-full'>

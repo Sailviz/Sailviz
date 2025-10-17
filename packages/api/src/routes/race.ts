@@ -1,6 +1,9 @@
 import prisma from "@sailviz/db";
 import dayjs from "dayjs";
-import { os, ORPCError } from "@orpc/server";
+import { implement, ORPCError } from "@orpc/server";
+import { ORPCcontract } from "../contract";
+
+const os = implement(ORPCcontract);
 
 export async function findTodaysRace(clubId: string) {
   var result = await prisma.race.findMany({
@@ -111,3 +114,23 @@ export async function countRaces(
   });
   return result;
 }
+
+export const updateRace = os.race.update.handler(async ({ input }) => {
+  const updatedRace = await prisma.race.update({
+    where: { id: input.id },
+    data: input,
+    include: {
+      series: true,
+      fleets: {
+        include: {
+          fleetSettings: true,
+        },
+      },
+    },
+  });
+  if (updatedRace) {
+    return updatedRace;
+  } else {
+    throw new ORPCError("BAD_REQUEST");
+  }
+});

@@ -1,12 +1,19 @@
 import * as DB from '@components/apiMethods'
+import { orpcClient } from '@lib/orpc'
+import type { RaceType, ResultType } from '@sailviz/types'
+import { useMutation } from '@tanstack/react-query'
 
-export async function calculateResults(race: RaceDataType) {
+export async function calculateResults(race: RaceType) {
+    const updateResult = useMutation(orpcClient.result.update.mutationOptions())
     //most nuber of laps.
     console.log(race)
     for (const fleet of race.fleets) {
+        if (fleet.results == undefined) {
+            return
+        }
         const maxLaps = Math.max.apply(
             null,
-            fleet.results.map(function (o: ResultDataType) {
+            fleet.results.map(function (o: ResultType) {
                 return o.numberLaps
             })
         )
@@ -19,6 +26,9 @@ export async function calculateResults(race: RaceDataType) {
 
         //calculate corrected time
         for (const result of resultsData) {
+            if (result == undefined) {
+                return
+            }
             console.log(result)
             //if we don't have a number of laps, set it to the number of laps
             if (result.numberLaps == 0) {
@@ -57,14 +67,14 @@ export async function calculateResults(race: RaceDataType) {
         sortedResults.forEach((result, index) => {
             if (result.resultCode != '') {
                 console.log(result)
-                result.HandicapPosition = fleet.results.length
+                result.HandicapPosition = fleet.results!.length
             } else {
                 result.HandicapPosition = index + 1
             }
         })
 
         // Await all DB updates
-        await Promise.all(sortedResults.map(result => DB.updateResult(result)))
+        await Promise.all(sortedResults.map(result => updateResult.mutateAsync(result)))
 
         console.log(sortedResults)
     }

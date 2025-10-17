@@ -6,13 +6,18 @@ import {
   ClubSchema,
   ClubType,
   FleetSchema,
+  FleetSettingsType,
   NextRaceSchema,
   RaceSchema,
+  RaceType,
+  ResultSchema,
+  ResultType,
   RoleSchema,
   SeriesSchema,
+  SeriesType,
+  StartSequenceStepSchema,
   UserSchema,
 } from "@sailviz/types";
-import { create } from "domain";
 
 const helloSchema = z.object({
   name: z.string(),
@@ -26,10 +31,31 @@ export const ORPCcontract = {
   laps: {
     global: oc.output(z.number()),
   },
+  startSequence: {
+    find: oc
+      .input(z.object({ seriesId: z.string() }))
+      .output(z.array(StartSequenceStepSchema)),
+    delete: oc
+      .input(z.object({ stepId: z.string() }))
+      .output(StartSequenceStepSchema),
+    update: oc
+      .input(
+        z.object({
+          seriesId: z.string(),
+          startSequence: z.array(StartSequenceStepSchema),
+        })
+      )
+      .output(z.array(StartSequenceStepSchema)),
+  },
   series: {
+    find: oc.input(z.object({ seriesId: z.string() })).output(SeriesSchema),
     club: oc
-      .input(z.object({ clubId: z.string() }))
-      .output(SeriesSchema.array()),
+      .input(z.object({ clubId: z.string(), includeRaces: z.boolean() }))
+      .output(z.array(SeriesSchema)),
+    create: oc
+      .input(z.object({ clubId: z.string(), name: z.string() }))
+      .output(SeriesSchema),
+    delete: oc.input(z.object({ seriesId: z.string() })).output(SeriesSchema),
   },
   club: {
     session: oc.output<typeof ClubSchema>(ClubSchema),
@@ -39,6 +65,9 @@ export const ORPCcontract = {
     find: oc
       .input(z.object({ fleetId: z.string() }))
       .output<typeof FleetSchema>(FleetSchema),
+    settings: {
+      create: oc.input(z.object({ seriesId: z.string() })).output(z.any()),
+    },
   },
   boat: {
     find: oc.input(z.object({ boatId: z.string() })).output(BoatSchema),
@@ -46,9 +75,7 @@ export const ORPCcontract = {
     update: oc.input(BoatSchema).output(BoatSchema),
   },
   race: {
-    find: oc
-      .input(z.object({ raceId: z.string() }))
-      .output<typeof RaceSchema>(RaceSchema),
+    find: oc.input(z.object({ raceId: z.string() })).output(RaceSchema),
     today: oc
       .input(z.object({ clubId: z.string() }))
       .output(NextRaceSchema.array()),
@@ -62,6 +89,11 @@ export const ORPCcontract = {
         })
       )
       .output(z.object({ races: z.array(RaceSchema), count: z.number() })),
+    update: oc.input(RaceSchema).output(RaceSchema),
+  },
+  result: {
+    create: oc.input(z.object({ fleetId: z.string() })).output(ResultSchema),
+    update: oc.input(ResultSchema).output(ResultSchema),
   },
   user: {
     update: oc.input(UserSchema).output(UserSchema),

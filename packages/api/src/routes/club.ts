@@ -1,10 +1,11 @@
 import prisma from "@sailviz/db";
+import { ClubType } from "packages/types/src/types";
 
 export async function getClub(clubId: string) {
   const club = await prisma.club.findUnique({
     where: { id: clubId },
   });
-  return club;
+  return club as unknown as ClubType; //have to do unknown as settings isn't typed in db
 }
 
 export async function updateClubById(input: any) {
@@ -12,5 +13,5 @@ export async function updateClubById(input: any) {
     where: { id: input.id },
     data: input,
   });
-  return club;
+  return club as unknown as ClubType;
 }

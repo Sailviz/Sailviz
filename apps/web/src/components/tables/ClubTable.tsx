@@ -1,22 +1,23 @@
-'use client'
-import React from 'react'
 import { createColumnHelper, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table'
 import { AVAILABLE_PERMISSIONS, userHasPermission } from '@components/helpers/users'
-import { useNavigate } from '@tanstack/react-router'
-import * as DB from '@components/apiMethods'
+import { useLoaderData, useNavigate } from '@tanstack/react-router'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
-import { useSession } from '@sailviz/auth/client'
-import * as Fetcher from '@components/Fetchers'
-import { mutate } from 'swr'
+import { type SeriesType } from '@sailviz/types'
 import { Button } from '../ui/button'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { orpcClient } from '@lib/orpc'
 
 const Action = ({ seriesId, viewHref, user }: { seriesId: string; viewHref: string; user?: UserDataType }) => {
     const navigate = useNavigate()
+    const seriesDeletion = useMutation(orpcClient.series.delete.mutationOptions())
+    const queryClient = useQueryClient()
 
     const onDeleteClick = async () => {
         if (confirm('are you sure you want to do this?')) {
-            await DB.deleteSeriesById(seriesId)
-            mutate('/api/GetSeriesByClubId') // This will revalidate the series data
+            await seriesDeletion.mutateAsync({ seriesId: seriesId })
+            queryClient.invalidateQueries({
+                queryKey: orpcClient.series.club.key({ type: 'query' })
+            })
         }
     }
 
@@ -40,23 +41,17 @@ const Action = ({ seriesId, viewHref, user }: { seriesId: string; viewHref: stri
     )
 }
 
-const columnHelper = createColumnHelper<SeriesDataType>()
+const columnHelper = createColumnHelper<SeriesType>()
 
 const ClubTable = ({ viewHref, clubId }: { viewHref: string; clubId?: string }) => {
-    const {
-        data: session,
-        isPending, //loading state
-        error, //error object
-        refetch //refetch the session
-    } = useSession()
+    const session = useLoaderData({ from: `__root__` })
 
     // if a clubId is provided then use that, otherwise use the session club id
     const clubIdToUse = clubId || session?.club!.id || ''
-    const { series, seriesIsError, seriesIsValidating } = Fetcher.GetSeriesByClubId(clubIdToUse)
-    // const [data, setData] = useState<SeriesDataType[]>([])
+    const { data: series } = useQuery(orpcClient.series.club.queryOptions({ input: { clubId: clubIdToUse, includeRaces: true } }))
 
     const data = series || []
-
+    console.log(data)
     var table = useReactTable({
         data,
         columns: [

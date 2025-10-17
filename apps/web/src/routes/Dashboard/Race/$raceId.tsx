@@ -1,5 +1,4 @@
 import React, { useEffect } from 'react'
-import * as DB from '@components/apiMethods'
 import dayjs from 'dayjs'
 import FleetHandicapResultsTable from '@components/tables/FleetHandicapResultsTable'
 import FleetPursuitResultsTable from '@components/tables/FleetPursuitResultsTable'
@@ -14,7 +13,7 @@ import CreateResultModal from '@components/layout/dashboard/CreateResultModal'
 import { calculateResults } from '@components/helpers/race'
 import { mutate } from 'swr'
 import { SmoothSpinner } from '@components/icons/smooth-spinner'
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
 import type { RaceType } from '@sailviz/types'
 
@@ -22,14 +21,20 @@ function Page() {
     const { raceId } = Route.useParams()
     const session = useLoaderData({ from: `__root__` })
 
-    const { data: race } = useQuery(orpcClient.race.find.queryOptions({ input: { raceId: raceId! } }))
+    const race = useQuery(orpcClient.race.find.queryOptions({ input: { raceId: raceId! } })).data as RaceType
     const { data: boats } = useQuery(orpcClient.boat.session.queryOptions())
+
+    const getRace = useMutation(orpcClient.race.find.mutationOptions())
+    const getTodayRace = useMutation(orpcClient.race.today.mutationOptions())
+
+    const updateRace = useMutation(orpcClient.race.update.mutationOptions())
+    const queryClient = useQueryClient()
 
     const [resultsUpdated, setResultsUpdated] = React.useState(true)
     const [calculatingResults, setCalculatingResults] = React.useState(false)
 
     //Capitalise the first letter of each word, and maintain cursor pos.
-    const saveRaceSettings = (e: any) => {
+    const saveRaceSettings = async (e: any) => {
         let newRaceData: RaceType = race
         const sentence = e.target.value.split(' ')
         const cursorPos = e.target.selectionStart
@@ -37,8 +42,10 @@ function Page() {
         const calitalisedSentence = capitalizedWords.join(' ')
 
         newRaceData.Duties[e.target.id] = calitalisedSentence
-        DB.updateRaceById(newRaceData)
-        // mutate('/api/GetRaceById?id=' + race.id)
+        await updateRace.mutateAsync(newRaceData)
+        queryClient.invalidateQueries({
+            queryKey: orpcClient.race.find.key({ type: 'query' })
+        })
 
         let inputElement = document.getElementById(e.target.id) as HTMLInputElement
         inputElement.value = calitalisedSentence
@@ -46,7 +53,11 @@ function Page() {
     }
 
     const copyFromPrevious = async () => {
-        let today = await DB.getTodaysRaceByClubId(session?.user.clubId!)
+        let today = await getTodayRace.mutateAsync({ clubId: session!.user.clubId })
+        if (today == undefined) {
+            alert('unable to get previous data')
+            return
+        }
         //sort by time, oldest first
         today.sort((a, b) => dayjs(a.Time).unix() - dayjs(b.Time).unix())
         console.log(today)
@@ -61,12 +72,12 @@ function Page() {
             alert('No previous race found')
             return
         }
-        let previousRaceData = await DB.getRaceById(previousRace.id)
+        let previousRaceData = (await getRace.mutateAsync({ raceId: previousRace.id })) as RaceType
         //copy duties
         let newDuties = previousRaceData.Duties
         //update DB
         console.log(newDuties)
-        await DB.updateRaceById({ ...race, Duties: newDuties })
+        await updateRace.mutateAsync({ ...race, Duties: newDuties })
         // mutateRace()
     }
 

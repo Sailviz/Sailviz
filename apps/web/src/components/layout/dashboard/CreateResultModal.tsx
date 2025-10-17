@@ -2,20 +2,25 @@ import { Button } from '@components/ui/button'
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTrigger } from '@components/ui/dialog'
 import { Input } from '@components/ui/input'
 import { Tabs, TabsList } from '@components/ui/tabs'
+import { orpcClient } from '@lib/orpc'
 import { TabsTrigger } from '@radix-ui/react-tabs'
+import type { BoatType, FleetType, RaceType } from '@sailviz/types'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useTheme } from 'next-themes'
 import { type ChangeEvent, useState } from 'react'
 import Select, { type CSSObjectWithLabel } from 'react-select'
-import * as DB from '@components/apiMethods'
-import * as Fetcher from '@components/Fetchers'
-export default function CreateResultDialog({ race, boats }: { race: RaceDataType; boats: BoatDataType[] }) {
+export default function CreateResultDialog({ race, boats }: { race: RaceType; boats: BoatType[] }) {
+    const queryClient = useQueryClient()
+
+    const createResult = useMutation(orpcClient.result.create.mutationOptions())
+    const updateResult = useMutation(orpcClient.result.update.mutationOptions())
+
     const [open, setOpen] = useState(false)
     const [helm, setHelm] = useState('')
     const [crew, setCrew] = useState('')
     const [sailNumber, setSailNumber] = useState('')
 
-    const { theme, setTheme } = useTheme()
-    const { mutateFleet } = Fetcher.Fleet(race.fleets[0]!.id)
+    const { theme } = useTheme()
 
     //array of fleets, dimensionally equal to selectedRaces
     const [selectedFleet, setSelectedFleet] = useState<string>(race.fleets[0]!.id)
@@ -32,7 +37,6 @@ export default function CreateResultDialog({ race, boats }: { race: RaceDataType
 
     const CapitaliseInput = (e: ChangeEvent<HTMLInputElement>) => {
         const sentence = e.target.value.split(' ')
-        const cursorPos = e.target.selectionStart
         const capitalizedWords = sentence.map(word => word.charAt(0).toUpperCase() + word.slice(1))
         const capitalisedSentence = capitalizedWords.join(' ')
         if (e.target.id == 'helm') setHelm(capitalisedSentence)
@@ -57,15 +61,17 @@ export default function CreateResultDialog({ race, boats }: { race: RaceDataType
         }
         if (error) return
 
-        let result = await DB.createResult(selectedFleet)
+        let result = await createResult.mutateAsync({ fleetId: selectedFleet })
         if (result == null) {
             console.error('Error creating result')
             return
         }
-        await DB.updateResult({ ...result, Helm: helm, Crew: crew, boat: selectedBoat.value, SailNumber: sailNumber })
+        await updateResult.mutateAsync({ ...result, Helm: helm, Crew: crew, boat: selectedBoat.value, SailNumber: sailNumber })
         setOpen(false)
 
-        mutateFleet()
+        queryClient.invalidateQueries({
+            queryKey: orpcClient.race.find.key({ type: 'query' })
+        })
     }
 
     const clearFields = () => {
@@ -125,7 +131,7 @@ export default function CreateResultDialog({ race, boats }: { race: RaceDataType
                                 setSelectedBoat(choice!)
                             }}
                             styles={{
-                                control: (provided, state) =>
+                                control: provided =>
                                     ({
                                         ...provided,
                                         border: boatError ? '2px solid #f31260' : 'none',
@@ -147,19 +153,19 @@ export default function CreateResultDialog({ race, boats }: { race: RaceDataType
                                             backgroundColor: theme == 'dark' ? '#3f3f46' : '#d4d4d8'
                                         }
                                     }) as CSSObjectWithLabel,
-                                menu: (provided, state) =>
+                                menu: provided =>
                                     ({
                                         ...provided,
                                         backgroundColor: theme == 'dark' ? '#18181b' : 'white',
                                         border: theme == 'dark' ? '2px solid #3f3f46' : '2px solid #d4d4d8',
                                         fontSize: '1rem'
                                     }) as CSSObjectWithLabel,
-                                input: (provided, state) =>
+                                input: provided =>
                                     ({
                                         ...provided,
                                         color: theme == 'dark' ? 'white' : 'black'
                                     }) as CSSObjectWithLabel,
-                                singleValue: (provided, state) =>
+                                singleValue: provided =>
                                     ({
                                         ...provided,
                                         color: theme == 'dark' ? 'white' : 'black'
@@ -196,7 +202,7 @@ export default function CreateResultDialog({ race, boats }: { race: RaceDataType
                         >
                             <TabsList className='grid w-full grid-cols-2'>
                                 {/* show buttons for each fleet in a series */}
-                                {race.fleets.map((fleet: FleetDataType, index) => {
+                                {race.fleets.map((fleet: FleetType) => {
                                     return (
                                         <TabsTrigger key={fleet.id + 'fleet select'} value={fleet.id}>
                                             {fleet.fleetSettings.name}

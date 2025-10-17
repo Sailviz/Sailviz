@@ -1,16 +1,17 @@
 'use client'
 import React, { useState } from 'react'
 import dayjs from 'dayjs'
-import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, SortingState, useReactTable } from '@tanstack/react-table'
+import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, type SortingState, useReactTable } from '@tanstack/react-table'
 import * as DB from '@components/apiMethods'
-import { useNavigate } from '@tanstack/react-router'
-import * as Fetcher from '@components/Fetchers'
+import { useLoaderData, useNavigate } from '@tanstack/react-router'
 import { AVAILABLE_PERMISSIONS, userHasPermission } from '@components/helpers/users'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select'
-import { useSession } from '@sailviz/auth/client'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { orpcClient } from '@lib/orpc'
+import type { RaceType } from '@sailviz/types'
 
 const raceOptions = [
     { value: 'Pursuit', label: 'Pursuit' },
@@ -84,8 +85,9 @@ const Type = ({ initialValue, race }: { initialValue: any; race: RaceDataType })
     )
 }
 
-const Action = ({ id, mutateSeries, user }: { id: string; mutateSeries: any; user: UserDataType }) => {
+const Action = ({ id, user }: { id: string; user: UserDataType }) => {
     const navigate = useNavigate()
+    const queryClient = useQueryClient()
 
     const onDeleteClick = async () => {
         if (confirm('are you sure you want to do this?')) {
@@ -93,7 +95,7 @@ const Action = ({ id, mutateSeries, user }: { id: string; mutateSeries: any; use
             if (!result) {
                 return
             }
-            mutateSeries()
+            queryClient.invalidateQueries({ queryKey: orpcClient.series.find.key({ type: 'query' }) })
         }
     }
     return (
@@ -113,22 +115,14 @@ const Action = ({ id, mutateSeries, user }: { id: string; mutateSeries: any; use
     )
 }
 
-const columnHelper = createColumnHelper<RaceDataType>()
+const columnHelper = createColumnHelper<RaceType>()
 
 const SeriesRaceTable = ({ seriesId }: { seriesId: string }) => {
-    const {
-        data: session,
-        isPending, //loading state
-        error, //error object
-        refetch //refetch the session
-    } = useSession()
-    const { series, seriesIsError, seriesIsValidating, mutateSeries } = Fetcher.Series(seriesId)
+    const session = useLoaderData({ from: `__root__` })
 
-    let data = series.races
-    if (data == undefined) {
-        data = []
-    }
+    const { data: series } = useQuery(orpcClient.series.find.queryOptions({ input: { seriesId: seriesId } }))
 
+    const data = series?.races || []
     const [sorting, setSorting] = useState<SortingState>([
         {
             id: 'number',
@@ -155,7 +149,7 @@ const SeriesRaceTable = ({ seriesId }: { seriesId: string }) => {
             columnHelper.accessor('id', {
                 id: 'action',
                 header: 'Actions',
-                cell: props => <Action id={props.row.original.id} user={session!.user} mutateSeries={mutateSeries} />
+                cell: props => <Action id={props.row.original.id} user={session!.user} />
             })
         ],
         state: {

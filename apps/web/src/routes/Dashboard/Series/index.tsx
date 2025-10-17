@@ -1,32 +1,33 @@
-'use client'
+import { createFileRoute, useLoaderData } from '@tanstack/react-router'
 import ClubTable from '@components/tables/ClubTable'
-import * as DB from '@components/apiMethods'
-import { mutate } from 'swr'
 import CreateSeriesModal from '@components/layout/dashboard/CreateSeriesModal'
 import { AVAILABLE_PERMISSIONS, userHasPermission } from '@components/helpers/users'
 import { title } from '@components/layout/home/primitaves'
 import { PageSkeleton } from '@components/layout/PageSkeleton'
-import { useSession } from '@sailviz/auth/client'
-import { use } from 'chai'
 import { useEffect, useState } from 'react'
-import { set } from 'cypress/types/lodash'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { orpcClient } from '@lib/orpc'
 
 export default function Page() {
-    const {
-        data: session,
-        isPending, //loading state
-        error, //error object
-        refetch //refetch the session
-    } = useSession()
+    const session = useLoaderData({ from: `__root__` })
+
+    const queryClient = useQueryClient()
+
+    const seriesCreation = useMutation(orpcClient.series.create.mutationOptions())
 
     const [allowCreate, setAllowCreate] = useState(false)
 
     const createSeries = async (seriesName: string) => {
-        // Here you would typically call an API to create the series
-        // For example:
-        await DB.createSeries(session?.user?.clubId!, seriesName)
-        // After creating the series, you might want to redirect or update the UI
-        mutate('/api/GetSeriesByClubId') // This will revalidate the series data
+        if (!session.club) {
+            throw new Error('No club found')
+        }
+        await seriesCreation.mutateAsync({
+            name: seriesName,
+            clubId: session.club.id
+        })
+        queryClient.invalidateQueries({
+            queryKey: orpcClient.series.club.key({ type: 'query' })
+        })
     }
 
     useEffect(() => {
@@ -34,9 +35,11 @@ export default function Page() {
             console.log('Session:', session)
             if (session?.club?.stripe.subscriptionStatus !== 'active') {
                 //check how many series the user has
-                const series = await DB.GetSeriesByClubId(session?.user?.clubId!)
-                console.log('Series:', series)
-                setAllowCreate(series.length === 0)
+                let { data: series } = useQuery(orpcClient.series.club.queryOptions({ input: { clubId: session?.user?.clubId!, includeRaces: false } }))
+                if (series == undefined) {
+                    series = []
+                }
+                setAllowCreate(series.length == 0)
 
                 // if not active, only allow a single series to be created
             } else {
@@ -70,3 +73,7 @@ export default function Page() {
         </div>
     )
 }
+
+export const Route = createFileRoute('/Dashboard/Series/')({
+    component: Page
+})

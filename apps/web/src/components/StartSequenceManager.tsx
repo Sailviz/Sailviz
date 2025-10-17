@@ -1,14 +1,16 @@
-'use client'
 import { useEffect, useState } from 'react'
-import { Button } from './ui/button'
-import * as DB from './apiMethods'
-import * as Fetcher from './Fetchers'
-import { Select } from './ui/select'
-import { Input } from './ui/input'
-import { Inder } from 'next/font/google'
+import { Button } from '@components/ui/button'
+import { Input } from '@components/ui/input'
 import { getFiveStartSequence } from './helpers/startSequence'
-const StartSequenceManager = ({ initialSequence, seriesId }: { initialSequence: StartSequenceStep[]; seriesId: string }) => {
-    const { series, seriesIsError, seriesIsValidating } = Fetcher.Series(seriesId)
+import type { StartSequenceStepType } from '@sailviz/types'
+import { useMutation, useQuery } from '@tanstack/react-query'
+import { orpcClient } from '@lib/orpc'
+const StartSequenceManager = ({ initialSequence, seriesId }: { initialSequence: StartSequenceStepType[]; seriesId: string }) => {
+    const { data: series } = useQuery(orpcClient.series.find.queryOptions({ input: { seriesId: seriesId } }))
+
+    const stepDeletion = useMutation(orpcClient.startSequence.delete.mutationOptions())
+    const stepUpdate = useMutation(orpcClient.startSequence.update.mutationOptions())
+
     const [sequence, setSequence] = useState<StartSequenceStep[]>(initialSequence)
 
     const updateStep = (index: number, key: keyof StartSequenceStep, value: string | number | object) => {
@@ -64,12 +66,12 @@ const StartSequenceManager = ({ initialSequence, seriesId }: { initialSequence: 
 
     const deleteStep = (index: number) => {
         setSequence(prev => prev.filter((_, i) => i !== index))
-        DB.deleteStartSequenceById(sequence[index]!.id!)
+        stepDeletion.mutateAsync({ stepId: sequence[index]!.id! })
     }
 
     const save = async () => {
         console.log('Saving sequence:', sequence)
-        DB.updateStartSequenceById(seriesId, sequence)
+        await stepUpdate.mutateAsync({ seriesId: seriesId, startSequence: sequence })
     }
 
     const setDefaultSequence = () => {
