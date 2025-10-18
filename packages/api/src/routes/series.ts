@@ -5,6 +5,7 @@ import { getClub } from "./club";
 
 const os = implement(ORPCcontract);
 
+//TODO change this to return count of races per series, don't need all the data when loading this many series.
 export async function findClubSeries(clubId: string, includeRaces: boolean) {
   var result = await prisma.series.findMany({
     where: {
@@ -46,8 +47,6 @@ export async function findSeries(id: string, includeRaces: boolean) {
 export const seriesbyClubId = os.series.club.handler(async ({ input }) => {
   console.log(input);
   const series = await findClubSeries(input.clubId, input.includeRaces);
-  console.log(series);
-  console.log(series[1].races);
   if (series) {
     return series;
   } else {
