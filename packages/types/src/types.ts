@@ -186,7 +186,7 @@ export const UserSchema = z.object({
   createdAt: z.date(),
   updatedAt: z.date(),
   displayUsername: z.string().nullable(),
-  roles: z.array(RoleSchema).optional(),
+  roles: z.array(RoleSchema),
   clubId: z.string(),
 });
 export type UserType = z.infer<typeof UserSchema>;

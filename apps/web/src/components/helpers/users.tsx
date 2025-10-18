@@ -1,3 +1,5 @@
+import type { UserType } from '@sailviz/types'
+
 export class AVAILABLE_PERMISSIONS {
     static readonly editSeries: PermissionType = { value: 'editSeries', label: 'Edit Series' } //edit button is not yet implemented so this permission is not used
     static readonly editRaces: PermissionType = { value: 'editRaces', label: 'Edit Races' } //edit button is not yet implemented so this permission is not used
@@ -20,13 +22,13 @@ export class AVAILABLE_PERMISSIONS {
 
 export const PERMISSIONS: PermissionType[] = Object.values(AVAILABLE_PERMISSIONS)
 
-export function userHasPermission(user: UserDataType | undefined, permission: PermissionType) {
+export function userHasPermission(user: UserType | undefined, permission: PermissionType) {
     if (user == undefined) return false
     let match = false
     user.roles
-        .flatMap(role => role.permissions.allowed)
+        .flatMap(role => role.permissions!.allowed)
         .forEach(perm => {
-            if (perm.value == permission.value) {
+            if (perm!.value == permission.value) {
                 match = true
             }
         })

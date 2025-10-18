@@ -60,6 +60,7 @@ export const ORPCcontract = {
   club: {
     session: oc.output<typeof ClubSchema>(ClubSchema),
     update: oc.input(ClubSchema).output(ClubSchema),
+    all: oc.output(z.array(ClubSchema)),
   },
   fleet: {
     find: oc
@@ -67,6 +68,10 @@ export const ORPCcontract = {
       .output<typeof FleetSchema>(FleetSchema),
     settings: {
       create: oc.input(z.object({ seriesId: z.string() })).output(z.any()),
+      find: oc.input(z.object({ seriesId: z.string() })).output(z.any()),
+      delete: oc
+        .input(z.object({ fleetSettingsId: z.string() }))
+        .output(z.any()),
     },
   },
   boat: {
@@ -90,6 +95,7 @@ export const ORPCcontract = {
       )
       .output(z.object({ races: z.array(RaceSchema), count: z.number() })),
     update: oc.input(RaceSchema).output(RaceSchema),
+    delete: oc.input(z.object({ raceId: z.string() })).output(RaceSchema),
   },
   result: {
     create: oc.input(z.object({ fleetId: z.string() })).output(ResultSchema),

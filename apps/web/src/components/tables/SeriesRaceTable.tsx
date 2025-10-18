@@ -1,25 +1,25 @@
-'use client'
 import React, { useState } from 'react'
 import dayjs from 'dayjs'
 import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, type SortingState, useReactTable } from '@tanstack/react-table'
-import * as DB from '@components/apiMethods'
 import { useLoaderData, useNavigate } from '@tanstack/react-router'
 import { AVAILABLE_PERMISSIONS, userHasPermission } from '@components/helpers/users'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
-import { Button } from '../ui/button'
-import { Input } from '../ui/input'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@components/ui/table'
+import { Button } from '@components/ui/button'
+import { Input } from '@components/ui/input'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
-import type { RaceType } from '@sailviz/types'
+import type { RaceType, SeriesType, UserType } from '@sailviz/types'
 
 const raceOptions = [
     { value: 'Pursuit', label: 'Pursuit' },
     { value: 'Handicap', label: 'Handicap' }
 ]
 
-const Time = ({ initialValue, race }: { initialValue: any; race: RaceDataType }) => {
+const Time = ({ initialValue, race }: { initialValue: any; race: RaceType }) => {
     const [value, setValue] = React.useState(initialValue)
+
+    const updateRace = useMutation(orpcClient.race.update.mutationOptions())
 
     const onBlur = () => {
         console.log(value)
@@ -27,7 +27,7 @@ const Time = ({ initialValue, race }: { initialValue: any; race: RaceDataType })
         var day = dayjs(time)
         if (day.isValid()) {
             race.Time = time
-            DB.updateRaceById(race)
+            updateRace.mutateAsync(race)
         }
     }
 
@@ -49,12 +49,14 @@ const Time = ({ initialValue, race }: { initialValue: any; race: RaceDataType })
     )
 }
 
-const Type = ({ initialValue, race }: { initialValue: any; race: RaceDataType }) => {
+const Type = ({ initialValue, race }: { initialValue: any; race: RaceType }) => {
     const [value, setValue] = React.useState(initialValue)
+
+    const updateRace = useMutation(orpcClient.race.update.mutationOptions())
 
     const onBlur = (type: string) => {
         race.Type = type
-        DB.updateRaceById(race)
+        updateRace.mutateAsync(race)
     }
 
     React.useEffect(() => {
@@ -85,13 +87,15 @@ const Type = ({ initialValue, race }: { initialValue: any; race: RaceDataType })
     )
 }
 
-const Action = ({ id, user }: { id: string; user: UserDataType }) => {
+const Action = ({ id, user }: { id: string; user: UserType }) => {
     const navigate = useNavigate()
     const queryClient = useQueryClient()
 
+    const deleteRace = useMutation(orpcClient.race.delete.mutationOptions())
+
     const onDeleteClick = async () => {
         if (confirm('are you sure you want to do this?')) {
-            let result = await DB.deleteRaceById(id)
+            const result = deleteRace.mutateAsync({ raceId: id })
             if (!result) {
                 return
             }
@@ -120,7 +124,7 @@ const columnHelper = createColumnHelper<RaceType>()
 const SeriesRaceTable = ({ seriesId }: { seriesId: string }) => {
     const session = useLoaderData({ from: `__root__` })
 
-    const { data: series } = useQuery(orpcClient.series.find.queryOptions({ input: { seriesId: seriesId } }))
+    const series = useQuery(orpcClient.series.find.queryOptions({ input: { seriesId: seriesId } })).data as SeriesType
 
     const data = series?.races || []
     const [sorting, setSorting] = useState<SortingState>([

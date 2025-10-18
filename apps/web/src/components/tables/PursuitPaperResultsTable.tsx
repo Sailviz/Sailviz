@@ -1,5 +1,6 @@
-import React, { forwardRef, useState } from 'react'
-import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, useReactTable, SortingState, ColumnDef } from '@tanstack/react-table'
+import { forwardRef, useState } from 'react'
+import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, useReactTable, type SortingState, type ColumnDef } from '@tanstack/react-table'
+import type { ResultType } from '@sailviz/types'
 
 const Text = ({ ...props }) => {
     const value = props.getValue()
@@ -23,19 +24,19 @@ const Time = ({ ...props }) => {
     )
 }
 
-const Empty = ({ ...props }) => {
+const Empty = () => {
     return <div />
 }
 
-const columnHelper = createColumnHelper<ResultDataType>()
+const columnHelper = createColumnHelper<ResultType>()
 
-const PursuitPaperResultsTable = forwardRef((props: { results: ResultDataType[] }, ref: any) => {
-    let [results, setResults] = useState<ResultDataType[]>(props.results)
+const PursuitPaperResultsTable = forwardRef((props: { results: ResultType[] }, ref: any) => {
+    let [results, setResults] = useState<ResultType[]>(props.results)
 
     //create 3 empty lines on sheet
-    results.push({} as ResultDataType)
-    results.push({} as ResultDataType)
-    results.push({} as ResultDataType)
+    results.push({} as ResultType)
+    results.push({} as ResultType)
+    results.push({} as ResultType)
 
     //sets sorting to position by default
     const [sorting, setSorting] = useState<SortingState>([
@@ -45,7 +46,7 @@ const PursuitPaperResultsTable = forwardRef((props: { results: ResultDataType[] 
         }
     ])
 
-    let columns: ColumnDef<ResultDataType, any>[] = [
+    let columns: ColumnDef<ResultType, any>[] = [
         columnHelper.accessor('Helm', {
             header: 'Helm',
             cell: props => <Text {...props} />,
@@ -82,7 +83,7 @@ const PursuitPaperResultsTable = forwardRef((props: { results: ResultDataType[] 
         const newColumn = columnHelper.display({
             header: (i + 1).toString(),
             size: 40,
-            cell: props => <Empty {...props} />,
+            cell: () => <Empty />,
             enableSorting: false
         })
         columns.push(newColumn)
@@ -90,7 +91,7 @@ const PursuitPaperResultsTable = forwardRef((props: { results: ResultDataType[] 
 
     const Position = columnHelper.display({
         header: 'Position',
-        cell: props => <Empty {...props} />,
+        cell: () => <Empty />,
         enableSorting: false
     })
     columns.push(Position)

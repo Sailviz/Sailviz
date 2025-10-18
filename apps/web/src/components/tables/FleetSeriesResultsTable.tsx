@@ -1,8 +1,10 @@
-'use client'
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, useReactTable, type SortingState } from '@tanstack/react-table'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
-import * as Fetcher from '@components/Fetchers'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@components/ui/table'
+import { useQuery } from '@tanstack/react-query'
+import { orpcClient } from '@lib/orpc'
+import type { FleetType, ResultType, SeriesType } from '@sailviz/types'
+
 //not a db type, only used here
 type SeriesResultsType = {
     Rank: number
@@ -59,13 +61,14 @@ const Result = ({ position, discarded, resultCode }: { position: number; discard
 const columnHelper = createColumnHelper<SeriesResultsType>()
 
 const FleetSeriesResultsTable = ({ seriesId, fleetSettingsId }: { seriesId: string; fleetSettingsId: string }) => {
-    const { series, seriesIsError, seriesIsValidating } = Fetcher.Series(seriesId)
+    // const { series, seriesIsError, seriesIsValidating } = Fetcher.Series(seriesId)
+    const series = useQuery(orpcClient.series.find.queryOptions({ input: { seriesId: seriesId } })).data as SeriesType
 
     //calculate results table from data.
     let [data, setData] = useState<SeriesResultsType[]>([])
 
     const calcTable = () => {
-        if (series == undefined) {
+        if (series == undefined || series.races == undefined) {
             console.log('seriesData is undefined')
             return
         }
@@ -73,12 +76,12 @@ const FleetSeriesResultsTable = ({ seriesId, fleetSettingsId }: { seriesId: stri
         console.log('seriesData', series)
         //collate results from same person.
         series.races.forEach(race => {
-            let fleet = race.fleets.find(fleet => fleet.fleetSettings.id == fleetSettingsId)?.results
+            let fleet = race.fleets.find((fleet: FleetType) => fleet.fleetSettings.id == fleetSettingsId)?.results
             if (fleet == undefined) {
                 console.log('fleet is undefined')
                 return
             }
-            fleet.forEach(result => {
+            fleet.forEach((result: ResultType) => {
                 //if new racer, add to tempresults
                 let index = tempresults.findIndex(function (t) {
                     return t.Helm == result.Helm && t.Boat?.id == result.boat?.id && t.SailNumber == result.SailNumber
@@ -93,7 +96,7 @@ const FleetSeriesResultsTable = ({ seriesId, fleetSettingsId }: { seriesId: stri
                         SailNumber: result.SailNumber,
                         Total: 0,
                         Net: 0,
-                        racePositions: Array(series.races.length).fill({ position: 0, discarded: false, resultCode: '' })
+                        racePositions: Array(series.races!.length).fill({ position: 0, discarded: false, resultCode: '' })
                     })
                     index -= 1
                 }
@@ -254,7 +257,7 @@ const FleetSeriesResultsTable = ({ seriesId, fleetSettingsId }: { seriesId: stri
     ])
 
     const generateColumns = () => {
-        if (series == undefined) {
+        if (series == undefined || series.races == undefined) {
             console.log('seriesData is undefined')
             return
         }

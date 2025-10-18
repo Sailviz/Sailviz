@@ -1,28 +1,13 @@
-'use client'
-import React, { ChangeEvent, useEffect, useState } from 'react'
 import { createColumnHelper, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table'
 import { EyeIcon } from '@components/icons/eye-icon'
-import { EditIcon } from '@components/icons/edit-icon'
-import { DeleteIcon } from '@components/icons/delete-icon'
-import { AVAILABLE_PERMISSIONS, userHasPermission } from '@components/helpers/users'
-import { useNavigate } from '@tanstack/react-router'
-import * as DB from '@components/apiMethods'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
-import { Link } from '@tanstack/react-router'
-import { useSession } from '@sailviz/auth/client'
-import * as Fetcher from '@components/Fetchers'
-import { mutate } from 'swr'
-import { Button } from '../ui/button'
+import { useLoaderData, useNavigate } from '@tanstack/react-router'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@components/ui/table'
+import { Button } from '@components/ui/button'
+import { useQuery } from '@tanstack/react-query'
+import { orpcClient } from '@lib/orpc'
+import type { ClubType } from '@sailviz/types'
 
 const Action = ({ ...props }: any) => {
-    const onDeleteClick = () => {
-        if (confirm('are you sure you want to do this?')) {
-            props.deleteSeries(props.row.original.id)
-        }
-    }
-    const onEditClick = () => {
-        props.editSeries(props.row.original.id)
-    }
     return (
         <div className='relative flex items-center gap-2'>
             <Button variant={'outline'} onClick={() => props.viewClub(props.row.original.id)}>
@@ -33,17 +18,11 @@ const Action = ({ ...props }: any) => {
     )
 }
 
-const columnHelper = createColumnHelper<ClubDataType>()
+const columnHelper = createColumnHelper<ClubType>()
 
 const TableOfClubs = () => {
-    const {
-        data: session,
-        isPending, //loading state
-        error, //error object
-        refetch //refetch the session
-    } = useSession()
-    const { clubs, clubsIsError, clubsIsValidating } = Fetcher.Clubs()
-    // const [data, setData] = useState<SeriesDataType[]>([])
+    const session = useLoaderData({ from: `__root__` })
+    const { data: clubs } = useQuery(orpcClient.club.all.queryOptions())
 
     const navigate = useNavigate()
 

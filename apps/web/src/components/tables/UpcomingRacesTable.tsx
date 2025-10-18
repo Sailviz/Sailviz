@@ -1,4 +1,3 @@
-'use client'
 import React, { useEffect, useState } from 'react'
 import dayjs from 'dayjs'
 import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, type SortingState, useReactTable } from '@tanstack/react-table'
@@ -38,7 +37,7 @@ const columnHelper = createColumnHelper<NextRaceDataType>()
 
 const UpcomingRacesTable = () => {
     const session = useLoaderData({ from: `__root__` })
-    // const { todaysRaces, todaysRacesIsError, todaysRacesIsValidating, mutateTodaysRaces } = Fetcher.GetTodaysRaceByClubId(session?.club?.id)
+
     const { data: todaysRaces } = useQuery(orpcClient.race.today.queryOptions({ input: { clubId: session?.club?.id! } }))
 
     const [sorting, setSorting] = useState<SortingState>([{ id: 'number', desc: false }])

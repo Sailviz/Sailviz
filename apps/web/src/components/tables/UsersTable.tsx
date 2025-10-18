@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, type SortingState, useReactTable } from '@tanstack/react-table'
 import { AVAILABLE_PERMISSIONS, userHasPermission } from '@components/helpers/users'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
-import { Link, useLoaderData } from '@tanstack/react-router'
+import { useLoaderData } from '@tanstack/react-router'
 import { Button } from '../ui/button'
 import { useQuery } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
@@ -25,9 +25,6 @@ const columnHelper = createColumnHelper<UserType>()
 
 const UsersTable = () => {
     const session = useLoaderData({ from: `__root__` })
-
-    // const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
-    // const { users, usersIsError, usersIsValidating } = Fetcher.Users(club)
 
     const { data: club } = useQuery(orpcClient.club.session.queryOptions())
     const { data: users } = useQuery(orpcClient.user.club.queryOptions({ input: { clubId: club?.id || '' } }))

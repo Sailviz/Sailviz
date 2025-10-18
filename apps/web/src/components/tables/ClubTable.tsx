@@ -2,12 +2,12 @@ import { createColumnHelper, flexRender, getCoreRowModel, useReactTable } from '
 import { AVAILABLE_PERMISSIONS, userHasPermission } from '@components/helpers/users'
 import { useLoaderData, useNavigate } from '@tanstack/react-router'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
-import { type SeriesType } from '@sailviz/types'
+import { type SeriesType, type UserType } from '@sailviz/types'
 import { Button } from '../ui/button'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
 
-const Action = ({ seriesId, viewHref, user }: { seriesId: string; viewHref: string; user?: UserDataType }) => {
+const Action = ({ seriesId, viewHref, user }: { seriesId: string; viewHref: string; user?: UserType }) => {
     const navigate = useNavigate()
     const seriesDeletion = useMutation(orpcClient.series.delete.mutationOptions())
     const queryClient = useQueryClient()

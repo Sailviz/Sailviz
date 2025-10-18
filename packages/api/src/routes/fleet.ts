@@ -67,3 +67,27 @@ export const createFleetSettings = os.fleet.settings.create.handler(
     }
   }
 );
+
+export const fleet_settings_find = os.fleet.settings.find.handler(
+  async ({ input }) => {
+    const fleetSettings = await prisma.fleetSettings.findMany({
+      where: {
+        seriesId: input.seriesId,
+      },
+    });
+    return fleetSettings;
+  }
+);
+
+export const fleet_settings_delete = os.fleet.settings.delete.handler(
+  async ({ input }) => {
+    const deletedFleetSettings = await prisma.fleetSettings.delete({
+      where: { id: input.fleetSettingsId },
+    });
+    if (deletedFleetSettings) {
+      return deletedFleetSettings;
+    } else {
+      throw new ORPCError("BAD_REQUEST");
+    }
+  }
+);

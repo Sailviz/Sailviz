@@ -134,3 +134,14 @@ export const updateRace = os.race.update.handler(async ({ input }) => {
     throw new ORPCError("BAD_REQUEST");
   }
 });
+
+export const race_delete = os.race.delete.handler(async ({ input }) => {
+  const deletedRace = await prisma.race.delete({
+    where: { id: input.raceId },
+  });
+  if (deletedRace) {
+    return deletedRace;
+  } else {
+    throw new ORPCError("BAD_REQUEST");
+  }
+});

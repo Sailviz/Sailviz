@@ -1,7 +1,6 @@
-import React, { forwardRef, useState } from 'react'
-import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, useReactTable, SortingState, ColumnDef } from '@tanstack/react-table'
-import { data } from 'cypress/types/jquery'
-import { start } from 'repl'
+import { forwardRef, useEffect, useState } from 'react'
+import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, useReactTable, type SortingState, type ColumnDef } from '@tanstack/react-table'
+import type { FleetType, ResultType } from '@sailviz/types'
 
 const Text = ({ text }: { text: string }) => {
     return <div className=' text-center'>{text}</div>
@@ -41,10 +40,10 @@ const CorrectedTime = ({ ...props }) => {
     return <div className=' text-center'>{valueString}</div>
 }
 
-const columnHelper = createColumnHelper<ResultDataType>()
+const columnHelper = createColumnHelper<ResultType>()
 
-const HandicapPaperResultsTable = forwardRef((props: { fleet: FleetDataType }, ref: any) => {
-    let [results, setResults] = useState<ResultDataType[]>(props.fleet.results)
+const HandicapPaperResultsTable = forwardRef((props: { fleet: FleetType }, ref: any) => {
+    let [results, setResults] = useState<ResultType[]>([])
     const fleet = props.fleet
 
     let allFinished = true
@@ -56,9 +55,9 @@ const HandicapPaperResultsTable = forwardRef((props: { fleet: FleetDataType }, r
 
     if (!allFinished) {
         //create 3 empty lines on an empty sheet only
-        results.push({} as ResultDataType)
-        results.push({} as ResultDataType)
-        results.push({} as ResultDataType)
+        results.push({} as ResultType)
+        results.push({} as ResultType)
+        results.push({} as ResultType)
     }
 
     //sets sorting to position by default
@@ -69,7 +68,15 @@ const HandicapPaperResultsTable = forwardRef((props: { fleet: FleetDataType }, r
         }
     ])
 
-    let columns: ColumnDef<ResultDataType, any>[] = [
+    useEffect(() => {
+        if (fleet.results == undefined) {
+            console.error('Fleet results undefined in HandicapPaperResultsTable')
+            return
+        }
+        setResults(fleet.results)
+    }, [fleet])
+
+    let columns: ColumnDef<ResultType, any>[] = [
         columnHelper.accessor('Helm', {
             header: 'Helm',
             cell: props => <Text text={props.getValue()} />,

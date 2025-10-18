@@ -1,28 +1,18 @@
-'use client'
-import React, { ChangeEvent, useState, useRef, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, useReactTable, type SortingState } from '@tanstack/react-table'
 import { EditIcon } from '@components/icons/edit-icon'
-import * as Fetcher from '@components/Fetchers'
 import { AVAILABLE_PERMISSIONS, userHasPermission } from '@components/helpers/users'
-import { PageSkeleton } from '@components/layout/PageSkeleton'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
-import { Button } from '../ui/button'
-import { Input } from '../ui/input'
-import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from '../ui/dropdown-menu'
-import { ChevronDown } from 'lucide-react'
-import { Link } from '@tanstack/react-router'
-import { useSession } from '@sailviz/auth/client'
-const columnHelper = createColumnHelper<ResultDataType>()
+import { Link, useLoaderData } from '@tanstack/react-router'
+import { useQuery } from '@tanstack/react-query'
+import { orpcClient } from '@lib/orpc'
+import type { FleetType, RaceType, ResultType } from '@sailviz/types'
+const columnHelper = createColumnHelper<ResultType>()
 
 const SignOnTable = ({ raceId }: { raceId: string }) => {
-    const {
-        data: session,
-        isPending, //loading state
-        error, //error object
-        refetch //refetch the session
-    } = useSession()
-    const { race, raceIsError, raceIsValidating } = Fetcher.Race(raceId, true)
-    let [data, setData] = useState<ResultDataType[]>([])
+    const session = useLoaderData({ from: `__root__` })
+    const race = useQuery(orpcClient.race.find.queryOptions({ input: { raceId: raceId } })).data as RaceType
+    let [data, setData] = useState<ResultType[]>([])
     let options: object[] = []
 
     const Text = ({ ...props }) => {
@@ -54,8 +44,6 @@ const SignOnTable = ({ raceId }: { raceId: string }) => {
         }
         const [value, setValue] = React.useState(initialValue)
 
-        const key = props.column.id + '_' + props.row.id
-
         return (
             <>
                 <div>{value.name}</div>
@@ -81,11 +69,9 @@ const SignOnTable = ({ raceId }: { raceId: string }) => {
 
     const [sorting, setSorting] = useState<SortingState>([])
 
-    const loadingState = session == undefined || race == undefined ? 'loading' : 'idle'
-
     useEffect(() => {
         if (race == undefined) return
-        setData(race.fleets.flatMap(fleet => fleet.results))
+        setData(race.fleets.flatMap((fleet: FleetType) => fleet.results as ResultType[]))
     }, [race])
 
     let table = useReactTable({

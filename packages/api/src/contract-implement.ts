@@ -6,6 +6,7 @@ import {
   findRace,
   findRaces,
   findTodaysRace,
+  race_delete,
   updateRace,
 } from "./routes/race";
 import {
@@ -19,8 +20,13 @@ import {
 import { findBoat, findBoats, updateBoatById } from "./routes/boats";
 import { auth } from "@sailviz/auth/auth";
 import { RequestHeadersPluginContext } from "@orpc/server/plugins";
-import { createFleetSettings, findFleet } from "./routes/fleet";
-import { getClub, updateClubById } from "./routes/club";
+import {
+  createFleetSettings,
+  findFleet,
+  fleet_settings_delete,
+  fleet_settings_find,
+} from "./routes/fleet";
+import { club_all, getClub, updateClubById } from "./routes/club";
 import {
   createUserInClub,
   deleteUserById,
@@ -336,6 +342,7 @@ export const mainRouter = os.router({
     club: racebyClubId,
     find: racebyId,
     update: updateRace,
+    delete: race_delete,
   },
   series: {
     find: getSeries,
@@ -347,11 +354,14 @@ export const mainRouter = os.router({
     find: fleetbyId,
     settings: {
       create: createFleetSettings,
+      find: fleet_settings_find,
+      delete: fleet_settings_delete,
     },
   },
   club: {
     session: club,
     update: updateClub,
+    all: club_all,
   },
   boat: {
     find: boat,

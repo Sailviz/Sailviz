@@ -1,7 +1,5 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, useReactTable, type SortingState } from '@tanstack/react-table'
-import { VerticalDotsIcon } from '@components/icons/vertical-dots-icon'
-import { Button } from '../ui/button'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
 
 const Text = ({ ...props }) => {
@@ -39,23 +37,6 @@ const Time = ({ ...props }) => {
     let time = new Date((value - props.startTime) * 1000).toISOString().substring(11, 19)
 
     return <div className=' text-center'>{time}</div>
-}
-
-function Sort({ column, table }: { column: any; table: any }) {
-    const firstValue = table.getPreFilteredRowModel().flatRows[0]?.getValue(column.id)
-
-    const columnFilterValue = column.getFilterValue()
-
-    return (
-        <div className='flex flex-row justify-center'>
-            <p onClick={e => column.toggleSorting(true)} className='cursor-pointer'>
-                ▲
-            </p>
-            <p onClick={e => column.toggleSorting(false)} className='cursor-pointer'>
-                ▼
-            </p>
-        </div>
-    )
 }
 
 const calculateHandicapResults = (fleet: FleetDataType) => {
@@ -140,12 +121,12 @@ const LiveResultsTable = (props: any) => {
     ])
 
     let columns = [
-        columnHelper.accessor('Helm', {
+        columnHelper.accessor(data => data.Helm, {
             header: 'Helm',
             cell: props => <Text {...props} />,
             enableSorting: false
         }),
-        columnHelper.accessor('Crew', {
+        columnHelper.accessor(data => data.Crew, {
             header: 'Crew',
             cell: props => <Text {...props} />,
             enableSorting: false
@@ -178,7 +159,7 @@ const LiveResultsTable = (props: any) => {
         columns.push(newColumn)
     }
 
-    const Correctedtime = columnHelper.accessor('CorrectedTime', {
+    const Correctedtime = columnHelper.accessor(data => data.CorrectedTime, {
         header: 'Corrected Time',
         cell: props => <CorrectedTime {...props} result={results.find(result => result.id == props.row.original.id)} />,
         enableSorting: false

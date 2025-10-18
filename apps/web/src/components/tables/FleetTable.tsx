@@ -1,15 +1,15 @@
-'use client'
 import React from 'react'
-import { createColumnHelper, flexRender, getCoreRowModel, RowSelection, useReactTable } from '@tanstack/react-table'
-import Select from 'react-select'
-import * as Fetcher from '@components/Fetchers'
+import { createColumnHelper, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table'
 import { AVAILABLE_PERMISSIONS, userHasPermission } from '@components/helpers/users'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
-import * as DB from '@components/apiMethods'
-import { useSession } from '@sailviz/auth/client'
-import EditFleetSettingsDialog from '../layout/dashboard/EditFleetSettingsModal'
-import { Button } from '../ui/button'
-import { Badge } from '../ui/badge'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@components/ui/table'
+import EditFleetSettingsDialog from '@components/layout/dashboard/EditFleetSettingsModal'
+import { Button } from '@components/ui/button'
+import { Badge } from '@components/ui/badge'
+import type { UserType } from '@sailviz/types'
+import { useLoaderData } from '@tanstack/react-router'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { orpcClient } from '@lib/orpc'
+
 const Boats = ({ ...props }: any) => {
     const initialValue = props.getValue()
     const [value, setValue] = React.useState<BoatDataType[]>(initialValue)
@@ -33,13 +33,18 @@ const Boats = ({ ...props }: any) => {
     )
 }
 
-const Action = ({ user, fleetSettings, seriesId, mutate }: { user: UserDataType; fleetSettings: FleetSettingsType; seriesId: string; mutate: any }) => {
+const Action = ({ user, fleetSettings, seriesId }: { user: UserType; fleetSettings: FleetSettingsType; seriesId: string }) => {
+    const deleteFleetSettings = useMutation(orpcClient.fleet.settings.delete.mutationOptions())
+    const queryClient = useQueryClient()
+
     const onDeleteClick = async () => {
         if (confirm('are you sure you want to do this?')) {
-            let res = await DB.DeleteFleetSettingsById(fleetSettings.id)
+            let res = await deleteFleetSettings.mutateAsync({ fleetSettingsId: fleetSettings.id })
             if (res) {
                 console.log('Fleet settings deleted successfully')
-                mutate() // Refresh the fleet settings
+                queryClient.invalidateQueries({
+                    queryKey: orpcClient.fleet.settings.find.key({ type: 'query' })
+                })
             } else {
                 console.error('Failed to delete fleet settings')
             }
@@ -61,18 +66,12 @@ const Action = ({ user, fleetSettings, seriesId, mutate }: { user: UserDataType;
     )
 }
 
-const customStyles = { multiValueRemove: (base: any) => ({ ...base, display: 'none' }) }
-
 const columnHelper = createColumnHelper<FleetSettingsType>()
 
 const FleetTable = ({ seriesId }: { seriesId: string }) => {
-    const { fleetSettings, fleetSettingsIsError, fleetSettingsIsValidating, mutateFleetSettings } = Fetcher.GetFleetSettingsBySeriesId(seriesId)
-    const {
-        data: session,
-        isPending, //loading state
-        error, //error object
-        refetch //refetch the session
-    } = useSession()
+    const session = useLoaderData({ from: `__root__` })
+
+    const { data: fleetSettings } = useQuery(orpcClient.fleet.settings.find.queryOptions({ input: { seriesId: seriesId } }))
 
     var data = fleetSettings
     if (data == undefined) {
@@ -93,7 +92,7 @@ const FleetTable = ({ seriesId }: { seriesId: string }) => {
             columnHelper.accessor('id', {
                 id: 'Edit',
                 header: 'Actions',
-                cell: props => <Action fleetSettings={props.row.original} seriesId={seriesId} user={session!.user} mutate={mutateFleetSettings} />
+                cell: props => <Action fleetSettings={props.row.original} seriesId={seriesId} user={session!.user} />
             })
         ],
         getCoreRowModel: getCoreRowModel()
