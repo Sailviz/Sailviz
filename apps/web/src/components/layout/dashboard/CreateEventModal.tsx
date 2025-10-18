@@ -1,16 +1,16 @@
-'use client'
 import { Button } from '@components/ui/button'
 import { Dialog, DialogContent, DialogFooter, DialogTitle, DialogTrigger } from '@components/ui/dialog'
 import { Input } from '@components/ui/input'
 import { useEffect, useState } from 'react'
-import * as DB from '@components/apiMethods'
-import { useSession } from '@sailviz/auth/client'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select'
 import dayjs from 'dayjs'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@components/ui/table'
 import { createColumnHelper, flexRender, getCoreRowModel, getFilteredRowModel, useReactTable } from '@tanstack/react-table'
 import { getFiveStartSequence, getThreeStartSequence } from '@components/helpers/startSequence'
 import { useLoaderData } from '@tanstack/react-router'
+import { useMutation } from '@tanstack/react-query'
+import { orpcClient } from '@lib/orpc'
+import type { RaceType } from '@sailviz/types'
 
 type Race = {
     number: number
@@ -98,27 +98,6 @@ const Type = ({ initialValue, race, updateType }: { initialValue: any; race: Rac
     )
 }
 
-const StartSequence = ({
-    initialValue,
-    race,
-    updateStartSequence
-}: {
-    initialValue: any
-    race: Race
-    updateStartSequence: (number: number, startSequence: string) => void
-}) => {
-    const [value, setValue] = useState(initialValue)
-
-    const onBlur = (startSequence: string) => {
-        updateStartSequence(race.number, startSequence)
-    }
-
-    useEffect(() => {
-        setValue(initialValue)
-    }, [initialValue])
-
-    return <></>
-}
 const Action = ({ number, removeRace }: { number: number; removeRace: any }) => {
     const onDeleteClick = async () => {
         removeRace(number)
@@ -141,6 +120,12 @@ export default function CreateEventDialog() {
     const [startSequence, setStartSequence] = useState('Five')
 
     const [open, setOpen] = useState(false)
+
+    const createSeriesMutation = useMutation(orpcClient.series.create.mutationOptions())
+    const findSeriesMutation = useMutation(orpcClient.series.find.mutationOptions())
+    const updateStartSequenceMutation = useMutation(orpcClient.startSequence.update.mutationOptions())
+    const createRaceMutation = useMutation(orpcClient.race.create.mutationOptions())
+    const updateRaceMutation = useMutation(orpcClient.race.update.mutationOptions())
 
     const addRace = () => {
         //these aren't actually the numbers that the race will get as they are assigned in the api.
@@ -173,27 +158,16 @@ export default function CreateEventDialog() {
         )
     }
 
-    const updateStartSequence = (number: number, startSequence: string) => {
-        setRaces(prevRaces =>
-            prevRaces.map(r => {
-                if (r.number === number) {
-                    return { ...r, startSequence: startSequence }
-                }
-                return r
-            })
-        )
-    }
-
     const createEvent = async (events: Race[]) => {
         console.log('Creating event', events)
         //create series
-        const res = await DB.createSeries(session?.user.cludId!, name) // this adds a single fleet to the series by default
+        const res = await createSeriesMutation.mutateAsync({ clubId: session?.user.cludId!, name: name }) // this adds a single fleet to the series by default
         if (!res) {
             console.error('Failed to create series')
             return
         }
         console.log('Created series', res)
-        const series = await DB.GetSeriesById(res.id)
+        const series = await findSeriesMutation.mutateAsync({ seriesId: res.id })
         if (!series) {
             console.error('Failed to fetch series after creation')
             return
@@ -201,20 +175,21 @@ export default function CreateEventDialog() {
         console.log('Fetched series', series)
         // set start sequence for series
         if (startSequence === 'Five') {
-            await DB.updateStartSequenceById(series.id, getFiveStartSequence(series.fleetSettings[0]?.id || ''))
+            await updateStartSequenceMutation.mutateAsync({ seriesId: series.id, startSequence: getFiveStartSequence(series.fleetSettings[0]?.id || '') })
         } else if (startSequence === 'Three') {
-            await DB.updateStartSequenceById(series.id, getThreeStartSequence(series.fleetSettings[0]?.id || ''))
+            await updateStartSequenceMutation.mutateAsync({ seriesId: series.id, startSequence: getThreeStartSequence(series.fleetSettings[0]?.id || '') })
         } else {
             console.error('Invalid start sequence')
             return
         }
         //create each race
         for (const event of events) {
-            const dbrace = await DB.createRace(session?.user.clubId!, series.id)
+            const dbrace: RaceType = await createRaceMutation.mutateAsync({ seriesId: series.id })
             //update race with details
             dbrace.Type = event.type
             dbrace.Time = event.time
-            await DB.updateRaceById(dbrace)
+
+            await updateRaceMutation.mutateAsync(dbrace)
         }
 
         setOpen(false)

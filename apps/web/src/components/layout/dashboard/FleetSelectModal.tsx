@@ -1,7 +1,5 @@
 import { Button } from '@components/ui/button'
 import { Dialog, DialogContent, DialogFooter, DialogHeader } from '@components/ui/dialog'
-import { useTheme } from 'next-themes'
-import { ChangeEvent, useState } from 'react'
 
 // these options are specific to each fleet
 enum raceModeType {
@@ -9,7 +7,6 @@ enum raceModeType {
     Finish,
     None
 }
-
 export default function FleetSelectDialog({
     isOpen,
     fleets,

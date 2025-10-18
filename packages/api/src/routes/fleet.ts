@@ -1,7 +1,7 @@
 import { implement, ORPCError } from "@orpc/server";
 import prisma from "@sailviz/db";
 import { ORPCcontract } from "../contract";
-import { StartSequenceStepType } from "@sailviz/types";
+import { FleetSettingsType, StartSequenceStepType } from "@sailviz/types";
 import { findSeries } from "./series";
 
 const os = implement(ORPCcontract);
@@ -86,6 +86,32 @@ export const fleet_settings_delete = os.fleet.settings.delete.handler(
     });
     if (deletedFleetSettings) {
       return deletedFleetSettings;
+    } else {
+      throw new ORPCError("BAD_REQUEST");
+    }
+  }
+);
+
+export const fleet_settings_update = os.fleet.settings.update.handler(
+  async ({ input }) => {
+    const updatedFleetSettings = await prisma.fleetSettings.update({
+      where: { id: input.id },
+      data: {
+        name: input.name,
+        boats: {
+          set: [
+            ...input.boats.map((boat) => ({
+              id: boat.id,
+            })),
+          ],
+        },
+      },
+      include: {
+        boats: true,
+      },
+    });
+    if (updatedFleetSettings) {
+      return updatedFleetSettings as FleetSettingsType;
     } else {
       throw new ORPCError("BAD_REQUEST");
     }

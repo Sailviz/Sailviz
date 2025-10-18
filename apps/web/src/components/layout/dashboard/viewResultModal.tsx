@@ -1,22 +1,12 @@
-'use client'
 import { useState } from 'react'
-import { DialogContent, DialogFooter, DialogHeader, Dialog } from '@components/ui/dialog'
-import { Button } from '@components/ui/button'
+import { DialogContent, Dialog } from '@components/ui/dialog'
 import { Input } from '@components/ui/input'
-import { useNavigate } from '@tanstack/react-router'
 
 export default function EditResultDialog({ result, fleet }: { result: ResultDataType; fleet: FleetDataType }) {
-    const navigate = useNavigate()
     const [open, setOpen] = useState(true)
 
     return (
-        <Dialog
-            open={open}
-            onOpenChange={open => {
-                setOpen(open)
-                if (!open) Router.back() // this catches the x button and clicking outside the modal, gets out of parallel route
-            }}
-        >
+        <Dialog open={open}>
             <DialogContent className='max-w-8/12'>
                 <div className='flex w-full flex-col'>
                     <div className='flex w-10/12'>
@@ -60,11 +50,6 @@ export default function EditResultDialog({ result, fleet }: { result: ResultData
                         </div>
                     </div>
                 </div>
-                <DialogFooter>
-                    <Button color='danger' onClick={() => Router.back()}>
-                        Close
-                    </Button>
-                </DialogFooter>
             </DialogContent>
         </Dialog>
     )

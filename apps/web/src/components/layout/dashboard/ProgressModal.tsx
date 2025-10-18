@@ -1,8 +1,6 @@
-'use client'
 import { Dialog, DialogContent } from '@components/ui/dialog'
 import { Progress } from '@components/ui/progress'
-import { useTheme } from 'next-themes'
-import { ChangeEvent, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 export default function ProgressDialog({ isOpen, Value, Max }: { isOpen: boolean; Value: number; Max: number }) {
     const [value, setValue] = useState(0)

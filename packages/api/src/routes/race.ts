@@ -2,6 +2,7 @@ import prisma from "@sailviz/db";
 import dayjs from "dayjs";
 import { implement, ORPCError } from "@orpc/server";
 import { ORPCcontract } from "../contract";
+import { ClubSettingsType, RaceType } from "packages/types/src/types";
 
 const os = implement(ORPCcontract);
 
@@ -141,6 +142,85 @@ export const race_delete = os.race.delete.handler(async ({ input }) => {
   });
   if (deletedRace) {
     return deletedRace;
+  } else {
+    throw new ORPCError("BAD_REQUEST");
+  }
+});
+
+export const race_create = os.race.create.handler(async ({ input }) => {
+  const series = await prisma.series.findUnique({
+    where: { id: input.seriesId },
+  });
+  if (!series) {
+    throw new ORPCError("Series not found");
+  }
+  const club = await prisma.club.findUnique({
+    where: { id: series.clubId },
+  });
+  let clubSettings = club.settings as ClubSettingsType;
+  let duties = clubSettings!.duties.reduce((obj, key, index) => {
+    obj[key] = "";
+    return obj;
+  }, {} as { [key: string]: any });
+
+  var races: RaceType[] = await prisma.race.findMany({
+    where: {
+      seriesId: input.seriesId,
+    },
+  });
+  var number = 1;
+  //this numbers the race with the lowest number that is not being used.
+  while (races.some((object) => object.number === number)) {
+    number++;
+  }
+
+  const newRace = await prisma.race.create({
+    data: {
+      number: number,
+      Time: dayjs().toISOString(),
+      Type: "Handicap",
+      Duties: duties,
+      series: {
+        connect: {
+          id: input.seriesId,
+        },
+      },
+    },
+    include: {
+      series: true,
+      fleets: {
+        include: {
+          fleetSettings: true,
+        },
+      },
+    },
+  });
+  var fleets = await prisma.fleetSettings.findMany({
+    where: {
+      seriesId: input.seriesId,
+    },
+  });
+  // create fleet for each fleet setting
+  fleets.forEach(async (fleet) => {
+    await prisma.fleet.create({
+      data: {
+        startTime: 0,
+        fleetSettings: {
+          connect: {
+            id: fleet.id,
+          },
+        },
+        race: {
+          connect: {
+            id: newRace.id,
+          },
+        },
+      },
+    });
+  });
+
+  if (newRace) {
+    return newRace;
   } else {
     throw new ORPCError("BAD_REQUEST");
   }

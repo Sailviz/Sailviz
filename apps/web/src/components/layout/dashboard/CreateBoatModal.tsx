@@ -1,19 +1,16 @@
-import { useTheme } from 'next-themes'
-import { ChangeEvent, useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTrigger } from '@components/ui/dialog'
 import { Button } from '@components/ui/button'
 import { Input } from '@components/ui/input'
-import { useNavigate } from '@tanstack/react-router'
-import * as DB from '@components/apiMethods'
-import { mutate } from 'swr'
-import { useSession } from '@sailviz/auth/client'
+import { useLoaderData } from '@tanstack/react-router'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { orpcClient } from '@lib/orpc'
+
 export default function CreateBoatDialog() {
-    const {
-        data: session,
-        isPending, //loading state
-        error, //error object
-        refetch //refetch the session
-    } = useSession()
+    const session = useLoaderData({ from: `__root__` })
+
+    const createBoatMutation = useMutation(orpcClient.boat.create.mutationOptions())
+    const queryClient = useQueryClient()
 
     const [boatName, setBoatName] = useState('')
     const [PY, setPY] = useState(0)
@@ -23,8 +20,16 @@ export default function CreateBoatDialog() {
     const [open, setOpen] = useState(false)
 
     const createBoat = async (boat: BoatDataType) => {
-        await DB.createBoat(boat.name, boat.crew, boat.py, boat.pursuitStartTime, session!.user.clubId)
-        mutate('/api/GetBoats')
+        await createBoatMutation.mutateAsync({
+            name: boat.name,
+            crew: boat.crew,
+            py: boat.py,
+            pursuitStartTime: boat.pursuitStartTime,
+            clubId: session!.user.clubId
+        })
+        queryClient.invalidateQueries({
+            queryKey: orpcClient.boat.session.key({ type: 'query' })
+        })
         setOpen(false)
     }
 

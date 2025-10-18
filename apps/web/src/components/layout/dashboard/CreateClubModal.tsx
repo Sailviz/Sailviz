@@ -1,18 +1,19 @@
-'use client'
-import { useTheme } from 'next-themes'
-import { ChangeEvent, startTransition, useEffect, useState } from 'react'
-import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTrigger } from '@components/ui/dialog'
+import { useState } from 'react'
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTrigger } from '@components/ui/dialog'
 import { Input } from '@components/ui/input'
 import { Button } from '@components/ui/button'
-import { mutate } from 'swr'
-import * as DB from '@components/apiMethods'
-import { signUp } from '@sailviz/auth/client'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { orpcClient } from '@lib/orpc'
+
 export default function CreateClubModal() {
     const [clubName, setClubName] = useState('')
     const [adminName, setAdminName] = useState('')
     const [adminPassword, setAdminPassword] = useState('')
     const [open, setOpen] = useState(false)
     const [clubNameError, setClubNameError] = useState(false)
+
+    const createClubMutation = useMutation(orpcClient.club.create.mutationOptions())
+    const queryClient = useQueryClient()
 
     let submitDisabled = false
 
@@ -34,59 +35,12 @@ export default function CreateClubModal() {
         }
         console.log('submitting')
 
-        await createClub(clubName)
-        mutate(`/api/GetClubs`)
+        await createClubMutation.mutateAsync({ name: clubName })
+        queryClient.invalidateQueries({
+            queryKey: orpcClient.club.all.key({ type: 'query' })
+        })
 
         setOpen(false)
-    }
-
-    const createClub = async (clubName: string) => {
-        //create a club for each fleet
-        let club = await DB.createClub(clubName)
-        console.log('Created club:', club)
-        let roles = await DB.GetRolesByClubId(club.id)
-        console.log('Roles for club:', roles)
-
-        const { data, error } = await signUp.email({
-            email: `${adminName}@sailviz.com`,
-            password: adminPassword,
-            username: adminName,
-            clubId: club.id,
-            startPage: '/Dashboard',
-            name: adminName
-        })
-        console.log('Sign up response:', data, error)
-        if (error) {
-            console.error('Error signing up:', error)
-            return
-        }
-
-        //create a user for the club admin and assign them the admin role
-        if (roles[0] == undefined || roles.length == 0) {
-            console.error('No roles found for club', club.id)
-            return
-        }
-        //add sailviz specific fields to the user
-        let user = {
-            id: data.user.id,
-            clubId: club.id,
-            startPage: 'Dashboard',
-            displayUsername: adminName,
-            username: adminName,
-            admin: false,
-            uuid: '',
-            roles: [
-                {
-                    id: roles[0].id,
-                    name: 'Admin',
-                    clubId: club.id,
-                    permissions: {
-                        allowed: []
-                    }
-                }
-            ]
-        } as UserDataType
-        await DB.updateUser(user)
     }
 
     const clearFields = async () => {

@@ -2,7 +2,6 @@ import { Button } from '@components/ui/button'
 import { Dialog, DialogContent, DialogFooter, DialogTitle } from '@components/ui/dialog'
 import { Input } from '@components/ui/input'
 import { useEffect, useState } from 'react'
-import * as DB from '@components/apiMethods'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
 
@@ -12,22 +11,25 @@ export default function EditBoatDialog({ boat, open, onClose }: { boat: BoatData
     const [Crew, setCrew] = useState(0)
     const [pursuitStartTime, setPursuitStartTime] = useState(0)
 
-    const mutation = useMutation(orpcClient.boat.update.mutationOptions())
+    const boatUpdateMutation = useMutation(orpcClient.boat.update.mutationOptions())
+    const boatDeleteMutation = useMutation(orpcClient.boat.delete.mutationOptions())
     const queryClient = useQueryClient()
 
     const editBoat = async (boat: BoatDataType) => {
-        await mutation.mutateAsync(boat)
-        onClose && onClose()
+        await boatUpdateMutation.mutateAsync(boat)
         queryClient.invalidateQueries({
             queryKey: orpcClient.boat.session.key({ type: 'query' })
         })
-        // mutate('/api/GetBoats')
+        onClose && onClose()
     }
 
     const deleteBoat = (boatId: string) => async () => {
         if (confirm('Are you sure you want to delete this boat?')) {
-            await DB.deleteBoatById(boatId)
-            // mutate('/api/GetBoats')
+            await boatDeleteMutation.mutateAsync({ boatId: boatId })
+            queryClient.invalidateQueries({
+                queryKey: orpcClient.boat.session.key({ type: 'query' })
+            })
+            onClose && onClose()
         }
     }
 

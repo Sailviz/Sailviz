@@ -1,15 +1,14 @@
-'use client'
-
 import { useTheme } from 'next-themes'
-import { ChangeEvent, useEffect, useState } from 'react'
-import * as DB from '@components/apiMethods'
-import Select, { CSSObjectWithLabel } from 'react-select'
-import * as Fetcher from '@components/Fetchers'
+import { useEffect, useState } from 'react'
+import Select, { type CSSObjectWithLabel } from 'react-select'
 import { Dialog, DialogContent, DialogFooter, DialogHeader } from '@components/ui/dialog'
 import { Button } from '@components/ui/button'
 import { Switch } from '@components/ui/switch'
 import { Input } from '@components/ui/input'
 import { useNavigate } from '@tanstack/react-router'
+import { useMutation, useQuery } from '@tanstack/react-query'
+import { orpcClient } from '@lib/orpc'
+import type { BoatType, RaceType } from '@sailviz/types'
 
 const resultCodeOptions = [
     { label: 'None', value: '' },
@@ -31,13 +30,14 @@ export default function EditResultModal({
     onSubmit: (result: ResultDataType) => void
     onDelete: (result: ResultDataType) => void
 }) {
-    const navigate = useNavigate()
     const [open, setOpen] = useState(true)
     console.log('EditResultModal', result)
-    const { fleet, fleetIsError, fleetIsValidating } = Fetcher.Fleet(result.fleetId)
+    const { data: fleet } = useQuery(orpcClient.fleet.find.queryOptions({ input: { fleetId: result?.fleetId || '' } }))
 
     const { theme, setTheme } = useTheme()
-    const { boats, boatsIsError, boatsIsValidating } = Fetcher.Boats()
+    const boats = useQuery(orpcClient.boat.session.queryOptions()).data as BoatType[]
+
+    const getRaceMutation = useMutation(orpcClient.race.find.mutationOptions())
 
     const [raceType, setRaceType] = useState('Handicap')
 
@@ -86,7 +86,7 @@ export default function EditResultModal({
             return
         }
         const getRaceType = async () => {
-            setRaceType(await DB.getRaceById(fleet.raceId).then(race => race.Type))
+            setRaceType(await getRaceMutation.mutateAsync({ raceId: fleet.raceId }).then((race: RaceType) => race.Type))
         }
         getRaceType()
         setHelm(result.Helm)
@@ -106,13 +106,7 @@ export default function EditResultModal({
     }, [result, fleet])
 
     return (
-        <Dialog
-            open={open}
-            onOpenChange={open => {
-                setOpen(open)
-                if (!open) Router.back() // this catches the x button and clicking outside the modal, gets out of parallel route
-            }}
-        >
+        <Dialog open={open}>
             <DialogContent className='max-w-8/12' title='Edit Result'>
                 <DialogHeader className='flex flex-col gap-1 text-2xl w-96'>Edit Result</DialogHeader>
                 <div className='flex flex-col w-full'>

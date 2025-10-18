@@ -1,10 +1,10 @@
-'use client'
-import { useTheme } from 'next-themes'
-import { ChangeEvent, useState } from 'react'
-import * as Fetcher from '@components/Fetchers'
+import { useEffect, useState } from 'react'
 import { DialogContent, DialogFooter, DialogHeader } from '@components/ui/dialog'
 import { Button } from '@components/ui/button'
 import { Input } from '@components/ui/input'
+import { useQuery } from '@tanstack/react-query'
+import { orpcClient } from '@lib/orpc'
+import type { SeriesType } from '@sailviz/types'
 
 export default function EditSeriesDialog({
     isOpen,
@@ -14,14 +14,19 @@ export default function EditSeriesDialog({
 }: {
     isOpen: boolean
     seriesId: string
-    onSubmit: (series: SeriesDataType) => void
+    onSubmit: (series: SeriesType) => void
     onClose: () => void
 }) {
-    const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
-    const { series, seriesIsError, seriesIsValidating } = Fetcher.Series(seriesId)
-    const [seriesName, setSeriesName] = useState(series.name)
+    const series = useQuery(orpcClient.series.find.queryOptions({ input: { seriesId: seriesId } })).data as SeriesType
+    const [seriesName, setSeriesName] = useState('')
 
-    const { theme, setTheme } = useTheme()
+    useEffect(() => {
+        if (series == undefined) return
+        setSeriesName(series.name)
+    }, [series])
+
+    if (series === undefined) return <></>
+
     return (
         <>
             <DialogContent>

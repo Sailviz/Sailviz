@@ -1,15 +1,17 @@
 import { useEffect, useState } from 'react'
 import Select from 'react-select'
-import * as Fetcher from '@components/Fetchers'
 import { Dialog, DialogContent, DialogFooter, DialogTitle } from '@components/ui/dialog'
 import { Button } from '@components/ui/button'
 import { Input } from '@components/ui/input'
 import { DialogTrigger } from '@radix-ui/react-dialog'
-import * as DB from '@components/apiMethods'
-import { mutate } from 'swr'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { orpcClient } from '@lib/orpc'
 
 export default function EditFleetSettingsDialog({ fleetSettings, seriesId }: { fleetSettings: FleetSettingsType; seriesId: string }) {
-    const { boats, boatsIsError, boatsIsValidating } = Fetcher.Boats()
+    const { data: boats } = useQuery(orpcClient.boat.session.queryOptions())
+
+    const updateFleetSettingsMutation = useMutation(orpcClient.fleet.settings.update.mutationOptions())
+    const queryClient = useQueryClient()
 
     const [name, setName] = useState('')
     const [selectedBoats, setSelectedBoats] = useState([{ label: '', value: {} as BoatDataType }])
@@ -18,9 +20,11 @@ export default function EditFleetSettingsDialog({ fleetSettings, seriesId }: { f
     const [open, setOpen] = useState(false)
 
     const onSubmit = async (fleetSettings: FleetSettingsType) => {
-        await DB.updateFleetSettingsById(fleetSettings)
+        await updateFleetSettingsMutation.mutateAsync(fleetSettings)
         console.log(seriesId)
-        mutate(`/api/GetFleetSettingsBySeriesId?id=${seriesId}`)
+        queryClient.invalidateQueries({
+            queryKey: orpcClient.fleet.settings.find.key({ type: 'query' })
+        })
         setOpen(false)
     }
 

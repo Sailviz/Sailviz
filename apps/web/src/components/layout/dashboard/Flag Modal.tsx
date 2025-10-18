@@ -1,6 +1,4 @@
 import { Dialog, DialogContent, DialogHeader } from '@components/ui/dialog'
-import { useTheme } from 'next-themes'
-import Image from 'next/image'
 
 const imageStyle = {
     border: '2px solid #000000'
@@ -35,11 +33,11 @@ export default function FlagDialog({
                     <div className='flex w-full flex-row h-full justify-evenly'>
                         {currentFlagStatus[0] ? (
                             <div className='h-full flex flex-col justify-start'>
-                                <Image src='/H_Flag.png' width={200} height={200} alt='flag1' style={imageStyle} />
+                                <img src='/H_Flag.png' width={200} height={200} alt='flag1' style={imageStyle} />
                             </div>
                         ) : (
                             <div className='h-full flex flex-col justify-end'>
-                                <Image src='/H_Flag.png' width={200} height={200} alt='flag1' style={imageStyle} />
+                                <img src='/H_Flag.png' width={200} height={200} alt='flag1' style={imageStyle} />
                             </div>
                         )}
                         <div className='h-full flex flex-col justify-evenly'>
@@ -54,11 +52,11 @@ export default function FlagDialog({
                         </div>
                         {currentFlagStatus[1] ? (
                             <div className='h-full flex flex-col justify-start'>
-                                <Image src='/P_Flag.png' width={200} height={200} alt='flag1' style={imageStyle} />
+                                <img src='/P_Flag.png' width={200} height={200} alt='flag1' style={imageStyle} />
                             </div>
                         ) : (
                             <div className='h-full flex flex-col justify-end'>
-                                <Image src='/P_Flag.png' width={200} height={200} alt='flag1' style={imageStyle} />
+                                <img src='/P_Flag.png' width={200} height={200} alt='flag1' style={imageStyle} />
                             </div>
                         )}
                     </div>
@@ -66,11 +64,11 @@ export default function FlagDialog({
                     <div className='flex w-full flex-row h-full justify-evenly'>
                         {nextFlagStatus[0] ? (
                             <div className='h-full flex flex-col justify-start'>
-                                <Image src='/H_Flag.png' width={200} height={200} alt='flag1' style={imageStyle} />
+                                <img src='/H_Flag.png' width={200} height={200} alt='flag1' style={imageStyle} />
                             </div>
                         ) : (
                             <div className='h-full flex flex-col justify-end'>
-                                <Image src='/H_Flag.png' width={200} height={200} alt='flag1' style={imageStyle} />
+                                <img src='/H_Flag.png' width={200} height={200} alt='flag1' style={imageStyle} />
                             </div>
                         )}
                         <div className='h-full flex flex-col justify-evenly'>
@@ -85,11 +83,11 @@ export default function FlagDialog({
                         </div>
                         {nextFlagStatus[1] ? (
                             <div className='h-full flex flex-col justify-start'>
-                                <Image src='/P_Flag.png' width={200} height={200} alt='flag1' style={imageStyle} />
+                                <img src='/P_Flag.png' width={200} height={200} alt='flag1' style={imageStyle} />
                             </div>
                         ) : (
                             <div className='h-full flex flex-col justify-end'>
-                                <Image src='/P_Flag.png' width={200} height={200} alt='flag1' style={imageStyle} />
+                                <img src='/P_Flag.png' width={200} height={200} alt='flag1' style={imageStyle} />
                             </div>
                         )}
                     </div>
