@@ -58,7 +58,7 @@ const ClubTable = ({ viewHref, clubId }: { viewHref: string; clubId?: string }) 
                 header: 'Series Name',
                 cell: info => info.getValue()
             }),
-            columnHelper.accessor(row => row.races.length.toString(), {
+            columnHelper.accessor(row => row.races!.length.toString(), {
                 id: 'Number of Races',
                 cell: info => info.getValue()
             }),

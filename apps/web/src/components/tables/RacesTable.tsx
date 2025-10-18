@@ -6,6 +6,7 @@ import { Button } from '@components/ui/button'
 import { Link } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
+import type { RaceType } from '@sailviz/types'
 
 const Time = ({ ...props }: any) => {
     const initialValue = props.getValue()
@@ -45,17 +46,13 @@ const Action = ({ viewHref, raceId }: { viewHref: string; raceId: string }) => {
     )
 }
 
-const columnHelper = createColumnHelper<RaceDataType>()
+const columnHelper = createColumnHelper<RaceType>()
 
 const RacesTable = ({ date, historical, viewHref, clubId }: { date: Date; historical: boolean; viewHref: string; clubId: string }) => {
     const [page, setPage] = useState(1)
-    // const {
-    //     data: races,
-    //     error: racesIsError,
-    //     isValidating: racesIsValidating
-    // } = useSWR(`/api/GetRacesByClubId?id=${clubId || ''}&page=${page}&date=${date}&historical=${historical}`, Fetcher.fetcher)
+
     const { data: races } = useQuery(orpcClient.race.club.queryOptions({ input: { clubId: clubId!, date: date.toISOString(), historical: historical, page: page } }))
-    const [data, setData] = useState<RaceDataType[]>([])
+    const [data, setData] = useState<RaceType[]>([])
     const [count, setCount] = useState(0)
     const rowsPerPage = 10
 

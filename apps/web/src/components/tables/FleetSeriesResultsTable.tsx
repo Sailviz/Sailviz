@@ -3,7 +3,7 @@ import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, use
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@components/ui/table'
 import { useQuery } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
-import type { FleetType, ResultType, SeriesType } from '@sailviz/types'
+import type { FleetType, RaceType, ResultType, SeriesType } from '@sailviz/types'
 
 //not a db type, only used here
 type SeriesResultsType = {
@@ -75,7 +75,7 @@ const FleetSeriesResultsTable = ({ seriesId, fleetSettingsId }: { seriesId: stri
         let tempresults: SeriesResultsType[] = []
         console.log('seriesData', series)
         //collate results from same person.
-        series.races.forEach(race => {
+        series.races.forEach((race: RaceType) => {
             let fleet = race.fleets.find((fleet: FleetType) => fleet.fleetSettings.id == fleetSettingsId)?.results
             if (fleet == undefined) {
                 console.log('fleet is undefined')
@@ -115,7 +115,7 @@ const FleetSeriesResultsTable = ({ seriesId, fleetSettingsId }: { seriesId: stri
         })
 
         //give duty team their average score if they have raced in the series
-        series.races.forEach(race => {
+        series.races.forEach((race: RaceType) => {
             //loop through duty team on each race.
             Object.entries(race.Duties).map(([displayName, name]) => {
                 let index = tempresults.findIndex(function (t) {
