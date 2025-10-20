@@ -1,25 +1,23 @@
-'use client'
-import React, { use, useEffect } from 'react'
-import { useNavigate } from '@tanstack/react-router'
+import { useEffect } from 'react'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import dayjs from 'dayjs'
 import FleetHandicapResultsTable from '@components/tables/FleetHandicapResultsTable'
 import FleetPursuitResultsTable from '@components/tables/FleetPursuitResultsTable'
-import * as Fetcher from '@components/Fetchers'
 import { PageSkeleton } from '@components/layout/PageSkeleton'
 import BackButton from '@components/layout/backButton'
 import { Breadcrumbs } from '@components/breadcrumbs'
-import { Input } from '@components/ui/input'
 import { Button } from '@components/ui/button'
 import { Link } from '@tanstack/react-router'
+import { useQuery } from '@tanstack/react-query'
+import { orpcClient } from '@lib/orpc'
+import type { RaceType } from '@sailviz/types'
 
-type PageProps = { params: Promise<{ slug: string }> }
-
-export default function Page(props: PageProps) {
+export default function Page() {
     const navigate = useNavigate()
 
-    const { slug } = use(props.params)
+    const { raceId } = Route.useParams()
 
-    const { race, raceIsError, raceIsValidating, mutateRace } = Fetcher.Race(slug, true)
+    const race = useQuery(orpcClient.race.find.queryOptions({ input: { raceId: raceId! } })).data as RaceType
 
     const openRacePanel = async () => {
         if (race.Type == 'Handicap') {
@@ -48,7 +46,7 @@ export default function Page(props: PageProps) {
     return (
         <>
             <div className='bg-green-500 text-center p-3 font-bold grid grid-cols-3 justify-items-start text-xl'>
-                <BackButton demoMode={true} />
+                <BackButton />
                 <div className='my-auto text-center justify-self-stretch'>Demo Mode</div>
             </div>
 
@@ -98,3 +96,7 @@ export default function Page(props: PageProps) {
         </>
     )
 }
+
+export const Route = createFileRoute('/Demo/Race/$raceId')({
+    component: Page
+})

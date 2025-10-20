@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import { useReactToPrint } from 'react-to-print'
 import HandicapPaperResultsTable from '@components/tables/HandicapPaperResultsTable'
 import PursuitPaperResultsTable from '@components/tables/PursuitPaperResultsTable'
@@ -6,7 +6,7 @@ import dayjs from 'dayjs'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
-import type { RaceType } from '@sailviz/types'
+import type { FleetType, RaceType } from '@sailviz/types'
 
 function Page() {
     const { raceId } = Route.useParams()
@@ -35,7 +35,7 @@ function Page() {
 
     return (
         <div className='h-full overflow-y-auto p-6' ref={contentRef}>
-            {race!.fleets.map((fleet, index) => {
+            {race!.fleets.map((fleet: FleetType, index: number) => {
                 return (
                     <div key={'fleetResults' + index}>
                         <p className='text-2xl'>

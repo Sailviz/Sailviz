@@ -3,6 +3,7 @@ import dayjs from "dayjs";
 import { implement, ORPCError } from "@orpc/server";
 import { ORPCcontract } from "../contract";
 import { ClubSettingsType, RaceType } from "packages/types/src/types";
+import { Race } from "packages/db/src/generated";
 
 const os = implement(ORPCcontract);
 
@@ -116,25 +117,31 @@ export async function countRaces(
   return result;
 }
 
-export const updateRace = os.race.update.handler(async ({ input }) => {
-  const updatedRace = await prisma.race.update({
-    where: { id: input.id },
-    data: input,
-    include: {
-      series: true,
-      fleets: {
-        include: {
-          fleetSettings: true,
+export const updateRace = os.race.update.handler(
+  async ({ input }: { input: any }) => {
+    const updatedRace = await prisma.race.update({
+      where: { id: input.id },
+      data: {
+        Duties: input.Duties,
+        Time: input.Time,
+        Type: input.Type,
+      },
+      include: {
+        series: true,
+        fleets: {
+          include: {
+            fleetSettings: true,
+          },
         },
       },
-    },
-  });
-  if (updatedRace) {
-    return updatedRace;
-  } else {
-    throw new ORPCError("BAD_REQUEST");
+    });
+    if (updatedRace) {
+      return updatedRace;
+    } else {
+      throw new ORPCError("BAD_REQUEST");
+    }
   }
-});
+);
 
 export const race_delete = os.race.delete.handler(async ({ input }) => {
   const deletedRace = await prisma.race.delete({
@@ -200,6 +207,7 @@ export const race_create = os.race.create.handler(async ({ input }) => {
       seriesId: input.seriesId,
     },
   });
+  console.log(fleets);
   // create fleet for each fleet setting
   fleets.forEach(async (fleet) => {
     await prisma.fleet.create({

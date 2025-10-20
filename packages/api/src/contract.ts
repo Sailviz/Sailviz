@@ -7,6 +7,7 @@ import {
   ClubType,
   FleetSchema,
   FleetSettingsType,
+  GlobalConfigSchema,
   NextRaceSchema,
   RaceSchema,
   RaceType,
@@ -138,5 +139,8 @@ export const ORPCcontract = {
       .output(z.array(RoleSchema)),
     update: oc.input(RoleSchema).output(RoleSchema),
     delete: oc.input(RoleSchema).output(RoleSchema),
+  },
+  globalConfig: {
+    find: oc.output(GlobalConfigSchema),
   },
 };

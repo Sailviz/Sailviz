@@ -53,6 +53,7 @@ import {
 } from "./routes/startSequence";
 import { RaceType } from "packages/types/src/types";
 import { createResult, updateResult } from "./routes/result";
+import { globalConfig_find } from "./routes/globalConfig";
 
 interface ORPCContext extends RequestHeadersPluginContext {
   req: Request;
@@ -392,5 +393,8 @@ export const mainRouter = os.router({
     club: rolesByClub,
     update: updateRole,
     delete: deleteRole,
+  },
+  globalConfig: {
+    find: globalConfig_find,
   },
 });
