@@ -6,6 +6,7 @@ import {
   ClubSchema,
   ClubType,
   FleetSchema,
+  FleetSettingsSchema,
   FleetSettingsType,
   GlobalConfigSchema,
   NextRaceSchema,
@@ -75,7 +76,7 @@ export const ORPCcontract = {
       delete: oc
         .input(z.object({ fleetSettingsId: z.string() }))
         .output(z.any()),
-      update: oc.input(FleetSettingsType).output(FleetSettingsType),
+      update: oc.input(FleetSettingsSchema).output(FleetSettingsSchema),
     },
   },
   boat: {
@@ -143,4 +144,4 @@ export const ORPCcontract = {
   globalConfig: {
     find: oc.output(GlobalConfigSchema),
   },
-};
+} as const;

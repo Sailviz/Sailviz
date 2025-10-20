@@ -72,12 +72,12 @@ export const SeriesSettingsSchema = z.object({
 });
 export type SeriesSettingsInputType = z.infer<typeof SeriesSettingsSchema>;
 
-export const FleetSettingsType = z.object({
+export const FleetSettingsSchema = z.object({
   id: z.string(),
   name: z.string(),
   boats: z.array(z.any()),
 });
-export type FleetSettingsType = z.infer<typeof FleetSettingsType>;
+export type FleetSettingsType = z.infer<typeof FleetSettingsSchema>;
 
 export const FlagStatusSchema = z.object({
   flag: z.string(),

@@ -43,8 +43,8 @@ export default function Page() {
             //add results data
             await Promise.all(
                 demoData.fleets
-                    .flatMap((fleet: FleetType) => fleet.results)
-                    .map(result => {
+                    .flatMap((fleet: FleetType) => fleet.results!)
+                    .map((result: ResultType) => {
                         return createResultMutation.mutateAsync({ fleetId: newRace.fleets[0]!.id }).then(newResult => {
                             updateResultMutation.mutateAsync({ ...newResult, Helm: result.Helm, Crew: result.Crew, boat: result.boat, SailNumber: result.SailNumber })
                         })
