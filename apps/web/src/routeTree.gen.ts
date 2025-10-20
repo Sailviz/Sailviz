@@ -16,10 +16,12 @@ import { Route as DashboardUsersIndexRouteImport } from './routes/Dashboard/User
 import { Route as DashboardSeriesIndexRouteImport } from './routes/Dashboard/Series/index'
 import { Route as DashboardRaceIndexRouteImport } from './routes/Dashboard/Race/index'
 import { Route as DashboardHardwareIndexRouteImport } from './routes/Dashboard/Hardware/index'
+import { Route as DashboardDocumentationIndexRouteImport } from './routes/Dashboard/Documentation/index'
 import { Route as DashboardClubIndexRouteImport } from './routes/Dashboard/Club/index'
 import { Route as DashboardBoatsIndexRouteImport } from './routes/Dashboard/Boats/index'
 import { Route as DashboardSeriesSeriesIdRouteImport } from './routes/Dashboard/Series/$seriesId'
 import { Route as DashboardRaceRaceIdRouteImport } from './routes/Dashboard/Race/$raceId'
+import { Route as DashboardPrintPaperResultsRaceIdRouteImport } from './routes/Dashboard/PrintPaperResults/$raceId'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/Login',
@@ -56,6 +58,12 @@ const DashboardHardwareIndexRoute = DashboardHardwareIndexRouteImport.update({
   path: '/Dashboard/Hardware/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DashboardDocumentationIndexRoute =
+  DashboardDocumentationIndexRouteImport.update({
+    id: '/Dashboard/Documentation/',
+    path: '/Dashboard/Documentation/',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const DashboardClubIndexRoute = DashboardClubIndexRouteImport.update({
   id: '/Dashboard/Club/',
   path: '/Dashboard/Club/',
@@ -76,15 +84,23 @@ const DashboardRaceRaceIdRoute = DashboardRaceRaceIdRouteImport.update({
   path: '/Dashboard/Race/$raceId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DashboardPrintPaperResultsRaceIdRoute =
+  DashboardPrintPaperResultsRaceIdRouteImport.update({
+    id: '/Dashboard/PrintPaperResults/$raceId',
+    path: '/Dashboard/PrintPaperResults/$raceId',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/Login': typeof LoginRoute
   '/Dashboard': typeof DashboardIndexRoute
+  '/Dashboard/PrintPaperResults/$raceId': typeof DashboardPrintPaperResultsRaceIdRoute
   '/Dashboard/Race/$raceId': typeof DashboardRaceRaceIdRoute
   '/Dashboard/Series/$seriesId': typeof DashboardSeriesSeriesIdRoute
   '/Dashboard/Boats': typeof DashboardBoatsIndexRoute
   '/Dashboard/Club': typeof DashboardClubIndexRoute
+  '/Dashboard/Documentation': typeof DashboardDocumentationIndexRoute
   '/Dashboard/Hardware': typeof DashboardHardwareIndexRoute
   '/Dashboard/Race': typeof DashboardRaceIndexRoute
   '/Dashboard/Series': typeof DashboardSeriesIndexRoute
@@ -94,10 +110,12 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/Login': typeof LoginRoute
   '/Dashboard': typeof DashboardIndexRoute
+  '/Dashboard/PrintPaperResults/$raceId': typeof DashboardPrintPaperResultsRaceIdRoute
   '/Dashboard/Race/$raceId': typeof DashboardRaceRaceIdRoute
   '/Dashboard/Series/$seriesId': typeof DashboardSeriesSeriesIdRoute
   '/Dashboard/Boats': typeof DashboardBoatsIndexRoute
   '/Dashboard/Club': typeof DashboardClubIndexRoute
+  '/Dashboard/Documentation': typeof DashboardDocumentationIndexRoute
   '/Dashboard/Hardware': typeof DashboardHardwareIndexRoute
   '/Dashboard/Race': typeof DashboardRaceIndexRoute
   '/Dashboard/Series': typeof DashboardSeriesIndexRoute
@@ -108,10 +126,12 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/Login': typeof LoginRoute
   '/Dashboard/': typeof DashboardIndexRoute
+  '/Dashboard/PrintPaperResults/$raceId': typeof DashboardPrintPaperResultsRaceIdRoute
   '/Dashboard/Race/$raceId': typeof DashboardRaceRaceIdRoute
   '/Dashboard/Series/$seriesId': typeof DashboardSeriesSeriesIdRoute
   '/Dashboard/Boats/': typeof DashboardBoatsIndexRoute
   '/Dashboard/Club/': typeof DashboardClubIndexRoute
+  '/Dashboard/Documentation/': typeof DashboardDocumentationIndexRoute
   '/Dashboard/Hardware/': typeof DashboardHardwareIndexRoute
   '/Dashboard/Race/': typeof DashboardRaceIndexRoute
   '/Dashboard/Series/': typeof DashboardSeriesIndexRoute
@@ -123,10 +143,12 @@ export interface FileRouteTypes {
     | '/'
     | '/Login'
     | '/Dashboard'
+    | '/Dashboard/PrintPaperResults/$raceId'
     | '/Dashboard/Race/$raceId'
     | '/Dashboard/Series/$seriesId'
     | '/Dashboard/Boats'
     | '/Dashboard/Club'
+    | '/Dashboard/Documentation'
     | '/Dashboard/Hardware'
     | '/Dashboard/Race'
     | '/Dashboard/Series'
@@ -136,10 +158,12 @@ export interface FileRouteTypes {
     | '/'
     | '/Login'
     | '/Dashboard'
+    | '/Dashboard/PrintPaperResults/$raceId'
     | '/Dashboard/Race/$raceId'
     | '/Dashboard/Series/$seriesId'
     | '/Dashboard/Boats'
     | '/Dashboard/Club'
+    | '/Dashboard/Documentation'
     | '/Dashboard/Hardware'
     | '/Dashboard/Race'
     | '/Dashboard/Series'
@@ -149,10 +173,12 @@ export interface FileRouteTypes {
     | '/'
     | '/Login'
     | '/Dashboard/'
+    | '/Dashboard/PrintPaperResults/$raceId'
     | '/Dashboard/Race/$raceId'
     | '/Dashboard/Series/$seriesId'
     | '/Dashboard/Boats/'
     | '/Dashboard/Club/'
+    | '/Dashboard/Documentation/'
     | '/Dashboard/Hardware/'
     | '/Dashboard/Race/'
     | '/Dashboard/Series/'
@@ -163,10 +189,12 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   LoginRoute: typeof LoginRoute
   DashboardIndexRoute: typeof DashboardIndexRoute
+  DashboardPrintPaperResultsRaceIdRoute: typeof DashboardPrintPaperResultsRaceIdRoute
   DashboardRaceRaceIdRoute: typeof DashboardRaceRaceIdRoute
   DashboardSeriesSeriesIdRoute: typeof DashboardSeriesSeriesIdRoute
   DashboardBoatsIndexRoute: typeof DashboardBoatsIndexRoute
   DashboardClubIndexRoute: typeof DashboardClubIndexRoute
+  DashboardDocumentationIndexRoute: typeof DashboardDocumentationIndexRoute
   DashboardHardwareIndexRoute: typeof DashboardHardwareIndexRoute
   DashboardRaceIndexRoute: typeof DashboardRaceIndexRoute
   DashboardSeriesIndexRoute: typeof DashboardSeriesIndexRoute
@@ -224,6 +252,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardHardwareIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/Dashboard/Documentation/': {
+      id: '/Dashboard/Documentation/'
+      path: '/Dashboard/Documentation'
+      fullPath: '/Dashboard/Documentation'
+      preLoaderRoute: typeof DashboardDocumentationIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/Dashboard/Club/': {
       id: '/Dashboard/Club/'
       path: '/Dashboard/Club'
@@ -252,6 +287,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardRaceRaceIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/Dashboard/PrintPaperResults/$raceId': {
+      id: '/Dashboard/PrintPaperResults/$raceId'
+      path: '/Dashboard/PrintPaperResults/$raceId'
+      fullPath: '/Dashboard/PrintPaperResults/$raceId'
+      preLoaderRoute: typeof DashboardPrintPaperResultsRaceIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -259,10 +301,12 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   LoginRoute: LoginRoute,
   DashboardIndexRoute: DashboardIndexRoute,
+  DashboardPrintPaperResultsRaceIdRoute: DashboardPrintPaperResultsRaceIdRoute,
   DashboardRaceRaceIdRoute: DashboardRaceRaceIdRoute,
   DashboardSeriesSeriesIdRoute: DashboardSeriesSeriesIdRoute,
   DashboardBoatsIndexRoute: DashboardBoatsIndexRoute,
   DashboardClubIndexRoute: DashboardClubIndexRoute,
+  DashboardDocumentationIndexRoute: DashboardDocumentationIndexRoute,
   DashboardHardwareIndexRoute: DashboardHardwareIndexRoute,
   DashboardRaceIndexRoute: DashboardRaceIndexRoute,
   DashboardSeriesIndexRoute: DashboardSeriesIndexRoute,

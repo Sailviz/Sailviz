@@ -4,6 +4,7 @@ import { tanstackRouter } from '@tanstack/router-plugin/vite'
 import tsconfigPaths from 'vite-tsconfig-paths'
 import tailwindcss from '@tailwindcss/vite'
 import { barrel } from 'vite-plugin-barrel'
+import mdx from '@mdx-js/rollup'
 // https://vite.dev/config/
 export default defineConfig({
     plugins: [
@@ -16,6 +17,7 @@ export default defineConfig({
         }),
         tsconfigPaths(),
         tailwindcss(),
+        mdx(),
         react()
     ]
 })

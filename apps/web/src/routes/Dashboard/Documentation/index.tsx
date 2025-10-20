@@ -1,9 +1,12 @@
-'use client'
 import { Button } from '@components/ui/button'
-import Docs from 'documentation/guides/RaceManagement.mdx'
-import { useNavigate } from '@tanstack/react-router'
+// @ts-ignore: MDX module has no type declarations in this repo
+import Docs from '@documentation/guides/RaceManagement.mdx'
+
 import { useRef } from 'react'
 import { useReactToPrint } from 'react-to-print'
+import { useMDXComponents } from '@components/mdx-components'
+import { MDXProvider } from '@mdx-js/react'
+import { useNavigate, createFileRoute } from '@tanstack/react-router'
 
 export default function Page() {
     const navigate = useNavigate()
@@ -12,13 +15,16 @@ export default function Page() {
     const handlePrint = useReactToPrint({
         contentRef,
         onAfterPrint: () => {
-            Router.back()
+            // navigate back to the dashboard after printing
+            navigate({ to: '/Dashboard/Documentation' })
         }
     })
     return (
         <div className='flex flex-col justify-center w-full pt-12'>
             <div ref={contentRef} className='mx-6'>
-                <Docs />
+                <MDXProvider components={useMDXComponents}>
+                    <Docs />
+                </MDXProvider>
             </div>
             <Button onClick={handlePrint} className='mt-4'>
                 Print
@@ -26,3 +32,7 @@ export default function Page() {
         </div>
     )
 }
+
+export const Route = createFileRoute('/Dashboard/Documentation/')({
+    component: Page
+})

@@ -179,7 +179,7 @@ function Page() {
                                 <></>
                             )}
 
-                            <Link to={`/PrintPaperResults/${race.id}`}>
+                            <Link to={`/Dashboard/PrintPaperResults/${race.id}`}>
                                 <Button>Print Race Sheet</Button>
                             </Link>
                             {userHasPermission(session.user, AVAILABLE_PERMISSIONS.UploadEntires) ? <EntryFileUpload raceId={race.id} /> : <></>}
