@@ -52,7 +52,7 @@ export default function Page() {
             )
             console.log('created demo race')
             // Redirect to another page
-            navigate(`/Demo/Race/${newRace.id}`)
+            navigate({ to: `/Demo/Race/${newRace.id}` })
         }
         if (GlobalConfig == undefined) {
             return
