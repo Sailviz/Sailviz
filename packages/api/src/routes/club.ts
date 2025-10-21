@@ -87,3 +87,14 @@ export const club_create = os.club.create.handler(async ({ input }) => {
     throw new ORPCError("Club not created");
   }
 });
+
+export const club_find = os.club.find.handler(async ({ input }) => {
+  const club = await prisma.club.findUnique({
+    where: { id: input.clubId },
+  });
+  if (club) {
+    return club as unknown as ClubType;
+  } else {
+    throw new ORPCError("Club not found");
+  }
+});

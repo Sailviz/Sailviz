@@ -34,7 +34,13 @@ import {
   fleet_settings_find,
   fleet_settings_update,
 } from "./routes/fleet";
-import { club_all, club_create, getClub, updateClubById } from "./routes/club";
+import {
+  club_all,
+  club_create,
+  club_find,
+  getClub,
+  updateClubById,
+} from "./routes/club";
 import {
   createUserInClub,
   deleteUserById,
@@ -374,6 +380,7 @@ export const mainRouter = os.router({
     update: updateClub,
     all: club_all,
     create: club_create,
+    find: club_find,
   },
   boat: {
     find: boat,

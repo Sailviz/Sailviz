@@ -1,20 +1,20 @@
-'use client'
-import React, { act, useEffect, useState } from 'react'
-import Script from 'next/script'
-import * as DB from '@components/apiMethods'
+import { useEffect, useState } from 'react'
 import SeriesResultsTable from '@components/tables/FleetSeriesResultsTable'
 import RaceTimer from '@components/HRaceTimer'
 import LiveFleetResultsTable from '@components/tables/LiveFleetResultsTable'
 import { animateScroll, Events } from 'react-scroll'
 import { useTheme } from 'next-themes'
-import { Peer, DataConnection } from 'peerjs'
+import { Peer, type DataConnection } from 'peerjs'
 import { useQRCode } from 'next-qrcode'
 import { title } from '@components/layout/home/primitaves'
 import FleetHandicapResultsTable from '@components/tables/FleetHandicapResultsTable'
 import FleetPursuitResultsTable from '@components/tables/FleetPursuitResultsTable'
-import * as Fetcher from '@components/Fetchers'
 import { mutate } from 'swr'
 import { Progress } from '@components/ui/progress'
+import { useMutation, useQuery } from '@tanstack/react-query'
+import { orpcClient } from '@lib/orpc'
+import { createFileRoute } from '@tanstack/react-router'
+import type { FleetType, RaceType, SeriesType } from '@sailviz/types'
 
 enum pageStateType {
     live,
@@ -29,27 +29,22 @@ const scrollOptions = {
     smooth: false
 }
 
-//This is the page that a chromecast is directed to.
-//it receives messages from the chromecast and displays the appropriate data.
-// club id is stored in a cookie and is used to get the relavent data / page to display.
-
-type PageProps = { params: Promise<{ slug: string }> }
-
-export default async function Page(props: PageProps) {
-    var interval: NodeJS.Timer | null = null
-    const params = await props.params
+export default async function Page() {
+    const { clubId } = Route.useParams()
 
     const { theme, setTheme } = useTheme()
 
     const { Image: QRCode } = useQRCode()
 
-    const [club, setClub] = useState<ClubDataType>({ id: params.slug } as ClubDataType)
+    const { data: club } = useQuery(orpcClient.club.find.queryOptions({ input: { clubId: clubId } }))
+    const { data: todaysRaces } = useQuery(orpcClient.race.today.queryOptions({ input: { clubId: clubId }, refetchInterval: 10000 }))
 
-    const { todaysRaces, todaysRacesIsError, todaysRacesIsValidating } = Fetcher.GetTodaysRaceByClubId(club.id)
+    const findRaceMutation = useMutation(orpcClient.race.find.mutationOptions())
+    const findSeriesMutation = useMutation(orpcClient.series.find.mutationOptions())
 
     const [pagestate, setPageState] = useState<pageStateType>(pageStateType.info)
-    var [activeRaceData, setActiveRaceData] = useState<RaceDataType>({} as RaceDataType)
-    var [activeSeriesData, setActiveSeriesData] = useState<SeriesDataType>({} as SeriesDataType)
+    var [activeRaceData, setActiveRaceData] = useState<RaceType>({} as RaceType)
+    var [activeSeriesData, setActiveSeriesData] = useState<SeriesType>({} as SeriesType)
 
     const [peerId, setPeerId] = useState<string>('')
 
@@ -116,18 +111,18 @@ export default async function Page(props: PageProps) {
         })
     }
 
-    const checkActive = (race: RaceDataType) => {
+    const checkActive = (race: RaceType) => {
         if (race.fleets.length == 0) {
             console.error('no fleets found')
         }
 
         //if any fleets have been started
-        if (race.fleets.some(fleet => fleet.startTime != 0)) {
+        if (race.fleets.some((fleet: FleetType) => fleet.startTime != 0)) {
             //race has started, check if all boats have finished
             return !race.fleets
                 .flatMap(fleet => fleet.results)
                 .every(result => {
-                    if (result.finishTime != 0) {
+                    if (result!.finishTime != 0) {
                         return true
                     }
                 })
@@ -138,12 +133,12 @@ export default async function Page(props: PageProps) {
     const showPage = async (id: string, type: string) => {
         switch (type) {
             case 'race':
-                setActiveRaceData(await DB.getRaceById(id))
+                setActiveRaceData((await findRaceMutation.mutateAsync({ raceId: id })) as RaceType)
                 setPageState(pageStateType.race)
                 break
 
             case 'series':
-                setActiveSeriesData(await DB.GetSeriesById(id))
+                setActiveSeriesData(await findSeriesMutation.mutateAsync({ seriesId: id }))
                 setPageState(pageStateType.series)
                 break
 
@@ -176,10 +171,12 @@ export default async function Page(props: PageProps) {
     const updateCheck = async () => {
         console.log('refreshing results')
         let activeFlag = false
-        var races = await DB.getTodaysRaceByClubId(club.id)
-        if (races.length > 0) {
-            for (let i = 0; i < races.length; i++) {
-                const res = await DB.getRaceById(races[i]!.id)
+        if (todaysRaces == undefined) {
+            return
+        }
+        if (todaysRaces.length > 0) {
+            for (let i = 0; i < todaysRaces.length; i++) {
+                const res = (await findRaceMutation.mutateAsync({ raceId: todaysRaces[i]!.id })) as RaceType
                 if (checkActive(res)) {
                     setActiveRaceData(res)
                     activeFlag = true
@@ -196,48 +193,35 @@ export default async function Page(props: PageProps) {
         //if no active races decide if series results or race results are more important.
         //if it is a trophy day show series results
         //if it is a normal day show last race results.
-        if (!activeFlag && races.length > 0) {
+        if (!activeFlag && todaysRaces.length > 0) {
             //check if all races have the same series ID
-            let sameSeries = races.flatMap(race => race.series.id).every((val, i, arr) => val === arr[0])
+            let sameSeries = todaysRaces.flatMap(race => race.series.id).every((val, i, arr) => val === arr[0])
             if (sameSeries) {
-                setActiveSeriesData(await DB.GetSeriesById(races[0]!.series.id))
+                setActiveSeriesData(await findSeriesMutation.mutateAsync({ seriesId: todaysRaces[0]!.series.id }))
                 setPageState(pageStateType.series)
             } else {
                 //show the most recent results
-                races.sort((a, b) => {
+                todaysRaces.sort((a, b) => {
                     return a.Time < b.Time ? 1 : -1
                 })
-                showPage(races[0]!.id, 'race')
+                showPage(todaysRaces[0]!.id, 'race')
             }
         }
     }
 
-    // useEffect(() => {
-    //     const timer1 = setInterval(async () => {
-    //         updateCheck()
-    //     }, 10000);
-    //     return () => {
-    //         clearTimeout(timer1);
-    //     }
-    // }, [club]);
-
     useEffect(() => {
         animateScroll.scrollToBottom(scrollOptions)
-        const fetch = async () => {
-            setClub(await DB.GetClubById(club.id))
-        }
-        if (club.id != '') {
-            fetch()
+        if (clubId != '') {
             setOrigin(window.location.origin)
         }
         initialize()
     }, [])
 
     useEffect(() => {
-        if (!todaysRacesIsValidating && todaysRaces && !timerActive) {
+        if (todaysRaces && !timerActive) {
             updateCheck()
         }
-    }, [todaysRaces, todaysRacesIsValidating])
+    }, [todaysRaces])
 
     useEffect(() => {
         let localTimer = timerValue
@@ -257,6 +241,10 @@ export default async function Page(props: PageProps) {
             }
         }
     }, [timerActive])
+
+    if (!club) {
+        return <div>Loading...</div>
+    }
 
     return (
         <div>
@@ -292,7 +280,7 @@ export default async function Page(props: PageProps) {
                 ) : null}
             </div>
             <div className='p-6'>
-                <h1 className={title({ color: 'blue' })}>SailViz - {club.displayName}</h1>
+                <h1 className={title({ color: 'blue' })}>SailViz - {club?.displayName}</h1>
             </div>
 
             {(() => {
@@ -369,3 +357,7 @@ export default async function Page(props: PageProps) {
         </div>
     )
 }
+
+export const Route = createFileRoute('/Cast/$clubId')({
+    component: Page
+})

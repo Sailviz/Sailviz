@@ -1,4 +1,4 @@
-import z, { uuid } from "zod";
+import { z } from "zod";
 
 export const DutySchema = z.any();
 export type DutyType = z.infer<typeof DutySchema>;
@@ -18,12 +18,13 @@ export const ResultSchema = z.object({
   SailNumber: z.string(),
   finishTime: z.number(),
   numberLaps: z.number(),
-  laps: LapSchema.array(),
+  laps: z.array(LapSchema),
   CorrectedTime: z.number(),
   PursuitPosition: z.number(),
   HandicapPosition: z.number(),
   resultCode: z.string(),
-  boat: z.any().optional(), //need to define BoatSchema
+  // Link to BoatSchema (defined later) without introducing runtime ordering issues
+  boat: z.lazy(() => BoatSchema).optional(),
 });
 export type ResultType = z.infer<typeof ResultSchema>;
 
@@ -31,7 +32,8 @@ export const FleetSchema = z.object({
   id: z.string(),
   raceId: z.string(),
   startTime: z.number(),
-  fleetSettings: z.any(),
+  // Wire to FleetSettingsSchema to avoid `any` leakage
+  fleetSettings: z.lazy(() => FleetSettingsSchema),
   results: z.array(ResultSchema).optional(),
 });
 export type FleetType = z.infer<typeof FleetSchema>;
@@ -40,9 +42,11 @@ export const SeriesSchema = z.object({
   id: z.string(),
   name: z.string(),
   clubId: z.string(),
-  settings: z.any().optional(),
+  // Use concrete schema for settings
+  settings: z.lazy(() => SeriesSettingsSchema).optional(),
   races: z.array(z.lazy(() => RaceSchema)).optional(),
-  fleetSettings: z.any().optional(),
+  // Provide optional series-level fleet settings if applicable
+  fleetSettings: z.lazy(() => FleetSettingsSchema).optional(),
 });
 export type SeriesType = z.infer<typeof SeriesSchema>;
 
@@ -54,7 +58,8 @@ export const RaceSchema = z.object({
   Type: z.string(),
   fleets: z.array(FleetSchema),
   seriesId: z.string(),
-  series: z.lazy(() => SeriesSchema.optional()),
+  // Make the property optional (not the inner schema)
+  series: z.lazy(() => SeriesSchema).optional(),
 });
 export type RaceType = z.infer<typeof RaceSchema>;
 
@@ -75,7 +80,8 @@ export type SeriesSettingsInputType = z.infer<typeof SeriesSettingsSchema>;
 export const FleetSettingsSchema = z.object({
   id: z.string(),
   name: z.string(),
-  boats: z.array(z.any()),
+  // Ensure boats are strongly typed
+  boats: z.array(z.lazy(() => BoatSchema)),
 });
 export type FleetSettingsType = z.infer<typeof FleetSettingsSchema>;
 
@@ -143,18 +149,19 @@ export const ClubSchema = z.object({
   settings: ClubSettingsSchema,
   //series: z.array(SeriesSchema).optional(), //this is needed, just commented out because it hasn't been implemented yet
   boats: BoatSchema.array().optional(),
-  stripe: z.any().optional(),
+  stripe: z.lazy(() => StripeSchema).optional(),
 });
 export type ClubType = z.infer<typeof ClubSchema>;
 
-export type Stripe = {
-  customerId: string;
-  subscriptionId: string;
-  productId: string;
-  planName: string;
-  subscriptionStatus: string;
-  updatedAt: string;
-};
+export const StripeSchema = z.object({
+  customerId: z.string(),
+  subscriptionId: z.string(),
+  productId: z.string(),
+  planName: z.string(),
+  subscriptionStatus: z.string(),
+  updatedAt: z.string(),
+});
+export type Stripe = z.infer<typeof StripeSchema>;
 
 export const PermissionSchema = z.object({
   value: z.string(),

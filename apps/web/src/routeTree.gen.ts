@@ -13,6 +13,7 @@ import { Route as LoginRouteImport } from './routes/Login'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DemoIndexRouteImport } from './routes/Demo/index'
 import { Route as DashboardIndexRouteImport } from './routes/Dashboard/index'
+import { Route as CastClubIdRouteImport } from './routes/Cast/$clubId'
 import { Route as DashboardUsersIndexRouteImport } from './routes/Dashboard/Users/index'
 import { Route as DashboardSeriesIndexRouteImport } from './routes/Dashboard/Series/index'
 import { Route as DashboardRaceIndexRouteImport } from './routes/Dashboard/Race/index'
@@ -43,6 +44,11 @@ const DemoIndexRoute = DemoIndexRouteImport.update({
 const DashboardIndexRoute = DashboardIndexRouteImport.update({
   id: '/Dashboard/',
   path: '/Dashboard/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CastClubIdRoute = CastClubIdRouteImport.update({
+  id: '/Cast/$clubId',
+  path: '/Cast/$clubId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardUsersIndexRoute = DashboardUsersIndexRouteImport.update({
@@ -106,6 +112,7 @@ const DashboardPrintPaperResultsRaceIdRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/Login': typeof LoginRoute
+  '/Cast/$clubId': typeof CastClubIdRoute
   '/Dashboard': typeof DashboardIndexRoute
   '/Demo': typeof DemoIndexRoute
   '/Dashboard/PrintPaperResults/$raceId': typeof DashboardPrintPaperResultsRaceIdRoute
@@ -123,6 +130,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/Login': typeof LoginRoute
+  '/Cast/$clubId': typeof CastClubIdRoute
   '/Dashboard': typeof DashboardIndexRoute
   '/Demo': typeof DemoIndexRoute
   '/Dashboard/PrintPaperResults/$raceId': typeof DashboardPrintPaperResultsRaceIdRoute
@@ -141,6 +149,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/Login': typeof LoginRoute
+  '/Cast/$clubId': typeof CastClubIdRoute
   '/Dashboard/': typeof DashboardIndexRoute
   '/Demo/': typeof DemoIndexRoute
   '/Dashboard/PrintPaperResults/$raceId': typeof DashboardPrintPaperResultsRaceIdRoute
@@ -160,6 +169,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/Login'
+    | '/Cast/$clubId'
     | '/Dashboard'
     | '/Demo'
     | '/Dashboard/PrintPaperResults/$raceId'
@@ -177,6 +187,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/Login'
+    | '/Cast/$clubId'
     | '/Dashboard'
     | '/Demo'
     | '/Dashboard/PrintPaperResults/$raceId'
@@ -194,6 +205,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/Login'
+    | '/Cast/$clubId'
     | '/Dashboard/'
     | '/Demo/'
     | '/Dashboard/PrintPaperResults/$raceId'
@@ -212,6 +224,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   LoginRoute: typeof LoginRoute
+  CastClubIdRoute: typeof CastClubIdRoute
   DashboardIndexRoute: typeof DashboardIndexRoute
   DemoIndexRoute: typeof DemoIndexRoute
   DashboardPrintPaperResultsRaceIdRoute: typeof DashboardPrintPaperResultsRaceIdRoute
@@ -255,6 +268,13 @@ declare module '@tanstack/react-router' {
       path: '/Dashboard'
       fullPath: '/Dashboard'
       preLoaderRoute: typeof DashboardIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/Cast/$clubId': {
+      id: '/Cast/$clubId'
+      path: '/Cast/$clubId'
+      fullPath: '/Cast/$clubId'
+      preLoaderRoute: typeof CastClubIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/Dashboard/Users/': {
@@ -340,6 +360,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   LoginRoute: LoginRoute,
+  CastClubIdRoute: CastClubIdRoute,
   DashboardIndexRoute: DashboardIndexRoute,
   DemoIndexRoute: DemoIndexRoute,
   DashboardPrintPaperResultsRaceIdRoute: DashboardPrintPaperResultsRaceIdRoute,
