@@ -33,11 +33,16 @@ export default function Page() {
                 await sendLoginRequest(GlobalConfig.demoUUID)
             }
             //create a new race for the demo
-            let tempRace: any = await createRaceMutation.mutateAsync({ seriesId: GlobalConfig.demoSeriesId })
-            const newRace: RaceType = await findRaceMutation.mutateAsync({ raceId: tempRace.id })
+            let newRace: RaceType = await createRaceMutation.mutateAsync({ seriesId: GlobalConfig.demoSeriesId })
+            console.log(newRace)
+            if (newRace.fleets.length == 0) {
+                console.log('no fleets in new race, something went wrong')
+                return
+            }
             //load demo data into the new race
             const demoData: RaceType = await findRaceMutation.mutateAsync({ raceId: GlobalConfig.demoDataId })
-            console.log(newRace)
+            console.log('loaded demo data:')
+            console.log(demoData)
             //update race data
             await updateRaceMutation.mutateAsync({ ...demoData, id: newRace.id, Type: 'Handicap', seriesId: GlobalConfig.demoSeriesId })
             //add results data

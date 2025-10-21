@@ -87,13 +87,13 @@ export async function findRace(id: string) {
       series: true,
       fleets: {
         include: {
+          fleetSettings: true,
           results: {
             include: {
-              laps: true,
               boat: true,
+              laps: true,
             },
           },
-          fleetSettings: true,
         },
       },
     },
@@ -207,28 +207,37 @@ export const race_create = os.race.create.handler(async ({ input }) => {
       seriesId: input.seriesId,
     },
   });
+  console.log("fleets in series:");
   console.log(fleets);
   // create fleet for each fleet setting
-  fleets.forEach(async (fleet) => {
-    await prisma.fleet.create({
-      data: {
-        startTime: 0,
-        fleetSettings: {
-          connect: {
-            id: fleet.id,
+  await Promise.all(
+    fleets.map(async (fleet) => {
+      console.log("creating fleet for fleet setting: " + fleet.id);
+      const newFleet = await prisma.fleet.create({
+        data: {
+          startTime: 0,
+          fleetSettings: {
+            connect: {
+              id: fleet.id,
+            },
+          },
+          race: {
+            connect: {
+              id: newRace.id,
+            },
           },
         },
-        race: {
-          connect: {
-            id: newRace.id,
-          },
-        },
-      },
-    });
-  });
+      });
+      console.log("created fleet: ");
+      console.log(newFleet);
+    })
+  );
 
-  if (newRace) {
-    return newRace;
+  const race = await findRace(newRace.id);
+  console.log(race);
+
+  if (race) {
+    return race;
   } else {
     throw new ORPCError("BAD_REQUEST");
   }
