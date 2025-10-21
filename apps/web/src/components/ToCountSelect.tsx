@@ -1,27 +1,27 @@
-'use client'
-import { ChangeEvent, useEffect, useState } from 'react'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select'
-import * as Fetcher from '@components/Fetchers'
-import * as DB from '@components/apiMethods'
+import { orpcClient } from '@lib/orpc'
+import type { RaceType, SeriesType } from '@sailviz/types'
 export function ToCountSelect({ seriesId }: { seriesId: string }) {
-    const { series, seriesIsError, seriesIsValidating, mutateSeries } = Fetcher.Series(seriesId)
+    const series = useQuery(orpcClient.series.find.queryOptions({ input: { seriesId } })).data as SeriesType
+
+    const updateSeriesMutation = useMutation(orpcClient.series.update.mutationOptions())
 
     const saveSeriesToCount = async (value: number) => {
         if (series === null) {
             return
         }
         console.log('Saving series to count:', value)
-        let newSeriesData: SeriesDataType = window.structuredClone(series)
+        let newSeriesData: SeriesType = window.structuredClone(series)
         console.log(newSeriesData)
         newSeriesData.settings['numberToCount'] = value
-        await DB.updateSeries(newSeriesData)
-        mutateSeries()
+        await updateSeriesMutation.mutateAsync(newSeriesData)
+        // mutateSeries()
     }
 
-    if (seriesIsValidating) {
-        return <div>Loading...</div>
+    if (!series) {
+        return <></>
     }
-    console.log(series)
 
     return (
         <div className='flex flex-col px-6 w-2/4 '>
@@ -37,7 +37,7 @@ export function ToCountSelect({ seriesId }: { seriesId: string }) {
                     <SelectValue placeholder='Select a fleet' />
                 </SelectTrigger>
                 <SelectContent>
-                    {series.races.map(race => (
+                    {series.races.map((race: RaceType) => (
                         <SelectItem key={race.id} value={race.number.toString()}>
                             {race.number}
                         </SelectItem>

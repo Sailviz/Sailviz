@@ -16,6 +16,7 @@ import {
   findClubSeries,
   findSeries,
   getSeries,
+  series_update,
   seriesbyClubId,
 } from "./routes/series";
 import {
@@ -365,6 +366,7 @@ export const mainRouter = os.router({
     club: seriesbyClubId,
     create: createSeries,
     delete: deleteSeries,
+    update: series_update,
   },
   fleet: {
     find: fleetbyId,

@@ -102,13 +102,39 @@ export const getSeries = os.series.find.handler(async ({ input }) => {
     where: { id: input.seriesId },
     include: {
       fleetSettings: true,
-      club: true,
-      races: true,
+      races: {
+        include: {
+          fleets: {
+            include: {
+              results: true,
+              fleetSettings: true,
+            },
+          },
+        },
+      },
     },
   });
+  console.log(series);
   if (series) {
     return series;
   } else {
     throw new ORPCError("NOT_FOUND");
   }
 });
+
+export const series_update = os.series.update.handler(
+  async ({ input }: { input: any }) => {
+    const updatedSeries = await prisma.series.update({
+      where: { id: input.id },
+      data: input,
+      include: {
+        fleetSettings: true,
+      },
+    });
+    if (updatedSeries) {
+      return updatedSeries;
+    } else {
+      throw new ORPCError("BAD_REQUEST");
+    }
+  }
+);

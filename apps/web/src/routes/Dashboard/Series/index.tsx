@@ -51,7 +51,6 @@ export default function Page() {
     }, [session])
 
     if (!session || !session.club) {
-        // If the user is not authenticated, redirect to the login page
         return <PageSkeleton />
     }
 
@@ -68,7 +67,7 @@ export default function Page() {
                 <></>
             )}
             <div className='p-6'>
-                <ClubTable viewHref='/Series/' />
+                <ClubTable viewHref='/Dashboard/Series/' />
             </div>
         </div>
     )

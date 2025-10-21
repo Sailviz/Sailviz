@@ -74,6 +74,9 @@ export const fleet_settings_find = os.fleet.settings.find.handler(
       where: {
         seriesId: input.seriesId,
       },
+      include: {
+        boats: true,
+      },
     });
     return fleetSettings;
   }

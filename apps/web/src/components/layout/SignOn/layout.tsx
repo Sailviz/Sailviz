@@ -9,6 +9,7 @@ import { useQuery } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
 import type { RaceType, UserType } from '@sailviz/types'
 import { useLoaderData } from '@tanstack/react-router'
+import Header from '../header'
 
 export default function SignOnLayout({ children }: { children: React.ReactNode }) {
     const session = useLoaderData({ from: `__root__` })
@@ -116,6 +117,8 @@ export default function SignOnLayout({ children }: { children: React.ReactNode }
         <SidebarProvider defaultOpen={true}>
             <AppSidebar navCollections={SignOn} />
             <SidebarInset>
+                <Header />
+
                 {/* page main content */}
                 <div className='flex flex-1 p-4 md:px-6'>{children}</div>
                 {/* page main content ends */}

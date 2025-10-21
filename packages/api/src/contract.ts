@@ -1,6 +1,6 @@
 // contract.ts
 import { oc } from "@orpc/contract";
-import { date, z } from "zod";
+import { z } from "zod";
 import {
   BoatSchema,
   ClubSchema,
@@ -58,6 +58,7 @@ export const ORPCcontract = {
       .input(z.object({ clubId: z.string(), name: z.string() }))
       .output(SeriesSchema),
     delete: oc.input(z.object({ seriesId: z.string() })).output(SeriesSchema),
+    update: oc.input(SeriesSchema).output(SeriesSchema),
   },
   club: {
     session: oc.output<typeof ClubSchema>(ClubSchema),
