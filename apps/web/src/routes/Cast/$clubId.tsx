@@ -120,8 +120,8 @@ export default async function Page() {
         if (race.fleets.some((fleet: FleetType) => fleet.startTime != 0)) {
             //race has started, check if all boats have finished
             return !race.fleets
-                .flatMap(fleet => fleet.results)
-                .every(result => {
+                .flatMap((fleet: FleetType) => fleet.results)
+                .every((result: any) => {
                     if (result!.finishTime != 0) {
                         return true
                     }

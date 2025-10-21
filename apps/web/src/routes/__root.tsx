@@ -4,12 +4,19 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { SidebarInset, SidebarProvider } from '@components/ui/sidebar'
 import AppSidebar from '@components/layout/app-sidebar'
 import { ScrollArea } from '@components/ui/scroll-area'
-import { navCollections } from 'src/constants/navCollections'
+import { AdminNavCollections, navCollections } from 'src/constants/navCollections'
 import Plausible from 'plausible-tracker'
 import ErrorBoundary from '@components/ErrorBoundary'
 import { ThemeProvider as NextThemesProvider, type ThemeProviderProps } from 'next-themes'
 import { getSession } from '@sailviz/auth/client'
 import Header from '@components/layout/header'
+
+enum Sidebar {
+    Dashboard,
+    Admin,
+    SignOn,
+    None
+}
 
 export const plausible = Plausible({
     domain: 'sailviz.com',
@@ -34,16 +41,24 @@ export const Route = createRootRoute({
         const router = useRouterState()
         const path = router.location.pathname
 
+        let sidebar: boolean = false
+        let collection
         plausible.enableAutoPageviews()
-        const showSidebar = path.startsWith('/Dashboard') || path.startsWith('/Admin')
+        if (path.startsWith('/Dashboard')) {
+            collection = navCollections
+            sidebar = true
+        } else if (path.startsWith('/Admin')) {
+            collection = AdminNavCollections
+            sidebar = true
+        }
 
         return (
             <ErrorBoundary>
                 <QueryClientProvider client={queryClient}>
                     <ThemeProvider attribute='class' defaultTheme='light'>
-                        {showSidebar ? (
+                        {sidebar ? (
                             <SidebarProvider defaultOpen={true}>
-                                <AppSidebar navCollections={navCollections} />
+                                <AppSidebar navCollections={collection!} />
                                 <SidebarInset>
                                     {/* page main content */}
                                     <Header />

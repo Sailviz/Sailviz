@@ -9,7 +9,6 @@ import {
   FleetSettingsSchema,
   FleetSettingsType,
   GlobalConfigSchema,
-  NextRaceSchema,
   RaceSchema,
   RaceType,
   ResultSchema,
@@ -101,7 +100,7 @@ export const ORPCcontract = {
     find: oc.input(z.object({ raceId: z.string() })).output(RaceSchema),
     today: oc
       .input(z.object({ clubId: z.string() }))
-      .output(NextRaceSchema.array()),
+      .output(z.array(RaceSchema)),
     club: oc
       .input(
         z.object({

@@ -1,20 +1,15 @@
-'use client'
-
-import * as Fetcher from '@components/Fetchers'
 import SignOnTable from '@components/tables/SignOnTable'
-import { useSession } from '@sailviz/auth/client'
 import { PageSkeleton } from '../PageSkeleton'
 import CreateResultModal from './CreateResultModal'
+import { useLoaderData } from '@tanstack/react-router'
+import { useQuery } from '@tanstack/react-query'
+import { orpcClient } from '@lib/orpc'
+import type { BoatType, RaceType } from '@sailviz/types'
 export default function SignOnView() {
-    const {
-        data: session,
-        isPending, //loading state
-        error, //error object
-        refetch //refetch the session
-    } = useSession()
+    const session = useLoaderData({ from: `__root__` })
 
-    const { todaysRaces, todaysRacesIsError, todaysRacesIsValidating, mutateTodaysRaces } = Fetcher.GetTodaysRaceByClubId(session?.club?.id)
-    const { boats, boatsIsError, boatsIsValidating } = Fetcher.Boats()
+    const todaysRaces = useQuery(orpcClient.race.today.queryOptions({ input: { clubId: session?.club?.id! } })).data as RaceType[]
+    const boats = useQuery(orpcClient.boat.session.queryOptions()).data as BoatType[]
 
     if (todaysRaces === undefined) {
         return <PageSkeleton />
@@ -30,7 +25,7 @@ export default function SignOnView() {
         <>
             <div className='w-full'>
                 <div className='overflow-x-scroll flex flex-row max-h-[94vh]'>
-                    {todaysRaces.map((race, index) => {
+                    {todaysRaces.map(race => {
                         console.log(race)
                         return (
                             <div className='m-6 inline-block' key={race.id}>

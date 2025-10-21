@@ -1,64 +1,21 @@
 import AppSidebar from '@components/layout/app-sidebar'
-import { ScrollArea } from '@components/ui/scroll-area'
 import { SidebarInset, SidebarProvider } from '@components/ui/sidebar'
-import { DocsIcon } from '@components/icons/docs-icon'
-import { HomeIcon } from '@components/icons/home-icon'
 import { RaceIcon } from '@components/icons/race-icon'
 import { SeriesIcon } from '@components/icons/series-icon'
-import { SettingsIcon } from '@components/icons/settings-icon'
 import { SignOnIcon } from '@components/icons/sign-on'
 import { SignOutIcon } from '@components/icons/sign-out'
-import type { Metadata } from 'next'
 import { AVAILABLE_PERMISSIONS, userHasPermission } from '@components/helpers/users'
-import prisma from '@lib/prisma'
-import dayjs from 'dayjs'
-import { race } from 'cypress/types/bluebird'
-import { Series } from '@components/Fetchers'
-import { headers } from 'next/headers'
-import { auth } from '@lib/auth'
+import { useQuery } from '@tanstack/react-query'
+import { orpcClient } from '@lib/orpc'
+import type { RaceType, UserType } from '@sailviz/types'
+import { useLoaderData } from '@tanstack/react-router'
 
-export const metadata: Metadata = {
-    title: 'SailViz',
-    description: 'Sailing race system for clubs and regattas'
-}
-export default async function SignOnLayout({ children }: { children: React.ReactNode }) {
-    const session = await auth.api.getSession({
-        headers: await headers() // you need to pass the headers object.
-    })
-    console.log('Session:', session)
-    const todaysRaces = await prisma.race.findMany({
-        where: {
-            AND: [
-                {
-                    Time: {
-                        gte: dayjs().set('hour', 0).set('minute', 0).set('second', 0).format('YYYY-MM-DD HH:ss'),
-                        lte: dayjs().set('hour', 24).set('minute', 0).set('second', 0).format('YYYY-MM-DD HH:ss')
-                    }
-                },
-                {
-                    series: {
-                        clubId: session?.user.clubId!
-                    }
-                }
-            ]
-        },
-        orderBy: {
-            Time: 'asc'
-        },
-        select: {
-            id: true,
-            number: true,
-            Time: true,
-            series: {
-                select: {
-                    name: true,
-                    id: true
-                }
-            }
-        }
-    })
+export default function SignOnLayout({ children }: { children: React.ReactNode }) {
+    const session = useLoaderData({ from: `__root__` })
 
-    const backButton: NavCollection = userHasPermission(session?.user!, AVAILABLE_PERMISSIONS.dashboardAccess)
+    const todaysRaces = useQuery(orpcClient.race.today.queryOptions({ input: { clubId: session!.user.clubId } })).data as RaceType[]
+
+    const backButton: NavCollection = userHasPermission(session!.user, AVAILABLE_PERMISSIONS.dashboardAccess)
         ? {
               title: 'Back to Dashboard',
               items: [

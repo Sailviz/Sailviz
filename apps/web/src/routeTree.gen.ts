@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as LoginRouteImport } from './routes/Login'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as SignOnIndexRouteImport } from './routes/SignOn/index'
 import { Route as DemoIndexRouteImport } from './routes/Demo/index'
 import { Route as DashboardIndexRouteImport } from './routes/Dashboard/index'
 import { Route as CastClubIdRouteImport } from './routes/Cast/$clubId'
@@ -34,6 +35,11 @@ const LoginRoute = LoginRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SignOnIndexRoute = SignOnIndexRouteImport.update({
+  id: '/SignOn/',
+  path: '/SignOn/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DemoIndexRoute = DemoIndexRouteImport.update({
@@ -115,6 +121,7 @@ export interface FileRoutesByFullPath {
   '/Cast/$clubId': typeof CastClubIdRoute
   '/Dashboard': typeof DashboardIndexRoute
   '/Demo': typeof DemoIndexRoute
+  '/SignOn': typeof SignOnIndexRoute
   '/Dashboard/PrintPaperResults/$raceId': typeof DashboardPrintPaperResultsRaceIdRoute
   '/Dashboard/Race/$raceId': typeof DashboardRaceRaceIdRoute
   '/Dashboard/Series/$seriesId': typeof DashboardSeriesSeriesIdRoute
@@ -133,6 +140,7 @@ export interface FileRoutesByTo {
   '/Cast/$clubId': typeof CastClubIdRoute
   '/Dashboard': typeof DashboardIndexRoute
   '/Demo': typeof DemoIndexRoute
+  '/SignOn': typeof SignOnIndexRoute
   '/Dashboard/PrintPaperResults/$raceId': typeof DashboardPrintPaperResultsRaceIdRoute
   '/Dashboard/Race/$raceId': typeof DashboardRaceRaceIdRoute
   '/Dashboard/Series/$seriesId': typeof DashboardSeriesSeriesIdRoute
@@ -152,6 +160,7 @@ export interface FileRoutesById {
   '/Cast/$clubId': typeof CastClubIdRoute
   '/Dashboard/': typeof DashboardIndexRoute
   '/Demo/': typeof DemoIndexRoute
+  '/SignOn/': typeof SignOnIndexRoute
   '/Dashboard/PrintPaperResults/$raceId': typeof DashboardPrintPaperResultsRaceIdRoute
   '/Dashboard/Race/$raceId': typeof DashboardRaceRaceIdRoute
   '/Dashboard/Series/$seriesId': typeof DashboardSeriesSeriesIdRoute
@@ -172,6 +181,7 @@ export interface FileRouteTypes {
     | '/Cast/$clubId'
     | '/Dashboard'
     | '/Demo'
+    | '/SignOn'
     | '/Dashboard/PrintPaperResults/$raceId'
     | '/Dashboard/Race/$raceId'
     | '/Dashboard/Series/$seriesId'
@@ -190,6 +200,7 @@ export interface FileRouteTypes {
     | '/Cast/$clubId'
     | '/Dashboard'
     | '/Demo'
+    | '/SignOn'
     | '/Dashboard/PrintPaperResults/$raceId'
     | '/Dashboard/Race/$raceId'
     | '/Dashboard/Series/$seriesId'
@@ -208,6 +219,7 @@ export interface FileRouteTypes {
     | '/Cast/$clubId'
     | '/Dashboard/'
     | '/Demo/'
+    | '/SignOn/'
     | '/Dashboard/PrintPaperResults/$raceId'
     | '/Dashboard/Race/$raceId'
     | '/Dashboard/Series/$seriesId'
@@ -227,6 +239,7 @@ export interface RootRouteChildren {
   CastClubIdRoute: typeof CastClubIdRoute
   DashboardIndexRoute: typeof DashboardIndexRoute
   DemoIndexRoute: typeof DemoIndexRoute
+  SignOnIndexRoute: typeof SignOnIndexRoute
   DashboardPrintPaperResultsRaceIdRoute: typeof DashboardPrintPaperResultsRaceIdRoute
   DashboardRaceRaceIdRoute: typeof DashboardRaceRaceIdRoute
   DashboardSeriesSeriesIdRoute: typeof DashboardSeriesSeriesIdRoute
@@ -254,6 +267,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/SignOn/': {
+      id: '/SignOn/'
+      path: '/SignOn'
+      fullPath: '/SignOn'
+      preLoaderRoute: typeof SignOnIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/Demo/': {
@@ -363,6 +383,7 @@ const rootRouteChildren: RootRouteChildren = {
   CastClubIdRoute: CastClubIdRoute,
   DashboardIndexRoute: DashboardIndexRoute,
   DemoIndexRoute: DemoIndexRoute,
+  SignOnIndexRoute: SignOnIndexRoute,
   DashboardPrintPaperResultsRaceIdRoute: DashboardPrintPaperResultsRaceIdRoute,
   DashboardRaceRaceIdRoute: DashboardRaceRaceIdRoute,
   DashboardSeriesSeriesIdRoute: DashboardSeriesSeriesIdRoute,

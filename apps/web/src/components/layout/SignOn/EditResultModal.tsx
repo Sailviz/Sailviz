@@ -1,8 +1,6 @@
 import { useTheme } from 'next-themes'
-import { ChangeEvent, useEffect, useState } from 'react'
-import Select, { CSSObjectWithLabel } from 'react-select'
-import * as Fetcher from '@components/Fetchers'
-import { PageSkeleton } from '@components/layout/PageSkeleton'
+import { type ChangeEvent, useState } from 'react'
+import Select, { type CSSObjectWithLabel } from 'react-select'
 import { Dialog, DialogContent, DialogFooter, DialogHeader } from '@components/ui/dialog'
 import { Button } from '@components/ui/button'
 import { Tabs, TabsList, TabsTrigger } from '@components/ui/tabs'
@@ -22,7 +20,6 @@ export default function EditResultModal({
     onSubmit: (result: ResultDataType) => void
     onDelete: (result: ResultDataType) => void
 }) {
-    const navigate = useNavigate()
     const [open, setOpen] = useState(true)
 
     const [helm, setHelm] = useState(result.Helm)
@@ -84,13 +81,7 @@ export default function EditResultModal({
     }
 
     return (
-        <Dialog
-            open={open}
-            onOpenChange={open => {
-                setOpen(open)
-                if (!open) Router.back() // this catches the x button and clicking outside the modal, gets out of parallel route
-            }}
-        >
+        <Dialog open={open}>
             <DialogContent className='max-w-8/12'>
                 <DialogHeader className='flex flex-col gap-1'>Edit Entry</DialogHeader>
                 <div className='flex w-full'>

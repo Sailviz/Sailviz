@@ -1,18 +1,20 @@
-'use client'
 import { useTheme } from 'next-themes'
-import { ChangeEvent, useEffect, useState } from 'react'
-import Select, { CSSObjectWithLabel } from 'react-select'
-import * as DB from '@components/apiMethods'
-import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTrigger } from '@components/ui/dialog'
+import { type ChangeEvent, useEffect, useState } from 'react'
+import Select, { type CSSObjectWithLabel } from 'react-select'
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTrigger } from '@components/ui/dialog'
 import { Input } from '@components/ui/input'
 import { Switch } from '@components/ui/switch'
 import { Tabs, TabsList, TabsTrigger } from '@components/ui/tabs'
 import { Button } from '@components/ui/button'
-import { useNavigate } from '@tanstack/react-router'
-import * as Fetcher from '@components/Fetchers'
-import { use } from 'chai'
 import { mutate } from 'swr'
-export default function CreateResultModal({ todaysRaces, boats }: { todaysRaces: RaceDataType[]; boats: BoatDataType[] }) {
+import { useMutation } from '@tanstack/react-query'
+import { orpcClient } from '@lib/orpc'
+import type { BoatType, FleetType, RaceType } from '@sailviz/types'
+
+export default function CreateResultModal({ todaysRaces, boats }: { todaysRaces: RaceType[]; boats: BoatType[] }) {
+    const createResultMutation = useMutation(orpcClient.result.create.mutationOptions())
+    const updateResultMutation = useMutation(orpcClient.result.update.mutationOptions())
+
     const [open, setOpen] = useState(false)
     const [helm, setHelm] = useState('')
     const [crew, setCrew] = useState('')
@@ -24,18 +26,18 @@ export default function CreateResultModal({ todaysRaces, boats }: { todaysRaces:
     const [selectedRaces, setSelectedRaces] = useState<string[]>([])
     //array of fleets, dimensionally equal to selectedRaces
     const [selectedFleets, setSelectedFleets] = useState<string[]>([])
-    const [selectedBoat, setSelectedBoat] = useState({ label: '', value: {} as BoatDataType })
+    const [selectedBoat, setSelectedBoat] = useState({ label: '', value: {} as BoatType })
 
     const [helmError, setHelmError] = useState(false)
     const [boatError, setBoatError] = useState(false)
     const [sailNumError, setSailNumError] = useState(false)
 
-    let options: { label: string; value: BoatDataType }[] = []
+    let options: { label: string; value: BoatType }[] = []
 
     //set the first boat as the selected boat
     if (boats && boats.length > 0) {
-        boats.forEach((boat: BoatDataType) => {
-            options.push({ value: boat as BoatDataType, label: boat.name })
+        boats.forEach((boat: BoatType) => {
+            options.push({ value: boat as BoatType, label: boat.name })
         })
     }
 
@@ -48,7 +50,7 @@ export default function CreateResultModal({ todaysRaces, boats }: { todaysRaces:
         if (e.target.id == 'crew') setCrew(capitalisedSentence)
     }
 
-    const updateRaceSelection = (race: RaceDataType, value: boolean) => {
+    const updateRaceSelection = (race: RaceType, value: boolean) => {
         if (value) {
             console.log(race)
             setSelectedRaces([...new Set([...selectedRaces, race.id])])
@@ -106,11 +108,11 @@ export default function CreateResultModal({ todaysRaces, boats }: { todaysRaces:
         setOpen(false)
     }
 
-    const createResult = async (fleetId: string, helm: string, crew: string, boat: BoatDataType, sailNum: string) => {
+    const createResult = async (fleetId: string, helm: string, crew: string, boat: BoatType, sailNum: string) => {
         console.log('createResult', fleetId, helm, crew, boat, sailNum)
         //create a result for each fleet
-        let result = await DB.createResult(fleetId)
-        await DB.updateResult({ ...result, Helm: helm, Crew: crew, boat: boat, SailNumber: sailNum })
+        let result = await createResultMutation.mutateAsync({ fleetId: fleetId })
+        await updateResultMutation.mutateAsync({ ...result, Helm: helm, Crew: crew, boat: boat, SailNumber: sailNum })
 
         console.log(helm, crew, boat, sailNum, fleetId)
     }
@@ -122,7 +124,7 @@ export default function CreateResultModal({ todaysRaces, boats }: { todaysRaces:
         setSailNumber('')
         setSelectedRaces([])
         setSelectedFleets([])
-        setSelectedBoat({ label: '', value: {} as BoatDataType })
+        setSelectedBoat({ label: '', value: {} as BoatType })
         submitDisabled = false
     }
 
@@ -269,7 +271,7 @@ export default function CreateResultModal({ todaysRaces, boats }: { todaysRaces:
                                 >
                                     {/* show buttons for each fleet in a series */}
                                     <TabsList>
-                                        {race.fleets.map((fleet: FleetDataType, index) => {
+                                        {race.fleets.map((fleet: FleetType, index) => {
                                             return (
                                                 <TabsTrigger
                                                     key={fleet.id + 'select'}

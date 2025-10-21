@@ -102,18 +102,6 @@ export const StartSequenceStepSchema = z.object({
 });
 export type StartSequenceStepType = z.infer<typeof StartSequenceStepSchema>;
 
-export const NextRaceSchema = z.object({
-  id: z.string(),
-  number: z.number(),
-  Time: z.string(),
-  series: z.object({
-    name: z.string(),
-    id: z.string(),
-  }),
-});
-
-export type NextRaceType = z.infer<typeof NextRaceSchema>;
-
 export type RaceSettingsType = {
   numberToCount: number;
 };
