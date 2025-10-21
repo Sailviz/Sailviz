@@ -126,7 +126,10 @@ export const series_update = os.series.update.handler(
   async ({ input }: { input: any }) => {
     const updatedSeries = await prisma.series.update({
       where: { id: input.id },
-      data: input,
+      data: {
+        settings: input.settings,
+        name: input.name,
+      },
       include: {
         fleetSettings: true,
       },
