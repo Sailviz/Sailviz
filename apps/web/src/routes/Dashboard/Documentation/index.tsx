@@ -8,7 +8,7 @@ import { useMDXComponents } from '@components/mdx-components'
 import { MDXProvider } from '@mdx-js/react'
 import { useNavigate, createFileRoute } from '@tanstack/react-router'
 
-export default function Page() {
+function Page() {
     const navigate = useNavigate()
     const contentRef = useRef<HTMLDivElement>(null)
 

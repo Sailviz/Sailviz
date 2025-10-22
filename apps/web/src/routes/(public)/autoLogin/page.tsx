@@ -4,7 +4,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { client } from '@sailviz/auth/client'
 import { method } from 'cypress/types/bluebird'
 import { useNavigate } from '@tanstack/react-router'
-export default function Page() {
+function Page() {
     const searchParams = useSearchParams()
     const navigate = useNavigate()
 

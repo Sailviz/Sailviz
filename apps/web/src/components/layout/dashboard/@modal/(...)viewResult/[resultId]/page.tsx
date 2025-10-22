@@ -5,7 +5,7 @@ import * as Fetcher from '@components/Fetchers'
 import ViewResultModal from '@components/layout/dashboard/viewResultModal'
 type PageProps = { params: Promise<{ resultId: string }> }
 
-export default function Page(props: PageProps) {
+function Page(props: PageProps) {
     const { resultId } = use(props.params)
 
     const { result, resultIsError, resultIsValidating } = Fetcher.Result(resultId)

@@ -13,7 +13,7 @@ enum pageModes {
 
 type PageProps = { params: Promise<{ club: string }> }
 
-export default function Page(props: PageProps) {
+function Page(props: PageProps) {
     const navigate = useNavigate()
 
     const { club: clubName } = use(props.params)

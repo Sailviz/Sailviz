@@ -8,7 +8,7 @@ import * as Fetcher from '@components/Fetchers'
 import { mutate } from 'swr'
 type PageProps = { params: Promise<{ resultId: string }> }
 
-export default function Page(props: PageProps) {
+function Page(props: PageProps) {
     const navigate = useNavigate()
     const { resultId } = use(props.params)
 

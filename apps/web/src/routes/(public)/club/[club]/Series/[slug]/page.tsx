@@ -8,7 +8,7 @@ import { title, subtitle } from '@components/layout/home/primitaves'
 
 type PageProps = { params: Promise<{ slug: string; club: string }> }
 
-export default function Page(props: PageProps) {
+function Page(props: PageProps) {
     const navigate = useNavigate()
 
     const params = use(props.params)

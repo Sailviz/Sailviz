@@ -5,7 +5,7 @@ import * as Fetcher from '@components/Fetchers'
 import EditRoleModal from '@components/layout/dashboard/EditRoleModal'
 type PageProps = { params: Promise<{ roleId: string }> }
 
-export default function Page(props: PageProps) {
+function Page(props: PageProps) {
     const navigate = useNavigate()
     const { roleId } = use(props.params)
 

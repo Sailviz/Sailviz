@@ -2,7 +2,7 @@ import SignOnLayout from '@components/layout/SignOn/layout'
 import SignOnView from '@components/layout/SignOn/SignOnView'
 import { createFileRoute } from '@tanstack/react-router'
 
-export default async function Page() {
+async function Page() {
     return (
         <SignOnLayout>
             <SignOnView />

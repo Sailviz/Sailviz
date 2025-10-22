@@ -8,7 +8,7 @@ import { use } from 'react'
 
 type PageProps = { params: Promise<{ slug: string }> }
 
-export default function Page(props: PageProps) {
+function Page(props: PageProps) {
     const navigate = useNavigate()
 
     const params = use(props.params)

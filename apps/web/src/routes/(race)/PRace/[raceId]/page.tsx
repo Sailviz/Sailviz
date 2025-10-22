@@ -35,7 +35,7 @@ enum raceModeType {
 
 type PageProps = { params: Promise<{ raceId: string }> }
 
-export default function Page(props: PageProps) {
+function Page(props: PageProps) {
     const { raceId } = use(props.params)
     const navigate = useNavigate()
 

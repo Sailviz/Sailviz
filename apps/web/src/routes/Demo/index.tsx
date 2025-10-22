@@ -5,7 +5,7 @@ import { useMutation, useQuery } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
 import type { FleetType, RaceType, ResultType } from '@sailviz/types'
 
-export default function Page() {
+function Page() {
     const navigate = useNavigate()
     const session = useLoaderData({ from: `__root__` })
 

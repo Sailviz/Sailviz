@@ -29,7 +29,7 @@ const scrollOptions = {
     smooth: false
 }
 
-export default async function Page() {
+function Page() {
     const { clubId } = Route.useParams()
 
     const { theme, setTheme } = useTheme()

@@ -8,7 +8,7 @@ import { Button } from '@components/ui/button'
 
 type PageProps = { params: Promise<{ clubId: string }> }
 
-export default function Page(props: PageProps) {
+function Page(props: PageProps) {
     const { clubId } = use(props.params)
     const {
         data: session,

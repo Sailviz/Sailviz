@@ -6,7 +6,7 @@ import { Card, CardContent } from '@components/ui/card'
 import { customerPortalAction } from '@lib/payments/actions'
 import PricingPage from '@/app/(public)/Pricing/page'
 
-export default function Page() {
+function Page() {
     const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
 
     if (clubIsValidating || clubIsError) {

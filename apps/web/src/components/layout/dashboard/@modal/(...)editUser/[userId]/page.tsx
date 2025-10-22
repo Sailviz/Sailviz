@@ -5,7 +5,7 @@ import EditUserDialog from '@components/layout/dashboard/EditUserModal'
 
 type PageProps = { params: Promise<{ userId: string }> }
 
-export default function Page(props: PageProps) {
+function Page(props: PageProps) {
     const { userId } = use(props.params)
 
     const { user, userIsError, userIsValidating } = Fetcher.User(userId)

@@ -12,7 +12,7 @@ import CreateBoatDialog from '@components/layout/dashboard/CreateBoatModal'
 import { useQuery } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
 
-export default function Page() {
+function Page() {
     const session = useLoaderData({ from: `__root__` })
     // const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
     // const { boats, boatsIsError, boatsIsValidating, mutateBoats: mutateBoats } = Fetcher.Boats()

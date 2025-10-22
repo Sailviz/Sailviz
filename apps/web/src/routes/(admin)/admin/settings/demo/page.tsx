@@ -6,7 +6,7 @@ import { useSession } from '@sailviz/auth/client'
 import { useEffect, useState } from 'react'
 import * as Fetcher from '@components/Fetchers'
 import * as DB from '@components/apiMethods'
-export default function Page() {
+function Page() {
     const {
         data: session,
         isPending, //loading state

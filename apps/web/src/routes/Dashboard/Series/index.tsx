@@ -8,7 +8,7 @@ import { useEffect, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
 
-export default function Page() {
+function Page() {
     const session = useLoaderData({ from: `__root__` })
 
     const queryClient = useQueryClient()

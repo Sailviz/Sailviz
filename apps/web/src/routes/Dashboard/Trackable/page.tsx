@@ -10,7 +10,7 @@ import { useState } from 'react'
 import { Button } from '@components/ui/button'
 import { useSession } from '@sailviz/auth/client'
 
-export default function Page() {
+function Page() {
     const {
         data: session,
         isPending, //loading state

@@ -8,7 +8,7 @@ import { useMutation, useQuery } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
 import { ActionButton } from '@components/ui/action-button'
 
-export default function Page() {
+function Page() {
     const session = useLoaderData({ from: `__root__` })
     const { data: club } = useQuery(orpcClient.club.session.queryOptions())
 
