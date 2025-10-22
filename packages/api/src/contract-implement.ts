@@ -57,6 +57,7 @@ import {
 import {
   deleteStartSequenceStep,
   findStartSequence,
+  startSequence_update,
 } from "./routes/startSequence";
 import { RaceType } from "packages/types/src/types";
 import { createResult, updateResult } from "./routes/result";
@@ -351,7 +352,7 @@ export const mainRouter = os.router({
   startSequence: {
     find: findStartSequence,
     delete: deleteStartSequenceStep,
-    update: undefined,
+    update: startSequence_update,
   },
   race: {
     today: todaysRaces,

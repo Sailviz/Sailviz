@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react'
 import { Button } from '@components/ui/button'
 import { Input } from '@components/ui/input'
-import { getFiveStartSequence } from './helpers/startSequence'
+import { getFiveStartSequence, getThreeStartSequence } from './helpers/startSequence'
 import type { StartSequenceStepType } from '@sailviz/types'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
+import { ActionButton } from './ui/action-button'
 const StartSequenceManager = ({ initialSequence, seriesId }: { initialSequence: StartSequenceStepType[]; seriesId: string }) => {
     const { data: series } = useQuery(orpcClient.series.find.queryOptions({ input: { seriesId: seriesId } }))
 
@@ -74,9 +75,15 @@ const StartSequenceManager = ({ initialSequence, seriesId }: { initialSequence: 
         await stepUpdate.mutateAsync({ seriesId: seriesId, startSequence: sequence })
     }
 
-    const setDefaultSequence = () => {
+    const setFiveSequence = () => {
         if (series?.fleetSettings[0] != undefined) {
             setSequence(getFiveStartSequence(series.fleetSettings[0].id))
+        }
+    }
+
+    const setThreeSequence = () => {
+        if (series?.fleetSettings[0] != undefined) {
+            setSequence(getThreeStartSequence(series.fleetSettings[0].id))
         }
     }
 
@@ -134,20 +141,20 @@ const StartSequenceManager = ({ initialSequence, seriesId }: { initialSequence: 
                     <button onClick={() => moveStep(index, 1)} disabled={index === sequence.length - 1}>
                         ↓
                     </button>
-                    <button onClick={() => deleteStep(index)} className='text-red-500'>
-                        ✖
-                    </button>
+                    <button onClick={() => deleteStep(index)}>✖</button>
                 </div>
             ))}
 
             <Button onClick={addStep} variant={'blue'} className='mx-4'>
                 Add Step
             </Button>
-            <Button onClick={save} variant={'blue'} className='mx-4'>
-                Save
+            <ActionButton action={save} before='Save' during='Saving...' after='Saved' variant='blue' />
+
+            <Button onClick={setFiveSequence} variant={'blue'} className='mx-4'>
+                Set 5 4 1 GO
             </Button>
-            <Button onClick={setDefaultSequence} variant={'blue'} className='mx-4'>
-                Set Default Sequence
+            <Button onClick={setThreeSequence} variant={'blue'} className='mx-4'>
+                Set 3 2 1 GO
             </Button>
         </div>
     )

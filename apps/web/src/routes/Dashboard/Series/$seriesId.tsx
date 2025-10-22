@@ -66,7 +66,7 @@ export default function Page() {
                     <> </>
                 )}
                 <div className='mb-6'>
-                    {series.fleetSettings.map((fleetSettings, index) => {
+                    {series.fleetSettings.map((fleetSettings: FleetSettingsType, index: any) => {
                         return (
                             <div key={fleetSettings.id + index} className='mb-6'>
                                 <div>{fleetSettings.name}</div>

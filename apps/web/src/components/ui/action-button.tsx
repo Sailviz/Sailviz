@@ -2,7 +2,19 @@ import { useState } from 'react'
 import { CheckIcon, LoaderIcon } from 'lucide-react'
 import { Button } from '@components/ui/button'
 
-export function ActionButton({ action, before, during, after }: { before: string; during: string; after: string; action: () => Promise<void> }) {
+export function ActionButton({
+    action,
+    before,
+    during,
+    after,
+    variant
+}: {
+    before: string
+    during: string
+    after: string
+    action: () => Promise<void>
+    variant?: 'default' | 'red' | 'outline' | 'secondary' | 'ghost' | 'link' | 'green' | 'blue' | 'warning'
+}) {
     const [isSaving, setIsSaving] = useState(false)
     const [isSaved, setIsSaved] = useState(false)
 
@@ -22,7 +34,7 @@ export function ActionButton({ action, before, during, after }: { before: string
     }
 
     return (
-        <Button onClick={handleClick} disabled={isSaving}>
+        <Button onClick={handleClick} disabled={isSaving} variant={variant}>
             {isSaving ? <LoaderIcon className='mr-2 h-4 w-4 animate-spin' /> : isSaved ? <CheckIcon className='mr-2 h-4 w-4 text-green-500' /> : null}
             {isSaving ? during : isSaved ? after : before}
         </Button>

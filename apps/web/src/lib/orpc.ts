@@ -13,8 +13,10 @@ const link = new RPCLink({
     // RPCLink supports supplying a fetch implementation — we wrap the global fetch
     fetch: (input: RequestInfo, init?: RequestInit) => fetch(input, { ...(init ?? {}), credentials: 'include' }),
     interceptors: [
-        onError(error => {
-            console.error(error)
+        onError((error: any) => {
+            if (error.name !== 'AbortError') {
+                console.error(error)
+            }
         })
     ]
 })

@@ -114,7 +114,6 @@ export const getSeries = os.series.find.handler(async ({ input }) => {
       },
     },
   });
-  console.log(series);
   if (series) {
     return series;
   } else {

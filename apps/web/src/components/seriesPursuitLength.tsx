@@ -1,11 +1,12 @@
-'use client'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select'
-import * as Fetcher from '@components/Fetchers'
-import * as DB from '@components/apiMethods'
 import { Input } from './ui/input'
 import { useState } from 'react'
+import { useMutation, useQuery } from '@tanstack/react-query'
+import { orpcClient } from '@lib/orpc'
+import type { SeriesType } from '@sailviz/types'
 export function SeriesPursuitLength({ seriesId }: { seriesId: string }) {
-    const { series, seriesIsError, seriesIsValidating, mutateSeries } = Fetcher.Series(seriesId)
+    const series = useQuery(orpcClient.series.find.queryOptions({ input: { seriesId: seriesId } })).data as SeriesType
+
+    const updateSeriesMutation = useMutation(orpcClient.series.update.mutationOptions())
 
     const [pursuitLength, setPursuitLength] = useState<number>(series?.settings?.pursuitLength || 0)
 
@@ -13,15 +14,10 @@ export function SeriesPursuitLength({ seriesId }: { seriesId: string }) {
         if (series === null) {
             return
         }
-        let newSeriesData: SeriesDataType = window.structuredClone(series)
+        let newSeriesData: SeriesType = window.structuredClone(series)
         newSeriesData.settings['pursuitLength'] = pursuitLength
-        await DB.updateSeries(newSeriesData)
+        await updateSeriesMutation.mutateAsync(newSeriesData)
     }
-
-    if (seriesIsValidating) {
-        return <div>Loading...</div>
-    }
-    console.log(series)
 
     return (
         <div className='flex flex-col px-6 w-2/4 '>

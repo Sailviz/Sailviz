@@ -32,14 +32,16 @@ export const deleteStartSequenceStep = os.startSequence.delete.handler(
   }
 );
 
-export const updateStartSequence = os.startSequence.update.handler(
+export const startSequence_update = os.startSequence.update.handler(
   async ({ input }) => {
     await prisma.$transaction(async (tx) => {
+      //keep track of processed IDs
+      let updateIds = [];
       for (const update of input.startSequence) {
         console.log(`Processing update: ${JSON.stringify(update)}`);
         if (update.id) {
           // Update existing entry
-          await tx.startSequence.update({
+          const res = await tx.startSequence.update({
             where: { id: update.id },
             data: {
               time: update.time,
@@ -50,9 +52,10 @@ export const updateStartSequence = os.startSequence.update.handler(
               fleetStart: update.fleetStart,
             },
           });
+          updateIds.push(res.id);
         } else {
           // Insert new step
-          await tx.startSequence.create({
+          const res = await tx.startSequence.create({
             data: {
               seriesId: input.seriesId,
               time: update.time,
@@ -63,8 +66,18 @@ export const updateStartSequence = os.startSequence.update.handler(
               fleetStart: update.fleetStart,
             },
           });
+          updateIds.push(res.id);
         }
       }
+
+      await tx.startSequence.deleteMany({
+        where: {
+          seriesId: input.seriesId,
+          id: {
+            notIn: updateIds,
+          },
+        },
+      });
     });
 
     console.log("Sequences updated successfully!");
