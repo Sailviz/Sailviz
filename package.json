@@ -2,7 +2,8 @@
   "scripts": {
     "dev:web": "concurrently -n \"API,WEB\" -c \"blue,green\" \"pnpm --filter api dev\" \"pnpm --filter web dev\"",
     "dev:desktop": "concurrently -n \"API,TAURI\" -c \"blue,magenta\" \"pnpm --filter api dev\" \"pnpm --filter desktop dev\"",
-    "dev:api": "pnpm --filter api dev"
+    "dev:api": "pnpm --filter api dev",
+    "build:web": "pnpm --filter web build"
   },
   "packageManager": "pnpm@10.18.1+sha512.77a884a165cbba2d8d1c19e3b4880eee6d2fcabd0d879121e282196b80042351d5eb3ca0935fa599da1dc51265cc68816ad2bddd2a2de5ea9fdf92adbec7cd34",
   "devDependencies": {

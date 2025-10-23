@@ -4,6 +4,7 @@ import prisma from "@sailviz/db";
 import { customSession, username } from "better-auth/plugins";
 import { myPluginClient } from "./client-plugin";
 import type { UserType, ClubType } from "@sailviz/types";
+import { reactStartCookies } from "better-auth/react-start";
 
 export const auth = betterAuth({
   trustedOrigins: ["http://localhost:3000", "http://localhost:5173"],
@@ -42,6 +43,7 @@ export const auth = betterAuth({
       };
     }),
     myPluginClient(),
+    reactStartCookies(),
   ],
   user: {
     additionalFields: {
