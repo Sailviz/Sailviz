@@ -29,7 +29,6 @@ export const club_all = os.club.all.handler(async ({ input }) => {
       userId: true,
     },
   });
-  console.log(clubs);
   return clubs as unknown as ClubType[];
 });
 
