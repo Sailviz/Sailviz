@@ -4,11 +4,8 @@ import { RPCHandler } from "@orpc/server/node";
 import { mainRouter } from "./contract-implement";
 import { toNodeHandler } from "better-auth/node";
 import { auth } from "@sailviz/auth/auth";
-import { onError, ORPCError } from "@orpc/server";
-import z from "zod";
 import { RequestHeadersPlugin } from "@orpc/server/plugins";
 const app = express();
-
 app.use(
   cors({
     origin: "http://localhost:5173",

@@ -5,9 +5,6 @@ import { customSession, username } from "better-auth/plugins";
 import { myPluginClient } from "./client-plugin";
 import type { UserType, ClubType } from "@sailviz/types";
 
-console.log("Initializing auth module");
-console.log(`githubId: ${process.env.GITHUB_CLIENT_ID}`);
-
 export const auth = betterAuth({
   trustedOrigins: ["http://localhost:3000", "http://localhost:5173"],
   plugins: [
@@ -77,8 +74,8 @@ export const auth = betterAuth({
   },
   socialProviders: {
     github: {
-      clientId: process.env.GITHUB_CLIENT_ID as string,
-      clientSecret: process.env.GITHUB_CLIENT_SECRET as string,
+      clientId: process.env.AUTH_GITHUB_ID as string,
+      clientSecret: process.env.AUTH_GITHUB_SECRET as string,
     },
   },
 }) as ReturnType<typeof betterAuth>;

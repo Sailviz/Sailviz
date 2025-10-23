@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { signIn, getSession } from '@sailviz/auth/client'
 import { Github, Loader2 } from 'lucide-react'
 import { useNavigate } from '@tanstack/react-router'
-
+import { server } from '@components/URL'
 export function LoginForm() {
     const navigate = useNavigate()
     const [username, setUsername] = useState('')
@@ -38,7 +38,7 @@ export function LoginForm() {
     const handleGitHubLogin = async () => {
         await signIn.social({
             provider: 'github',
-            callbackURL: '/authsorter'
+            callbackURL: server + '/authsorter'
         })
     }
 
