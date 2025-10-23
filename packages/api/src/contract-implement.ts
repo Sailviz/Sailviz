@@ -39,6 +39,7 @@ import {
   club_all,
   club_create,
   club_find,
+  club_name,
   getClub,
   updateClubById,
 } from "./routes/club";
@@ -384,6 +385,7 @@ export const mainRouter = os.router({
     all: club_all,
     create: club_create,
     find: club_find,
+    name: club_name,
   },
   boat: {
     find: boat,

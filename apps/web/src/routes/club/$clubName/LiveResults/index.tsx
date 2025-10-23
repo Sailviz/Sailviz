@@ -1,41 +1,27 @@
 'use client'
-import { use, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 
-import { useNavigate } from '@tanstack/react-router'
+import { useNavigate, createFileRoute } from '@tanstack/react-router'
 import * as DB from '@components/apiMethods'
 import LiveFleetResultsTable from '@components/tables/LiveFleetResultsTable'
 import RaceTimer from '@components/HRaceTimer'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { orpcClient } from '@lib/orpc'
+import type { ClubType, RaceType } from '@sailviz/types'
 
 enum pageModes {
     live,
     notLive
 }
 
-type PageProps = { params: Promise<{ club: string }> }
+function Page() {
+    const { clubName } = Route.useParams()
+    const club = useQuery(orpcClient.club.name.queryOptions({ input: { clubName: clubName! } })).data as ClubType
+    const races = useQuery(orpcClient.race.today.queryOptions({ input: { clubId: club!.id }, queryKey: [club] })).data
 
-function Page(props: PageProps) {
-    const navigate = useNavigate()
+    const queryClient = useQueryClient()
 
-    const { club: clubName } = use(props.params)
-    const [club, setClub] = useState<ClubDataType | undefined>(undefined)
-
-    var [clubId, setClubId] = useState<string>('')
-    var [races, setRaces] = useState<RaceDataType[]>([
-        {
-            id: '',
-            number: 0,
-            Time: '',
-            Duties: [{} as DutyDataType],
-            fleets: [],
-            Type: '',
-            seriesId: '',
-            series: {} as SeriesDataType
-        }
-    ])
-
-    var results
-
-    var [activeRace, setActiveRace] = useState<RaceDataType>({
+    var [activeRace, setActiveRace] = useState<RaceType>({
         id: '',
         number: 0,
         Time: '',
@@ -44,11 +30,15 @@ function Page(props: PageProps) {
         Type: '',
         seriesId: '',
         series: {} as SeriesDataType
-    } as RaceDataType)
+    } as RaceType)
 
     var [mode, setMode] = useState<pageModes>(pageModes.notLive)
 
-    const checkActive = (race: RaceDataType) => {
+    const checkActive = (race: RaceType) => {
+        if (race.fleets == undefined) {
+            console.error('no fleets found')
+            return false
+        }
         if (race.fleets.length == 0) {
             console.error('no fleets found')
         }
@@ -59,7 +49,7 @@ function Page(props: PageProps) {
             return !race.fleets
                 .flatMap(fleet => fleet.results)
                 .every(result => {
-                    if (result.finishTime != 0) {
+                    if (result!.finishTime != 0) {
                         return true
                     }
                 })
@@ -68,57 +58,25 @@ function Page(props: PageProps) {
     }
 
     useEffect(() => {
-        if (clubName) {
-            DB.getClubByName(clubName.toString()).then(data => {
-                if (data) {
-                    setClubId(data.id)
-                } else {
-                    console.log('could not find club')
-                }
-            })
-        }
-    }, [Router])
-
-    useEffect(() => {
-        if (clubId != '') {
-            const fetchTodaysRaces = async () => {
-                var data = await DB.getTodaysRaceByClubId(clubId)
-                if (data) {
-                    let racesCopy: RaceDataType[] = []
-                    for (let i = 0; i < data.length; i++) {
-                        const res = await DB.getRaceById(data[i]!.id)
-                        racesCopy[i] = res
-                        if (checkActive(racesCopy[i]!)) {
-                            setMode(pageModes.live)
-                            setActiveRace(racesCopy[i]!)
-                        }
-                    }
-                    console.log(racesCopy)
-                    setRaces(racesCopy)
-                } else {
-                    console.log('could not find todays race')
-                }
+        races?.forEach(race => {
+            if (checkActive(race)) {
+                setMode(pageModes.live)
+                setActiveRace(race)
             }
-
-            const fetchClub = async () => {
-                const club = await DB.GetClubById(clubId)
-                setClub(club)
-                if (club.stripe.planName != 'SailViz Pro') {
-                    console.log('Club does not have Sailviz Pro subscription')
-                } else {
-                    console.log('Club has Sailviz Pro subscription')
-                    fetchTodaysRaces()
-                }
-            }
-            fetchClub()
-        }
-    }, [clubId])
+        })
+    }, [races])
 
     useEffect(() => {
         const timer1 = setTimeout(async () => {
             let activeFlag = false
             console.log('refreshing results')
-
+            if (races == undefined) {
+                console.error('races undefined')
+                queryClient.invalidateQueries({
+                    queryKey: orpcClient.race.today.key({ type: 'query' })
+                })
+                return
+            }
             //check if any of the races are active
             for (let race of races) {
                 race = await DB.getRaceById(race.id)
@@ -145,7 +103,7 @@ function Page(props: PageProps) {
                     case pageModes.live:
                         return (
                             <div key={JSON.stringify(activeRace)}>
-                                {activeRace.fleets.map((fleet, index) => {
+                                {activeRace.fleets!.map(fleet => {
                                     //change this to select the active race.
                                     return (
                                         <>
@@ -167,7 +125,7 @@ function Page(props: PageProps) {
                                             </div>
                                             <div className='m-6' key={activeRace.id}>
                                                 <div className='text-4xl font-extrabold text-gray-700 p-6'>
-                                                    {activeRace.series.name}: {activeRace.number} - {fleet.fleetSettings.name}
+                                                    {activeRace.series!.name}: {activeRace.number} - {fleet.fleetSettings.name}
                                                 </div>
                                                 <LiveFleetResultsTable fleet={fleet} startTime={fleet.startTime} handicap={activeRace.Type} />
                                             </div>
@@ -193,3 +151,7 @@ function Page(props: PageProps) {
         </div>
     )
 }
+
+export const Route = createFileRoute('/club/$clubName/LiveResults/')({
+    component: Page
+})

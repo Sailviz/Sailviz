@@ -16,16 +16,16 @@ export default function HomeNav() {
                     <NavigationMenu className='flex justify-start items-start'>
                         <NavigationMenuList className='flex justify-start gap-4 flex-row'>
                             <NavigationMenuItem>
-                                <NavigationMenuLink to='/'>Home</NavigationMenuLink>
+                                <NavigationMenuLink href='/'>Home</NavigationMenuLink>
                             </NavigationMenuItem>
                             <NavigationMenuItem>
-                                <NavigationMenuLink to='/club'>Clubs</NavigationMenuLink>
+                                <NavigationMenuLink href='/club'>Clubs</NavigationMenuLink>
                             </NavigationMenuItem>
                             <NavigationMenuItem>
-                                <NavigationMenuLink to='/Pricing'>Pricing</NavigationMenuLink>
+                                <NavigationMenuLink href='/Pricing'>Pricing</NavigationMenuLink>
                             </NavigationMenuItem>
                             <NavigationMenuItem>
-                                <NavigationMenuLink to='/Events'>Events</NavigationMenuLink>
+                                <NavigationMenuLink href='/Events'>Events</NavigationMenuLink>
                             </NavigationMenuItem>
                         </NavigationMenuList>
                     </NavigationMenu>

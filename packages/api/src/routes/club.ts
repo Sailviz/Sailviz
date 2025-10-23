@@ -22,7 +22,14 @@ export async function updateClubById(input: any) {
 }
 
 export const club_all = os.club.all.handler(async ({ input }) => {
-  const clubs = await prisma.club.findMany();
+  const clubs = await prisma.club.findMany({
+    omit: {
+      settings: true,
+      stripeCustomerId: true,
+      userId: true,
+    },
+  });
+  console.log(clubs);
   return clubs as unknown as ClubType[];
 });
 
@@ -91,6 +98,22 @@ export const club_create = os.club.create.handler(async ({ input }) => {
 export const club_find = os.club.find.handler(async ({ input }) => {
   const club = await prisma.club.findUnique({
     where: { id: input.clubId },
+  });
+  if (club) {
+    return club as unknown as ClubType;
+  } else {
+    throw new ORPCError("Club not found");
+  }
+});
+
+export const club_name = os.club.name.handler(async ({ input }) => {
+  const club = await prisma.club.findUnique({
+    where: { name: input.clubName },
+    omit: {
+      settings: true,
+      stripeCustomerId: true,
+      userId: true,
+    },
   });
   if (club) {
     return club as unknown as ClubType;

@@ -128,7 +128,7 @@ export const ClubSchema = z.object({
   id: z.string(),
   name: z.string(),
   displayName: z.string(),
-  settings: ClubSettingsSchema,
+  settings: ClubSettingsSchema.optional(),
   //series: z.array(SeriesSchema).optional(), //this is needed, just commented out because it hasn't been implemented yet
   boats: BoatSchema.array().optional(),
   stripe: z.any().optional(),
