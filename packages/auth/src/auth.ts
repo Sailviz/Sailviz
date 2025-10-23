@@ -3,7 +3,10 @@ import { prismaAdapter } from "better-auth/adapters/prisma";
 import prisma from "@sailviz/db";
 import { customSession, username } from "better-auth/plugins";
 import { myPluginClient } from "./client-plugin";
-import type { UserDataType, ClubDataType } from "@sailviz/types";
+import type { UserType, ClubType } from "@sailviz/types";
+
+console.log("Initializing auth module");
+console.log(`githubId: ${process.env.GITHUB_CLIENT_ID}`);
 
 export const auth = betterAuth({
   trustedOrigins: ["http://localhost:3000", "http://localhost:5173"],
@@ -15,7 +18,7 @@ export const auth = betterAuth({
         include: {
           roles: true,
         },
-      })) as unknown as UserDataType | null;
+      })) as unknown as UserType | null;
       if (!dbUser) {
         throw new Error("User not found");
       }
@@ -34,7 +37,7 @@ export const auth = betterAuth({
         include: {
           stripe: true,
         },
-      })) as unknown as ClubDataType | null;
+      })) as unknown as ClubType | null;
       return {
         club,
         user: dbUser,

@@ -12,6 +12,7 @@ export function LoginForm() {
     const [loading, setLoading] = useState(false)
 
     const handleSubmit = async () => {
+        setLoading(true)
         await signIn
             .username({
                 username,
@@ -25,12 +26,13 @@ export function LoginForm() {
                 const { data: session } = await getSession()
                 console.log('Session with custom fields:', session)
                 if (session === null) {
-                    // alert('Login failed. Please check your username and password.')
+                    alert('Login failed. Please check your username and password.')
                     return
                 }
                 console.log('Session:', session)
                 navigate({ to: '/' + session.user.startPage })
             })
+        setLoading(false)
     }
 
     const handleGitHubLogin = async () => {
@@ -72,7 +74,19 @@ export function LoginForm() {
                     </div>
                     <div className='grid gap-2'>
                         Password
-                        <Input id='password' name='password' type='password' required value={password} onChange={e => setPassword(e.target.value)} />
+                        <Input
+                            id='password'
+                            name='password'
+                            type='password'
+                            required
+                            value={password}
+                            onChange={e => setPassword(e.target.value)}
+                            onKeyDown={event => {
+                                if (event.key == 'Enter') {
+                                    handleSubmit()
+                                }
+                            }}
+                        />
                     </div>
                     <Button type='submit' className='w-full' disabled={loading} onClick={handleSubmit}>
                         {loading ? <Loader2 size={16} className='animate-spin' /> : 'Login'}
