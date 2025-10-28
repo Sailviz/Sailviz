@@ -9,7 +9,7 @@ function Page() {
         return navigate({ to: '/' })
     } else {
         if (session.user.admin) {
-            return navigate({ to: '/admin/Dashboard' })
+            return navigate({ to: '/admin' })
         } else {
             return navigate({ to: '/Dashboard' })
         }

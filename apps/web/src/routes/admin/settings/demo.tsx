@@ -1,36 +1,31 @@
 'use client'
+import { createFileRoute, useLoaderData } from '@tanstack/react-router'
 import { title } from '@components/layout/home/primitaves'
 import { Button } from '@components/ui/button'
 import { Input } from '@components/ui/input'
-import { useSession } from '@sailviz/auth/client'
 import { useEffect, useState } from 'react'
-import * as Fetcher from '@components/Fetchers'
 import * as DB from '@components/apiMethods'
+import { useQuery } from '@tanstack/react-query'
+import { orpcClient } from '@lib/orpc'
 function Page() {
-    const {
-        data: session,
-        isPending, //loading state
-        error, //error object
-        refetch //refetch the session
-    } = useSession()
-    console.log('Session:', session)
+    const session = useLoaderData({ from: `__root__` })
 
     const [demoClubId, setDemoClubId] = useState('')
     const [demoSeriesId, setDemoSeriesId] = useState('')
     const [demoDataId, setDemoDataId] = useState('')
     const [demoUUID, setDemoUUID] = useState('')
 
-    const { GlobalConfig, GlobalConfigIsError, GlobalConfigIsValidating } = Fetcher.UseGlobalConfig()
+    const GlobalConfig = useQuery(orpcClient.globalConfig.find.queryOptions()).data
 
     useEffect(() => {
-        if (GlobalConfig == undefined || GlobalConfigIsValidating) {
+        if (GlobalConfig == undefined) {
             return
         }
         setDemoClubId(GlobalConfig.demoClubId)
         setDemoSeriesId(GlobalConfig.demoSeriesId)
         setDemoDataId(GlobalConfig.demoDataId)
         setDemoUUID(GlobalConfig.demoUUID)
-    }, [GlobalConfig, GlobalConfigIsValidating])
+    }, [GlobalConfig])
 
     const save = async () => {
         await DB.updateGlobalConfig({
@@ -86,3 +81,7 @@ function Page() {
         </div>
     )
 }
+
+export const Route = createFileRoute('/admin/settings/demo')({
+    component: Page
+})

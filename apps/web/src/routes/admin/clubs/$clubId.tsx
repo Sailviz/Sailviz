@@ -1,27 +1,18 @@
-'use client'
+import { createFileRoute, useLoaderData } from '@tanstack/react-router'
 import { title } from '@components/layout/home/primitaves'
 import * as fetcher from '@components/Fetchers'
-import { useSession } from '@sailviz/auth/client'
-import { use } from 'react'
 import { Card, CardContent } from '@components/ui/card'
-import { Button } from '@components/ui/button'
+import { useQuery } from '@tanstack/react-query'
+import { orpcClient } from '@lib/orpc'
 
-type PageProps = { params: Promise<{ clubId: string }> }
+function Page() {
+    const { clubId } = Route.useParams()
 
-function Page(props: PageProps) {
-    const { clubId } = use(props.params)
-    const {
-        data: session,
-        isPending, //loading state
-        error, //error object
-        refetch //refetch the session
-    } = useSession()
-    console.log('Session:', session)
+    const session = useLoaderData({ from: `__root__` })
 
-    const { club, clubIsValidating, clubIsError } = fetcher.GetClubById(clubId || '')
-    console.log('Club:', club)
+    const club = useQuery(orpcClient.club.find.queryOptions({ input: { clubId: clubId } })).data
 
-    if (clubIsValidating || clubIsError || !club) {
+    if (!club) {
         return <div>Loading...</div>
     }
 
@@ -49,3 +40,7 @@ function Page(props: PageProps) {
         </div>
     )
 }
+
+export const Route = createFileRoute('/admin/clubs/$clubId')({
+    component: Page
+})

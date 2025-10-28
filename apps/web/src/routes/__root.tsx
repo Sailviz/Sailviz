@@ -47,7 +47,7 @@ export const Route = createRootRoute({
         if (path.startsWith('/Dashboard')) {
             collection = navCollections
             sidebar = true
-        } else if (path.startsWith('/Admin')) {
+        } else if (path.startsWith('/admin')) {
             collection = AdminNavCollections
             sidebar = true
         }

@@ -1,11 +1,8 @@
+import { createFileRoute, useLoaderData } from '@tanstack/react-router'
 import { title } from '@components/layout/home/primitaves'
-import { headers } from 'next/headers'
-import { auth } from '@lib/auth'
-export default async function Page() {
-    const session = await auth.api.getSession({
-        headers: await headers() // you need to pass the headers object.
-    })
-    console.log('Session:', session)
+
+function Page() {
+    const session = useLoaderData({ from: `__root__` })
 
     return (
         <div>
@@ -16,3 +13,7 @@ export default async function Page() {
         </div>
     )
 }
+
+export const Route = createFileRoute('/admin/')({
+    component: Page
+})
