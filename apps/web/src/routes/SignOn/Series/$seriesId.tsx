@@ -1,23 +1,17 @@
-'use client'
-import { useNavigate } from '@tanstack/react-router'
+import { createFileRoute } from '@tanstack/react-router'
 import SeriesResultsTable from '@components/tables/FleetSeriesResultsTable'
-import * as Fetcher from '@components/Fetchers'
 import { PageSkeleton } from '@components/layout/PageSkeleton'
 import { title } from '@components/layout/home/primitaves'
-import { use } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import { orpcClient } from '@lib/orpc'
+import type { FleetSettingsType, SeriesType } from '@sailviz/types'
 
-type PageProps = { params: Promise<{ slug: string }> }
+function Page() {
+    const { seriesId } = Route.useParams()
 
-function Page(props: PageProps) {
-    const navigate = useNavigate()
+    const series = useQuery(orpcClient.series.find.queryOptions({ input: { seriesId } })).data as SeriesType
 
-    const params = use(props.params)
-
-    const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
-    const { series, seriesIsError, seriesIsValidating } = Fetcher.Series(params.slug)
-
-    console.log(series)
-    if (clubIsValidating || seriesIsError || series == undefined || club == undefined) {
+    if (series == undefined) {
         return <PageSkeleton />
     }
     return (
@@ -30,7 +24,7 @@ function Page(props: PageProps) {
                 </p>
             </div>
             <div className='h-5/6 p-6'>
-                {series?.fleetSettings.map((fleetSettings, index) => {
+                {series.fleetSettings.map((fleetSettings: FleetSettingsType) => {
                     return (
                         <>
                             <div>{fleetSettings.name}</div>
@@ -42,3 +36,7 @@ function Page(props: PageProps) {
         </div>
     )
 }
+
+export const Route = createFileRoute('/SignOn/Series/$seriesId')({
+    component: Page
+})

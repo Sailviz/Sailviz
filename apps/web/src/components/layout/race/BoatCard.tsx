@@ -1,5 +1,6 @@
 import { Button } from '@components/ui/button'
 import { Spinner } from '@components/ui/spinner'
+import type { FleetType, ResultType } from '@sailviz/types'
 import { useEffect, useRef, useState } from 'react'
 
 // these options are the same across all fleets
@@ -34,8 +35,8 @@ export default function BoatCard({
     finishBoat,
     showRetireModal
 }: {
-    result: ResultDataType
-    fleet: FleetDataType
+    result: ResultType
+    fleet: FleetType
     pursuit: boolean
     mode: raceModeType
     raceState: raceStateType

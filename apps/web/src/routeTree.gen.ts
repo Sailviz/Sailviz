@@ -19,6 +19,7 @@ import { Route as RegisterIndexRouteImport } from './routes/Register/index'
 import { Route as LogoutIndexRouteImport } from './routes/Logout/index'
 import { Route as DemoIndexRouteImport } from './routes/Demo/index'
 import { Route as DashboardIndexRouteImport } from './routes/Dashboard/index'
+import { Route as HRaceRaceIdRouteImport } from './routes/HRace/$raceId'
 import { Route as CastClubIdRouteImport } from './routes/Cast/$clubId'
 import { Route as ClubClubNameIndexRouteImport } from './routes/club/$clubName/index'
 import { Route as AdminClubsIndexRouteImport } from './routes/admin/clubs/index'
@@ -31,7 +32,10 @@ import { Route as DashboardClubIndexRouteImport } from './routes/Dashboard/Club/
 import { Route as DashboardBoatsIndexRouteImport } from './routes/Dashboard/Boats/index'
 import { Route as AdminSettingsDemoRouteImport } from './routes/admin/settings/demo'
 import { Route as AdminClubsClubIdRouteImport } from './routes/admin/clubs/$clubId'
+import { Route as SignOnSeriesSeriesIdRouteImport } from './routes/SignOn/Series/$seriesId'
+import { Route as SignOnRaceRaceIdRouteImport } from './routes/SignOn/Race/$raceId'
 import { Route as DemoRaceRaceIdRouteImport } from './routes/Demo/Race/$raceId'
+import { Route as DashboardTrackablePageRouteImport } from './routes/Dashboard/Trackable/page'
 import { Route as DashboardSeriesSeriesIdRouteImport } from './routes/Dashboard/Series/$seriesId'
 import { Route as DashboardRaceRaceIdRouteImport } from './routes/Dashboard/Race/$raceId'
 import { Route as DashboardPrintPaperResultsRaceIdRouteImport } from './routes/Dashboard/PrintPaperResults/$raceId'
@@ -87,6 +91,11 @@ const DemoIndexRoute = DemoIndexRouteImport.update({
 const DashboardIndexRoute = DashboardIndexRouteImport.update({
   id: '/Dashboard/',
   path: '/Dashboard/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HRaceRaceIdRoute = HRaceRaceIdRouteImport.update({
+  id: '/HRace/$raceId',
+  path: '/HRace/$raceId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CastClubIdRoute = CastClubIdRouteImport.update({
@@ -150,9 +159,24 @@ const AdminClubsClubIdRoute = AdminClubsClubIdRouteImport.update({
   path: '/admin/clubs/$clubId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SignOnSeriesSeriesIdRoute = SignOnSeriesSeriesIdRouteImport.update({
+  id: '/SignOn/Series/$seriesId',
+  path: '/SignOn/Series/$seriesId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SignOnRaceRaceIdRoute = SignOnRaceRaceIdRouteImport.update({
+  id: '/SignOn/Race/$raceId',
+  path: '/SignOn/Race/$raceId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DemoRaceRaceIdRoute = DemoRaceRaceIdRouteImport.update({
   id: '/Demo/Race/$raceId',
   path: '/Demo/Race/$raceId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardTrackablePageRoute = DashboardTrackablePageRouteImport.update({
+  id: '/Dashboard/Trackable/page',
+  path: '/Dashboard/Trackable/page',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardSeriesSeriesIdRoute = DashboardSeriesSeriesIdRouteImport.update({
@@ -193,6 +217,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/Login': typeof LoginRoute
   '/Cast/$clubId': typeof CastClubIdRoute
+  '/HRace/$raceId': typeof HRaceRaceIdRoute
   '/Dashboard': typeof DashboardIndexRoute
   '/Demo': typeof DemoIndexRoute
   '/Logout': typeof LogoutIndexRoute
@@ -204,7 +229,10 @@ export interface FileRoutesByFullPath {
   '/Dashboard/PrintPaperResults/$raceId': typeof DashboardPrintPaperResultsRaceIdRoute
   '/Dashboard/Race/$raceId': typeof DashboardRaceRaceIdRoute
   '/Dashboard/Series/$seriesId': typeof DashboardSeriesSeriesIdRoute
+  '/Dashboard/Trackable/page': typeof DashboardTrackablePageRoute
   '/Demo/Race/$raceId': typeof DemoRaceRaceIdRoute
+  '/SignOn/Race/$raceId': typeof SignOnRaceRaceIdRoute
+  '/SignOn/Series/$seriesId': typeof SignOnSeriesSeriesIdRoute
   '/admin/clubs/$clubId': typeof AdminClubsClubIdRoute
   '/admin/settings/demo': typeof AdminSettingsDemoRoute
   '/Dashboard/Boats': typeof DashboardBoatsIndexRoute
@@ -224,6 +252,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/Login': typeof LoginRoute
   '/Cast/$clubId': typeof CastClubIdRoute
+  '/HRace/$raceId': typeof HRaceRaceIdRoute
   '/Dashboard': typeof DashboardIndexRoute
   '/Demo': typeof DemoIndexRoute
   '/Logout': typeof LogoutIndexRoute
@@ -235,7 +264,10 @@ export interface FileRoutesByTo {
   '/Dashboard/PrintPaperResults/$raceId': typeof DashboardPrintPaperResultsRaceIdRoute
   '/Dashboard/Race/$raceId': typeof DashboardRaceRaceIdRoute
   '/Dashboard/Series/$seriesId': typeof DashboardSeriesSeriesIdRoute
+  '/Dashboard/Trackable/page': typeof DashboardTrackablePageRoute
   '/Demo/Race/$raceId': typeof DemoRaceRaceIdRoute
+  '/SignOn/Race/$raceId': typeof SignOnRaceRaceIdRoute
+  '/SignOn/Series/$seriesId': typeof SignOnSeriesSeriesIdRoute
   '/admin/clubs/$clubId': typeof AdminClubsClubIdRoute
   '/admin/settings/demo': typeof AdminSettingsDemoRoute
   '/Dashboard/Boats': typeof DashboardBoatsIndexRoute
@@ -256,6 +288,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/Login': typeof LoginRoute
   '/Cast/$clubId': typeof CastClubIdRoute
+  '/HRace/$raceId': typeof HRaceRaceIdRoute
   '/Dashboard/': typeof DashboardIndexRoute
   '/Demo/': typeof DemoIndexRoute
   '/Logout/': typeof LogoutIndexRoute
@@ -267,7 +300,10 @@ export interface FileRoutesById {
   '/Dashboard/PrintPaperResults/$raceId': typeof DashboardPrintPaperResultsRaceIdRoute
   '/Dashboard/Race/$raceId': typeof DashboardRaceRaceIdRoute
   '/Dashboard/Series/$seriesId': typeof DashboardSeriesSeriesIdRoute
+  '/Dashboard/Trackable/page': typeof DashboardTrackablePageRoute
   '/Demo/Race/$raceId': typeof DemoRaceRaceIdRoute
+  '/SignOn/Race/$raceId': typeof SignOnRaceRaceIdRoute
+  '/SignOn/Series/$seriesId': typeof SignOnSeriesSeriesIdRoute
   '/admin/clubs/$clubId': typeof AdminClubsClubIdRoute
   '/admin/settings/demo': typeof AdminSettingsDemoRoute
   '/Dashboard/Boats/': typeof DashboardBoatsIndexRoute
@@ -289,6 +325,7 @@ export interface FileRouteTypes {
     | '/'
     | '/Login'
     | '/Cast/$clubId'
+    | '/HRace/$raceId'
     | '/Dashboard'
     | '/Demo'
     | '/Logout'
@@ -300,7 +337,10 @@ export interface FileRouteTypes {
     | '/Dashboard/PrintPaperResults/$raceId'
     | '/Dashboard/Race/$raceId'
     | '/Dashboard/Series/$seriesId'
+    | '/Dashboard/Trackable/page'
     | '/Demo/Race/$raceId'
+    | '/SignOn/Race/$raceId'
+    | '/SignOn/Series/$seriesId'
     | '/admin/clubs/$clubId'
     | '/admin/settings/demo'
     | '/Dashboard/Boats'
@@ -320,6 +360,7 @@ export interface FileRouteTypes {
     | '/'
     | '/Login'
     | '/Cast/$clubId'
+    | '/HRace/$raceId'
     | '/Dashboard'
     | '/Demo'
     | '/Logout'
@@ -331,7 +372,10 @@ export interface FileRouteTypes {
     | '/Dashboard/PrintPaperResults/$raceId'
     | '/Dashboard/Race/$raceId'
     | '/Dashboard/Series/$seriesId'
+    | '/Dashboard/Trackable/page'
     | '/Demo/Race/$raceId'
+    | '/SignOn/Race/$raceId'
+    | '/SignOn/Series/$seriesId'
     | '/admin/clubs/$clubId'
     | '/admin/settings/demo'
     | '/Dashboard/Boats'
@@ -351,6 +395,7 @@ export interface FileRouteTypes {
     | '/'
     | '/Login'
     | '/Cast/$clubId'
+    | '/HRace/$raceId'
     | '/Dashboard/'
     | '/Demo/'
     | '/Logout/'
@@ -362,7 +407,10 @@ export interface FileRouteTypes {
     | '/Dashboard/PrintPaperResults/$raceId'
     | '/Dashboard/Race/$raceId'
     | '/Dashboard/Series/$seriesId'
+    | '/Dashboard/Trackable/page'
     | '/Demo/Race/$raceId'
+    | '/SignOn/Race/$raceId'
+    | '/SignOn/Series/$seriesId'
     | '/admin/clubs/$clubId'
     | '/admin/settings/demo'
     | '/Dashboard/Boats/'
@@ -383,6 +431,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   LoginRoute: typeof LoginRoute
   CastClubIdRoute: typeof CastClubIdRoute
+  HRaceRaceIdRoute: typeof HRaceRaceIdRoute
   DashboardIndexRoute: typeof DashboardIndexRoute
   DemoIndexRoute: typeof DemoIndexRoute
   LogoutIndexRoute: typeof LogoutIndexRoute
@@ -394,7 +443,10 @@ export interface RootRouteChildren {
   DashboardPrintPaperResultsRaceIdRoute: typeof DashboardPrintPaperResultsRaceIdRoute
   DashboardRaceRaceIdRoute: typeof DashboardRaceRaceIdRoute
   DashboardSeriesSeriesIdRoute: typeof DashboardSeriesSeriesIdRoute
+  DashboardTrackablePageRoute: typeof DashboardTrackablePageRoute
   DemoRaceRaceIdRoute: typeof DemoRaceRaceIdRoute
+  SignOnRaceRaceIdRoute: typeof SignOnRaceRaceIdRoute
+  SignOnSeriesSeriesIdRoute: typeof SignOnSeriesSeriesIdRoute
   AdminClubsClubIdRoute: typeof AdminClubsClubIdRoute
   AdminSettingsDemoRoute: typeof AdminSettingsDemoRoute
   DashboardBoatsIndexRoute: typeof DashboardBoatsIndexRoute
@@ -483,6 +535,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/HRace/$raceId': {
+      id: '/HRace/$raceId'
+      path: '/HRace/$raceId'
+      fullPath: '/HRace/$raceId'
+      preLoaderRoute: typeof HRaceRaceIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/Cast/$clubId': {
       id: '/Cast/$clubId'
       path: '/Cast/$clubId'
@@ -567,11 +626,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminClubsClubIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/SignOn/Series/$seriesId': {
+      id: '/SignOn/Series/$seriesId'
+      path: '/SignOn/Series/$seriesId'
+      fullPath: '/SignOn/Series/$seriesId'
+      preLoaderRoute: typeof SignOnSeriesSeriesIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/SignOn/Race/$raceId': {
+      id: '/SignOn/Race/$raceId'
+      path: '/SignOn/Race/$raceId'
+      fullPath: '/SignOn/Race/$raceId'
+      preLoaderRoute: typeof SignOnRaceRaceIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/Demo/Race/$raceId': {
       id: '/Demo/Race/$raceId'
       path: '/Demo/Race/$raceId'
       fullPath: '/Demo/Race/$raceId'
       preLoaderRoute: typeof DemoRaceRaceIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/Dashboard/Trackable/page': {
+      id: '/Dashboard/Trackable/page'
+      path: '/Dashboard/Trackable/page'
+      fullPath: '/Dashboard/Trackable/page'
+      preLoaderRoute: typeof DashboardTrackablePageRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/Dashboard/Series/$seriesId': {
@@ -623,6 +703,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   LoginRoute: LoginRoute,
   CastClubIdRoute: CastClubIdRoute,
+  HRaceRaceIdRoute: HRaceRaceIdRoute,
   DashboardIndexRoute: DashboardIndexRoute,
   DemoIndexRoute: DemoIndexRoute,
   LogoutIndexRoute: LogoutIndexRoute,
@@ -634,7 +715,10 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardPrintPaperResultsRaceIdRoute: DashboardPrintPaperResultsRaceIdRoute,
   DashboardRaceRaceIdRoute: DashboardRaceRaceIdRoute,
   DashboardSeriesSeriesIdRoute: DashboardSeriesSeriesIdRoute,
+  DashboardTrackablePageRoute: DashboardTrackablePageRoute,
   DemoRaceRaceIdRoute: DemoRaceRaceIdRoute,
+  SignOnRaceRaceIdRoute: SignOnRaceRaceIdRoute,
+  SignOnSeriesSeriesIdRoute: SignOnSeriesSeriesIdRoute,
   AdminClubsClubIdRoute: AdminClubsClubIdRoute,
   AdminSettingsDemoRoute: AdminSettingsDemoRoute,
   DashboardBoatsIndexRoute: DashboardBoatsIndexRoute,

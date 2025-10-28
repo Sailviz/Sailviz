@@ -34,6 +34,7 @@ import {
   fleet_settings_delete,
   fleet_settings_find,
   fleet_settings_update,
+  fleet_update,
 } from "./routes/fleet";
 import {
   club_all,
@@ -63,6 +64,7 @@ import {
 import { RaceType } from "packages/types/src/types";
 import { createResult, updateResult } from "./routes/result";
 import { globalConfig_find } from "./routes/globalConfig";
+import { lap_create, lap_delete } from "./routes/lap";
 
 interface ORPCContext extends RequestHeadersPluginContext {
   req: Request;
@@ -100,7 +102,7 @@ const hello = os.hello.handler(({ input }) => {
   return { name, message: `Hello, ${name}!` };
 });
 
-const getGlobalLaps = os.laps.global.handler(async ({ context }) => {
+const getGlobalLaps = os.lap.global.handler(async ({ context }) => {
   var laps = await prisma.lap.count({});
   console.log(laps);
   if (laps) {
@@ -343,8 +345,10 @@ const deleteRole = os.role.delete
 
 export const mainRouter = os.router({
   hello,
-  laps: {
+  lap: {
     global: getGlobalLaps,
+    create: lap_create,
+    delete: lap_delete,
   },
   result: {
     create: createResult,
@@ -372,6 +376,7 @@ export const mainRouter = os.router({
   },
   fleet: {
     find: fleetbyId,
+    update: fleet_update,
     settings: {
       create: createFleetSettings,
       find: fleet_settings_find,

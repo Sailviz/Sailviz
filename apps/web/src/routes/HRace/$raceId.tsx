@@ -1,10 +1,6 @@
-'use client'
-import React, { ChangeEvent, MouseEventHandler, use, useEffect, useState } from 'react'
-import { useNavigate } from '@tanstack/react-router'
-import * as DB from '@components/apiMethods'
+import { useEffect, useState } from 'react'
+import { useNavigate, createFileRoute, useLoaderData } from '@tanstack/react-router'
 import { calculateResults } from '@components/helpers/race'
-
-import * as Fetcher from '@components/Fetchers'
 import RetireModal from '@components/layout/dashboard/RetireModal'
 import BoatCard from '@components/layout/race/BoatCard'
 import { PageSkeleton } from '@components/layout/PageSkeleton'
@@ -12,11 +8,10 @@ import { mutate } from 'swr'
 import FlagModal from '@components/layout/dashboard/Flag Modal'
 import { Button } from '@components/ui/button'
 import RaceTimer from '@components/layout/race/raceTimer'
-import { DropdownMenu, DropdownMenuItem } from '@components/ui/dropdown-menu'
-import { DropdownMenuContent, DropdownMenuTrigger } from '@radix-ui/react-dropdown-menu'
-import { CaretDownIcon } from '@radix-ui/react-icons'
 import FleetSelectDialog from '@components/layout/dashboard/FleetSelectModal'
-import { useSession } from '@sailviz/auth/client'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { orpcClient } from '@lib/orpc'
+import type { ClubType, FleetType, RaceType, ResultType } from '@sailviz/types'
 
 // these options are the same across all fleets
 enum raceStateType {
@@ -34,22 +29,29 @@ enum raceModeType {
     None
 }
 
-type PageProps = { params: Promise<{ raceId: string }> }
+function Page() {
+    const { raceId } = Route.useParams()
 
-function Page(props: PageProps) {
-    const { raceId } = use(props.params)
     const navigate = useNavigate()
 
-    const {
-        data: session,
-        isPending, //loading state
-        error, //error object
-        refetch //refetch the session
-    } = useSession()
-    const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
+    const session = useLoaderData({ from: `__root__` })
 
-    const { race, raceIsError, raceIsValidating } = Fetcher.Race(raceId, true)
-    const { startSequence, startSequenceIsError, startSequenceIsValidating, mutateStartSequence } = Fetcher.GetStartSequence(race?.seriesId)
+    const queryClient = useQueryClient()
+
+    const club = useQuery(orpcClient.club.session.queryOptions()).data as ClubType
+
+    const race = useQuery(orpcClient.race.find.queryOptions({ input: { raceId: raceId }, results: true, boats: true })).data as RaceType
+
+    const startSequence = useQuery(orpcClient.startSequence.find.queryOptions({ input: { seriesId: race!.seriesId } })).data as StartSequenceStep[]
+
+    const updateFleetMutation = useMutation(orpcClient.fleet.update.mutationOptions())
+    const updateResultMutation = useMutation(orpcClient.result.update.mutationOptions())
+
+    const findRaceMutation = useMutation(orpcClient.race.find.mutationOptions())
+
+    const createLapMutation = useMutation(orpcClient.lap.create.mutationOptions())
+
+    const deleteLapMutation = useMutation(orpcClient.lap.delete.mutationOptions())
 
     const [retireModal, setRetireModal] = useState(false)
     const [fleetSelectModal, setFleetSelectModal] = useState(false)
@@ -63,7 +65,7 @@ function Page(props: PageProps) {
     const [raceState, setRaceState] = useState<raceStateType>(raceStateType.reset)
     const [lastRaceState, setLastRaceState] = useState<raceStateType>(raceStateType.reset)
     const [raceMode, setRaceMode] = useState<raceModeType[]>([])
-    const [activeResult, setActiveResult] = useState<ResultDataType>({
+    const [activeResult, setActiveResult] = useState<ResultType>({
         id: '',
         Helm: '',
         Crew: '',
@@ -113,7 +115,7 @@ function Page(props: PageProps) {
             }
             fleet.startTime = lastStartTime - startTimeStep.time
             console.log('Setting start time for fleet ' + fleet.id + ' to ' + fleet.startTime)
-            await DB.updateFleetById(fleet)
+            await updateFleetMutation.mutateAsync(fleet)
         })
 
         setFlagModal(true)
@@ -186,7 +188,7 @@ function Page(props: PageProps) {
         setRaceMode([...raceMode.slice(0, index), raceModeType.Lap, ...raceMode.slice(index + 1)])
     }
 
-    const dynamicSort = async (results: ResultDataType[]) => {
+    const dynamicSort = async (results: ResultType[]) => {
         results.sort((a, b) => {
             //if done a lap, predicted is sum of lap times + last lap.
             //if no lap done, predicted is py.
@@ -226,7 +228,7 @@ function Page(props: PageProps) {
         })
     }
 
-    const sortByLastLap = (results: ResultDataType[]) => {
+    const sortByLastLap = (results: ResultType[]) => {
         results.sort((a, b) => {
             //get last lap time, not including last lap.
             let aIndex = a.finishTime != 0 ? 2 : 1
@@ -270,15 +272,15 @@ function Page(props: PageProps) {
         //Update database
         race.fleets.forEach(async fleet => {
             fleet.startTime = 0
-            await DB.updateFleetById(fleet)
+            await updateFleetMutation.mutateAsync(fleet)
         })
     }
 
     const showRetireModal = (resultId: String) => {
         setRetireModal(true)
-        let result: ResultDataType | undefined
+        let result: ResultType | undefined
         race.fleets.some(fleet => {
-            result = fleet.results.find(result => result.id === resultId)
+            result = fleet.results!.find(result => result.id === resultId)
             return result !== undefined
         })
         if (result == undefined) {
@@ -292,10 +294,12 @@ function Page(props: PageProps) {
         // retireModal.onClose()
         let tempdata = activeResult
         tempdata.resultCode = resultCode
-        await DB.updateResult(tempdata)
+        await updateResultMutation.mutateAsync(tempdata)
 
-        let data = await DB.getRaceById(race.id)
-        //mutate race
+        //update race
+        queryClient.invalidateQueries({
+            queryKey: orpcClient.race.find.key({ type: 'query' })
+        })
 
         //change back to lap mode
         setRetireModal(false)
@@ -303,9 +307,9 @@ function Page(props: PageProps) {
     }
 
     const lapBoat = async (resultId: string) => {
-        let result: ResultDataType | undefined
+        let result: ResultType | undefined
         race.fleets.some(fleet => {
-            result = fleet.results.find(result => result.id === resultId)
+            result = fleet.results!.find(result => result.id === resultId)
             return result !== undefined
         })
         if (result == undefined) {
@@ -321,10 +325,10 @@ function Page(props: PageProps) {
 
         // await DB.CreateLap(resultId, Math.floor(new Date().getTime() / 1000))
         //load back race data
-        let optimisticData: RaceDataType = window.structuredClone(race)
+        let optimisticData: RaceType = window.structuredClone(race)
         //update optimistic data with new lap
-        optimisticData.fleets.forEach((fleet: FleetDataType) => {
-            fleet.results.forEach(res => {
+        optimisticData.fleets.forEach((fleet: FleetType) => {
+            fleet.results!.forEach(res => {
                 if (res.id == resultId) {
                     res.laps.push({ resultId: resultId, time: Math.floor(new Date().getTime() / 1000), id: '' })
                 }
@@ -335,13 +339,13 @@ function Page(props: PageProps) {
         mutate(
             `/api/GetRaceById?id=${race.id}&results=true`,
             async update => {
-                await DB.CreateLap(resultId, Math.floor(new Date().getTime() / 1000))
-                return await DB.getRaceById(race.id, true)
+                await createLapMutation.mutateAsync({ resultId: resultId, time: Math.floor(new Date().getTime() / 1000) })
+                return await findRaceMutation.mutateAsync({ raceId: race.id })
             },
             { optimisticData: optimisticData, rollbackOnError: false, revalidate: false }
         )
 
-        dynamicSort(optimisticData.fleets.flatMap(fleet => fleet.results))
+        dynamicSort(optimisticData.fleets.flatMap(fleet => fleet.results!))
     }
 
     const calculate = async () => {
@@ -363,7 +367,7 @@ function Page(props: PageProps) {
         sound!.currentTime = 0
         sound!.play()
 
-        let result = race.fleets.flatMap(fleet => fleet.results).find(result => result.id === resultId)
+        let result = race.fleets.flatMap(fleet => fleet.results!).find(result => result.id === resultId)
 
         if (result == undefined) {
             console.error('Could not find result with id: ' + resultId)
@@ -372,10 +376,10 @@ function Page(props: PageProps) {
         //save state for undo
         setLastAction({ type: 'finish', resultId: resultId })
 
-        let optimisticData: RaceDataType = window.structuredClone(race)
+        let optimisticData: RaceType = window.structuredClone(race)
         //update optimistic data with new lap
-        optimisticData.fleets.forEach((fleet: FleetDataType) => {
-            fleet.results.forEach(res => {
+        optimisticData.fleets.forEach((fleet: FleetType) => {
+            fleet.results!.forEach(res => {
                 if (res.id == resultId) {
                     res.finishTime = time
                     res.laps.push({ resultId: resultId, time: time, id: '' })
@@ -388,23 +392,23 @@ function Page(props: PageProps) {
         mutate(
             `/api/GetRaceById?id=${race.id}&results=true`,
             async update => {
-                await DB.CreateLap(resultId, time)
+                await createLapMutation.mutateAsync({ resultId: resultId, time: time })
 
-                await DB.updateResult({ ...result, finishTime: time })
-                return await DB.getRaceById(race.id, true)
+                await updateResultMutation.mutateAsync({ ...result, finishTime: time })
+                return await findRaceMutation.mutateAsync({ raceId: race.id })
             },
             { optimisticData: optimisticData, rollbackOnError: false, revalidate: false }
         )
         //if more than one fleet, we need to force dynamic sort
         if (raceMode.length > 1) {
-            dynamicSort(optimisticData.fleets.flatMap(fleet => fleet.results))
+            dynamicSort(optimisticData.fleets.flatMap(fleet => fleet.results!))
         } else {
             //if only one fleet, we can sort by last lap
-            sortByLastLap(optimisticData.fleets.flatMap(fleet => fleet.results))
+            sortByLastLap(optimisticData.fleets.flatMap(fleet => fleet.results!))
         }
     }
 
-    const checkAllFinished = (results: ResultDataType[]) => {
+    const checkAllFinished = (results: ResultType[]) => {
         //check if all boats in fleet have finished
         let allFinished = true
         results.forEach(data => {
@@ -415,7 +419,7 @@ function Page(props: PageProps) {
         return allFinished
     }
 
-    const checkAnyFinished = (results: ResultDataType[]) => {
+    const checkAnyFinished = (results: ResultType[]) => {
         //check if any boats in fleet have finished
         let anyFinished = false
         results.forEach(data => {
@@ -435,7 +439,7 @@ function Page(props: PageProps) {
             return
         }
 
-        let actionResult = race.fleets.flatMap(fleet => fleet.results).find(result => result.id === lastAction.resultId)
+        let actionResult = race.fleets.flatMap(fleet => fleet.results!).find(result => result.id === lastAction.resultId)
         if (actionResult == undefined) {
             console.error('Could not find result with id: ' + lastAction.resultId)
             return
@@ -447,15 +451,15 @@ function Page(props: PageProps) {
                 console.error('no lap to delete')
                 return
             }
-            await DB.DeleteLapById(lapId)
+            await deleteLapMutation.mutateAsync({ lapId: lapId })
         } else if (lastAction.type == 'finish') {
             let lapId = actionResult.laps.slice(-1)[0]?.id
             if (lapId == undefined) {
                 console.error('no finish lap to delete')
                 return
             }
-            await DB.DeleteLapById(lapId)
-            await DB.updateResult({ ...actionResult, finishTime: 0 })
+            await deleteLapMutation.mutateAsync({ lapId: lapId })
+            await updateResultMutation.mutateAsync({ ...actionResult, finishTime: 0 })
         }
 
         //mutate race
@@ -514,10 +518,10 @@ function Page(props: PageProps) {
         //sort by last lap when finish mode with single fleet
         //if there is more than one fleet, we don't sort by last lap as it would get confusing
         if (raceMode.length == 1 && raceMode[0] == raceModeType.Finish) {
-            sortByLastLap(race.fleets.flatMap(fleet => fleet.results))
+            sortByLastLap(race.fleets.flatMap(fleet => fleet.results!))
         } else if (raceMode.length == 1 && raceMode[0] == raceModeType.Lap) {
             //this doesn't work on first load as the results are not loaded yet
-            dynamicSort(race.fleets.flatMap(fleet => fleet.results))
+            dynamicSort(race.fleets.flatMap(fleet => fleet.results!))
         }
     }, [raceMode])
 
@@ -526,10 +530,10 @@ function Page(props: PageProps) {
         if (race == undefined) return
 
         setRaceState(raceStateType.reset)
-        dynamicSort(race.fleets.flatMap(fleet => fleet.results))
+        dynamicSort(race.fleets.flatMap(fleet => fleet.results!))
 
         //check for all fleets finished?
-        if (checkAllFinished(race.fleets.flatMap(fleet => fleet.results))) {
+        if (checkAllFinished(race.fleets.flatMap(fleet => fleet.results!))) {
             setRaceState(raceStateType.calculate)
         } else if (race.fleets.some(fleet => fleet.startTime != 0)) {
             setRaceState(raceStateType.running)
@@ -538,7 +542,7 @@ function Page(props: PageProps) {
         // check individual fleet states
         race.fleets.forEach(fleet => {
             let index = race.fleets.findIndex(f => f.id == fleet.id)
-            if (checkAnyFinished(fleet.results)) {
+            if (checkAnyFinished(fleet.results!)) {
                 // if any boat in the fleet has finished, the fleet must be in finish mode
                 setRaceMode([...raceMode.slice(0, index), raceModeType.Finish, ...raceMode.slice(index + 1)])
             } else {
@@ -553,7 +557,7 @@ function Page(props: PageProps) {
         })
     }, [race])
 
-    if (raceIsError || race == undefined || clubIsError || club == undefined || session == undefined || startSequenceIsError || startSequence == undefined) {
+    if (race == undefined || club == undefined || session == undefined || startSequence == undefined) {
         return <PageSkeleton />
     }
 
@@ -670,8 +674,8 @@ function Page(props: PageProps) {
                 <div className='overflow-auto'>
                     <div className='flex flex-row justify-around flex-wrap' id='EntrantCards'>
                         {race.fleets
-                            .flatMap(fleets => fleets.results)
-                            .map((result: ResultDataType, index) => {
+                            .flatMap(fleets => fleets.results!)
+                            .map((result: ResultType, index) => {
                                 let fleetIndex = race.fleets.findIndex(fleet => fleet.id == result.fleetId)
                                 return (
                                     <BoatCard
@@ -693,3 +697,7 @@ function Page(props: PageProps) {
         </>
     )
 }
+
+export const Route = createFileRoute('/HRace/$raceId')({
+    component: Page
+})

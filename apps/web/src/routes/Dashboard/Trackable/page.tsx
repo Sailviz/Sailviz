@@ -1,23 +1,19 @@
-'use client'
-import * as Fetcher from '@components/Fetchers'
+import { createFileRoute, useLoaderData } from '@tanstack/react-router'
 import { PageSkeleton } from '@components/layout/PageSkeleton'
 import { AVAILABLE_PERMISSIONS, userHasPermission } from '@components/helpers/users'
 import { title } from '@components/layout/home/primitaves'
 import TrackerTable from '@components/tables/TrackerTable'
-import TrackerStatusModal from '@components/layout/dashboard/TrackerStatusModal'
 import * as Trackable from '@components/trackable'
 import { useState } from 'react'
 import { Button } from '@components/ui/button'
-import { useSession } from '@sailviz/auth/client'
+import { useQuery } from '@tanstack/react-query'
+import { orpcClient } from '@lib/orpc'
+import type { ClubType } from '@sailviz/types'
 
 function Page() {
-    const {
-        data: session,
-        isPending, //loading state
-        error, //error object
-        refetch //refetch the session
-    } = useSession()
-    const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
+    const session = useLoaderData({ from: `__root__` })
+
+    const club = useQuery(orpcClient.club.session.queryOptions()).data as ClubType
 
     // const statusModal = useDisclosure()
     const [viewingTracker, setviewingTracker] = useState<TrackerDataType>()
@@ -31,7 +27,7 @@ function Page() {
         await Trackable.syncTrackers(club.settings.trackable.orgID, club.id)
     }
 
-    if (clubIsValidating || clubIsError || session == undefined) {
+    if (club == undefined || session == undefined) {
         return <PageSkeleton />
     }
 
@@ -53,14 +49,6 @@ function Page() {
 
     return (
         <>
-            {/* <TrackerStatusModal
-                isOpen={statusModal.isOpen}
-                tracker={viewingTracker}
-                onClose={() => {
-                    statusModal.onClose()
-                    setviewingTracker(undefined)
-                }}
-            ></TrackerStatusModal> */}
             <div className='p-6'>
                 <h1 className={title({ color: 'blue' })}>Trackable Settings</h1>
             </div>
@@ -76,3 +64,7 @@ function Page() {
         </>
     )
 }
+
+export const Route = createFileRoute('/Dashboard/Trackable/page')({
+    component: Page
+})

@@ -18,7 +18,7 @@ export const ResultSchema = z.object({
   SailNumber: z.string(),
   finishTime: z.number(),
   numberLaps: z.number(),
-  laps: LapSchema.array().optional(),
+  laps: LapSchema.array(),
   CorrectedTime: z.number(),
   PursuitPosition: z.number(),
   HandicapPosition: z.number(),
@@ -52,7 +52,7 @@ export const RaceSchema = z.object({
   Time: z.string(),
   Duties: DutySchema.optional(),
   Type: z.string(),
-  fleets: z.array(FleetSchema).optional(),
+  fleets: z.array(FleetSchema),
   seriesId: z.string(),
   series: z.lazy(() => SeriesSchema.optional()),
 });
@@ -128,7 +128,7 @@ export const ClubSchema = z.object({
   id: z.string(),
   name: z.string(),
   displayName: z.string(),
-  settings: ClubSettingsSchema.optional(),
+  settings: ClubSettingsSchema,
   //series: z.array(SeriesSchema).optional(), //this is needed, just commented out because it hasn't been implemented yet
   boats: BoatSchema.array().optional(),
   stripe: z.any().optional(),

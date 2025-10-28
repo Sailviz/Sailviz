@@ -43,6 +43,23 @@ async function createFleet(raceId: string, fleetSettingsId: string) {
   return res;
 }
 
+export const fleet_update = os.fleet.update.handler(async ({ input }) => {
+  const updatedFleet = await prisma.fleet.update({
+    where: { id: input.id },
+    data: {
+      startTime: input.startTime,
+    },
+    include: {
+      fleetSettings: true,
+    },
+  });
+  if (updatedFleet) {
+    return updatedFleet;
+  } else {
+    throw new ORPCError("BAD_REQUEST");
+  }
+});
+
 export const createFleetSettings = os.fleet.settings.create.handler(
   async ({ input }) => {
     const newFleetSettings = await prisma.fleetSettings.create({

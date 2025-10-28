@@ -9,6 +9,7 @@ import {
   FleetSettingsSchema,
   FleetSettingsType,
   GlobalConfigSchema,
+  LapSchema,
   RaceSchema,
   RaceType,
   ResultSchema,
@@ -30,8 +31,12 @@ export const ORPCcontract = {
   hello: oc
     .input(z.object({ name: z.string().optional() }).optional())
     .output(helloSchema),
-  laps: {
+  lap: {
     global: oc.output(z.number()),
+    create: oc
+      .input(z.object({ resultId: z.string(), time: z.number() }))
+      .output(LapSchema),
+    delete: oc.input(z.object({ lapId: z.string() })).output(LapSchema),
   },
   startSequence: {
     find: oc
@@ -72,6 +77,7 @@ export const ORPCcontract = {
     find: oc
       .input(z.object({ fleetId: z.string() }))
       .output<typeof FleetSchema>(FleetSchema),
+    update: oc.input(FleetSchema).output(FleetSchema),
     settings: {
       create: oc.input(z.object({ seriesId: z.string() })).output(z.any()),
       find: oc.input(z.object({ seriesId: z.string() })).output(z.any()),

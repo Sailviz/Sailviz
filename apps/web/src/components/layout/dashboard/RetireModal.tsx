@@ -1,5 +1,6 @@
 import { Button } from '@components/ui/button'
 import { Dialog, DialogContent, DialogFooter, DialogTitle } from '@components/ui/dialog'
+import type { ResultType } from '@sailviz/types'
 
 const resultCodes = [
     { desc: 'Did Not Finish', code: 'DNF' },
@@ -18,7 +19,7 @@ export default function RetireDialog({
     isOpen: boolean
     onSubmit: (resultCode: string) => void
     onClose: () => void
-    result: ResultDataType
+    result: ResultType
 }) {
     return (
         <Dialog

@@ -1,5 +1,6 @@
 import { Button } from '@components/ui/button'
 import { Dialog, DialogContent, DialogFooter, DialogHeader } from '@components/ui/dialog'
+import type { FleetType } from '@sailviz/types'
 
 // these options are specific to each fleet
 enum raceModeType {
@@ -16,7 +17,7 @@ export default function FleetSelectDialog({
 }: {
     isOpen: boolean
     mode: raceModeType
-    fleets: FleetDataType[]
+    fleets: FleetType[]
     onSubmit: (fleetId: string[], mode: raceModeType) => void
     onClose: () => void
 }) {
