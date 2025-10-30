@@ -14,7 +14,7 @@ import { createFileRoute } from '@tanstack/react-router'
 var peer: Peer = new Peer()
 var conn: DataConnection | null = null
 
-export default async function Page() {
+function Page() {
     let { clubId } = Route.useParams()
 
     const findClubMutation = useMutation(orpcClient.club.name.mutationOptions())
