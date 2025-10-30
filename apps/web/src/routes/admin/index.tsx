@@ -1,9 +1,7 @@
-import { createFileRoute, useLoaderData } from '@tanstack/react-router'
+import { createFileRoute } from '@tanstack/react-router'
 import { title } from '@components/layout/home/primitaves'
 
 function Page() {
-    const session = useLoaderData({ from: `__root__` })
-
     return (
         <div>
             <div className='p-6'>

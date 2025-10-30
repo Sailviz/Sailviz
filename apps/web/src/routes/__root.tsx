@@ -1,6 +1,5 @@
-import { createRouter, Outlet, RouterProvider, useRouterState } from '@tanstack/react-router'
-import { createRootRoute } from '@tanstack/react-router'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { createRootRouteWithContext, Outlet, useRouterState } from '@tanstack/react-router'
+import { QueryClientProvider, type QueryClient } from '@tanstack/react-query'
 import { SidebarInset, SidebarProvider } from '@components/ui/sidebar'
 import AppSidebar from '@components/layout/app-sidebar'
 import { ScrollArea } from '@components/ui/scroll-area'
@@ -11,11 +10,11 @@ import { ThemeProvider as NextThemesProvider, type ThemeProviderProps } from 'ne
 import { getSession } from '@sailviz/auth/client'
 import Header from '@components/layout/header'
 
-enum Sidebar {
-    Dashboard,
-    Admin,
-    SignOn,
-    None
+export interface MyRouterContext {
+    // Optional auth object; not required at router creation time
+    auth?: any
+    // Shared React Query client instance for use in loaders/beforeLoad
+    queryClient: QueryClient
 }
 
 export const plausible = Plausible({
@@ -28,9 +27,9 @@ export const ThemeProvider = (props: ThemeProviderProps): React.JSX.Element => {
     return NextThemesProvider(props) as React.JSX.Element
 }
 
-// Create a top-level QueryClient for react-query hooks
-const queryClient = new QueryClient()
-export const Route = createRootRoute({
+// Use the shared QueryClient provided at the app root
+import { queryClient } from 'src/lib/queryClient'
+export const Route = createRootRouteWithContext<MyRouterContext>()({
     loader: async () => {
         const { data: session } = await getSession()
         console.log('Session in root loader:', session)

@@ -1,5 +1,5 @@
 'use client'
-import { createFileRoute, useLoaderData } from '@tanstack/react-router'
+import { createFileRoute, redirect } from '@tanstack/react-router'
 import { title } from '@components/layout/home/primitaves'
 import { Button } from '@components/ui/button'
 import { Input } from '@components/ui/input'
@@ -7,9 +7,8 @@ import { useEffect, useState } from 'react'
 import * as DB from '@components/apiMethods'
 import { useQuery } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
+import { ensureAdmin } from 'src/lib/session'
 function Page() {
-    const session = useLoaderData({ from: `__root__` })
-
     const [demoClubId, setDemoClubId] = useState('')
     const [demoSeriesId, setDemoSeriesId] = useState('')
     const [demoDataId, setDemoDataId] = useState('')
@@ -83,5 +82,9 @@ function Page() {
 }
 
 export const Route = createFileRoute('/admin/settings/demo')({
-    component: Page
+    component: Page,
+    beforeLoad: async ({ context }) => {
+        const session = await ensureAdmin(context.queryClient)
+        if (!session) throw redirect({ to: '/Login' })
+    }
 })

@@ -1,12 +1,17 @@
 import { Button } from '@components/ui/button'
 import { Input } from '@components/ui/input'
 import { useState } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import { signIn, getSession } from '@sailviz/auth/client'
 import { Github, Loader2 } from 'lucide-react'
 import { useNavigate } from '@tanstack/react-router'
+import { useRouter } from '@tanstack/react-router'
 import { server } from '@components/URL'
+import { sessionQueryKey } from 'src/lib/session'
 export function LoginForm() {
     const navigate = useNavigate()
+    const router = useRouter()
+    const queryClient = useQueryClient()
     const [username, setUsername] = useState('')
     const [password, setPassword] = useState('')
     const [loading, setLoading] = useState(false)
@@ -30,6 +35,15 @@ export function LoginForm() {
                     return
                 }
                 console.log('Session:', session)
+                // Make the fresh session immediately available to consumers
+                // so guards/beforeLoad can read it synchronously from cache.
+                try {
+                    queryClient.setQueryData(sessionQueryKey, session)
+                } catch {}
+                // Now re-run route loaders so pages depending on loaders refresh.
+                try {
+                    await router.invalidate()
+                } catch {}
                 navigate({ to: '/' + session.user.startPage })
             })
         setLoading(false)

@@ -1,8 +1,9 @@
 import { title } from '@components/layout/home/primitaves'
-import { useLoaderData, createFileRoute } from '@tanstack/react-router'
+import { useLoaderData, createFileRoute, redirect } from '@tanstack/react-router'
 import { PageSkeleton } from '@components/layout/PageSkeleton'
 import TableOfClubs from '@components/tables/TableOfClubs'
 import CreateClubModal from '@components/layout/dashboard/CreateClubModal'
+import { ensureAdmin } from 'src/lib/session'
 
 function Page() {
     const session = useLoaderData({ from: `__root__` })
@@ -28,5 +29,9 @@ function Page() {
 }
 
 export const Route = createFileRoute('/admin/clubs/')({
-    component: Page
+    component: Page,
+    beforeLoad: async ({ context }) => {
+        const session = await ensureAdmin(context.queryClient)
+        if (!session) throw redirect({ to: '/Login' })
+    }
 })
