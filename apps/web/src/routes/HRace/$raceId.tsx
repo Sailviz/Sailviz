@@ -12,6 +12,7 @@ import FleetSelectDialog from '@components/layout/dashboard/FleetSelectModal'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
 import type { ClubType, FleetType, RaceType, ResultType } from '@sailviz/types'
+import BackButton from '@components/layout/backButton'
 
 // these options are the same across all fleets
 enum raceStateType {
@@ -98,7 +99,7 @@ function Page() {
         //use time for button
         let lastStartTime = Math.floor(new Date().getTime() / 1000 + startSequence.reduce((max, step) => (step.time > max ? step.time : max), 0))
         //start the timer
-        fetch('https://' + club.settings.clockIP + '/set?startTime=' + (lastStartTime - club.settings.clockOffset).toString(), {
+        fetch('https://' + club.settings!.clockIP + '/set?startTime=' + (lastStartTime - club.settings!.clockOffset).toString(), {
             signal: controller.signal,
             mode: 'no-cors'
         }).catch(err => {
@@ -145,15 +146,13 @@ function Page() {
 
     const handleHoot = (time: number) => {
         //sound horn
-        fetch('https://' + club.settings.hornIP + `/hoot?startTime=${time}`, {
+        fetch('https://' + club.settings!.hornIP + `/hoot?startTime=${time}`, {
             signal: controller.signal,
             headers: new Headers({ 'content-type': 'text/plain' })
+        }).catch(err => {
+            console.log('horn not connected')
+            console.log(err)
         })
-            .then(response => {})
-            .catch(err => {
-                console.log('horn not connected')
-                console.log(err)
-            })
 
         let sound = document.getElementById('Beep') as HTMLAudioElement
         sound!.currentTime = 0
@@ -168,7 +167,7 @@ function Page() {
         sound!.play()
 
         //this is to cache the horn TLS so that when it needs to hoot it is quicker.
-        fetch('https://' + club.settings.hornIP + '/reset', {
+        fetch('https://' + club.settings!.hornIP + '/reset', {
             signal: controller.signal,
             headers: new Headers({ 'content-type': 'text/plain' })
         })
@@ -256,14 +255,14 @@ function Page() {
 
     const stopRace = async () => {
         setRaceState(raceStateType.stopped)
-        fetch('https://' + club.settings.clockIP + '/reset', { signal: controller.signal, mode: 'no-cors' }).catch(function (err) {
+        fetch('https://' + club.settings!.clockIP + '/reset', { signal: controller.signal, mode: 'no-cors' }).catch(function (err) {
             console.log('Clock not connected: ', err)
         })
     }
 
     const resetRace = async () => {
         //add are you sure here
-        fetch('https://' + club.settings.clockIP + '/reset', { signal: controller.signal, mode: 'no-cors' }).catch(function (err) {
+        fetch('https://' + club.settings!.clockIP + '/reset', { signal: controller.signal, mode: 'no-cors' }).catch(function (err) {
             console.log('Clock not connected: ', err)
         })
 
@@ -338,7 +337,7 @@ function Page() {
         //mutate race
         mutate(
             `/api/GetRaceById?id=${race.id}&results=true`,
-            async update => {
+            async _ => {
                 await createLapMutation.mutateAsync({ resultId: resultId, time: Math.floor(new Date().getTime() / 1000) })
                 return await findRaceMutation.mutateAsync({ raceId: race.id })
             },
@@ -356,12 +355,10 @@ function Page() {
     const finishBoat = async (resultId: string) => {
         const time = Math.floor(new Date().getTime() / 1000)
         //sound horn
-        fetch('http://' + club.settings.hornIP + '/hoot?startTime=200', { signal: controller.signal, mode: 'no-cors' })
-            .then(response => {})
-            .catch(err => {
-                console.log('horn not connected')
-                console.log(err)
-            })
+        fetch('http://' + club.settings!.hornIP + '/hoot?startTime=200', { signal: controller.signal, mode: 'no-cors' }).catch(err => {
+            console.log('horn not connected')
+            console.log(err)
+        })
         //sound beep
         let sound = document.getElementById('Beep') as HTMLAudioElement
         sound!.currentTime = 0
@@ -391,7 +388,7 @@ function Page() {
         //mutate race
         mutate(
             `/api/GetRaceById?id=${race.id}&results=true`,
-            async update => {
+            async _ => {
                 await createLapMutation.mutateAsync({ resultId: resultId, time: time })
 
                 await updateResultMutation.mutateAsync({ ...result, finishTime: time })
@@ -562,139 +559,149 @@ function Page() {
     }
 
     return (
-        <>
-            <RetireModal isOpen={retireModal} onSubmit={retireBoat} result={activeResult} onClose={() => setRetireModal(false)} />
-            <FleetSelectDialog mode={selectMode} isOpen={fleetSelectModal} onSubmit={setFleetMode} onClose={() => setFleetSelectModal(false)} fleets={race.fleets} />
-            <FlagModal isOpen={flagModal} currentFlagStatus={flagStatus} nextFlagStatus={nextFlagStatus} onClose={() => setFlagModal(false)} />
-            <audio id='Beep' src='/Beep-6.mp3'></audio>
-            <audio id='Countdown' src='/Countdown.mp3'></audio>
-            <div className='w-full flex flex-col items-center justify-start panel-height'>
-                <div className='flex w-full flex-col justify-around' key={JSON.stringify(raceState)}>
-                    <div className='flex flex-row'>
-                        <div className='w-1/4 p-2 m-2 border-4 rounded-lg  text-lg font-medium'>
-                            Event: {race?.series?.name} - {race?.number}
-                        </div>
-                        <div className='w-1/4 p-2 m-2 border-4 rounded-lg text-lg font-medium'>
-                            Race Time:
-                            <RaceTimer
-                                key={race.fleets.reduce((max, step) => (step.startTime > max ? step.startTime : max), 0)}
-                                sequence={startSequence}
-                                // start time is the max start time of all fleets, so that the timer starts at the latest start time.
-                                startTime={race.fleets.reduce((max, step) => (step.startTime > max ? step.startTime : max), 0)}
-                                onFlagChange={handleFlagChange}
-                                onHoot={handleHoot}
-                                timerActive={raceState == raceStateType.running}
-                                reset={raceState == raceStateType.reset}
-                                onSequenceEnd={handleSequenceEnd}
-                                onWarning={handleWarning}
-                                onFleetStart={handleFleetStart}
-                            />
-                        </div>
-                        <div className='p-2 w-1/4' id='RaceStateButton'>
-                            {(() => {
-                                switch (raceState) {
-                                    case raceStateType.reset:
-                                        return (
-                                            <Button onClick={() => startRaceButton()} size='big' variant={'green'}>
-                                                Start
-                                            </Button>
-                                        )
-                                    case raceStateType.running:
-                                        return (
-                                            <Button
-                                                onClick={e => {
-                                                    confirm('are you sure you want to stop the race?') ? stopRace() : null
-                                                }}
-                                                size='big'
-                                                variant={'red'}
-                                            >
-                                                Stop
-                                            </Button>
-                                        )
-                                    case raceStateType.stopped:
-                                        return (
-                                            <Button onClick={() => resetRace()} size='big' variant={'blue'}>
-                                                Reset
-                                            </Button>
-                                        )
-                                    case raceStateType.calculate:
-                                        return (
-                                            <Button id='CalcResultsButton' onClick={calculate} size='big' variant={'green'}>
-                                                Calculate Results
-                                            </Button>
-                                        )
-                                    case raceStateType.retire:
-                                        return (
-                                            <Button size='big' variant={'secondary'}>
-                                                Retire Mode
-                                            </Button>
-                                        )
-                                    default:
-                                        return <p> unknown race state</p>
-                                }
-                            })()}
-                        </div>
+        <div className='flex flex-col h-full overflow-hidden'>
+            <nav className='py-2.5 border-b-2 flex h-16'>
+                <div className='container flex flex-wrap justify-start items-start'>
+                    <div className='px-3'>
+                        <BackButton route={'/Dashboard/Race/' + raceId} />
                     </div>
+                    <div className=' text-4xl font-bold px-1 cursor-pointer'>SailViz </div>
                 </div>
-                <div className='flex w-full shrink flex-row justify-around'>
-                    <div className='w-1/5 p-2'>
-                        <Button onClick={() => undo()} size='big' variant={'warning'}>
-                            Undo Last Action
-                        </Button>
+            </nav>
+            <main className='flex items-stretch w-full h-full'>
+                <RetireModal isOpen={retireModal} onSubmit={retireBoat} result={activeResult} onClose={() => setRetireModal(false)} />
+                <FleetSelectDialog mode={selectMode} isOpen={fleetSelectModal} onSubmit={setFleetMode} onClose={() => setFleetSelectModal(false)} fleets={race.fleets} />
+                <FlagModal isOpen={flagModal} currentFlagStatus={flagStatus} nextFlagStatus={nextFlagStatus} onClose={() => setFlagModal(false)} />
+                <audio id='Beep' src='/Beep-6.mp3'></audio>
+                <audio id='Countdown' src='/Countdown.mp3'></audio>
+                <div className='w-full flex flex-col items-center justify-start panel-height'>
+                    <div className='flex w-full flex-col justify-around' key={JSON.stringify(raceState)}>
+                        <div className='flex flex-row'>
+                            <div className='w-1/4 p-2 m-2 border-4 rounded-lg  text-lg font-medium'>
+                                Event: {race?.series?.name} - {race?.number}
+                            </div>
+                            <div className='w-1/4 p-2 m-2 border-4 rounded-lg text-lg font-medium'>
+                                Race Time:
+                                <RaceTimer
+                                    key={race.fleets.reduce((max, step) => (step.startTime > max ? step.startTime : max), 0)}
+                                    sequence={startSequence}
+                                    // start time is the max start time of all fleets, so that the timer starts at the latest start time.
+                                    startTime={race.fleets.reduce((max, step) => (step.startTime > max ? step.startTime : max), 0)}
+                                    onFlagChange={handleFlagChange}
+                                    onHoot={handleHoot}
+                                    timerActive={raceState == raceStateType.running}
+                                    reset={raceState == raceStateType.reset}
+                                    onSequenceEnd={handleSequenceEnd}
+                                    onWarning={handleWarning}
+                                    onFleetStart={handleFleetStart}
+                                />
+                            </div>
+                            <div className='p-2 w-1/4' id='RaceStateButton'>
+                                {(() => {
+                                    switch (raceState) {
+                                        case raceStateType.reset:
+                                            return (
+                                                <Button onClick={() => startRaceButton()} size='big' variant={'green'}>
+                                                    Start
+                                                </Button>
+                                            )
+                                        case raceStateType.running:
+                                            return (
+                                                <Button
+                                                    onClick={_ => {
+                                                        confirm('are you sure you want to stop the race?') ? stopRace() : null
+                                                    }}
+                                                    size='big'
+                                                    variant={'red'}
+                                                >
+                                                    Stop
+                                                </Button>
+                                            )
+                                        case raceStateType.stopped:
+                                            return (
+                                                <Button onClick={() => resetRace()} size='big' variant={'blue'}>
+                                                    Reset
+                                                </Button>
+                                            )
+                                        case raceStateType.calculate:
+                                            return (
+                                                <Button id='CalcResultsButton' onClick={calculate} size='big' variant={'green'}>
+                                                    Calculate Results
+                                                </Button>
+                                            )
+                                        case raceStateType.retire:
+                                            return (
+                                                <Button size='big' variant={'secondary'}>
+                                                    Retire Mode
+                                                </Button>
+                                            )
+                                        default:
+                                            return <p> unknown race state</p>
+                                    }
+                                })()}
+                            </div>
+                        </div>
                     </div>
-                    <div className='w-1/5 p-2' id='RetireModeButton'>
-                        {raceState == raceStateType.retire ? (
-                            <Button onClick={() => setRaceState(lastRaceState)} size='big' variant={'blue'}>
-                                Cancel Retirement
+                    <div className='flex w-full shrink flex-row justify-around'>
+                        <div className='w-1/5 p-2'>
+                            <Button onClick={() => undo()} size='big' variant={'warning'}>
+                                Undo Last Action
                             </Button>
-                        ) : (
-                            <Button
-                                onClick={() => {
-                                    setLastRaceState(raceState)
-                                    setRaceState(raceStateType.retire)
-                                }}
-                                size='big'
-                                variant={'blue'}
-                            >
-                                Retire a Boat
+                        </div>
+                        <div className='w-1/5 p-2' id='RetireModeButton'>
+                            {raceState == raceStateType.retire ? (
+                                <Button onClick={() => setRaceState(lastRaceState)} size='big' variant={'blue'}>
+                                    Cancel Retirement
+                                </Button>
+                            ) : (
+                                <Button
+                                    onClick={() => {
+                                        setLastRaceState(raceState)
+                                        setRaceState(raceStateType.retire)
+                                    }}
+                                    size='big'
+                                    variant={'blue'}
+                                >
+                                    Retire a Boat
+                                </Button>
+                            )}
+                        </div>
+                        <div className='w-1/5 p-2' id='LapModeButton'>
+                            <Button onClick={lapModeClick} size='big' variant={'blue'}>
+                                Lap Mode
                             </Button>
-                        )}
+                        </div>
+                        <div className='w-1/5 p-2' id='FinishModeButton'>
+                            <Button onClick={finishModeClick} size='big' variant={'blue'}>
+                                Finish Mode
+                            </Button>
+                        </div>
                     </div>
-                    <div className='w-1/5 p-2' id='LapModeButton'>
-                        <Button onClick={lapModeClick} size='big' variant={'blue'}>
-                            Lap Mode
-                        </Button>
-                    </div>
-                    <div className='w-1/5 p-2' id='FinishModeButton'>
-                        <Button onClick={finishModeClick} size='big' variant={'blue'}>
-                            Finish Mode
-                        </Button>
-                    </div>
-                </div>
-                <div className='overflow-auto'>
-                    <div className='flex flex-row justify-around flex-wrap' id='EntrantCards'>
-                        {race.fleets
-                            .flatMap(fleets => fleets.results!)
-                            .map((result: ResultType, index) => {
-                                let fleetIndex = race.fleets.findIndex(fleet => fleet.id == result.fleetId)
-                                return (
-                                    <BoatCard
-                                        key={result.id}
-                                        result={result}
-                                        fleet={race.fleets.find(fleet => fleet.id == result.fleetId)!}
-                                        pursuit={false}
-                                        mode={raceMode[fleetIndex]!}
-                                        raceState={raceState}
-                                        lapBoat={lapBoat}
-                                        finishBoat={finishBoat}
-                                        showRetireModal={showRetireModal}
-                                    />
-                                )
-                            })}
+                    <div className='overflow-auto'>
+                        <div className='flex flex-row justify-around flex-wrap' id='EntrantCards'>
+                            {race.fleets
+                                .flatMap(fleets => fleets.results!)
+                                .map((result: ResultType) => {
+                                    let fleetIndex = race.fleets.findIndex(fleet => fleet.id == result.fleetId)
+                                    return (
+                                        <BoatCard
+                                            key={result.id}
+                                            result={result}
+                                            fleet={race.fleets.find(fleet => fleet.id == result.fleetId)!}
+                                            pursuit={false}
+                                            mode={raceMode[fleetIndex]!}
+                                            raceState={raceState}
+                                            lapBoat={lapBoat}
+                                            finishBoat={finishBoat}
+                                            showRetireModal={showRetireModal}
+                                        />
+                                    )
+                                })}
+                        </div>
                     </div>
                 </div>
-            </div>
-        </>
+            </main>
+        </div>
     )
 }
 

@@ -15,7 +15,7 @@ export default function HomePageLayout({
                 </NavbarBrand> */}
                 <NavigationMenuContent className='hidden sm:flex gap-4'>
                     <NavigationMenuItem>
-                        <Link color='foreground' href='#'>
+                        <Link color='foreground' href='#' to={undefined}>
                             Features
                         </Link>
                     </NavigationMenuItem>
@@ -25,7 +25,7 @@ export default function HomePageLayout({
                         </Link>
                     </NavigationMenuItem>
                     <NavigationMenuItem>
-                        <Link color='foreground' href='#'>
+                        <Link color='foreground' href='#' to={undefined}>
                             Integrations
                         </Link>
                     </NavigationMenuItem>

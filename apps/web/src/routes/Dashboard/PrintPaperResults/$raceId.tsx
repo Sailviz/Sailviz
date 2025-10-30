@@ -39,12 +39,12 @@ function Page() {
                 return (
                     <div key={'fleetResults' + index}>
                         <p className='text-2xl'>
-                            {race.series.name} - Race {race.number} ({dayjs(race.Time).format('DD/MM/YYYY HH:mm')}) - {fleet.fleetSettings.name}
+                            {race.series!.name} - Race {race.number} ({dayjs(race.Time).format('DD/MM/YYYY HH:mm')}) - {fleet.fleetSettings.name}
                         </p>
                         {race.Type == 'Handicap' ? (
                             <HandicapPaperResultsTable fleet={fleet} />
                         ) : (
-                            <PursuitPaperResultsTable results={race.fleets.flatMap(fleet => fleet.results!)} />
+                            <PursuitPaperResultsTable {...race.fleets.flatMap(fleet => fleet.results!)} />
                         )}
                     </div>
                 )

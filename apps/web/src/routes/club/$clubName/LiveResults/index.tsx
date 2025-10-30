@@ -1,11 +1,9 @@
-'use client'
 import { useEffect, useState } from 'react'
 
-import { useNavigate, createFileRoute } from '@tanstack/react-router'
-import * as DB from '@components/apiMethods'
+import { createFileRoute } from '@tanstack/react-router'
 import LiveFleetResultsTable from '@components/tables/LiveFleetResultsTable'
 import RaceTimer from '@components/HRaceTimer'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
 import type { ClubType, RaceType } from '@sailviz/types'
 
@@ -20,6 +18,8 @@ function Page() {
     const races = useQuery(orpcClient.race.today.queryOptions({ input: { clubId: club!.id }, queryKey: [club] })).data
 
     const queryClient = useQueryClient()
+
+    const findRaceMutation = useMutation(orpcClient.race.find.mutationOptions())
 
     var [activeRace, setActiveRace] = useState<RaceType>({
         id: '',
@@ -79,7 +79,7 @@ function Page() {
             }
             //check if any of the races are active
             for (let race of races) {
-                race = await DB.getRaceById(race.id)
+                race = await findRaceMutation.mutateAsync({ raceId: race.id })
                 if (checkActive(race)) {
                     setMode(pageModes.live)
                     setActiveRace(race)

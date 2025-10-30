@@ -1,4 +1,4 @@
-import z, { uuid } from "zod";
+import z from "zod";
 
 export const DutySchema = z.any();
 export type DutyType = z.infer<typeof DutySchema>;

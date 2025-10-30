@@ -30,7 +30,7 @@ export default function SignOnView() {
                         return (
                             <div className='m-6 inline-block' key={race.id}>
                                 <div className='text-4xl font-extrabol p-6'>
-                                    {race.series.name}: {race.number} at {race.Time.slice(10, 16)}
+                                    Series Name: {race.number} at {race.Time.slice(10, 16)}
                                 </div>
                                 <SignOnTable raceId={race.id} />
                             </div>

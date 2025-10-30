@@ -13,9 +13,7 @@ import {
     SidebarMenuSub,
     SidebarMenuSubButton,
     SidebarMenuSubItem,
-    SidebarRail,
-    SidebarTrigger,
-    useSidebar
+    SidebarRail
 } from '@components/ui/sidebar'
 import { ChevronRight, GalleryVerticalEnd } from 'lucide-react'
 import { Link } from '@tanstack/react-router'

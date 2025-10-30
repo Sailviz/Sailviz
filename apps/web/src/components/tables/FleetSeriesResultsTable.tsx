@@ -117,7 +117,7 @@ const FleetSeriesResultsTable = ({ seriesId, fleetSettingsId }: { seriesId: stri
         //give duty team their average score if they have raced in the series
         series.races.forEach((race: RaceType) => {
             //loop through duty team on each race.
-            Object.entries(race.Duties).map(([displayName, name]) => {
+            Object.entries(race.Duties).map(([_, name]) => {
                 let index = tempresults.findIndex(function (t) {
                     return t.Helm == (name as unknown as string) //cast to unknown to avoid type error
                 })
@@ -125,7 +125,7 @@ const FleetSeriesResultsTable = ({ seriesId, fleetSettingsId }: { seriesId: stri
                     //get average score
                     let total = 0
                     let count = 0
-                    tempresults[index]!.racePositions.forEach((position, i) => {
+                    tempresults[index]!.racePositions.forEach(position => {
                         if (position.position != 0) {
                             total += position.position
                             count++
@@ -262,7 +262,7 @@ const FleetSeriesResultsTable = ({ seriesId, fleetSettingsId }: { seriesId: stri
             return
         }
 
-        series.races.sort((a, b) => a.number - b.number)
+        series.races.sort((a: { number: number }, b: { number: number }) => a.number - b.number)
         var newColumns: any[] = []
         //add column for each race in series
         series.races.forEach((race: RaceDataType, index: number) => {

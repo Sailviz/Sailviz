@@ -1,13 +1,10 @@
-'use client'
-import { checkoutAction } from '@lib/payments/actions'
 import { Check } from 'lucide-react'
 import { Button } from '@components/ui/button'
-import { Link } from '@tanstack/react-router'
 import { useState } from 'react'
-import { Select } from '@components/ui/select'
 import { Switch } from '@components/ui/switch'
+import { createFileRoute } from '@tanstack/react-router'
 
-export default function PricingPage() {
+export function Page() {
     const [monthly, setMonthly] = useState(true)
     return (
         <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12'>
@@ -60,10 +57,15 @@ function PricingCard({ name, price, interval, features, priceId }: { name: strin
                     </li>
                 ))}
             </ul>
-            <form action={checkoutAction}>
+            {/* TODO */}
+            <form action={'null'}>
                 <input type='hidden' name='priceId' value={priceId} />
                 <Button> Start Now </Button>
             </form>
         </div>
     )
 }
+
+export const Route = createFileRoute('/Pricing/page')({
+    component: Page
+})

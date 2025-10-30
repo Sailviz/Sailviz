@@ -33,7 +33,7 @@ class ErrorBoundary extends React.Component<React.PropsWithChildren<{}>, ErrorBo
                     <Button type='button' className='p-4' onClick={() => this.setState({ hasError: false })}>
                         Reload
                     </Button>
-                    <BackButton />
+                    <BackButton route='/Dashboard' />
                     <div id='errorcode' className='p-4' />
                     <div id='errorinfo' className='p-4' />
                 </div>

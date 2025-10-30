@@ -1,12 +1,9 @@
-import { useState } from 'react'
 import { DialogContent, Dialog } from '@components/ui/dialog'
 import { Input } from '@components/ui/input'
 
 export default function EditResultDialog({ result, fleet }: { result: ResultDataType; fleet: FleetDataType }) {
-    const [open, setOpen] = useState(true)
-
     return (
-        <Dialog open={open}>
+        <Dialog open={true}>
             <DialogContent className='max-w-8/12'>
                 <div className='flex w-full flex-col'>
                     <div className='flex w-10/12'>

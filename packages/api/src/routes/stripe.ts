@@ -9,109 +9,109 @@ export const stripe = new Stripe(
   }
 );
 
-export async function createCheckoutSession({
-  club,
-  priceId,
-}: {
-  club: ClubType | null;
-  priceId: string;
-}) {
-  const session = await auth.api.getSession({
-    headers: await headers(), // you need to pass the headers object.
-  });
+// export async function createCheckoutSession({
+//   club,
+//   priceId,
+// }: {
+//   club: ClubType | null;
+//   priceId: string;
+// }) {
+//   const session = await auth.api.getSession({
+//     headers: await headers(), // you need to pass the headers object.
+//   });
 
-  if (!club || !session) {
-    redirect(`/sign-up?redirect=checkout&priceId=${priceId}`);
-  }
+//   if (!club || !session) {
+//     redirect(`/sign-up?redirect=checkout&priceId=${priceId}`);
+//   }
 
-  console.log(club, priceId);
+//   console.log(club, priceId);
 
-  const stripeSession = await stripe.checkout.sessions.create({
-    payment_method_types: ["card"],
-    line_items: [
-      {
-        price: priceId,
-        quantity: 1,
-      },
-    ],
-    mode: "subscription",
-    success_url: `${server}/api/stripe/checkout?session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${server}/Dashboard/Subscription`,
-    customer: club.stripe.customerId || undefined,
-    client_reference_id: session.user.id,
-    allow_promotion_codes: true,
-  });
+//   const stripeSession = await stripe.checkout.sessions.create({
+//     payment_method_types: ["card"],
+//     line_items: [
+//       {
+//         price: priceId,
+//         quantity: 1,
+//       },
+//     ],
+//     mode: "subscription",
+//     success_url: `${server}/api/stripe/checkout?session_id={CHECKOUT_SESSION_ID}`,
+//     cancel_url: `${server}/Dashboard/Subscription`,
+//     customer: club.stripe.customerId || undefined,
+//     client_reference_id: session.user.id,
+//     allow_promotion_codes: true,
+//   });
 
-  redirect(stripeSession.url!);
-}
+//   redirect(stripeSession.url!);
+// }
 
-export async function createCustomerPortalSession(club: ClubDataType) {
-  if (!club.stripe.customerId || !club.stripe.productId) {
-    redirect("/Dashboard/Subscription");
-  }
+// export async function createCustomerPortalSession(club: ClubDataType) {
+//   if (!club.stripe.customerId || !club.stripe.productId) {
+//     redirect("/Dashboard/Subscription");
+//   }
 
-  let configuration: Stripe.BillingPortal.Configuration;
-  const configurations = await stripe.billingPortal.configurations.list();
+//   let configuration: Stripe.BillingPortal.Configuration;
+//   const configurations = await stripe.billingPortal.configurations.list();
 
-  if (configurations.data.length > 0) {
-    configuration = configurations.data[0]!;
-  } else {
-    const product = await stripe.products.retrieve(club.stripe.productId);
-    if (!product.active) {
-      throw new Error("Team's product is not active in Stripe");
-    }
+//   if (configurations.data.length > 0) {
+//     configuration = configurations.data[0]!;
+//   } else {
+//     const product = await stripe.products.retrieve(club.stripe.productId);
+//     if (!product.active) {
+//       throw new Error("Team's product is not active in Stripe");
+//     }
 
-    const prices = await stripe.prices.list({
-      product: product.id,
-      active: true,
-    });
-    if (prices.data.length === 0) {
-      throw new Error("No active prices found for the team's product");
-    }
+//     const prices = await stripe.prices.list({
+//       product: product.id,
+//       active: true,
+//     });
+//     if (prices.data.length === 0) {
+//       throw new Error("No active prices found for the team's product");
+//     }
 
-    configuration = await stripe.billingPortal.configurations.create({
-      business_profile: {
-        headline: "Manage your subscription",
-      },
-      features: {
-        subscription_update: {
-          enabled: true,
-          default_allowed_updates: ["price", "quantity", "promotion_code"],
-          proration_behavior: "create_prorations",
-          products: [
-            {
-              product: product.id,
-              prices: prices.data.map((price) => price.id),
-            },
-          ],
-        },
-        subscription_cancel: {
-          enabled: true,
-          mode: "at_period_end",
-          cancellation_reason: {
-            enabled: true,
-            options: [
-              "too_expensive",
-              "missing_features",
-              "switched_service",
-              "unused",
-              "other",
-            ],
-          },
-        },
-        payment_method_update: {
-          enabled: true,
-        },
-      },
-    });
-  }
+//     configuration = await stripe.billingPortal.configurations.create({
+//       business_profile: {
+//         headline: "Manage your subscription",
+//       },
+//       features: {
+//         subscription_update: {
+//           enabled: true,
+//           default_allowed_updates: ["price", "quantity", "promotion_code"],
+//           proration_behavior: "create_prorations",
+//           products: [
+//             {
+//               product: product.id,
+//               prices: prices.data.map((price) => price.id),
+//             },
+//           ],
+//         },
+//         subscription_cancel: {
+//           enabled: true,
+//           mode: "at_period_end",
+//           cancellation_reason: {
+//             enabled: true,
+//             options: [
+//               "too_expensive",
+//               "missing_features",
+//               "switched_service",
+//               "unused",
+//               "other",
+//             ],
+//           },
+//         },
+//         payment_method_update: {
+//           enabled: true,
+//         },
+//       },
+//     });
+//   }
 
-  return stripe.billingPortal.sessions.create({
-    customer: club.stripe.customerId,
-    return_url: `${server}/Dashboard/Subscription`,
-    configuration: configuration.id,
-  });
-}
+//   return stripe.billingPortal.sessions.create({
+//     customer: club.stripe.customerId,
+//     return_url: `${server}/Dashboard/Subscription`,
+//     configuration: configuration.id,
+//   });
+// }
 
 export async function handleSubscriptionChange(
   subscription: Stripe.Subscription

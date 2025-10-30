@@ -112,7 +112,7 @@ export default function CreateResultDialog({ race, boats }: { race: RaceType; bo
                             }}
                             placeholder='J Bloggs'
                             autoComplete='off'
-                            // isInvalid={helmError}
+                            isInvalid={helmError}
                         />
                     </div>
                     <div className='flex flex-col px-6 w-full'>
@@ -183,7 +183,7 @@ export default function CreateResultDialog({ race, boats }: { race: RaceType; bo
                                 setSailNumError(false)
                                 setSailNumber(e.target.value)
                             }}
-                            // isInvalid={sailNumError}
+                            isInvalid={sailNumError}
                         />
                     </div>
                 </div>

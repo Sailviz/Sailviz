@@ -23,7 +23,7 @@ export function SeriesPursuitLength({ seriesId }: { seriesId: string }) {
         <div className='flex flex-col px-6 w-2/4 '>
             Pursuit Length (minutes):
             <Input
-                onBlur={e => {
+                onBlur={_ => {
                     savePursuitLength()
                 }}
                 onChange={e => {

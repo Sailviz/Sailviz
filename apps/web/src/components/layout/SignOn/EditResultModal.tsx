@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader } from '@components/u
 import { Button } from '@components/ui/button'
 import { Tabs, TabsList, TabsTrigger } from '@components/ui/tabs'
 import { Input } from '@components/ui/input'
-import { useNavigate } from '@tanstack/react-router'
+import type { FleetType } from '@sailviz/types'
 
 export default function EditResultModal({
     result,
@@ -20,13 +20,11 @@ export default function EditResultModal({
     onSubmit: (result: ResultDataType) => void
     onDelete: (result: ResultDataType) => void
 }) {
-    const [open, setOpen] = useState(true)
-
     const [helm, setHelm] = useState(result.Helm)
     const [crew, setCrew] = useState(result.Crew)
     const [sailNumber, setSailNumber] = useState(result.SailNumber)
 
-    const { theme, setTheme } = useTheme()
+    const { theme } = useTheme()
 
     const [selectedFleet, setSelectedFleet] = useState<string>(result.fleetId)
     const [selectedBoat, setSelectedBoat] = useState({ label: result.boat.name, value: result.boat })
@@ -43,7 +41,6 @@ export default function EditResultModal({
     const CapitaliseInput = (e: ChangeEvent<HTMLInputElement>) => {
         console.log(e.target.id)
         const sentence = e.target.value.split(' ')
-        const cursorPos = e.target.selectionStart
         const capitalizedWords = sentence.map(word => word.charAt(0).toUpperCase() + word.slice(1))
         const capitalisedSentence = capitalizedWords.join(' ')
         console.log(capitalisedSentence)
@@ -81,7 +78,7 @@ export default function EditResultModal({
     }
 
     return (
-        <Dialog open={open}>
+        <Dialog open={true}>
             <DialogContent className='max-w-8/12'>
                 <DialogHeader className='flex flex-col gap-1'>Edit Entry</DialogHeader>
                 <div className='flex w-full'>
@@ -98,7 +95,7 @@ export default function EditResultModal({
                             }}
                             placeholder='J Bloggs'
                             autoComplete='off'
-                            // isInvalid={helmError}
+                            isInvalid={helmError}
                         />
                     </div>
                     <div className='flex flex-col px-6 w-full'>
@@ -114,7 +111,7 @@ export default function EditResultModal({
                             value={selectedBoat}
                             onChange={choice => setSelectedBoat(choice!)}
                             styles={{
-                                control: (provided, state) =>
+                                control: provided =>
                                     ({
                                         ...provided,
                                         border: boatError ? '2px solid #f31260' : 'none',
@@ -136,19 +133,19 @@ export default function EditResultModal({
                                             backgroundColor: theme == 'dark' ? '#3f3f46' : '#d4d4d8'
                                         }
                                     }) as CSSObjectWithLabel,
-                                menu: (provided, state) =>
+                                menu: provided =>
                                     ({
                                         ...provided,
                                         backgroundColor: theme == 'dark' ? '#18181b' : 'white',
                                         border: theme == 'dark' ? '2px solid #3f3f46' : '2px solid #d4d4d8',
                                         fontSize: '1rem'
                                     }) as CSSObjectWithLabel,
-                                input: (provided, state) =>
+                                input: provided =>
                                     ({
                                         ...provided,
                                         color: theme == 'dark' ? 'white' : 'black'
                                     }) as CSSObjectWithLabel,
-                                singleValue: (provided, state) =>
+                                singleValue: provided =>
                                     ({
                                         ...provided,
                                         color: theme == 'dark' ? 'white' : 'black'
@@ -167,7 +164,7 @@ export default function EditResultModal({
                                 setSailNumError(false)
                                 setSailNumber(e.target.value)
                             }}
-                            // isInvalid={sailNumError}
+                            isInvalid={sailNumError}
                         />
                     </div>
                 </div>
@@ -191,7 +188,7 @@ export default function EditResultModal({
                             >
                                 {/* show buttons for each fleet in a series */}
                                 <TabsList>
-                                    {race.fleets.map((fleet: FleetDataType, index) => {
+                                    {race.fleets.map((fleet: FleetType) => {
                                         return (
                                             <TabsTrigger key={fleet.id + 'select'} value={fleet.id}>
                                                 {fleet?.fleetSettings?.name}

@@ -1,5 +1,4 @@
-'use client'
-import { MoveDown, MoveRight, PhoneCall } from 'lucide-react'
+import { MoveDown, MoveRight } from 'lucide-react'
 import { Button } from '@components/ui/button'
 import { useNavigate } from '@tanstack/react-router'
 

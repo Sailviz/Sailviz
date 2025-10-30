@@ -108,7 +108,7 @@ export default function BoatCard({
                                     <Button
                                         variant={'blue'}
                                         className=' w-36 m-6 h-4/6 text-xl'
-                                        onClick={e => {
+                                        onClick={_ => {
                                             setIsDisabled(true)
                                             timeoutRef.current = setTimeout(() => {
                                                 setIsDisabled(false)
@@ -127,7 +127,7 @@ export default function BoatCard({
                                         <Button
                                             variant={'blue'}
                                             className=' w-36 m-6 h-4/6 text-xl'
-                                            onClick={e => {
+                                            onClick={_ => {
                                                 setIsDisabled(true)
                                                 timeoutRef.current = setTimeout(() => {
                                                     setIsDisabled(false)
@@ -144,7 +144,7 @@ export default function BoatCard({
                                         <Button
                                             variant={'blue'}
                                             className=' w-36 m-6 h-4/6 text-xl'
-                                            onClick={e => {
+                                            onClick={_ => {
                                                 setIsDisabled(true)
                                                 timeoutRef.current = setTimeout(() => {
                                                     setIsDisabled(false)

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, useReactTable, type SortingState } from '@tanstack/react-table'
 import { EditIcon } from '@components/icons/edit-icon'
 import { AVAILABLE_PERMISSIONS, userHasPermission } from '@components/helpers/users'
@@ -6,19 +6,23 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '.
 import { Link, useLoaderData } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
-import type { FleetType, RaceType, ResultType } from '@sailviz/types'
+import type { BoatType, FleetType, RaceType, ResultType } from '@sailviz/types'
 const columnHelper = createColumnHelper<ResultType>()
 
 const SignOnTable = ({ raceId }: { raceId: string }) => {
     const session = useLoaderData({ from: `__root__` })
     const race = useQuery(orpcClient.race.find.queryOptions({ input: { raceId: raceId } })).data as RaceType
     let [data, setData] = useState<ResultType[]>([])
-    let options: object[] = []
 
-    const Text = ({ ...props }) => {
-        const initialValue = props.getValue()
-        const [value, setValue] = React.useState(initialValue)
+    const Text = ({ text }: { text: string }) => {
+        return (
+            <>
+                <div>{text}</div>
+            </>
+        )
+    }
 
+    const Number = ({ value }: { value: number }) => {
         return (
             <>
                 <div>{value}</div>
@@ -26,27 +30,10 @@ const SignOnTable = ({ raceId }: { raceId: string }) => {
         )
     }
 
-    const Number = ({ ...props }: any) => {
-        const initialValue = props.getValue()
-        const [value, setValue] = React.useState(initialValue)
-
+    const Class = ({ boat }: { boat: BoatType }) => {
         return (
             <>
-                <div>{value}</div>
-            </>
-        )
-    }
-
-    const Class = ({ ...props }: any) => {
-        var initialValue = props.getValue()
-        if (initialValue == null) {
-            initialValue = { value: '', label: '' }
-        }
-        const [value, setValue] = React.useState(initialValue)
-
-        return (
-            <>
-                <div>{value.name}</div>
+                <div>{boat.name}</div>
             </>
         )
     }
@@ -79,25 +66,25 @@ const SignOnTable = ({ raceId }: { raceId: string }) => {
         columns: [
             columnHelper.accessor('Helm', {
                 header: 'Helm',
-                cell: props => <Text {...props} />,
+                cell: props => <Text text={props.getValue()} />,
                 enableSorting: false,
                 meta: { 'aria-label': 'Helm' }
             }),
             columnHelper.accessor('Crew', {
                 header: 'Crew',
-                cell: props => <Text {...props} />,
+                cell: props => <Text text={props.getValue()} />,
                 enableSorting: false
             }),
             columnHelper.accessor('boat', {
                 header: 'Class',
                 id: 'Class',
                 size: 300,
-                cell: props => <Class {...props} options={options} />,
+                cell: props => <Class boat={props.getValue()} />,
                 enableSorting: false
             }),
             columnHelper.accessor('SailNumber', {
                 header: 'Sail Number',
-                cell: props => <Number {...props} disabled={false} />,
+                cell: props => <Number value={props.getValue()} />,
                 enableSorting: false
             }),
             columnHelper.display({

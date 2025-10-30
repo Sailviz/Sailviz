@@ -2,8 +2,10 @@ import { Button } from '@components/ui/button'
 import { Input } from '@components/ui/input'
 import { signUp } from '@sailviz/auth/client'
 import { useState } from 'react'
-import * as DB from '@components/apiMethods'
 import { useNavigate } from '@tanstack/react-router'
+import { useMutation } from '@tanstack/react-query'
+import { orpcClient } from '@lib/orpc'
+import type { UserType } from '@sailviz/types'
 
 export function RegisterForm() {
     const navigate = useNavigate()
@@ -12,18 +14,21 @@ export function RegisterForm() {
     const [clubName, setClubName] = useState('')
     const [email, setEmail] = useState('')
 
+    const createClubMutation = useMutation(orpcClient.club.create.mutationOptions())
+    const findRolesMutation = useMutation(orpcClient.role.club.mutationOptions())
+    const updateUserMutation = useMutation(orpcClient.user.update.mutationOptions())
+
     const createClub = async () => {
         //create a club for each fleet
-        let club = await DB.createClub(clubName)
+        let club = await createClubMutation.mutateAsync({ name: clubName })
         console.log('Created club:', club)
-        let roles = await DB.GetRolesByClubId(club.id)
+        let roles = await findRolesMutation.mutateAsync({ clubId: club.id })
         console.log('Roles for club:', roles)
 
         const { data, error } = await signUp.email({
             email: email,
             password: password,
             username: username,
-            clubId: club.id,
             startPage: '/Dashboard',
             name: username
         })
@@ -47,6 +52,11 @@ export function RegisterForm() {
             username: username,
             admin: false,
             uuid: '',
+            email: '',
+            emailVerified: false,
+            image: '',
+            createdAt: new Date(),
+            updatedAt: new Date(),
             roles: [
                 {
                     id: roles[0].id,
@@ -57,8 +67,8 @@ export function RegisterForm() {
                     }
                 }
             ]
-        } as UserDataType
-        await DB.updateUser(user)
+        } as UserType
+        await updateUserMutation.mutateAsync(user)
         navigate({ to: '/Dashboard' })
     }
     return (

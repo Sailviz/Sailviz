@@ -5,7 +5,6 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader } from '@components/u
 import { Button } from '@components/ui/button'
 import { Switch } from '@components/ui/switch'
 import { Input } from '@components/ui/input'
-import { useNavigate } from '@tanstack/react-router'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
 import type { BoatType, RaceType } from '@sailviz/types'
@@ -30,11 +29,10 @@ export default function EditResultModal({
     onSubmit: (result: ResultDataType) => void
     onDelete: (result: ResultDataType) => void
 }) {
-    const [open, setOpen] = useState(true)
     console.log('EditResultModal', result)
     const { data: fleet } = useQuery(orpcClient.fleet.find.queryOptions({ input: { fleetId: result?.fleetId || '' } }))
 
-    const { theme, setTheme } = useTheme()
+    const { theme } = useTheme()
     const boats = useQuery(orpcClient.boat.session.queryOptions()).data as BoatType[]
 
     const getRaceMutation = useMutation(orpcClient.race.find.mutationOptions())
@@ -106,7 +104,7 @@ export default function EditResultModal({
     }, [result, fleet])
 
     return (
-        <Dialog open={open}>
+        <Dialog open={true}>
             <DialogContent className='max-w-8/12' title='Edit Result'>
                 <DialogHeader className='flex flex-col gap-1 text-2xl w-96'>Edit Result</DialogHeader>
                 <div className='flex flex-col w-full'>
@@ -136,7 +134,7 @@ export default function EditResultModal({
                                     setBoat(choice!.value)
                                 }}
                                 styles={{
-                                    control: (provided, state) =>
+                                    control: provided =>
                                         ({
                                             ...provided,
                                             border: 'none',
@@ -158,19 +156,19 @@ export default function EditResultModal({
                                                 backgroundColor: theme == 'dark' ? '#3f3f46' : '#d4d4d8'
                                             }
                                         }) as CSSObjectWithLabel,
-                                    menu: (provided, state) =>
+                                    menu: provided =>
                                         ({
                                             ...provided,
                                             backgroundColor: theme == 'dark' ? '#18181b' : 'white',
                                             border: theme == 'dark' ? '2px solid #3f3f46' : '2px solid #d4d4d8',
                                             fontSize: '1rem'
                                         }) as CSSObjectWithLabel,
-                                    input: (provided, state) =>
+                                    input: provided =>
                                         ({
                                             ...provided,
                                             color: theme == 'dark' ? 'white' : 'black'
                                         }) as CSSObjectWithLabel,
-                                    singleValue: (provided, state) =>
+                                    singleValue: provided =>
                                         ({
                                             ...provided,
                                             color: theme == 'dark' ? 'white' : 'black'
@@ -202,7 +200,7 @@ export default function EditResultModal({
                                         value={resultCodeOption}
                                         onChange={choice => setResultCodeOption(choice!)}
                                         styles={{
-                                            control: (provided, state) =>
+                                            control: provided =>
                                                 ({
                                                     ...provided,
                                                     border: 'none',
@@ -224,19 +222,19 @@ export default function EditResultModal({
                                                         backgroundColor: theme == 'dark' ? '#3f3f46' : '#d4d4d8'
                                                     }
                                                 }) as CSSObjectWithLabel,
-                                            menu: (provided, state) =>
+                                            menu: provided =>
                                                 ({
                                                     ...provided,
                                                     backgroundColor: theme == 'dark' ? '#18181b' : 'white',
                                                     border: theme == 'dark' ? '2px solid #3f3f46' : '2px solid #d4d4d8',
                                                     fontSize: '1rem'
                                                 }) as CSSObjectWithLabel,
-                                            input: (provided, state) =>
+                                            input: provided =>
                                                 ({
                                                     ...provided,
                                                     color: theme == 'dark' ? 'white' : 'black'
                                                 }) as CSSObjectWithLabel,
-                                            singleValue: (provided, state) =>
+                                            singleValue: provided =>
                                                 ({
                                                     ...provided,
                                                     color: theme == 'dark' ? 'white' : 'black'

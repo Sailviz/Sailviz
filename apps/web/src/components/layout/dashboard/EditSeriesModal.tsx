@@ -6,17 +6,7 @@ import { useQuery } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
 import type { SeriesType } from '@sailviz/types'
 
-export default function EditSeriesDialog({
-    isOpen,
-    seriesId,
-    onSubmit,
-    onClose
-}: {
-    isOpen: boolean
-    seriesId: string
-    onSubmit: (series: SeriesType) => void
-    onClose: () => void
-}) {
+export default function EditSeriesDialog({ seriesId, onSubmit, onClose }: { seriesId: string; onSubmit: (series: SeriesType) => void; onClose: () => void }) {
     const series = useQuery(orpcClient.series.find.queryOptions({ input: { seriesId: seriesId } })).data as SeriesType
     const [seriesName, setSeriesName] = useState('')
 

@@ -1,14 +1,13 @@
-const jwt = require('jsonwebtoken')
-const jwtSecret = process.env.jwtSecret
-import prisma from '@lib/prisma'
-import * as Fetcher from '@components/Fetchers'
-import { auth } from '@lib/auth'
-import { headers } from 'next/headers'
+import { orpcClient } from '@lib/orpc'
+import { useQuery } from '@tanstack/react-query'
+import { useLoaderData } from '@tanstack/react-router'
+
+//ignore ts error about prisma not being available on server side
+// @ts-ignore
+import prisma from '@sailviz/db'
 
 export async function isRequestAdmin() {
-    const session = await auth.api.getSession({
-        headers: await headers() // you need to pass the headers object.
-    })
+    const session = useLoaderData({ from: `__root__` })
 
     if (session?.user.admin) {
         return true
@@ -16,20 +15,14 @@ export async function isRequestAdmin() {
     return false
 }
 export async function isRequestAuthorised(id: string, table: string) {
-    const session = await auth.api.getSession({
-        headers: await headers() // you need to pass the headers object.
-    })
+    const session = useLoaderData({ from: `__root__` })
 
     //bypass if admin
     if (session?.user.admin) {
         return true
     }
     //bypass if demo mode
-    const GlobalConfig = await prisma.globalConfig.findFirst({
-        where: {
-            active: true
-        }
-    })
+    const GlobalConfig = useQuery(orpcClient.globalConfig.find.queryOptions()).data
     const demo = await isRequestOwnData(id, GlobalConfig!.demoClubId, table)
     if (demo) {
         return true

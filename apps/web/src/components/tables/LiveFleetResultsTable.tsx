@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, useReactTable, type SortingState } from '@tanstack/react-table'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
+import type { FleetType, ResultType } from '@sailviz/types'
 
 const Text = ({ ...props }) => {
     const value = props.getValue()
@@ -39,17 +40,17 @@ const Time = ({ ...props }) => {
     return <div className=' text-center'>{time}</div>
 }
 
-const calculateHandicapResults = (fleet: FleetDataType) => {
+const calculateHandicapResults = (fleet: FleetType) => {
     //most nuber of laps.
     const maxLaps = Math.max.apply(
         null,
-        fleet.results.map(function (o: ResultDataType) {
+        fleet.results!.map(function (o: ResultType) {
             return o.laps.length
         })
     )
 
     //calculate corrected time
-    fleet.results.forEach(result => {
+    fleet.results!.forEach(result => {
         //don't know why types aren't quite working here
         if (result.laps.length == 0) {
             return
@@ -62,7 +63,7 @@ const calculateHandicapResults = (fleet: FleetDataType) => {
     //calculate finish position
 
     //sort by corrected time, if corrected time is 0 move to end, and rtd to end
-    fleet.results.sort((a, b) => {
+    fleet.results!.sort((a, b) => {
         if (a.resultCode != '') {
             return 1
         }
@@ -84,27 +85,22 @@ const calculateHandicapResults = (fleet: FleetDataType) => {
         return 0
     })
 
-    fleet.results.forEach((result, index) => {
+    fleet.results!.forEach((result, index) => {
         result.HandicapPosition = index + 1
     })
     return fleet
 }
 
-const calculatePursuitResults = (fleet: FleetDataType) => {
+const calculatePursuitResults = (fleet: FleetType) => {
     return fleet
 }
 
-const columnHelper = createColumnHelper<ResultDataType>()
+const columnHelper = createColumnHelper<ResultType>()
 
-const LiveResultsTable = (props: any) => {
-    let [fleet, setFleet] = useState<FleetDataType>(props.fleet)
-    let [startTime, setStartTime] = useState<number>(props.startTime)
-    console.log(props.handicap)
-    let [handicap, setHandicap] = useState<boolean>(props.handicap == 'Handicap' ? true : false)
-
-    let [results, setResults] = useState<ResultDataType[]>(props.handicap == 'Handicap' ? calculateHandicapResults(fleet).results : calculatePursuitResults(fleet).results)
+const LiveResultsTable = ({ fleet, startTime, handicap }: { fleet: FleetType; startTime: number; handicap: string }) => {
+    const results = handicap == 'Handicap' ? calculateHandicapResults(fleet).results! : calculatePursuitResults(fleet).results!
     let maxLaps = 0
-    results.forEach((result, index) => {
+    results.forEach(result => {
         if (result.laps.length > maxLaps) {
             maxLaps = result.laps.length
         }

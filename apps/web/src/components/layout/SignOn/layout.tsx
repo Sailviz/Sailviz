@@ -7,7 +7,7 @@ import { SignOutIcon } from '@components/icons/sign-out'
 import { AVAILABLE_PERMISSIONS, userHasPermission } from '@components/helpers/users'
 import { useQuery } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
-import type { RaceType, UserType } from '@sailviz/types'
+import type { RaceType } from '@sailviz/types'
 import { useLoaderData } from '@tanstack/react-router'
 import Header from '../header'
 
@@ -45,7 +45,7 @@ export default function SignOnLayout({ children }: { children: React.ReactNode }
           }
 
     const todaysRacesItems: NavItem[] = todaysRaces.map(race => ({
-        title: `${race.series.name}: ${race.number}`,
+        title: `SeriesName: ${race.number}`,
         url: `/SignOn/Race/${race.id}?`,
         icon: <RaceIcon />,
         shortcut: ['e', 'e'],
@@ -53,8 +53,8 @@ export default function SignOnLayout({ children }: { children: React.ReactNode }
         items: []
     }))
 
-    const todaysSeries = [...new Set(todaysRaces?.map(race => race.series.name))]
-    const todaysSeriesIds = [...new Set(todaysRaces?.map(race => race.series.id))]
+    const todaysSeries = [...new Set(todaysRaces?.map(race => race.series!.name))]
+    const todaysSeriesIds = [...new Set(todaysRaces?.map(race => race.seriesId))]
 
     const todaysSeriesItems: NavItem[] = todaysSeries.map((Series, index) => {
         return {

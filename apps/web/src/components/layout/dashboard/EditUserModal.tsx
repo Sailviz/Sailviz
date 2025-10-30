@@ -11,7 +11,6 @@ export default function EditUserDialog({ user, clubRoles, open, onClose }: { use
     const [displayName, setDisplayName] = useState('')
     const [name, setName] = useState('')
     const [startPage, setStartPage] = useState('')
-    const [password, setPassword] = useState('')
     const [roles, setRoles] = useState<RoleType[]>([])
 
     const updateUserMutation = useMutation(orpcClient.user.update.mutationOptions())
@@ -81,13 +80,6 @@ export default function EditUserDialog({ user, clubRoles, open, onClose }: { use
                         <p className='text-2xl font-bold text-gray-700'>Start Page</p>
 
                         <Input type='text' value={startPage} onChange={e => setStartPage(e.target.value)} />
-                    </div>
-                </div>
-                <div>
-                    <div className='flex flex-col px-6 w-1/4'>
-                        <p className='text-2xl font-bold text-gray-700'>Update Password (not functional)</p>
-
-                        <Input type='password' onChange={e => setPassword(e.target.value)} />
                     </div>
                 </div>
                 <DialogFooter>

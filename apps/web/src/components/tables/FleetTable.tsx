@@ -12,7 +12,7 @@ import { orpcClient } from '@lib/orpc'
 
 const Boats = ({ ...props }: any) => {
     const initialValue = props.getValue()
-    const [value, setValue] = React.useState<BoatDataType[]>(initialValue)
+    const [value] = React.useState<BoatDataType[]>(initialValue)
     let boats: { value: string; label: string }[] = []
 
     if (value) {

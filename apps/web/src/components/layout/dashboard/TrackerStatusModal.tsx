@@ -1,7 +1,7 @@
 import dayjs from 'dayjs'
 import { DialogContent, DialogHeader } from '@components/ui/dialog'
 
-export default function TrackerStatusDialog({ isOpen, tracker, onClose }: { isOpen: boolean; tracker: TrackerDataType | undefined; onClose?: () => void }) {
+export default function TrackerStatusDialog({ tracker }: { tracker: TrackerDataType | undefined }) {
     return (
         <>
             <DialogContent>

@@ -1,15 +1,15 @@
-'use client'
-import * as Fetcher from '@components/Fetchers'
 import { PageSkeleton } from '@components/layout/PageSkeleton'
 import { Button } from '@components/ui/button'
 import { Card, CardContent } from '@components/ui/card'
-import { customerPortalAction } from '@lib/payments/actions'
-import PricingPage from '@/app/(public)/Pricing/page'
+import { orpcClient } from '@lib/orpc'
+import { useQuery } from '@tanstack/react-query'
+import { createFileRoute } from '@tanstack/react-router'
+import { Page as PricingPage } from 'src/routes/Pricing/page'
 
 function Page() {
-    const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
+    const club = useQuery(orpcClient.club.session.queryOptions()).data
 
-    if (clubIsValidating || clubIsError) {
+    if (club == undefined) {
         return <PageSkeleton />
     }
     console.log('Club:', club)
@@ -30,7 +30,8 @@ function Page() {
                                 </p>
                             </div>
                             {club.stripe?.subscriptionStatus === 'active' && (
-                                <form action={customerPortalAction}>
+                                // TODO: Replace 'null' with actual manage subscription URL
+                                <form action={'null'}>
                                     <Button type='submit' variant='outline'>
                                         Manage Subscription
                                     </Button>
@@ -44,3 +45,7 @@ function Page() {
         </div>
     )
 }
+
+export const Route = createFileRoute('/Dashboard/Subscription/')({
+    component: Page
+})

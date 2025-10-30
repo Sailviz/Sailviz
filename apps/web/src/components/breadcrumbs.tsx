@@ -1,7 +1,8 @@
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@components/ui/breadcrumb'
-import * as DB from '@components/apiMethods'
 import { Fragment, useEffect, useState } from 'react'
 import { useRouterState } from '@tanstack/react-router'
+import { useMutation } from '@tanstack/react-query'
+import { orpcClient } from '@lib/orpc'
 
 type BreadcrumbItem = {
     title: string
@@ -13,18 +14,20 @@ export function Breadcrumbs() {
     const pathname = Router.location.pathname
     const [items, setItems] = useState<BreadcrumbItem[]>([])
 
+    const findRaceMutation = useMutation(orpcClient.race.find.mutationOptions())
+
     useEffect(() => {
         // If no exact match, fall back to generating breadcrumbs from the path
         const segments = pathname.split('/').filter(Boolean)
 
         //Race page
         if (segments[0] == 'Race') {
-            DB.getRaceById(segments[1]!, false).then(res => {
+            findRaceMutation.mutateAsync({ raceId: segments[1]! }).then(res => {
                 console.log(res)
                 setItems([
                     {
-                        title: res.series.name,
-                        link: `/Series/${res.series.id}`
+                        title: res.series!.name,
+                        link: `/Series/${res.series!.id}`
                     },
                     {
                         title: `Race ${res.number}`,

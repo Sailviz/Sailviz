@@ -32,7 +32,7 @@ const scrollOptions = {
 function Page() {
     const { clubId } = Route.useParams()
 
-    const { theme, setTheme } = useTheme()
+    const { setTheme } = useTheme()
 
     const { Image: QRCode } = useQRCode()
 
@@ -61,7 +61,7 @@ function Page() {
         // Create own peer object with connection to shared PeerJS server
         peer = new Peer()
 
-        peer.on('open', function (id) {
+        peer.on('open', function () {
             console.log('ID: ' + peer.id)
             setPeerId(peer.id)
         })
@@ -195,9 +195,9 @@ function Page() {
         //if it is a normal day show last race results.
         if (!activeFlag && todaysRaces.length > 0) {
             //check if all races have the same series ID
-            let sameSeries = todaysRaces.flatMap(race => race.series.id).every((val, i, arr) => val === arr[0])
+            let sameSeries = todaysRaces.flatMap(race => race.seriesId).every((val, _, arr) => val === arr[0])
             if (sameSeries) {
-                setActiveSeriesData(await findSeriesMutation.mutateAsync({ seriesId: todaysRaces[0]!.series.id }))
+                setActiveSeriesData(await findSeriesMutation.mutateAsync({ seriesId: todaysRaces[0]!.seriesId }))
                 setPageState(pageStateType.series)
             } else {
                 //show the most recent results
@@ -309,7 +309,7 @@ function Page() {
                                                     />
                                                 </div>
                                                 <div className='text-4xl font-extrabold px-6 py-3'>
-                                                    {activeRaceData.series.name}: {activeRaceData.number} - {fleet.fleetSettings.name}
+                                                    SeriesName: {activeRaceData.number} - {fleet.fleetSettings.name}
                                                 </div>
                                             </div>
 
@@ -335,7 +335,7 @@ function Page() {
                                     return (
                                         <div key={'fleetResults' + index}>
                                             <div className='text-4xl font-extrabold p-6'>
-                                                {activeRaceData.series.name}: {activeRaceData.number} - {fleet.fleetSettings.name}
+                                                SeriesName: {activeRaceData.number} - {fleet.fleetSettings.name}
                                             </div>
                                             {activeRaceData.Type == 'Handicap' ? (
                                                 <FleetHandicapResultsTable showTime={true} editable={false} fleetId={fleet.id} />

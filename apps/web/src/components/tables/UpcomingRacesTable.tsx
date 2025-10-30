@@ -6,6 +6,7 @@ import { Button } from '../ui/button'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
 import { useQuery } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
+import type { RaceType } from '@sailviz/types'
 
 const Time = ({ ...props }: any) => {
     const initialValue = props.getValue()
@@ -33,7 +34,7 @@ const Action = ({ ...props }: any) => {
     )
 }
 
-const columnHelper = createColumnHelper<NextRaceDataType>()
+const columnHelper = createColumnHelper<RaceType>()
 
 const UpcomingRacesTable = () => {
     const session = useLoaderData({ from: `__root__` })
@@ -41,7 +42,7 @@ const UpcomingRacesTable = () => {
     const { data: todaysRaces } = useQuery(orpcClient.race.today.queryOptions({ input: { clubId: session?.club?.id! } }))
 
     const [sorting, setSorting] = useState<SortingState>([{ id: 'number', desc: false }])
-    const [data, setData] = useState<NextRaceDataType[]>([])
+    const [data, setData] = useState<RaceType[]>([])
 
     useEffect(() => {
         if (todaysRaces) {
@@ -52,7 +53,7 @@ const UpcomingRacesTable = () => {
     var table = useReactTable({
         data,
         columns: [
-            columnHelper.accessor(data => data.series.name, {
+            columnHelper.accessor(data => data.series!.name, {
                 header: 'Series',
                 cell: info => info.getValue().toString(),
                 enableSorting: true

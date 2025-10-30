@@ -1,9 +1,10 @@
-'use client'
 import { useEffect, useState } from 'react'
 import { Peer, DataConnection } from 'peerjs'
 import { title } from '@components/layout/home/primitaves'
-import * as DB from '@components/apiMethods'
-import { useSearchParams } from 'next/navigation'
+import { useMutation } from '@tanstack/react-query'
+import { orpcClient } from '@lib/orpc'
+import type { ClubType, RaceType, SeriesType } from '@sailviz/types'
+import { createFileRoute } from '@tanstack/react-router'
 
 //club page should contain:
 //list of current series
@@ -13,13 +14,16 @@ import { useSearchParams } from 'next/navigation'
 var peer: Peer = new Peer()
 var conn: DataConnection | null = null
 
-type PageProps = { params: Promise<{ slug: string }> }
+export default async function Page() {
+    let { clubId } = Route.useParams()
 
-export default async function Page(props: PageProps) {
-    const params = await props.params
+    const findClubMutation = useMutation(orpcClient.club.name.mutationOptions())
 
-    const [clubId, setClubId] = useState<string>(params.slug)
-    const [club, setClub] = useState<ClubDataType>({} as ClubDataType)
+    const findRaceMutation = useMutation(orpcClient.race.find.mutationOptions())
+    const findSeriesMutation = useMutation(orpcClient.series.find.mutationOptions())
+    const findTodaysRacesMutation = useMutation(orpcClient.race.today.mutationOptions())
+
+    const [club, setClub] = useState<ClubType>({} as ClubType)
     const [races, setRaces] = useState<any[]>([])
     const [series, setSeries] = useState<any[]>([])
 
@@ -27,7 +31,7 @@ export default async function Page(props: PageProps) {
         // Create own peer object with connection to shared PeerJS server
         peer = new Peer()
 
-        peer.on('open', function (id) {
+        peer.on('open', function () {
             console.log('ID: ' + peer.id)
             join()
         })
@@ -61,14 +65,14 @@ export default async function Page(props: PageProps) {
      * connection and data received on it.
      */
     function join() {
-        console.log('Joining: ' + params.slug)
+        console.log('Joining: ' + clubId)
         // Close old connection
         if (conn) {
             conn.close()
         }
-        console.log('Connecting to: ' + params.slug)
+        console.log('Connecting to: ' + clubId)
         // Create connection to destination peer specified in the input field
-        conn = peer.connect(params.slug, {
+        conn = peer.connect(clubId, {
             reliable: true
         })
 
@@ -84,7 +88,7 @@ export default async function Page(props: PageProps) {
             console.log('Received: ' + datastring)
             let data = JSON.parse(datastring as string)
             if (data['type'] == 'clubId') {
-                setClubId(data['clubId'])
+                clubId = data['clubId']
             }
         })
         conn.on('close', function () {
@@ -140,25 +144,25 @@ export default async function Page(props: PageProps) {
     useEffect(() => {
         initialize()
         const fetch = async () => {
-            setClub(await DB.GetClubById(clubId))
+            setClub(await findClubMutation.mutateAsync(clubId))
         }
         const fetchTodaysRaces = async () => {
-            var data = await DB.getTodaysRaceByClubId(clubId)
+            var data = await findTodaysRacesMutation.mutateAsync(clubId)
             console.log(data)
             if (data) {
-                let racesCopy: RaceDataType[] = []
+                let racesCopy: RaceType[] = []
                 for (let i = 0; i < data.length; i++) {
                     console.log(data[i]!.number)
-                    const res = await DB.getRaceById(data[i]!.id)
+                    const res = await findRaceMutation.mutateAsync({ raceId: data[i]!.id })
                     racesCopy[i] = res
                 }
-                racesCopy.sort((a: RaceDataType, b: RaceDataType) => a.number - b.number)
+                racesCopy.sort((a: RaceType, b: RaceType) => a.number - b.number)
                 setRaces(racesCopy)
                 let SeriesIds = racesCopy.flatMap(race => race.seriesId)
                 let uniqueSeriesIds = [...new Set(SeriesIds)]
-                let seriesCopy: SeriesDataType[] = []
+                let seriesCopy: SeriesType[] = []
                 uniqueSeriesIds.forEach(id => {
-                    DB.GetSeriesById(id).then(data => {
+                    findSeriesMutation.mutateAsync({ seriesId: id }).then(data => {
                         seriesCopy.push(data)
                     })
                 })
@@ -231,3 +235,7 @@ export default async function Page(props: PageProps) {
         </div>
     )
 }
+
+export const Route = createFileRoute('/CastControl/$clubId')({
+    component: Page
+})

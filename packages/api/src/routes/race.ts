@@ -146,6 +146,14 @@ export const updateRace = os.race.update.handler(
 export const race_delete = os.race.delete.handler(async ({ input }) => {
   const deletedRace = await prisma.race.delete({
     where: { id: input.raceId },
+    include: {
+      fleets: {
+        include: {
+          fleetSettings: true,
+        },
+      },
+      series: true,
+    },
   });
   if (deletedRace) {
     return deletedRace;
@@ -173,6 +181,14 @@ export const race_create = os.race.create.handler(async ({ input }) => {
   var races: RaceType[] = await prisma.race.findMany({
     where: {
       seriesId: input.seriesId,
+    },
+    include: {
+      series: true,
+      fleets: {
+        include: {
+          fleetSettings: true,
+        },
+      },
     },
   });
   var number = 1;

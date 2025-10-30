@@ -1,18 +1,11 @@
-'use client'
-import useSWR from 'swr'
-import * as Fetcher from '@components/Fetchers'
 import { useEffect, useState } from 'react'
-
-type CardProps = {
-    name: string
-    description: string
-    link: string
-}
+import { useQuery } from '@tanstack/react-query'
+import { orpcClient } from '@lib/orpc'
 
 export default function LapsCounter() {
     const [lastData, setLastData] = useState(0)
 
-    function increaseNumberAnimation(elementId: string, endNumber: number, speed = 1) {
+    function increaseNumberAnimation(elementId: string, endNumber: number) {
         const element = document.getElementById(elementId) as HTMLElement
 
         if (!element) return
@@ -30,17 +23,17 @@ export default function LapsCounter() {
         }
     }
 
-    var { data, error, isValidating } = useSWR('/api/GetGlobalLaps', Fetcher.fetcher)
-    if (data == undefined) {
-        data = 0
+    var laps = useQuery(orpcClient.lap.global.queryOptions()).data
+    if (laps == undefined) {
+        laps = 0
     }
 
     useEffect(() => {
-        if (data) {
-            setLastData(data)
-            increaseNumberAnimation('nbr', data)
+        if (laps) {
+            setLastData(laps)
+            increaseNumberAnimation('nbr', laps)
         }
-    }, [data])
+    }, [laps])
     return (
         <section className='flex flex-col justify-center p-6 duration-500 border-2 border-pink-500 rounded shadow-xl motion-safe:hover:scale-105 cursor-pointer'>
             <h2 className='text-2xl text-gray-700'>

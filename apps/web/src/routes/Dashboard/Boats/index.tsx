@@ -1,5 +1,4 @@
 import { type ChangeEvent } from 'react'
-import * as DB from '@components/apiMethods'
 import { PageSkeleton } from '@components/layout/PageSkeleton'
 import Papa from 'papaparse'
 import BoatTable from '@components/tables/BoatTable'
@@ -9,7 +8,7 @@ import { Button } from '@components/ui/button'
 import { Input } from '@components/ui/input'
 import { createFileRoute, useLoaderData } from '@tanstack/react-router'
 import CreateBoatDialog from '@components/layout/dashboard/CreateBoatModal'
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
 
 function Page() {
@@ -19,6 +18,9 @@ function Page() {
 
     const { data: club } = useQuery(orpcClient.club.session.queryOptions())
     const { data: boats } = useQuery(orpcClient.boat.session.queryOptions())
+
+    const createBoatMutation = useMutation(orpcClient.boat.create.mutationOptions())
+    const updateBoatMutation = useMutation(orpcClient.boat.update.mutationOptions())
 
     const boatFileUploadHandler = async (e: ChangeEvent<HTMLInputElement>) => {
         if (boats == undefined || club == undefined) return
@@ -35,7 +37,13 @@ function Page() {
                     }
                     let DBboat = boats.find(DBboat => DBboat.name == boat.Name)
                     if (DBboat == undefined) {
-                        await DB.createBoat(boat.Name, parseInt(boat.Crew), parseInt(boat.PY), parseInt(boat.pursuitStartTime || 0), club.id)
+                        await createBoatMutation.mutateAsync({
+                            name: boat.Name,
+                            crew: parseInt(boat.Crew),
+                            py: parseInt(boat.PY),
+                            pursuitStartTime: parseInt(boat.pursuitStartTime || 0),
+                            clubId: club.id
+                        })
                     } else {
                         //check if uploaded boat is different from existing boat
                         if (
@@ -45,7 +53,7 @@ function Page() {
                             DBboat.pursuitStartTime == parseInt(boat.pursuitStartTime || 0)
                         ) {
                         } else {
-                            DB.updateBoatById({
+                            updateBoatMutation.mutateAsync({
                                 ...DBboat,
                                 name: boat.Name,
                                 crew: parseInt(boat.Crew),

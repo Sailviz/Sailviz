@@ -14,7 +14,6 @@ import {
   createSeries,
   deleteSeries,
   findClubSeries,
-  findSeries,
   getSeries,
   series_update,
   seriesbyClubId,
@@ -63,7 +62,7 @@ import {
 } from "./routes/startSequence";
 import { RaceType } from "packages/types/src/types";
 import { createResult, updateResult } from "./routes/result";
-import { globalConfig_find } from "./routes/globalConfig";
+import { globalConfig_find, globalConfig_update } from "./routes/globalConfig";
 import { lap_create, lap_delete } from "./routes/lap";
 
 interface ORPCContext extends RequestHeadersPluginContext {
@@ -413,5 +412,6 @@ export const mainRouter = os.router({
   },
   globalConfig: {
     find: globalConfig_find,
+    update: globalConfig_update,
   },
 });

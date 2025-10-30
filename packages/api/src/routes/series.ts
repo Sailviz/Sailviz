@@ -61,7 +61,7 @@ export const createSeries = os.series.create.handler(async ({ input }) => {
       name: input.name,
       settings: {
         numberToCount: 0,
-        pursuitLength: club.settings.pursuitLength,
+        pursuitLength: club.settings!.pursuitLength,
       },
       club: {
         connect: {

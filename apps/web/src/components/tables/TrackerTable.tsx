@@ -1,42 +1,15 @@
-'use client'
-import React, { ChangeEvent, useState } from 'react'
 import { createColumnHelper, flexRender, getCoreRowModel, useReactTable, getFilteredRowModel } from '@tanstack/react-table'
 import { EyeIcon } from '@components/icons/eye-icon'
-import { SearchIcon } from '@components/icons/search-icon'
-import * as Fetcher from '@components/Fetchers'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
-import { Button } from '../ui/button'
-import { Input } from '../ui/input'
-import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from '../ui/dropdown-menu'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@components/ui/table'
+import { Button } from '@components/ui/button'
+import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from '@components/ui/dropdown-menu'
 import { ChevronDown } from 'lucide-react'
-import { Link } from '@tanstack/react-router'
-import { useSession } from '@sailviz/auth/client'
+import { useLoaderData } from '@tanstack/react-router'
 
 const columnHelper = createColumnHelper<TrackerDataType>()
 
-const Text = ({ ...props }) => {
-    const initialValue = props.getValue()
-    const [value, setValue] = React.useState(initialValue)
-
+const Text = ({ value }: { value: string }) => {
     return <div className=''>{value}</div>
-}
-
-function Filter({ column, table }: { column: any; table: any }) {
-    const columnFilterValue = column.getFilterValue()
-
-    return (
-        <Input
-            className='w-full'
-            placeholder='Search by name...'
-            value={column.getFilterValue()}
-            //so that you can type a space, otherwise it will be blocked
-            onKeyDown={(e: any) => {
-                if (e.key === ' ') {
-                    e.stopPropagation()
-                }
-            }}
-        />
-    )
 }
 
 const Action = ({ ...props }: any) => {
@@ -51,13 +24,9 @@ const Action = ({ ...props }: any) => {
 }
 
 const TrackerTable = (props: any) => {
-    const {
-        data: session,
-        isPending, //loading state
-        error, //error object
-        refetch //refetch the session
-    } = useSession()
-    const { trackers, trackersIsError, trackersIsValidating } = Fetcher.Trackers()
+    const session = useLoaderData({ from: `__root__` })
+
+    const trackers = [] as TrackerDataType[]
 
     const data = trackers || []
 
@@ -65,14 +34,12 @@ const TrackerTable = (props: any) => {
         props.trackerStatus(tracker)
     }
 
-    const loadingState = trackersIsValidating || data?.length === 0 ? 'loading' : 'idle'
-
     const table = useReactTable({
         data,
         columns: [
             columnHelper.accessor('name', {
                 header: 'Tracker',
-                cell: props => <Text {...props} />,
+                cell: props => <Text value={props.getValue()} />,
                 enableColumnFilter: true
             }),
             columnHelper.accessor('trackerID', {

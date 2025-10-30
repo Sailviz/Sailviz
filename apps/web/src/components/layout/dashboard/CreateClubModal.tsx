@@ -94,7 +94,7 @@ export default function CreateClubModal() {
                     <div className='flex flex-col px-6 w-full'>
                         <p className='text-2xl font-bold'>Admin Account</p>
 
-                        <Input id='clubName' type='text' value={adminName} />
+                        <Input id='clubName' type='text' value={adminName} isInvalid={clubNameError} />
                     </div>
                     <div className='flex flex-col px-6 w-full'>
                         <p className='text-2xl font-bold'>Admin Password</p>

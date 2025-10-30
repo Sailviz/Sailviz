@@ -1,11 +1,13 @@
-import React, { useState, useEffect } from 'react'
-import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, useReactTable, SortingState, sortingFns, SortingFn, Row } from '@tanstack/react-table'
-import * as Fetcher from '@components/Fetchers'
+import { useState } from 'react'
+import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, useReactTable, type SortingState } from '@tanstack/react-table'
 import { ChevronDownIcon } from '@components/icons/chevron-down-icon'
 import { ChevronUpIcon } from '@components/icons/chevron-up-icon'
 import { SmoothSpinner } from '@components/icons/smooth-spinner'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@components/ui/table'
 import { Button } from '@components/ui/button'
+import type { FleetType, ResultType } from '@sailviz/types'
+import { useQuery } from '@tanstack/react-query'
+import { orpcClient } from '@lib/orpc'
 
 enum raceStateType {
     running,
@@ -13,13 +15,6 @@ enum raceStateType {
     reset,
     calculate,
     retire
-}
-
-// these options are specific to each fleet
-enum raceModeType {
-    Lap,
-    Finish,
-    None
 }
 
 const Text = ({ text }: { text: string }) => {
@@ -31,7 +26,7 @@ const StartTime = ({ seconds }: { seconds: number }) => {
     return <div>{new Date(seconds * 1000).toISOString().substr(14, 5)}</div>
 }
 
-const Position = ({ text, result }: { text: string; result: ResultDataType }) => {
+const Position = ({ text, result }: { text: string; result: ResultType }) => {
     if (result.resultCode != '') {
         text = result.resultCode
     }
@@ -46,7 +41,7 @@ const Class = ({ boat }: { boat: BoatDataType }) => {
     return <div>{boat.name}</div>
 }
 
-const Sort = ({ result, max, moveUp, moveDown }: { result: ResultDataType; max: number; moveUp: (id: string) => Promise<void>; moveDown: (id: string) => Promise<void> }) => {
+const Sort = ({ result, max, moveUp, moveDown }: { result: ResultType; max: number; moveUp: (id: string) => Promise<void>; moveDown: (id: string) => Promise<void> }) => {
     const [upLoading, setUpLoading] = useState(false)
     const [downLoading, setDownLoading] = useState(false)
     return (
@@ -76,7 +71,7 @@ const Sort = ({ result, max, moveUp, moveDown }: { result: ResultDataType; max: 
     )
 }
 
-const Action = ({ raceState, result, showRetireModal }: { raceState: raceStateType; result: ResultDataType; showRetireModal: (id: string) => void }) => {
+const Action = ({ raceState, result, showRetireModal }: { raceState: raceStateType; result: ResultType; showRetireModal: (id: string) => void }) => {
     if (raceState == raceStateType.retire) {
         return (
             <Button color='danger' onClick={() => showRetireModal(result.id)} disabled={result.resultCode != ''}>
@@ -88,7 +83,7 @@ const Action = ({ raceState, result, showRetireModal }: { raceState: raceStateTy
     }
 }
 
-const columnHelper = createColumnHelper<ResultDataType>()
+const columnHelper = createColumnHelper<ResultType>()
 
 const PursuitTable = ({
     fleetId,
@@ -103,7 +98,7 @@ const PursuitTable = ({
     moveUp: (id: string) => Promise<void>
     moveDown: (id: string) => Promise<void>
 }) => {
-    const { fleet, fleetIsValidating, fleetIsError } = Fetcher.Fleet(fleetId)
+    const fleet = useQuery(orpcClient.fleet.find.queryOptions({ input: { fleetId } })).data as FleetType
     let data = fleet.results //.filter(result => result.resultCode == '')
     if (data == undefined) {
         data = []
@@ -126,7 +121,7 @@ const PursuitTable = ({
             header: 'Adjust Position',
             id: 'Sort',
             // max is the number of boats without a result code
-            cell: props => <Sort result={props.row.original} moveUp={moveUp} moveDown={moveDown} max={data.filter(result => result.resultCode == '').length} />
+            cell: props => <Sort result={props.row.original} moveUp={moveUp} moveDown={moveDown} max={data.filter((result: ResultType) => result.resultCode == '').length} />
         }),
         columnHelper.accessor('Helm', {
             header: 'Helm',
@@ -160,7 +155,6 @@ const PursuitTable = ({
             cell: props => <Action raceState={raceState} showRetireModal={showRetireModal} result={props.getValue()} />
         })
     ]
-    const loadingState = fleetIsValidating || data?.length === 0 ? 'loading' : 'idle'
 
     let table = useReactTable({
         data,

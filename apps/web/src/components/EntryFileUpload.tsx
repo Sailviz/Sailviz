@@ -1,18 +1,21 @@
-'use client'
-import { ChangeEvent, useEffect, useState } from 'react'
+import { type ChangeEvent, useState } from 'react'
 import { Button } from './ui/button'
 import { Input } from './ui/input'
 import Papa from 'papaparse'
 import ProgressModal from './layout/dashboard/ProgressModal'
-import * as Fetcher from '@components/Fetchers'
-import * as DB from '@components/apiMethods'
 import { mutate } from 'swr'
+import { useMutation, useQuery } from '@tanstack/react-query'
+import { orpcClient } from '@lib/orpc'
+import type { BoatType, ResultType } from '@sailviz/types'
 export function EntryFileUpload({ raceId }: { raceId: string }) {
     const [progressValue, setProgressValue] = useState(0)
     const [progressMax, setProgressMax] = useState(0)
     const [progressOpen, setProgressOpen] = useState(false)
-    const { race, raceIsError, raceIsValidating, mutateRace } = Fetcher.Race(raceId, false)
-    const { boats, boatsIsError, boatsIsValidating } = Fetcher.Boats()
+    const race = useQuery(orpcClient.race.find.queryOptions({ input: { raceId: raceId } })).data
+    const boats = useQuery(orpcClient.boat.session.queryOptions()).data as BoatType[]
+
+    const createResultMutation = useMutation(orpcClient.result.create.mutationOptions())
+    const updateResultMutation = useMutation(orpcClient.result.update.mutationOptions())
 
     const entryFileUploadHandler = async (e: ChangeEvent<HTMLInputElement>) => {
         if (race == null) {
@@ -39,17 +42,17 @@ export function EntryFileUpload({ raceId }: { raceId: string }) {
 
                         return
                     }
-                    let result: ResultDataType = {} as ResultDataType
+                    let result: ResultType = {} as ResultType
                     if (line.Fleet == undefined) {
                         if (race.fleets.length > 1) {
                             alert("fleets aren't defined and there is more than one fleet in race")
                             return
                         } else {
-                            result = await DB.createResult(race.fleets[0]!.id)
+                            result = await createResultMutation.mutateAsync({ fleetId: race.fleets[0]!.id })
                         }
                     } else {
                         //fleet is defined
-                        result = await DB.createResult(race.fleets.find(fleet => fleet.fleetSettings.name == line.Fleet)!.id)
+                        result = await createResultMutation.mutateAsync({ fleetId: race.fleets.find(fleet => fleet.fleetSettings.name == line.Fleet)!.id })
                     }
                     result.Helm = line.Helm
                     result.Crew = line.Crew
@@ -63,7 +66,7 @@ export function EntryFileUpload({ raceId }: { raceId: string }) {
                     }
                     console.log(result)
                     //update with info
-                    await DB.updateResult(result)
+                    await updateResultMutation.mutateAsync(result)
                 }
                 setProgressOpen(false)
             }

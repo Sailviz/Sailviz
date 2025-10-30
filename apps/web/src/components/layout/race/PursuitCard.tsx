@@ -1,22 +1,8 @@
-import { useEffect, useState } from 'react'
-
 enum raceStateType {
     running,
     stopped,
     reset,
     calculate
-}
-
-enum modeType {
-    Retire,
-    Lap,
-    Finish
-}
-
-const secondsToTimeString = (seconds: number) => {
-    let minutes = Math.floor(seconds / 60)
-    let remainder = seconds % 60
-    return minutes.toString().padStart(2, '0') + ':' + remainder.toString().padStart(2, '0')
 }
 
 export default function PursuitCard({
@@ -30,12 +16,6 @@ export default function PursuitCard({
     lapBoat: (id: string) => void
     showRetireModal: (id: string) => void
 }) {
-    const [isLoading, setIsLoading] = useState(false)
-
-    useEffect(() => {
-        setIsLoading(false)
-    }, [result])
-
     if (result.resultCode != '') {
         return (
             <div id={result.id} className={'bg-red-300 border-2 border-pink-500'}>
@@ -59,7 +39,7 @@ export default function PursuitCard({
                         </h2>
                         <div className='flex'>
                             <p
-                                onClick={e => {
+                                onClick={_ => {
                                     confirm('are you sure you want to retire ' + result.SailNumber) ? showRetireModal(result.id) : null
                                 }}
                                 className='cursor-pointer text-white bg-blue-600 font-medium rounded-lg text-sm p-5 mx-2 ml-auto text-center flex'

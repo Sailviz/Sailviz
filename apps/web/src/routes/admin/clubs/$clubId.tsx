@@ -1,14 +1,11 @@
-import { createFileRoute, useLoaderData } from '@tanstack/react-router'
+import { createFileRoute } from '@tanstack/react-router'
 import { title } from '@components/layout/home/primitaves'
-import * as fetcher from '@components/Fetchers'
 import { Card, CardContent } from '@components/ui/card'
 import { useQuery } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
 
 function Page() {
     const { clubId } = Route.useParams()
-
-    const session = useLoaderData({ from: `__root__` })
 
     const club = useQuery(orpcClient.club.find.queryOptions({ input: { clubId: clubId } })).data
 

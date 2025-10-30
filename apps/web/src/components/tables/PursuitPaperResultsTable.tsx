@@ -30,9 +30,7 @@ const Empty = () => {
 
 const columnHelper = createColumnHelper<ResultType>()
 
-const PursuitPaperResultsTable = forwardRef((props: { results: ResultType[] }, ref: any) => {
-    let [results, setResults] = useState<ResultType[]>(props.results)
-
+const PursuitPaperResultsTable = forwardRef((results: ResultType[], ref: any) => {
     //create 3 empty lines on sheet
     results.push({} as ResultType)
     results.push({} as ResultType)
@@ -107,7 +105,7 @@ const PursuitPaperResultsTable = forwardRef((props: { results: ResultType[] }, r
         getSortedRowModel: getSortedRowModel()
     })
     return (
-        <div key={JSON.stringify(props.results)} className='block max-w-full' ref={ref}>
+        <div className='block max-w-full' ref={ref}>
             <table className='w-full border-spacing-0'>
                 <thead>
                     {table.getHeaderGroups().map(headerGroup => (

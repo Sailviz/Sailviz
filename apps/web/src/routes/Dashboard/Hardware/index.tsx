@@ -21,14 +21,14 @@ function Page() {
         if (club == undefined) {
             throw new Error('Club is undefined')
         }
-        await clubMutation.mutateAsync({ ...club, settings: { ...club.settings, clockIP: clockIP, clockOffset: parseInt(clockOffset), hornIP: hornIP } })
+        await clubMutation.mutateAsync({ ...club, settings: { ...club.settings!, clockIP: clockIP, clockOffset: parseInt(clockOffset), hornIP: hornIP } })
     }
 
     useEffect(() => {
         if (club == undefined) return
-        setClockIP(club.settings.clockIP)
-        setClockOffset(club.settings.clockOffset.toString())
-        setHornIP(club.settings.hornIP)
+        setClockIP(club.settings!.clockIP)
+        setClockOffset(club.settings!.clockOffset.toString())
+        setHornIP(club.settings!.hornIP)
     }, [club])
 
     if (club == undefined || session == undefined) {

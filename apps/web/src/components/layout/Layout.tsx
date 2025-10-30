@@ -1,5 +1,4 @@
 import { Link } from '@tanstack/react-router'
-import Image from 'next/image'
 import { ThemeSwitcher } from '../ui/ThemeSwitcher'
 export const siteTitle = 'SailViz'
 
@@ -21,6 +20,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                                     <Link
                                         href='/About'
                                         className='block py-2 pr-4 pl-3 text-gray-700 border-b border-gray-100 hover:bg-gray-50 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0'
+                                        to={undefined}
                                     >
                                         About
                                     </Link>
@@ -29,6 +29,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                                     <Link
                                         href='/Contact'
                                         className='block py-2 pr-4 pl-3 text-gray-700 hover:bg-gray-50 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 '
+                                        to={undefined}
                                     >
                                         Contact
                                     </Link>
@@ -37,6 +38,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                                     <Link
                                         href='/Login'
                                         className='text-white bg-blue-700 hover:bg-pink-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0'
+                                        to={undefined}
                                     >
                                         Login
                                     </Link>

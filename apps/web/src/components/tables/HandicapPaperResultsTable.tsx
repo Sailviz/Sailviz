@@ -106,7 +106,7 @@ const HandicapPaperResultsTable = forwardRef((props: { fleet: FleetType }, ref: 
             const newColumn = columnHelper.display({
                 header: (i + 1).toString(),
                 size: 40,
-                cell: props => <Empty />,
+                cell: _ => <Empty />,
                 enableSorting: false
             })
             columns.push(newColumn)
@@ -122,7 +122,7 @@ const HandicapPaperResultsTable = forwardRef((props: { fleet: FleetType }, ref: 
     if (!allFinished) {
         const Seconds = columnHelper.display({
             header: 'Seconds',
-            cell: props => <Empty />,
+            cell: _ => <Empty />,
             enableSorting: false
         })
         columns.push(Seconds)
@@ -133,7 +133,7 @@ const HandicapPaperResultsTable = forwardRef((props: { fleet: FleetType }, ref: 
         id: 'PY',
         cell: props => <Text text={props.getValue()} />,
         enableSorting: true,
-        sortingFn: (rowA, rowB, columnId) => {
+        sortingFn: (rowA, rowB) => {
             if (rowA.original.boat?.py == undefined) {
                 return Number.MAX_SAFE_INTEGER
             }

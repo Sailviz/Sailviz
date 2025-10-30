@@ -1,11 +1,10 @@
-'use client'
-import React, { useState, useEffect } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useEffect } from 'react'
 import { client } from '@sailviz/auth/client'
-import { method } from 'cypress/types/bluebird'
-import { useNavigate } from '@tanstack/react-router'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
+
 function Page() {
-    const searchParams = useSearchParams()
+    const { UUID } = Route.useParams()
+
     const navigate = useNavigate()
 
     const sendLoginRequest = async (uuid: string) => {
@@ -16,12 +15,11 @@ function Page() {
     }
 
     useEffect(() => {
-        const uuid = searchParams.get('uuid')
-        console.log(uuid)
-        if (uuid != undefined) {
-            sendLoginRequest(uuid)
+        console.log(UUID)
+        if (UUID != undefined) {
+            sendLoginRequest(UUID)
         }
-    }, [Router])
+    }, [])
 
     return (
         <div className='container mx-auto flex flex-col items-center justify-center h-screen p-4'>
@@ -32,3 +30,7 @@ function Page() {
         </div>
     )
 }
+
+export const Route = createFileRoute('/autoLogin/$UUID')({
+    component: Page
+})

@@ -1,11 +1,9 @@
-'use client'
 import { createFileRoute, redirect } from '@tanstack/react-router'
 import { title } from '@components/layout/home/primitaves'
 import { Button } from '@components/ui/button'
 import { Input } from '@components/ui/input'
 import { useEffect, useState } from 'react'
-import * as DB from '@components/apiMethods'
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
 import { ensureAdmin } from 'src/lib/session'
 function Page() {
@@ -15,6 +13,8 @@ function Page() {
     const [demoUUID, setDemoUUID] = useState('')
 
     const GlobalConfig = useQuery(orpcClient.globalConfig.find.queryOptions()).data
+
+    const updateGlobalConfigMutation = useMutation(orpcClient.globalConfig.update.mutationOptions())
 
     useEffect(() => {
         if (GlobalConfig == undefined) {
@@ -27,7 +27,7 @@ function Page() {
     }, [GlobalConfig])
 
     const save = async () => {
-        await DB.updateGlobalConfig({
+        await updateGlobalConfigMutation.mutateAsync({
             demoClubId: demoClubId,
             demoSeriesId: demoSeriesId,
             demoDataId: demoDataId,

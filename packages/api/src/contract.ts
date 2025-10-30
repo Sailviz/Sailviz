@@ -4,23 +4,17 @@ import { z } from "zod";
 import {
   BoatSchema,
   ClubSchema,
-  ClubType,
   FleetSchema,
   FleetSettingsSchema,
-  FleetSettingsType,
   GlobalConfigSchema,
   LapSchema,
   RaceSchema,
-  RaceType,
   ResultSchema,
-  ResultType,
   RoleSchema,
   SeriesSchema,
-  SeriesType,
   StartSequenceStepSchema,
   UserSchema,
 } from "@sailviz/types";
-import { create } from "domain";
 
 const helloSchema = z.object({
   name: z.string(),
@@ -151,5 +145,6 @@ export const ORPCcontract = {
   },
   globalConfig: {
     find: oc.output(GlobalConfigSchema),
+    update: oc.input(GlobalConfigSchema).output(GlobalConfigSchema),
   },
 } as const;

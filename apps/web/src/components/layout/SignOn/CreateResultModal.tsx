@@ -20,7 +20,7 @@ export default function CreateResultModal({ todaysRaces, boats }: { todaysRaces:
     const [crew, setCrew] = useState('')
     const [sailNumber, setSailNumber] = useState('')
 
-    const { theme, setTheme } = useTheme()
+    const { theme } = useTheme()
     let submitDisabled = false
 
     const [selectedRaces, setSelectedRaces] = useState<string[]>([])
@@ -43,7 +43,6 @@ export default function CreateResultModal({ todaysRaces, boats }: { todaysRaces:
 
     const CapitaliseInput = (e: ChangeEvent<HTMLInputElement>) => {
         const sentence = e.target.value.split(' ')
-        const cursorPos = e.target.selectionStart
         const capitalizedWords = sentence.map(word => word.charAt(0).toUpperCase() + word.slice(1))
         const capitalisedSentence = capitalizedWords.join(' ')
         if (e.target.id == 'helm') setHelm(capitalisedSentence)
@@ -161,6 +160,7 @@ export default function CreateResultModal({ todaysRaces, boats }: { todaysRaces:
                             }}
                             placeholder='J Bloggs'
                             autoComplete='off'
+                            isInvalid={helmError}
                         />
                     </div>
                     <div className='flex flex-col px-6 w-full'>
@@ -179,7 +179,7 @@ export default function CreateResultModal({ todaysRaces, boats }: { todaysRaces:
                                 setSelectedBoat(choice!)
                             }}
                             styles={{
-                                control: (provided, state) =>
+                                control: provided =>
                                     ({
                                         ...provided,
                                         border: boatError ? '2px solid #f31260' : 'none',
@@ -201,19 +201,19 @@ export default function CreateResultModal({ todaysRaces, boats }: { todaysRaces:
                                             backgroundColor: theme == 'dark' ? '#3f3f46' : '#d4d4d8'
                                         }
                                     }) as CSSObjectWithLabel,
-                                menu: (provided, state) =>
+                                menu: provided =>
                                     ({
                                         ...provided,
                                         backgroundColor: theme == 'dark' ? '#18181b' : 'white',
                                         border: theme == 'dark' ? '2px solid #3f3f46' : '2px solid #d4d4d8',
                                         fontSize: '1rem'
                                     }) as CSSObjectWithLabel,
-                                input: (provided, state) =>
+                                input: provided =>
                                     ({
                                         ...provided,
                                         color: theme == 'dark' ? 'white' : 'black'
                                     }) as CSSObjectWithLabel,
-                                singleValue: (provided, state) =>
+                                singleValue: provided =>
                                     ({
                                         ...provided,
                                         color: theme == 'dark' ? 'white' : 'black'
@@ -231,12 +231,13 @@ export default function CreateResultModal({ todaysRaces, boats }: { todaysRaces:
                                 setSailNumError(false)
                                 setSailNumber(e.target.value)
                             }}
+                            isInvalid={sailNumError}
                         />
                     </div>
                 </div>
 
                 <div className='text-4xl font-extrabold p-6'>Select Races</div>
-                {todaysRaces.map((race, index) => {
+                {todaysRaces.map(race => {
                     if (race.fleets.some(fleet => fleet.startTime != 0)) {
                         //a fleet in the race has started so don't allow entry
                         return <div key={race.id + 'finished'}></div>
@@ -246,7 +247,7 @@ export default function CreateResultModal({ todaysRaces, boats }: { todaysRaces:
                         <div className='mx-6 mb-10' key={race.id + 'select'}>
                             <div className='flex flex-row'>
                                 <div className='py-2 font-bold px-4'>
-                                    {race.series.name} {race.number}
+                                    {race.series!.name} {race.number}
                                 </div>
                                 <Switch
                                     id={race.id + 'Switch'}
@@ -271,7 +272,7 @@ export default function CreateResultModal({ todaysRaces, boats }: { todaysRaces:
                                 >
                                     {/* show buttons for each fleet in a series */}
                                     <TabsList>
-                                        {race.fleets.map((fleet: FleetType, index) => {
+                                        {race.fleets.map((fleet: FleetType) => {
                                             return (
                                                 <TabsTrigger
                                                     key={fleet.id + 'select'}

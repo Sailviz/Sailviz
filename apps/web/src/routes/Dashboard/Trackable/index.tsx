@@ -3,8 +3,6 @@ import { PageSkeleton } from '@components/layout/PageSkeleton'
 import { AVAILABLE_PERMISSIONS, userHasPermission } from '@components/helpers/users'
 import { title } from '@components/layout/home/primitaves'
 import TrackerTable from '@components/tables/TrackerTable'
-import * as Trackable from '@components/trackable'
-import { useState } from 'react'
 import { Button } from '@components/ui/button'
 import { useQuery } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
@@ -15,23 +13,15 @@ function Page() {
 
     const club = useQuery(orpcClient.club.session.queryOptions()).data as ClubType
 
-    // const statusModal = useDisclosure()
-    const [viewingTracker, setviewingTracker] = useState<TrackerDataType>()
-
-    const trackerStatus = async (tracker: TrackerDataType) => {
-        // statusModal.onOpen()
-        setviewingTracker(await Trackable.getTrackerStatus(tracker.trackerID))
-    }
-
-    const syncTrackers = async () => {
-        await Trackable.syncTrackers(club.settings.trackable.orgID, club.id)
-    }
+    // const syncTrackers = async () => {
+    //     await Trackable.syncTrackers(club.settings!.trackable.orgID, club.id)
+    // }
 
     if (club == undefined || session == undefined) {
         return <PageSkeleton />
     }
 
-    if (!club.settings.trackable.enabled) {
+    if (!club.settings!.trackable.enabled) {
         return (
             <div>
                 <p>Trackable is not enabled for your club, contact support for more information</p>
@@ -54,17 +44,17 @@ function Page() {
             </div>
             <p className='text-2xl font-bold px-6 py-2'>Trackers</p>
             <div className='flex flex-row items-center px-6 py-2 w-1/2 justify-around'>
-                <Button className='mx-1' color='primary' onClick={syncTrackers}>
+                <Button className='mx-1' color='primary' onClick={() => {}}>
                     Sync Trackers
                 </Button>
             </div>
             <div className='text-2xl font-bold px-6 py-2'>
-                <TrackerTable trackerStatus={trackerStatus} />
+                <TrackerTable trackerStatus={() => {}} />
             </div>
         </>
     )
 }
 
-export const Route = createFileRoute('/Dashboard/Trackable/page')({
+export const Route = createFileRoute('/Dashboard/Trackable/')({
     component: Page
 })

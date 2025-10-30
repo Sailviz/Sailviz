@@ -1,4 +1,3 @@
-'use client'
 import { SailVizIcon } from '@components/icons/sailviz-icon'
 import { NavigationMenu, NavigationMenuItem, NavigationMenuLink, NavigationMenuList } from '../../ui/navigation-menu'
 import { Link } from '@tanstack/react-router'
