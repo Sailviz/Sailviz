@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Peer, DataConnection } from 'peerjs'
+import { Peer, type DataConnection } from 'peerjs'
 import { title } from '@components/layout/home/primitaves'
 import { useMutation } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
