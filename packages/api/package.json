@@ -19,6 +19,7 @@
     "dev": "tsx src/server.ts",
     "prebuild": "pnpm -w --filter @sailviz/db build && node scripts/generate-config.js",
     "build": "tsc --build && tsc-alias",
+    "postbuild": "node scripts/copy-db-generated.cjs",
     "build:dev": "set NODE_ENV=development npm run build",
     "build:test": "set NODE_ENV=test npm run build",
     "build:prod": "set NODE_ENV=production npm run build"
