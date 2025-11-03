@@ -4,6 +4,8 @@ import path from "path";
 import dotenv from "dotenv";
 
 // Decide which env file to load
+console.log("Generating config.ts from .env files...");
+console.log(`NODE_ENV: ${process.env.NODE_ENV}`);
 const env = process.env.NODE_ENV || "development";
 const envFile = `.env.${env}`;
 const envPath = path.resolve(process.cwd(), envFile);
