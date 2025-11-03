@@ -121,3 +121,15 @@ export const club_name = os.club.name.handler(async ({ input }) => {
     throw new ORPCError("Club not found");
   }
 });
+
+export const club_findByStripeCustomerId =
+  os.club.findByStripeCustomerId.handler(async ({ input }) => {
+    const club = await prisma.club.findFirst({
+      where: { stripeCustomerId: input.stripeCustomerId },
+    });
+    if (club) {
+      return club as unknown as ClubType;
+    } else {
+      throw new ORPCError("Club not found");
+    }
+  });

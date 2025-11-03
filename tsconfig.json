@@ -8,7 +8,8 @@
       "@sailviz/api/*": ["packages/api/src/*"],
       "@sailviz/auth/*": ["packages/auth/src/*"],
       "@sailviz/shared/*": ["packages/shared/*"],
-      "@sailviz/types": ["packages/types/"]
+      "@sailviz/types": ["packages/types/src/types.ts"],
+      "@sailviz/types/*": ["packages/types/*"]
     }
   }
 }

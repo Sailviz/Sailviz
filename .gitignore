@@ -1,5 +1,7 @@
-.env
+.env*
 node_modules/
 **/node_modules/
 .pnpm-store/
 /packages/db/src/generated
+packages/api/src/config.ts
+/packages/api/dist

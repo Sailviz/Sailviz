@@ -1,5 +1,6 @@
 {
   "name": "@sailviz/api",
+  "type": "module",
   "dependencies": {
     "@orpc/client": "^1.9.3",
     "@orpc/server": "^1.9.3",
@@ -15,13 +16,19 @@
     "./router": "./src/router.ts"
   },
   "scripts": {
-    "dev": "tsx src/server.ts"
+    "dev": "tsx src/server.ts",
+    "prebuild": "node scripts/generate-config.js",
+    "build": "tsc --build && tsc-alias",
+    "build:dev": "set NODE_ENV=development npm run build",
+    "build:test": "set NODE_ENV=test npm run build",
+    "build:prod": "set NODE_ENV=production npm run build"
   },
   "packageManager": "pnpm@10.18.1+sha512.77a884a165cbba2d8d1c19e3b4880eee6d2fcabd0d879121e282196b80042351d5eb3ca0935fa599da1dc51265cc68816ad2bddd2a2de5ea9fdf92adbec7cd34",
   "devDependencies": {
     "@types/node": "^24.7.0",
     "ts-node": "^10.9.2",
     "ts-node-dev": "^2.0.0",
+    "tsc-alias": "^1.8.16",
     "tsx": "^4.20.6",
     "typescript": "~5.9.3"
   }

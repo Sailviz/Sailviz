@@ -5,10 +5,13 @@ import { mainRouter } from "./contract-implement";
 import { toNodeHandler } from "better-auth/node";
 import { auth } from "@sailviz/auth/auth";
 import { RequestHeadersPlugin } from "@orpc/server/plugins";
+
+import { ORIGIN_URL } from "./config";
+
 const app = express();
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: ORIGIN_URL || "http://localhost:5173",
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   })

@@ -66,6 +66,9 @@ export const ORPCcontract = {
     create: oc.input(z.object({ name: z.string() })).output(ClubSchema),
     find: oc.input(z.object({ clubId: z.string() })).output(ClubSchema),
     name: oc.input(z.object({ clubName: z.string() })).output(ClubSchema),
+    findByStripeCustomerId: oc
+      .input(z.object({ stripeCustomerId: z.string() }))
+      .output(ClubSchema),
   },
   fleet: {
     find: oc
