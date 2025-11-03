@@ -5,3 +5,4 @@ node_modules/
 /packages/db/src/generated
 packages/api/src/config.ts
 /packages/api/dist
+/packages/db/dist

@@ -61,7 +61,7 @@ import {
   findStartSequence,
   startSequence_update,
 } from "./routes/startSequence";
-import { RaceType } from "packages/types/src/types";
+import { RaceType } from "@sailviz/types";
 import { createResult, updateResult } from "./routes/result";
 import { globalConfig_find, globalConfig_update } from "./routes/globalConfig";
 import { lap_create, lap_delete } from "./routes/lap";

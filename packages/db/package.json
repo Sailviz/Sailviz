@@ -2,11 +2,13 @@
   "name": "@sailviz/db",
   "version": "1.0.0",
   "description": "",
+  "type": "module",
   "main": "src/index.ts",
   "exports": {
     ".": "./src/index.ts"
   },
   "scripts": {
+    "build": "tsc -p tsconfig.json && node scripts/copy-generated.cjs",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -17,5 +19,8 @@
     "@prisma/client": "^6.17.0",
     "dotenv": "^17.2.3",
     "prisma": "^6.16.3"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.0"
   }
 }

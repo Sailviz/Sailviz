@@ -17,7 +17,7 @@
   },
   "scripts": {
     "dev": "tsx src/server.ts",
-    "prebuild": "node scripts/generate-config.js",
+    "prebuild": "pnpm -w --filter @sailviz/db build && node scripts/generate-config.js",
     "build": "tsc --build && tsc-alias",
     "build:dev": "set NODE_ENV=development npm run build",
     "build:test": "set NODE_ENV=test npm run build",
