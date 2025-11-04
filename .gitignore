@@ -6,3 +6,4 @@ node_modules/
 packages/api/src/config.ts
 /packages/api/dist
 /packages/db/dist
+packages/auth/src/config.ts

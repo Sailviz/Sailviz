@@ -6,10 +6,10 @@ import {
 import { createAuthClient } from "better-auth/react";
 import { myPluginClient } from "./client-plugin";
 import type { ClubType, UserType } from "@sailviz/types";
+import { BASE_URL } from "./config";
 
 export const client = createAuthClient({
-  baseURL: "http://localhost:3000",
-  // baseURL: "https://dev.sailviz.com",
+  baseURL: BASE_URL,
   basePath: "/api/auth/",
   plugins: [
     usernameClient(),
