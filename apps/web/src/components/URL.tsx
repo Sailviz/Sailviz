@@ -1,5 +1,5 @@
-if (!process.env.BASE_URL) {
+if (!import.meta.env.VITE_BASE_URL) {
     throw new Error('BASE_URL is not defined in environment variables')
 }
 
-export const server = process.env.BASE_URL
+export const server = import.meta.env.VITE_BASE_URL

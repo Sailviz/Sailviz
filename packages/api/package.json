@@ -1,6 +1,5 @@
 {
   "name": "@sailviz/api",
-  "type": "module",
   "dependencies": {
     "@orpc/client": "^1.9.3",
     "@orpc/server": "^1.9.3",

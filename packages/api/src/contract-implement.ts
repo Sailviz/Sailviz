@@ -25,9 +25,6 @@ import {
   findBoats,
   updateBoatById,
 } from "./routes/boats";
-import * as Auth from "@sailviz/auth/auth";
-const _authAny: any = Auth as any;
-const auth = _authAny?.auth ?? _authAny?.default ?? _authAny;
 import { RequestHeadersPluginContext } from "@orpc/server/plugins";
 import {
   createFleetSettings,
@@ -67,6 +64,7 @@ import { RaceType } from "@sailviz/types";
 import { createResult, updateResult } from "./routes/result";
 import { globalConfig_find, globalConfig_update } from "./routes/globalConfig";
 import { lap_create, lap_delete } from "./routes/lap";
+import { auth } from "@sailviz/auth/auth";
 
 interface ORPCContext extends RequestHeadersPluginContext {
   req: Request;

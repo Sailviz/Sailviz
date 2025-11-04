@@ -8,8 +8,8 @@ import { myPluginClient } from "./client-plugin";
 import type { ClubType, UserType } from "@sailviz/types";
 
 export const client = createAuthClient({
-  // baseURL: "http://localhost:3000",
-  baseURL: "https://dev.sailviz.com",
+  baseURL: "http://localhost:3000",
+  // baseURL: "https://dev.sailviz.com",
   basePath: "/api/auth/",
   plugins: [
     usernameClient(),
