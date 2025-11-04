@@ -25,7 +25,9 @@ import {
   findBoats,
   updateBoatById,
 } from "./routes/boats";
-import { auth } from "@sailviz/auth/auth";
+import * as Auth from "@sailviz/auth/auth";
+const _authAny: any = Auth as any;
+const auth = _authAny?.auth ?? _authAny?.default ?? _authAny;
 import { RequestHeadersPluginContext } from "@orpc/server/plugins";
 import {
   createFleetSettings,

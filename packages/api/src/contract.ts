@@ -1,20 +1,7 @@
 // contract.ts
 import { oc } from "@orpc/contract";
 import { z } from "zod";
-import {
-  BoatSchema,
-  ClubSchema,
-  FleetSchema,
-  FleetSettingsSchema,
-  GlobalConfigSchema,
-  LapSchema,
-  RaceSchema,
-  ResultSchema,
-  RoleSchema,
-  SeriesSchema,
-  StartSequenceStepSchema,
-  UserSchema,
-} from "@sailviz/types";
+import * as Types from "@sailviz/types";
 
 const helloSchema = z.object({
   name: z.string(),
@@ -29,65 +16,65 @@ export const ORPCcontract = {
     global: oc.output(z.number()),
     create: oc
       .input(z.object({ resultId: z.string(), time: z.number() }))
-      .output(LapSchema),
-    delete: oc.input(z.object({ lapId: z.string() })).output(LapSchema),
+      .output(Types.LapSchema),
+    delete: oc.input(z.object({ lapId: z.string() })).output(Types.LapSchema),
   },
   startSequence: {
     find: oc
       .input(z.object({ seriesId: z.string() }))
-      .output(z.array(StartSequenceStepSchema)),
+      .output(z.array(Types.StartSequenceStepSchema)),
     delete: oc
       .input(z.object({ stepId: z.string() }))
-      .output(StartSequenceStepSchema),
+      .output(Types.StartSequenceStepSchema),
     update: oc
       .input(
         z.object({
           seriesId: z.string(),
-          startSequence: z.array(StartSequenceStepSchema),
+          startSequence: z.array(Types.StartSequenceStepSchema),
         })
       )
-      .output(z.array(StartSequenceStepSchema)),
+      .output(z.array(Types.StartSequenceStepSchema)),
   },
   series: {
-    find: oc.input(z.object({ seriesId: z.string() })).output(SeriesSchema),
+    find: oc.input(z.object({ seriesId: z.string() })).output(Types.SeriesSchema),
     club: oc
       .input(z.object({ clubId: z.string(), includeRaces: z.boolean() }))
-      .output(z.array(SeriesSchema)),
+      .output(z.array(Types.SeriesSchema)),
     create: oc
       .input(z.object({ clubId: z.string(), name: z.string() }))
-      .output(SeriesSchema),
-    delete: oc.input(z.object({ seriesId: z.string() })).output(SeriesSchema),
-    update: oc.input(SeriesSchema).output(SeriesSchema),
+      .output(Types.SeriesSchema),
+    delete: oc.input(z.object({ seriesId: z.string() })).output(Types.SeriesSchema),
+    update: oc.input(Types.SeriesSchema).output(Types.SeriesSchema),
   },
   club: {
-    session: oc.output<typeof ClubSchema>(ClubSchema),
-    update: oc.input(ClubSchema).output(ClubSchema),
-    all: oc.output(z.array(ClubSchema)),
-    create: oc.input(z.object({ name: z.string() })).output(ClubSchema),
-    find: oc.input(z.object({ clubId: z.string() })).output(ClubSchema),
-    name: oc.input(z.object({ clubName: z.string() })).output(ClubSchema),
+    session: oc.output<typeof Types.ClubSchema>(Types.ClubSchema),
+    update: oc.input(Types.ClubSchema).output(Types.ClubSchema),
+    all: oc.output(z.array(Types.ClubSchema)),
+    create: oc.input(z.object({ name: z.string() })).output(Types.ClubSchema),
+    find: oc.input(z.object({ clubId: z.string() })).output(Types.ClubSchema),
+    name: oc.input(z.object({ clubName: z.string() })).output(Types.ClubSchema),
     findByStripeCustomerId: oc
       .input(z.object({ stripeCustomerId: z.string() }))
-      .output(ClubSchema),
+      .output(Types.ClubSchema),
   },
   fleet: {
     find: oc
       .input(z.object({ fleetId: z.string() }))
-      .output<typeof FleetSchema>(FleetSchema),
-    update: oc.input(FleetSchema).output(FleetSchema),
+      .output<typeof Types.FleetSchema>(Types.FleetSchema),
+    update: oc.input(Types.FleetSchema).output(Types.FleetSchema),
     settings: {
       create: oc.input(z.object({ seriesId: z.string() })).output(z.any()),
       find: oc.input(z.object({ seriesId: z.string() })).output(z.any()),
       delete: oc
         .input(z.object({ fleetSettingsId: z.string() }))
         .output(z.any()),
-      update: oc.input(FleetSettingsSchema).output(FleetSettingsSchema),
+      update: oc.input(Types.FleetSettingsSchema).output(Types.FleetSettingsSchema),
     },
   },
   boat: {
-    find: oc.input(z.object({ boatId: z.string() })).output(BoatSchema),
-    session: oc.output(z.array(BoatSchema)),
-    update: oc.input(BoatSchema).output(BoatSchema),
+    find: oc.input(z.object({ boatId: z.string() })).output(Types.BoatSchema),
+    session: oc.output(z.array(Types.BoatSchema)),
+    update: oc.input(Types.BoatSchema).output(Types.BoatSchema),
     create: oc
       .input(
         z.object({
@@ -98,14 +85,14 @@ export const ORPCcontract = {
           clubId: z.string(),
         })
       )
-      .output(BoatSchema),
-    delete: oc.input(z.object({ boatId: z.string() })).output(BoatSchema),
+      .output(Types.BoatSchema),
+    delete: oc.input(z.object({ boatId: z.string() })).output(Types.BoatSchema),
   },
   race: {
-    find: oc.input(z.object({ raceId: z.string() })).output(RaceSchema),
+    find: oc.input(z.object({ raceId: z.string() })).output(Types.RaceSchema),
     today: oc
       .input(z.object({ clubId: z.string() }))
-      .output(z.array(RaceSchema)),
+      .output(z.array(Types.RaceSchema)),
     club: oc
       .input(
         z.object({
@@ -115,39 +102,39 @@ export const ORPCcontract = {
           historical: z.boolean(),
         })
       )
-      .output(z.object({ races: z.array(RaceSchema), count: z.number() })),
-    update: oc.input(RaceSchema).output(RaceSchema),
-    delete: oc.input(z.object({ raceId: z.string() })).output(RaceSchema),
+      .output(z.object({ races: z.array(Types.RaceSchema), count: z.number() })),
+    update: oc.input(Types.RaceSchema).output(Types.RaceSchema),
+    delete: oc.input(z.object({ raceId: z.string() })).output(Types.RaceSchema),
     create: oc
       .input(
         z.object({
           seriesId: z.string(),
         })
       )
-      .output(RaceSchema),
+      .output(Types.RaceSchema),
   },
   result: {
-    create: oc.input(z.object({ fleetId: z.string() })).output(ResultSchema),
-    update: oc.input(ResultSchema).output(ResultSchema),
+    create: oc.input(z.object({ fleetId: z.string() })).output(Types.ResultSchema),
+    update: oc.input(Types.ResultSchema).output(Types.ResultSchema),
   },
   user: {
-    update: oc.input(UserSchema).output(UserSchema),
-    create: oc.input(z.object({ clubId: z.string() })).output(UserSchema),
+    update: oc.input(Types.UserSchema).output(Types.UserSchema),
+    create: oc.input(z.object({ clubId: z.string() })).output(Types.UserSchema),
     club: oc
       .input(z.object({ clubId: z.string() }))
-      .output(z.array(UserSchema)),
-    delete: oc.input(UserSchema).output(UserSchema),
+      .output(z.array(Types.UserSchema)),
+    delete: oc.input(Types.UserSchema).output(Types.UserSchema),
   },
   role: {
-    create: oc.input(z.object({ clubId: z.string() })).output(RoleSchema),
+    create: oc.input(z.object({ clubId: z.string() })).output(Types.RoleSchema),
     club: oc
       .input(z.object({ clubId: z.string() }))
-      .output(z.array(RoleSchema)),
-    update: oc.input(RoleSchema).output(RoleSchema),
-    delete: oc.input(RoleSchema).output(RoleSchema),
+      .output(z.array(Types.RoleSchema)),
+    update: oc.input(Types.RoleSchema).output(Types.RoleSchema),
+    delete: oc.input(Types.RoleSchema).output(Types.RoleSchema),
   },
   globalConfig: {
-    find: oc.output(GlobalConfigSchema),
-    update: oc.input(GlobalConfigSchema).output(GlobalConfigSchema),
+    find: oc.output(Types.GlobalConfigSchema),
+    update: oc.input(Types.GlobalConfigSchema).output(Types.GlobalConfigSchema),
   },
 } as const;

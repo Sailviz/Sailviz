@@ -3,7 +3,10 @@ import cors from "cors";
 import { RPCHandler } from "@orpc/server/node";
 import { mainRouter } from "./contract-implement";
 import { toNodeHandler } from "better-auth/node";
-import { auth } from "@sailviz/auth/auth";
+import * as AuthMod from "@sailviz/auth/auth";
+// Be resilient to different export styles (named vs default)
+const authAny: any = (AuthMod as any);
+const auth = authAny?.auth ?? authAny?.default ?? authAny;
 import { RequestHeadersPlugin } from "@orpc/server/plugins";
 
 import { ORIGIN_URL } from "./config";

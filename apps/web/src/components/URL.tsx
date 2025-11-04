@@ -1,3 +1,5 @@
-const dev = process.env.NODE_ENV !== 'production'
+if (!process.env.BASE_URL) {
+    throw new Error('BASE_URL is not defined in environment variables')
+}
 
-export const server = dev ? 'http://localhost:5173' : 'https://sailviz.com'
+export const server = process.env.BASE_URL
