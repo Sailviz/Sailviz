@@ -7,3 +7,4 @@ packages/api/src/config.ts
 /packages/api/dist
 /packages/db/dist
 packages/auth/src/config.ts
+packages/db/src/config.ts

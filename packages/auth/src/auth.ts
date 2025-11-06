@@ -7,7 +7,12 @@ import type { UserType, ClubType } from "@sailviz/types";
 import { reactStartCookies } from "better-auth/react-start";
 
 export const auth = betterAuth({
-  trustedOrigins: ["http://localhost:3000", "http://localhost:5173"],
+  trustedOrigins: [
+    "http://localhost:3000",
+    "http://localhost:5173",
+    "https://dev.sailviz.com",
+    "https://sailviz.com",
+  ],
   plugins: [
     username(),
     customSession(async ({ user, session }) => {
