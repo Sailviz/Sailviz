@@ -4,7 +4,7 @@ import { type ContractRouterClient } from '@orpc/contract'
 import { ORPCcontract } from '@sailviz/api/contract'
 import { createTanstackQueryUtils } from '@orpc/tanstack-query'
 
-if (!import.meta.env.VITE_API_URL) {
+if (import.meta.env.VITE_API_URL == undefined) {
     throw new Error('API_URL is not defined in environment variables')
 }
 const link = new RPCLink({

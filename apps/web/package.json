@@ -4,10 +4,13 @@
     "version": "0.0.0",
     "type": "module",
     "scripts": {
-        "dev": "vite --mode development",
+        "dev": " cross-env NODE_ENV=development vite --mode development",
         "build": "tsc -b && vite build",
         "lint": "eslint .",
-        "preview": "vite preview"
+        "preview": "vite preview",
+        "build:dev": "cross-env NODE_ENV=development tsc -b && vite build --mode development",
+        "build:test": "cross-env NODE_ENV=test tsc -b && vite build --mode test",
+        "build:prod": "cross-env NODE_ENV=production tsc -b && vite build --mode production"
     },
     "dependencies": {
         "@auth/prisma-adapter": "^2.7.2",

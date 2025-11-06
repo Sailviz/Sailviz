@@ -335,7 +335,7 @@ importers:
         version: 4.1.12
     devDependencies:
       '@types/node':
-        specifier: ^24.7.0
+        specifier: ^24.10.0
         version: 24.10.0
       cross-env:
         specifier: ^7.0.3
@@ -368,6 +368,9 @@ importers:
       '@types/node':
         specifier: ^24.9.1
         version: 24.10.0
+      dotenv:
+        specifier: ^17.2.3
+        version: 17.2.3
 
   packages/db:
     dependencies:

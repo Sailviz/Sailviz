@@ -3,7 +3,9 @@
     "dev:web": "concurrently -n \"API,WEB\" -c \"blue,green\" \"pnpm --filter api dev\" \"pnpm --filter web dev\"",
     "dev:desktop": "concurrently -n \"API,TAURI\" -c \"blue,magenta\" \"pnpm --filter api dev\" \"pnpm --filter desktop dev\"",
     "dev:api": "pnpm --filter api dev",
-    "build:web": "pnpm --filter web build",
+    "build:dev:web": "pnpm --filter web build:dev",
+    "build:test:web": "pnpm --filter web build:test",
+    "build:prod:web": "pnpm --filter web build:prod",
     "build:dev:api": "pnpm --filter @sailviz/api run build:dev",
     "build:test:api": "pnpm --filter @sailviz/api run build:test",
     "build:prod:api": "pnpm --filter @sailviz/api run build:prod"

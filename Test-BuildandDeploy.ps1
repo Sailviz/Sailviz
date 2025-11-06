@@ -4,7 +4,7 @@ if ($LASTEXITCODE -ne 0) {
     Write-Error "API build failed. Exiting script."
     exit $LASTEXITCODE
 }
-pnpm run build:web
+pnpm run build:test:web
 if ($LASTEXITCODE -ne 0) {
     Write-Error "Web build failed. Exiting script."
     exit $LASTEXITCODE
