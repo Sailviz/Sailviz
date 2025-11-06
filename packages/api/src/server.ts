@@ -11,7 +11,7 @@ import { auth } from "@sailviz/auth/auth";
 const app = express();
 app.use(
   cors({
-    origin: ORIGIN_URL || "http://localhost:5173",
+    origin: ORIGIN_URL,
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   })
