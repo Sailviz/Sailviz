@@ -3,6 +3,7 @@
     "module": "esnext", // or "nodenext"
     "moduleResolution": "bundler", // or "node16" or "bundler
     "baseUrl": ".",
+    "skipLibCheck": true,
     "paths": {
       "@sailviz/db": ["packages/db/src"],
       "@sailviz/api/*": ["packages/api/src/*"],

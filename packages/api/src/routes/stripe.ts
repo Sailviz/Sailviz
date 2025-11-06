@@ -1,12 +1,10 @@
 import prisma from "@sailviz/db";
 import Stripe from "stripe";
+import { STRIPE_SECRET_KEY } from "../config";
 
-const stripe = new Stripe(
-  process.env.STRIPE_SECRET_KEY || "key not available",
-  {
-    apiVersion: "2025-09-30.clover",
-  }
-);
+const stripe = new Stripe(STRIPE_SECRET_KEY, {
+  apiVersion: "2025-09-30.clover",
+});
 export async function createStripeCustomer(clubId: string) {
   const club = await prisma.club.findUnique({
     where: {

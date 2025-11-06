@@ -25,12 +25,12 @@
   },
   "packageManager": "pnpm@10.18.1+sha512.77a884a165cbba2d8d1c19e3b4880eee6d2fcabd0d879121e282196b80042351d5eb3ca0935fa599da1dc51265cc68816ad2bddd2a2de5ea9fdf92adbec7cd34",
   "devDependencies": {
-    "@types/node": "^24.7.0",
+    "@types/node": "^24.10.0",
+    "cross-env": "^7.0.3",
     "ts-node": "^10.9.2",
     "ts-node-dev": "^2.0.0",
     "tsc-alias": "^1.8.16",
     "tsx": "^4.20.6",
-    "typescript": "~5.9.3",
-    "cross-env": "^7.0.3"
+    "typescript": "~5.9.3"
   }
 }
