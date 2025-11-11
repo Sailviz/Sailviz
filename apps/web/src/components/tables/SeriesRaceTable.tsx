@@ -95,11 +95,10 @@ const Action = ({ id, user }: { id: string; user: UserType }) => {
 
     const onDeleteClick = async () => {
         if (confirm('are you sure you want to do this?')) {
-            const result = deleteRace.mutateAsync({ raceId: id })
-            if (!result) {
-                return
-            }
-            queryClient.invalidateQueries({ queryKey: orpcClient.series.find.key({ type: 'query' }) })
+            await deleteRace.mutateAsync({ raceId: id })
+            await queryClient.invalidateQueries({
+                queryKey: orpcClient.series.find.key({ type: 'query' })
+            })
         }
     }
     return (
