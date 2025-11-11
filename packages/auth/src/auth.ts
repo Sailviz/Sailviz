@@ -11,7 +11,9 @@ export const auth = betterAuth({
     "http://localhost:3000",
     "http://localhost:5173",
     "https://dev.sailviz.com",
+    "https://api.dev.sailviz.com",
     "https://sailviz.com",
+    "https://api.sailviz.com",
   ],
   plugins: [
     username(),
