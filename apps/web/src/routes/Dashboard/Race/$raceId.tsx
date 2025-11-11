@@ -30,6 +30,8 @@ function Page() {
     const updateRace = useMutation(orpcClient.race.update.mutationOptions())
     const queryClient = useQueryClient()
 
+    const updateResultMutation = useMutation(orpcClient.result.update.mutationOptions())
+
     const [resultsUpdated, setResultsUpdated] = React.useState(true)
     const [calculatingResults, setCalculatingResults] = React.useState(false)
 
@@ -102,7 +104,7 @@ function Page() {
 
     const calculate = async () => {
         setCalculatingResults(true)
-        await calculateResults(race)
+        await calculateResults(race, updateResultMutation)
         for (const fleet of race.fleets) {
             mutate(`/api/GetFleetById?id=${fleet.id}`)
         }
@@ -137,7 +139,6 @@ function Page() {
     if (session == undefined || race == undefined || boats == undefined) {
         return <PageSkeleton />
     }
-    console.log(boats)
     return (
         <div id='race' className='h-full w-full overflow-y-auto'>
             {/* <ViewResultModal isOpen={viewModal.isOpen} result={activeResult} fleet={activeFleet} onClose={viewModal.onClose} /> */}

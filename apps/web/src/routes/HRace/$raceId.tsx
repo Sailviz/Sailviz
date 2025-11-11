@@ -44,7 +44,7 @@ function Page() {
     const raceQueryOptions = orpcClient.race.find.queryOptions({ input: { raceId: raceId }, results: true, boats: true })
     const race = useQuery(raceQueryOptions).data as RaceType
 
-    const startSequence = useQuery(orpcClient.startSequence.find.queryOptions({ input: { seriesId: race!.seriesId } })).data as StartSequenceStep[]
+    const startSequence = useQuery(orpcClient.startSequence.find.queryOptions({ input: { seriesId: race?.seriesId } })).data as StartSequenceStep[]
 
     const updateFleetMutation = useMutation(orpcClient.fleet.update.mutationOptions())
     const updateResultMutation = useMutation(orpcClient.result.update.mutationOptions())
@@ -349,8 +349,8 @@ function Page() {
     }
 
     const calculate = async () => {
-        await calculateResults(race)
-        navigate({ to: '/Race/' + race.id })
+        await calculateResults(race, updateResultMutation)
+        navigate({ to: '/Dashboard/Race/' + race.id })
     }
 
     const finishBoat = async (resultId: string) => {
@@ -619,7 +619,7 @@ function Page() {
                                             )
                                         case raceStateType.calculate:
                                             return (
-                                                <Button id='CalcResultsButton' onClick={calculate} size='big' variant={'green'}>
+                                                <Button id='CalcResultsButton' onClick={() => calculate()} size='big' variant={'green'}>
                                                     Calculate Results
                                                 </Button>
                                             )

@@ -38,7 +38,7 @@ function Page() {
             return !race
                 .fleets!.flatMap(fleet => fleet.results)
                 .every(result => {
-                    if (result!.finishTime != 0) {
+                    if (result!.finishTime != 0 || result!.resultCode != '') {
                         return true
                     }
                 })

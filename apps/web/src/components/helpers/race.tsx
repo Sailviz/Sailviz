@@ -1,9 +1,7 @@
-import { orpcClient } from '@lib/orpc'
 import type { RaceType, ResultType } from '@sailviz/types'
-import { useMutation } from '@tanstack/react-query'
 
-export async function calculateResults(race: RaceType) {
-    const updateResult = useMutation(orpcClient.result.update.mutationOptions())
+export async function calculateResults(race: RaceType, updateResultMutation: { mutateAsync: (result: ResultType) => Promise<any> }) {
+    console.log('Calculating results for race:')
     //most nuber of laps.
     console.log(race)
     for (const fleet of race.fleets) {
@@ -73,7 +71,7 @@ export async function calculateResults(race: RaceType) {
         })
 
         // Await all DB updates
-        await Promise.all(sortedResults.map(result => updateResult.mutateAsync(result)))
+        await Promise.all(sortedResults.map(result => updateResultMutation.mutateAsync(result)))
 
         console.log(sortedResults)
     }

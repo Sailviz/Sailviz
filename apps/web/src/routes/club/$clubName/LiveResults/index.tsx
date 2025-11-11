@@ -15,7 +15,7 @@ enum pageModes {
 function Page() {
     const { clubName } = Route.useParams()
     const club = useQuery(orpcClient.club.name.queryOptions({ input: { clubName: clubName! } })).data as ClubType
-    const races = useQuery(orpcClient.race.today.queryOptions({ input: { clubId: club!.id }, queryKey: [club] })).data
+    const races = useQuery(orpcClient.race.today.queryOptions({ input: { clubId: club?.id }, queryKey: [club] })).data
 
     const queryClient = useQueryClient()
 
@@ -49,7 +49,11 @@ function Page() {
             return !race.fleets
                 .flatMap(fleet => fleet.results)
                 .every(result => {
-                    if (result!.finishTime != 0) {
+                    console.log('checking result', result)
+                    if (result == undefined) {
+                        return true
+                    }
+                    if (result.finishTime != 0 || result.resultCode != '') {
                         return true
                     }
                 })
@@ -103,7 +107,7 @@ function Page() {
                     case pageModes.live:
                         return (
                             <div key={JSON.stringify(activeRace)}>
-                                {activeRace.fleets!.map(fleet => {
+                                {activeRace.fleets?.map(fleet => {
                                     //change this to select the active race.
                                     return (
                                         <>
@@ -139,7 +143,7 @@ function Page() {
                             <div>
                                 <p className='text-6xl font-extrabold text-gray-700 p-6'>{club?.name}</p>
                                 {/* this backwards case is so that the upgrade message isn't shown during page load. */}
-                                {club?.stripe.planName != 'SailViz' ? (
+                                {club?.stripe?.planName != 'SailViz' ? (
                                     <p className='text-2xl font-extrabold text-gray-700 p-6'>No Races Currently Active</p>
                                 ) : (
                                     <p className='text-2xl font-extrabold text-gray-700 p-6'>Upgrade to Sailviz Pro to enable Live Results</p>
