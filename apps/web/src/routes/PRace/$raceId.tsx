@@ -10,7 +10,6 @@ import { Button } from '@components/ui/button'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
 import type { ClubType, FleetType, RaceType, ResultType, SeriesType } from '@sailviz/types'
-import { mutate } from 'swr'
 import BackButton from '@components/layout/backButton'
 
 enum raceStateType {
@@ -49,13 +48,14 @@ function Page() {
 
     const club = useQuery(orpcClient.club.session.queryOptions()).data as ClubType
 
-    const race = useQuery(orpcClient.race.find.queryOptions({ input: { raceId: raceId }, results: true, boats: true })).data as RaceType
+    // Capture race query options for consistent queryKey usage in optimistic updates
+    const raceQueryOptions = orpcClient.race.find.queryOptions({ input: { raceId: raceId }, results: true, boats: true })
+    const race = useQuery(raceQueryOptions).data as RaceType
     const series = useQuery(orpcClient.series.find.queryOptions({ input: { seriesId: race!.seriesId } })).data as SeriesType
 
     const updateFleetMutation = useMutation(orpcClient.fleet.update.mutationOptions())
     const updateResultMutation = useMutation(orpcClient.result.update.mutationOptions())
 
-    const findRaceMutation = useMutation(orpcClient.race.find.mutationOptions())
     const findSeriesMutation = useMutation(orpcClient.series.find.mutationOptions())
 
     const createLapMutation = useMutation(orpcClient.lap.create.mutationOptions())
@@ -95,9 +95,7 @@ function Page() {
         setFlagStatus([false, false])
         setNextFlagStatus([true, false])
 
-        queryClient.invalidateQueries({
-            queryKey: orpcClient.race.find.key({ type: 'query' })
-        })
+        queryClient.invalidateQueries({ queryKey: raceQueryOptions.queryKey })
         startRace()
     }
 
@@ -248,15 +246,17 @@ function Page() {
                 }
             })
         })
-        //mutate race
-        mutate(
-            `/api/GetRaceById?id=${race.id}&results=true`,
-            async _ => {
-                await updateResultMutation.mutateAsync(tempdata)
-                return await findRaceMutation.mutateAsync({ raceId: race.id })
-            },
-            { optimisticData: optimisticData, rollbackOnError: false, revalidate: false }
-        )
+        // Optimistic update via TanStack Query
+        const previousRace = queryClient.getQueryData<RaceType>(raceQueryOptions.queryKey)
+        queryClient.setQueryData(raceQueryOptions.queryKey, optimisticData)
+        try {
+            await updateResultMutation.mutateAsync(tempdata)
+        } catch (err) {
+            if (previousRace) queryClient.setQueryData(raceQueryOptions.queryKey, previousRace)
+            throw err
+        } finally {
+            queryClient.invalidateQueries({ queryKey: raceQueryOptions.queryKey })
+        }
 
         let sound = document.getElementById('Beep') as HTMLAudioElement
         sound!.currentTime = 0
@@ -273,7 +273,8 @@ function Page() {
                 })
 
             // force mutate to reload data
-            mutate(`/api/GetFleetById?id=${race.fleets[0]!.id}`)
+            // Refresh race data after positional updates
+            queryClient.invalidateQueries({ queryKey: raceQueryOptions.queryKey })
         }
         setRaceState(lastRaceState)
     }
@@ -376,15 +377,17 @@ function Page() {
             })
         })
 
-        //mutate race
-        mutate(
-            `/api/GetRaceById?id=${race.id}&results=true`,
-            async _ => {
-                await createLapMutation.mutateAsync({ resultId: resultId, time: time })
-                return await findRaceMutation.mutateAsync({ raceId: race.id })
-            },
-            { optimisticData: optimisticData, rollbackOnError: false, revalidate: false }
-        )
+        // Optimistic update via TanStack Query
+        const previousRace = queryClient.getQueryData<RaceType>(raceQueryOptions.queryKey)
+        queryClient.setQueryData(raceQueryOptions.queryKey, optimisticData)
+        try {
+            await createLapMutation.mutateAsync({ resultId: resultId, time: time })
+        } catch (err) {
+            if (previousRace) queryClient.setQueryData(raceQueryOptions.queryKey, previousRace)
+            throw err
+        } finally {
+            queryClient.invalidateQueries({ queryKey: raceQueryOptions.queryKey })
+        }
 
         let sound = document.getElementById('Beep') as HTMLAudioElement
         sound!.currentTime = 0
@@ -440,9 +443,7 @@ function Page() {
             await updateResultMutation.mutateAsync(res)
         })
 
-        await queryClient.invalidateQueries({
-            queryKey: orpcClient.race.find.key({ type: 'query' })
-        })
+        await queryClient.invalidateQueries({ queryKey: raceQueryOptions.queryKey })
 
         setRaceState(raceStateType.calculate)
         setTableView(true)
@@ -502,9 +503,7 @@ function Page() {
             await updateResultMutation.mutateAsync(actionResult)
         }
 
-        queryClient.invalidateQueries({
-            queryKey: orpcClient.race.find.key({ type: 'query' })
-        })
+        queryClient.invalidateQueries({ queryKey: raceQueryOptions.queryKey })
     }
 
     const controller = new AbortController()

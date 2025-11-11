@@ -23,7 +23,7 @@ export default function FlagDialog({
             }}
         >
             <DialogContent>
-                <DialogHeader className='flex flex-col'>Flag Positions</DialogHeader>
+                <DialogHeader className='flex flex-col'></DialogHeader>
                 <div className='flex flex-row w-full justify-around'>
                     <div className='text-2xl font-bold'>Current</div>
                     <div className='text-2xl font-bold'>Next</div>

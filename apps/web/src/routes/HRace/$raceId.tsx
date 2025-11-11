@@ -4,7 +4,6 @@ import { calculateResults } from '@components/helpers/race'
 import RetireModal from '@components/layout/dashboard/RetireModal'
 import BoatCard from '@components/layout/race/BoatCard'
 import { PageSkeleton } from '@components/layout/PageSkeleton'
-import { mutate } from 'swr'
 import FlagModal from '@components/layout/dashboard/Flag Modal'
 import { Button } from '@components/ui/button'
 import RaceTimer from '@components/layout/race/raceTimer'
@@ -41,14 +40,14 @@ function Page() {
 
     const club = useQuery(orpcClient.club.session.queryOptions()).data as ClubType
 
-    const race = useQuery(orpcClient.race.find.queryOptions({ input: { raceId: raceId }, results: true, boats: true })).data as RaceType
+    // Capture query options so we can reuse the exact queryKey for optimistic updates
+    const raceQueryOptions = orpcClient.race.find.queryOptions({ input: { raceId: raceId }, results: true, boats: true })
+    const race = useQuery(raceQueryOptions).data as RaceType
 
     const startSequence = useQuery(orpcClient.startSequence.find.queryOptions({ input: { seriesId: race!.seriesId } })).data as StartSequenceStep[]
 
     const updateFleetMutation = useMutation(orpcClient.fleet.update.mutationOptions())
     const updateResultMutation = useMutation(orpcClient.result.update.mutationOptions())
-
-    const findRaceMutation = useMutation(orpcClient.race.find.mutationOptions())
 
     const createLapMutation = useMutation(orpcClient.lap.create.mutationOptions())
 
@@ -188,6 +187,7 @@ function Page() {
     }
 
     const dynamicSort = async (results: ResultType[]) => {
+        console.log(results)
         results.sort((a, b) => {
             //if done a lap, predicted is sum of lap times + last lap.
             //if no lap done, predicted is py.
@@ -295,10 +295,8 @@ function Page() {
         tempdata.resultCode = resultCode
         await updateResultMutation.mutateAsync(tempdata)
 
-        //update race
-        queryClient.invalidateQueries({
-            queryKey: orpcClient.race.find.key({ type: 'query' })
-        })
+        // refresh race query
+        queryClient.invalidateQueries({ queryKey: raceQueryOptions.queryKey })
 
         //change back to lap mode
         setRetireModal(false)
@@ -333,18 +331,21 @@ function Page() {
                 }
             })
         })
-        console.log(optimisticData)
-        //mutate race
-        mutate(
-            `/api/GetRaceById?id=${race.id}&results=true`,
-            async _ => {
-                await createLapMutation.mutateAsync({ resultId: resultId, time: Math.floor(new Date().getTime() / 1000) })
-                return await findRaceMutation.mutateAsync({ raceId: race.id })
-            },
-            { optimisticData: optimisticData, rollbackOnError: false, revalidate: false }
-        )
-
+        // optimistic update via TanStack Query
+        const previousRace = queryClient.getQueryData<RaceType>(raceQueryOptions.queryKey)
+        queryClient.setQueryData(raceQueryOptions.queryKey, optimisticData)
         dynamicSort(optimisticData.fleets.flatMap(fleet => fleet.results!))
+
+        try {
+            await createLapMutation.mutateAsync({ resultId: resultId, time: Math.floor(new Date().getTime() / 1000) })
+        } catch (err) {
+            // rollback on error
+            if (previousRace) queryClient.setQueryData(raceQueryOptions.queryKey, previousRace)
+            throw err
+        } finally {
+            // ensure server state sync
+            queryClient.invalidateQueries({ queryKey: raceQueryOptions.queryKey })
+        }
     }
 
     const calculate = async () => {
@@ -384,24 +385,25 @@ function Page() {
                 }
             })
         })
-        console.log(optimisticData)
-        //mutate race
-        mutate(
-            `/api/GetRaceById?id=${race.id}&results=true`,
-            async _ => {
-                await createLapMutation.mutateAsync({ resultId: resultId, time: time })
-
-                await updateResultMutation.mutateAsync({ ...result, finishTime: time })
-                return await findRaceMutation.mutateAsync({ raceId: race.id })
-            },
-            { optimisticData: optimisticData, rollbackOnError: false, revalidate: false }
-        )
-        //if more than one fleet, we need to force dynamic sort
+        // optimistic update via TanStack Query
+        const previousRace = queryClient.getQueryData<RaceType>(raceQueryOptions.queryKey)
+        queryClient.setQueryData(raceQueryOptions.queryKey, optimisticData)
         if (raceMode.length > 1) {
             dynamicSort(optimisticData.fleets.flatMap(fleet => fleet.results!))
         } else {
-            //if only one fleet, we can sort by last lap
             sortByLastLap(optimisticData.fleets.flatMap(fleet => fleet.results!))
+        }
+
+        try {
+            await createLapMutation.mutateAsync({ resultId: resultId, time: time })
+            await updateResultMutation.mutateAsync({ ...result, finishTime: time })
+        } catch (err) {
+            // rollback on error
+            if (previousRace) queryClient.setQueryData(raceQueryOptions.queryKey, previousRace)
+            throw err
+        } finally {
+            // ensure server state sync
+            queryClient.invalidateQueries({ queryKey: raceQueryOptions.queryKey })
         }
     }
 
@@ -459,7 +461,8 @@ function Page() {
             await updateResultMutation.mutateAsync({ ...actionResult, finishTime: 0 })
         }
 
-        //mutate race
+        // refresh race data after undo action
+        queryClient.invalidateQueries({ queryKey: raceQueryOptions.queryKey })
     }
 
     const finishModeClick = () => {
@@ -501,15 +504,6 @@ function Page() {
     }
 
     const controller = new AbortController()
-
-    // useEffect(() => {
-    //     if (mode == modeType.Finish) {
-    //         sortByLastLap(race.fleets.flatMap(fleet => fleet.results))
-    //     } else if (mode == modeType.Lap) {
-    //         //this doesn't work on first load as the results are not loaded yet
-    //         dynamicSort(race.fleets.flatMap(fleet => fleet.results))
-    //     }
-    // }, [mode])
 
     useEffect(() => {
         //sort by last lap when finish mode with single fleet
