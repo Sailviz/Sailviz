@@ -19,15 +19,15 @@ export function Breadcrumbs() {
     useEffect(() => {
         // If no exact match, fall back to generating breadcrumbs from the path
         const segments = pathname.split('/').filter(Boolean)
-
+        console.log('Pathname segments:', segments)
         //Race page
-        if (segments[0] == 'Race') {
-            findRaceMutation.mutateAsync({ raceId: segments[1]! }).then(res => {
+        if (segments[1] == 'Race') {
+            findRaceMutation.mutateAsync({ raceId: segments[2]! }).then(res => {
                 console.log(res)
                 setItems([
                     {
                         title: res.series!.name,
-                        link: `/Series/${res.series!.id}`
+                        link: `/Dashboard/Series/${res.series!.id}`
                     },
                     {
                         title: `Race ${res.number}`,
