@@ -5,9 +5,9 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader } from '@components/u
 import { Button } from '@components/ui/button'
 import { Switch } from '@components/ui/switch'
 import { Input } from '@components/ui/input'
-import { useMutation, useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
-import type { BoatType, RaceType } from '@sailviz/types'
+import type { BoatType, RaceType, ResultType } from '@sailviz/types'
 
 const resultCodeOptions = [
     { label: 'None', value: '' },
@@ -19,23 +19,27 @@ const resultCodeOptions = [
 ]
 
 export default function EditResultModal({
+    open,
     result,
     advancedEdit,
-    onSubmit,
-    onDelete
+    onClose
 }: {
-    result: ResultDataType
+    open: boolean
+    result: ResultType | undefined
     advancedEdit: boolean
-    onSubmit: (result: ResultDataType) => void
-    onDelete: (result: ResultDataType) => void
+    onClose: () => void
 }) {
-    console.log('EditResultModal', result)
     const { data: fleet } = useQuery(orpcClient.fleet.find.queryOptions({ input: { fleetId: result?.fleetId || '' } }))
 
     const { theme } = useTheme()
     const boats = useQuery(orpcClient.boat.session.queryOptions()).data as BoatType[]
 
+    const updateResultMutation = useMutation(orpcClient.result.update.mutationOptions())
+    const deleteResultMutation = useMutation(orpcClient.result.delete.mutationOptions())
+
     const getRaceMutation = useMutation(orpcClient.race.find.mutationOptions())
+
+    const queryClient = useQueryClient()
 
     const [raceType, setRaceType] = useState('Handicap')
 
@@ -64,7 +68,7 @@ export default function EditResultModal({
         if (basicElapsed == '00:00:00') {
             finishTime = 0 // if no time is set make finish time 0, effectively setting the boat to have not finished
         }
-        onSubmit({
+        await updateResultMutation.mutateAsync({
             ...result!,
             Helm: helm,
             Crew: crew,
@@ -76,6 +80,17 @@ export default function EditResultModal({
             PursuitPosition: pursuitPosition,
             HandicapPosition: handicapPosition
         })
+
+        await queryClient.invalidateQueries({
+            queryKey: orpcClient.fleet.find.key({ type: 'query', input: { fleetId: fleet!.id } })
+        })
+
+        onClose()
+    }
+
+    const onDelete = async (result: ResultType) => {
+        await deleteResultMutation.mutateAsync({ id: result.id })
+        onClose()
     }
 
     useEffect(() => {
@@ -104,7 +119,7 @@ export default function EditResultModal({
     }, [result, fleet])
 
     return (
-        <Dialog open={true}>
+        <Dialog open={open} onOpenChange={() => onClose()}>
             <DialogContent className='max-w-8/12' title='Edit Result'>
                 <DialogHeader className='flex flex-col gap-1 text-2xl w-96'>Edit Result</DialogHeader>
                 <div className='flex flex-col w-full'>
@@ -301,8 +316,8 @@ export default function EditResultModal({
                                 </label>
                             </div>
                             {viewLaps ? (
-                                <div className='flex flex-row w-full flex-wrap' id='LapData' key={JSON.stringify(result!.laps)}>
-                                    {result.laps.map((lap: LapDataType, index: number) => {
+                                <div className='flex flex-row w-full flex-wrap' id='LapData'>
+                                    {result?.laps.map((lap: LapDataType, index: number) => {
                                         return (
                                             <div className='flex flex-col px-6 w-min' key={lap.time + index}>
                                                 <p className='text-2xl font-bold p-2'>Lap {index + 1}</p>

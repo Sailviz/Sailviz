@@ -42,7 +42,13 @@ function Page() {
         const calitalisedSentence = capitalizedWords.join(' ')
 
         newRaceData.Duties[e.target.id] = calitalisedSentence
-        await updateRace.mutateAsync(newRaceData)
+        await updateRace.mutateAsync({
+            id: race.id,
+            Duties: newRaceData.Duties,
+            Time: race.Time,
+            Type: race.Type,
+            number: race.number
+        })
         queryClient.invalidateQueries({
             queryKey: orpcClient.race.find.key({ type: 'query' })
         })
@@ -77,7 +83,13 @@ function Page() {
         let newDuties = previousRaceData.Duties
         //update DB
         console.log(newDuties)
-        await updateRace.mutateAsync({ ...race, Duties: newDuties })
+        await updateRace.mutateAsync({
+            id: race.id,
+            Duties: newDuties,
+            Time: race.Time,
+            Type: race.Type,
+            number: race.number
+        })
         // mutateRace()
     }
 
@@ -195,9 +207,14 @@ function Page() {
                                             showTime={true}
                                             editable={userHasPermission(session!.user, AVAILABLE_PERMISSIONS.editResults)}
                                             fleetId={fleet.id}
+                                            advancedEdit={userHasPermission(session!.user, AVAILABLE_PERMISSIONS.advancedResultEdit)}
                                         />
                                     ) : (
-                                        <FleetPursuitResultsTable editable={userHasPermission(session!.user, AVAILABLE_PERMISSIONS.editResults)} fleetId={fleet.id} />
+                                        <FleetPursuitResultsTable
+                                            editable={userHasPermission(session!.user, AVAILABLE_PERMISSIONS.editResults)}
+                                            advancedEdit={userHasPermission(session!.user, AVAILABLE_PERMISSIONS.advancedResultEdit)}
+                                            fleetId={fleet.id}
+                                        />
                                     )}
                                 </div>
                             )

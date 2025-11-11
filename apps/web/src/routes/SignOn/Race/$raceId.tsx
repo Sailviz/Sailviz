@@ -27,9 +27,9 @@ function Page() {
                         <div key={'fleetResults' + index} className='h-screen'>
                             <div className='p-6 h-5/6'>
                                 {race.Type == 'Handicap' ? (
-                                    <FleetHandicapResultsTable showTime={true} editable={false} fleetId={fleet.id} />
+                                    <FleetHandicapResultsTable showTime={true} editable={false} fleetId={fleet.id} advancedEdit={false} />
                                 ) : (
-                                    <FleetPursuitResultsTable editable={false} fleetId={fleet.id} />
+                                    <FleetPursuitResultsTable editable={false} advancedEdit={false} fleetId={fleet.id} />
                                 )}
                             </div>
                         </div>

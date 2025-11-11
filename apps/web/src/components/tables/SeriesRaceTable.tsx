@@ -27,7 +27,12 @@ const Time = ({ initialValue, race }: { initialValue: any; race: RaceType }) => 
         var day = dayjs(time)
         if (day.isValid()) {
             race.Time = time
-            updateRace.mutateAsync(race)
+            updateRace.mutateAsync({
+                id: race.id,
+                Time: race.Time,
+                Type: race.Type,
+                number: race.number
+            })
         }
     }
 
@@ -56,7 +61,12 @@ const Type = ({ initialValue, race }: { initialValue: any; race: RaceType }) => 
 
     const onBlur = (type: string) => {
         race.Type = type
-        updateRace.mutateAsync(race)
+        updateRace.mutateAsync({
+            id: race.id,
+            Time: race.Time,
+            Type: race.Type,
+            number: race.number
+        })
     }
 
     React.useEffect(() => {
@@ -95,7 +105,7 @@ const Action = ({ id, user }: { id: string; user: UserType }) => {
 
     const onDeleteClick = async () => {
         if (confirm('are you sure you want to do this?')) {
-            await deleteRace.mutateAsync({ raceId: id })
+            await deleteRace.mutateAsync({ id: id })
             await queryClient.invalidateQueries({
                 queryKey: orpcClient.series.find.key({ type: 'query' })
             })

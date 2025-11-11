@@ -82,9 +82,9 @@ function Page() {
                                 return (
                                     <div key={'fleetResults' + index}>
                                         {race.Type == 'Handicap' ? (
-                                            <FleetHandicapResultsTable showTime={true} editable={false} fleetId={fleet.id} />
+                                            <FleetHandicapResultsTable showTime={true} editable={false} fleetId={fleet.id} advancedEdit={false} />
                                         ) : (
-                                            <FleetPursuitResultsTable editable={false} fleetId={fleet.id} />
+                                            <FleetPursuitResultsTable editable={false} advancedEdit={false} fleetId={fleet.id} />
                                         )}
                                     </div>
                                 )

@@ -2,10 +2,11 @@ import React, { useEffect, useState } from 'react'
 import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, useReactTable, type SortingState } from '@tanstack/react-table'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@components/ui/table'
 import { Button } from '@components/ui/button'
-import { Link } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
 import type { ResultType } from '@sailviz/types'
+import EditResultDialog from '@components/layout/dashboard/EditResultModal'
+import ViewResultDialog from '@components/layout/dashboard/viewResultModal'
 
 const Text = ({ value }: { value: string }) => {
     return <div className=' text-center'>{value}</div>
@@ -37,26 +38,15 @@ const CorrectedTime = ({ ...props }) => {
     return <div className=' text-center'>{valueString}</div>
 }
 
-const Edit = ({ resultId }: { resultId: string }) => {
-    return (
-        <Link to={`/editResult/${resultId}`}>
-            <Button>Edit</Button>
-        </Link>
-    )
-}
-
-const View = ({ resultId }: { resultId: string }) => {
-    return (
-        <Link to={`/viewResult/${resultId}`}>
-            <Button>View</Button>
-        </Link>
-    )
-}
-
 const columnHelper = createColumnHelper<ResultType>()
 
-const FleetHandicapResultsTable = ({ fleetId, editable, showTime }: { fleetId: string; editable: boolean; showTime: boolean }) => {
+const FleetHandicapResultsTable = ({ fleetId, editable, advancedEdit, showTime }: { fleetId: string; editable: boolean; advancedEdit: boolean; showTime: boolean }) => {
     const { data: fleet } = useQuery(orpcClient.fleet.find.queryOptions({ input: { fleetId } }))
+
+    const [editModalOpen, setEditModalOpen] = useState(false)
+    const [viewModalOpen, setViewModalOpen] = useState(false)
+    const [modalData, setModalData] = useState<ResultType | undefined>(undefined)
+
     let data = fleet?.results
     if (data == undefined) {
         data = []
@@ -129,12 +119,30 @@ const FleetHandicapResultsTable = ({ fleetId, editable, showTime }: { fleetId: s
 
     const editColumn = columnHelper.accessor('id', {
         id: 'Edit',
-        cell: props => <Edit resultId={props.row.original.id} />
+        cell: props => (
+            <Button
+                onClick={() => {
+                    setEditModalOpen(true)
+                    setModalData(props.row.original)
+                }}
+            >
+                Edit
+            </Button>
+        )
     })
 
     const viewColumn = columnHelper.accessor('id', {
-        id: 'Edit',
-        cell: props => <View resultId={props.row.original.id} />
+        id: 'View',
+        cell: props => (
+            <Button
+                onClick={() => {
+                    setViewModalOpen(true)
+                    setModalData(props.row.original)
+                }}
+            >
+                View
+            </Button>
+        )
     })
 
     if (editable) {
@@ -155,6 +163,9 @@ const FleetHandicapResultsTable = ({ fleetId, editable, showTime }: { fleetId: s
     })
     return (
         <div className='w-full'>
+            <EditResultDialog open={editModalOpen} result={modalData} advancedEdit={advancedEdit} onClose={() => setEditModalOpen(false)} />
+            <ViewResultDialog open={viewModalOpen} result={modalData} onClose={() => setViewModalOpen(false)} />
+
             <div className='flex items-center py-4'>
                 <h1>
                     {fleet?.fleetSettings?.name}: {data.length} boats entered

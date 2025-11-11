@@ -38,6 +38,18 @@ export const createResult = os.result.create.handler(async ({ input }) => {
 });
 
 export const updateResult = os.result.update.handler(async ({ input }) => {
+  await prisma.result.update({
+    where: {
+      id: input.id,
+    },
+    data: {
+      boat: {
+        connect: {
+          id: input.boat.id,
+        },
+      },
+    },
+  });
   const updatedResult = await prisma.result.update({
     where: { id: input.id },
     data: {
@@ -59,6 +71,23 @@ export const updateResult = os.result.update.handler(async ({ input }) => {
   });
   if (updatedResult) {
     return updatedResult;
+  } else {
+    throw new ORPCError("BAD_REQUEST");
+  }
+});
+
+export const deleteResult = os.result.delete.handler(async ({ input }) => {
+  const res = await prisma.result.delete({
+    where: {
+      id: input.id,
+    },
+    include: {
+      laps: true,
+      fleet: true,
+    },
+  });
+  if (res) {
+    return res;
   } else {
     throw new ORPCError("BAD_REQUEST");
   }

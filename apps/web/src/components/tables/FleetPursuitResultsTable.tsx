@@ -2,10 +2,11 @@ import { useState } from 'react'
 import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, useReactTable, type SortingState } from '@tanstack/react-table'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@components/ui/table'
 import { Button } from '@components/ui/button'
-import { Link } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
 import type { BoatType, ResultType } from '@sailviz/types'
+import EditResultModal from '@components/layout/dashboard/EditResultModal'
+import ViewResultDialog from '@components/layout/dashboard/viewResultModal'
 
 const Text = ({ value }: { value: string }) => {
     return <div>{value}</div>
@@ -14,18 +15,15 @@ const Class = ({ value }: { value: BoatType }) => {
     return <div>{value.name}</div>
 }
 
-const Edit = ({ result }: { result: ResultType }) => {
-    return (
-        <Link to={`/editResult/${result.id}`}>
-            <Button className='mx-1'>Edit</Button>
-        </Link>
-    )
-}
-
 const columnHelper = createColumnHelper<ResultType>()
 
-const FleetPursuitResultsTable = ({ fleetId, editable }: { fleetId: string; editable: boolean }) => {
+const FleetPursuitResultsTable = ({ fleetId, editable, advancedEdit }: { fleetId: string; editable: boolean; advancedEdit: boolean }) => {
     const { data: fleet } = useQuery(orpcClient.fleet.find.queryOptions({ input: { fleetId } }))
+
+    const [editModalOpen, setEditModalOpen] = useState(false)
+    const [viewModalOpen, setViewModalOpen] = useState(false)
+    const [modalData, setModalData] = useState<ResultType | undefined>(undefined)
+
     let data = fleet?.results
     if (data == undefined) {
         data = []
@@ -76,11 +74,36 @@ const FleetPursuitResultsTable = ({ fleetId, editable }: { fleetId: string; edit
 
     const editColumn = columnHelper.accessor('id', {
         id: 'Edit',
-        cell: props => <Edit result={props.row.original} />
+        cell: props => (
+            <Button
+                onClick={() => {
+                    setEditModalOpen(true)
+                    setModalData(props.row.original)
+                }}
+            >
+                Edit
+            </Button>
+        )
+    })
+
+    const viewColumn = columnHelper.accessor('id', {
+        id: 'View',
+        cell: props => (
+            <Button
+                onClick={() => {
+                    setViewModalOpen(true)
+                    setModalData(props.row.original)
+                }}
+            >
+                View
+            </Button>
+        )
     })
 
     if (editable) {
         columns.push(editColumn)
+    } else {
+        columns.push(viewColumn)
     }
 
     let table = useReactTable({
@@ -95,6 +118,8 @@ const FleetPursuitResultsTable = ({ fleetId, editable }: { fleetId: string; edit
     })
     return (
         <div className='w-full'>
+            <EditResultModal open={editModalOpen} result={modalData} advancedEdit={advancedEdit} onClose={() => setEditModalOpen(false)} />
+            <ViewResultDialog open={viewModalOpen} result={modalData} onClose={() => setViewModalOpen(false)} />
             <div className='flex items-center py-4'>
                 <h1>{data.length} boats entered</h1>
             </div>

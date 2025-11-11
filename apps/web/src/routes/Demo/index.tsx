@@ -44,7 +44,7 @@ function Page() {
             console.log('loaded demo data:')
             console.log(demoData)
             //update race data
-            await updateRaceMutation.mutateAsync({ ...demoData, id: newRace.id, Type: 'Handicap', seriesId: GlobalConfig.demoSeriesId })
+            await updateRaceMutation.mutateAsync({ ...demoData, id: newRace.id, Type: 'Handicap' })
             //add results data
             await Promise.all(
                 demoData

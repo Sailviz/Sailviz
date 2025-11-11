@@ -61,7 +61,7 @@ import {
   startSequence_update,
 } from "./routes/startSequence";
 import { RaceType } from "@sailviz/types";
-import { createResult, updateResult } from "./routes/result";
+import { createResult, deleteResult, updateResult } from "./routes/result";
 import { globalConfig_find, globalConfig_update } from "./routes/globalConfig";
 import { lap_create, lap_delete } from "./routes/lap";
 import { auth } from "@sailviz/auth/auth";
@@ -353,6 +353,7 @@ export const mainRouter = os.router({
   result: {
     create: createResult,
     update: updateResult,
+    delete: deleteResult,
   },
   startSequence: {
     find: findStartSequence,

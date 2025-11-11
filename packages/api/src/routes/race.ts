@@ -145,7 +145,7 @@ export const updateRace = os.race.update.handler(
 
 export const race_delete = os.race.delete.handler(async ({ input }) => {
   const deletedRace = await prisma.race.delete({
-    where: { id: input.raceId },
+    where: { id: input.id },
     include: {
       fleets: {
         include: {

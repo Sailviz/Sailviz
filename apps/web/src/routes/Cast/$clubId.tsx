@@ -338,9 +338,9 @@ function Page() {
                                                 SeriesName: {activeRaceData.number} - {fleet.fleetSettings.name}
                                             </div>
                                             {activeRaceData.Type == 'Handicap' ? (
-                                                <FleetHandicapResultsTable showTime={true} editable={false} fleetId={fleet.id} />
+                                                <FleetHandicapResultsTable showTime={true} editable={false} fleetId={fleet.id} advancedEdit={false} />
                                             ) : (
-                                                <FleetPursuitResultsTable editable={false} fleetId={fleet.id} />
+                                                <FleetPursuitResultsTable editable={false} advancedEdit={false} fleetId={fleet.id} />
                                             )}
                                         </div>
                                     )
