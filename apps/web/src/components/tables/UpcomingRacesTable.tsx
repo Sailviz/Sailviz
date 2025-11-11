@@ -27,7 +27,7 @@ const Action = ({ ...props }: any) => {
 
     return (
         <>
-            <Button color='success' onClick={() => navigate({ to: '/Race/' + props.row.original.id })}>
+            <Button color='success' onClick={() => navigate({ to: '/Dashboard/Race/' + props.row.original.id })}>
                 Open
             </Button>
         </>
