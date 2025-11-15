@@ -29,7 +29,7 @@ export default function EditResultModal({
     advancedEdit: boolean
     onClose: () => void
 }) {
-    const { data: fleet } = useQuery(orpcClient.fleet.find.queryOptions({ input: { fleetId: result?.fleetId || '' } }))
+    const { data: fleet } = useQuery(orpcClient.fleet.find.queryOptions({ input: { fleetId: result?.fleetId || '' }, enabled: !!result }))
 
     const { theme } = useTheme()
     const boats = useQuery(orpcClient.boat.session.queryOptions()).data as BoatType[]
@@ -94,7 +94,6 @@ export default function EditResultModal({
     }
 
     useEffect(() => {
-        console.log('EditResultModal useEffect', result, fleet)
         if (result == undefined || fleet == undefined) {
             return
         }

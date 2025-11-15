@@ -5,7 +5,7 @@ import type { ResultType } from '@sailviz/types'
 import { useQuery } from '@tanstack/react-query'
 
 export default function ViewResultDialog({ open, result, onClose }: { open: boolean; result: ResultType | undefined; onClose: () => void }) {
-    const { data: fleet } = useQuery(orpcClient.fleet.find.queryOptions({ input: { fleetId: result?.fleetId || '' } }))
+    const { data: fleet } = useQuery(orpcClient.fleet.find.queryOptions({ input: { fleetId: result?.fleetId || '' }, enabled: !!result }))
 
     return (
         <Dialog open={open} onOpenChange={onClose}>

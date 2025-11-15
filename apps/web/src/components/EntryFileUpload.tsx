@@ -3,8 +3,7 @@ import { Button } from './ui/button'
 import { Input } from './ui/input'
 import Papa from 'papaparse'
 import ProgressModal from './layout/dashboard/ProgressModal'
-import { mutate } from 'swr'
-import { useMutation, useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
 import type { BoatType, ResultType } from '@sailviz/types'
 export function EntryFileUpload({ raceId }: { raceId: string }) {
@@ -14,6 +13,8 @@ export function EntryFileUpload({ raceId }: { raceId: string }) {
     const race = useQuery(orpcClient.race.find.queryOptions({ input: { raceId: raceId } })).data
     const boats = useQuery(orpcClient.boat.session.queryOptions()).data as BoatType[]
 
+    const queryClient = useQueryClient()
+
     const createResultMutation = useMutation(orpcClient.result.create.mutationOptions())
     const updateResultMutation = useMutation(orpcClient.result.update.mutationOptions())
 
@@ -21,12 +22,16 @@ export function EntryFileUpload({ raceId }: { raceId: string }) {
         if (race == null) {
             return
         }
-        if (e.target.files == null || e.target.files.length == 0) {
+        const inputEl = e.target
+        const file = inputEl.files?.[0]
+        if (!file) {
             return
         }
+        // Reset the input so selecting the same file again will fire onChange
+        inputEl.value = ''
         setProgressOpen(true)
         setProgressValue(0)
-        Papa.parse(e.target.files![0]!, {
+        Papa.parse(file, {
             header: true,
             skipEmptyLines: true,
             complete: async function (results: any) {
@@ -68,12 +73,16 @@ export function EntryFileUpload({ raceId }: { raceId: string }) {
                     //update with info
                     await updateResultMutation.mutateAsync(result)
                 }
+                // After all mutations are finished, invalidate affected fleet queries so tables refetch
+
+                for (const fleet of race.fleets) {
+                    await queryClient.invalidateQueries({
+                        queryKey: orpcClient.fleet.find.key({ type: 'query', input: { fleetId: fleet.id } })
+                    })
+                }
                 setProgressOpen(false)
             }
         })
-        for (const fleet of race.fleets) {
-            mutate(`/api/GetFleetById?id=${fleet.id}`)
-        }
     }
 
     return (

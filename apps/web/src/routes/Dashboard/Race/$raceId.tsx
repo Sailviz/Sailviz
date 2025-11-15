@@ -11,7 +11,6 @@ import { EntryFileUpload } from '@components/EntryFileUpload'
 import { PageSkeleton } from '@components/layout/PageSkeleton'
 import CreateResultModal from '@components/layout/dashboard/CreateResultModal'
 import { calculateResults } from '@components/helpers/race'
-import { mutate } from 'swr'
 import { SmoothSpinner } from '@components/icons/smooth-spinner'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
@@ -106,7 +105,9 @@ function Page() {
         setCalculatingResults(true)
         await calculateResults(race, updateResultMutation)
         for (const fleet of race.fleets) {
-            mutate(`/api/GetFleetById?id=${fleet.id}`)
+            await queryClient.invalidateQueries({
+                queryKey: orpcClient.fleet.find.key({ type: 'query', input: { fleetId: fleet!.id } })
+            })
         }
         setResultsUpdated(true)
         setCalculatingResults(false)
@@ -141,7 +142,6 @@ function Page() {
     }
     return (
         <div id='race' className='h-full w-full overflow-y-auto'>
-            {/* <ViewResultModal isOpen={viewModal.isOpen} result={activeResult} fleet={activeFleet} onClose={viewModal.onClose} /> */}
             <div className='flex flex-wrap justify-center gap-4 w-full'>
                 <div className='flex flex-wrap px-4 divide-y divide-solid w-full justify-center'>
                     <div className='py-4 w-3/5'>

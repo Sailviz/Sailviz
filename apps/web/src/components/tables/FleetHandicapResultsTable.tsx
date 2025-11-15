@@ -47,11 +47,6 @@ const FleetHandicapResultsTable = ({ fleetId, editable, advancedEdit, showTime }
     const [viewModalOpen, setViewModalOpen] = useState(false)
     const [modalData, setModalData] = useState<ResultType | undefined>(undefined)
 
-    let data = fleet?.results
-    if (data == undefined) {
-        data = []
-    }
-
     let [startTime, setStartTime] = useState(fleet?.startTime || 0)
 
     const [sorting, setSorting] = useState<SortingState>([
@@ -60,6 +55,10 @@ const FleetHandicapResultsTable = ({ fleetId, editable, advancedEdit, showTime }
             desc: false
         }
     ])
+
+    useEffect(() => {
+        console.log('Fleet updated:', fleet)
+    }, [fleet])
 
     useEffect(() => {
         setStartTime(fleet?.startTime || 0)
@@ -108,7 +107,7 @@ const FleetHandicapResultsTable = ({ fleetId, editable, advancedEdit, showTime }
 
     const correctedTimeColumn = columnHelper.accessor('CorrectedTime', {
         header: 'Corrected Time',
-        cell: props => <CorrectedTime {...props} result={data?.find(result => result.id == props.row.original.id)} />,
+        cell: props => <CorrectedTime {...props} result={fleet?.results?.find(result => result.id == props.row.original.id)} />,
         enableSorting: false
     })
 
@@ -152,7 +151,7 @@ const FleetHandicapResultsTable = ({ fleetId, editable, advancedEdit, showTime }
     }
 
     let table = useReactTable({
-        data,
+        data: fleet?.results || [],
         columns: columns,
         state: {
             sorting
@@ -168,7 +167,7 @@ const FleetHandicapResultsTable = ({ fleetId, editable, advancedEdit, showTime }
 
             <div className='flex items-center py-4'>
                 <h1>
-                    {fleet?.fleetSettings?.name}: {data.length} boats entered
+                    {fleet?.fleetSettings?.name}: {fleet?.results?.length} boats entered
                 </h1>
             </div>
             <div className='rounded-md border'>

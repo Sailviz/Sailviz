@@ -6,8 +6,7 @@ import { Input } from '@components/ui/input'
 import { Switch } from '@components/ui/switch'
 import { Tabs, TabsList, TabsTrigger } from '@components/ui/tabs'
 import { Button } from '@components/ui/button'
-import { mutate } from 'swr'
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
 import type { BoatType, FleetType, RaceType } from '@sailviz/types'
 
@@ -19,6 +18,8 @@ export default function CreateResultModal({ todaysRaces, boats }: { todaysRaces:
     const [helm, setHelm] = useState('')
     const [crew, setCrew] = useState('')
     const [sailNumber, setSailNumber] = useState('')
+
+    const queryClient = useQueryClient()
 
     const { theme } = useTheme()
     let submitDisabled = false
@@ -101,7 +102,9 @@ export default function CreateResultModal({ todaysRaces, boats }: { todaysRaces:
             await createResult(selectedFleets[i]!, helm, crew, selectedBoat.value, sailNumber)
         }
         todaysRaces.forEach(race => {
-            mutate(`/api/GetRaceById?id=${race.id}&results=true`)
+            queryClient.invalidateQueries({
+                queryKey: orpcClient.race.find.key({ type: 'query', input: { raceId: race.id } })
+            })
         })
 
         setOpen(false)
