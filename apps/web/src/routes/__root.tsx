@@ -46,15 +46,13 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
         useEffect(() => {
             const isTauri = '__TAURI_INTERNALS__' in window
             console.log('Setting up F11 fullscreen toggle. Is Tauri:', isTauri)
-            
+
             const handleKeyDown = async (e: KeyboardEvent) => {
-                console.log('Key pressed:', e.key, 'Code:', e.code)
-                
                 if (e.key === 'F11' || e.code === 'F11') {
                     console.log('F11 detected!')
                     e.preventDefault()
                     e.stopPropagation()
-                    
+
                     if (isTauri) {
                         try {
                             console.log('Toggling fullscreen via Tauri invoke...')
