@@ -13,9 +13,6 @@
     "windows": [
       {
         "title": "sailviz",
-        "width": 1200,
-        "height": 600,
-        "resizable": true,
         "fullscreen": false,
         "url": "Login"
       }

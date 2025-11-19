@@ -9,6 +9,8 @@ import ErrorBoundary from '@components/ErrorBoundary'
 import { ThemeProvider as NextThemesProvider, type ThemeProviderProps } from 'next-themes'
 import { getSession } from '@sailviz/auth/client'
 import Header from '@components/layout/header'
+import { useEffect } from 'react'
+import { invoke } from '@tauri-apps/api/core'
 
 export interface MyRouterContext {
     // Optional auth object; not required at router creation time
@@ -39,6 +41,41 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
     component: () => {
         const router = useRouterState()
         const path = router.location.pathname
+
+        // F11 fullscreen toggle for Tauri
+        useEffect(() => {
+            const isTauri = '__TAURI_INTERNALS__' in window
+            console.log('Setting up F11 fullscreen toggle. Is Tauri:', isTauri)
+            
+            const handleKeyDown = async (e: KeyboardEvent) => {
+                console.log('Key pressed:', e.key, 'Code:', e.code)
+                
+                if (e.key === 'F11' || e.code === 'F11') {
+                    console.log('F11 detected!')
+                    e.preventDefault()
+                    e.stopPropagation()
+                    
+                    if (isTauri) {
+                        try {
+                            console.log('Toggling fullscreen via Tauri invoke...')
+                            await invoke('toggle_fullscreen')
+                            console.log('Fullscreen toggled successfully')
+                        } catch (error) {
+                            console.error('Error toggling fullscreen:', error)
+                        }
+                    } else {
+                        console.log('Not in Tauri environment')
+                    }
+                }
+            }
+
+            document.addEventListener('keydown', handleKeyDown, { capture: true })
+            console.log('F11 event listener attached')
+
+            return () => {
+                document.removeEventListener('keydown', handleKeyDown, { capture: true })
+            }
+        }, [])
 
         let sidebar: boolean = false
         let collection
