@@ -21,9 +21,13 @@ console.log(`Loading environment from: ${finalPath}`);
 const parsed = dotenv.config({ path: finalPath }).parsed || {};
 
 // Generate TypeScript config file
-const lines = Object.entries(parsed).map(
-  ([key, value]) => `export const ${key} = ${JSON.stringify(value)};`
-);
+const lines = Object.entries(parsed).map(([key, value]) => {
+  if (key === "ORIGIN_URL") {
+    return `export const ${key} = ${JSON.stringify(value.split(","))};`;
+  } else {
+    return `export const ${key} = ${JSON.stringify(value)};`;
+  }
+});
 
 const output = `// AUTO-GENERATED FILE. Do not edit.
 ${lines.join("\n")}
