@@ -3,7 +3,7 @@ import Stripe from "stripe";
 import { STRIPE_SECRET_KEY } from "../config";
 
 const stripe = new Stripe(STRIPE_SECRET_KEY, {
-  apiVersion: "2025-09-30.clover",
+  apiVersion: "2025-10-29.clover",
 });
 export async function createStripeCustomer(clubId: string) {
   const club = await prisma.club.findUnique({

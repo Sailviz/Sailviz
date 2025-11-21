@@ -267,6 +267,9 @@ importers:
       cypress:
         specifier: ^13.6.6
         version: 13.17.0
+      dotenv:
+        specifier: ^17.2.3
+        version: 17.2.3
       eslint:
         specifier: ^9.36.0
         version: 9.39.1(jiti@2.6.1)

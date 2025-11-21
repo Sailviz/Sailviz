@@ -7,9 +7,10 @@
         "dev": " cross-env NODE_ENV=development vite --mode development",
         "lint": "eslint .",
         "preview": "vite preview",
-        "build:dev": "cross-env NODE_ENV=development tsc -b && vite build --mode development",
-        "build:test": "cross-env NODE_ENV=test tsc -b && vite build --mode test",
-        "build:prod": "cross-env NODE_ENV=production tsc -b && vite build --mode production"
+        "prebuild": "node ../../../packages/auth/scripts/generate-config.js",
+        "build:dev": "set NODE_ENV=development&& tsc -b && node ../../packages/auth/scripts/generate-config.js && vite build --mode development",
+        "build:test": "set NODE_ENV=test&& tsc -b && node ../../packages/auth/scripts/generate-config.js && vite build --mode test",
+        "build:prod": "set NODE_ENV=production tsc -b && node ../../packages/auth/scripts/generate-config.js && vite build --mode production"
     },
     "dependencies": {
         "@auth/prisma-adapter": "^2.7.2",
@@ -96,6 +97,7 @@
         "@vitejs/plugin-react": "^5.0.4",
         "autoprefixer": "^10.4.21",
         "cypress": "^13.6.6",
+        "dotenv": "^17.2.3",
         "eslint": "^9.36.0",
         "eslint-plugin-react-hooks": "^5.2.0",
         "eslint-plugin-react-refresh": "^0.4.22",
