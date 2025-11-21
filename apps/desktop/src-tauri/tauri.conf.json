@@ -2,12 +2,11 @@
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "sailviz",
   "version": "0.1.0",
-  "identifier": "com.tauri.dev",
+  "identifier": "com.sailviz",
   "build": {
-    "frontendDist": "../../apps/web/dist",
+    "frontendDist": "../../../apps/web/dist",
     "devUrl": "http://localhost:5173",
-    "beforeDevCommand": "pnpm --filter web run dev",
-    "beforeBuildCommand": "pnpm --filter web run build"
+    "beforeDevCommand": "pnpm --filter web run dev"
   },
   "app": {
     "windows": [

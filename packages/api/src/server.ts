@@ -38,6 +38,7 @@ app.all("{/*path}", async (req, res, next) => {
   next();
 });
 
-app.listen(3000, () => {
-  console.log("🚀 oRPC server listening on http://127.0.0.1:3000");
+// Listen on all interfaces to support Android device access when using host IP
+app.listen(3000, "0.0.0.0", () => {
+  console.log("🚀 oRPC server listening on http://0.0.0.0:3000");
 });

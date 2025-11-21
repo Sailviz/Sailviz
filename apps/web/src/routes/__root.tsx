@@ -33,11 +33,29 @@ export const ThemeProvider = (props: ThemeProviderProps): React.JSX.Element => {
 import { queryClient } from 'src/lib/queryClient'
 export const Route = createRootRouteWithContext<MyRouterContext>()({
     loader: async () => {
-        const { data: session } = await getSession()
-        console.log('Session in root loader:', session)
-        return session
+        try {
+            const { data: session } = await getSession()
+            console.log('Session in root loader:', session)
+            return session
+        } catch (e) {
+            console.error('Root loader getSession failed:', e)
+            // Gracefully degrade: return null session so UI can still render
+            return null
+        }
     },
     staleTime: 1000 * 60, // 1 minute
+    errorComponent: ({ error }) => {
+        // TanStack Router data/load errors fallback
+        return (
+            <div className='p-6 space-y-4'>
+                <h1 className='text-xl font-bold'>An error occurred</h1>
+                <p className='text-red-600 break-all'>{String(error)}</p>
+                <p className='text-sm text-muted-foreground'>
+                    If this is a network error on Android, ensure ports are forwarded (adb reverse) or BASE_URL points to your host machine.
+                </p>
+            </div>
+        )
+    },
     component: () => {
         const router = useRouterState()
         const path = router.location.pathname

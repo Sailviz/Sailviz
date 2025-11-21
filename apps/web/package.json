@@ -5,7 +5,6 @@
     "type": "module",
     "scripts": {
         "dev": " cross-env NODE_ENV=development vite --mode development",
-        "build": "tsc -b && vite build",
         "lint": "eslint .",
         "preview": "vite preview",
         "build:dev": "cross-env NODE_ENV=development tsc -b && vite build --mode development",
