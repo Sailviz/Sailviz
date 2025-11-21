@@ -6,7 +6,7 @@
     "dev:test:desktop": "pnpm --filter web build:test && pnpm tauri dev",
     "build:dev:desktop": "pnpm --filter web build:dev && pnpm tauri build",
     "build:test:desktop": "pnpm --filter web build:test && pnpm tauri build",
-    "android:test": "pnpm --filter web build:test && tauri build",
+    "android:test": "pnpm --filter web build:test && pnpm tauri android build --debug",
     "load": "adb install -r ./src-tauri/gen/android/app/build/outputs/apk/universal/debug/app-universal-debug.apk"
   },
   "packageManager": "pnpm@10.18.1+sha512.77a884a165cbba2d8d1c19e3b4880eee6d2fcabd0d879121e282196b80042351d5eb3ca0935fa599da1dc51265cc68816ad2bddd2a2de5ea9fdf92adbec7cd34",
