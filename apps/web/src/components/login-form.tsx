@@ -94,7 +94,7 @@ export function LoginForm() {
             // Retrieve session using token fallback
             const { data: session } = await getSession()
             console.log('Session with custom fields (tauri):', session)
-            if (session === null) {
+            if (session.error != null) {
                 alert('Login failed. Please check your username and password.')
                 setLoading(false)
                 return
