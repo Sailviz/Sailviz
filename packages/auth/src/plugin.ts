@@ -2,7 +2,7 @@ import { createAuthEndpoint } from "better-auth/api";
 import type { BetterAuthPlugin } from "better-auth";
 import prisma from "@sailviz/db";
 import { setSessionCookie } from "better-auth/cookies";
-import bcrypt from "bcryptjs";
+import { scrypt, timingSafeEqual } from "node:crypto";
 // Dummy function: replace with your actual user lookup/auth logic
 async function readUserByUUID(uuid: string) {
   // Example: fetch user from DB and return user object or null
@@ -10,6 +10,24 @@ async function readUserByUUID(uuid: string) {
     where: { uuid: uuid },
   });
   return user;
+}
+const hex = {
+  encode: (buf) => Buffer.from(buf).toString("hex"),
+  decode: (hexstr) => Buffer.from(hexstr, "hex"),
+};
+function scryptAsync(password, salt, opts) {
+  return new Promise((resolve, reject) => {
+    scrypt(
+      password,
+      salt,
+      opts.dkLen,
+      { N: opts.N, r: opts.r, p: opts.p, maxmem: opts.maxmem },
+      (err, derivedKey) => {
+        if (err) return reject(err);
+        resolve(derivedKey);
+      }
+    );
+  });
 }
 
 export const myPlugin = () => {
@@ -76,6 +94,12 @@ export const myPlugin = () => {
             tokenFromHeader ||
             ctx.request.headers.get("x-session-token") ||
             ctx.request.headers.get("x-token");
+          console.log(
+            "sessionByToken: received token header:",
+            tokenFromHeader ||
+              ctx.request.headers.get("x-session-token") ||
+              ctx.request.headers.get("x-token")
+          );
           if (!token) {
             return ctx.json({ error: "Missing token" }, { status: 401 });
           }
@@ -83,6 +107,16 @@ export const myPlugin = () => {
           const session = await prisma.session.findUnique({
             where: { token },
           });
+          console.log(
+            "sessionByToken: lookup result session=",
+            session
+              ? {
+                  id: session.id,
+                  userId: session.userId,
+                  expiresAt: session.expiresAt,
+                }
+              : null
+          );
           if (!session) {
             return ctx.json({ error: "Session not found" }, { status: 401 });
           }
@@ -92,6 +126,7 @@ export const myPlugin = () => {
 
           const user = await prisma.user.findUnique({
             where: { id: session.userId },
+            include: { roles: true },
           });
           if (!user) {
             return ctx.json({ error: "User not found" }, { status: 404 });
@@ -130,9 +165,15 @@ export const myPlugin = () => {
             );
           }
 
-          const user = await prisma.user.findFirst({ where: { username } });
+          const user = await prisma.user.findFirst({
+            where: { username },
+            include: { roles: true },
+          });
           if (!user) {
-            return ctx.json({ error: "Invalid credentials" }, { status: 401 });
+            return ctx.json(
+              { error: "account doesn't exist" },
+              { status: 401 }
+            );
           }
 
           // Find any account row with a password for this user
@@ -140,11 +181,30 @@ export const myPlugin = () => {
             where: { userId: user.id, NOT: { password: null } },
           });
           if (!account || !account.password) {
-            return ctx.json({ error: "Invalid credentials" }, { status: 401 });
+            return ctx.json({ error: "Invalid account" }, { status: 401 });
           }
 
-          const ok = await bcrypt.compare(password, account.password as string);
+          let ok = false;
+
+          const [salt, keyHex] = account.password.split(":");
+          if (!salt || !keyHex) throw new Error("Invalid hash");
+          const targetKey: any = await await scryptAsync(
+            password.normalize("NFKC"),
+            salt,
+            {
+              N: 16384,
+              r: 16,
+              p: 1,
+              dkLen: 64,
+              maxmem: 67108864,
+            }
+          );
+          const expected = hex.decode(keyHex);
+          if (targetKey.length !== expected.length) return false;
+          ok = timingSafeEqual(targetKey, expected);
+
           if (!ok) {
+            console.warn("Password verification failed for user", user.id);
             return ctx.json({ error: "Invalid credentials" }, { status: 401 });
           }
 
@@ -164,6 +224,13 @@ export const myPlugin = () => {
               userAgent: ctx.request.headers.get("user-agent") || null,
             },
           });
+
+          console.log(
+            "tauriSignIn: created session token=",
+            token,
+            "userId=",
+            user.id
+          );
 
           let club = null;
           if (user.clubId) {

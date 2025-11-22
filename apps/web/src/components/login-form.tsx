@@ -60,14 +60,21 @@ export function LoginForm() {
             // Store token securely for Tauri. Prefer Tauri store when available.
             try {
                 if (typeof window !== 'undefined' && (window as any).__TAURI__ !== undefined) {
-                    // Running inside Tauri renderer — use tauri-plugin-store-api directly
+                    // Running inside Tauri renderer — use the Tauri store plugin directly
                     try {
                         // Use eval'd dynamic import so the bundler doesn't try to
-                        // resolve `tauri-plugin-store-api` during web build.
-                        const { Store } = await eval('import("tauri-plugin-store-api")')
+                        // resolve the plugin during web build. Import the official
+                        // package name so it resolves inside the Tauri renderer.
+                        const { Store } = await eval('import("@tauri-apps/plugin-store")')
                         const store = new Store('sailviz-store.dat')
                         await store.set('sailviz_token', data.token)
                         await store.save()
+                        try {
+                            const check = await store.get('sailviz_token')
+                            console.debug('login-form: stored token in Tauri store present=', !!check)
+                        } catch (e) {
+                            console.warn('login-form: failed to verify token in store', e)
+                        }
                         // Initialize the Tauri fetch wrapper so future fetches include the token
                         try {
                             const tauriInit = await import('../tauri-init')

@@ -9,12 +9,31 @@ if (import.meta.env.VITE_API_URL == undefined) {
 }
 const link = new RPCLink({
     url: import.meta.env.VITE_API_URL,
-    headers: () => ({}),
-    // fetch: <-- provide fetch polyfill fetch if needed
-    // remove the hard-coded Authorization header and let the browser send cookies
-    // ensure cookies (better-auth session cookie) are sent with each request
+    // Provide Authorization header from localStorage when available (Tauri/dev token path).
+    // For web cookie-based flow this returns empty and cookies are used via `credentials: 'include'`.
+    headers: () => {
+        try {
+            if (typeof window !== 'undefined') {
+                const token = (window as any).localStorage?.getItem('sailviz_token')
+                if (token) return { Authorization: `Bearer ${token}` }
+            }
+        } catch (e) {}
+        return {}
+    },
     // RPCLink supports supplying a fetch implementation — we wrap the global fetch
-    fetch: (input: RequestInfo, init?: RequestInit) => fetch(input, { ...(init ?? {}), credentials: 'include' }),
+    // to ensure cookies are included for web sessions and to inject the
+    // Authorization header from localStorage when available (synchronous).
+    fetch: (input: RequestInfo, init?: RequestInit) => {
+        try {
+            const token = typeof window !== 'undefined' ? (window as any).localStorage?.getItem('sailviz_token') : null
+            const headers = new Headers((init?.headers as HeadersInit) || {})
+            if (token) headers.set('Authorization', `Bearer ${token}`)
+            const merged: RequestInit = { ...(init ?? {}), credentials: 'include', headers }
+            return fetch(input, merged)
+        } catch (e) {
+            return fetch(input, { ...(init ?? {}), credentials: 'include' })
+        }
+    },
     interceptors: [
         onError((error: any) => {
             if (error.name !== 'AbortError') {

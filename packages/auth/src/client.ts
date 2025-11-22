@@ -80,7 +80,7 @@ export async function getSession(fetchOptions?: RequestInit) {
 
 // Helper for non-cookie clients (Tauri): fetch the session by bearer token.
 export async function getSessionByToken(token: string) {
-  const res = await fetch(`/my-plugin/session-by-token`, {
+  const res = await fetch(`${BASE_URL}/api/auth/my-plugin/session-by-token`, {
     method: "GET",
     headers: {
       Authorization: `Bearer ${token}`,
