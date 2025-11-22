@@ -148,6 +148,30 @@ export const myPlugin = () => {
           });
         }
       ),
+      // Allow clients to delete a session by bearer token (Tauri sign-out).
+      sessionByTokenDelete: createAuthEndpoint(
+        "/my-plugin/session-by-token",
+        {
+          method: "DELETE",
+        },
+        async (ctx) => {
+          const authHeader = ctx.request.headers.get("authorization") || "";
+          const tokenFromHeader = authHeader.startsWith("Bearer ")
+            ? authHeader.slice(7)
+            : null;
+          const token =
+            tokenFromHeader ||
+            ctx.request.headers.get("x-session-token") ||
+            ctx.request.headers.get("x-token");
+          if (!token) {
+            return ctx.json({ error: "Missing token" }, { status: 401 });
+          }
+
+          const deleted = await prisma.session.deleteMany({ where: { token } });
+          console.log("sessionByToken DELETE: deleted count=", deleted.count);
+          return ctx.json({ deleted: deleted.count });
+        }
+      ),
       // Tauri-friendly username/password sign-in which returns a token
       // (cookies won't work in custom URI schemes). This creates a session
       // record and returns the token so desktop/mobile clients can store it.
