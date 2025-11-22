@@ -137,6 +137,9 @@ importers:
       '@tauri-apps/api':
         specifier: ^2.9.0
         version: 2.9.0
+      '@tauri-apps/plugin-store':
+        specifier: ^2.2.0
+        version: 2.4.1
       '@types/react':
         specifier: ^18.3.3
         version: 18.3.26
@@ -367,6 +370,9 @@ importers:
       '@orpc/server':
         specifier: ^1.9.3
         version: 1.10.4
+      bcryptjs:
+        specifier: ^3.0.2
+        version: 3.0.3
       better-auth:
         specifier: ^1.3.34
         version: 1.3.34(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
@@ -2184,6 +2190,9 @@ packages:
     resolution: {integrity: sha512-BQ7iLUXTQcyG1PpzLWeVSmBCedYDpnA/6Cm/kRFGtqjTf/eVUlyYO5S2ee07tLum3nWwDBWTGFZeruO8yEukfA==}
     engines: {node: '>= 10'}
     hasBin: true
+
+  '@tauri-apps/plugin-store@2.4.1':
+    resolution: {integrity: sha512-ckGSEzZ5Ii4Hf2D5x25Oqnm2Zf9MfDWAzR+volY0z/OOBz6aucPKEY0F649JvQ0Vupku6UJo7ugpGRDOFOunkA==}
 
   '@tsconfig/node10@1.0.11':
     resolution: {integrity: sha512-DcRjDCujK/kCk/cUe8Xz8ZSpm8mS3mNNpta+jGCA6USEDfktlNvm1+IuZ9eTcDbNk41BHwpHHeW+N1lKCz4zOw==}
@@ -6891,6 +6900,10 @@ snapshots:
       '@tauri-apps/cli-win32-arm64-msvc': 2.9.3
       '@tauri-apps/cli-win32-ia32-msvc': 2.9.3
       '@tauri-apps/cli-win32-x64-msvc': 2.9.3
+
+  '@tauri-apps/plugin-store@2.4.1':
+    dependencies:
+      '@tauri-apps/api': 2.9.0
 
   '@tsconfig/node10@1.0.11': {}
 

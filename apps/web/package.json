@@ -5,6 +5,7 @@
     "type": "module",
     "scripts": {
         "dev": " cross-env NODE_ENV=development vite --mode development",
+        "test": " cross-env NODE_ENV=test vite --mode test",
         "lint": "eslint .",
         "preview": "vite preview",
         "prebuild": "node ../../../packages/auth/scripts/generate-config.js",
@@ -51,6 +52,7 @@
         "@tanstack/react-table": "^8.7.6",
         "@tanstack/router-plugin": "^1.132.37",
         "@tauri-apps/api": "^2.9.0",
+        "@tauri-apps/plugin-store": "^2.2.0",
         "@types/react": "^18.3.3",
         "bcryptjs": "^3.0.2",
         "better-auth": "^1.2.9",

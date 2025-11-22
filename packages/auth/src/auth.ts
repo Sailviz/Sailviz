@@ -3,6 +3,7 @@ import { prismaAdapter } from "better-auth/adapters/prisma";
 import prisma from "@sailviz/db";
 import { customSession, username } from "better-auth/plugins";
 import { myPluginClient } from "./client-plugin";
+import { myPlugin } from "./plugin";
 import type { UserType, ClubType } from "@sailviz/types";
 import { reactStartCookies } from "better-auth/react-start";
 
@@ -14,6 +15,7 @@ export const auth = betterAuth({
     "https://api.dev.sailviz.com",
     "https://sailviz.com",
     "https://api.sailviz.com",
+    "http://tauri.localhost",
   ],
   plugins: [
     username(),
@@ -50,6 +52,7 @@ export const auth = betterAuth({
       };
     }),
     myPluginClient(),
+    myPlugin(),
     reactStartCookies(),
   ],
   user: {

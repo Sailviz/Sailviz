@@ -3,3 +3,5 @@ if (!import.meta.env.VITE_BASE_URL) {
 }
 
 export const server = import.meta.env.VITE_BASE_URL
+
+export const api_server = import.meta.env.VITE_API_URL

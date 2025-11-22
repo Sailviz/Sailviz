@@ -11,11 +11,7 @@ export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'key not avail
 })
 
 export async function createCheckoutSession({ club, priceId }: { club: ClubType | null; priceId: string }) {
-    const session = await getSession({
-        fetchOptions: {
-            headers: {} // TODO: Replace with actual headers if needed
-        }
-    }).then(res => {
+    const session = await getSession({}).then(res => {
         return res.data
     })
 
