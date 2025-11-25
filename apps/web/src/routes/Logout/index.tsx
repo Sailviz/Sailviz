@@ -19,30 +19,64 @@ function Page() {
                     let token: string | null = null
                     try {
                         const { Store } = await eval('import("@tauri-apps/plugin-store")')
-                        const store = new Store('sailviz-store.dat')
-                        token = (await store.get('sailviz_token')) as string | null
-                        await store.delete('sailviz_token')
-                        await store.save()
+                        // Try a couple of store filenames used historically
+                        const storeNames = ['sailviz-store.dat', 'sailviz-store']
+                        for (const name of storeNames) {
+                            try {
+                                const store = new Store(name)
+                                const found = (await store.get('sailviz_token')) as string | null
+                                if (found) token = found
+                                try {
+                                    await store.delete('sailviz_token')
+                                } catch {}
+                                try {
+                                    await store.save()
+                                } catch {}
+                            } catch (inner) {
+                                // ignore per-store errors and try next
+                            }
+                        }
                     } catch (e) {
                         // fallback to localStorage
                         try {
-                            token = (window as any).localStorage
-                                ?.getItem('sailviz_token')(window as any)
-                                .localStorage?.removeItem('sailviz_token')
-                        } catch {}
+                            token = window?.localStorage?.getItem('sailviz_token') ?? null
+                            window?.localStorage?.removeItem('sailviz_token')
+                        } catch (e) {
+                            console.warn('localStorage token cleanup failed', e)
+                        }
                     }
+
+                    // As a safety, also remove any lingering localStorage key
+                    try {
+                        window?.localStorage?.removeItem('sailviz_token')
+                    } catch {}
 
                     // Notify server to delete session by token if we have one
                     if (token) {
                         try {
-                            await fetch(`${api_server}/api/auth/my-plugin/session-by-token`, {
+                            console.debug('Logout: deleting token on server', token)
+                            // Try to send token both in header and query param to ensure
+                            // it reaches the server in environments where headers
+                            // may be filtered.
+                            const resp = await fetch(`${api_server}/api/auth/my-plugin/session-by-token?token=${encodeURIComponent(
+                                token
+                            )}`, {
                                 method: 'DELETE',
                                 headers: {
                                     Authorization: `Bearer ${token}`,
                                     'Content-Type': 'application/json'
                                 }
                             })
-                        } catch (e) {}
+                            if (!resp.ok) {
+                                console.warn('Server token delete responded non-ok', resp.status)
+                            } else {
+                                console.debug('Server token delete OK')
+                            }
+                        } catch (e) {
+                            console.warn('Failed to notify server to delete token', e)
+                        }
+                    } else {
+                        console.debug('Logout: no token found in store/localStorage')
                     }
                 } catch (e) {
                     console.warn('Tauri logout failed:', e)

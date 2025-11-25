@@ -90,8 +90,11 @@ export const myPlugin = () => {
           const tokenFromHeader = authHeader.startsWith("Bearer ")
             ? authHeader.slice(7)
             : null;
+          const url = new URL(ctx.request.url);
+          const tokenQuery = url.searchParams.get('token');
           const token =
             tokenFromHeader ||
+            tokenQuery ||
             ctx.request.headers.get("x-session-token") ||
             ctx.request.headers.get("x-token");
           console.log(
