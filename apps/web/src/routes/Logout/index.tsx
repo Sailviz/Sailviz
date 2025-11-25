@@ -58,9 +58,7 @@ function Page() {
                             // Try to send token both in header and query param to ensure
                             // it reaches the server in environments where headers
                             // may be filtered.
-                            const resp = await fetch(`${api_server}/api/auth/my-plugin/session-by-token?token=${encodeURIComponent(
-                                token
-                            )}`, {
+                            const resp = await fetch(`${api_server}/api/auth/my-plugin/session-by-token?token=${encodeURIComponent(token)}`, {
                                 method: 'DELETE',
                                 headers: {
                                     Authorization: `Bearer ${token}`,

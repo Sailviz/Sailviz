@@ -91,7 +91,7 @@ export const myPlugin = () => {
             ? authHeader.slice(7)
             : null;
           const url = new URL(ctx.request.url);
-          const tokenQuery = url.searchParams.get('token');
+          const tokenQuery = url.searchParams.get("token");
           const token =
             tokenFromHeader ||
             tokenQuery ||

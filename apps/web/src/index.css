@@ -46,6 +46,57 @@
     --color-chart-5: hsl(var(--chart-5));
 }
 
+/* Safe-area insets for devices with display cutouts (notches/punch-holes)
+   Adds CSS vars that fallback to 0 and applies padding to keep content
+   inside the safe area on mobile (Android/iOS) when `viewport-fit=cover`.
+*/
+:root {
+    --safe-area-inset-top: env(safe-area-inset-top, 0px);
+    --safe-area-inset-right: env(safe-area-inset-right, 0px);
+    --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
+    --safe-area-inset-left: env(safe-area-inset-left, 0px);
+}
+
+@layer base {
+    /* Do not apply safe-area padding globally to `body` — it caused
+       the initial page content to sit too far down. Instead apply
+       safe-area padding to the page inset container (`data-sidebar-inset`)
+       and sidebar overlays so spacing is consistent. */
+    body {
+        margin: 0;
+    }
+}
+
+/* Ensure any sidebar overlay or fixed UI respects the safe-area insets.
+   Fixed elements (like the desktop sidebar) are positioned relative to
+   the viewport so `body` padding doesn't affect them — apply the
+   padding directly to the sidebar container and mobile sheet content. */
+[data-sidebar='sidebar'] {
+    box-sizing: border-box;
+    padding-top: var(--safe-area-inset-top);
+    padding-right: var(--safe-area-inset-right);
+    padding-bottom: var(--safe-area-inset-bottom);
+    padding-left: var(--safe-area-inset-left);
+}
+
+/* Mobile sheet (offcanvas) content also needs safe-area handling. */
+[data-mobile='true'][data-sidebar='sidebar'] {
+    box-sizing: border-box;
+    padding-top: var(--safe-area-inset-top);
+    padding-right: var(--safe-area-inset-right);
+    padding-bottom: var(--safe-area-inset-bottom);
+    padding-left: var(--safe-area-inset-left);
+}
+
+/* Ensure the main page inset preserves safe-area when sidebar overlays */
+[data-sidebar-inset='true'] {
+    box-sizing: border-box;
+    padding-top: var(--safe-area-inset-top);
+    padding-right: var(--safe-area-inset-right);
+    padding-bottom: var(--safe-area-inset-bottom);
+    padding-left: var(--safe-area-inset-left);
+}
+
 /*
   The default border color has changed to `currentColor` in Tailwind CSS v4,
   so we've added these compatibility styles to make sure everything still

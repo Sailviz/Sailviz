@@ -16,6 +16,7 @@ export function LoginForm() {
     const [username, setUsername] = useState('')
     const [password, setPassword] = useState('')
     const [loading, setLoading] = useState(false)
+    const [checkingSession, setCheckingSession] = useState(true)
 
     // On mount, check for an existing session. If running inside Tauri,
     // keep the native splashscreen visible until we've verified the session
@@ -53,7 +54,7 @@ export function LoginForm() {
                 // Final fallback: if the web-based splash overlay exists, hide it.
                 try {
                     if ((window as any).hideTauriSplash) {
-                        (window as any).hideTauriSplash()
+                        ;(window as any).hideTauriSplash()
                         return
                     }
                     const el = document.getElementById('tauri-splash')
@@ -88,8 +89,11 @@ export function LoginForm() {
                         return
                     }
                 }
+                // No valid session found; allow the login UI to render
+                if (mounted) setCheckingSession(false)
             } catch (e) {
                 // ignore — treat as unauthenticated
+                if (mounted) setCheckingSession(false)
             }
 
             // No session — remove splash (if present) and stay on login page
@@ -98,6 +102,7 @@ export function LoginForm() {
                     await hideSplash()
                 } catch (e) {}
             }
+            if (mounted) setCheckingSession(false)
         })()
 
         return () => {
@@ -238,6 +243,11 @@ export function LoginForm() {
             provider: 'github',
             callbackURL: server + '/authsorter'
         })
+    }
+
+    if (checkingSession) {
+        // Keep a minimal blank while we verify session to avoid flashing the login UI
+        return <div />
     }
 
     return (

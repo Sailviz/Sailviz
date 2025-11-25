@@ -1,48 +1,74 @@
-<body>
-    <!-- Native-like splash for Tauri: shown only for packaged Tauri runtime.
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    </head>
+    <body>
+        <!-- Native-like splash for Tauri: shown only for packaged Tauri runtime.
          It will be hidden immediately on web (non-tauri) and can be hidden
          programmatically by calling `window.hideTauriSplash()` from app code.
     -->
-    <div id="tauri-splash" style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#0f172a;color:#fff;font-family:system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;z-index:99999">
-        <div style="text-align:center">
-            <div style="font-size:28px;font-weight:700;letter-spacing:0.5px">sailviz</div>
+        <div
+            id="tauri-splash"
+            style="
+                position: fixed;
+                inset: 0;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background: #0f172a;
+                color: #fff;
+                font-family:
+                    system-ui,
+                    Segoe UI,
+                    Roboto,
+                    Helvetica,
+                    Arial,
+                    sans-serif;
+                z-index: 99999;
+            "
+        >
+            <div style="text-align: center">
+                <div style="font-size: 28px; font-weight: 700; letter-spacing: 0.5px">sailviz</div>
+            </div>
         </div>
-    </div>
 
-    <div id="root"></div>
-    <script>
-        // Minimal runtime detection and helper for the splash.
-        (function(){
-            function isTauri() {
-                try {
-                    if (typeof window === 'undefined') return false;
-                    const w = window;
-                    if ('__TAURI_INTERNALS__' in w) return true;
-                    if (w.__TAURI__ !== undefined && w.__TAURI__ !== null) return true;
-                    if (w.__TAURI_IPC__ !== undefined && w.__TAURI_IPC__ !== null) return true;
-                    const ua = (navigator && navigator.userAgent) ? navigator.userAgent.toLowerCase() : '';
-                    if (ua.indexOf('tauri') !== -1) return true;
-                } catch(e) {}
-                return false;
-            }
-
-            // If not running under Tauri, hide immediately to avoid showing on web.
-            var splash = document.getElementById('tauri-splash');
-            if (!isTauri()) {
-                if (splash && splash.style) splash.style.display = 'none';
-            }
-
-            // Expose a global fallback so app code can hide the splash if native plugin
-            // isn't available or as a final fallback.
-            try {
-                window.hideTauriSplash = function() {
-                    var el = document.getElementById('tauri-splash');
-                    if (el && el.style) el.style.display = 'none';
+        <div id="root"></div>
+        <script>
+            // Minimal runtime detection and helper for the splash.
+            ;(function () {
+                function isTauri() {
+                    try {
+                        if (typeof window === 'undefined') return false
+                        const w = window
+                        if ('__TAURI_INTERNALS__' in w) return true
+                        if (w.__TAURI__ !== undefined && w.__TAURI__ !== null) return true
+                        if (w.__TAURI_IPC__ !== undefined && w.__TAURI_IPC__ !== null) return true
+                        const ua = navigator && navigator.userAgent ? navigator.userAgent.toLowerCase() : ''
+                        if (ua.indexOf('tauri') !== -1) return true
+                    } catch (e) {}
+                    return false
                 }
-            } catch (e) {
-                // ignore
-            }
-        })();
-    </script>
-    <script type="module" src="/src/main.tsx"></script>
-</body>
+
+                // If not running under Tauri, hide immediately to avoid showing on web.
+                var splash = document.getElementById('tauri-splash')
+                if (!isTauri()) {
+                    if (splash && splash.style) splash.style.display = 'none'
+                }
+
+                // Expose a global fallback so app code can hide the splash if native plugin
+                // isn't available or as a final fallback.
+                try {
+                    window.hideTauriSplash = function () {
+                        var el = document.getElementById('tauri-splash')
+                        if (el && el.style) el.style.display = 'none'
+                    }
+                } catch (e) {
+                    // ignore
+                }
+            })()
+        </script>
+        <script type="module" src="/src/main.tsx"></script>
+    </body>
+</html>
