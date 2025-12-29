@@ -6,11 +6,15 @@
   "exports": {
     ".": "./src/types.ts"
   },
+  "scripts": {
+    "build": "tsc -p tsconfig.json"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "packageManager": "pnpm@10.18.1",
   "dependencies": {
-    "zod": "^4.1.12"
+    "zod": "^4.1.12",
+    "ts-node": "^10.9.2"
   }
 }
