@@ -124,16 +124,14 @@ export const BoatSchema = z.object({
 });
 export type BoatType = z.infer<typeof BoatSchema>;
 
-export const ClubSchema = z.object({
+export const OrgSchema = z.object({
   id: z.string(),
   name: z.string(),
-  displayName: z.string(),
-  settings: ClubSettingsSchema.optional(),
-  //series: z.array(SeriesSchema).optional(), //this is needed, just commented out because it hasn't been implemented yet
-  boats: BoatSchema.array().optional(),
-  stripe: z.any().optional(),
+  logo: z.string().nullable(),
+  slug: z.string(),
+  settings: z.any(),
 });
-export type ClubType = z.infer<typeof ClubSchema>;
+export type Org = z.infer<typeof OrgSchema>;
 
 export type Stripe = {
   customerId: string;

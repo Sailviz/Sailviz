@@ -1,7 +1,5 @@
 import UpcomingRacesTable from '@components/tables/UpcomingRacesTable'
-import { PageSkeleton } from '@components/layout/PageSkeleton'
 import { title } from '@components/layout/home/primitaves'
-
 import { Button } from '@components/ui/button'
 import { createFileRoute, Link, useLoaderData } from '@tanstack/react-router'
 import HornTestButton from '@components/layout/home/HornTestButton'
@@ -10,16 +8,10 @@ import CreateEventDialog from '@components/layout/dashboard/CreateEventModal'
 
 function Page() {
     const session = useLoaderData({ from: `__root__` })
-    console.log('Session in Dashboard:', session)
-    if (!session || !session.club) {
-        // If the user is not authenticated, redirect to the login page
-        return <PageSkeleton />
-    }
-
     return (
         <div>
             <div className='p-6'>
-                <h1 className={title({ color: 'blue' })}>{session.club.displayName}</h1>
+                <h1 className={title({ color: 'blue' })}>{session.session.activeOrganizationId}</h1>
             </div>
             <div className='flex flex-row'>
                 <div>

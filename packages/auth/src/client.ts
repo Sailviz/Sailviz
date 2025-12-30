@@ -1,36 +1,16 @@
 import {
   customSessionClient,
-  inferAdditionalFields,
+  organizationClient,
   usernameClient,
 } from "better-auth/client/plugins";
 import { createAuthClient } from "better-auth/react";
-import { myPluginClient } from "./client-plugin";
-import type { ClubType, UserType } from "@sailviz/types";
 import { BASE_URL } from "./config";
+import * as Types from "@sailviz/types";
 
 export const client = createAuthClient({
   baseURL: BASE_URL,
-  basePath: "/api/auth/",
-  plugins: [
-    usernameClient(),
-    inferAdditionalFields({
-      user: {
-        startPage: {
-          type: "string",
-          required: true,
-        },
-      },
-      club: {
-        type: "json",
-        required: true,
-      },
-    }),
-    // Do not import the server `auth` value here (it imports Prisma).
-    // The generic type is optional for the client plugin; omitting it
-    // avoids bundling server-only code into the browser.
-    customSessionClient(),
-    myPluginClient(),
-  ],
+  basePath: "/api/auth",
+  plugins: [usernameClient(), organizationClient(), customSessionClient()],
 });
 
 // Destructure core methods but provide a thin, typed wrapper for `useSession`
@@ -98,8 +78,8 @@ export const useSession = () => {
   return _useSession() as ReturnType<typeof _useSession> & {
     data:
       | (ReturnType<typeof _useSession>["data"] & {
-          club: ClubType | null;
-          user: UserType;
+          org: Types.Org | null;
+          user: Types.UserType;
         })
       | null;
   };

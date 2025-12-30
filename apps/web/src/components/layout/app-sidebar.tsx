@@ -19,6 +19,7 @@ import { ChevronRight, GalleryVerticalEnd } from 'lucide-react'
 import { Link } from '@tanstack/react-router'
 import { SailVizIcon } from '../icons/sailviz-icon'
 import { ThemeSwitcher } from '../ui/ThemeSwitcher'
+import { OrgSwitcher } from './org-switcher'
 
 export const company = {
     name: 'Acme Inc',
@@ -42,6 +43,7 @@ export default function AppSidebar({ navCollections }: { navCollections: NavColl
                         </div>
                     </div>
                 </div>
+                <OrgSwitcher />
             </SidebarHeader>
             <SidebarContent className='overflow-x-hidden'>
                 {navCollections.map((collection, index) => {

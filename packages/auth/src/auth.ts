@@ -1,11 +1,9 @@
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import prisma from "@sailviz/db";
-import { customSession, username } from "better-auth/plugins";
-import { myPluginClient } from "./client-plugin";
-import { myPlugin } from "./plugin";
-import type { UserType, ClubType } from "@sailviz/types";
+import { organization, username } from "better-auth/plugins";
 import { reactStartCookies } from "better-auth/react-start";
+import * as config from "./config";
 
 export const auth = betterAuth({
   trustedOrigins: [
@@ -17,60 +15,7 @@ export const auth = betterAuth({
     "https://api.sailviz.com",
     "http://tauri.localhost",
   ],
-  plugins: [
-    username(),
-    customSession(async ({ user, session }) => {
-      const dbUser = (await prisma.user.findUnique({
-        where: { id: user.id },
-        include: {
-          roles: true,
-        },
-      })) as unknown as UserType | null;
-      if (!dbUser) {
-        throw new Error("User not found");
-      }
-      // some users may not have a clubId, so we need to handle that
-      if (!dbUser.clubId) {
-        return {
-          user: dbUser,
-          session,
-          club: null,
-        };
-      }
-      const club = (await prisma.club.findFirst({
-        where: {
-          id: dbUser.clubId,
-        },
-        include: {
-          stripe: true,
-        },
-      })) as unknown as ClubType | null;
-      return {
-        club,
-        user: dbUser,
-        session,
-      };
-    }),
-    myPluginClient(),
-    myPlugin(),
-    reactStartCookies(),
-  ],
-  user: {
-    additionalFields: {
-      startPage: {
-        type: "string",
-        required: true,
-        defaultValue: "Dashboard",
-        input: false,
-      },
-    },
-  },
-  club: {
-    type: "json",
-    required: true,
-    defaultValue: null,
-    input: false,
-  },
+  plugins: [username(), organization(), reactStartCookies()],
   session: {
     cookieCache: {
       enabled: true,
@@ -86,8 +31,8 @@ export const auth = betterAuth({
   },
   socialProviders: {
     github: {
-      clientId: process.env.AUTH_GITHUB_ID as string,
-      clientSecret: process.env.AUTH_GITHUB_SECRET as string,
+      clientId: config.AUTH_GITHUB_ID as string,
+      clientSecret: config.AUTH_GITHUB_SECRET as string,
     },
   },
 }) as ReturnType<typeof betterAuth>;
