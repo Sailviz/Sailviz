@@ -19,36 +19,21 @@ model globalConfig {
 }
 
 model User {
-  id              String    @id @unique @default(uuid())
-  username        String    @default("")
-  uuid            String?   @unique
-  startPage       String
-  admin           Boolean   @default(false)
-  name            String    @default("")
-  email           String?   @unique
-  emailVerified   Boolean
-  image           String?   @db.Text
-  createdAt       DateTime
-  updatedAt       DateTime
-  displayUsername String?   @db.Text
-  sessions        Session[]
-  accounts        Account[]
-  clubId          String?
-  club            Club?     @relation(fields: [clubId], references: [id])
-  roles           Role[]    @relation("RoleToUser")
+  id            String       @id @unique @default(uuid())
+  startPage     String
+  admin         Boolean      @default(false)
+  name          String       @default("")
+  email         String?      @unique
+  emailVerified Boolean
+  image         String?      @db.Text
+  createdAt     DateTime
+  updatedAt     DateTime
+  sessions      Session[]
+  accounts      Account[]
+  members       Member[]
+  invitations   Invitation[]
 
   @@map("user")
-}
-
-model Role {
-  id          String @id @unique @default(uuid())
-  name        String
-  clubId      String
-  permissions Json
-  club        Club   @relation(fields: [clubId], references: [id])
-  users       User[] @relation("RoleToUser")
-
-  @@index([clubId])
 }
 
 model Boat {
@@ -57,28 +42,61 @@ model Boat {
   crew             Int
   py               Int
   pursuitStartTime Int
-  clubId           String
-  club             Club            @relation(fields: [clubId], references: [id])
+  orgId            String
+  organization     Organization    @relation(fields: [orgId], references: [id])
   results          Result[]
   fleets           FleetSettings[] @relation("BoatToFleetSettings")
 
-  @@index([clubId])
+  @@index([orgId])
 }
 
-model Club {
-  id               String    @id @unique @default(uuid())
-  name             String    @unique
+model Organization {
+  id               String       @id @unique @default(uuid())
+  name             String
+  slug             String
+  logo             String?
+  createdAt        DateTime
+  metaData         String?
   settings         Json
-  displayName      String?
   boats            Boat[]
   Buoy             Buoy[]
-  roles            Role[]
   series           Series[]
   Trackers         Tracker[]
-  stripe           Stripe?   @relation(fields: [stripeCustomerId], references: [customerId])
+  stripe           Stripe?      @relation(fields: [stripeCustomerId], references: [customerId])
   stripeCustomerId String?
-  users            User[]
-  userId           String?   @unique
+  members          Member[]
+  invitations      Invitation[]
+}
+
+model Member {
+  id             String       @id
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  userId         String
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role           String       @db.Text
+  createdAt      DateTime
+
+  @@index([organizationId(length: 191)])
+  @@index([userId(length: 191)])
+  @@map("member")
+}
+
+model Invitation {
+  id             String       @id
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  email          String       @db.Text
+  role           String?      @db.Text
+  status         String       @db.Text
+  expiresAt      DateTime
+  createdAt      DateTime     @default(now())
+  inviterId      String
+  user           User         @relation(fields: [inviterId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId(length: 191)])
+  @@index([email(length: 191)])
+  @@map("invitation")
 }
 
 model Stripe {
@@ -89,20 +107,20 @@ model Stripe {
   planName           String?
   subscriptionStatus String?
   updatedAt          String?
-  Club               Club[]
+  organization       Organization[]
 }
 
 model Series {
   id             String          @id @unique @default(uuid())
   name           String
-  clubId         String
+  orgId          String
   settings       Json
   fleetSettings  FleetSettings[]
   races          Race[]
-  club           Club            @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  organization   Organization    @relation(fields: [orgId], references: [id], onDelete: Cascade)
   startSequences StartSequence[]
 
-  @@index([clubId])
+  @@index([orgId])
 }
 
 model StartSequence {
@@ -189,24 +207,24 @@ model Lap {
 }
 
 model Tracker {
-  trackerID String @id @unique
-  clubId    String
-  name      String
-  club      Club   @relation(fields: [clubId], references: [id])
+  trackerID    String       @id @unique
+  orgId        String
+  name         String
+  organization Organization @relation(fields: [orgId], references: [id])
 
-  @@index([clubId])
+  @@index([orgId])
 }
 
 model Buoy {
-  id         String  @id @unique @default(uuid())
-  name       String
-  clubId     String
-  pos        Json
-  isMoveable Boolean
-  trackerID  String
-  club       Club    @relation(fields: [clubId], references: [id])
+  id           String       @id @unique @default(uuid())
+  name         String
+  orgId        String
+  pos          Json
+  isMoveable   Boolean
+  trackerID    String
+  organization Organization @relation(fields: [orgId], references: [id])
 
-  @@index([clubId])
+  @@index([orgId])
 }
 
 model Session {
