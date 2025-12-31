@@ -79,6 +79,6 @@ function Page() {
         </>
     )
 }
-export const Route = createFileRoute('/Dashboard/Series/$seriesId')({
+export const Route = createFileRoute('/dashboard/Series/$seriesId')({
     component: Page
 })

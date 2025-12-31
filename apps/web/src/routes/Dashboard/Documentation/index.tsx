@@ -33,6 +33,6 @@ function Page() {
     )
 }
 
-export const Route = createFileRoute('/Dashboard/Documentation/')({
+export const Route = createFileRoute('/dashboard/Documentation/')({
     component: Page
 })

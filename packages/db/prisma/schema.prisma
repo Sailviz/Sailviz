@@ -31,6 +31,7 @@ model User {
   accounts      Account[]
   members       Member[]
   invitations   Invitation[]
+  results       Result[]
 
   @@map("user")
 }
@@ -190,9 +191,12 @@ model Result {
   laps             Lap[]
   boat             Boat?   @relation(fields: [boatId], references: [id])
   fleet            Fleet?  @relation(fields: [fleetId], references: [id], onDelete: Cascade)
+  userId           String?
+  user             User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([fleetId])
   @@index([boatId])
+  @@index([userId])
 }
 
 model Lap {

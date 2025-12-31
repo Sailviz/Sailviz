@@ -13,11 +13,11 @@ export const navCollections: NavCollection[] = [
         items: [
             {
                 title: 'Home',
-                url: '/Dashboard',
+                url: '/dashboard',
                 icon: <HomeIcon />,
                 isActive: true,
                 shortcut: ['d', 'd'],
-                items: [] // Empty array as there are no child items for Dashboard
+                items: [] // Empty array as there are no child items for dashboard
             }
         ]
     },
@@ -26,7 +26,7 @@ export const navCollections: NavCollection[] = [
         items: [
             {
                 title: 'Races',
-                url: '/Dashboard/Race',
+                url: '/dashboard/Race',
                 icon: <RaceIcon />,
                 shortcut: ['p', 'p'],
                 isActive: false,
@@ -34,7 +34,7 @@ export const navCollections: NavCollection[] = [
             },
             {
                 title: 'Series',
-                url: '/Dashboard/Series',
+                url: '/dashboard/Series',
                 icon: <SeriesIcon />,
                 shortcut: ['e', 'e'],
                 isActive: false,
@@ -42,7 +42,7 @@ export const navCollections: NavCollection[] = [
             },
             {
                 title: 'User Guide',
-                url: '/Dashboard/Documentation',
+                url: '/dashboard/Documentation',
                 icon: <DocsIcon />,
                 shortcut: ['e', 'e'],
                 isActive: false,
@@ -75,7 +75,7 @@ export const navCollections: NavCollection[] = [
                 items: [
                     {
                         title: 'Club',
-                        url: '/Dashboard/Club',
+                        url: '/dashboard/Club',
                         icon: <HomeIcon />,
                         shortcut: ['m', 'm'],
                         isActive: false,
@@ -84,7 +84,7 @@ export const navCollections: NavCollection[] = [
                     {
                         title: 'Boats',
                         shortcut: ['l', 'l'],
-                        url: '/Dashboard/Boats',
+                        url: '/dashboard/Boats',
                         icon: <HomeIcon />,
                         isActive: false,
                         items: []
@@ -92,7 +92,7 @@ export const navCollections: NavCollection[] = [
                     {
                         title: 'Hardware',
                         shortcut: ['l', 'l'],
-                        url: '/Dashboard/Hardware',
+                        url: '/dashboard/Hardware',
                         icon: <HomeIcon />,
                         isActive: false,
                         items: []
@@ -100,7 +100,7 @@ export const navCollections: NavCollection[] = [
                     {
                         title: 'Users',
                         shortcut: ['l', 'l'],
-                        url: '/Dashboard/Users',
+                        url: '/dashboard/Users',
                         icon: <HomeIcon />,
                         isActive: false,
                         items: []
@@ -108,7 +108,7 @@ export const navCollections: NavCollection[] = [
                     {
                         title: 'Subscription',
                         shortcut: ['l', 'l'],
-                        url: '/Dashboard/Subscription',
+                        url: '/dashboard/Subscription',
                         icon: <HomeIcon />,
                         isActive: false,
                         items: []
@@ -116,7 +116,7 @@ export const navCollections: NavCollection[] = [
                     {
                         title: 'Trackable',
                         shortcut: ['l', 'l'],
-                        url: '/Dashboard/Trackable',
+                        url: '/dashboard/Trackable',
                         icon: <HomeIcon />,
                         isActive: false,
                         items: []
@@ -151,7 +151,7 @@ export const AdminNavCollections: NavCollection[] = [
                 icon: <HomeIcon />,
                 isActive: true,
                 shortcut: ['d', 'd'],
-                items: [] // Empty array as there are no child items for Dashboard
+                items: [] // Empty array as there are no child items for dashboard
             }
         ]
     },
@@ -191,6 +191,57 @@ export const AdminNavCollections: NavCollection[] = [
             }
         ]
     },
+    {
+        title: '',
+        items: [
+            {
+                title: 'Log Out',
+                url: '/Logout',
+                icon: <SignOutIcon />,
+                shortcut: ['e', 'e'],
+                isActive: false,
+                items: [] // No child items
+            }
+        ]
+    }
+]
+
+export const meCollections: NavCollection[] = [
+    {
+        title: '',
+        items: [
+            {
+                title: 'Home',
+                url: '/me',
+                icon: <HomeIcon />,
+                isActive: true,
+                shortcut: ['d', 'd'],
+                items: [] // Empty array as there are no child items for dashboard
+            }
+        ]
+    },
+    {
+        title: 'Main Menu',
+        items: [
+            {
+                title: 'My Races',
+                url: '/me/races',
+                icon: <RaceIcon />,
+                shortcut: ['p', 'p'],
+                isActive: false,
+                items: [] // No child items
+            },
+            {
+                title: 'My Clubs',
+                url: '/me/clubs',
+                icon: <RaceIcon />,
+                shortcut: ['p', 'p'],
+                isActive: false,
+                items: [] // No child items
+            }
+        ]
+    },
+
     {
         title: '',
         items: [

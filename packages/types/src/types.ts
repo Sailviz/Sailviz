@@ -15,6 +15,7 @@ export const ResultSchema = z.object({
   fleetId: z.string(),
   Helm: z.string(),
   Crew: z.string(),
+  userId: z.string().nullable().optional(),
   SailNumber: z.string(),
   finishTime: z.number(),
   numberLaps: z.number(),

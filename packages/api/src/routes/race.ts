@@ -101,6 +101,106 @@ export async function findRace(id: string) {
   return result;
 }
 
+export async function findRacesForUser(
+  userId: string,
+  skip = 0,
+  take = 50,
+  date = dayjs().toISOString(),
+  historical = false
+) {
+  const where: any = {
+    fleets: {
+      some: {
+        results: {
+          some: {
+            userId: userId,
+          },
+        },
+      },
+    },
+    ...(historical ? { Time: { lte: date } } : { Time: { gte: date } }),
+  };
+
+  const result = await prisma.race.findMany({
+    skip,
+    take,
+    where,
+    include: {
+      series: true,
+      fleets: {
+        include: {
+          fleetSettings: true,
+          results: {
+            include: {
+              boat: true,
+              laps: true,
+            },
+          },
+        },
+      },
+    },
+    orderBy: {
+      Time: historical ? "desc" : "asc",
+    },
+  });
+  return result;
+}
+
+export async function findTodaysRacesScoped(scope: {
+  type: string;
+  clubId?: string;
+  userId?: string;
+}) {
+  if (scope.type === "club") {
+    if (!scope.clubId) return [];
+    return await findTodaysRace(scope.clubId);
+  }
+  if (scope.type === "personal") {
+    if (!scope.userId) return [];
+    // use start/end of today
+    const start = dayjs()
+      .set("hour", 0)
+      .set("minute", 0)
+      .set("second", 0)
+      .format("YYYY-MM-DD HH:ss");
+    const end = dayjs()
+      .set("hour", 24)
+      .set("minute", 0)
+      .set("second", 0)
+      .format("YYYY-MM-DD HH:ss");
+    const result = await prisma.race.findMany({
+      where: {
+        AND: [
+          { Time: { gte: start, lte: end } },
+          {
+            fleets: {
+              some: {
+                results: {
+                  some: {
+                    userId: scope.userId,
+                  },
+                },
+              },
+            },
+          },
+        ],
+      },
+      orderBy: { Time: "asc" },
+      include: {
+        fleets: {
+          include: {
+            fleetSettings: true,
+            results: { include: { boat: true, laps: true } },
+          },
+        },
+        series: true,
+      },
+    });
+    return result;
+  }
+  return [];
+}
+
 export async function countRaces(
   seriesId: string[],
   date: string,

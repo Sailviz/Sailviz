@@ -23,7 +23,7 @@ export async function ensureAdmin(queryClient: QueryClient) {
         return null
     }
     // Check if the user has admin flag set to true
-    if (!session.user?.admin) {
+    if (!(session.session.activeOrganizationId == 'admin-id')) {
         return null
     }
     return session

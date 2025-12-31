@@ -10,7 +10,7 @@ function Page() {
     const session = useLoaderData({ from: `__root__` })
 
     console.log('Session:', session)
-    if (!session || !session.club) {
+    if (!session) {
         // If the user is not authenticated, redirect to the login page
         return <PageSkeleton />
     }
@@ -27,17 +27,17 @@ function Page() {
                 </div>
                 <div className='px-3'>
                     <p className='text-2xl font-bold p-6'>Upcoming</p>
-                    <RacesTable clubId={session.club.id} date={new Date()} historical={false} viewHref='/Dashboard/Race/' />
+                    <RacesTable clubId={session.session.activeOrganizationId} date={new Date()} historical={false} viewHref='/Dashboard/Race/' />
                 </div>
                 <div className='px-3'>
                     <p className='text-2xl font-bold p-6'>Recent</p>
-                    <RacesTable clubId={session.club.id} date={new Date()} historical={true} viewHref='/Dashboard/Race/' />
+                    <RacesTable clubId={session.session.activeOrganizationId} date={new Date()} historical={true} viewHref='/Dashboard/Race/' />
                 </div>
             </div>
         </div>
     )
 }
 
-export const Route = createFileRoute('/Dashboard/Race/')({
+export const Route = createFileRoute('/dashboard/Race/')({
     component: Page
 })

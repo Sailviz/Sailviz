@@ -3,8 +3,7 @@ import { QueryClientProvider, type QueryClient } from '@tanstack/react-query'
 import { SidebarInset, SidebarProvider } from '@components/ui/sidebar'
 import AppSidebar from '@components/layout/app-sidebar'
 import { ScrollArea } from '@components/ui/scroll-area'
-import { AdminNavCollections, navCollections } from 'src/constants/navCollections'
-import Plausible from 'plausible-tracker'
+import { AdminNavCollections, meCollections, navCollections } from 'src/constants/navCollections'
 import ErrorBoundary from '@components/ErrorBoundary'
 import { ThemeProvider as NextThemesProvider, type ThemeProviderProps } from 'next-themes'
 import { getSession } from '@sailviz/auth/client'
@@ -19,11 +18,6 @@ export interface MyRouterContext {
     queryClient: QueryClient
 }
 
-export const plausible = Plausible({
-    domain: 'sailviz.com',
-    trackLocalhost: false
-})
-
 //this avoids type issues because the types are not up do date.
 export const ThemeProvider = (props: ThemeProviderProps): React.JSX.Element => {
     return NextThemesProvider(props) as React.JSX.Element
@@ -32,6 +26,21 @@ export const ThemeProvider = (props: ThemeProviderProps): React.JSX.Element => {
 // Use the shared QueryClient provided at the app root
 import { queryClient } from 'src/lib/queryClient'
 export const Route = createRootRouteWithContext<MyRouterContext>()({
+    beforeLoad: async () => {
+        try {
+            const { data: session } = await getSession()
+            console.log('Session in root beforeLoad:', session)
+            return {
+                auth: session
+            }
+        } catch (e) {
+            console.error('Root beforeLoad getSession failed:', e)
+            // Gracefully degrade: return null session so UI can still render
+            return {
+                auth: null
+            }
+        }
+    },
     loader: async () => {
         try {
             const { data: session } = await getSession()
@@ -95,8 +104,10 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 
         let sidebar: boolean = false
         let collection
-        plausible.enableAutoPageviews()
-        if (path.startsWith('/Dashboard')) {
+        if (path.startsWith('/dashboard/me')) {
+            collection = meCollections
+            sidebar = true
+        } else if (path.startsWith('/dashboard')) {
             collection = navCollections
             sidebar = true
         } else if (path.startsWith('/admin')) {

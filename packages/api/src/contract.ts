@@ -99,6 +99,9 @@ export const ORPCcontract = {
     today: oc
       .input(z.object({ clubId: z.string() }))
       .output(z.array(Types.RaceSchema)),
+    personal: oc
+      .input(z.object({}).optional())
+      .output(z.array(Types.RaceSchema)),
     club: oc
       .input(
         z.object({

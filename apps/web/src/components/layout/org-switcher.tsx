@@ -37,9 +37,6 @@ export function OrgSwitcher() {
         })
         console.log('Fetched organizations:', organizations)
         setOrgList(organizations)
-        if (organizations.length > 0 && !active) {
-            setActive(organizations[0])
-        }
     }, [orgs])
 
     function setActiveOrganization(org: Types.Org) {
@@ -50,11 +47,33 @@ export function OrgSwitcher() {
                 organizationSlug: org.slug
             })
             .then(() => {
-                router.navigate({ to: '/Dashboard' })
+                if (org.id == 'admin-id') {
+                    router.navigate({ to: '/admin' })
+                } else {
+                    router.navigate({ to: '/dashboard' })
+                }
             })
     }
 
-    if (!active) return null
+    function setPersonal() {
+        // Immediately update local state so UI shows personal area
+        setActive(null)
+        client.organization
+            .setActive({
+                organizationId: null,
+                organizationSlug: ''
+            })
+            .then(() => {
+                // Navigate to personal area. server RPCs use authenticated user context.
+                router.navigate({ to: '/dashboard/me' })
+            })
+    }
+
+    // Render even when active is null; show personal as the selected state
+    const isPersonal = active === null
+    const displayName = isPersonal ? 'My Races' : (active?.name ?? '')
+    const displayLogo = isPersonal ? '' : (active?.logo ?? '')
+
     return (
         <SidebarMenu>
             <SidebarMenuItem>
@@ -62,10 +81,10 @@ export function OrgSwitcher() {
                     <DropdownMenuTrigger asChild>
                         <SidebarMenuButton size='lg' className='data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground'>
                             <div className='bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg'>
-                                <img src={active.logo || ''} className='size-4' />
+                                {displayLogo ? <img src={displayLogo} className='size-4' /> : <div className='size-4' />}
                             </div>
                             <div className='grid flex-1 text-left text-sm leading-tight'>
-                                <span className='truncate font-semibold'>{active.name}</span>
+                                <span className='truncate font-semibold'>{displayName}</span>
                             </div>
                             <ChevronsUpDown className='ml-auto' />
                         </SidebarMenuButton>
@@ -77,8 +96,21 @@ export function OrgSwitcher() {
                         sideOffset={4}
                     >
                         <DropdownMenuLabel className='text-muted-foreground text-xs'>Organisations</DropdownMenuLabel>
+                        {/* Personal / Me option */}
+                        <DropdownMenuItem key={'personal'} onClick={() => setPersonal()} className={`gap-2 p-2 ${isPersonal ? 'font-semibold' : ''}`}>
+                            <div className='flex size-6 items-center justify-center rounded-sm border'>
+                                <div className='size-4' />
+                            </div>
+                            My Races
+                            <DropdownMenuShortcut>⌘0</DropdownMenuShortcut>
+                        </DropdownMenuItem>
+
                         {orgList.map((org, index) => (
-                            <DropdownMenuItem key={org.name} onClick={() => setActiveOrganization(org)} className='gap-2 p-2'>
+                            <DropdownMenuItem
+                                key={org.name}
+                                onClick={() => setActiveOrganization(org)}
+                                className={`gap-2 p-2 ${active && active.id === org.id ? 'font-semibold' : ''}`}
+                            >
                                 <div className='flex size-6 items-center justify-center rounded-sm border'>
                                     <img src={org.logo || ''} className='size-4 shrink-0' />
                                 </div>

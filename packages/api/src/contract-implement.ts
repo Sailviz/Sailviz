@@ -6,10 +6,12 @@ import {
   findRace,
   findRaces,
   findTodaysRace,
+  findTodaysRacesScoped,
   race_create,
   race_delete,
   updateRace,
 } from "./routes/race";
+import { translateActiveOrgToScope } from "./lib/translateActiveOrgToScope";
 import {
   createSeries,
   deleteSeries,
@@ -157,6 +159,22 @@ const authMiddleware = os
       if (!session || !session.user) {
         throw new ORPCError("UNAUTHORIZED", { message: "Login required" });
       }
+      // Validate personal:<userId> markers to prevent session hijacking.
+      try {
+        const activeOrg = session?.session?.activeOrganizationId;
+        if (
+          typeof activeOrg === "string" &&
+          activeOrg.startsWith("personal:")
+        ) {
+          const uid = activeOrg.split(":")[1];
+          if (!uid || uid !== session.user.id) {
+            // clear invalid personal marker
+            session.session.activeOrganizationId = null;
+          }
+        }
+      } catch (e) {
+        // ignore validation errors
+      }
     }
     const result = await next({ context: { ...context, session } });
     return result;
@@ -181,15 +199,33 @@ const getGlobalLaps = os.lap.global.handler(async ({ context }) => {
   }
 });
 
-const todaysRaces = os.race.today.handler(async ({ input }) => {
-  const races = await findTodaysRace(input.clubId);
-  console.log(races);
-  if (races) {
-    return races;
-  } else {
-    throw new ORPCError("BAD_REQUEST");
-  }
-});
+const todaysRaces = os.race.today
+  .use(authMiddleware)
+  .handler(async ({ input, context }) => {
+    const session = (context as any).session;
+    const scope = translateActiveOrgToScope(session);
+    let races;
+    if (scope.type === "club") {
+      // fall back to input.clubId if provided
+      const clubId = scope.clubId ?? input.clubId;
+      races = await findTodaysRace(clubId as string);
+    } else if (scope.type === "personal") {
+      // ensure the requested personal scope matches the authenticated user
+      const authUserId = session?.user?.id;
+      if (!authUserId || scope.userId !== authUserId) {
+        throw new ORPCError("UNAUTHORIZED", {
+          message: "Invalid personal scope",
+        });
+      }
+      races = await findTodaysRacesScoped(scope as any);
+    }
+    console.log(races);
+    if (races) {
+      return races;
+    } else {
+      throw new ORPCError("BAD_REQUEST");
+    }
+  });
 
 const racebyClubId = os.race.club.handler(async ({ input }) => {
   const series = await findClubSeries(input.clubId, true);
@@ -431,6 +467,16 @@ export const mainRouter = os.router({
   },
   race: {
     today: todaysRaces,
+    personal: os.race.personal
+      .use(authMiddleware)
+      .handler(async ({ context }) => {
+        const session = (context as any).session;
+        if (!session || !session.user)
+          throw new ORPCError("UNAUTHORIZED", { message: "Login required" });
+        const scope = { type: "personal", userId: session.user.id } as any;
+        const races = await findTodaysRacesScoped(scope);
+        return races;
+      }),
     club: racebyClubId,
     find: racebyId,
     update: updateRace,
