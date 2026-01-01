@@ -6,8 +6,6 @@ const os = implement(ORPCcontract);
 
 export const createResult = os.result.create.handler(
   async ({ input, context }) => {
-    const session = (context as any)?.session;
-    const userId = session?.user?.id ?? null;
     const newResult = await prisma.result.create({
       data: {
         Helm: "",
@@ -27,7 +25,6 @@ export const createResult = os.result.create.handler(
         laps: {},
         numberLaps: 0,
         resultCode: "",
-        userId: userId,
       },
       include: {
         laps: true,
@@ -44,8 +41,6 @@ export const createResult = os.result.create.handler(
 
 export const updateResult = os.result.update.handler(
   async ({ input, context }) => {
-    const session = (context as any)?.session;
-    const userId = session?.user?.id ?? null;
     await prisma.result.update({
       where: {
         id: input.id,
@@ -71,7 +66,7 @@ export const updateResult = os.result.update.handler(
         HandicapPosition: input.HandicapPosition,
         fleetId: input.fleetId,
         numberLaps: input.numberLaps,
-        userId: userId,
+        userId: input.userId,
       },
       include: {
         laps: true,

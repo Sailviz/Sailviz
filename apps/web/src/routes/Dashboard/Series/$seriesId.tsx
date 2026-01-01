@@ -32,7 +32,7 @@ function Page() {
         }
     }
 
-    if (!session || !session.club || series == undefined || startSequence == undefined) {
+    if (!session || series == undefined || startSequence == undefined) {
         console.log('Series', series)
         // If the user is not authenticated, redirect to the login page
         return <PageSkeleton />

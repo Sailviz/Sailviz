@@ -43,12 +43,12 @@ const Action = ({ seriesId, viewHref, user }: { seriesId: string; viewHref: stri
 
 const columnHelper = createColumnHelper<SeriesType>()
 
-const ClubTable = ({ viewHref, clubId }: { viewHref: string; clubId?: string }) => {
+const ClubTable = ({ viewHref, orgId }: { viewHref: string; orgId?: string }) => {
     const session = useLoaderData({ from: `__root__` })
 
-    // if a clubId is provided then use that, otherwise use the session club id
-    const clubIdToUse = clubId || session?.club!.id || ''
-    const { data: series } = useQuery(orpcClient.series.club.queryOptions({ input: { clubId: clubIdToUse, includeRaces: true } }))
+    // if a orgId is provided then use that, otherwise use the session club id
+    const orgIdToUse = orgId || session?.session.activeOrganizationId
+    const { data: series } = useQuery(orpcClient.series.club.queryOptions({ input: { orgId: orgIdToUse, includeRaces: true } }))
     console.log('Series data:', series)
     const data = series || []
     var table = useReactTable({

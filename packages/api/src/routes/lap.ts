@@ -1,7 +1,6 @@
 import { implement, ORPCError } from "@orpc/server";
 import prisma from "@sailviz/db";
 import { ORPCcontract } from "../contract";
-import { getClub } from "./club";
 
 const os = implement(ORPCcontract);
 

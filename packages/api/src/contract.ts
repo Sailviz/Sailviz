@@ -9,9 +9,6 @@ const helloSchema = z.object({
 });
 
 export const ORPCcontract = {
-  hello: oc
-    .input(z.object({ name: z.string().optional() }).optional())
-    .output(helloSchema),
   lap: {
     global: oc.output(z.number()),
     create: oc
@@ -40,26 +37,26 @@ export const ORPCcontract = {
       .input(z.object({ seriesId: z.string() }))
       .output(Types.SeriesSchema),
     club: oc
-      .input(z.object({ clubId: z.string(), includeRaces: z.boolean() }))
+      .input(z.object({ orgId: z.string(), includeRaces: z.boolean() }))
       .output(z.array(Types.SeriesSchema)),
     create: oc
-      .input(z.object({ clubId: z.string(), name: z.string() }))
+      .input(z.object({ orgId: z.string(), name: z.string() }))
       .output(Types.SeriesSchema),
     delete: oc
       .input(z.object({ seriesId: z.string() }))
       .output(Types.SeriesSchema),
     update: oc.input(Types.SeriesSchema).output(Types.SeriesSchema),
   },
-  club: {
-    session: oc.output<typeof Types.ClubSchema>(Types.ClubSchema),
-    update: oc.input(Types.ClubSchema).output(Types.ClubSchema),
-    all: oc.output(z.array(Types.ClubSchema)),
-    create: oc.input(z.object({ name: z.string() })).output(Types.ClubSchema),
-    find: oc.input(z.object({ clubId: z.string() })).output(Types.ClubSchema),
-    name: oc.input(z.object({ clubName: z.string() })).output(Types.ClubSchema),
+  organization: {
+    session: oc.output<typeof Types.OrgSchema>(Types.OrgSchema),
+    update: oc.input(Types.OrgSchema).output(Types.OrgSchema),
+    all: oc.output(z.array(Types.OrgSchema)),
+    create: oc.input(z.object({ name: z.string() })).output(Types.OrgSchema),
+    find: oc.input(z.object({ orgId: z.string() })).output(Types.OrgSchema),
+    name: oc.input(z.object({ orgName: z.string() })).output(Types.OrgSchema),
     findByStripeCustomerId: oc
       .input(z.object({ stripeCustomerId: z.string() }))
-      .output(Types.ClubSchema),
+      .output(Types.OrgSchema),
   },
   fleet: {
     find: oc
@@ -88,7 +85,7 @@ export const ORPCcontract = {
           crew: z.number(),
           py: z.number(),
           pursuitStartTime: z.number(),
-          clubId: z.string(),
+          orgId: z.string(),
         })
       )
       .output(Types.BoatSchema),
@@ -97,15 +94,12 @@ export const ORPCcontract = {
   race: {
     find: oc.input(z.object({ raceId: z.string() })).output(Types.RaceSchema),
     today: oc
-      .input(z.object({ clubId: z.string() }))
+      .input(z.object({ orgId: z.string() }))
       .output(z.array(Types.RaceSchema)),
-    personal: oc
-      .input(z.object({}).optional())
-      .output(z.array(Types.RaceSchema)),
-    club: oc
+    org: oc
       .input(
         z.object({
-          clubId: z.string(),
+          orgId: z.string(),
           page: z.number(),
           date: z.string(),
           historical: z.boolean(),
@@ -143,19 +137,8 @@ export const ORPCcontract = {
   },
   user: {
     update: oc.input(Types.UserSchema).output(Types.UserSchema),
-    create: oc.input(z.object({ clubId: z.string() })).output(Types.UserSchema),
-    club: oc
-      .input(z.object({ clubId: z.string() }))
-      .output(z.array(Types.UserSchema)),
+    create: oc.input(z.object({ orgId: z.string() })).output(Types.UserSchema),
     delete: oc.input(Types.UserSchema).output(Types.UserSchema),
-  },
-  role: {
-    create: oc.input(z.object({ clubId: z.string() })).output(Types.RoleSchema),
-    club: oc
-      .input(z.object({ clubId: z.string() }))
-      .output(z.array(Types.RoleSchema)),
-    update: oc.input(Types.RoleSchema).output(Types.RoleSchema),
-    delete: oc.input(Types.RoleSchema).output(Types.RoleSchema),
   },
   globalConfig: {
     find: oc.output(Types.GlobalConfigSchema),

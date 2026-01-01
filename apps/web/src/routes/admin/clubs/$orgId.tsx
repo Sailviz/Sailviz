@@ -5,9 +5,9 @@ import { useQuery } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
 
 function Page() {
-    const { clubId } = Route.useParams()
+    const { orgId } = Route.useParams()
 
-    const club = useQuery(orpcClient.club.find.queryOptions({ input: { clubId: clubId } })).data
+    const club = useQuery(orpcClient.organization.find.queryOptions({ input: { orgId: orgId } })).data
 
     if (!club) {
         return <div>Loading...</div>
@@ -38,6 +38,6 @@ function Page() {
     )
 }
 
-export const Route = createFileRoute('/admin/clubs/$clubId')({
+export const Route = createFileRoute('/admin/clubs/$orgId')({
     component: Page
 })

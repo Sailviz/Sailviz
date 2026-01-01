@@ -5,28 +5,28 @@ import { STRIPE_SECRET_KEY } from "../config";
 const stripe = new Stripe(STRIPE_SECRET_KEY, {
   apiVersion: "2025-10-29.clover",
 });
-export async function createStripeCustomer(clubId: string) {
-  const club = await prisma.club.findUnique({
+export async function createStripeCustomer(orgId: string) {
+  const org = await prisma.organization.findUnique({
     where: {
-      id: clubId,
+      id: orgId,
     },
   });
 
-  if (!club) {
+  if (!org) {
     throw new Error("Club not found");
   }
 
   const customer = await stripe.customers.create({
-    name: club.name,
-    email: club.name + "_admin@sailviz.com", // Placeholder email, should be replaced with actual admin email
+    name: org.name,
+    email: org.name + "_admin@sailviz.com", // Placeholder email, should be replaced with actual admin email
     metadata: {
-      clubId: club.id,
+      orgId: org.id,
     },
   });
 
-  await prisma.club.update({
+  await prisma.organization.update({
     where: {
-      id: club.id,
+      id: org.id,
     },
     data: {
       stripe: {

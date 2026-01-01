@@ -52,7 +52,7 @@ model Boat {
 
 model Organization {
   id               String       @id @unique @default(uuid())
-  name             String
+  name             String       @unique
   slug             String
   logo             String?
   createdAt        DateTime

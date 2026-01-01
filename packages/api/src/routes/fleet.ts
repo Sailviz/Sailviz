@@ -137,3 +137,12 @@ export const fleet_settings_update = os.fleet.settings.update.handler(
     }
   }
 );
+
+export const fleet_find = os.fleet.find.handler(async ({ input }) => {
+  const fleet = await findFleet(input.fleetId);
+  if (fleet) {
+    return fleet;
+  } else {
+    throw new ORPCError("NOT_FOUND");
+  }
+});

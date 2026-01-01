@@ -18,12 +18,9 @@ function Page() {
     const [allowCreate, setAllowCreate] = useState(false)
 
     const createSeries = async (seriesName: string) => {
-        if (!session.club) {
-            throw new Error('No club found')
-        }
         await seriesCreation.mutateAsync({
             name: seriesName,
-            clubId: session.club.id
+            orgId: session?.session.activeOrganizationId
         })
         queryClient.invalidateQueries({
             queryKey: orpcClient.series.club.key({ type: 'query' })
@@ -35,7 +32,7 @@ function Page() {
             console.log('Session:', session)
             if (session?.club?.stripe.subscriptionStatus !== 'active') {
                 //check how many series the user has
-                let { data: series } = useQuery(orpcClient.series.club.queryOptions({ input: { clubId: session?.user?.clubId!, includeRaces: false } }))
+                let { data: series } = useQuery(orpcClient.series.club.queryOptions({ input: { orgId: session?.session.activeOrganizationId, includeRaces: false } }))
                 if (series == undefined) {
                     series = []
                 }
@@ -50,7 +47,7 @@ function Page() {
         checkSubscription()
     }, [session])
 
-    if (!session || !session.club) {
+    if (!session) {
         return <PageSkeleton />
     }
 
@@ -67,7 +64,7 @@ function Page() {
                 <></>
             )}
             <div className='p-6'>
-                <ClubTable viewHref='/Dashboard/Series/' />
+                <ClubTable viewHref='/dashboard/Series/' />
             </div>
         </div>
     )

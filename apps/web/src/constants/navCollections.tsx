@@ -225,7 +225,7 @@ export const meCollections: NavCollection[] = [
         items: [
             {
                 title: 'My Races',
-                url: '/me/races',
+                url: '/dashboard/me/races',
                 icon: <RaceIcon />,
                 shortcut: ['p', 'p'],
                 isActive: false,
@@ -233,7 +233,7 @@ export const meCollections: NavCollection[] = [
             },
             {
                 title: 'My Clubs',
-                url: '/me/clubs',
+                url: '/dashboard/me/clubs',
                 icon: <RaceIcon />,
                 shortcut: ['p', 'p'],
                 isActive: false,

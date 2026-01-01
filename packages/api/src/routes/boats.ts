@@ -2,13 +2,14 @@ import prisma from "@sailviz/db";
 import { BoatType } from "packages/types/src/types";
 import { implement, ORPCError } from "@orpc/server";
 import { ORPCcontract } from "../contract";
+import { authMiddleware } from "../middleware";
 
 const os = implement(ORPCcontract);
 
-export async function findBoats(clubId: string) {
+export async function findBoats(orgId: string) {
   var result = await prisma.boat.findMany({
     where: {
-      clubId: clubId,
+      orgId: orgId,
     },
     orderBy: {
       name: "asc",
@@ -41,9 +42,9 @@ export const boat_create = os.boat.create.handler(async ({ input }) => {
       crew: input.crew,
       py: input.py,
       pursuitStartTime: input.pursuitStartTime,
-      club: {
+      organization: {
         connect: {
-          id: input.clubId,
+          id: input.orgId,
         },
       },
     },
@@ -65,3 +66,41 @@ export const boat_delete = os.boat.delete.handler(async ({ input }) => {
     throw new ORPCError("BAD_REQUEST");
   }
 });
+
+export const boat_update = os.boat.update
+  .use(authMiddleware)
+  .handler(async ({ input, context }) => {
+    const session = context.session as any;
+    if (!session || !session.user) {
+      throw new ORPCError("UNAUTHORIZED", { message: "Login required" });
+    }
+    const updatedBoat = await updateBoatById(input);
+    if (!updatedBoat) {
+      throw new ORPCError("BAD_REQUEST", { message: "Could not update boat" });
+    }
+    return updatedBoat;
+  });
+
+export const boat_find = os.boat.find
+  .use(authMiddleware)
+  .handler(async ({ input }) => {
+    const boat = await findBoat(input.boatId);
+    if (boat) {
+      return boat;
+    } else {
+      throw new ORPCError("NOT_FOUND");
+    }
+  });
+
+export const boat_session = os.boat.session
+  .use(authMiddleware)
+  .handler(async ({ context }) => {
+    const session = context.session as any; // this is because the session type is not quite correct
+    const clubId = session?.session.activeOrganizationId;
+    const boatsList = await findBoats(clubId);
+    if (boatsList) {
+      return boatsList;
+    } else {
+      throw new ORPCError("NOT_FOUND");
+    }
+  });

@@ -48,10 +48,10 @@ const Action = ({ viewHref, raceId }: { viewHref: string; raceId: string }) => {
 
 const columnHelper = createColumnHelper<RaceType>()
 
-const RacesTable = ({ date, historical, viewHref, clubId }: { date: Date; historical: boolean; viewHref: string; clubId: string }) => {
+const RacesTable = ({ date, historical, viewHref, orgId }: { date: Date; historical: boolean; viewHref: string; orgId: string }) => {
     const [page, setPage] = useState(1)
 
-    const { data: races } = useQuery(orpcClient.race.club.queryOptions({ input: { clubId: clubId!, date: date.toISOString(), historical: historical, page: page } }))
+    const { data: races } = useQuery(orpcClient.race.org.queryOptions({ input: { orgId: orgId!, date: date.toISOString(), historical: historical, page: page } }))
     const [data, setData] = useState<RaceType[]>([])
     const [count, setCount] = useState(0)
     const rowsPerPage = 10

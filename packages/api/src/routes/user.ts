@@ -1,73 +1,81 @@
 import prisma from "@sailviz/db";
-import { UserType, RoleType, Permission } from "@sailviz/types";
+import * as Types from "@sailviz/types";
 
-function toUserType(u: any & { roles: any[] }): UserType {
-  const roles: RoleType[] = (u.roles || []).map((r) => ({
-    id: r.id,
-    name: r.name,
-    clubId: r.clubId,
-    // permissions is stored as JSON in DB; coerce to our runtime type
-    permissions:
-      (r.permissions as unknown as { allowed?: Permission[] }) || undefined,
-  }));
+const { implement, ORPCError } = require("@orpc/server");
+import { ORPCcontract } from "../contract";
+import { authMiddleware } from "../middleware";
+const os = implement(ORPCcontract);
 
-  return {
-    id: u.id,
-    username: u.username,
-    uuid: (u as unknown as { uuid: string | null }).uuid ?? null,
-    startPage: u.startPage,
-    admin: u.admin,
-    email: (u as unknown as { email: string | null }).email ?? null,
-    emailVerified: u.emailVerified,
-    image: (u as unknown as { image: string | null }).image ?? null,
-    createdAt: u.createdAt,
-    updatedAt: u.updatedAt,
-    displayUsername:
-      (u as unknown as { displayUsername: string | null }).displayUsername ??
-      null,
-    roles,
-    clubId: (u.clubId ?? "") as string,
-  };
-}
-
-export async function updateUserById(user: UserType): Promise<UserType> {
-  const { id, roles, ...updateData } = user;
+export async function updateUserById(
+  user: Types.UserType
+): Promise<Types.UserType> {
+  const { id, ...updateData } = user;
   const updatedUser = await prisma.user.update({
     where: { id },
     data: updateData as any,
-    include: { roles: true },
   });
-  return toUserType(updatedUser as any);
+  return updatedUser;
 }
 
-export async function createUserInClub(clubId: string): Promise<UserType> {
+async function createUser(): Promise<Types.UserType> {
   const newUser = await prisma.user.create({
     data: {
-      username: "",
+      name: "",
       email: null,
       emailVerified: false,
       createdAt: new Date(),
       updatedAt: new Date(),
-      clubId: clubId,
       startPage: "Dashboard",
     },
-    include: { roles: true },
   });
-  return toUserType(newUser as any);
+  return newUser as Types.UserType;
 }
 
-export async function deleteUserById(userId: string): Promise<UserType> {
+export async function deleteUserById(userId: string): Promise<Types.UserType> {
   const deletedUser = await prisma.user.delete({
     where: { id: userId },
-    include: { roles: true },
   });
-  return toUserType(deletedUser as any);
+  return deletedUser as Types.UserType;
 }
 
-export async function getUsersByClub(clubId: string): Promise<UserType[]> {
-  const users = await prisma.user.findMany({
-    where: { clubId },
-    include: { roles: true },
+export const user_create = os.user.create
+  .use(authMiddleware)
+  .handler(async ({ input, context }) => {
+    const session = context.session as any;
+    if (!session || !session.user) {
+      throw new ORPCError("UNAUTHORIZED", { message: "Login required" });
+    }
+    const newUser = await createUser();
+    if (!newUser) {
+      throw new ORPCError("BAD_REQUEST", { message: "Could not create user" });
+    }
+    return newUser;
   });
-  return users.map((u) => toUserType(u as any));
-}
+
+export const user_update = os.user.update
+  .use(authMiddleware)
+  .handler(async ({ input, context }) => {
+    const session = context.session as any;
+    if (!session || !session.user) {
+      throw new ORPCError("UNAUTHORIZED", { message: "Login required" });
+    }
+    const updatedUser = await updateUserById(input);
+    if (!updatedUser) {
+      throw new ORPCError("BAD_REQUEST", { message: "Could not update user" });
+    }
+    return updatedUser;
+  });
+
+export const user_delete = os.user.delete
+  .use(authMiddleware)
+  .handler(async ({ input, context }) => {
+    const session = context.session as any;
+    if (!session || !session.user) {
+      throw new ORPCError("UNAUTHORIZED", { message: "Login required" });
+    }
+    const deletedUser = await deleteUserById(input.id);
+    if (!deletedUser) {
+      throw new ORPCError("BAD_REQUEST", { message: "Could not delete user" });
+    }
+    return deletedUser;
+  });

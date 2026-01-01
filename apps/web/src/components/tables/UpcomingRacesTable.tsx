@@ -39,7 +39,7 @@ const columnHelper = createColumnHelper<RaceType>()
 const UpcomingRacesTable = () => {
     const session = useLoaderData({ from: `__root__` })
 
-    const { data: todaysRaces } = useQuery(orpcClient.race.today.queryOptions({ input: { clubId: session?.club?.id! } }))
+    const { data: todaysRaces } = useQuery(orpcClient.race.today.queryOptions({ input: { orgId: session?.session.activeOrganizationId } }))
 
     const [sorting, setSorting] = useState<SortingState>([{ id: 'number', desc: false }])
     const [data, setData] = useState<RaceType[]>([])

@@ -1,7 +1,9 @@
-import { os, ORPCError } from "@orpc/server";
+import { implement, ORPCError } from "@orpc/server";
+import { ORPCcontract } from "../contract";
 import prisma from "@sailviz/db";
+const os = implement(ORPCcontract);
 
-export const getGlobalLaps = os.handler(async ({ context }) => {
+export const lap_global = os.lap.global.handler(async ({ context }) => {
   var laps = await prisma.lap.count({});
   console.log(laps);
   if (laps) {

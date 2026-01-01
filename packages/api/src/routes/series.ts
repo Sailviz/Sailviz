@@ -1,15 +1,15 @@
 import { implement, ORPCError } from "@orpc/server";
 import prisma from "@sailviz/db";
 import { ORPCcontract } from "../contract";
-import { getClub } from "./club";
+import { getOrg } from "./organization";
 
 const os = implement(ORPCcontract);
 
 //TODO change this to return count of races per series, don't need all the data when loading this many series.
-export async function findClubSeries(clubId: string, includeRaces: boolean) {
+export async function findOrgSeries(orgId: string, includeRaces: boolean) {
   var result = await prisma.series.findMany({
     where: {
-      clubId: clubId,
+      orgId: orgId,
     },
     include: {
       ...(includeRaces
@@ -46,7 +46,7 @@ export async function findSeries(id: string, includeRaces: boolean) {
 
 export const seriesbyClubId = os.series.club.handler(async ({ input }) => {
   console.log(input);
-  const series = await findClubSeries(input.clubId, input.includeRaces);
+  const series = await findOrgSeries(input.orgId, input.includeRaces);
   if (series) {
     return series;
   } else {
@@ -55,7 +55,7 @@ export const seriesbyClubId = os.series.club.handler(async ({ input }) => {
 });
 
 export const createSeries = os.series.create.handler(async ({ input }) => {
-  const club = await getClub(input.clubId);
+  const club = await getOrg(input.orgId);
   const newSeries = await prisma.series.create({
     data: {
       name: input.name,
@@ -63,9 +63,9 @@ export const createSeries = os.series.create.handler(async ({ input }) => {
         numberToCount: 0,
         pursuitLength: club.settings!.pursuitLength,
       },
-      club: {
+      organization: {
         connect: {
-          id: input.clubId,
+          id: input.orgId,
         },
       },
     },

@@ -5,7 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Button } from '@components/ui/button'
 import { useQuery } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
-import type { ClubType } from '@sailviz/types'
+import * as Types from '@sailviz/types'
 
 const Action = ({ ...props }: any) => {
     return (
@@ -18,11 +18,11 @@ const Action = ({ ...props }: any) => {
     )
 }
 
-const columnHelper = createColumnHelper<ClubType>()
+const columnHelper = createColumnHelper<Types.Org>()
 
 const TableOfClubs = () => {
     const session = useLoaderData({ from: `__root__` })
-    const { data: clubs } = useQuery(orpcClient.club.all.queryOptions())
+    const { data: clubs } = useQuery(orpcClient.organization.all.queryOptions())
 
     const navigate = useNavigate()
 

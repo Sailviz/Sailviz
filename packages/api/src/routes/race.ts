@@ -4,10 +4,11 @@ import { implement, ORPCError } from "@orpc/server";
 import { ORPCcontract } from "../contract";
 import { ClubSettingsType, RaceType } from "packages/types/src/types";
 import { Race } from "packages/db/src/generated";
+import { findOrgSeries } from "./series";
 
 const os = implement(ORPCcontract);
 
-export async function findTodaysRace(clubId: string) {
+export async function findTodaysRace(orgId: string) {
   var result = await prisma.race.findMany({
     where: {
       AND: [
@@ -27,7 +28,7 @@ export async function findTodaysRace(clubId: string) {
         },
         {
           series: {
-            clubId: clubId,
+            orgId: orgId,
           },
         },
       ],
@@ -262,6 +263,11 @@ export const race_delete = os.race.delete.handler(async ({ input }) => {
   }
 });
 
+export const race_today = os.race.today.handler(async ({ input }) => {
+  const races = await findTodaysRace(input.orgId);
+  return races;
+});
+
 export const race_create = os.race.create.handler(async ({ input }) => {
   const series = await prisma.series.findUnique({
     where: { id: input.seriesId },
@@ -269,8 +275,8 @@ export const race_create = os.race.create.handler(async ({ input }) => {
   if (!series) {
     throw new ORPCError("Series not found");
   }
-  const club = await prisma.club.findUnique({
-    where: { id: series.clubId },
+  const club = await prisma.organization.findUnique({
+    where: { id: series.orgId },
   });
   let clubSettings = club.settings as ClubSettingsType;
   let duties = clubSettings!.duties.reduce((obj, key, index) => {
@@ -356,5 +362,36 @@ export const race_create = os.race.create.handler(async ({ input }) => {
     return race;
   } else {
     throw new ORPCError("BAD_REQUEST");
+  }
+});
+
+export const race_org = os.race.org.handler(async ({ input }) => {
+  const series = await findOrgSeries(input.orgId, true);
+
+  if (!series || series.length === 0) {
+    throw new ORPCError("NOT_FOUND");
+  }
+
+  const count = await countRaces(
+    series.map((s) => s.id),
+    input.date,
+    input.historical
+  );
+  const races = await findRaces(
+    series.map((s) => s.id),
+    input.page ?? 0,
+    100,
+    input.date,
+    input.historical ?? false
+  );
+  return { races, count };
+});
+
+export const race_find = os.race.find.handler(async ({ input }) => {
+  const race = await findRace(input.raceId);
+  if (race) {
+    return race as RaceType;
+  } else {
+    throw new ORPCError("NOT_FOUND");
   }
 });
