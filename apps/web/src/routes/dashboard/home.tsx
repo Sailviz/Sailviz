@@ -5,13 +5,25 @@ import { createFileRoute, Link, useLoaderData } from '@tanstack/react-router'
 import HornTestButton from '@components/layout/home/HornTestButton'
 
 import CreateEventDialog from '@components/layout/dashboard/CreateEventModal'
+import { useEffect, useState } from 'react'
+import { client } from '@sailviz/auth/client'
 
 function Page() {
     const session = useLoaderData({ from: `__root__` })
+    const [org, setOrg] = useState<any>(null)
+    useEffect(() => {
+        async function fetchActiveOrg() {
+            const activeOrgId = await session.session.activeOrganizationId
+            const org = await client.organization.getFullOrganization(activeOrgId)
+            setOrg(org.data)
+        }
+        fetchActiveOrg()
+    }, [])
+
     return (
         <div>
             <div className='p-6'>
-                <h1 className={title({ color: 'blue' })}>{session.session.activeOrganizationId}</h1>
+                <h1 className={title({ color: 'blue' })}>{org?.name}</h1>
             </div>
             <div className='flex flex-row'>
                 <div>
