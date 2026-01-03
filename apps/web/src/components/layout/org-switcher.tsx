@@ -14,7 +14,7 @@ import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from '@co
 import { client } from '@sailviz/auth/client'
 import * as Types from '@sailviz/types'
 import { useEffect } from 'react'
-import { useRouter } from '@tanstack/react-router'
+import { useLoaderData, useRouter } from '@tanstack/react-router'
 
 export function OrgSwitcher() {
     const { isMobile } = useSidebar()
@@ -23,6 +23,7 @@ export function OrgSwitcher() {
     const [orgList, setOrgList] = React.useState<Types.Org[]>([])
 
     const orgs = client.useListOrganizations()
+    const session = useLoaderData({ from: `__root__` })
 
     useEffect(() => {
         const organizations: Types.Org[] = []
@@ -38,6 +39,31 @@ export function OrgSwitcher() {
         console.log('Fetched organizations:', organizations)
         setOrgList(organizations)
     }, [orgs])
+
+    useEffect(() => {
+        async function fetchActiveOrg() {
+            try {
+                const activeOrgId = await session.session.activeOrganizationId
+                console.log('Active organization ID:', activeOrgId)
+                const org = await client.organization.getFullOrganization(activeOrgId)
+                console.log('Active organization fetched:', org.data)
+                if (!org.data) {
+                    setActive(null)
+                    return
+                }
+                setActive({
+                    name: org.data.name,
+                    logo: org.data.logo || '',
+                    id: org.data.id,
+                    slug: org.data.slug,
+                    settings: {}
+                })
+            } catch (error) {
+                console.error('Error fetching active organization:', error)
+            }
+        }
+        fetchActiveOrg()
+    }, [])
 
     function setActiveOrganization(org: Types.Org) {
         setActive(org)
