@@ -104,15 +104,6 @@ type ClubSettingsType = {
     }
 }
 
-type BoatDataType = {
-    id: string
-    name: string
-    crew: number
-    py: number
-    pursuitStartTime: number
-    clubId: string
-}
-
 type ClubDataType = {
     id: string
     name: string

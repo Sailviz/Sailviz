@@ -1,7 +1,6 @@
 import { useLoaderData, createFileRoute } from '@tanstack/react-router'
 import { PageSkeleton } from '@components/layout/PageSkeleton'
 import UsersTable from '@components/tables/UsersTable'
-import RoleTable from '@components/tables/RoleTable'
 import { AVAILABLE_PERMISSIONS, userHasPermission } from '@components/helpers/users'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
@@ -10,42 +9,26 @@ import { ActionButton } from '@components/ui/action-button'
 function Page() {
     const session = useLoaderData({ from: `__root__` })
 
-    const { data: club } = useQuery(orpcClient.club.session.queryOptions())
+    const { data: org } = useQuery(orpcClient.organization.session.queryOptions())
 
     const userCreation = useMutation(orpcClient.user.create.mutationOptions())
-    const roleCreation = useMutation(orpcClient.role.create.mutationOptions())
     const queryClient = useQueryClient()
 
     const createUser = async () => {
-        if (club == undefined) {
-            throw new Error('No club found')
+        if (org == undefined) {
+            throw new Error('No org found')
         }
-        const user = await userCreation.mutateAsync({ clubId: club.id })
+        const user = await userCreation.mutateAsync({ orgId: org.id })
         if (user) {
             queryClient.invalidateQueries({
-                queryKey: orpcClient.user.club.key({ type: 'query' })
+                queryKey: orpcClient.user.create.key({ type: 'query' })
             })
         } else {
             throw new Error('Could not create user')
         }
     }
 
-    const createRole = async () => {
-        if (club == undefined) {
-            throw new Error('No club found')
-        }
-        const role = await roleCreation.mutateAsync({ clubId: club.id })
-        console.log(role)
-        if (role) {
-            queryClient.invalidateQueries({
-                queryKey: orpcClient.role.club.key({ type: 'query' })
-            })
-        } else {
-            throw new Error('Could not create role')
-        }
-    }
-
-    if (club == undefined || session == undefined) {
+    if (org == undefined || session == undefined) {
         return <PageSkeleton />
     }
 
@@ -57,15 +40,6 @@ function Page() {
                     <UsersTable />
                     {userHasPermission(session.user, AVAILABLE_PERMISSIONS.editUsers) ? (
                         <ActionButton before={'Create User'} during={'Creating'} after={'Created'} action={createUser} />
-                    ) : (
-                        <></>
-                    )}
-                </div>
-                <div className='p-6'>
-                    Roles
-                    <RoleTable />
-                    {userHasPermission(session.user, AVAILABLE_PERMISSIONS.editRoles) ? (
-                        <ActionButton before={'Create Role'} during={'Creating'} after={'Created'} action={createRole} />
                     ) : (
                         <></>
                     )}

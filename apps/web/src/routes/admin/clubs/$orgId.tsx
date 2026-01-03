@@ -8,8 +8,9 @@ function Page() {
     const { orgId } = Route.useParams()
 
     const club = useQuery(orpcClient.organization.find.queryOptions({ input: { orgId: orgId } })).data
+    const stripe = useQuery(orpcClient.stripe.find.queryOptions({ input: { orgId: club?.id }, queryKey: [club] })).data
 
-    if (!club) {
+    if (!club || !stripe) {
         return <div>Loading...</div>
     }
 
@@ -21,11 +22,11 @@ function Page() {
                     <div className='space-y-4'>
                         <div className='flex flex-col sm:flex-row justify-between items-start sm:items-center'>
                             <div className='mb-4 sm:mb-0'>
-                                <p className='font-medium'>Current Plan: {club.stripe?.planName || 'None'}</p>
+                                <p className='font-medium'>Current Plan: {stripe.planName || 'None'}</p>
                                 <p className='text-sm text-muted-foreground'>
-                                    {club.stripe?.subscriptionStatus === 'active'
+                                    {stripe.subscriptionStatus === 'active'
                                         ? 'Billed monthly'
-                                        : club.stripe?.subscriptionStatus === 'trialing'
+                                        : stripe.subscriptionStatus === 'trialing'
                                           ? 'Trial period'
                                           : 'No active subscription'}
                                 </p>

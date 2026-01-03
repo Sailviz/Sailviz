@@ -6,7 +6,7 @@ import { Input } from '@components/ui/input'
 import { DialogTrigger } from '@radix-ui/react-dialog'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
-
+import * as Types from '@sailviz/types'
 export default function EditFleetSettingsDialog({ fleetSettings, seriesId }: { fleetSettings: FleetSettingsType; seriesId: string }) {
     const { data: boats } = useQuery(orpcClient.boat.session.queryOptions())
 
@@ -14,8 +14,8 @@ export default function EditFleetSettingsDialog({ fleetSettings, seriesId }: { f
     const queryClient = useQueryClient()
 
     const [name, setName] = useState('')
-    const [selectedBoats, setSelectedBoats] = useState([{ label: '', value: {} as BoatDataType }])
-    const [options, setOptions] = useState([{ label: '', value: {} as BoatDataType }])
+    const [selectedBoats, setSelectedBoats] = useState([{ label: '', value: {} as Types.BoatType }])
+    const [options, setOptions] = useState([{ label: '', value: {} as Types.BoatType }])
 
     const [open, setOpen] = useState(false)
 
@@ -37,11 +37,11 @@ export default function EditFleetSettingsDialog({ fleetSettings, seriesId }: { f
 
     useEffect(() => {
         if (boats === undefined) return
-        let tempoptions: { label: string; value: BoatDataType }[] = []
+        let tempoptions: { label: string; value: Types.BoatType }[] = []
         boats.forEach(boat => {
             // Check if the boat is already selected
             if (selectedBoats.find(x => x.value.id === boat.id)) return
-            tempoptions.push({ value: boat as BoatDataType, label: boat.name })
+            tempoptions.push({ value: boat as Types.BoatType, label: boat.name })
         })
         setOptions(tempoptions)
     }, [boats, selectedBoats])

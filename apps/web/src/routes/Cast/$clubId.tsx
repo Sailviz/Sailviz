@@ -36,8 +36,8 @@ function Page() {
 
     const { Image: QRCode } = useQRCode()
 
-    const { data: club } = useQuery(orpcClient.club.find.queryOptions({ input: { clubId: clubId } }))
-    const { data: todaysRaces } = useQuery(orpcClient.race.today.queryOptions({ input: { clubId: clubId }, refetchInterval: 10000 }))
+    const { data: club } = useQuery(orpcClient.organization.find.queryOptions({ input: { orgId: clubId } }))
+    const { data: todaysRaces } = useQuery(orpcClient.race.today.queryOptions({ input: { orgId: clubId }, refetchInterval: 10000 }))
 
     const findRaceMutation = useMutation(orpcClient.race.find.mutationOptions())
     const findSeriesMutation = useMutation(orpcClient.series.find.mutationOptions())
@@ -280,7 +280,7 @@ function Page() {
                 ) : null}
             </div>
             <div className='p-6'>
-                <h1 className={title({ color: 'blue' })}>SailViz - {club?.displayName}</h1>
+                <h1 className={title({ color: 'blue' })}>SailViz - {club?.name}</h1>
             </div>
 
             {(() => {

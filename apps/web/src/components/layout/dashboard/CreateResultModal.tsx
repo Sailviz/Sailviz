@@ -9,6 +9,8 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useTheme } from 'next-themes'
 import { type ChangeEvent, useState } from 'react'
 import Select, { type CSSObjectWithLabel } from 'react-select'
+import * as Types from '@sailviz/types'
+
 export default function CreateResultDialog({ race, boats }: { race: RaceType; boats: BoatType[] }) {
     const queryClient = useQueryClient()
 
@@ -24,15 +26,15 @@ export default function CreateResultDialog({ race, boats }: { race: RaceType; bo
 
     //array of fleets, dimensionally equal to selectedRaces
     const [selectedFleet, setSelectedFleet] = useState<string>(race.fleets[0]!.id)
-    const [selectedBoat, setSelectedBoat] = useState({ label: '', value: {} as BoatDataType })
+    const [selectedBoat, setSelectedBoat] = useState({ label: '', value: {} as Types.BoatType })
 
     const [helmError, setHelmError] = useState(false)
     const [boatError, setBoatError] = useState(false)
     const [sailNumError, setSailNumError] = useState(false)
 
-    let options: { label: string; value: BoatDataType }[] = []
-    boats.forEach((boat: BoatDataType) => {
-        options.push({ value: boat as BoatDataType, label: boat.name })
+    let options: { label: string; value: Types.BoatType }[] = []
+    boats.forEach((boat: Types.BoatType) => {
+        options.push({ value: boat as Types.BoatType, label: boat.name })
     })
 
     const CapitaliseInput = (e: ChangeEvent<HTMLInputElement>) => {
@@ -80,7 +82,7 @@ export default function CreateResultDialog({ race, boats }: { race: RaceType; bo
         setCrew('')
         setSailNumber('')
         setSelectedFleet('')
-        setSelectedBoat({ label: '', value: {} as BoatDataType })
+        setSelectedBoat({ label: '', value: {} as Types.BoatType })
     }
 
     return (

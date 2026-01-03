@@ -14,7 +14,7 @@ import Header from '../header'
 export default function SignOnLayout({ children }: { children: React.ReactNode }) {
     const session = useLoaderData({ from: `__root__` })
 
-    const todaysRaces = useQuery(orpcClient.race.today.queryOptions({ input: { clubId: session!.user.clubId } })).data as RaceType[]
+    const todaysRaces = useQuery(orpcClient.race.today.queryOptions({ input: { orgId: session!.user.clubId } })).data as RaceType[]
 
     const backButton: NavCollection = userHasPermission(session!.user, AVAILABLE_PERMISSIONS.dashboardAccess)
         ? {

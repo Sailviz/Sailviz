@@ -8,7 +8,7 @@ import type { BoatType, RaceType } from '@sailviz/types'
 export default function SignOnView() {
     const session = useLoaderData({ from: `__root__` })
 
-    const todaysRaces = useQuery(orpcClient.race.today.queryOptions({ input: { clubId: session?.club?.id! } })).data as RaceType[]
+    const todaysRaces = useQuery(orpcClient.race.today.queryOptions({ input: { orgId: session?.club?.id! } })).data as RaceType[]
     const boats = useQuery(orpcClient.boat.session.queryOptions()).data as BoatType[]
 
     if (todaysRaces === undefined) {

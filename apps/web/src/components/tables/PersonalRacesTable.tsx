@@ -1,9 +1,7 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import dayjs from 'dayjs'
 import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, type SortingState, useReactTable } from '@tanstack/react-table'
-import { useLoaderData, useNavigate } from '@tanstack/react-router'
-import { useQuery } from '@tanstack/react-query'
-import { orpcClient } from '@lib/orpc'
+import { useNavigate } from '@tanstack/react-router'
 import { Button } from '../ui/button'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
 import * as Types from '@sailviz/types'
@@ -37,12 +35,12 @@ const Action = ({ ...props }: any) => {
 const columnHelper = createColumnHelper<Types.RaceType>()
 
 const PersonalRacesTable = () => {
-    const session = useLoaderData({ from: `__root__` })
+    // const session = useLoaderData({ from: `__root__` })
 
     const [sorting, setSorting] = useState<SortingState>([{ id: 'number', desc: false }])
     const [data, setData] = useState<Types.RaceType[]>([])
 
-    const { data: todaysRaces } = useQuery(orpcClient.race.personal.queryOptions({ input: {} }))
+    const todaysRaces: Types.RaceType[] = []
 
     React.useEffect(() => {
         if (todaysRaces) setData(todaysRaces)

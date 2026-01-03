@@ -60,7 +60,7 @@ function Page() {
     }
 
     const copyFromPrevious = async () => {
-        let today = await getTodayRace.mutateAsync({ clubId: session!.user.clubId })
+        let today = await getTodayRace.mutateAsync({ orgId: session!.user.clubId })
         if (today == undefined) {
             alert('unable to get previous data')
             return

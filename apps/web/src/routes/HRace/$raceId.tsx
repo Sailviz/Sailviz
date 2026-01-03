@@ -10,8 +10,8 @@ import RaceTimer from '@components/layout/race/raceTimer'
 import FleetSelectDialog from '@components/layout/dashboard/FleetSelectModal'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
-import type { ClubType, FleetType, RaceType, ResultType } from '@sailviz/types'
 import BackButton from '@components/layout/backButton'
+import * as Types from '@sailviz/types'
 
 // these options are the same across all fleets
 enum raceStateType {
@@ -38,11 +38,11 @@ function Page() {
 
     const queryClient = useQueryClient()
 
-    const club = useQuery(orpcClient.club.session.queryOptions()).data as ClubType
+    const club = useQuery(orpcClient.organization.session.queryOptions()).data as Types.Org
 
     // Capture query options so we can reuse the exact queryKey for optimistic updates
     const raceQueryOptions = orpcClient.race.find.queryOptions({ input: { raceId: raceId }, results: true, boats: true })
-    const race = useQuery(raceQueryOptions).data as RaceType
+    const race = useQuery(raceQueryOptions).data as Types.RaceType
 
     const startSequence = useQuery(orpcClient.startSequence.find.queryOptions({ input: { seriesId: race?.seriesId } })).data as StartSequenceStep[]
 
@@ -65,7 +65,7 @@ function Page() {
     const [raceState, setRaceState] = useState<raceStateType>(raceStateType.reset)
     const [lastRaceState, setLastRaceState] = useState<raceStateType>(raceStateType.reset)
     const [raceMode, setRaceMode] = useState<raceModeType[]>([])
-    const [activeResult, setActiveResult] = useState<ResultType>({
+    const [activeResult, setActiveResult] = useState<Types.ResultType>({
         id: '',
         Helm: '',
         Crew: '',
@@ -186,7 +186,7 @@ function Page() {
         setRaceMode([...raceMode.slice(0, index), raceModeType.Lap, ...raceMode.slice(index + 1)])
     }
 
-    const dynamicSort = async (results: ResultType[]) => {
+    const dynamicSort = async (results: Types.ResultType[]) => {
         console.log(results)
         results.sort((a, b) => {
             //if done a lap, predicted is sum of lap times + last lap.
@@ -227,7 +227,7 @@ function Page() {
         })
     }
 
-    const sortByLastLap = (results: ResultType[]) => {
+    const sortByLastLap = (results: Types.ResultType[]) => {
         results.sort((a, b) => {
             //get last lap time, not including last lap.
             let aIndex = a.finishTime != 0 ? 2 : 1
@@ -277,7 +277,7 @@ function Page() {
 
     const showRetireModal = (resultId: String) => {
         setRetireModal(true)
-        let result: ResultType | undefined
+        let result: Types.ResultType | undefined
         race.fleets.some(fleet => {
             result = fleet.results!.find(result => result.id === resultId)
             return result !== undefined
@@ -304,7 +304,7 @@ function Page() {
     }
 
     const lapBoat = async (resultId: string) => {
-        let result: ResultType | undefined
+        let result: Types.ResultType | undefined
         race.fleets.some(fleet => {
             result = fleet.results!.find(result => result.id === resultId)
             return result !== undefined
@@ -322,9 +322,9 @@ function Page() {
 
         // await DB.CreateLap(resultId, Math.floor(new Date().getTime() / 1000))
         //load back race data
-        let optimisticData: RaceType = window.structuredClone(race)
+        let optimisticData: Types.RaceType = window.structuredClone(race)
         //update optimistic data with new lap
-        optimisticData.fleets.forEach((fleet: FleetType) => {
+        optimisticData.fleets.forEach((fleet: Types.FleetType) => {
             fleet.results!.forEach(res => {
                 if (res.id == resultId) {
                     res.laps.push({ resultId: resultId, time: Math.floor(new Date().getTime() / 1000), id: '' })
@@ -332,7 +332,7 @@ function Page() {
             })
         })
         // optimistic update via TanStack Query
-        const previousRace = queryClient.getQueryData<RaceType>(raceQueryOptions.queryKey)
+        const previousRace = queryClient.getQueryData<Types.RaceType>(raceQueryOptions.queryKey)
         queryClient.setQueryData(raceQueryOptions.queryKey, optimisticData)
         dynamicSort(optimisticData.fleets.flatMap(fleet => fleet.results!))
 
@@ -374,9 +374,9 @@ function Page() {
         //save state for undo
         setLastAction({ type: 'finish', resultId: resultId })
 
-        let optimisticData: RaceType = window.structuredClone(race)
+        let optimisticData: Types.RaceType = window.structuredClone(race)
         //update optimistic data with new lap
-        optimisticData.fleets.forEach((fleet: FleetType) => {
+        optimisticData.fleets.forEach((fleet: Types.FleetType) => {
             fleet.results!.forEach(res => {
                 if (res.id == resultId) {
                     res.finishTime = time
@@ -386,7 +386,7 @@ function Page() {
             })
         })
         // optimistic update via TanStack Query
-        const previousRace = queryClient.getQueryData<RaceType>(raceQueryOptions.queryKey)
+        const previousRace = queryClient.getQueryData<Types.RaceType>(raceQueryOptions.queryKey)
         queryClient.setQueryData(raceQueryOptions.queryKey, optimisticData)
         if (raceMode.length > 1) {
             dynamicSort(optimisticData.fleets.flatMap(fleet => fleet.results!))
@@ -407,7 +407,7 @@ function Page() {
         }
     }
 
-    const checkAllFinished = (results: ResultType[]) => {
+    const checkAllFinished = (results: Types.ResultType[]) => {
         //check if all boats in fleet have finished
         let allFinished = true
         results.forEach(data => {
@@ -418,7 +418,7 @@ function Page() {
         return allFinished
     }
 
-    const checkAnyFinished = (results: ResultType[]) => {
+    const checkAnyFinished = (results: Types.ResultType[]) => {
         //check if any boats in fleet have finished
         let anyFinished = false
         results.forEach(data => {
@@ -675,7 +675,7 @@ function Page() {
                         <div className='flex flex-row justify-around flex-wrap' id='EntrantCards'>
                             {race.fleets
                                 .flatMap(fleets => fleets.results!)
-                                .map((result: ResultType) => {
+                                .map((result: Types.ResultType) => {
                                     let fleetIndex = race.fleets.findIndex(fleet => fleet.id == result.fleetId)
                                     return (
                                         <BoatCard

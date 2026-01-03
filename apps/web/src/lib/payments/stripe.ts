@@ -4,23 +4,23 @@ import { getSession } from '@sailviz/auth/client'
 import { redirect } from '@tanstack/react-router'
 import { useMutation } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
-import type { ClubType } from '@sailviz/types'
+import * as Types from '@sailviz/types'
 
 export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'key not available', {
     apiVersion: '2025-08-27.basil'
 })
 
-export async function createCheckoutSession({ club, priceId }: { club: ClubType | null; priceId: string }) {
+export async function createCheckoutSession({ customer, priceId }: { customer: Types.Stripe | null; priceId: string }) {
     const session = await getSession({}).then(res => {
         return res.data
     })
 
-    if (club == undefined || session == undefined) {
+    if (customer == undefined || session == undefined) {
         redirect({ to: `/sign-up?redirect=checkout&priceId=${priceId}` })
         return
     }
 
-    console.log(club, priceId)
+    console.log(customer, priceId)
 
     const stripeSession = await stripe.checkout.sessions.create({
         payment_method_types: ['card'],
@@ -33,7 +33,7 @@ export async function createCheckoutSession({ club, priceId }: { club: ClubType 
         mode: 'subscription',
         success_url: `${server}/api/stripe/checkout?session_id={CHECKOUT_SESSION_ID}`,
         cancel_url: `${server}/Dashboard/Subscription`,
-        customer: club.stripe.customerId || undefined,
+        // customer: club.stripe.customerId || undefined,
         client_reference_id: session.user.id,
         allow_promotion_codes: true
     })
@@ -41,8 +41,8 @@ export async function createCheckoutSession({ club, priceId }: { club: ClubType 
     redirect({ to: stripeSession.url! })
 }
 
-export async function createCustomerPortalSession(club: ClubType) {
-    if (!club.stripe.customerId || !club.stripe.productId) {
+export async function createCustomerPortalSession(customer: Types.Stripe) {
+    if (!customer.customerId) {
         redirect({ to: '/Dashboard/Subscription' })
     }
 
@@ -52,7 +52,7 @@ export async function createCustomerPortalSession(club: ClubType) {
     if (configurations.data.length > 0) {
         configuration = configurations.data[0]!
     } else {
-        const product = await stripe.products.retrieve(club.stripe.productId)
+        const product = await stripe.products.retrieve(customer.productId || '')
         if (!product.active) {
             throw new Error("Team's product is not active in Stripe")
         }
@@ -97,7 +97,7 @@ export async function createCustomerPortalSession(club: ClubType) {
     }
 
     return stripe.billingPortal.sessions.create({
-        customer: club.stripe.customerId,
+        customer: customer.customerId || '',
         return_url: `${server}/Dashboard/Subscription`,
         configuration: configuration.id
     })
@@ -108,10 +108,10 @@ export async function handleSubscriptionChange(subscription: Stripe.Subscription
     const subscriptionId = subscription.id
     const status = subscription.status
 
-    const fetchClubMutation = useMutation(orpcClient.club.findByStripeCustomerId.mutationOptions())
-    const updateClubMutation = useMutation(orpcClient.club.update.mutationOptions())
+    const fetchStripeMutation = useMutation(orpcClient.organization.findByStripeCustomerId.mutationOptions())
+    const updateStripeMutation = useMutation(orpcClient.stripe.update.mutationOptions())
 
-    const club = await fetchClubMutation.mutateAsync({ stripeCustomerId: customerId })
+    const club = await fetchStripeMutation.mutateAsync({ stripeCustomerId: customerId })
 
     if (!club) {
         console.error('Club not found for Stripe customer:', customerId)
@@ -120,29 +120,23 @@ export async function handleSubscriptionChange(subscription: Stripe.Subscription
 
     if (status === 'active' || status === 'trialing') {
         const plan = subscription.items.data[0]?.plan
-        await updateClubMutation.mutateAsync({
+        await updateStripeMutation.mutateAsync({
             ...club,
-            stripe: {
-                ...club.stripe,
-                customerId: customerId,
-                subscriptionId: subscriptionId,
-                productId: plan?.product as string,
-                planName: (plan?.product as Stripe.Product).name,
-                subscriptionStatus: status,
-                updatedAt: new Date().toISOString()
-            }
+            customerId: customerId,
+            subscriptionId: subscriptionId,
+            productId: plan?.product as string,
+            planName: (plan?.product as Stripe.Product).name,
+            subscriptionStatus: status,
+            updatedAt: new Date().toISOString()
         })
     } else if (status === 'canceled' || status === 'unpaid') {
-        await updateClubMutation.mutateAsync({
-            ...club,
-            stripe: {
-                ...club.stripe,
-                subscriptionId: null,
-                productId: null,
-                planName: null,
-                subscriptionStatus: status,
-                updatedAt: new Date().toISOString()
-            }
+        await updateStripeMutation.mutateAsync({
+            customerId: customerId,
+            subscriptionId: null,
+            productId: null,
+            planName: null,
+            subscriptionStatus: status,
+            updatedAt: new Date().toISOString()
         })
     }
 }
@@ -179,9 +173,9 @@ export async function getStripeProducts() {
 }
 
 export async function createStripeCustomer(clubId: string) {
-    const fetchClubMutation = useMutation(orpcClient.club.find.mutationOptions())
-    const updateClubMutation = useMutation(orpcClient.club.update.mutationOptions())
-    const club = await fetchClubMutation.mutateAsync({ clubId })
+    const fetchClubMutation = useMutation(orpcClient.organization.find.mutationOptions())
+    const updateStripeMutation = useMutation(orpcClient.stripe.update.mutationOptions())
+    const club = await fetchClubMutation.mutateAsync({ orgId: clubId })
     if (!club) {
         throw new Error('Club not found')
     }
@@ -194,17 +188,14 @@ export async function createStripeCustomer(clubId: string) {
         }
     })
 
-    await updateClubMutation.mutateAsync({
+    await updateStripeMutation.mutateAsync({
         ...club,
-        stripe: {
-            ...club.stripe,
-            customerId: customer.id,
-            subscriptionId: null,
-            productId: null,
-            planName: null,
-            subscriptionStatus: 'inactive',
-            updatedAt: new Date().toISOString()
-        }
+        customerId: customer.id,
+        subscriptionId: null,
+        productId: null,
+        planName: null,
+        subscriptionStatus: 'inactive',
+        updatedAt: new Date().toISOString()
     })
 
     return customer

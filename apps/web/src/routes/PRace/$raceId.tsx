@@ -9,8 +9,8 @@ import FlagModal from '@components/layout/dashboard/Flag Modal'
 import { Button } from '@components/ui/button'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
-import type { ClubType, FleetType, RaceType, ResultType, SeriesType } from '@sailviz/types'
 import BackButton from '@components/layout/backButton'
+import * as Types from '@sailviz/types'
 
 enum raceStateType {
     running,
@@ -46,12 +46,12 @@ function Page() {
 
     const queryClient = useQueryClient()
 
-    const club = useQuery(orpcClient.club.session.queryOptions()).data as ClubType
+    const club = useQuery(orpcClient.organization.session.queryOptions()).data as Types.Org
 
     // Capture race query options for consistent queryKey usage in optimistic updates
     const raceQueryOptions = orpcClient.race.find.queryOptions({ input: { raceId: raceId }, results: true, boats: true })
-    const race = useQuery(raceQueryOptions).data as RaceType
-    const series = useQuery(orpcClient.series.find.queryOptions({ input: { seriesId: race!.seriesId } })).data as SeriesType
+    const race = useQuery(raceQueryOptions).data as Types.RaceType
+    const series = useQuery(orpcClient.series.find.queryOptions({ input: { seriesId: race!.seriesId } })).data as Types.SeriesType
 
     const updateFleetMutation = useMutation(orpcClient.fleet.update.mutationOptions())
     const updateResultMutation = useMutation(orpcClient.result.update.mutationOptions())
@@ -67,7 +67,7 @@ function Page() {
 
     var [lastAction, setLastAction] = useState<{ type: string; resultId: string }>({ type: '', resultId: '' })
 
-    const [activeResult, setActiveResult] = useState<ResultType>({} as ResultType)
+    const [activeResult, setActiveResult] = useState<Types.ResultType>({} as Types.ResultType)
 
     const [tableView, setTableView] = useState(false)
 
@@ -236,9 +236,9 @@ function Page() {
         setLastAction({ type: 'retire', resultId: tempdata.id })
 
         setRetireModal(false)
-        let optimisticData: RaceType = window.structuredClone(race)
+        let optimisticData: Types.RaceType = window.structuredClone(race)
         //update optimistic data with new lap
-        optimisticData.fleets.forEach((fleet: FleetType) => {
+        optimisticData.fleets.forEach((fleet: Types.FleetType) => {
             fleet.results!.forEach(res => {
                 if (res.id == tempdata.id) {
                     res.resultCode = resultCode
@@ -247,7 +247,7 @@ function Page() {
             })
         })
         // Optimistic update via TanStack Query
-        const previousRace = queryClient.getQueryData<RaceType>(raceQueryOptions.queryKey)
+        const previousRace = queryClient.getQueryData<Types.RaceType>(raceQueryOptions.queryKey)
         queryClient.setQueryData(raceQueryOptions.queryKey, optimisticData)
         try {
             await updateResultMutation.mutateAsync(tempdata)
@@ -306,7 +306,7 @@ function Page() {
     const moveDown = async (id: string) => {
         //move selected boat up and boat above it down
         let toMoveDown = race.fleets.flatMap(fleet => fleet.results!).find(result => result.id === id)
-        let toMoveUp: ResultType | undefined = race.fleets.flatMap(fleet => fleet.results!).find(result => result.PursuitPosition == toMoveDown!.PursuitPosition + 1)
+        let toMoveUp: Types.ResultType | undefined = race.fleets.flatMap(fleet => fleet.results!).find(result => result.PursuitPosition == toMoveDown!.PursuitPosition + 1)
         if (toMoveDown == undefined) {
             console.error('no boat to move down')
             return
@@ -327,10 +327,10 @@ function Page() {
         })
     }
 
-    const dynamicSort = async (data: RaceType) => {
+    const dynamicSort = async (data: Types.RaceType) => {
         // there is just one fleet so grab the first one
         let start = race.fleets[0]!.startTime
-        data.fleets[0]!.results!.sort((a: ResultType, b: ResultType) => {
+        data.fleets[0]!.results!.sort((a: Types.ResultType, b: Types.ResultType) => {
             //if done a lap, predicted is sum of lap times + last lap.
             //if no lap done, predicted is py.
             let aPredicted =
@@ -367,9 +367,9 @@ function Page() {
     const lapBoat = async (resultId: string) => {
         let time = Math.floor(new Date().getTime() / 1000)
         //load back race data
-        let optimisticData: RaceType = window.structuredClone(race)
+        let optimisticData: Types.RaceType = window.structuredClone(race)
         //update optimistic data with new lap
-        optimisticData.fleets.forEach((fleet: FleetType) => {
+        optimisticData.fleets.forEach((fleet: Types.FleetType) => {
             fleet.results!.forEach(res => {
                 if (res.id == resultId) {
                     res.laps.push({ resultId: resultId, time: time, id: '' })
@@ -378,7 +378,7 @@ function Page() {
         })
 
         // Optimistic update via TanStack Query
-        const previousRace = queryClient.getQueryData<RaceType>(raceQueryOptions.queryKey)
+        const previousRace = queryClient.getQueryData<Types.RaceType>(raceQueryOptions.queryKey)
         queryClient.setQueryData(raceQueryOptions.queryKey, optimisticData)
         try {
             await createLapMutation.mutateAsync({ resultId: resultId, time: time })
@@ -414,7 +414,7 @@ function Page() {
 
         //set provisional positions
 
-        race.fleets[0]!.results!.sort((a: ResultType, b: ResultType) => {
+        race.fleets[0]!.results!.sort((a: Types.ResultType, b: Types.ResultType) => {
             // push retired to the bottom
             if (a.resultCode != '') {
                 return 1
@@ -464,7 +464,7 @@ function Page() {
 
     const showRetireModal = (resultId: string) => {
         setRetireModal(true)
-        let result: ResultType | undefined
+        let result: Types.ResultType | undefined
         race.fleets.some(fleet => {
             result = fleet.results!.find(result => result.id === resultId)
             return result !== undefined
@@ -671,7 +671,7 @@ function Page() {
                             <div className='flex flex-row justify-around flex-wrap' id='EntrantCards'>
                                 {race.fleets
                                     .flatMap(fleets => fleets.results!)
-                                    .map((result: ResultType) => {
+                                    .map((result: Types.ResultType) => {
                                         return (
                                             <BoatCard
                                                 key={result.id}

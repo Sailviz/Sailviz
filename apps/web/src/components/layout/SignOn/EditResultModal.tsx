@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader } from '@components/u
 import { Button } from '@components/ui/button'
 import { Tabs, TabsList, TabsTrigger } from '@components/ui/tabs'
 import { Input } from '@components/ui/input'
-import type { FleetType } from '@sailviz/types'
+import type { BoatType, FleetType } from '@sailviz/types'
 
 export default function EditResultModal({
     result,
@@ -15,7 +15,7 @@ export default function EditResultModal({
     onDelete
 }: {
     result: ResultDataType
-    boats: BoatDataType[]
+    boats: BoatType[]
     race: RaceDataType
     onSubmit: (result: ResultDataType) => void
     onDelete: (result: ResultDataType) => void
@@ -33,9 +33,9 @@ export default function EditResultModal({
     const [boatError, setBoatError] = useState(false)
     const [sailNumError, setSailNumError] = useState(false)
 
-    let options: { label: string; value: BoatDataType }[] = []
-    boats.forEach((boat: BoatDataType) => {
-        options.push({ value: boat as BoatDataType, label: boat.name })
+    let options: { label: string; value: BoatType }[] = []
+    boats.forEach((boat: BoatType) => {
+        options.push({ value: boat as BoatType, label: boat.name })
     })
 
     const CapitaliseInput = (e: ChangeEvent<HTMLInputElement>) => {

@@ -6,22 +6,21 @@ import TrackerTable from '@components/tables/TrackerTable'
 import { Button } from '@components/ui/button'
 import { useQuery } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
-import type { ClubType } from '@sailviz/types'
 
 function Page() {
     const session = useLoaderData({ from: `__root__` })
 
-    const club = useQuery(orpcClient.club.session.queryOptions()).data as ClubType
+    const org = useQuery(orpcClient.organization.session.queryOptions()).data
 
     // const syncTrackers = async () => {
-    //     await Trackable.syncTrackers(club.settings!.trackable.orgID, club.id)
+    //     await Trackable.syncTrackers(org.settings!.trackable.orgID, org.id)
     // }
 
-    if (club == undefined || session == undefined) {
+    if (org == undefined || session == undefined) {
         return <PageSkeleton />
     }
 
-    if (!club.settings!.trackable.enabled) {
+    if (!org.settings!.trackable.enabled) {
         return (
             <div>
                 <p>Trackable is not enabled for your club, contact support for more information</p>

@@ -3,11 +3,6 @@ import { oc } from "@orpc/contract";
 import { z } from "zod";
 import * as Types from "@sailviz/types";
 
-const helloSchema = z.object({
-  name: z.string(),
-  message: z.string(),
-});
-
 export const ORPCcontract = {
   lap: {
     global: oc.output(z.number()),
@@ -15,6 +10,10 @@ export const ORPCcontract = {
       .input(z.object({ resultId: z.string(), time: z.number() }))
       .output(Types.LapSchema),
     delete: oc.input(z.object({ lapId: z.string() })).output(Types.LapSchema),
+  },
+  stripe: {
+    find: oc.output(Types.stripeSchema),
+    update: oc.input(Types.stripeSchema).output(Types.stripeSchema),
   },
   startSequence: {
     find: oc

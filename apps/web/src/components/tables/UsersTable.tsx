@@ -4,8 +4,7 @@ import { AVAILABLE_PERMISSIONS, userHasPermission } from '@components/helpers/us
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
 import { useLoaderData } from '@tanstack/react-router'
 import { Button } from '../ui/button'
-import { useQuery } from '@tanstack/react-query'
-import { orpcClient } from '@lib/orpc'
+import * as Types from '@sailviz/types'
 import type { UserType } from '@sailviz/types'
 import EditUserDialog from '@components/layout/dashboard/EditUserModal'
 
@@ -26,10 +25,6 @@ const columnHelper = createColumnHelper<UserType>()
 const UsersTable = () => {
     const session = useLoaderData({ from: `__root__` })
 
-    const { data: club } = useQuery(orpcClient.club.session.queryOptions())
-    const { data: users } = useQuery(orpcClient.user.club.queryOptions({ input: { clubId: club?.id || '' } }))
-    const { data: roles } = useQuery(orpcClient.role.club.queryOptions({ input: { clubId: club?.id || '' } }))
-
     const [modalIsOpen, setModalIsOpen] = useState(false)
     const [modalData, setModalData] = useState<UserType | undefined>(undefined)
 
@@ -45,7 +40,7 @@ const UsersTable = () => {
         }
     ])
 
-    var data = users
+    var data: Types.UserType[] = []
     if (data == undefined) {
         data = []
     }
@@ -53,7 +48,7 @@ const UsersTable = () => {
     var table = useReactTable({
         data,
         columns: [
-            columnHelper.accessor('username', {
+            columnHelper.accessor('name', {
                 id: 'number',
                 cell: info => info.getValue(),
                 enableSorting: true
@@ -73,7 +68,7 @@ const UsersTable = () => {
     })
     return (
         <div className='rounded-md border w-full'>
-            <EditUserDialog open={modalIsOpen} user={modalData!} clubRoles={roles!} onClose={() => setModalIsOpen(false)} />
+            <EditUserDialog open={modalIsOpen} user={modalData!} onClose={() => setModalIsOpen(false)} />
             <Table aria-label='Upcoming Races Table'>
                 <TableHeader>
                     <TableRow>

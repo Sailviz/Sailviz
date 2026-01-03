@@ -12,9 +12,9 @@ import { ActionButton } from '@components/ui/action-button'
 function Page() {
     const session = useLoaderData({ from: `__root__` })
 
-    const { data: club } = useQuery(orpcClient.club.session.queryOptions())
+    const { data: club } = useQuery(orpcClient.organization.session.queryOptions())
 
-    const clubMutation = useMutation(orpcClient.club.update.mutationOptions())
+    const clubMutation = useMutation(orpcClient.organization.update.mutationOptions())
 
     const [pursuitLength, setPursuitLength] = useState(0)
 

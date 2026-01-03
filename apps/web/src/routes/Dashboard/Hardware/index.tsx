@@ -10,28 +10,28 @@ import { ActionButton } from '@components/ui/action-button'
 
 function Page() {
     const session = useLoaderData({ from: `__root__` })
-    const { data: club } = useQuery(orpcClient.club.session.queryOptions())
+    const { data: org } = useQuery(orpcClient.organization.session.queryOptions())
 
     const [clockIP, setClockIP] = useState('')
     const [clockOffset, setClockOffset] = useState('')
     const [hornIP, setHornIP] = useState('')
-    const clubMutation = useMutation(orpcClient.club.update.mutationOptions())
+    const orgMutation = useMutation(orpcClient.organization.update.mutationOptions())
 
     const saveClubSettings = async () => {
-        if (club == undefined) {
+        if (org == undefined) {
             throw new Error('Club is undefined')
         }
-        await clubMutation.mutateAsync({ ...club, settings: { ...club.settings!, clockIP: clockIP, clockOffset: parseInt(clockOffset), hornIP: hornIP } })
+        await orgMutation.mutateAsync({ ...org, settings: { ...org.settings!, clockIP: clockIP, clockOffset: parseInt(clockOffset), hornIP: hornIP } })
     }
 
     useEffect(() => {
-        if (club == undefined) return
-        setClockIP(club.settings!.clockIP)
-        setClockOffset(club.settings!.clockOffset.toString())
-        setHornIP(club.settings!.hornIP)
-    }, [club])
+        if (org == undefined) return
+        setClockIP(org.settings!.clockIP)
+        setClockOffset(org.settings!.clockOffset.toString())
+        setHornIP(org.settings!.hornIP)
+    }, [org])
 
-    if (club == undefined || session == undefined) {
+    if (org == undefined || session == undefined) {
         return <PageSkeleton />
     }
     if (userHasPermission(session.user, AVAILABLE_PERMISSIONS.editHardware))

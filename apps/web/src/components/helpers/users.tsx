@@ -23,5 +23,11 @@ export class AVAILABLE_PERMISSIONS {
 export const PERMISSIONS: PermissionType[] = Object.values(AVAILABLE_PERMISSIONS)
 
 export function userHasPermission(user: UserType | undefined, permission: PermissionType) {
+    if (user == undefined) {
+        return false
+    }
+    if (permission == undefined) {
+        return false
+    }
     return true
 }

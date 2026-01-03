@@ -5,7 +5,7 @@ import LiveFleetResultsTable from '@components/tables/LiveFleetResultsTable'
 import RaceTimer from '@components/HRaceTimer'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
-import type { ClubType, RaceType } from '@sailviz/types'
+import * as Types from '@sailviz/types'
 
 enum pageModes {
     live,
@@ -13,15 +13,16 @@ enum pageModes {
 }
 
 function Page() {
-    const { clubName } = Route.useParams()
-    const club = useQuery(orpcClient.club.name.queryOptions({ input: { clubName: clubName! } })).data as ClubType
-    const races = useQuery(orpcClient.race.today.queryOptions({ input: { clubId: club?.id }, queryKey: [club] })).data
+    const { orgName } = Route.useParams()
+    const org = useQuery(orpcClient.organization.name.queryOptions({ input: { orgName: orgName! } })).data as Types.Org
+    const stripe = useQuery(orpcClient.stripe.find.queryOptions({ input: { orgId: org?.id }, queryKey: [org] })).data
+    const races = useQuery(orpcClient.race.today.queryOptions({ input: { orgId: org?.id }, queryKey: [org] })).data
 
     const queryClient = useQueryClient()
 
     const findRaceMutation = useMutation(orpcClient.race.find.mutationOptions())
 
-    var [activeRace, setActiveRace] = useState<RaceType>({
+    var [activeRace, setActiveRace] = useState<Types.RaceType>({
         id: '',
         number: 0,
         Time: '',
@@ -30,11 +31,11 @@ function Page() {
         Type: '',
         seriesId: '',
         series: {} as SeriesDataType
-    } as RaceType)
+    } as unknown as Types.RaceType)
 
     var [mode, setMode] = useState<pageModes>(pageModes.notLive)
 
-    const checkActive = (race: RaceType) => {
+    const checkActive = (race: Types.RaceType) => {
         if (race.fleets == undefined) {
             console.error('no fleets found')
             return false
@@ -141,9 +142,9 @@ function Page() {
                     default: //includes notLive state
                         return (
                             <div>
-                                <p className='text-6xl font-extrabold text-gray-700 p-6'>{club?.name}</p>
+                                <p className='text-6xl font-extrabold text-gray-700 p-6'>{org?.name}</p>
                                 {/* this backwards case is so that the upgrade message isn't shown during page load. */}
-                                {club?.stripe?.planName != 'SailViz' ? (
+                                {stripe?.planName != 'SailViz' ? (
                                     <p className='text-2xl font-extrabold text-gray-700 p-6'>No Races Currently Active</p>
                                 ) : (
                                     <p className='text-2xl font-extrabold text-gray-700 p-6'>Upgrade to Sailviz Pro to enable Live Results</p>

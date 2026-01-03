@@ -9,10 +9,11 @@ import type { UserType } from '@sailviz/types'
 import { useLoaderData } from '@tanstack/react-router'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
+import * as Types from '@sailviz/types'
 
 const Boats = ({ ...props }: any) => {
     const initialValue = props.getValue()
-    const [value] = React.useState<BoatDataType[]>(initialValue)
+    const [value] = React.useState<Types.BoatType[]>(initialValue)
     let boats: { value: string; label: string }[] = []
 
     if (value) {

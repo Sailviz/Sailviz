@@ -42,7 +42,7 @@ const TableOfClubs = () => {
                 header: 'Club Name',
                 cell: info => info.getValue()
             }),
-            columnHelper.accessor(data => data.stripe?.customerId || '', {
+            columnHelper.accessor(data => data.stripeCustomerId || '', {
                 header: 'Stripe Customer ID',
                 cell: info => info.getValue()
             }),

@@ -161,7 +161,7 @@ export default function CreateEventDialog() {
     const createEvent = async (events: Race[]) => {
         console.log('Creating event', events)
         //create series
-        const res = await createSeriesMutation.mutateAsync({ clubId: session?.user.cludId!, name: name }) // this adds a single fleet to the series by default
+        const res = await createSeriesMutation.mutateAsync({ orgId: session?.user.cludId!, name: name }) // this adds a single fleet to the series by default
         if (!res) {
             console.error('Failed to create series')
             return

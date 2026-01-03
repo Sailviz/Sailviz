@@ -2,7 +2,11 @@ import PersonalRacesTable from '@components/tables/PersonalRacesTable'
 import { createFileRoute } from '@tanstack/react-router'
 
 function Page() {
-    return <div>Home</div>
+    return (
+        <div>
+            <PersonalRacesTable />
+        </div>
+    )
 }
 
 export const Route = createFileRoute('/dashboard/me/')({

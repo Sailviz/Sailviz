@@ -45,22 +45,22 @@ export default function EditResultModal({
 
     const [viewLaps, setViewLaps] = useState(false)
     const [resultCodeOption, setResultCodeOption] = useState({ label: '', value: '' })
-    const [boatOption, setBoatOption] = useState({ label: '', value: {} as BoatDataType })
+    const [boatOption, setBoatOption] = useState({ label: '', value: {} as BoatType })
     const [numberLaps, setNumberLaps] = useState(0)
 
     const [basicElapsed, setBasicElapsed] = useState('00:00:00')
 
     const [helm, setHelm] = useState('')
     const [crew, setCrew] = useState('')
-    const [boat, setBoat] = useState<BoatDataType>({} as BoatDataType)
+    const [boat, setBoat] = useState<BoatType>({} as BoatType)
     const [sailNumber, setSailNumber] = useState('')
 
     const [handicapPosition, setHandicapPosition] = useState(0)
     const [pursuitPosition, setPursuitPosition] = useState(0)
 
-    let options: { label: string; value: BoatDataType }[] = []
-    boats.forEach((boat: BoatDataType) => {
-        options.push({ value: boat as BoatDataType, label: boat.name })
+    let options: { label: string; value: BoatType }[] = []
+    boats.forEach((boat: BoatType) => {
+        options.push({ value: boat as BoatType, label: boat.name })
     })
 
     const submit = async () => {
@@ -112,7 +112,7 @@ export default function EditResultModal({
         if (result.boat != null) {
             setBoatOption({ label: result.boat.name, value: result.boat })
         } else {
-            setBoatOption({ label: '', value: {} as BoatDataType })
+            setBoatOption({ label: '', value: {} as BoatType })
         }
         setResultCodeOption(result.resultCode == '' ? { label: 'None', value: '' } : { label: result.resultCode, value: result.resultCode })
     }, [result, fleet])

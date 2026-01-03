@@ -26,7 +26,7 @@ const BoatTable = () => {
     const { data: boats } = useQuery(orpcClient.boat.session.queryOptions({ input: { boatId: '' } }))
 
     const [modalIsOpen, setModalIsOpen] = useState(false)
-    const [modalData, setModalData] = useState<BoatDataType | undefined>(undefined)
+    const [modalData, setModalData] = useState<BoatType | undefined>(undefined)
 
     const data = boats || []
 

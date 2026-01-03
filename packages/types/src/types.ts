@@ -131,17 +131,9 @@ export const OrgSchema = z.object({
   logo: z.string().nullable(),
   slug: z.string(),
   settings: z.any(),
+  stripeCustomerId: z.string().nullable(),
 });
 export type Org = z.infer<typeof OrgSchema>;
-
-export type Stripe = {
-  customerId: string;
-  subscriptionId: string;
-  productId: string;
-  planName: string;
-  subscriptionStatus: string;
-  updatedAt: string;
-};
 
 export const UserSchema = z.object({
   id: z.string(),
@@ -171,3 +163,13 @@ export type TrackerDataType = {
     gps?: string;
   };
 };
+
+export const stripeSchema = z.object({
+  customerId: z.string(),
+  subscriptionId: z.string().nullable(),
+  productId: z.string().nullable(),
+  planName: z.string().nullable(),
+  subscriptionStatus: z.string().nullable(),
+  updatedAt: z.string().nullable(),
+});
+export type Stripe = z.infer<typeof stripeSchema>;

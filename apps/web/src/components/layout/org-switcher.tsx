@@ -33,7 +33,8 @@ export function OrgSwitcher() {
                 logo: org.logo || '',
                 id: org.id,
                 slug: org.slug,
-                settings: {}
+                settings: {},
+                stripeCustomerId: ''
             })
         })
         console.log('Fetched organizations:', organizations)
@@ -56,7 +57,8 @@ export function OrgSwitcher() {
                     logo: org.data.logo || '',
                     id: org.data.id,
                     slug: org.data.slug,
-                    settings: {}
+                    settings: {},
+                    stripeCustomerId: ''
                 })
             } catch (error) {
                 console.error('Error fetching active organization:', error)

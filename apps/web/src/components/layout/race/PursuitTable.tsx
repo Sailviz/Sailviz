@@ -5,7 +5,7 @@ import { ChevronUpIcon } from '@components/icons/chevron-up-icon'
 import { SmoothSpinner } from '@components/icons/smooth-spinner'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@components/ui/table'
 import { Button } from '@components/ui/button'
-import type { FleetType, ResultType } from '@sailviz/types'
+import type { BoatType, FleetType, ResultType } from '@sailviz/types'
 import { useQuery } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
 
@@ -37,7 +37,7 @@ const Laps = ({ laps }: { laps: LapDataType[] }) => {
     return <div>{laps.length}</div>
 }
 
-const Class = ({ boat }: { boat: BoatDataType }) => {
+const Class = ({ boat }: { boat: BoatType }) => {
     return <div>{boat.name}</div>
 }
 

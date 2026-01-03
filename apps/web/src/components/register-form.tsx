@@ -9,28 +9,24 @@ import type { UserType } from '@sailviz/types'
 
 export function RegisterForm() {
     const navigate = useNavigate()
-    const [username, setUsername] = useState('')
+    const [name, setUsername] = useState('')
     const [password, setPassword] = useState('')
     const [clubName, setClubName] = useState('')
     const [email, setEmail] = useState('')
 
-    const createClubMutation = useMutation(orpcClient.club.create.mutationOptions())
-    const findRolesMutation = useMutation(orpcClient.role.club.mutationOptions())
+    const createClubMutation = useMutation(orpcClient.organization.create.mutationOptions())
     const updateUserMutation = useMutation(orpcClient.user.update.mutationOptions())
 
     const createClub = async () => {
         //create a club for each fleet
         let club = await createClubMutation.mutateAsync({ name: clubName })
         console.log('Created club:', club)
-        let roles = await findRolesMutation.mutateAsync({ clubId: club.id })
-        console.log('Roles for club:', roles)
 
         const { data, error } = await signUp.email({
             email: email,
             password: password,
-            username: username,
-            startPage: '/Dashboard',
-            name: username
+            username: name,
+            name: name
         })
         console.log('Sign up response:', data, error)
         if (error) {
@@ -38,35 +34,19 @@ export function RegisterForm() {
             return
         }
 
-        //create a user for the club admin and assign them the admin role
-        if (roles[0] == undefined || roles.length == 0) {
-            console.error('No roles found for club', club.id)
-            return
-        }
         //add sailviz specific fields to the user
         let user = {
             id: data.user.id,
             clubId: club.id,
             startPage: 'Dashboard',
-            displayUsername: username,
-            username: username,
+            name: name,
             admin: false,
             uuid: '',
             email: '',
             emailVerified: false,
             image: '',
             createdAt: new Date(),
-            updatedAt: new Date(),
-            roles: [
-                {
-                    id: roles[0].id,
-                    name: 'Admin',
-                    clubId: club.id,
-                    permissions: {
-                        allowed: []
-                    }
-                }
-            ]
+            updatedAt: new Date()
         } as UserType
         await updateUserMutation.mutateAsync(user)
         navigate({ to: '/Dashboard' })
@@ -104,7 +84,7 @@ export function RegisterForm() {
                     </div>
                     <div className='grid gap-2'>
                         Username
-                        <Input id='username' name='username' value={username} />
+                        <Input id='name' name='name' value={name} />
                     </div>
                     <div className='grid gap-2'>
                         Email

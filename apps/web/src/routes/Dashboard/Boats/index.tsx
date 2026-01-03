@@ -16,7 +16,7 @@ function Page() {
     // const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
     // const { boats, boatsIsError, boatsIsValidating, mutateBoats: mutateBoats } = Fetcher.Boats()
 
-    const { data: club } = useQuery(orpcClient.club.session.queryOptions())
+    const { data: club } = useQuery(orpcClient.organization.session.queryOptions())
     const { data: boats } = useQuery(orpcClient.boat.session.queryOptions())
 
     const createBoatMutation = useMutation(orpcClient.boat.create.mutationOptions())
@@ -42,7 +42,7 @@ function Page() {
                             crew: parseInt(boat.Crew),
                             py: parseInt(boat.PY),
                             pursuitStartTime: parseInt(boat.pursuitStartTime || 0),
-                            clubId: club.id
+                            orgId: club.id
                         })
                     } else {
                         //check if uploaded boat is different from existing boat

@@ -9,8 +9,8 @@ import { CircleAlert } from 'lucide-react'
 import { Link } from '@tanstack/react-router'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
-import type { ClubType, RaceType } from '@sailviz/types'
 import HomeNav from '@components/layout/home/navbar'
+import * as Types from '@sailviz/types'
 
 //club page should contain:
 //list of current series
@@ -20,14 +20,14 @@ import HomeNav from '@components/layout/home/navbar'
 function Page() {
     const { clubName } = Route.useParams()
 
-    const club = useQuery(orpcClient.club.name.queryOptions({ input: { clubName: clubName! } })).data as ClubType
+    const club = useQuery(orpcClient.organization.name.queryOptions({ input: { orgName: clubName! } })).data as Types.Org
 
     const todaysRaces = useMutation(orpcClient.race.today.mutationOptions())
     const findRaceMutation = useMutation(orpcClient.race.find.mutationOptions())
 
     const [showLiveBanner, setShowLiveBanner] = useState(false)
 
-    const checkActive = (race: RaceType) => {
+    const checkActive = (race: Types.RaceType) => {
         if (race.fleets!.length == 0) {
             console.error('no fleets found')
         }
@@ -47,7 +47,7 @@ function Page() {
     }
     useEffect(() => {
         if (club == undefined) return
-        todaysRaces.mutateAsync({ clubId: club.id }).then(races => {
+        todaysRaces.mutateAsync({ orgId: club.id }).then(races => {
             if (races.length > 0) {
                 for (let i = 0; i < races.length; i++) {
                     findRaceMutation.mutateAsync({ raceId: races[i]!.id }).then(race => {
@@ -78,19 +78,19 @@ function Page() {
                 </Link>
                 <BannerClose />
             </Banner>
-            <div className={title({ color: 'blue' }) + ' px-4'}>{club.displayName}</div>
+            <div className={title({ color: 'blue' }) + ' px-4'}>{club.name}</div>
             <div className='flex flex-row'>
                 <div className='flex-col w-1/2 px-4'>
                     <div className='py-4'>
                         <div className={title({ color: 'blue' })}>Latest Races:</div>
                     </div>
-                    <RacesTable clubId={club.id} date={new Date()} historical={true} viewHref={`/club/${clubName}/Race/`} />
+                    <RacesTable orgId={club.id} date={new Date()} historical={true} viewHref={`/club/${clubName}/Race/`} />
                 </div>
                 <div className='flex-col w-1/2 px-4'>
                     <div className='py-4'>
                         <div className={title({ color: 'blue' })}>Latest Series:</div>
                     </div>
-                    <ClubTable viewHref={`/club/${clubName}/Series/`} clubId={club.id} />
+                    <ClubTable viewHref={`/club/${clubName}/Series/`} orgId={club.id} />
                 </div>
             </div>
         </>

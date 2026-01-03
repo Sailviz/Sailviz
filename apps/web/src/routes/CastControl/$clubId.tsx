@@ -3,7 +3,7 @@ import { Peer, type DataConnection } from 'peerjs'
 import { title } from '@components/layout/home/primitaves'
 import { useMutation } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
-import type { ClubType, RaceType, SeriesType } from '@sailviz/types'
+import * as Types from '@sailviz/types'
 import { createFileRoute } from '@tanstack/react-router'
 
 //club page should contain:
@@ -17,13 +17,13 @@ var conn: DataConnection | null = null
 function Page() {
     let { clubId } = Route.useParams()
 
-    const findClubMutation = useMutation(orpcClient.club.name.mutationOptions())
+    const findClubMutation = useMutation(orpcClient.organization.name.mutationOptions())
 
     const findRaceMutation = useMutation(orpcClient.race.find.mutationOptions())
     const findSeriesMutation = useMutation(orpcClient.series.find.mutationOptions())
     const findTodaysRacesMutation = useMutation(orpcClient.race.today.mutationOptions())
 
-    const [club, setClub] = useState<ClubType>({} as ClubType)
+    const [club, setClub] = useState<Types.Org>({} as Types.Org)
     const [races, setRaces] = useState<any[]>([])
     const [series, setSeries] = useState<any[]>([])
 
@@ -150,17 +150,17 @@ function Page() {
             var data = await findTodaysRacesMutation.mutateAsync(clubId)
             console.log(data)
             if (data) {
-                let racesCopy: RaceType[] = []
+                let racesCopy: Types.RaceType[] = []
                 for (let i = 0; i < data.length; i++) {
                     console.log(data[i]!.number)
                     const res = await findRaceMutation.mutateAsync({ raceId: data[i]!.id })
                     racesCopy[i] = res
                 }
-                racesCopy.sort((a: RaceType, b: RaceType) => a.number - b.number)
+                racesCopy.sort((a: Types.RaceType, b: Types.RaceType) => a.number - b.number)
                 setRaces(racesCopy)
                 let SeriesIds = racesCopy.flatMap(race => race.seriesId)
                 let uniqueSeriesIds = [...new Set(SeriesIds)]
-                let seriesCopy: SeriesType[] = []
+                let seriesCopy: Types.SeriesType[] = []
                 uniqueSeriesIds.forEach(id => {
                     findSeriesMutation.mutateAsync({ seriesId: id }).then(data => {
                         seriesCopy.push(data)
@@ -181,7 +181,7 @@ function Page() {
         <div className='flex flex-col px-6'>
             <div className='flex flex-col'>
                 <div className='flex flex-row mb-2 justify-center'>
-                    <h1 className={title({ color: 'blue' })}>{club.displayName} - Control</h1>
+                    <h1 className={title({ color: 'blue' })}>{club.name} - Control</h1>
                 </div>
                 <div className='flex flex-row mb-2 justify-center'>
                     <div className='m-6'>

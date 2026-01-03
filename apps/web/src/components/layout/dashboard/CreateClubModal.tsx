@@ -12,7 +12,7 @@ export default function CreateClubModal() {
     const [open, setOpen] = useState(false)
     const [clubNameError, setClubNameError] = useState(false)
 
-    const createClubMutation = useMutation(orpcClient.club.create.mutationOptions())
+    const createClubMutation = useMutation(orpcClient.organization.create.mutationOptions())
     const queryClient = useQueryClient()
 
     let submitDisabled = false
@@ -37,7 +37,7 @@ export default function CreateClubModal() {
 
         await createClubMutation.mutateAsync({ name: clubName })
         queryClient.invalidateQueries({
-            queryKey: orpcClient.club.all.key({ type: 'query' })
+            queryKey: orpcClient.organization.all.key({ type: 'query' })
         })
 
         setOpen(false)

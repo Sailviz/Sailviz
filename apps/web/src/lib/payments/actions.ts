@@ -3,12 +3,12 @@ import { getSession } from '@sailviz/auth/client'
 import { redirect } from '@tanstack/react-router'
 import { useMutation } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
-import type { ClubType } from '@sailviz/types'
+import * as Types from '@sailviz/types'
 
-type ActionWithTeamFunction<T> = (formData: FormData, club: ClubType) => Promise<T>
+type ActionWithTeamFunction<T> = (formData: FormData, customer: Types.Stripe) => Promise<T>
 
 function withTeam<T>(action: ActionWithTeamFunction<T>) {
-    const fetchClubMutation = useMutation(orpcClient.club.find.mutationOptions())
+    const fetchStripeMutation = useMutation(orpcClient.stripe.find.mutationOptions())
 
     return async (formData: FormData): Promise<T> => {
         const session = await getSession()
@@ -24,21 +24,21 @@ function withTeam<T>(action: ActionWithTeamFunction<T>) {
         if (!clubId) {
             throw new Error('User does not have a clubId')
         }
-        const club = await fetchClubMutation.mutateAsync({ clubId })
-        if (!club) {
+        const customer = await fetchStripeMutation.mutateAsync({ orgId: clubId })
+        if (!customer) {
             throw new Error('Club not found')
         }
 
-        return action(formData, club)
+        return action(formData, customer)
     }
 }
 
-export const checkoutAction = withTeam(async (formData, club) => {
+export const checkoutAction = withTeam(async (formData, customer) => {
     const priceId = formData.get('priceId') as string
-    await createCheckoutSession({ club: club, priceId })
+    await createCheckoutSession({ customer, priceId })
 })
 
-export const customerPortalAction = withTeam(async (_: any, club: ClubType) => {
-    const portalSession = await createCustomerPortalSession(club)
+export const customerPortalAction = withTeam(async (_: any, customer: Types.Stripe) => {
+    const portalSession = await createCustomerPortalSession(customer)
     redirect({ to: portalSession.url })
 })

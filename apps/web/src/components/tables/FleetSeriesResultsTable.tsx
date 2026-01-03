@@ -3,14 +3,14 @@ import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, use
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@components/ui/table'
 import { useQuery } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
-import type { FleetType, RaceType, ResultType, SeriesType } from '@sailviz/types'
+import type { FleetType, RaceType, ResultType, SeriesType, BoatType } from '@sailviz/types'
 
 //not a db type, only used here
 type SeriesResultsType = {
     Rank: number
     Helm: string
     Crew: string
-    Boat: BoatDataType
+    Boat: BoatType
     SailNumber: string
     Total: number
     Net: number

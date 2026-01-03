@@ -4,8 +4,9 @@ import { Input } from '@components/ui/input'
 import { useEffect, useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
+import * as Types from '@sailviz/types'
 
-export default function EditBoatDialog({ boat, open, onClose }: { boat: BoatDataType | undefined; open: boolean; onClose?: () => void }) {
+export default function EditBoatDialog({ boat, open, onClose }: { boat: Types.BoatType | undefined; open: boolean; onClose?: () => void }) {
     const [boatName, setBoatName] = useState('')
     const [PY, setPY] = useState(0)
     const [Crew, setCrew] = useState(0)
@@ -15,7 +16,7 @@ export default function EditBoatDialog({ boat, open, onClose }: { boat: BoatData
     const boatDeleteMutation = useMutation(orpcClient.boat.delete.mutationOptions())
     const queryClient = useQueryClient()
 
-    const editBoat = async (boat: BoatDataType) => {
+    const editBoat = async (boat: Types.BoatType) => {
         await boatUpdateMutation.mutateAsync(boat)
         queryClient.invalidateQueries({
             queryKey: orpcClient.boat.session.key({ type: 'query' })
