@@ -3,14 +3,7 @@ import type { BetterAuthPlugin } from "better-auth";
 import prisma from "@sailviz/db";
 import { setSessionCookie } from "better-auth/cookies";
 import { scrypt, timingSafeEqual } from "node:crypto";
-// Dummy function: replace with your actual user lookup/auth logic
-async function readUserByUUID(uuid: string) {
-  // Example: fetch user from DB and return user object or null
-  const user = await prisma.user.findUnique({
-    where: { uuid: uuid },
-  });
-  return user;
-}
+
 const hex = {
   encode: (buf) => Buffer.from(buf).toString("hex"),
   decode: (hexstr) => Buffer.from(hexstr, "hex"),
@@ -34,48 +27,6 @@ export const myPlugin = () => {
   return {
     id: "my-plugin",
     endpoints: {
-      authByUUID: createAuthEndpoint(
-        "/my-plugin/auth-by-uuid",
-        {
-          method: "POST",
-        },
-        async (ctx) => {
-          const { uuid } = ctx.body;
-          console.log("Received UUID:", uuid);
-          if (!uuid) {
-            return ctx.json({ error: "UUID required" }, { status: 400 });
-          }
-          const user = await readUserByUUID(uuid);
-          console.log("User found:", user);
-          if (!user) {
-            return ctx.json({ error: "User not found" }, { status: 404 });
-          }
-
-          const session = {
-            id: crypto.randomUUID(),
-            token: crypto.randomUUID(),
-            userId: user.id,
-            expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24), // 1 day expiry
-            createdAt: new Date(),
-            updatedAt: new Date(),
-          };
-          await setSessionCookie(ctx, {
-            session,
-            user: {
-              ...user,
-              email: user.email ?? "", //This accounts for users without an email
-            },
-          });
-          return ctx.json({
-            message: "Authenticated",
-            user,
-            // Return the session token so non-http clients (e.g. Tauri) can
-            // store it and use it for subsequent requests via Authorization header.
-            token: session.token,
-            expiresAt: session.expiresAt,
-          });
-        }
-      ),
       // New endpoint: allow clients to exchange a bearer token for the
       // full session payload (user + club + session). This is useful for
       // desktop apps using a custom URI scheme where cookies are not
@@ -129,24 +80,13 @@ export const myPlugin = () => {
 
           const user = await prisma.user.findUnique({
             where: { id: session.userId },
-            include: { roles: true },
           });
           if (!user) {
             return ctx.json({ error: "User not found" }, { status: 404 });
           }
 
-          // Lookup club like the server-side customSession plugin does
-          let club = null;
-          if (user.clubId) {
-            club = await prisma.club.findFirst({
-              where: { id: user.clubId },
-              include: { stripe: true },
-            });
-          }
-
           return ctx.json({
             user,
-            club,
             session,
           });
         }
@@ -193,8 +133,7 @@ export const myPlugin = () => {
           }
 
           const user = await prisma.user.findFirst({
-            where: { username },
-            include: { roles: true },
+            where: { name: username },
           });
           if (!user) {
             return ctx.json(
@@ -258,18 +197,8 @@ export const myPlugin = () => {
             "userId=",
             user.id
           );
-
-          let club = null;
-          if (user.clubId) {
-            club = await prisma.club.findFirst({
-              where: { id: user.clubId },
-              include: { stripe: true },
-            });
-          }
-
           return ctx.json({
             user,
-            club,
             token: session.token,
             expiresAt: session.expiresAt,
           });

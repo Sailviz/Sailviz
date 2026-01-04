@@ -51,8 +51,15 @@
                     return false
                 }
 
-                // If not running under Tauri, hide immediately to avoid showing on web.
                 var splash = document.getElementById('tauri-splash')
+
+                // Check if the splash screen has already been hidden
+                if (localStorage.getItem('splashHidden') === 'true') {
+                    if (splash && splash.style) splash.style.display = 'none'
+                    return
+                }
+
+                // If not running under Tauri, hide immediately to avoid showing on web.
                 if (!isTauri()) {
                     if (splash && splash.style) splash.style.display = 'none'
                 }

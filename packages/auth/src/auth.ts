@@ -4,6 +4,7 @@ import prisma from "@sailviz/db";
 import { customSession, organization, username } from "better-auth/plugins";
 import { reactStartCookies } from "better-auth/react-start";
 import * as config from "./config";
+import { myPlugin } from "./plugin";
 
 export const auth = betterAuth({
   trustedOrigins: [
@@ -15,7 +16,7 @@ export const auth = betterAuth({
     "https://api.sailviz.com",
     "http://tauri.localhost",
   ],
-  plugins: [username(), organization(), reactStartCookies()],
+  plugins: [username(), organization(), reactStartCookies(), myPlugin()],
   session: {
     cookieCache: {
       enabled: true,
@@ -26,7 +27,7 @@ export const auth = betterAuth({
     additionalFields: {
       startPage: {
         type: "string",
-        defaultValue: "/dashboard/home",
+        defaultValue: "/dashboard/me",
         required: true,
       },
     },
@@ -42,6 +43,16 @@ export const auth = betterAuth({
     github: {
       clientId: config.AUTH_GITHUB_ID as string,
       clientSecret: config.AUTH_GITHUB_SECRET as string,
+    },
+  },
+  advanced: {
+    cookies: {
+      state: {
+        attributes: {
+          sameSite: "none",
+          secure: true,
+        },
+      },
     },
   },
 }) as ReturnType<typeof betterAuth>;

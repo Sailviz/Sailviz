@@ -1,12 +1,8 @@
-import PersonalRacesTable from '@components/tables/PersonalRacesTable'
 import { createFileRoute } from '@tanstack/react-router'
 
 function Page() {
-    return (
-        <div>
-            <PersonalRacesTable />
-        </div>
-    )
+    console.log('Page component rendered') // Log when Page renders
+    return <div>{/* <PersonalRacesTable /> */}</div>
 }
 
 export const Route = createFileRoute('/dashboard/me/')({

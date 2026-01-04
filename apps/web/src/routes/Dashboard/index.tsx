@@ -1,9 +1,5 @@
 import { createFileRoute, redirect } from '@tanstack/react-router'
 
-function Page() {
-    return null // This component shouldn't render - redirect happens in beforeLoad
-}
-
 export const Route = createFileRoute('/dashboard/')({
     beforeLoad: async ({ context }) => {
         const session = context?.auth
@@ -18,6 +14,5 @@ export const Route = createFileRoute('/dashboard/')({
         } else {
             throw redirect({ to: '/dashboard/home' })
         }
-    },
-    component: Page
+    }
 })

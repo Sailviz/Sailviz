@@ -2,12 +2,12 @@ import { Button } from '@components/ui/button'
 import { Input } from '@components/ui/input'
 import { useEffect, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
-import { signIn, getSession } from '@sailviz/auth/client'
+import { signIn, getSession, type Session } from '@sailviz/auth/client'
 import { isTauriRuntime } from '../is-tauri'
 import { Github, Loader2 } from 'lucide-react'
 import { useNavigate } from '@tanstack/react-router'
 import { useRouter } from '@tanstack/react-router'
-import { api_server, server } from '@components/URL'
+import { api_server } from '@components/URL'
 import { sessionQueryKey } from 'src/lib/session'
 export function LoginForm() {
     const navigate = useNavigate()
@@ -18,6 +18,56 @@ export function LoginForm() {
     const [loading, setLoading] = useState(false)
     const [checkingSession, setCheckingSession] = useState(true)
 
+    async function hideSplash() {
+        try {
+            // Check if the splash screen has already been hidden
+            if (localStorage.getItem('splashHidden') === 'true') {
+                return
+            }
+
+            // Try plugin dynamic import first
+            try {
+                const mod = await eval('import("@tauri-apps/plugin-splashscreen")')
+                if (mod && typeof (mod as any).hide === 'function') {
+                    await (mod as any).hide()
+                    return
+                }
+                if (mod && typeof (mod as any).close === 'function') {
+                    await (mod as any).close()
+                    return
+                }
+            } catch (e) {
+                // ignore and try invoke
+            }
+
+            // Fallback: attempt invoke plugin command (plugin:NAME|cmd)
+            try {
+                const { invoke } = await eval('import("@tauri-apps/api/tauri")')
+                // try common command names used by splash plugins
+                await invoke('plugin:splashscreen|close')
+            } catch (e) {
+                // ignore any errors
+            }
+
+            // Final fallback: if the web-based splash overlay exists, hide it.
+            try {
+                if ((window as any).hideTauriSplash) {
+                    ;(window as any).hideTauriSplash()
+                    localStorage.setItem('splashHidden', 'true') // Cache the state
+                    return
+                }
+                const el = document.getElementById('tauri-splash')
+                if (el && (el as HTMLElement).style) {
+                    ;(el as HTMLElement).style.display = 'none'
+                    localStorage.setItem('splashHidden', 'true') // Cache the state
+                }
+            } catch (e) {
+                // ignore
+            }
+        } catch (e) {
+            console.warn('hideSplash failed', e)
+        }
+    }
     // On mount, check for an existing session. If running inside Tauri,
     // keep the native splashscreen visible until we've verified the session
     // and either navigated to the dashboard or removed the splash so the
@@ -25,52 +75,9 @@ export function LoginForm() {
     useEffect(() => {
         let mounted = true
 
-        async function hideSplash() {
-            try {
-                // Try plugin dynamic import first
-                try {
-                    const mod = await eval('import("@tauri-apps/plugin-splashscreen")')
-                    if (mod && typeof (mod as any).hide === 'function') {
-                        await (mod as any).hide()
-                        return
-                    }
-                    if (mod && typeof (mod as any).close === 'function') {
-                        await (mod as any).close()
-                        return
-                    }
-                } catch (e) {
-                    // ignore and try invoke
-                }
-
-                // Fallback: attempt invoke plugin command (plugin:NAME|cmd)
-                try {
-                    const { invoke } = await eval('import("@tauri-apps/api/tauri")')
-                    // try common command names used by splash plugins
-                    await invoke('plugin:splashscreen|close')
-                } catch (e) {
-                    // ignore any errors
-                }
-
-                // Final fallback: if the web-based splash overlay exists, hide it.
-                try {
-                    if ((window as any).hideTauriSplash) {
-                        ;(window as any).hideTauriSplash()
-                        return
-                    }
-                    const el = document.getElementById('tauri-splash')
-                    if (el && (el as HTMLElement).style) (el as HTMLElement).style.display = 'none'
-                } catch (e) {
-                    // ignore
-                }
-            } catch (e) {
-                console.warn('hideSplash failed', e)
-            }
-        }
-
         ;(async () => {
             try {
-                const res: any = await getSession()
-                const session = res?.data ?? res?.session ?? res ?? null
+                const session: Session = await getSession()
                 if (!mounted) return
                 if (session && session.user) {
                     // We have a valid session — navigate to start page
@@ -81,11 +88,11 @@ export function LoginForm() {
                     } catch (e) {}
                     try {
                         // Use router navigation to avoid full reloads
-                        navigate({ to: '/' + (session.user.startPage || 'Dashboard') })
+                        navigate({ to: '/' + (session.user.startPage || 'dashboard/me') })
                         return
                     } catch (e) {
                         // fallback to full reload
-                        window.location.replace('/' + (session.user.startPage || 'Dashboard'))
+                        window.location.replace('/' + (session.user.startPage || 'dashboard/me'))
                         return
                     }
                 }
@@ -118,7 +125,6 @@ export function LoginForm() {
         if (isTauri) {
             console.log('handleSubmit: taking Tauri auth branch')
             // Tauri: call the server-side tauri sign-in endpoint which returns a token
-            // In the test environment the API is hosted at api.dev.sailviz.com
             let res: Response
             try {
                 res = await fetch(`${api_server}/api/auth/my-plugin/tauri-signin`, {
@@ -241,7 +247,7 @@ export function LoginForm() {
     const handleGitHubLogin = async () => {
         await signIn.social({
             provider: 'github',
-            callbackURL: server + '/authsorter'
+            callbackURL: 'http://localhost:5173' + '/dashboard/me'
         })
     }
 
