@@ -8,9 +8,10 @@ import { Button } from '@components/ui/button'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
 import { ActionButton } from '@components/ui/action-button'
+import type { Session } from '@sailviz/auth/client'
 
 function Page() {
-    const session = useLoaderData({ from: `__root__` })
+    const session: Session = useLoaderData({ from: `__root__` })
 
     const { data: club } = useQuery(orpcClient.organization.session.queryOptions())
 

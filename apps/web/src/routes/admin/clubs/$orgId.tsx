@@ -8,7 +8,7 @@ function Page() {
     const { orgId } = Route.useParams()
 
     const club = useQuery(orpcClient.organization.find.queryOptions({ input: { orgId: orgId } })).data
-    const stripe = useQuery(orpcClient.stripe.find.queryOptions({ input: { orgId: club?.id }, queryKey: [club] })).data
+    const stripe = useQuery(orpcClient.stripe.org.queryOptions({ input: { orgId: club!.id }, queryKey: [club] })).data
 
     if (!club || !stripe) {
         return <div>Loading...</div>

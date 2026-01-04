@@ -10,11 +10,12 @@ import { orpcClient } from '@lib/orpc'
 import type { RaceType } from '@sailviz/types'
 import { useLoaderData } from '@tanstack/react-router'
 import Header from '../header'
+import type { Session } from '@sailviz/auth/client'
 
 export default function SignOnLayout({ children }: { children: React.ReactNode }) {
-    const session = useLoaderData({ from: `__root__` })
+    const session: Session = useLoaderData({ from: `__root__` })
 
-    const todaysRaces = useQuery(orpcClient.race.today.queryOptions({ input: { orgId: session!.user.clubId } })).data as RaceType[]
+    const todaysRaces = useQuery(orpcClient.race.today.queryOptions({ input: { orgId: session.session.activeOrganizationId! } })).data as RaceType[]
 
     const backButton: NavCollection = userHasPermission(session!.user, AVAILABLE_PERMISSIONS.dashboardAccess)
         ? {

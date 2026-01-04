@@ -1,13 +1,13 @@
 import { useEffect } from 'react'
 import { createFileRoute, useLoaderData, useNavigate } from '@tanstack/react-router'
-import { client } from '@sailviz/auth/client'
+import { client, type Session } from '@sailviz/auth/client'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
 import type { FleetType, RaceType, ResultType } from '@sailviz/types'
 
 function Page() {
     const navigate = useNavigate()
-    const session = useLoaderData({ from: `__root__` })
+    const session: Session = useLoaderData({ from: `__root__` })
 
     const GlobalConfig = useQuery(orpcClient.globalConfig.find.queryOptions()).data as GlobalConfigType
 

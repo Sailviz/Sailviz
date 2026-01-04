@@ -2,12 +2,18 @@ import { PageSkeleton } from '@components/layout/PageSkeleton'
 import { Button } from '@components/ui/button'
 import { Card, CardContent } from '@components/ui/card'
 import { orpcClient } from '@lib/orpc'
+import type { Session } from '@sailviz/auth/client'
 import { useQuery } from '@tanstack/react-query'
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, useLoaderData } from '@tanstack/react-router'
 import { Page as PricingPage } from 'src/routes/Pricing/page'
 
 function Page() {
-    const stripe = useQuery(orpcClient.stripe.find.queryOptions()).data
+    const session: Session = useLoaderData({ from: `__root__` })
+    if (!session.session.activeOrganizationId) {
+        return <PageSkeleton />
+    }
+
+    const stripe = useQuery(orpcClient.stripe.org.queryOptions({ input: { orgId: session.session.activeOrganizationId } })).data
 
     if (stripe == undefined) {
         return <PageSkeleton />

@@ -35,7 +35,7 @@ const Action = ({ ...props }: any) => {
 const columnHelper = createColumnHelper<Types.RaceType>()
 
 const PersonalRacesTable = () => {
-    // const session = useLoaderData({ from: `__root__` })
+    // const session: Session = useLoaderData({ from: `__root__` })
 
     const [sorting, setSorting] = useState<SortingState>([{ id: 'number', desc: false }])
     const [data, setData] = useState<Types.RaceType[]>([])

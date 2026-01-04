@@ -7,10 +7,11 @@ import { Link, useLoaderData } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
 import type { BoatType, FleetType, RaceType, ResultType } from '@sailviz/types'
+import type { Session } from '@sailviz/auth/client'
 const columnHelper = createColumnHelper<ResultType>()
 
 const SignOnTable = ({ raceId }: { raceId: string }) => {
-    const session = useLoaderData({ from: `__root__` })
+    const session: Session = useLoaderData({ from: `__root__` })
     const race = useQuery(orpcClient.race.find.queryOptions({ input: { raceId: raceId } })).data as RaceType
     let [data, setData] = useState<ResultType[]>([])
 

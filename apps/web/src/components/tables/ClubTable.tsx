@@ -6,6 +6,7 @@ import { type SeriesType, type UserType } from '@sailviz/types'
 import { Button } from '../ui/button'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
+import type { Session } from '@sailviz/auth/client'
 
 const Action = ({ seriesId, viewHref, user }: { seriesId: string; viewHref: string; user?: UserType }) => {
     const navigate = useNavigate()
@@ -44,10 +45,10 @@ const Action = ({ seriesId, viewHref, user }: { seriesId: string; viewHref: stri
 const columnHelper = createColumnHelper<SeriesType>()
 
 const ClubTable = ({ viewHref, orgId }: { viewHref: string; orgId?: string }) => {
-    const session = useLoaderData({ from: `__root__` })
+    const session: Session = useLoaderData({ from: `__root__` })
 
     // if a orgId is provided then use that, otherwise use the session club id
-    const orgIdToUse = orgId || session?.session.activeOrganizationId
+    const orgIdToUse = orgId || session.session.activeOrganizationId!
     const { data: series } = useQuery(orpcClient.series.club.queryOptions({ input: { orgId: orgIdToUse, includeRaces: true } }))
     console.log('Series data:', series)
     const data = series || []

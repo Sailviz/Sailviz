@@ -8,7 +8,7 @@ import * as Types from '@sailviz/types'
 type ActionWithTeamFunction<T> = (formData: FormData, customer: Types.Stripe) => Promise<T>
 
 function withTeam<T>(action: ActionWithTeamFunction<T>) {
-    const fetchStripeMutation = useMutation(orpcClient.stripe.find.mutationOptions())
+    const fetchStripeMutation = useMutation(orpcClient.stripe.org.mutationOptions())
 
     return async (formData: FormData): Promise<T> => {
         const session = await getSession()

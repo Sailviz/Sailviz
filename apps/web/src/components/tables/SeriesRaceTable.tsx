@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
 import type { RaceType, SeriesType, UserType } from '@sailviz/types'
+import type { Session } from '@sailviz/auth/client'
 
 const raceOptions = [
     { value: 'Pursuit', label: 'Pursuit' },
@@ -131,7 +132,7 @@ const Action = ({ id, user }: { id: string; user: UserType }) => {
 const columnHelper = createColumnHelper<RaceType>()
 
 const SeriesRaceTable = ({ seriesId }: { seriesId: string }) => {
-    const session = useLoaderData({ from: `__root__` })
+    const session: Session = useLoaderData({ from: `__root__` })
 
     const series = useQuery(orpcClient.series.find.queryOptions({ input: { seriesId: seriesId } })).data as SeriesType
 

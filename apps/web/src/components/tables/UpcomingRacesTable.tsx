@@ -7,6 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '.
 import { useQuery } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
 import type { RaceType } from '@sailviz/types'
+import type { Session } from '@sailviz/auth/client'
 
 const Time = ({ ...props }: any) => {
     const initialValue = props.getValue()
@@ -37,9 +38,9 @@ const Action = ({ ...props }: any) => {
 const columnHelper = createColumnHelper<RaceType>()
 
 const UpcomingRacesTable = () => {
-    const session = useLoaderData({ from: `__root__` })
+    const session: Session = useLoaderData({ from: `__root__` })
 
-    const { data: todaysRaces } = useQuery(orpcClient.race.today.queryOptions({ input: { orgId: session?.session.activeOrganizationId } }))
+    const { data: todaysRaces } = useQuery(orpcClient.race.today.queryOptions({ input: { orgId: session.session.activeOrganizationId! } }))
 
     const [sorting, setSorting] = useState<SortingState>([{ id: 'number', desc: false }])
     const [data, setData] = useState<RaceType[]>([])

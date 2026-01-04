@@ -15,7 +15,7 @@ enum pageModes {
 function Page() {
     const { orgName } = Route.useParams()
     const org = useQuery(orpcClient.organization.name.queryOptions({ input: { orgName: orgName! } })).data as Types.Org
-    const stripe = useQuery(orpcClient.stripe.find.queryOptions({ input: { orgId: org?.id }, queryKey: [org] })).data
+    const stripe = useQuery(orpcClient.stripe.org.queryOptions({ input: { orgId: org?.id }, queryKey: [org] })).data
     const races = useQuery(orpcClient.race.today.queryOptions({ input: { orgId: org?.id }, queryKey: [org] })).data
 
     const queryClient = useQueryClient()

@@ -10,6 +10,7 @@ import { useLoaderData } from '@tanstack/react-router'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
 import * as Types from '@sailviz/types'
+import type { Session } from '@sailviz/auth/client'
 
 const Boats = ({ ...props }: any) => {
     const initialValue = props.getValue()
@@ -70,7 +71,7 @@ const Action = ({ user, fleetSettings, seriesId }: { user: UserType; fleetSettin
 const columnHelper = createColumnHelper<FleetSettingsType>()
 
 const FleetTable = ({ seriesId }: { seriesId: string }) => {
-    const session = useLoaderData({ from: `__root__` })
+    const session: Session = useLoaderData({ from: `__root__` })
 
     const { data: fleetSettings } = useQuery(orpcClient.fleet.settings.find.queryOptions({ input: { seriesId: seriesId } }))
 

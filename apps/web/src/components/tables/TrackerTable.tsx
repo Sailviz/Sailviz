@@ -5,6 +5,7 @@ import { Button } from '@components/ui/button'
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from '@components/ui/dropdown-menu'
 import { ChevronDown } from 'lucide-react'
 import { useLoaderData } from '@tanstack/react-router'
+import type { Session } from '@sailviz/auth/client'
 
 const columnHelper = createColumnHelper<TrackerDataType>()
 
@@ -24,7 +25,7 @@ const Action = ({ ...props }: any) => {
 }
 
 const TrackerTable = (props: any) => {
-    const session = useLoaderData({ from: `__root__` })
+    const session: Session = useLoaderData({ from: `__root__` })
 
     const trackers = [] as TrackerDataType[]
 

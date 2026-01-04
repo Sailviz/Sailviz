@@ -13,7 +13,6 @@ import { Route as LoginRouteImport } from './routes/Login'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
 import { Route as ClubIndexRouteImport } from './routes/club/index'
-import { Route as AuthsorterIndexRouteImport } from './routes/authsorter/index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as SignOnIndexRouteImport } from './routes/SignOn/index'
 import { Route as RegisterIndexRouteImport } from './routes/Register/index'
@@ -71,11 +70,6 @@ const DashboardIndexRoute = DashboardIndexRouteImport.update({
 const ClubIndexRoute = ClubIndexRouteImport.update({
   id: '/club/',
   path: '/club/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthsorterIndexRoute = AuthsorterIndexRouteImport.update({
-  id: '/authsorter/',
-  path: '/authsorter/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
@@ -289,7 +283,6 @@ export interface FileRoutesByFullPath {
   '/Register': typeof RegisterIndexRoute
   '/SignOn': typeof SignOnIndexRoute
   '/admin': typeof AdminIndexRoute
-  '/authsorter': typeof AuthsorterIndexRoute
   '/club': typeof ClubIndexRoute
   '/dashboard': typeof DashboardIndexRoute
   '/Demo/Race/$raceId': typeof DemoRaceRaceIdRoute
@@ -334,7 +327,6 @@ export interface FileRoutesByTo {
   '/Register': typeof RegisterIndexRoute
   '/SignOn': typeof SignOnIndexRoute
   '/admin': typeof AdminIndexRoute
-  '/authsorter': typeof AuthsorterIndexRoute
   '/club': typeof ClubIndexRoute
   '/dashboard': typeof DashboardIndexRoute
   '/Demo/Race/$raceId': typeof DemoRaceRaceIdRoute
@@ -380,7 +372,6 @@ export interface FileRoutesById {
   '/Register/': typeof RegisterIndexRoute
   '/SignOn/': typeof SignOnIndexRoute
   '/admin/': typeof AdminIndexRoute
-  '/authsorter/': typeof AuthsorterIndexRoute
   '/club/': typeof ClubIndexRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/Demo/Race/$raceId': typeof DemoRaceRaceIdRoute
@@ -427,7 +418,6 @@ export interface FileRouteTypes {
     | '/Register'
     | '/SignOn'
     | '/admin'
-    | '/authsorter'
     | '/club'
     | '/dashboard'
     | '/Demo/Race/$raceId'
@@ -472,7 +462,6 @@ export interface FileRouteTypes {
     | '/Register'
     | '/SignOn'
     | '/admin'
-    | '/authsorter'
     | '/club'
     | '/dashboard'
     | '/Demo/Race/$raceId'
@@ -517,7 +506,6 @@ export interface FileRouteTypes {
     | '/Register/'
     | '/SignOn/'
     | '/admin/'
-    | '/authsorter/'
     | '/club/'
     | '/dashboard/'
     | '/Demo/Race/$raceId'
@@ -563,7 +551,6 @@ export interface RootRouteChildren {
   RegisterIndexRoute: typeof RegisterIndexRoute
   SignOnIndexRoute: typeof SignOnIndexRoute
   AdminIndexRoute: typeof AdminIndexRoute
-  AuthsorterIndexRoute: typeof AuthsorterIndexRoute
   ClubIndexRoute: typeof ClubIndexRoute
   DashboardIndexRoute: typeof DashboardIndexRoute
   DemoRaceRaceIdRoute: typeof DemoRaceRaceIdRoute
@@ -622,13 +609,6 @@ declare module '@tanstack/react-router' {
       path: '/club'
       fullPath: '/club'
       preLoaderRoute: typeof ClubIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/authsorter/': {
-      id: '/authsorter/'
-      path: '/authsorter'
-      fullPath: '/authsorter'
-      preLoaderRoute: typeof AuthsorterIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/': {
@@ -915,7 +895,6 @@ const rootRouteChildren: RootRouteChildren = {
   RegisterIndexRoute: RegisterIndexRoute,
   SignOnIndexRoute: SignOnIndexRoute,
   AdminIndexRoute: AdminIndexRoute,
-  AuthsorterIndexRoute: AuthsorterIndexRoute,
   ClubIndexRoute: ClubIndexRoute,
   DashboardIndexRoute: DashboardIndexRoute,
   DemoRaceRaceIdRoute: DemoRaceRaceIdRoute,

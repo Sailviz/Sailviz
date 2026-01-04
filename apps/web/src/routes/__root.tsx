@@ -6,7 +6,7 @@ import { ScrollArea } from '@components/ui/scroll-area'
 import { AdminNavCollections, meCollections, navCollections } from 'src/constants/navCollections'
 import ErrorBoundary from '@components/ErrorBoundary'
 import { ThemeProvider as NextThemesProvider, type ThemeProviderProps } from 'next-themes'
-import { getSession } from '@sailviz/auth/client'
+import { getSession, type Session } from '@sailviz/auth/client'
 import Header from '@components/layout/header'
 import { useEffect } from 'react'
 import { invoke } from '@tauri-apps/api/core'
@@ -45,7 +45,7 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
         try {
             const { data: session } = await getSession()
             console.log('Session in root loader:', session)
-            return session
+            return session as Session
         } catch (e) {
             console.error('Root loader getSession failed:', e)
             // Gracefully degrade: return null session so UI can still render

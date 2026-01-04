@@ -12,8 +12,11 @@ export const ORPCcontract = {
     delete: oc.input(z.object({ lapId: z.string() })).output(Types.LapSchema),
   },
   stripe: {
-    find: oc.output(Types.stripeSchema),
+    find: oc
+      .input(z.object({ stripeCustomerId: z.string() }))
+      .output(Types.stripeSchema),
     update: oc.input(Types.stripeSchema).output(Types.stripeSchema),
+    org: oc.input(z.object({ orgId: z.string() })).output(Types.stripeSchema),
   },
   startSequence: {
     find: oc

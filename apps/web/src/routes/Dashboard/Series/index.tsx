@@ -7,9 +7,11 @@ import { PageSkeleton } from '@components/layout/PageSkeleton'
 import { useEffect, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
+import { client, type Session } from '@sailviz/auth/client'
 
 function Page() {
-    const session = useLoaderData({ from: `__root__` })
+    const session: Session = useLoaderData({ from: `__root__` })
+    const { data: org } = client.useActiveOrganization()
 
     const queryClient = useQueryClient()
 
@@ -20,7 +22,7 @@ function Page() {
     const createSeries = async (seriesName: string) => {
         await seriesCreation.mutateAsync({
             name: seriesName,
-            orgId: session?.session.activeOrganizationId
+            orgId: session?.session.activeOrganizationId!
         })
         queryClient.invalidateQueries({
             queryKey: orpcClient.series.club.key({ type: 'query' })
@@ -30,9 +32,9 @@ function Page() {
     useEffect(() => {
         const checkSubscription = async () => {
             console.log('Session:', session)
-            if (session?.club?.stripe.subscriptionStatus !== 'active') {
+            if (org?.metadata.subscriptionStatus !== 'active') {
                 //check how many series the user has
-                let { data: series } = useQuery(orpcClient.series.club.queryOptions({ input: { orgId: session?.session.activeOrganizationId, includeRaces: false } }))
+                let { data: series } = useQuery(orpcClient.series.club.queryOptions({ input: { orgId: session.session.activeOrganizationId!, includeRaces: false } }))
                 if (series == undefined) {
                     series = []
                 }

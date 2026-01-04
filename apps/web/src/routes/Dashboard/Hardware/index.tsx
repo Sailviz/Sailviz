@@ -7,9 +7,10 @@ import { Input } from '@components/ui/input'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
 import { ActionButton } from '@components/ui/action-button'
+import type { Session } from '@sailviz/auth/client'
 
 function Page() {
-    const session = useLoaderData({ from: `__root__` })
+    const session: Session = useLoaderData({ from: `__root__` })
     const { data: org } = useQuery(orpcClient.organization.session.queryOptions())
 
     const [clockIP, setClockIP] = useState('')

@@ -49,6 +49,7 @@ import { createResult, deleteResult, updateResult } from "./routes/result";
 import { globalConfig_find, globalConfig_update } from "./routes/globalConfig";
 import { lap_create, lap_delete } from "./routes/lap";
 import { lap_global } from "./routes/globalLaps";
+import { stripe_find, stripe_org, stripe_update } from "./routes/stripe";
 
 const os = implement(ORPCcontract);
 
@@ -57,6 +58,11 @@ export const mainRouter = os.router({
     global: lap_global,
     create: lap_create,
     delete: lap_delete,
+  },
+  stripe: {
+    find: stripe_find,
+    update: stripe_update,
+    org: stripe_org,
   },
   result: {
     create: createResult,

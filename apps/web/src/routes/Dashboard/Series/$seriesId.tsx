@@ -11,20 +11,26 @@ import { SeriesPursuitLength } from '@components/seriesPursuitLength'
 import { useLoaderData, createFileRoute } from '@tanstack/react-router'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
+import { client, type Session } from '@sailviz/auth/client'
 
 function Page() {
-    const session = useLoaderData({ from: `__root__` })
+    const session: Session = useLoaderData({ from: `__root__` })
     const { seriesId } = Route.useParams()
+
+    const { data: org } = client.useActiveOrganization()
 
     const FleetSettingsCreation = useMutation(orpcClient.fleet.settings.create.mutationOptions())
     const queryClient = useQueryClient()
+
+    const stripeFetchQuery = useMutation(orpcClient.stripe.org.mutationOptions())
 
     const { data: series } = useQuery(orpcClient.series.find.queryOptions({ input: { seriesId: seriesId } }))
     const { data: startSequence } = useQuery(orpcClient.startSequence.find.queryOptions({ input: { seriesId: seriesId } }))
 
     const createFleetSettings = async () => {
         //only create fleet settings if the club has pro subscription
-        if (session?.club?.stripe.planName == 'SailViz Pro') {
+        const customer = await stripeFetchQuery.mutateAsync({ orgId: session!.session.activeOrganizationId! })
+        if (customer.planName == 'SailViz Pro' && customer.subscriptionStatus == 'active') {
             await FleetSettingsCreation.mutateAsync({ seriesId: seriesId })
             queryClient.invalidateQueries({
                 queryKey: orpcClient.series.find.key({ type: 'query', input: { seriesId: seriesId } })
@@ -32,7 +38,7 @@ function Page() {
         }
     }
 
-    if (!session || series == undefined || startSequence == undefined) {
+    if (!session || series == undefined || startSequence == undefined || org == undefined) {
         console.log('Series', series)
         // If the user is not authenticated, redirect to the login page
         return <PageSkeleton />
@@ -46,7 +52,7 @@ function Page() {
                 <div className='p-6'>
                     <SeriesRaceTable seriesId={seriesId} />
                 </div>
-                {userHasPermission(session?.user, AVAILABLE_PERMISSIONS.editRaces) ? <AddRaceButton seriesId={seriesId} /> : <> </>}
+                {userHasPermission(session.user, AVAILABLE_PERMISSIONS.editRaces) ? <AddRaceButton seriesId={seriesId} /> : <> </>}
 
                 <p className='text-6xl font-extrabold p-6'>Fleets</p>
                 <div className='p-6'>
@@ -54,7 +60,7 @@ function Page() {
                 </div>
                 {userHasPermission(session?.user, AVAILABLE_PERMISSIONS.editFleets) ? (
                     <>
-                        <Button onClick={createFleetSettings} disabled={session?.club?.stripe.planName != 'SailViz Pro'}>
+                        <Button onClick={createFleetSettings} disabled={org.metadata.planName != 'SailViz Pro'}>
                             Add Fleet
                         </Button>
                         <StartSequenceManager initialSequence={startSequence} seriesId={seriesId} key={startSequence?.length} />

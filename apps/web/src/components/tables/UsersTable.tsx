@@ -7,6 +7,7 @@ import { Button } from '../ui/button'
 import * as Types from '@sailviz/types'
 import type { UserType } from '@sailviz/types'
 import EditUserDialog from '@components/layout/dashboard/EditUserModal'
+import type { Session } from '@sailviz/auth/client'
 
 const Action = ({ user, session, onClick }: { user: UserType; session: any; onClick: (user: UserType) => void }) => {
     if (userHasPermission(session.user, AVAILABLE_PERMISSIONS.editUsers)) {
@@ -23,7 +24,7 @@ const Action = ({ user, session, onClick }: { user: UserType; session: any; onCl
 const columnHelper = createColumnHelper<UserType>()
 
 const UsersTable = () => {
-    const session = useLoaderData({ from: `__root__` })
+    const session: Session = useLoaderData({ from: `__root__` })
 
     const [modalIsOpen, setModalIsOpen] = useState(false)
     const [modalData, setModalData] = useState<UserType | undefined>(undefined)

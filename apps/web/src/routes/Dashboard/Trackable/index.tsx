@@ -6,9 +6,10 @@ import TrackerTable from '@components/tables/TrackerTable'
 import { Button } from '@components/ui/button'
 import { useQuery } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
+import type { Session } from '@sailviz/auth/client'
 
 function Page() {
-    const session = useLoaderData({ from: `__root__` })
+    const session: Session = useLoaderData({ from: `__root__` })
 
     const org = useQuery(orpcClient.organization.session.queryOptions()).data
 

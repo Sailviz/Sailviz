@@ -12,6 +12,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
 import BackButton from '@components/layout/backButton'
 import * as Types from '@sailviz/types'
+import type { Session } from '@sailviz/auth/client'
 
 // these options are the same across all fleets
 enum raceStateType {
@@ -34,7 +35,7 @@ function Page() {
 
     const navigate = useNavigate()
 
-    const session = useLoaderData({ from: `__root__` })
+    const session: Session = useLoaderData({ from: `__root__` })
 
     const queryClient = useQueryClient()
 

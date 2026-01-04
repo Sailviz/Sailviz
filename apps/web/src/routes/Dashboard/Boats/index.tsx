@@ -10,9 +10,10 @@ import { createFileRoute, useLoaderData } from '@tanstack/react-router'
 import CreateBoatDialog from '@components/layout/dashboard/CreateBoatModal'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
+import type { Session } from '@sailviz/auth/client'
 
 function Page() {
-    const session = useLoaderData({ from: `__root__` })
+    const session: Session = useLoaderData({ from: `__root__` })
     // const { club, clubIsError, clubIsValidating } = Fetcher.UseClub()
     // const { boats, boatsIsError, boatsIsValidating, mutateBoats: mutateBoats } = Fetcher.Boats()
 

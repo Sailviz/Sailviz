@@ -1,5 +1,6 @@
 import {
   customSessionClient,
+  inferAdditionalFields,
   organizationClient,
   usernameClient,
 } from "better-auth/client/plugins";
@@ -10,7 +11,19 @@ import * as Types from "@sailviz/types";
 export const client = createAuthClient({
   baseURL: BASE_URL,
   basePath: "/api/auth",
-  plugins: [usernameClient(), organizationClient(), customSessionClient()],
+  plugins: [
+    usernameClient(),
+    organizationClient(),
+    customSessionClient(),
+    inferAdditionalFields({
+      user: {
+        startPage: {
+          type: "string",
+          required: true,
+        },
+      },
+    }),
+  ],
 });
 
 // Destructure core methods but provide a thin, typed wrapper for `useSession`
@@ -26,6 +39,7 @@ const {
 } = client;
 
 export { signUp, signIn, signOut };
+export type Session = typeof client.$Infer.Session;
 
 // Wrap the library `getSession` so desktop clients (Tauri) can fall back
 // to token-based session retrieval when cookies aren't available.

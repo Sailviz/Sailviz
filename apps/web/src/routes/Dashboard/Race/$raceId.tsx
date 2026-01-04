@@ -15,10 +15,11 @@ import { SmoothSpinner } from '@components/icons/smooth-spinner'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
 import type { RaceType } from '@sailviz/types'
+import type { Session } from '@sailviz/auth/client'
 
 function Page() {
     const { raceId } = Route.useParams()
-    const session = useLoaderData({ from: `__root__` })
+    const session: Session = useLoaderData({ from: `__root__` })
 
     const race = useQuery(orpcClient.race.find.queryOptions({ input: { raceId: raceId! } })).data as RaceType
     const { data: boats } = useQuery(orpcClient.boat.session.queryOptions())
@@ -60,7 +61,7 @@ function Page() {
     }
 
     const copyFromPrevious = async () => {
-        let today = await getTodayRace.mutateAsync({ orgId: session!.user.clubId })
+        let today = await getTodayRace.mutateAsync({ orgId: session.session.activeOrganizationId! })
         if (today == undefined) {
             alert('unable to get previous data')
             return

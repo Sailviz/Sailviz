@@ -1,7 +1,7 @@
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import prisma from "@sailviz/db";
-import { organization, username } from "better-auth/plugins";
+import { customSession, organization, username } from "better-auth/plugins";
 import { reactStartCookies } from "better-auth/react-start";
 import * as config from "./config";
 
@@ -20,6 +20,15 @@ export const auth = betterAuth({
     cookieCache: {
       enabled: true,
       maxAge: 60 * 60 * 24, // Cache duration in seconds
+    },
+  },
+  user: {
+    additionalFields: {
+      startPage: {
+        type: "string",
+        defaultValue: "/dashboard/home",
+        required: true,
+      },
     },
   },
   database: prismaAdapter(prisma, {

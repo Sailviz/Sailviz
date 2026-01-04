@@ -4,9 +4,10 @@ import { PageSkeleton } from '@components/layout/PageSkeleton'
 import TableOfClubs from '@components/tables/TableOfClubs'
 import CreateClubModal from '@components/layout/dashboard/CreateClubModal'
 import { ensureAdmin } from 'src/lib/session'
+import type { Session } from '@sailviz/auth/client'
 
 function Page() {
-    const session = useLoaderData({ from: `__root__` })
+    const session: Session = useLoaderData({ from: `__root__` })
 
     if (!session) {
         // If the user is not authenticated, redirect to the login page

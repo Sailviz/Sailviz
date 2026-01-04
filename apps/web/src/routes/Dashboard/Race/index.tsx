@@ -5,12 +5,15 @@ import UpcomingRacesTable from '@components/tables/UpcomingRacesTable'
 import { PageSkeleton } from '@components/layout/PageSkeleton'
 
 import { createFileRoute, useLoaderData } from '@tanstack/react-router'
+import type { Session } from '@sailviz/auth/client'
 
 function Page() {
-    const session = useLoaderData({ from: `__root__` })
+    const session: Session = useLoaderData({ from: `__root__` })
+
+    const orgId = session?.session.activeOrganizationId
 
     console.log('Session:', session)
-    if (!session) {
+    if (!session || !orgId) {
         // If the user is not authenticated, redirect to the login page
         return <PageSkeleton />
     }
@@ -27,11 +30,11 @@ function Page() {
                 </div>
                 <div className='px-3'>
                     <p className='text-2xl font-bold p-6'>Upcoming</p>
-                    <RacesTable orgId={session.session.activeOrganizationId} date={new Date()} historical={false} viewHref='/Dashboard/Race/' />
+                    <RacesTable orgId={orgId} date={new Date()} historical={false} viewHref='/Dashboard/Race/' />
                 </div>
                 <div className='px-3'>
                     <p className='text-2xl font-bold p-6'>Recent</p>
-                    <RacesTable orgId={session.session.activeOrganizationId} date={new Date()} historical={true} viewHref='/Dashboard/Race/' />
+                    <RacesTable orgId={orgId} date={new Date()} historical={true} viewHref='/Dashboard/Race/' />
                 </div>
             </div>
         </div>

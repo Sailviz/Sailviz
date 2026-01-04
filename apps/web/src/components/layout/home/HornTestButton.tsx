@@ -2,18 +2,21 @@ import { Button } from '@components/ui/button'
 
 import { useLoaderData } from '@tanstack/react-router'
 import { PageSkeleton } from '../PageSkeleton'
+import { client, type Session } from '@sailviz/auth/client'
 
 export default function HornTestButton() {
     const controller = new AbortController()
-    const session = useLoaderData({ from: `__root__` })
+    const session: Session = useLoaderData({ from: `__root__` })
+    const { data: org } = client.useActiveOrganization()
+
     console.log('Session:', session)
-    if (!session) {
+    if (!session || !org) {
         // If the user is not authenticated, redirect to the login page
         return <PageSkeleton />
     }
 
     const hornTest = async () => {
-        fetch('https://' + session.club!.settings!.hornIP + '/hoot?startTime=100', {
+        fetch('https://' + org.metadata.settings.hornIP + '/hoot?startTime=100', {
             signal: controller.signal,
             headers: new Headers({ 'content-type': 'text/plain' })
         })

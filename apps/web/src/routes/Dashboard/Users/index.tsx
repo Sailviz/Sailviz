@@ -5,9 +5,10 @@ import { AVAILABLE_PERMISSIONS, userHasPermission } from '@components/helpers/us
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
 import { ActionButton } from '@components/ui/action-button'
+import type { Session } from '@sailviz/auth/client'
 
 function Page() {
-    const session = useLoaderData({ from: `__root__` })
+    const session: Session = useLoaderData({ from: `__root__` })
 
     const { data: org } = useQuery(orpcClient.organization.session.queryOptions())
 

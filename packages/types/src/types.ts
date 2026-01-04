@@ -138,11 +138,10 @@ export type Org = z.infer<typeof OrgSchema>;
 export const UserSchema = z.object({
   id: z.string(),
   name: z.string(),
-  uuid: z.string().nullable(),
   startPage: z.string(),
   email: z.string().nullable(),
   emailVerified: z.boolean(),
-  image: z.string().nullable(),
+  image: z.string().nullable().optional(),
   createdAt: z.date(),
   updatedAt: z.date(),
 });

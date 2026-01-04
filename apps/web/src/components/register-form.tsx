@@ -26,7 +26,8 @@ export function RegisterForm() {
             email: email,
             password: password,
             username: name,
-            name: name
+            name: name,
+            startPage: 'Dashboard'
         })
         console.log('Sign up response:', data, error)
         if (error) {

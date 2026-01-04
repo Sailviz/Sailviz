@@ -1,7 +1,7 @@
 import UpcomingRacesTable from '@components/tables/UpcomingRacesTable'
 import { title } from '@components/layout/home/primitaves'
 import { Button } from '@components/ui/button'
-import { createFileRoute, Link, useLoaderData } from '@tanstack/react-router'
+import { createFileRoute, Link } from '@tanstack/react-router'
 import HornTestButton from '@components/layout/home/HornTestButton'
 
 import CreateEventDialog from '@components/layout/dashboard/CreateEventModal'
@@ -9,12 +9,10 @@ import { useEffect, useState } from 'react'
 import { client } from '@sailviz/auth/client'
 
 function Page() {
-    const session = useLoaderData({ from: `__root__` })
     const [org, setOrg] = useState<any>(null)
     useEffect(() => {
         async function fetchActiveOrg() {
-            const activeOrgId = await session.session.activeOrganizationId
-            const org = await client.organization.getFullOrganization(activeOrgId)
+            const org = await client.organization.getFullOrganization()
             setOrg(org.data)
         }
         fetchActiveOrg()
