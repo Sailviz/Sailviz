@@ -8,10 +8,12 @@ import { ActionButton } from '@components/ui/action-button'
 import type { Session } from '@sailviz/auth/client'
 import { useEffect, useState } from 'react'
 import { client } from '@sailviz/auth/client'
+import { Input } from '@components/ui/input'
 
 function Page() {
     const session: Session = useLoaderData({ from: `__root__` })
 
+    const [inviteEmail, setInviteEmail] = useState('')
     const [org, setOrg] = useState<any>(null)
     useEffect(() => {
         async function fetchActiveOrg() {
@@ -21,21 +23,12 @@ function Page() {
         fetchActiveOrg()
     }, [])
 
-    const userCreation = useMutation(orpcClient.user.create.mutationOptions())
-    const queryClient = useQueryClient()
-
-    const createUser = async () => {
-        if (org == undefined) {
-            throw new Error('No org found')
-        }
-        const user = await userCreation.mutateAsync({ orgId: org.id })
-        if (user) {
-            queryClient.invalidateQueries({
-                queryKey: orpcClient.user.create.key({ type: 'query' })
-            })
-        } else {
-            throw new Error('Could not create user')
-        }
+    const inviteUser = async () => {
+        const { data } = await client.organization.inviteMember({
+            email: inviteEmail,
+            role: 'member'
+        })
+        console.log('Invitation sent:', data)
     }
 
     if (org == undefined || session == undefined) {
@@ -49,7 +42,10 @@ function Page() {
                     Users
                     <MembersTable orgId={session.session.activeOrganizationId!} />
                     {userHasPermission(session.user, AVAILABLE_PERMISSIONS.editUsers) ? (
-                        <ActionButton before={'Create User'} during={'Creating'} after={'Created'} action={createUser} />
+                        <div className='flex flex-row m-6'>
+                            <Input placeholder='email' onChange={v => setInviteEmail(v.target.value)} value={inviteEmail} />
+                            <ActionButton before={'Invite User'} during={'Inviting'} after={'Invited'} action={inviteUser} />
+                        </div>
                     ) : (
                         <></>
                     )}

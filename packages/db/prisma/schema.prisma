@@ -105,6 +105,7 @@ model teamMember {
 model Invitation {
   id             String       @id
   organizationId String
+  teamId         String?
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   email          String       @db.Text
   role           String?      @db.Text

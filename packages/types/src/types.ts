@@ -1,4 +1,4 @@
-import z from "zod";
+import z, { email } from "zod";
 
 export const DutySchema = z.any();
 export type DutyType = z.infer<typeof DutySchema>;
@@ -190,3 +190,16 @@ export const stripeSchema = z.object({
   updatedAt: z.string().nullable(),
 });
 export type Stripe = z.infer<typeof stripeSchema>;
+
+export const invitationSchema = z.object({
+  id: z.string(),
+  organizationId: z.string(),
+  orgName: z.string().optional(),
+  email: z.string(),
+  expiresAt: z.date(),
+  inviterId: z.string(),
+  role: z.string(),
+  status: z.string(),
+  teamId: z.string().optional(),
+});
+export type Invitation = z.infer<typeof invitationSchema>;
