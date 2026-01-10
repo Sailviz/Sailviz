@@ -55,7 +55,7 @@
         "@tauri-apps/plugin-store": "^2.2.0",
         "@types/react": "^18.3.3",
         "bcryptjs": "^3.0.2",
-        "better-auth": "^1.2.9",
+        "better-auth": "^1.4.10",
         "class-variance-authority": "^0.7.1",
         "clsx": "^2.1.1",
         "csvtojson": "^2.0.10",

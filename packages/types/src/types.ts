@@ -1,4 +1,5 @@
 import z, { email } from "zod";
+import { tr } from "zod/locales";
 
 export const DutySchema = z.any();
 export type DutyType = z.infer<typeof DutySchema>;
@@ -16,6 +17,7 @@ export const ResultSchema = z.object({
   Helm: z.string(),
   Crew: z.string(),
   userId: z.string().nullable().optional(),
+  trackableParticipantId: z.string().nullable().optional(),
   SailNumber: z.string(),
   finishTime: z.number(),
   numberLaps: z.number(),
@@ -55,6 +57,7 @@ export const RaceSchema = z.object({
   Type: z.string(),
   fleets: z.array(FleetSchema),
   seriesId: z.string(),
+  trackableEventId: z.string().nullable().optional(),
   series: z.lazy(() => SeriesSchema.optional()),
 });
 export type RaceType = z.infer<typeof RaceSchema>;
@@ -194,7 +197,7 @@ export type Stripe = z.infer<typeof stripeSchema>;
 export const invitationSchema = z.object({
   id: z.string(),
   organizationId: z.string(),
-  orgName: z.string().optional(),
+  organizationName: z.string().optional(),
   email: z.string(),
   expiresAt: z.date(),
   inviterId: z.string(),
@@ -203,3 +206,59 @@ export const invitationSchema = z.object({
   teamId: z.string().optional(),
 });
 export type Invitation = z.infer<typeof invitationSchema>;
+
+////////// Trackable types //////////
+
+export const WaypointSchema = z.object({
+  id: z.string(),
+  eventId: z.string(),
+  name: z.string(),
+  lat: z.number(),
+  lon: z.number(),
+  radius: z.number(),
+  sequence: z.number(),
+  isDeleted: z.boolean(),
+});
+export type Waypoint = z.infer<typeof WaypointSchema>;
+
+export const DeviceSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  orgId: z.string().nullable(),
+  isDeleted: z.boolean(),
+  product: z.any().nullable(),
+  firmwareVersion: z.any().nullable(),
+});
+export type Device = z.infer<typeof DeviceSchema>;
+
+export const PositionSchema = z.object({
+  lat: z.number(),
+  lon: z.number(),
+  timestamp: z.number(),
+});
+export type Position = z.infer<typeof PositionSchema>;
+
+export const TrackerSchema = z.object({
+  id: z.string(),
+  position: PositionSchema,
+  battery: z.number().optional(),
+  gps: z.number().optional(),
+  chargeStatus: z.number().optional(),
+  timestamp: z.number().optional(),
+});
+export type Tracker = z.infer<typeof TrackerSchema>;
+
+export const TEventSchema = z.object({
+  id: z.string(),
+  organisation: z.any(),
+  name: z.string(),
+  eventType: z.number(),
+  startTime: z.number().optional(),
+  endTime: z.number().optional(),
+  waypoints: z.array(z.any()),
+  participants: z.array(z.any()),
+  isSailviz: z.boolean(),
+  isRunning: z.boolean(),
+  isDeleted: z.boolean(),
+});
+export type TEvent = z.infer<typeof TEventSchema>;

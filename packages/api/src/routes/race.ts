@@ -278,8 +278,10 @@ export const race_create = os.race.create.handler(async ({ input }) => {
   const club = await prisma.organization.findUnique({
     where: { id: series.orgId },
   });
-  let clubSettings = club.settings as ClubSettingsType;
-  let duties = clubSettings!.duties.reduce((obj, key, index) => {
+
+  let dutiesarray = JSON.parse(club.metadata).duties as string[];
+  console.log("duties array:", dutiesarray);
+  let duties = dutiesarray!.reduce((obj, key, index) => {
     obj[key] = "";
     return obj;
   }, {} as { [key: string]: any });

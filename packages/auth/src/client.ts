@@ -12,7 +12,6 @@ export const client = createAuthClient({
   baseURL: BASE_URL,
   basePath: "/api/auth",
   plugins: [
-    usernameClient(),
     organizationClient({
       teams: {
         enabled: true,

@@ -123,8 +123,8 @@ export function LoginForm() {
 
         // Web (cookie-based) flow
         await signIn
-            .username({
-                username,
+            .email({
+                email: username,
                 password,
                 fetchOptions: {
                     redirect: 'manual', // Prevent automatic redirection

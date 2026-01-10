@@ -146,4 +146,15 @@ export const ORPCcontract = {
     find: oc.output(Types.GlobalConfigSchema),
     update: oc.input(Types.GlobalConfigSchema).output(Types.GlobalConfigSchema),
   },
+  trackable: {
+    createParticipant: oc
+      .input(
+        z.object({
+          orgId: z.string(),
+          eventId: z.string(),
+          deviceId: z.string(),
+        })
+      )
+      .output(z.any()),
+  },
 } as const;

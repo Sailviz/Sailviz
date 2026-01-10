@@ -5,6 +5,7 @@ import { title } from '@components/layout/home/primitaves'
 import { useQuery } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
 import type { FleetSettingsType, SeriesType } from '@sailviz/types'
+import SignOnLayout from '@components/layout/SignOn/layout'
 
 function Page() {
     const { seriesId } = Route.useParams()
@@ -15,7 +16,7 @@ function Page() {
         return <PageSkeleton />
     }
     return (
-        <div className='h-screen'>
+        <SignOnLayout>
             <div className='h-1/6 p-6'>
                 <h1 className={title({ color: 'blue' })}>Series Results - {series.name} </h1>
                 <p className='py-4 text-2xl font-bold'>
@@ -33,7 +34,7 @@ function Page() {
                     )
                 })}
             </div>
-        </div>
+        </SignOnLayout>
     )
 }
 

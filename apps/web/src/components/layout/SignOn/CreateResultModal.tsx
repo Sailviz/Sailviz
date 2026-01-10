@@ -13,11 +13,13 @@ import type { BoatType, FleetType, RaceType } from '@sailviz/types'
 export default function CreateResultModal({ todaysRaces, boats }: { todaysRaces: RaceType[]; boats: BoatType[] }) {
     const createResultMutation = useMutation(orpcClient.result.create.mutationOptions())
     const updateResultMutation = useMutation(orpcClient.result.update.mutationOptions())
+    const createParticipantMutation = useMutation(orpcClient.trackable.createParticipant.mutationOptions())
 
     const [open, setOpen] = useState(false)
     const [helm, setHelm] = useState('')
     const [crew, setCrew] = useState('')
     const [sailNumber, setSailNumber] = useState('')
+    const [trackerId, setTrackerId] = useState('')
 
     const queryClient = useQueryClient()
 
@@ -94,12 +96,16 @@ export default function CreateResultModal({ todaysRaces, boats }: { todaysRaces:
             submitDisabled = false
             return
         }
-        console.log('submitting')
-        console.log(selectedFleets)
+
         //call submit for each fleet selected
         for (let i = 0; i < selectedFleets.length; i++) {
-            console.log(i)
-            await createResult(selectedFleets[i]!, helm, crew, selectedBoat.value, sailNumber)
+            //create the participant in trackable.
+            let participantId = ''
+            if (trackerId != '') {
+                const participant = await createParticipantMutation.mutateAsync({ eventId: '', orgId: '', deviceId: trackerId })
+                participantId = participant.id
+            }
+            await createResult(selectedFleets[i]!, helm, crew, selectedBoat.value, sailNumber, participantId)
         }
         todaysRaces.forEach(race => {
             queryClient.invalidateQueries({
@@ -110,11 +116,11 @@ export default function CreateResultModal({ todaysRaces, boats }: { todaysRaces:
         setOpen(false)
     }
 
-    const createResult = async (fleetId: string, helm: string, crew: string, boat: BoatType, sailNum: string) => {
+    const createResult = async (fleetId: string, helm: string, crew: string, boat: BoatType, sailNum: string, participantId: string) => {
         console.log('createResult', fleetId, helm, crew, boat, sailNum)
         //create a result for each fleet
         let result = await createResultMutation.mutateAsync({ fleetId: fleetId })
-        await updateResultMutation.mutateAsync({ ...result, Helm: helm, Crew: crew, boat: boat, SailNumber: sailNum })
+        await updateResultMutation.mutateAsync({ ...result, Helm: helm, Crew: crew, boat: boat, SailNumber: sailNum, trackableParticipantId: participantId })
 
         console.log(helm, crew, boat, sailNum, fleetId)
     }
@@ -123,6 +129,7 @@ export default function CreateResultModal({ todaysRaces, boats }: { todaysRaces:
         console.log('clearing fields')
         setHelm('')
         setCrew('')
+        setTrackerId('')
         setSailNumber('')
         setSelectedRaces([])
         setSelectedFleets([])
@@ -239,68 +246,76 @@ export default function CreateResultModal({ todaysRaces, boats }: { todaysRaces:
                     </div>
                 </div>
 
-                <div className='text-4xl font-extrabold p-6'>Select Races</div>
-                {todaysRaces.map(race => {
-                    if (race.fleets.some(fleet => fleet.startTime != 0)) {
-                        //a fleet in the race has started so don't allow entry
-                        return <div key={race.id + 'finished'}></div>
-                    }
+                <div className='flex flex-row'>
+                    <div className='flex flex-col flex-2'>
+                        <div className='text-4xl font-extrabold p-6'>Select Races</div>
+                        {todaysRaces.map(race => {
+                            if (race.fleets.some(fleet => fleet.startTime != 0)) {
+                                //a fleet in the race has started so don't allow entry
+                                return <div key={race.id + 'finished'}></div>
+                            }
 
-                    return (
-                        <div className='mx-6 mb-10' key={race.id + 'select'}>
-                            <div className='flex flex-row'>
-                                <div className='py-2 font-bold px-4'>
-                                    {race.series!.name} {race.number}
-                                </div>
-                                <Switch
-                                    id={race.id + 'Switch'}
-                                    onCheckedChange={value => {
-                                        updateRaceSelection(race, value)
-                                    }}
-                                    color='success'
-                                />
-                                <Tabs
-                                    aria-label='Options'
-                                    className='px-3'
-                                    value={selectedFleets.find(fleetId => race.fleets.flatMap(fleet => fleet.id).includes(fleetId))}
-                                    color='primary'
-                                    //insert the selected fleet into the selectedFleets array at the index of the race
-                                    onValueChange={key => {
-                                        console.log(key.toString())
-                                        // remove fleets associated with this race
-                                        let arr = selectedFleets.filter(value => !race.fleets.flatMap(fleet => fleet.id).includes(value))
-                                        arr.push(key.toString())
-                                        setSelectedFleets(arr)
-                                    }}
-                                >
-                                    {/* show buttons for each fleet in a series */}
-                                    <TabsList>
-                                        {race.fleets.map((fleet: FleetType) => {
-                                            return (
-                                                <TabsTrigger
-                                                    key={fleet.id + 'select'}
-                                                    value={fleet.id}
-                                                    disabled={selectedRaces.findIndex(r => r == race.id) == -1 ? true : false}
-                                                    className='data-[state=active]:bg-green-500'
-                                                >
-                                                    {fleet.fleetSettings.name}
-                                                </TabsTrigger>
-                                            )
-                                        })}
-                                    </TabsList>
-                                </Tabs>
-                                {race.Type == 'Pursuit' ? (
-                                    <div className='pl-6 py-auto text-2xl font-bold text-gray-700'>
-                                        Start Time: {String(Math.floor((selectedBoat.value.pursuitStartTime || 0) / 60)).padStart(2, '0')}:
-                                        {String((selectedBoat.value.pursuitStartTime || 0) % 60).padStart(2, '0')}
+                            return (
+                                <div className='mx-6 mb-10' key={race.id + 'select'}>
+                                    <div className='flex flex-row'>
+                                        <div className='py-2 font-bold px-4'>
+                                            {race.series!.name} {race.number}
+                                        </div>
+                                        <Switch
+                                            id={race.id + 'Switch'}
+                                            onCheckedChange={value => {
+                                                updateRaceSelection(race, value)
+                                            }}
+                                            color='success'
+                                        />
+                                        <Tabs
+                                            aria-label='Options'
+                                            className='px-3'
+                                            value={selectedFleets.find(fleetId => race.fleets.flatMap(fleet => fleet.id).includes(fleetId))}
+                                            color='primary'
+                                            //insert the selected fleet into the selectedFleets array at the index of the race
+                                            onValueChange={key => {
+                                                console.log(key.toString())
+                                                // remove fleets associated with this race
+                                                let arr = selectedFleets.filter(value => !race.fleets.flatMap(fleet => fleet.id).includes(value))
+                                                arr.push(key.toString())
+                                                setSelectedFleets(arr)
+                                            }}
+                                        >
+                                            {/* show buttons for each fleet in a series */}
+                                            <TabsList>
+                                                {race.fleets.map((fleet: FleetType) => {
+                                                    return (
+                                                        <TabsTrigger
+                                                            key={fleet.id + 'select'}
+                                                            value={fleet.id}
+                                                            disabled={selectedRaces.findIndex(r => r == race.id) == -1 ? true : false}
+                                                            className='data-[state=active]:bg-green-500'
+                                                        >
+                                                            {fleet.fleetSettings.name}
+                                                        </TabsTrigger>
+                                                    )
+                                                })}
+                                            </TabsList>
+                                        </Tabs>
+                                        {race.Type == 'Pursuit' ? (
+                                            <div className='pl-6 py-auto text-2xl font-bold text-gray-700'>
+                                                Start Time: {String(Math.floor((selectedBoat.value.pursuitStartTime || 0) / 60)).padStart(2, '0')}:
+                                                {String((selectedBoat.value.pursuitStartTime || 0) % 60).padStart(2, '0')}
+                                            </div>
+                                        ) : (
+                                            <></>
+                                        )}
                                     </div>
-                                ) : (
-                                    <></>
-                                )}
-                            </div>
-                        </div>
-                    )
-                })}
+                                </div>
+                            )
+                        })}
+                    </div>
+                    <div className='flex flex-col px-6'>
+                        <p className='text-2xl font-bold'>Tracker ID</p>
+                        <Input id='trackerId' placeholder='please ignore' type='text' value={trackerId} onChange={v => setTrackerId(v.target.value)} autoComplete='off' />
+                    </div>
+                </div>
                 <DialogFooter>
                     <Button color='success' onClick={Submit}>
                         Submit

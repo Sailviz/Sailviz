@@ -121,7 +121,7 @@ export default function SignOnLayout({ children }: { children: React.ReactNode }
                 <Header />
 
                 {/* page main content */}
-                <div className='flex flex-1 p-4 md:px-6'>{children}</div>
+                <div className='flex flex-1 p-4 md:px-6 flex-col'>{children}</div>
                 {/* page main content ends */}
             </SidebarInset>
         </SidebarProvider>

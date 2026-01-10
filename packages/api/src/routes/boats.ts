@@ -3,6 +3,7 @@ import { BoatType } from "packages/types/src/types";
 import { implement, ORPCError } from "@orpc/server";
 import { ORPCcontract } from "../contract";
 import { authMiddleware } from "../middleware";
+import { withSession } from "../context";
 
 const os = implement(ORPCcontract);
 

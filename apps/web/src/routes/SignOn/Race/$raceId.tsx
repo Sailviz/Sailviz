@@ -6,6 +6,7 @@ import { title } from '@components/layout/home/primitaves'
 import { useQuery } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
 import * as Types from '@sailviz/types'
+import SignOnLayout from '@components/layout/SignOn/layout'
 
 function Page() {
     const { raceId } = Route.useParams()
@@ -16,10 +17,12 @@ function Page() {
         return <PageSkeleton />
     }
     return (
-        <div className='flex flex-col'>
-            <h1 className={title({ color: 'blue' })}>
-                Results - {race.series!.name} - Race {race.number}
-            </h1>
+        <SignOnLayout>
+            <div className='h-1/6 p-6'>
+                <h1 className={title({ color: 'blue' })}>
+                    Results - {race.series!.name} - Race {race.number}
+                </h1>
+            </div>
             <div className='flex flex-row'>
                 {race.fleets.map((fleet, index) => {
                     return (
@@ -35,7 +38,7 @@ function Page() {
                     )
                 })}
             </div>
-        </div>
+        </SignOnLayout>
     )
 }
 

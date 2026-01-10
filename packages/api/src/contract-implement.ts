@@ -50,6 +50,7 @@ import { globalConfig_find, globalConfig_update } from "./routes/globalConfig";
 import { lap_create, lap_delete } from "./routes/lap";
 import { lap_global } from "./routes/globalLaps";
 import { stripe_find, stripe_org, stripe_update } from "./routes/stripe";
+import { trackable_createParticipant } from "./routes/trackable";
 
 const os = implement(ORPCcontract);
 
@@ -123,5 +124,8 @@ export const mainRouter = os.router({
   globalConfig: {
     find: globalConfig_find,
     update: globalConfig_update,
+  },
+  trackable: {
+    createParticipant: trackable_createParticipant,
   },
 });

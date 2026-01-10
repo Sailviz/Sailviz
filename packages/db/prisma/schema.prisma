@@ -57,7 +57,7 @@ model Organization {
   slug             String
   logo             String?
   createdAt        DateTime
-  metaData         Json?
+  metadata         String?
   boats            Boat[]
   Buoy             Buoy[]
   series           Series[]

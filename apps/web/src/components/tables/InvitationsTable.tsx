@@ -4,8 +4,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '.
 import * as Types from '@sailviz/types'
 import { client } from '@sailviz/auth/client'
 import { ActionButton } from '@components/ui/action-button'
-import { useMutation } from '@tanstack/react-query'
-import { orpcClient } from '@lib/orpc'
 
 const Action = ({ invitation, onClick }: { invitation: Types.Invitation; onClick: (id: string) => Promise<void> }) => {
     return (
@@ -20,28 +18,14 @@ const columnHelper = createColumnHelper<Types.Invitation>()
 const invitationsTable = () => {
     const [data, setData] = useState<Types.Invitation[]>([])
 
-    const findOrgMutation = useMutation(orpcClient.organization.find.mutationOptions())
-
     useEffect(() => {
         async function fetchInvitations() {
-            const { data } = await client.organization.listUserInvitations()
-            let invitations = data as Types.Invitation[]
-            console.log('Fetched invitations:', data)
+            let { data: invitations } = await client.organization.listUserInvitations()
+            console.log('Fetched invitations:', invitations)
             if (!invitations) return
 
             //filter out accepted invitations
             invitations = invitations.filter(invitation => invitation.status !== 'accepted')
-
-            await Promise.all(
-                invitations.map(async (invitation, index) => {
-                    // Get org name
-                    const orgData = await findOrgMutation.mutateAsync({ orgId: invitation.organizationId })
-                    if (orgData) {
-                        invitations[index].orgName = orgData.name
-                        console.log('Updated invitation with org name:', invitation)
-                    }
-                })
-            )
 
             console.log('Final invitations with org names:', invitations)
             setData(invitations)
@@ -69,7 +53,7 @@ const invitationsTable = () => {
     var table = useReactTable({
         data,
         columns: [
-            columnHelper.accessor(invitation => invitation.orgName, {
+            columnHelper.accessor(invitation => invitation.organizationName, {
                 id: 'Name',
                 cell: info => info.getValue(),
                 enableSorting: true
