@@ -21,7 +21,7 @@ function Page() {
         return <PageSkeleton />
     }
 
-    if (!org.settings!.trackable.enabled) {
+    if (!org.metaData!.trackable.enabled) {
         return (
             <div>
                 <p>Trackable is not enabled for your club, contact support for more information</p>

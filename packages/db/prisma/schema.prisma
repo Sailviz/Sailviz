@@ -32,6 +32,7 @@ model User {
   members       Member[]
   invitations   Invitation[]
   results       Result[]
+  teamMembers   teamMember[]
 
   @@map("user")
 }
@@ -56,8 +57,7 @@ model Organization {
   slug             String
   logo             String?
   createdAt        DateTime
-  metaData         String?
-  settings         Json
+  metaData         Json?
   boats            Boat[]
   Buoy             Buoy[]
   series           Series[]
@@ -66,6 +66,7 @@ model Organization {
   stripeCustomerId String?
   members          Member[]
   invitations      Invitation[]
+  teams            Team[]
 }
 
 model Member {
@@ -80,6 +81,25 @@ model Member {
   @@index([organizationId(length: 191)])
   @@index([userId(length: 191)])
   @@map("member")
+}
+
+model Team {
+  id             String       @id @unique @default(uuid())
+  name           String
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime
+  teamMembers    teamMember[]
+}
+
+model teamMember {
+  id        String   @id @unique @default(uuid())
+  teamId    String
+  userId    String
+  createdAt DateTime @default(now())
+  team      Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Invitation {

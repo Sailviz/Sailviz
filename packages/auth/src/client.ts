@@ -13,7 +13,11 @@ export const client = createAuthClient({
   basePath: "/api/auth",
   plugins: [
     usernameClient(),
-    organizationClient(),
+    organizationClient({
+      teams: {
+        enabled: true,
+      },
+    }),
     customSessionClient(),
     inferAdditionalFields({
       user: {
@@ -24,6 +28,20 @@ export const client = createAuthClient({
       },
     }),
   ],
+  fetchOptions: {
+    auth: {
+      type: "Bearer",
+      token: () => localStorage.getItem("bearer_token") || "",
+    },
+    onSuccess: (ctx) => {
+      const authToken = ctx.response.headers.get("set-auth-token");
+      console.log("sign-in success:", ctx);
+      console.log("authToken from header:", authToken);
+      if (authToken) {
+        localStorage.setItem("bearer_token", authToken || "");
+      }
+    },
+  },
 });
 
 // Destructure core methods but provide a thin, typed wrapper for `useSession`

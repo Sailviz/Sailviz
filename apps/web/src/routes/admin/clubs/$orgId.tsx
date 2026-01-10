@@ -3,12 +3,15 @@ import { title } from '@components/layout/home/primitaves'
 import { Card, CardContent } from '@components/ui/card'
 import { useQuery } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
+import MembersTable from '@components/tables/MembersTable'
+import TeamsTable from '@components/tables/TeamsTable'
+import CreateTeamModal from '@components/layout/dashboard/createTeamModal'
 
 function Page() {
     const { orgId } = Route.useParams()
 
     const club = useQuery(orpcClient.organization.find.queryOptions({ input: { orgId: orgId } })).data
-    const stripe = useQuery(orpcClient.stripe.org.queryOptions({ input: { orgId: club!.id }, queryKey: [club] })).data
+    const stripe = useQuery(orpcClient.stripe.org.queryOptions({ input: { orgId: orgId } })).data
 
     if (!club || !stripe) {
         return <div>Loading...</div>
@@ -35,6 +38,13 @@ function Page() {
                     </div>
                 </CardContent>
             </Card>
+            <div>
+                <div className='text-2xl font-bold px-6 py-2'>Members</div>
+                <MembersTable orgId={orgId!} />
+                <div className='text-2xl font-bold px-6 py-2'>Teams</div>
+                <TeamsTable orgId={orgId!} />
+                <CreateTeamModal orgId={orgId!} />
+            </div>
         </div>
     )
 }

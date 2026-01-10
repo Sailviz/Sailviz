@@ -7,7 +7,6 @@ import { isTauriRuntime } from '../is-tauri'
 import { Github, Loader2 } from 'lucide-react'
 import { useNavigate } from '@tanstack/react-router'
 import { useRouter } from '@tanstack/react-router'
-import { api_server } from '@components/URL'
 import { sessionQueryKey } from 'src/lib/session'
 export function LoginForm() {
     const navigate = useNavigate()
@@ -122,95 +121,6 @@ export function LoginForm() {
         const isTauri = isTauriRuntime()
         console.log('handleSubmit: isTauri ->', isTauri)
 
-        if (isTauri) {
-            console.log('handleSubmit: taking Tauri auth branch')
-            // Tauri: call the server-side tauri sign-in endpoint which returns a token
-            let res: Response
-            try {
-                res = await fetch(`${api_server}/api/auth/my-plugin/tauri-signin`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, password })
-                })
-            } catch (e) {
-                console.error('Tauri sign-in fetch failed:', e)
-                alert('Login failed: cannot reach auth server.')
-                setLoading(false)
-                return
-            }
-            if (!res.ok) {
-                const text = await res.text().catch(() => '')
-                console.error('Tauri sign-in failed', res.status, text)
-                alert('Login failed. Please check your username and password.')
-                setLoading(false)
-                return
-            }
-            let data: any = null
-            try {
-                data = await res.json()
-            } catch (e) {
-                console.error('Tauri sign-in: failed to parse JSON response', e)
-                alert('Login failed: invalid response from auth server.')
-                setLoading(false)
-                return
-            }
-            console.log('Tauri sign-in response:', data)
-
-            // Store token securely for Tauri. Prefer Tauri store when available.
-            try {
-                if (typeof window !== 'undefined' && (window as any).__TAURI__ !== undefined) {
-                    // Running inside Tauri renderer — use the Tauri store plugin directly
-                    try {
-                        // Use eval'd dynamic import so the bundler doesn't try to
-                        // resolve the plugin during web build. Import the official
-                        // package name so it resolves inside the Tauri renderer.
-                        const { Store } = await eval('import("@tauri-apps/plugin-store")')
-                        const store = new Store('sailviz-store.dat')
-                        await store.set('sailviz_token', data.token)
-                        await store.save()
-                        try {
-                            const check = await store.get('sailviz_token')
-                            console.debug('login-form: stored token in Tauri store present=', !!check)
-                        } catch (e) {
-                            console.warn('login-form: failed to verify token in store', e)
-                        }
-                        // Initialize the Tauri fetch wrapper so future fetches include the token
-                        try {
-                            const tauriInit = await import('../tauri-init')
-                            await tauriInit.initTauriAuth()
-                        } catch (e) {}
-                    } catch (e) {
-                        // Fallback to localStorage if helper import fails
-                        try {
-                            ;(window as any).localStorage.setItem('sailviz_token', data.token)
-                        } catch {}
-                    }
-                } else {
-                    ;(window as any).localStorage.setItem('sailviz_token', data.token)
-                }
-            } catch (e) {}
-
-            // Retrieve session using token fallback
-            const { data: session } = await getSession()
-            console.log('Session with custom fields (tauri):', session)
-            if (session.error != null) {
-                alert('Login failed. Please check your username and password.')
-                setLoading(false)
-                return
-            }
-
-            // continue with normal post-login flow
-            try {
-                queryClient.setQueryData(sessionQueryKey, session)
-            } catch {}
-            try {
-                await router.invalidate()
-            } catch {}
-            navigate({ to: '/' + session.user.startPage })
-            setLoading(false)
-            return
-        }
-
         // Web (cookie-based) flow
         await signIn
             .username({
@@ -245,10 +155,34 @@ export function LoginForm() {
     }
 
     const handleGitHubLogin = async () => {
-        await signIn.social({
-            provider: 'github',
-            callbackURL: 'http://localhost:5173' + '/dashboard/me'
-        })
+        await signIn
+            .social({
+                provider: 'github',
+                callbackURL: 'http://localhost:5173' + '/dashboard/me',
+                fetchOptions: {
+                    redirect: 'manual'
+                }
+            })
+            .then(async ({ data, error }) => {
+                console.log('SignIn response:', data, error)
+                const { data: session } = await getSession()
+                console.log('Session with custom fields:', session)
+                if (session === null) {
+                    alert('Login failed. Please check your username and password.')
+                    return
+                }
+                console.log('Session:', session)
+                // Make the fresh session immediately available to consumers
+                // so guards/beforeLoad can read it synchronously from cache.
+                try {
+                    queryClient.setQueryData(sessionQueryKey, session)
+                } catch {}
+                // Now re-run route loaders so pages depending on loaders refresh.
+                try {
+                    await router.invalidate()
+                } catch {}
+                navigate({ to: '/' + session.user.startPage })
+            })
     }
 
     if (checkingSession) {

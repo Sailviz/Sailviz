@@ -22,14 +22,14 @@ function Page() {
         if (org == undefined) {
             throw new Error('Club is undefined')
         }
-        await orgMutation.mutateAsync({ ...org, settings: { ...org.settings!, clockIP: clockIP, clockOffset: parseInt(clockOffset), hornIP: hornIP } })
+        await orgMutation.mutateAsync({ ...org, metaData: { ...org.metaData!, clockIP: clockIP, clockOffset: parseInt(clockOffset), hornIP: hornIP } })
     }
 
     useEffect(() => {
         if (org == undefined) return
-        setClockIP(org.settings!.clockIP)
-        setClockOffset(org.settings!.clockOffset.toString())
-        setHornIP(org.settings!.hornIP)
+        setClockIP(org.metaData!.clockIP)
+        setClockOffset(org.metaData!.clockOffset.toString())
+        setHornIP(org.metaData!.hornIP)
     }, [org])
 
     if (org == undefined || session == undefined) {

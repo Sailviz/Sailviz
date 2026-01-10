@@ -1,16 +1,25 @@
 import { useLoaderData, createFileRoute } from '@tanstack/react-router'
 import { PageSkeleton } from '@components/layout/PageSkeleton'
-import UsersTable from '@components/tables/UsersTable'
+import MembersTable from '@components/tables/MembersTable'
 import { AVAILABLE_PERMISSIONS, userHasPermission } from '@components/helpers/users'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
 import { ActionButton } from '@components/ui/action-button'
 import type { Session } from '@sailviz/auth/client'
+import { useEffect, useState } from 'react'
+import { client } from '@sailviz/auth/client'
 
 function Page() {
     const session: Session = useLoaderData({ from: `__root__` })
 
-    const { data: org } = useQuery(orpcClient.organization.session.queryOptions())
+    const [org, setOrg] = useState<any>(null)
+    useEffect(() => {
+        async function fetchActiveOrg() {
+            const org = await client.organization.getFullOrganization()
+            setOrg(org.data)
+        }
+        fetchActiveOrg()
+    }, [])
 
     const userCreation = useMutation(orpcClient.user.create.mutationOptions())
     const queryClient = useQueryClient()
@@ -38,7 +47,7 @@ function Page() {
             <>
                 <div className='p-6'>
                     Users
-                    <UsersTable />
+                    <MembersTable orgId={session.session.activeOrganizationId!} />
                     {userHasPermission(session.user, AVAILABLE_PERMISSIONS.editUsers) ? (
                         <ActionButton before={'Create User'} during={'Creating'} after={'Created'} action={createUser} />
                     ) : (

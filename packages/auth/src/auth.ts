@@ -1,7 +1,7 @@
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import prisma from "@sailviz/db";
-import { customSession, organization, username } from "better-auth/plugins";
+import { bearer, organization, username } from "better-auth/plugins";
 import { reactStartCookies } from "better-auth/react-start";
 import * as config from "./config";
 import { myPlugin } from "./plugin";
@@ -16,7 +16,17 @@ export const auth = betterAuth({
     "https://api.sailviz.com",
     "http://tauri.localhost",
   ],
-  plugins: [username(), organization(), reactStartCookies(), myPlugin()],
+  plugins: [
+    username(),
+    organization({
+      teams: {
+        enabled: true,
+      },
+    }),
+    reactStartCookies(),
+    myPlugin(),
+    bearer(),
+  ],
   session: {
     cookieCache: {
       enabled: true,

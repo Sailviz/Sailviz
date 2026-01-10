@@ -21,36 +21,36 @@ function Page() {
 
     useEffect(() => {
         if (club == undefined) return
-        setPursuitLength(club.settings!.pursuitLength)
+        setPursuitLength(club.metaData!.pursuitLength)
     }, [club])
 
     const savePursuitLength = async (pursuitLength: number) => {
         if (club == undefined) {
             throw new Error('Club is undefined')
         }
-        await clubMutation.mutateAsync({ ...club, settings: { ...club.settings!, pursuitLength: pursuitLength } })
+        await clubMutation.mutateAsync({ ...club, metaData: { ...club.metaData!, pursuitLength: pursuitLength } })
     }
 
     const addDuty = async () => {
         if (club == undefined) {
             throw new Error('Club is undefined')
         }
-        await clubMutation.mutateAsync({ ...club, settings: { ...club.settings!, duties: [...club.settings!.duties, 'Duty'] } })
+        await clubMutation.mutateAsync({ ...club, metaData: { ...club.metaData!, duties: [...club.metaData!.duties, 'Duty'] } })
     }
 
     const editDuty = async (index: number, value: string) => {
         if (club == undefined) {
             throw new Error('Club is undefined')
         }
-        let newDuties = club.settings!.duties
+        let newDuties = club.metaData!.duties
         newDuties[index] = value
-        await clubMutation.mutateAsync({ ...club, settings: { ...club.settings!, duties: newDuties } })
+        await clubMutation.mutateAsync({ ...club, metaData: { ...club.metaData!, duties: newDuties } })
     }
 
     useEffect(() => {
         if (club == undefined) return
         console.log(club)
-        if (club.settings!.pursuitLength == undefined) return
+        if (club.metaData!.pursuitLength == undefined) return
     }, [club])
 
     if (club == undefined || session == undefined) {
@@ -67,7 +67,7 @@ function Page() {
                 <p className='text-2xl font-bold p-6'>Duties</p>
                 <Table>
                     <TableBody>
-                        {club.settings!.duties.map((row: string, index: number) => (
+                        {club.metaData!.duties.map((row: string, index: number) => (
                             <TableRow key={row}>
                                 <TableCell>
                                     <div className='grow justify-self-start'>

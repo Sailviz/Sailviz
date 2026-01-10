@@ -32,8 +32,8 @@ export function OrgSwitcher() {
                 logo: org.logo || '',
                 id: org.id,
                 slug: org.slug,
-                settings: {},
-                stripeCustomerId: ''
+                stripeCustomerId: '',
+                metaData: {}
             })
         })
         console.log('Fetched organizations:', organizations)
@@ -54,7 +54,7 @@ export function OrgSwitcher() {
                     logo: org.data.logo || '',
                     id: org.data.id,
                     slug: org.data.slug,
-                    settings: {},
+                    metaData: {},
                     stripeCustomerId: ''
                 })
             } catch (error) {

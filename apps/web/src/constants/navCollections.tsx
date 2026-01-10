@@ -212,7 +212,7 @@ export const meCollections: NavCollection[] = [
         items: [
             {
                 title: 'Home',
-                url: '/me',
+                url: '/dashboard/me',
                 icon: <HomeIcon />,
                 isActive: true,
                 shortcut: ['d', 'd'],

@@ -25,7 +25,6 @@ export async function updateOrgById(input: any) {
 export const org_all = os.organization.all.handler(async ({ input }) => {
   const orgs = await prisma.organization.findMany({
     omit: {
-      settings: true,
       stripeCustomerId: true,
     },
   });
@@ -40,7 +39,7 @@ export const org_create = os.organization.create.handler(async ({ input }) => {
       name: input.name,
       createdAt: new Date(),
       slug: input.name,
-      settings: {
+      metaData: {
         duties: [
           "Race Officer",
           "Assistant Race Officer",
@@ -82,7 +81,6 @@ export const org_name = os.organization.name.handler(async ({ input }) => {
   const org = await prisma.organization.findUnique({
     where: { name: input.orgName },
     omit: {
-      settings: true,
       stripeCustomerId: true,
     },
   });
@@ -109,10 +107,11 @@ export const org_session = os.organization.session
   .use(authMiddleware)
   .handler(async ({ context }) => {
     const session = context.session as any; // this is because the session type is not quite correct
-    if (!session || !session.user) {
+    console.log("org_session: session=", session);
+    if (!session) {
       throw new ORPCError("UNAUTHORIZED", { message: "Login required" });
     }
-    const orgId = session.club.id;
+    const orgId = session.session.activeOrganizationId;
     const club = await getOrg(orgId);
     if (!club) {
       throw new ORPCError("NOT_FOUND");

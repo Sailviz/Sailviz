@@ -130,22 +130,40 @@ export const OrgSchema = z.object({
   name: z.string(),
   logo: z.string().nullable(),
   slug: z.string(),
-  settings: z.any(),
-  stripeCustomerId: z.string().nullable(),
+  metaData: z.any(),
+  stripeCustomerId: z.string().optional().nullable(),
 });
 export type Org = z.infer<typeof OrgSchema>;
 
 export const UserSchema = z.object({
   id: z.string(),
   name: z.string(),
-  startPage: z.string(),
+  startPage: z.string().optional(),
   email: z.string().nullable(),
-  emailVerified: z.boolean(),
+  emailVerified: z.boolean().optional(),
   image: z.string().nullable().optional(),
-  createdAt: z.date(),
-  updatedAt: z.date(),
+  createdAt: z.date().optional(),
+  updatedAt: z.date().optional(),
 });
 export type UserType = z.infer<typeof UserSchema>;
+
+export const MemberSchema = z.object({
+  user: UserSchema,
+  id: z.string(),
+  organizationId: z.string(),
+  role: z.string(),
+  createdAt: z.date(),
+});
+export type Member = z.infer<typeof MemberSchema>;
+
+export const TeamSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  organizationId: z.string(),
+  createdAt: z.date(),
+  updatedAt: z.date().optional(),
+});
+export type Team = z.infer<typeof TeamSchema>;
 
 export type TrackerDataType = {
   trackerID: string;
