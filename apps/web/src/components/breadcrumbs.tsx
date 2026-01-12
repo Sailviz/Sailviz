@@ -27,7 +27,7 @@ export function Breadcrumbs() {
                 setItems([
                     {
                         title: res.series!.name,
-                        link: `/Dashboard/Series/${res.series!.id}`
+                        link: `/dashboard/Series/${res.series!.id}`
                     },
                     {
                         title: `Race ${res.number}`,

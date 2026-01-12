@@ -118,6 +118,7 @@ export const ORPCcontract = {
           Time: z.string().optional(),
           Duties: Types.DutySchema.optional(),
           Type: z.string().optional(),
+          trackableEventId: z.string().nullable().optional(),
         })
       )
       .output(Types.RaceSchema),
@@ -147,14 +148,25 @@ export const ORPCcontract = {
     update: oc.input(Types.GlobalConfigSchema).output(Types.GlobalConfigSchema),
   },
   trackable: {
-    createParticipant: oc
-      .input(
-        z.object({
-          orgId: z.string(),
-          eventId: z.string(),
-          deviceId: z.string(),
-        })
-      )
-      .output(z.any()),
+    participant: {
+      create: oc
+        .input(
+          z.object({
+            eventId: z.string(),
+            deviceId: z.string(),
+          })
+        )
+        .output(z.any()),
+    },
+    event: {
+      create: oc
+        .input(z.object({ orgId: z.string(), name: z.string() }))
+        .output(z.any()),
+    },
+    device: {
+      list: oc
+        .input(z.object({ orgId: z.string() }))
+        .output(z.array(Types.DeviceSchema)),
+    },
   },
 } as const;

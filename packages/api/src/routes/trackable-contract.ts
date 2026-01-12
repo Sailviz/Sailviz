@@ -71,8 +71,6 @@ export const TrackableContract = {
     find: oc.input(z.string()).output(Types.TrackerSchema),
   },
   participant: {
-    create: oc.input(
-      z.object({ orgId: z.string(), eventId: z.string(), deviceId: z.string() })
-    ),
+    create: oc.input(z.object({ eventId: z.string(), deviceId: z.string() })),
   },
 };

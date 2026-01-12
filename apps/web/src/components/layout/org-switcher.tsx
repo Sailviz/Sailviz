@@ -36,7 +36,6 @@ export function OrgSwitcher() {
                 metaData: {}
             })
         })
-        console.log('Fetched organizations:', organizations)
         setOrgList(organizations)
     }, [orgs])
 
@@ -44,7 +43,6 @@ export function OrgSwitcher() {
         async function fetchActiveOrg() {
             try {
                 const org = await client.organization.getFullOrganization()
-                console.log('Active organization fetched:', org.data)
                 if (!org.data) {
                     setActive(null)
                     return

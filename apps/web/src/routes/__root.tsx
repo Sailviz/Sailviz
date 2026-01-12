@@ -29,7 +29,6 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
     beforeLoad: async () => {
         try {
             const { data: session } = await getSession()
-            console.log('Session in root beforeLoad:', session)
             return {
                 auth: session
             }
@@ -44,7 +43,6 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
     loader: async () => {
         try {
             const { data: session } = await getSession()
-            console.log('Session in root loader:', session)
             return session as Session
         } catch (e) {
             console.error('Root loader getSession failed:', e)
@@ -95,8 +93,6 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
             }
 
             document.addEventListener('keydown', handleKeyDown, { capture: true })
-            console.log('F11 event listener attached')
-
             return () => {
                 document.removeEventListener('keydown', handleKeyDown, { capture: true })
             }

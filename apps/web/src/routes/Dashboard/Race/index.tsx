@@ -30,11 +30,11 @@ function Page() {
                 </div>
                 <div className='px-3'>
                     <p className='text-2xl font-bold p-6'>Upcoming</p>
-                    <RacesTable orgId={orgId} date={new Date()} historical={false} viewHref='/Dashboard/Race/' />
+                    <RacesTable orgId={orgId} date={new Date()} historical={false} viewHref='/dashboard/Race/' />
                 </div>
                 <div className='px-3'>
                     <p className='text-2xl font-bold p-6'>Recent</p>
-                    <RacesTable orgId={orgId} date={new Date()} historical={true} viewHref='/Dashboard/Race/' />
+                    <RacesTable orgId={orgId} date={new Date()} historical={true} viewHref='/dashboard/Race/' />
                 </div>
             </div>
         </div>

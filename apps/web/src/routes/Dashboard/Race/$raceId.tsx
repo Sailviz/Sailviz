@@ -122,13 +122,13 @@ function Page() {
             const maxLaps = Math.max.apply(
                 null,
                 fleet.results.map(function (o: ResultDataType) {
-                    return o.laps.length
+                    return o.laps?.length || 0
                 })
             )
             fleet.results.forEach((result: any) => {
                 //calculate what the corrected time should be
                 let seconds = result.finishTime - fleet.startTime
-                let correctedTime = (seconds * 1000 * (maxLaps / result.numberLaps)) / result.boat.py
+                let correctedTime = (seconds * 1000 * (maxLaps / result.numberLaps)) / result.boat?.py
                 correctedTime = Math.round(correctedTime * 10) / 10
                 if (result.CorrectedTime != correctedTime) {
                     setResultsUpdated(false)
@@ -193,7 +193,7 @@ function Page() {
                                 <></>
                             )}
 
-                            <Link to={`/Dashboard/PrintPaperResults/${race.id}`}>
+                            <Link to={`/dashboard/PrintPaperResults/${race.id}`}>
                                 <Button>Print Race Sheet</Button>
                             </Link>
                             {userHasPermission(session.user, AVAILABLE_PERMISSIONS.UploadEntires) ? <EntryFileUpload raceId={race.id} /> : <></>}

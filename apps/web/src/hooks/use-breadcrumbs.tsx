@@ -8,15 +8,7 @@ type BreadcrumbItem = {
 
 // This allows to add custom title as well
 const routeMapping: Record<string, BreadcrumbItem[]> = {
-    '/dashboard': [{ title: 'Dashboard', link: '/dashboard' }],
-    '/dashboard/employee': [
-        { title: 'Dashboard', link: '/dashboard' },
-        { title: 'Employee', link: '/dashboard/employee' }
-    ],
-    '/dashboard/product': [
-        { title: 'Dashboard', link: '/dashboard' },
-        { title: 'Products', link: '/dashboard/product' }
-    ]
+    '/dashboard': [{ title: 'Dashboard', link: '/dashboard' }]
     // Add more custom mappings as needed
 }
 

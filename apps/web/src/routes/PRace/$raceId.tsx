@@ -554,7 +554,7 @@ function Page() {
             <nav className='py-2.5 border-b-2 flex h-16'>
                 <div className='container flex flex-wrap justify-start items-start'>
                     <div className='px-3'>
-                        <BackButton route={'/Dashboard/Race/' + raceId} />
+                        <BackButton route={'/dashboard/Race/' + raceId} />
                     </div>
                     <div className=' text-4xl font-bold px-1 cursor-pointer'>SailViz </div>
                 </div>

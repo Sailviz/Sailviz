@@ -15,19 +15,19 @@ function Page() {
     const stripe = useQuery(orpcClient.stripe.org.queryOptions({ input: { orgId: orgId } })).data
 
     const updateMetadata = async () => {
-        const { data, error } = await client.organization.update({
+        await client.organization.update({
             data: {
                 // required
                 metadata: {
-                    planName: 'SailViz Pro',
-                    subscriptionStatus: 'active',
-                    hardware: { clockOffset: 1, hornIP: '', clockIP: '' },
-                    trackable: { enabled: true, orgId: 'test' },
+                    planName: '',
+                    subscriptionStatus: '',
+                    hardware: { clockOffset: 0, hornIP: '', clockIP: '' },
+                    trackable: { enabled: false, orgId: '' },
                     duties: ['Race Officer', 'Assistant Race Officer', 'Safety Officer', 'Assistant Safety Officer', 'Duty Officer'],
                     pursuitLength: 60
                 }
             },
-            organizationId: '05790916-fafe-4f5b-8aca-eaa6521a5c58'
+            organizationId: orgId
         })
     }
 

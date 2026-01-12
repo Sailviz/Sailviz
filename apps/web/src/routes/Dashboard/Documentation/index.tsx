@@ -16,7 +16,7 @@ function Page() {
         contentRef,
         onAfterPrint: () => {
             // navigate back to the dashboard after printing
-            navigate({ to: '/Dashboard/Documentation' })
+            navigate({ to: '/dashboard/Documentation' })
         }
     })
     return (

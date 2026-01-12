@@ -12,24 +12,24 @@ function Page() {
 
     const [trackableOrgId, setTrackableOrgId] = useState<string>('')
     const [org, setOrg] = useState<any>(null)
+    const [metadata, setMetadata] = useState<any>(null)
     useEffect(() => {
         async function fetchActiveOrg() {
-            const org = await client.organization.getFullOrganization()
-            if (org.data) {
-                setOrg(org.data)
-                const metadata = JSON.parse(org.data.metadata)
-                if (metadata.trackable && metadata.trackable.orgId) {
-                    setTrackableOrgId(metadata.trackable.orgId)
-                }
-            }
+            const { data: org } = await client.organization.getFullOrganization()
+
+            const metadata = JSON.parse(org!.metadata)
+            console.log('Org metadata:', metadata)
+            setMetadata(metadata)
+            setTrackableOrgId(metadata.trackable.orgId || '')
+            setOrg(org)
         }
         fetchActiveOrg()
     }, [])
 
     const updateOrgIg = async () => {
-        const updatedMetadata = JSON.parse(org.metadata)
+        const updatedMetadata = metadata
         updatedMetadata.trackable.orgId = trackableOrgId
-        client.organization.update({
+        await client.organization.update({
             data: {
                 metadata: updatedMetadata
             },
@@ -41,7 +41,7 @@ function Page() {
         return <PageSkeleton />
     }
 
-    if (!JSON.parse(org.metadata).trackable.enabled) {
+    if (!metadata.trackable.enabled) {
         return (
             <div>
                 <p>Trackable is not enabled for your club, contact support for more information</p>

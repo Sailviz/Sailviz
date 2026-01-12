@@ -20,7 +20,7 @@ function Page() {
         contentRef,
         onAfterPrint: () => {
             // navigate back to the dashboard after printing
-            navigate({ to: '/Dashboard/Race/' + raceId })
+            navigate({ to: '/dashboard/Race/' + raceId })
         }
     })
 

@@ -114,7 +114,7 @@ const Action = ({ id, user }: { id: string; user: UserType }) => {
     }
     return (
         <div className='relative flex items-center gap-2'>
-            <Button onClick={() => navigate({ to: '/Dashboard/Race/' + id })}>View</Button>
+            <Button onClick={() => navigate({ to: '/dashboard/Race/' + id })}>View</Button>
 
             {userHasPermission(user, AVAILABLE_PERMISSIONS.editRaces) ? (
                 <>

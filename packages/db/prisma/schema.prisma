@@ -159,14 +159,15 @@ model StartSequence {
 }
 
 model Race {
-  id       String  @id @unique @default(uuid())
-  number   Int
-  Time     String
-  Type     String
-  seriesId String
-  Duties   Json
-  fleets   Fleet[]
-  series   Series  @relation(fields: [seriesId], references: [id], onDelete: Cascade)
+  id               String  @id @unique @default(uuid())
+  trackableEventId String?
+  number           Int
+  Time             String
+  Type             String
+  seriesId         String
+  Duties           Json
+  fleets           Fleet[]
+  series           Series  @relation(fields: [seriesId], references: [id], onDelete: Cascade)
 
   @@index([seriesId])
 }

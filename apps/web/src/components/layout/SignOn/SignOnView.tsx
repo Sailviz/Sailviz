@@ -4,17 +4,25 @@ import CreateResultModal from './CreateResultModal'
 import { useLoaderData } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
-import type { BoatType, RaceType } from '@sailviz/types'
-import type { Session } from '@sailviz/auth/client'
+import type { BoatType } from '@sailviz/types'
+import { client, type Session } from '@sailviz/auth/client'
 export default function SignOnView() {
     const session: Session = useLoaderData({ from: `__root__` })
 
-    const todaysRaces = useQuery(orpcClient.race.today.queryOptions({ input: { orgId: session.session.activeOrganizationId! } })).data as RaceType[]
+    const { data: todaysRaces } = useQuery(orpcClient.race.today.queryOptions({ input: { orgId: session.session.activeOrganizationId! } }))
     const boats = useQuery(orpcClient.boat.session.queryOptions()).data as BoatType[]
 
+    const metadata = JSON.parse(client.useActiveOrganization().data?.metadata || '{}')
+    const { data: trackers } = useQuery(
+        orpcClient.trackable.device.list.queryOptions({
+            input: { orgId: metadata.trackable.orgId || '' },
+            enabled: metadata !== undefined
+        })
+    )
     if (todaysRaces === undefined) {
         return <PageSkeleton />
     }
+    console.log(todaysRaces)
     if (todaysRaces?.length <= 0) {
         return (
             <div>
@@ -39,7 +47,7 @@ export default function SignOnView() {
                     })}
                 </div>
                 <div className='mt-2 text-center max-h-[5vh] overflow-hidden'>
-                    <CreateResultModal todaysRaces={todaysRaces} boats={boats} />
+                    <CreateResultModal todaysRaces={todaysRaces} boats={boats} trackers={trackers ?? []} />
                 </div>
             </div>
         </>

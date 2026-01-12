@@ -17,13 +17,17 @@ export default function SignOnLayout({ children }: { children: React.ReactNode }
 
     const todaysRaces = useQuery(orpcClient.race.today.queryOptions({ input: { orgId: session.session.activeOrganizationId! } })).data as RaceType[]
 
+    if (todaysRaces == undefined) {
+        return <div>Loading...</div>
+    }
+
     const backButton: NavCollection = userHasPermission(session!.user, AVAILABLE_PERMISSIONS.dashboardAccess)
         ? {
               title: 'Back to Dashboard',
               items: [
                   {
                       title: 'Back to Dashboard',
-                      url: '/Dashboard',
+                      url: '/dashboard',
                       icon: <SignOutIcon />,
                       isActive: false,
                       items: [],

@@ -20,14 +20,29 @@ const link = new RPCLink({
 const trackableClient: ContractRouterClient<typeof TrackableContract> =
   createORPCClient(link);
 
-export const trackable_createParticipant =
-  os.trackable.createParticipant.handler(async ({ input, context }) => {
-    console.log("trackable_createParticipant input", input);
+export const trackable_participant_create =
+  os.trackable.participant.create.handler(async ({ input, context }) => {
     const res = trackableClient.participant.create({
-      orgId: input.orgId,
       eventId: input.eventId,
       deviceId: input.deviceId,
     });
-    console.log("trackable_createParticipant", res);
     return res;
   });
+
+export const trackable_event_create = os.trackable.event.create.handler(
+  async ({ input, context }) => {
+    // Placeholder implementation
+    const res = trackableClient.event.create({
+      name: input.name,
+      orgId: input.orgId,
+    });
+    return res;
+  }
+);
+
+export const trackable_device_list = os.trackable.device.list.handler(
+  async ({ input, context }) => {
+    const res = trackableClient.device.all({ orgId: input.orgId });
+    return res;
+  }
+);

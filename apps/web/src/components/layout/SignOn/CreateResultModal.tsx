@@ -8,12 +8,12 @@ import { Tabs, TabsList, TabsTrigger } from '@components/ui/tabs'
 import { Button } from '@components/ui/button'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
-import type { BoatType, FleetType, RaceType } from '@sailviz/types'
+import * as Types from '@sailviz/types'
 
-export default function CreateResultModal({ todaysRaces, boats }: { todaysRaces: RaceType[]; boats: BoatType[] }) {
+export default function CreateResultModal({ todaysRaces, boats, trackers }: { todaysRaces: Types.RaceType[]; boats: Types.BoatType[]; trackers: Types.Device[] }) {
     const createResultMutation = useMutation(orpcClient.result.create.mutationOptions())
     const updateResultMutation = useMutation(orpcClient.result.update.mutationOptions())
-    const createParticipantMutation = useMutation(orpcClient.trackable.createParticipant.mutationOptions())
+    const createParticipantMutation = useMutation(orpcClient.trackable.participant.create.mutationOptions())
 
     const [open, setOpen] = useState(false)
     const [helm, setHelm] = useState('')
@@ -29,18 +29,18 @@ export default function CreateResultModal({ todaysRaces, boats }: { todaysRaces:
     const [selectedRaces, setSelectedRaces] = useState<string[]>([])
     //array of fleets, dimensionally equal to selectedRaces
     const [selectedFleets, setSelectedFleets] = useState<string[]>([])
-    const [selectedBoat, setSelectedBoat] = useState({ label: '', value: {} as BoatType })
+    const [selectedBoat, setSelectedBoat] = useState({ label: '', value: {} as Types.BoatType })
 
     const [helmError, setHelmError] = useState(false)
     const [boatError, setBoatError] = useState(false)
     const [sailNumError, setSailNumError] = useState(false)
 
-    let options: { label: string; value: BoatType }[] = []
+    let options: { label: string; value: Types.BoatType }[] = []
 
     //set the first boat as the selected boat
     if (boats && boats.length > 0) {
-        boats.forEach((boat: BoatType) => {
-            options.push({ value: boat as BoatType, label: boat.name })
+        boats.forEach((boat: Types.BoatType) => {
+            options.push({ value: boat as Types.BoatType, label: boat.name })
         })
     }
 
@@ -52,7 +52,7 @@ export default function CreateResultModal({ todaysRaces, boats }: { todaysRaces:
         if (e.target.id == 'crew') setCrew(capitalisedSentence)
     }
 
-    const updateRaceSelection = (race: RaceType, value: boolean) => {
+    const updateRaceSelection = (race: Types.RaceType, value: boolean) => {
         if (value) {
             console.log(race)
             setSelectedRaces([...new Set([...selectedRaces, race.id])])
@@ -102,8 +102,14 @@ export default function CreateResultModal({ todaysRaces, boats }: { todaysRaces:
             //create the participant in trackable.
             let participantId = ''
             if (trackerId != '') {
-                const participant = await createParticipantMutation.mutateAsync({ eventId: '', orgId: '', deviceId: trackerId })
-                participantId = participant.id
+                const race = todaysRaces.filter(race => race.fleets.some(f => f.id == selectedFleets[i]))[0]!
+                console.log(race)
+                if (race.trackableEventId != null) {
+                    const participant = await createParticipantMutation.mutateAsync({ eventId: race.trackableEventId, deviceId: trackerId })
+                    participantId = participant.id
+                } else {
+                    console.log("trackable event id is null, can't create participant")
+                }
             }
             await createResult(selectedFleets[i]!, helm, crew, selectedBoat.value, sailNumber, participantId)
         }
@@ -116,7 +122,7 @@ export default function CreateResultModal({ todaysRaces, boats }: { todaysRaces:
         setOpen(false)
     }
 
-    const createResult = async (fleetId: string, helm: string, crew: string, boat: BoatType, sailNum: string, participantId: string) => {
+    const createResult = async (fleetId: string, helm: string, crew: string, boat: Types.BoatType, sailNum: string, participantId: string) => {
         console.log('createResult', fleetId, helm, crew, boat, sailNum)
         //create a result for each fleet
         let result = await createResultMutation.mutateAsync({ fleetId: fleetId })
@@ -133,7 +139,7 @@ export default function CreateResultModal({ todaysRaces, boats }: { todaysRaces:
         setSailNumber('')
         setSelectedRaces([])
         setSelectedFleets([])
-        setSelectedBoat({ label: '', value: {} as BoatType })
+        setSelectedBoat({ label: '', value: {} as Types.BoatType })
         submitDisabled = false
     }
 
@@ -284,7 +290,7 @@ export default function CreateResultModal({ todaysRaces, boats }: { todaysRaces:
                                         >
                                             {/* show buttons for each fleet in a series */}
                                             <TabsList>
-                                                {race.fleets.map((fleet: FleetType) => {
+                                                {race.fleets.map((fleet: Types.FleetType) => {
                                                     return (
                                                         <TabsTrigger
                                                             key={fleet.id + 'select'}
@@ -313,7 +319,59 @@ export default function CreateResultModal({ todaysRaces, boats }: { todaysRaces:
                     </div>
                     <div className='flex flex-col px-6'>
                         <p className='text-2xl font-bold'>Tracker ID</p>
-                        <Input id='trackerId' placeholder='please ignore' type='text' value={trackerId} onChange={v => setTrackerId(v.target.value)} autoComplete='off' />
+                        <Select<{ label: string; value: string }>
+                            id='trackerId'
+                            className=' w-56 h-full text-3xl'
+                            options={trackers.map(tracker => {
+                                return { label: tracker.name, value: tracker.id }
+                            })}
+                            value={{ label: trackers.find(t => t.id === trackerId)?.name || '', value: trackerId }}
+                            onChange={choice => {
+                                setBoatError(false)
+                                setTrackerId(choice!.value)
+                            }}
+                            styles={{
+                                control: provided =>
+                                    ({
+                                        ...provided,
+                                        border: boatError ? '2px solid #f31260' : 'none',
+                                        padding: '0.5rem',
+                                        fontSize: '1rem',
+                                        borderRadius: '0.5rem',
+                                        color: 'white',
+                                        backgroundColor: theme == 'dark' ? '#27272a' : '#f4f4f5',
+                                        '&:hover': {
+                                            backgroundColor: theme == 'dark' ? '#3f3f46' : '#e4e4e7'
+                                        }
+                                    }) as CSSObjectWithLabel,
+                                option: (provided, state) =>
+                                    ({
+                                        ...provided,
+                                        color: theme == 'dark' ? 'white' : 'black',
+                                        backgroundColor: theme == 'dark' ? (state.isSelected ? '#27272a' : '#18181b') : state.isSelected ? '#f4f4f5' : 'white',
+                                        '&:hover': {
+                                            backgroundColor: theme == 'dark' ? '#3f3f46' : '#d4d4d8'
+                                        }
+                                    }) as CSSObjectWithLabel,
+                                menu: provided =>
+                                    ({
+                                        ...provided,
+                                        backgroundColor: theme == 'dark' ? '#18181b' : 'white',
+                                        border: theme == 'dark' ? '2px solid #3f3f46' : '2px solid #d4d4d8',
+                                        fontSize: '1rem'
+                                    }) as CSSObjectWithLabel,
+                                input: provided =>
+                                    ({
+                                        ...provided,
+                                        color: theme == 'dark' ? 'white' : 'black'
+                                    }) as CSSObjectWithLabel,
+                                singleValue: provided =>
+                                    ({
+                                        ...provided,
+                                        color: theme == 'dark' ? 'white' : 'black'
+                                    }) as CSSObjectWithLabel
+                            }}
+                        />
                     </div>
                 </div>
                 <DialogFooter>

@@ -34,8 +34,6 @@ export const client = createAuthClient({
     },
     onSuccess: (ctx) => {
       const authToken = ctx.response.headers.get("set-auth-token");
-      console.log("sign-in success:", ctx);
-      console.log("authToken from header:", authToken);
       if (authToken) {
         localStorage.setItem("bearer_token", authToken || "");
       }
