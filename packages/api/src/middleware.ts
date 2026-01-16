@@ -14,7 +14,6 @@ export const authMiddleware = os
 
     // Get session from Better Auth
     const session = await auth.api.getSession({ headers });
-    console.log("authMiddleware: session=", session);
     // Optionally enforce authentication
     if (!session) {
       throw new ORPCError("UNAUTHORIZED");
