@@ -187,7 +187,7 @@ export default function CreateResultModal({ todaysRaces, boats, trackers }: { to
                         <p className='text-2xl font-bold'>Class</p>
                         <Select
                             id='Class'
-                            className=' w-56 h-full text-3xl'
+                            className=' w-56 text-3xl'
                             options={options}
                             value={selectedBoat}
                             onChange={choice => {
@@ -321,7 +321,7 @@ export default function CreateResultModal({ todaysRaces, boats, trackers }: { to
                         <p className='text-2xl font-bold'>Tracker ID</p>
                         <Select<{ label: string; value: string }>
                             id='trackerId'
-                            className=' w-56 h-full text-3xl'
+                            className=' w-56 text-3xl'
                             options={trackers.map(tracker => {
                                 return { label: tracker.name, value: tracker.id }
                             })}

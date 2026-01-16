@@ -1,5 +1,4 @@
 import UpcomingRacesTable from '@components/tables/UpcomingRacesTable'
-import { title } from '@components/layout/home/primitaves'
 import { Button } from '@components/ui/button'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import HornTestButton from '@components/layout/home/HornTestButton'
