@@ -48,6 +48,7 @@ import { Route as AdminClubsOrgIdRouteImport } from './routes/admin/clubs/$orgId
 import { Route as SignOnSeriesSeriesIdRouteImport } from './routes/SignOn/Series/$seriesId'
 import { Route as SignOnRaceRaceIdRouteImport } from './routes/SignOn/Race/$raceId'
 import { Route as DemoRaceRaceIdRouteImport } from './routes/Demo/Race/$raceId'
+import { Route as DemoHRaceRaceIdRouteImport } from './routes/Demo/HRace/$raceId'
 import { Route as ClubClubNameLiveResultsIndexRouteImport } from './routes/club/$clubName/LiveResults/index'
 import { Route as ClubClubNameSeriesSeriesIdRouteImport } from './routes/club/$clubName/Series/$seriesId'
 import { Route as ClubClubNameRaceRaceIdRouteImport } from './routes/club/$clubName/Race/$raceId'
@@ -250,6 +251,11 @@ const DemoRaceRaceIdRoute = DemoRaceRaceIdRouteImport.update({
   path: '/Demo/Race/$raceId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DemoHRaceRaceIdRoute = DemoHRaceRaceIdRouteImport.update({
+  id: '/Demo/HRace/$raceId',
+  path: '/Demo/HRace/$raceId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ClubClubNameLiveResultsIndexRoute =
   ClubClubNameLiveResultsIndexRouteImport.update({
     id: '/club/$clubName/LiveResults/',
@@ -285,6 +291,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminIndexRoute
   '/club': typeof ClubIndexRoute
   '/dashboard': typeof DashboardIndexRoute
+  '/Demo/HRace/$raceId': typeof DemoHRaceRaceIdRoute
   '/Demo/Race/$raceId': typeof DemoRaceRaceIdRoute
   '/SignOn/Race/$raceId': typeof SignOnRaceRaceIdRoute
   '/SignOn/Series/$seriesId': typeof SignOnSeriesSeriesIdRoute
@@ -329,6 +336,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminIndexRoute
   '/club': typeof ClubIndexRoute
   '/dashboard': typeof DashboardIndexRoute
+  '/Demo/HRace/$raceId': typeof DemoHRaceRaceIdRoute
   '/Demo/Race/$raceId': typeof DemoRaceRaceIdRoute
   '/SignOn/Race/$raceId': typeof SignOnRaceRaceIdRoute
   '/SignOn/Series/$seriesId': typeof SignOnSeriesSeriesIdRoute
@@ -374,6 +382,7 @@ export interface FileRoutesById {
   '/admin/': typeof AdminIndexRoute
   '/club/': typeof ClubIndexRoute
   '/dashboard/': typeof DashboardIndexRoute
+  '/Demo/HRace/$raceId': typeof DemoHRaceRaceIdRoute
   '/Demo/Race/$raceId': typeof DemoRaceRaceIdRoute
   '/SignOn/Race/$raceId': typeof SignOnRaceRaceIdRoute
   '/SignOn/Series/$seriesId': typeof SignOnSeriesSeriesIdRoute
@@ -420,6 +429,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/club'
     | '/dashboard'
+    | '/Demo/HRace/$raceId'
     | '/Demo/Race/$raceId'
     | '/SignOn/Race/$raceId'
     | '/SignOn/Series/$seriesId'
@@ -464,6 +474,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/club'
     | '/dashboard'
+    | '/Demo/HRace/$raceId'
     | '/Demo/Race/$raceId'
     | '/SignOn/Race/$raceId'
     | '/SignOn/Series/$seriesId'
@@ -508,6 +519,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/club/'
     | '/dashboard/'
+    | '/Demo/HRace/$raceId'
     | '/Demo/Race/$raceId'
     | '/SignOn/Race/$raceId'
     | '/SignOn/Series/$seriesId'
@@ -553,6 +565,7 @@ export interface RootRouteChildren {
   AdminIndexRoute: typeof AdminIndexRoute
   ClubIndexRoute: typeof ClubIndexRoute
   DashboardIndexRoute: typeof DashboardIndexRoute
+  DemoHRaceRaceIdRoute: typeof DemoHRaceRaceIdRoute
   DemoRaceRaceIdRoute: typeof DemoRaceRaceIdRoute
   SignOnRaceRaceIdRoute: typeof SignOnRaceRaceIdRoute
   SignOnSeriesSeriesIdRoute: typeof SignOnSeriesSeriesIdRoute
@@ -856,6 +869,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DemoRaceRaceIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/Demo/HRace/$raceId': {
+      id: '/Demo/HRace/$raceId'
+      path: '/Demo/HRace/$raceId'
+      fullPath: '/Demo/HRace/$raceId'
+      preLoaderRoute: typeof DemoHRaceRaceIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/club/$clubName/LiveResults/': {
       id: '/club/$clubName/LiveResults/'
       path: '/club/$clubName/LiveResults'
@@ -897,6 +917,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminIndexRoute: AdminIndexRoute,
   ClubIndexRoute: ClubIndexRoute,
   DashboardIndexRoute: DashboardIndexRoute,
+  DemoHRaceRaceIdRoute: DemoHRaceRaceIdRoute,
   DemoRaceRaceIdRoute: DemoRaceRaceIdRoute,
   SignOnRaceRaceIdRoute: SignOnRaceRaceIdRoute,
   SignOnSeriesSeriesIdRoute: SignOnSeriesSeriesIdRoute,

@@ -1,4 +1,5 @@
 import {
+  anonymousClient,
   customSessionClient,
   inferAdditionalFields,
   organizationClient,
@@ -17,6 +18,7 @@ export const client = createAuthClient({
         enabled: true,
       },
     }),
+    anonymousClient(),
     customSessionClient(),
     inferAdditionalFields({
       user: {

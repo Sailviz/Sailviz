@@ -59,7 +59,7 @@ export default function EditResultModal({
     const [pursuitPosition, setPursuitPosition] = useState(0)
 
     let options: { label: string; value: BoatType }[] = []
-    boats.forEach((boat: BoatType) => {
+    boats?.forEach((boat: BoatType) => {
         options.push({ value: boat as BoatType, label: boat.name })
     })
 

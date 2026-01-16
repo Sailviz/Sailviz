@@ -18,10 +18,8 @@ function Page() {
     const createResultMutation = useMutation(orpcClient.result.create.mutationOptions())
     const updateResultMutation = useMutation(orpcClient.result.update.mutationOptions())
 
-    const sendLoginRequest = async (uuid: string) => {
-        // @ts-ignore not sure why this is needed, but it is
-        const res = await client.myPlugin.authByUuid({ uuid, fetchOptions: { method: 'POST' } })
-        console.log(res)
+    const sendLoginRequest = async () => {
+        await client.signIn.anonymous()
     }
 
     useEffect(() => {
@@ -30,7 +28,7 @@ function Page() {
             //auth ourself
             console.log(session)
             if (session == null) {
-                await sendLoginRequest(GlobalConfig.demoUUID)
+                await sendLoginRequest()
             }
             //create a new race for the demo
             let newRace: RaceType = (await createRaceMutation.mutateAsync({ seriesId: GlobalConfig.demoSeriesId })) as RaceType

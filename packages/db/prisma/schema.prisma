@@ -24,6 +24,7 @@ model User {
   name          String       @default("")
   email         String?      @unique
   emailVerified Boolean
+  isAnonymous   Boolean      @default(false)
   image         String?      @db.Text
   createdAt     DateTime
   updatedAt     DateTime

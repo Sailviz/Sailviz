@@ -2,7 +2,6 @@ import { useEffect } from 'react'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import dayjs from 'dayjs'
 import FleetHandicapResultsTable from '@components/tables/FleetHandicapResultsTable'
-import FleetPursuitResultsTable from '@components/tables/FleetPursuitResultsTable'
 import { PageSkeleton } from '@components/layout/PageSkeleton'
 import BackButton from '@components/layout/backButton'
 import { Breadcrumbs } from '@components/breadcrumbs'
@@ -20,11 +19,7 @@ function Page() {
     const race = useQuery(orpcClient.race.find.queryOptions({ input: { raceId: raceId! } })).data as RaceType
 
     const openRacePanel = async () => {
-        if (race.Type == 'Handicap') {
-            navigate({ to: '/HRace/' + race.id })
-        } else {
-            navigate({ to: '/PRace/' + race.id })
-        }
+        navigate({ to: '/Demo/HRace/' + race.id })
     }
 
     const downloadResults = async () => {
@@ -81,11 +76,7 @@ function Page() {
                             {race.fleets.map((fleet, index) => {
                                 return (
                                     <div key={'fleetResults' + index}>
-                                        {race.Type == 'Handicap' ? (
-                                            <FleetHandicapResultsTable showTime={true} editable={false} fleetId={fleet.id} advancedEdit={false} />
-                                        ) : (
-                                            <FleetPursuitResultsTable editable={false} advancedEdit={false} fleetId={fleet.id} />
-                                        )}
+                                        <FleetHandicapResultsTable showTime={true} editable={false} fleetId={fleet.id} advancedEdit={false} />
                                     </div>
                                 )
                             })}
