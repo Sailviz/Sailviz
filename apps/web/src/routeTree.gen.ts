@@ -39,6 +39,7 @@ import { Route as ClubClubNameIndexRouteImport } from './routes/club/$clubName/i
 import { Route as AdminClubsIndexRouteImport } from './routes/admin/clubs/index'
 import { Route as SignOnGuideIndexRouteImport } from './routes/SignOn/Guide/index'
 import { Route as DashboardMeRacesRouteImport } from './routes/dashboard/me/races'
+import { Route as DashboardMeProfileRouteImport } from './routes/dashboard/me/profile'
 import { Route as DashboardMeClubsRouteImport } from './routes/dashboard/me/clubs'
 import { Route as DashboardSeriesSeriesIdRouteImport } from './routes/dashboard/Series/$seriesId'
 import { Route as DashboardRaceRaceIdRouteImport } from './routes/dashboard/Race/$raceId'
@@ -205,6 +206,11 @@ const DashboardMeRacesRoute = DashboardMeRacesRouteImport.update({
   path: '/dashboard/me/races',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DashboardMeProfileRoute = DashboardMeProfileRouteImport.update({
+  id: '/dashboard/me/profile',
+  path: '/dashboard/me/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DashboardMeClubsRoute = DashboardMeClubsRouteImport.update({
   id: '/dashboard/me/clubs',
   path: '/dashboard/me/clubs',
@@ -301,6 +307,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/Race/$raceId': typeof DashboardRaceRaceIdRoute
   '/dashboard/Series/$seriesId': typeof DashboardSeriesSeriesIdRoute
   '/dashboard/me/clubs': typeof DashboardMeClubsRoute
+  '/dashboard/me/profile': typeof DashboardMeProfileRoute
   '/dashboard/me/races': typeof DashboardMeRacesRoute
   '/SignOn/Guide': typeof SignOnGuideIndexRoute
   '/admin/clubs': typeof AdminClubsIndexRoute
@@ -346,6 +353,7 @@ export interface FileRoutesByTo {
   '/dashboard/Race/$raceId': typeof DashboardRaceRaceIdRoute
   '/dashboard/Series/$seriesId': typeof DashboardSeriesSeriesIdRoute
   '/dashboard/me/clubs': typeof DashboardMeClubsRoute
+  '/dashboard/me/profile': typeof DashboardMeProfileRoute
   '/dashboard/me/races': typeof DashboardMeRacesRoute
   '/SignOn/Guide': typeof SignOnGuideIndexRoute
   '/admin/clubs': typeof AdminClubsIndexRoute
@@ -392,6 +400,7 @@ export interface FileRoutesById {
   '/dashboard/Race/$raceId': typeof DashboardRaceRaceIdRoute
   '/dashboard/Series/$seriesId': typeof DashboardSeriesSeriesIdRoute
   '/dashboard/me/clubs': typeof DashboardMeClubsRoute
+  '/dashboard/me/profile': typeof DashboardMeProfileRoute
   '/dashboard/me/races': typeof DashboardMeRacesRoute
   '/SignOn/Guide/': typeof SignOnGuideIndexRoute
   '/admin/clubs/': typeof AdminClubsIndexRoute
@@ -439,6 +448,7 @@ export interface FileRouteTypes {
     | '/dashboard/Race/$raceId'
     | '/dashboard/Series/$seriesId'
     | '/dashboard/me/clubs'
+    | '/dashboard/me/profile'
     | '/dashboard/me/races'
     | '/SignOn/Guide'
     | '/admin/clubs'
@@ -484,6 +494,7 @@ export interface FileRouteTypes {
     | '/dashboard/Race/$raceId'
     | '/dashboard/Series/$seriesId'
     | '/dashboard/me/clubs'
+    | '/dashboard/me/profile'
     | '/dashboard/me/races'
     | '/SignOn/Guide'
     | '/admin/clubs'
@@ -529,6 +540,7 @@ export interface FileRouteTypes {
     | '/dashboard/Race/$raceId'
     | '/dashboard/Series/$seriesId'
     | '/dashboard/me/clubs'
+    | '/dashboard/me/profile'
     | '/dashboard/me/races'
     | '/SignOn/Guide/'
     | '/admin/clubs/'
@@ -575,6 +587,7 @@ export interface RootRouteChildren {
   DashboardRaceRaceIdRoute: typeof DashboardRaceRaceIdRoute
   DashboardSeriesSeriesIdRoute: typeof DashboardSeriesSeriesIdRoute
   DashboardMeClubsRoute: typeof DashboardMeClubsRoute
+  DashboardMeProfileRoute: typeof DashboardMeProfileRoute
   DashboardMeRacesRoute: typeof DashboardMeRacesRoute
   SignOnGuideIndexRoute: typeof SignOnGuideIndexRoute
   AdminClubsIndexRoute: typeof AdminClubsIndexRoute
@@ -806,6 +819,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardMeRacesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/dashboard/me/profile': {
+      id: '/dashboard/me/profile'
+      path: '/dashboard/me/profile'
+      fullPath: '/dashboard/me/profile'
+      preLoaderRoute: typeof DashboardMeProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/dashboard/me/clubs': {
       id: '/dashboard/me/clubs'
       path: '/dashboard/me/clubs'
@@ -927,6 +947,7 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardRaceRaceIdRoute: DashboardRaceRaceIdRoute,
   DashboardSeriesSeriesIdRoute: DashboardSeriesSeriesIdRoute,
   DashboardMeClubsRoute: DashboardMeClubsRoute,
+  DashboardMeProfileRoute: DashboardMeProfileRoute,
   DashboardMeRacesRoute: DashboardMeRacesRoute,
   SignOnGuideIndexRoute: SignOnGuideIndexRoute,
   AdminClubsIndexRoute: AdminClubsIndexRoute,

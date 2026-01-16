@@ -1,3 +1,4 @@
+import { AccountsIcon } from '@components/icons/accounts-icon'
 import { DocsIcon } from '@components/icons/docs-icon'
 import { HomeIcon } from '@components/icons/home-icon'
 import { RaceIcon } from '@components/icons/race-icon'
@@ -217,6 +218,14 @@ export const meCollections: NavCollection[] = [
                 isActive: true,
                 shortcut: ['d', 'd'],
                 items: [] // Empty array as there are no child items for dashboard
+            },
+            {
+                title: 'Profile',
+                url: '/dashboard/me/profile',
+                icon: <AccountsIcon />,
+                isActive: true,
+                shortcut: ['d', 'd'],
+                items: [] // Empty array as there are no child items for dashboard
             }
         ]
     },
@@ -224,7 +233,7 @@ export const meCollections: NavCollection[] = [
         title: 'Main Menu',
         items: [
             {
-                title: 'My Races',
+                title: 'Results',
                 url: '/dashboard/me/races',
                 icon: <RaceIcon />,
                 shortcut: ['p', 'p'],
