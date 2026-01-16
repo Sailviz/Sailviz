@@ -21,7 +21,7 @@ function Page() {
     return (
         <div>
             <div className='p-6'>
-                <h1 className={title({ color: 'blue' })}>{org?.name}</h1>
+                <h1>{org?.name}</h1>
             </div>
             <div className='flex flex-row'>
                 <div>

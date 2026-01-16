@@ -4,7 +4,6 @@ import Docs from '@documentation/guides/RaceManagement.mdx'
 
 import { useRef } from 'react'
 import { useReactToPrint } from 'react-to-print'
-import { useMDXComponents } from '@components/mdx-components'
 import { MDXProvider } from '@mdx-js/react'
 import { useNavigate, createFileRoute } from '@tanstack/react-router'
 
@@ -22,7 +21,7 @@ function Page() {
     return (
         <div className='flex flex-col justify-center w-full pt-12'>
             <div ref={contentRef} className='mx-6'>
-                <MDXProvider components={useMDXComponents}>
+                <MDXProvider>
                     <Docs />
                 </MDXProvider>
             </div>
