@@ -20,9 +20,9 @@ export default function HomeNav() {
                             <NavigationMenuItem>
                                 <NavigationMenuLink href='/club'>Clubs</NavigationMenuLink>
                             </NavigationMenuItem>
-                            <NavigationMenuItem>
+                            {/* <NavigationMenuItem>
                                 <NavigationMenuLink href='/Pricing'>Pricing</NavigationMenuLink>
-                            </NavigationMenuItem>
+                            </NavigationMenuItem> */}
                             <NavigationMenuItem>
                                 <NavigationMenuLink href='/Events'>Events</NavigationMenuLink>
                             </NavigationMenuItem>

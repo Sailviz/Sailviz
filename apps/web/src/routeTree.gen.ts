@@ -16,11 +16,11 @@ import { Route as ClubIndexRouteImport } from './routes/club/index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as SignOnIndexRouteImport } from './routes/SignOn/index'
 import { Route as RegisterIndexRouteImport } from './routes/Register/index'
+import { Route as PricingIndexRouteImport } from './routes/Pricing/index'
 import { Route as LogoutIndexRouteImport } from './routes/Logout/index'
 import { Route as DemoIndexRouteImport } from './routes/Demo/index'
 import { Route as DashboardHomeRouteImport } from './routes/dashboard/home'
 import { Route as AutoLoginUUIDRouteImport } from './routes/autoLogin/$UUID'
-import { Route as PricingPageRouteImport } from './routes/Pricing/page'
 import { Route as PRaceRaceIdRouteImport } from './routes/PRace/$raceId'
 import { Route as HRaceRaceIdRouteImport } from './routes/HRace/$raceId'
 import { Route as CastControlClubIdRouteImport } from './routes/CastControl/$clubId'
@@ -87,6 +87,11 @@ const RegisterIndexRoute = RegisterIndexRouteImport.update({
   path: '/Register/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PricingIndexRoute = PricingIndexRouteImport.update({
+  id: '/Pricing/',
+  path: '/Pricing/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LogoutIndexRoute = LogoutIndexRouteImport.update({
   id: '/Logout/',
   path: '/Logout/',
@@ -105,11 +110,6 @@ const DashboardHomeRoute = DashboardHomeRouteImport.update({
 const AutoLoginUUIDRoute = AutoLoginUUIDRouteImport.update({
   id: '/autoLogin/$UUID',
   path: '/autoLogin/$UUID',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PricingPageRoute = PricingPageRouteImport.update({
-  id: '/Pricing/page',
-  path: '/Pricing/page',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PRaceRaceIdRoute = PRaceRaceIdRouteImport.update({
@@ -275,11 +275,11 @@ export interface FileRoutesByFullPath {
   '/CastControl/$clubId': typeof CastControlClubIdRoute
   '/HRace/$raceId': typeof HRaceRaceIdRoute
   '/PRace/$raceId': typeof PRaceRaceIdRoute
-  '/Pricing/page': typeof PricingPageRoute
   '/autoLogin/$UUID': typeof AutoLoginUUIDRoute
   '/dashboard/home': typeof DashboardHomeRoute
   '/Demo': typeof DemoIndexRoute
   '/Logout': typeof LogoutIndexRoute
+  '/Pricing': typeof PricingIndexRoute
   '/Register': typeof RegisterIndexRoute
   '/SignOn': typeof SignOnIndexRoute
   '/admin': typeof AdminIndexRoute
@@ -319,11 +319,11 @@ export interface FileRoutesByTo {
   '/CastControl/$clubId': typeof CastControlClubIdRoute
   '/HRace/$raceId': typeof HRaceRaceIdRoute
   '/PRace/$raceId': typeof PRaceRaceIdRoute
-  '/Pricing/page': typeof PricingPageRoute
   '/autoLogin/$UUID': typeof AutoLoginUUIDRoute
   '/dashboard/home': typeof DashboardHomeRoute
   '/Demo': typeof DemoIndexRoute
   '/Logout': typeof LogoutIndexRoute
+  '/Pricing': typeof PricingIndexRoute
   '/Register': typeof RegisterIndexRoute
   '/SignOn': typeof SignOnIndexRoute
   '/admin': typeof AdminIndexRoute
@@ -364,11 +364,11 @@ export interface FileRoutesById {
   '/CastControl/$clubId': typeof CastControlClubIdRoute
   '/HRace/$raceId': typeof HRaceRaceIdRoute
   '/PRace/$raceId': typeof PRaceRaceIdRoute
-  '/Pricing/page': typeof PricingPageRoute
   '/autoLogin/$UUID': typeof AutoLoginUUIDRoute
   '/dashboard/home': typeof DashboardHomeRoute
   '/Demo/': typeof DemoIndexRoute
   '/Logout/': typeof LogoutIndexRoute
+  '/Pricing/': typeof PricingIndexRoute
   '/Register/': typeof RegisterIndexRoute
   '/SignOn/': typeof SignOnIndexRoute
   '/admin/': typeof AdminIndexRoute
@@ -410,11 +410,11 @@ export interface FileRouteTypes {
     | '/CastControl/$clubId'
     | '/HRace/$raceId'
     | '/PRace/$raceId'
-    | '/Pricing/page'
     | '/autoLogin/$UUID'
     | '/dashboard/home'
     | '/Demo'
     | '/Logout'
+    | '/Pricing'
     | '/Register'
     | '/SignOn'
     | '/admin'
@@ -454,11 +454,11 @@ export interface FileRouteTypes {
     | '/CastControl/$clubId'
     | '/HRace/$raceId'
     | '/PRace/$raceId'
-    | '/Pricing/page'
     | '/autoLogin/$UUID'
     | '/dashboard/home'
     | '/Demo'
     | '/Logout'
+    | '/Pricing'
     | '/Register'
     | '/SignOn'
     | '/admin'
@@ -498,11 +498,11 @@ export interface FileRouteTypes {
     | '/CastControl/$clubId'
     | '/HRace/$raceId'
     | '/PRace/$raceId'
-    | '/Pricing/page'
     | '/autoLogin/$UUID'
     | '/dashboard/home'
     | '/Demo/'
     | '/Logout/'
+    | '/Pricing/'
     | '/Register/'
     | '/SignOn/'
     | '/admin/'
@@ -543,11 +543,11 @@ export interface RootRouteChildren {
   CastControlClubIdRoute: typeof CastControlClubIdRoute
   HRaceRaceIdRoute: typeof HRaceRaceIdRoute
   PRaceRaceIdRoute: typeof PRaceRaceIdRoute
-  PricingPageRoute: typeof PricingPageRoute
   AutoLoginUUIDRoute: typeof AutoLoginUUIDRoute
   DashboardHomeRoute: typeof DashboardHomeRoute
   DemoIndexRoute: typeof DemoIndexRoute
   LogoutIndexRoute: typeof LogoutIndexRoute
+  PricingIndexRoute: typeof PricingIndexRoute
   RegisterIndexRoute: typeof RegisterIndexRoute
   SignOnIndexRoute: typeof SignOnIndexRoute
   AdminIndexRoute: typeof AdminIndexRoute
@@ -632,6 +632,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RegisterIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/Pricing/': {
+      id: '/Pricing/'
+      path: '/Pricing'
+      fullPath: '/Pricing'
+      preLoaderRoute: typeof PricingIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/Logout/': {
       id: '/Logout/'
       path: '/Logout'
@@ -658,13 +665,6 @@ declare module '@tanstack/react-router' {
       path: '/autoLogin/$UUID'
       fullPath: '/autoLogin/$UUID'
       preLoaderRoute: typeof AutoLoginUUIDRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/Pricing/page': {
-      id: '/Pricing/page'
-      path: '/Pricing/page'
-      fullPath: '/Pricing/page'
-      preLoaderRoute: typeof PricingPageRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/PRace/$raceId': {
@@ -887,11 +887,11 @@ const rootRouteChildren: RootRouteChildren = {
   CastControlClubIdRoute: CastControlClubIdRoute,
   HRaceRaceIdRoute: HRaceRaceIdRoute,
   PRaceRaceIdRoute: PRaceRaceIdRoute,
-  PricingPageRoute: PricingPageRoute,
   AutoLoginUUIDRoute: AutoLoginUUIDRoute,
   DashboardHomeRoute: DashboardHomeRoute,
   DemoIndexRoute: DemoIndexRoute,
   LogoutIndexRoute: LogoutIndexRoute,
+  PricingIndexRoute: PricingIndexRoute,
   RegisterIndexRoute: RegisterIndexRoute,
   SignOnIndexRoute: SignOnIndexRoute,
   AdminIndexRoute: AdminIndexRoute,

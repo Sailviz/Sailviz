@@ -5,7 +5,7 @@ import { orpcClient } from '@lib/orpc'
 import type { Session } from '@sailviz/auth/client'
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute, useLoaderData } from '@tanstack/react-router'
-import { Page as PricingPage } from 'src/routes/Pricing/page'
+import { Page as PricingPage } from 'src/routes/Pricing'
 
 function Page() {
     const session: Session = useLoaderData({ from: `__root__` })
