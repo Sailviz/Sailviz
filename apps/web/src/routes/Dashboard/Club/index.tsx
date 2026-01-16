@@ -13,49 +13,44 @@ import type { Session } from '@sailviz/auth/client'
 function Page() {
     const session: Session = useLoaderData({ from: `__root__` })
 
-    const { data: club } = useQuery(orpcClient.organization.session.queryOptions())
+    const { data: org } = useQuery(orpcClient.organization.session.queryOptions())
 
-    const clubMutation = useMutation(orpcClient.organization.update.mutationOptions())
+    const orgMutation = useMutation(orpcClient.organization.update.mutationOptions())
 
     const [pursuitLength, setPursuitLength] = useState(0)
 
     useEffect(() => {
-        if (club == undefined) return
-        setPursuitLength(club.metaData!.pursuitLength)
-    }, [club])
+        if (org == undefined) return
+        setPursuitLength(JSON.parse(org.metadata).pursuitLength)
+    }, [org])
 
     const savePursuitLength = async (pursuitLength: number) => {
-        if (club == undefined) {
+        if (org == undefined) {
             throw new Error('Club is undefined')
         }
-        await clubMutation.mutateAsync({ ...club, metaData: { ...club.metaData!, pursuitLength: pursuitLength } })
+        await orgMutation.mutateAsync({ ...org, metadata: { ...org.metadata!, pursuitLength: pursuitLength } })
     }
 
     const addDuty = async () => {
-        if (club == undefined) {
+        if (org == undefined) {
             throw new Error('Club is undefined')
         }
-        await clubMutation.mutateAsync({ ...club, metaData: { ...club.metaData!, duties: [...club.metaData!.duties, 'Duty'] } })
+        await orgMutation.mutateAsync({ ...org, metadata: { ...org.metadata!, duties: [...org.metadata!.duties, 'Duty'] } })
     }
 
     const editDuty = async (index: number, value: string) => {
-        if (club == undefined) {
+        if (org == undefined) {
             throw new Error('Club is undefined')
         }
-        let newDuties = club.metaData!.duties
+        let newDuties = org.metadata!.duties
         newDuties[index] = value
-        await clubMutation.mutateAsync({ ...club, metaData: { ...club.metaData!, duties: newDuties } })
+        await orgMutation.mutateAsync({ ...org, metadata: { ...org.metadata!, duties: newDuties } })
     }
 
-    useEffect(() => {
-        if (club == undefined) return
-        console.log(club)
-        if (club.metaData!.pursuitLength == undefined) return
-    }, [club])
-
-    if (club == undefined || session == undefined) {
+    if (org == undefined || session == undefined) {
         return <PageSkeleton />
     }
+    console.log(org)
     if (userHasPermission(session.user, AVAILABLE_PERMISSIONS.editHardware))
         return (
             <div className='flex flex-col'>
@@ -67,7 +62,7 @@ function Page() {
                 <p className='text-2xl font-bold p-6'>Duties</p>
                 <Table>
                     <TableBody>
-                        {club.metaData!.duties.map((row: string, index: number) => (
+                        {JSON.parse(org.metadata)!.duties.map((row: string, index: number) => (
                             <TableRow key={row}>
                                 <TableCell>
                                     <div className='grow justify-self-start'>

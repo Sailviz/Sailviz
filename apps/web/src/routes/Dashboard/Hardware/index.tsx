@@ -7,7 +7,7 @@ import { Input } from '@components/ui/input'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
 import { ActionButton } from '@components/ui/action-button'
-import type { Session } from '@sailviz/auth/client'
+import { client, type Session } from '@sailviz/auth/client'
 
 function Page() {
     const session: Session = useLoaderData({ from: `__root__` })
@@ -16,20 +16,23 @@ function Page() {
     const [clockIP, setClockIP] = useState('')
     const [clockOffset, setClockOffset] = useState('')
     const [hornIP, setHornIP] = useState('')
-    const orgMutation = useMutation(orpcClient.organization.update.mutationOptions())
 
     const saveClubSettings = async () => {
         if (org == undefined) {
             throw new Error('Club is undefined')
         }
-        await orgMutation.mutateAsync({ ...org, metaData: { ...org.metaData!, clockIP: clockIP, clockOffset: parseInt(clockOffset), hornIP: hornIP } })
+        client.organization.update({
+            data: {
+                metadata: { ...JSON.parse(org.metadata), hardware: { clockIP: clockIP, clockOffset: parseInt(clockOffset), hornIP: hornIP } }
+            }
+        })
     }
 
     useEffect(() => {
         if (org == undefined) return
-        setClockIP(org.metaData!.clockIP)
-        setClockOffset(org.metaData!.clockOffset.toString())
-        setHornIP(org.metaData!.hornIP)
+        setClockIP(JSON.parse(org.metadata).hardware.clockIP)
+        setClockOffset(JSON.parse(org.metadata).hardware.clockOffset.toString())
+        setHornIP(JSON.parse(org.metadata).hardware.hornIP)
     }, [org])
 
     if (org == undefined || session == undefined) {

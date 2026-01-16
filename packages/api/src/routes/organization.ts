@@ -39,7 +39,7 @@ export const org_create = os.organization.create.handler(async ({ input }) => {
       name: input.name,
       createdAt: new Date(),
       slug: input.name,
-      metaData: {
+      metadata: JSON.stringify({
         duties: [
           "Race Officer",
           "Assistant Race Officer",
@@ -52,7 +52,7 @@ export const org_create = os.organization.create.handler(async ({ input }) => {
         trackable: { orgID: "", enabled: false },
         clockOffset: 1,
         pursuitLength: 60,
-      },
+      }),
     },
   });
 
@@ -107,7 +107,6 @@ export const org_session = os.organization.session
   .use(authMiddleware)
   .handler(async ({ context }) => {
     const session = context.session as any; // this is because the session type is not quite correct
-    console.log("org_session: session=", session);
     if (!session) {
       throw new ORPCError("UNAUTHORIZED", { message: "Login required" });
     }

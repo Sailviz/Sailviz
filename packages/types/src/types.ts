@@ -133,7 +133,7 @@ export const OrgSchema = z.object({
   name: z.string(),
   logo: z.string().nullable(),
   slug: z.string(),
-  metaData: z.any(),
+  metadata: z.any(),
   stripeCustomerId: z.string().optional().nullable(),
 });
 export type Org = z.infer<typeof OrgSchema>;

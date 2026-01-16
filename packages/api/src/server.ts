@@ -14,7 +14,7 @@ app.use(
     origin: ORIGIN_URL,
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
-  })
+  }),
 );
 
 const mainHandler = new RPCHandler(mainRouter, {
@@ -28,7 +28,7 @@ app.use(express.json());
 // use a catch-all to let the RPC handler inspect all requests
 app.all("{/*path}", async (req, res, next) => {
   const { matched } = await mainHandler.handle(req, res, {
-    context: { headers: req.headers },
+    context: { req, reqHeaders: req.headers },
   });
 
   if (matched) {

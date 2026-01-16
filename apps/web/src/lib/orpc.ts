@@ -9,6 +9,7 @@ if (import.meta.env.VITE_API_URL == undefined) {
 }
 const link = new RPCLink({
     url: import.meta.env.VITE_API_URL,
+    fetch: (url, options) => fetch(url, { ...options, credentials: 'include' }),
     // Provide Authorization header from localStorage when available (Tauri/dev token path).
     // For web cookie-based flow this returns empty and cookies are used via `credentials: 'include'`.
     interceptors: [
