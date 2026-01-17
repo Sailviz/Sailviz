@@ -25,7 +25,6 @@ const Time = ({ ...props }: any) => {
 const Race = ({ ...props }: any) => {
     const initialValue = props.getValue()
     const [value, setValue] = React.useState(initialValue)
-    console.log(initialValue)
     React.useEffect(() => {
         setValue(initialValue)
     }, [initialValue])

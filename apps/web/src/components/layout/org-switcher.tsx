@@ -15,6 +15,8 @@ import { client } from '@sailviz/auth/client'
 import * as Types from '@sailviz/types'
 import { useEffect } from 'react'
 import { useRouter } from '@tanstack/react-router'
+import { queryClient } from '@lib/queryClient'
+import { sessionQueryKey } from '@lib/session'
 
 export function OrgSwitcher() {
     const { isMobile } = useSidebar()
@@ -69,7 +71,11 @@ export function OrgSwitcher() {
                 organizationId: org.id,
                 organizationSlug: org.slug
             })
-            .then(() => {
+            .then(async () => {
+                // Now re-run route loaders so pages depending on loaders refresh.
+                try {
+                    await router.invalidate()
+                } catch {}
                 if (org.id == 'admin-id') {
                     router.navigate({ to: '/admin' })
                 } else {

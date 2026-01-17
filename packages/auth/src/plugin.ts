@@ -18,7 +18,7 @@ function scryptAsync(password, salt, opts) {
       (err, derivedKey) => {
         if (err) return reject(err);
         resolve(derivedKey);
-      }
+      },
     );
   });
 }
@@ -39,7 +39,7 @@ export const myPlugin = () => {
         async (ctx) => {
           const authHeader = ctx.request.headers.get("authorization") || "";
           const tokenFromHeader = authHeader.startsWith("Bearer ")
-            ? authHeader.slice(7)
+            ? authHeader.slice(2, 32)
             : null;
           const url = new URL(ctx.request.url);
           const tokenQuery = url.searchParams.get("token");
@@ -52,7 +52,7 @@ export const myPlugin = () => {
             "sessionByToken: received token header:",
             tokenFromHeader ||
               ctx.request.headers.get("x-session-token") ||
-              ctx.request.headers.get("x-token")
+              ctx.request.headers.get("x-token"),
           );
           if (!token) {
             return ctx.json({ error: "Missing token" }, { status: 401 });
@@ -69,7 +69,7 @@ export const myPlugin = () => {
                   userId: session.userId,
                   expiresAt: session.expiresAt,
                 }
-              : null
+              : null,
           );
           if (!session) {
             return ctx.json({ error: "Session not found" }, { status: 401 });
@@ -89,7 +89,7 @@ export const myPlugin = () => {
             user,
             session,
           });
-        }
+        },
       ),
       // Allow clients to delete a session by bearer token (Tauri sign-out).
       sessionByTokenDelete: createAuthEndpoint(
@@ -113,7 +113,7 @@ export const myPlugin = () => {
           const deleted = await prisma.session.deleteMany({ where: { token } });
           console.log("sessionByToken DELETE: deleted count=", deleted.count);
           return ctx.json({ deleted: deleted.count });
-        }
+        },
       ),
       // Tauri-friendly username/password sign-in which returns a token
       // (cookies won't work in custom URI schemes). This creates a session
@@ -128,7 +128,7 @@ export const myPlugin = () => {
           if (!username || !password) {
             return ctx.json(
               { error: "username and password required" },
-              { status: 400 }
+              { status: 400 },
             );
           }
 
@@ -138,7 +138,7 @@ export const myPlugin = () => {
           if (!user) {
             return ctx.json(
               { error: "account doesn't exist" },
-              { status: 401 }
+              { status: 401 },
             );
           }
 
@@ -163,7 +163,7 @@ export const myPlugin = () => {
               p: 1,
               dkLen: 64,
               maxmem: 67108864,
-            }
+            },
           );
           const expected = hex.decode(keyHex);
           if (targetKey.length !== expected.length) return false;
@@ -195,14 +195,14 @@ export const myPlugin = () => {
             "tauriSignIn: created session token=",
             token,
             "userId=",
-            user.id
+            user.id,
           );
           return ctx.json({
             user,
             token: session.token,
             expiresAt: session.expiresAt,
           });
-        }
+        },
       ),
     },
   } satisfies BetterAuthPlugin;
