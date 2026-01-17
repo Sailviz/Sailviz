@@ -87,7 +87,11 @@ function Page() {
                 try {
                     await router.invalidate()
                 } catch {}
-                navigate({ to: '/' })
+                if (isTauri) {
+                    navigate({ to: '/Login' })
+                } else {
+                    navigate({ to: '/' })
+                }
                 return
             }
 
