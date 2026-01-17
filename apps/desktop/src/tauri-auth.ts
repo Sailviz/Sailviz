@@ -5,7 +5,7 @@
 import { Store } from "@tauri-apps/plugin-store";
 
 const store = new Store("sailviz-store.dat");
-const TOKEN_KEY = "sailviz_token";
+const TOKEN_KEY = "bearer_token";
 
 export async function storeToken(token: string) {
   try {
@@ -38,7 +38,7 @@ export async function removeToken() {
 // A small helper to attach Authorization header using the stored token.
 export async function authFetch(
   input: RequestInfo,
-  init?: RequestInit
+  init?: RequestInit,
 ): Promise<Response> {
   const token = await getToken();
   const headers = new Headers(init?.headers as HeadersInit);

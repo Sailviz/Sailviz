@@ -72,7 +72,7 @@ export async function getSession(fetchOptions?: RequestInit) {
   try {
     const token =
       typeof window !== "undefined"
-        ? (window as any).localStorage?.getItem("sailviz_token")
+        ? (window as any).localStorage?.getItem("bearer_token")
         : null;
     if (token) {
       const tokenRes = await getSessionByToken(token);

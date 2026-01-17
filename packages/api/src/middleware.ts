@@ -10,10 +10,8 @@ interface ORPCContext extends RequestHeadersPluginContext {
 export const authMiddleware = os
   .$context<ORPCContext>()
   .middleware(async ({ context, next }) => {
-    const headers = context.reqHeaders ?? {};
-
     // Get session from Better Auth
-    const session = await auth.api.getSession({ headers });
+    const session = await auth.api.getSession({ headers: context.reqHeaders });
     // Optionally enforce authentication
     if (!session) {
       throw new ORPCError("UNAUTHORIZED");

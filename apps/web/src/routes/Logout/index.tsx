@@ -24,10 +24,10 @@ function Page() {
                         for (const name of storeNames) {
                             try {
                                 const store = new Store(name)
-                                const found = (await store.get('sailviz_token')) as string | null
+                                const found = (await store.get('bearer_token')) as string | null
                                 if (found) token = found
                                 try {
-                                    await store.delete('sailviz_token')
+                                    await store.delete('bearer_token')
                                 } catch {}
                                 try {
                                     await store.save()
@@ -39,8 +39,8 @@ function Page() {
                     } catch (e) {
                         // fallback to localStorage
                         try {
-                            token = window?.localStorage?.getItem('sailviz_token') ?? null
-                            window?.localStorage?.removeItem('sailviz_token')
+                            token = window?.localStorage?.getItem('bearer_token') ?? null
+                            window?.localStorage?.removeItem('bearer_token')
                         } catch (e) {
                             console.warn('localStorage token cleanup failed', e)
                         }
@@ -48,7 +48,7 @@ function Page() {
 
                     // As a safety, also remove any lingering localStorage key
                     try {
-                        window?.localStorage?.removeItem('sailviz_token')
+                        window?.localStorage?.removeItem('bearer_token')
                     } catch {}
 
                     // Notify server to delete session by token if we have one
