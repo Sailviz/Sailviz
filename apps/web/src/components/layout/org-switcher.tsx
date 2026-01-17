@@ -15,8 +15,6 @@ import { client } from '@sailviz/auth/client'
 import * as Types from '@sailviz/types'
 import { useEffect } from 'react'
 import { useRouter } from '@tanstack/react-router'
-import { queryClient } from '@lib/queryClient'
-import { sessionQueryKey } from '@lib/session'
 
 export function OrgSwitcher() {
     const { isMobile } = useSidebar()

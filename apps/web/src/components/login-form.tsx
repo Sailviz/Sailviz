@@ -2,7 +2,7 @@ import { Button } from '@components/ui/button'
 import { Input } from '@components/ui/input'
 import { useEffect, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
-import { signIn, getSession, type Session } from '@sailviz/auth/client'
+import { signIn, getSession } from '@sailviz/auth/client'
 import { isTauriRuntime } from '../is-tauri'
 import { Github, Loader2 } from 'lucide-react'
 import { useNavigate } from '@tanstack/react-router'
@@ -76,9 +76,10 @@ export function LoginForm() {
 
         ;(async () => {
             try {
-                const session: Session = await getSession()
+                const { data: session } = await getSession()
+                console.log('LoginForm: existing session check:', session)
                 if (!mounted) return
-                if (session && session.user) {
+                if (session && session.session) {
                     // We have a valid session — navigate to start page
                     try {
                         if (isTauriRuntime()) {
