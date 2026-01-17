@@ -61,7 +61,7 @@ export const createSeries = os.series.create.handler(async ({ input }) => {
       name: input.name,
       settings: {
         numberToCount: 0,
-        pursuitLength: club.settings!.pursuitLength,
+        pursuitLength: club.metadata!.pursuitLength,
       },
       organization: {
         connect: {
@@ -138,5 +138,5 @@ export const series_update = os.series.update.handler(
     } else {
       throw new ORPCError("BAD_REQUEST");
     }
-  }
+  },
 );

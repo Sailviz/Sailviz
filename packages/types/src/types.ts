@@ -1,5 +1,4 @@
-import z, { email } from "zod";
-import { tr } from "zod/locales";
+import z from "zod";
 
 export const DutySchema = z.any();
 export type DutyType = z.infer<typeof DutySchema>;

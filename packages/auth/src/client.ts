@@ -3,7 +3,6 @@ import {
   customSessionClient,
   inferAdditionalFields,
   organizationClient,
-  usernameClient,
 } from "better-auth/client/plugins";
 import { createAuthClient } from "better-auth/react";
 import { BASE_URL } from "./config";
@@ -18,6 +17,7 @@ export const client = createAuthClient({
         enabled: true,
       },
     }),
+
     anonymousClient(),
     customSessionClient(),
     inferAdditionalFields({

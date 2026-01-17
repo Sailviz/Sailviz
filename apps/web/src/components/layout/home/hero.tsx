@@ -6,7 +6,7 @@ export function Hero() {
     const navigate = useNavigate()
 
     return (
-        <div className='w-full bg-gradient-to-b from-blue-500 to-blue-700 text-white py-20'>
+        <div className='w-full bg-linear-to-b from-blue-500 to-blue-700 text-white py-20'>
             <div className='container mx-auto'>
                 <div className='flex gap-4 py-10 lg:py-20 items-center justify-center flex-col'>
                     <div className='flex gap-4 flex-col text-center'>

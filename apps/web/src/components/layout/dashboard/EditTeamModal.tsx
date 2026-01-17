@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Dialog, DialogContent, DialogFooter, DialogTitle } from '@components/ui/dialog'
 import { Button } from '@components/ui/button'
 import * as Types from '@sailviz/types'

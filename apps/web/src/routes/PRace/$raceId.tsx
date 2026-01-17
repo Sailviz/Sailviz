@@ -77,7 +77,7 @@ function Page() {
         let localTime = Math.floor(new Date().getTime() / 1000 + startLength)
 
         //start the timer
-        fetch('https://' + club.settings!.clockIP + '/set?startTime=' + (localTime - club.settings!.clockOffset).toString(), {
+        fetch('https://' + club.metadata!.clockIP + '/set?startTime=' + (localTime - club.metadata!.clockOffset).toString(), {
             signal: controller.signal,
             mode: 'no-cors'
         }).catch(err => {
@@ -114,7 +114,7 @@ function Page() {
         sound!.currentTime = 0
         sound!.play()
         //this is to cache the horn TLS so that when it needs to hoot it is quicker.
-        fetch('https://' + club.settings!.hornIP + '/reset', {
+        fetch('https://' + club.metadata!.hornIP + '/reset', {
             signal: controller.signal,
             headers: new Headers({ 'content-type': 'text/plain' })
         })
@@ -126,7 +126,7 @@ function Page() {
         setNextFlagStatus([true, true])
 
         //sound horn
-        fetch('https://' + club.settings!.hornIP + '/hoot?startTime=300', {
+        fetch('https://' + club.metadata!.hornIP + '/hoot?startTime=300', {
             signal: controller.signal,
             headers: new Headers({ 'content-type': 'text/plain' })
         }).catch(err => {
@@ -144,7 +144,7 @@ function Page() {
         setNextFlagStatus([true, false])
 
         //sound horn
-        fetch('https://' + club.settings!.hornIP + '/hoot?startTime=300', {
+        fetch('https://' + club.metadata!.hornIP + '/hoot?startTime=300', {
             signal: controller.signal,
             headers: new Headers({ 'content-type': 'text/plain' })
         }).catch(err => {
@@ -163,7 +163,7 @@ function Page() {
         setNextFlagStatus([false, false])
 
         //sound horn
-        fetch('https://' + club.settings!.hornIP + '/hoot?startTime=500', {
+        fetch('https://' + club.metadata!.hornIP + '/hoot?startTime=500', {
             signal: controller.signal,
             headers: new Headers({ 'content-type': 'text/plain' })
         }).catch(err => {
@@ -183,7 +183,7 @@ function Page() {
         setFlagModal(false)
 
         //sound horn
-        fetch('https://' + club.settings!.hornIP + '/hoot?startTime=300', {
+        fetch('https://' + club.metadata!.hornIP + '/hoot?startTime=300', {
             signal: controller.signal,
             headers: new Headers({ 'content-type': 'text/plain' })
         }).catch(err => {
@@ -201,7 +201,7 @@ function Page() {
     const stopRace = async () => {
         setRaceState(raceStateType.stopped)
         const timeoutId = setTimeout(() => controller.abort(), 2000)
-        fetch('https://' + club.settings!.clockIP + '/reset', { signal: controller.signal, mode: 'no-cors' })
+        fetch('https://' + club.metadata!.clockIP + '/reset', { signal: controller.signal, mode: 'no-cors' })
             .then(_ => {
                 clearTimeout(timeoutId)
             })
@@ -212,7 +212,7 @@ function Page() {
 
     const resetRace = async () => {
         const timeoutId = setTimeout(() => controller.abort(), 2000)
-        fetch('https://' + club.settings!.clockIP + '/reset', { signal: controller.signal, mode: 'no-cors' })
+        fetch('https://' + club.metadata!.clockIP + '/reset', { signal: controller.signal, mode: 'no-cors' })
             .then(_ => {
                 clearTimeout(timeoutId)
             })
@@ -400,7 +400,7 @@ function Page() {
     const endRace = async () => {
         console.log('ending race')
         //sound horn
-        fetch('http://' + club.settings!.hornIP + '/hoot?startTime=300', {
+        fetch('http://' + club.metadata!.hornIP + '/hoot?startTime=300', {
             signal: controller.signal,
             mode: 'no-cors',
             headers: new Headers({ 'content-type': 'text/plain', 'Access-Control-Allow-Methods': 'POST' })
@@ -514,7 +514,7 @@ function Page() {
             console.log(race)
             if (race.fleets[0]!.startTime == 0) {
                 setRaceState(raceStateType.reset)
-            } else if (race.fleets[0]!.startTime + club.settings!.pursuitLength * 60 < Math.floor(new Date().getTime() / 1000)) {
+            } else if (race.fleets[0]!.startTime + club.metadata!.pursuitLength * 60 < Math.floor(new Date().getTime() / 1000)) {
                 setRaceState(raceStateType.calculate)
                 setTableView(true)
             } else {

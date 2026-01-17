@@ -99,7 +99,7 @@ function Page() {
         //use time for button
         let lastStartTime = Math.floor(new Date().getTime() / 1000 + startSequence.reduce((max, step) => (step.time > max ? step.time : max), 0))
         //start the timer
-        fetch('https://' + club.metaData!.clockIP + '/set?startTime=' + (lastStartTime - club.metaData!.clockOffset).toString(), {
+        fetch('https://' + club.metadata!.clockIP + '/set?startTime=' + (lastStartTime - club.metadata!.clockOffset).toString(), {
             signal: controller.signal,
             mode: 'no-cors'
         }).catch(err => {
@@ -146,7 +146,7 @@ function Page() {
 
     const handleHoot = (time: number) => {
         //sound horn
-        fetch('https://' + club.metaData!.hornIP + `/hoot?startTime=${time}`, {
+        fetch('https://' + club.metadata!.hornIP + `/hoot?startTime=${time}`, {
             signal: controller.signal,
             headers: new Headers({ 'content-type': 'text/plain' })
         }).catch(err => {
@@ -167,7 +167,7 @@ function Page() {
         sound!.play()
 
         //this is to cache the horn TLS so that when it needs to hoot it is quicker.
-        fetch('https://' + club.metaData!.hornIP + '/reset', {
+        fetch('https://' + club.metadata!.hornIP + '/reset', {
             signal: controller.signal,
             headers: new Headers({ 'content-type': 'text/plain' })
         })
@@ -256,14 +256,14 @@ function Page() {
 
     const stopRace = async () => {
         setRaceState(raceStateType.stopped)
-        fetch('https://' + club.metaData!.clockIP + '/reset', { signal: controller.signal, mode: 'no-cors' }).catch(function (err) {
+        fetch('https://' + club.metadata!.clockIP + '/reset', { signal: controller.signal, mode: 'no-cors' }).catch(function (err) {
             console.log('Clock not connected: ', err)
         })
     }
 
     const resetRace = async () => {
         //add are you sure here
-        fetch('https://' + club.metaData!.clockIP + '/reset', { signal: controller.signal, mode: 'no-cors' }).catch(function (err) {
+        fetch('https://' + club.metadata!.clockIP + '/reset', { signal: controller.signal, mode: 'no-cors' }).catch(function (err) {
             console.log('Clock not connected: ', err)
         })
 
@@ -357,7 +357,7 @@ function Page() {
     const finishBoat = async (resultId: string) => {
         const time = Math.floor(new Date().getTime() / 1000)
         //sound horn
-        fetch('http://' + club.metaData!.hornIP + '/hoot?startTime=200', { signal: controller.signal, mode: 'no-cors' }).catch(err => {
+        fetch('http://' + club.metadata!.hornIP + '/hoot?startTime=200', { signal: controller.signal, mode: 'no-cors' }).catch(err => {
             console.log('horn not connected')
             console.log(err)
         })
