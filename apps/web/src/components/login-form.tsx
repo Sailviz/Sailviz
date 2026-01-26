@@ -159,7 +159,7 @@ export function LoginForm() {
         await signIn
             .social({
                 provider: 'github',
-                callbackURL: 'http://localhost:5173' + '/dashboard/me',
+                callbackURL: import.meta.env.VITE_BASE_URL + '/dashboard/me',
                 fetchOptions: {
                     redirect: 'manual'
                 }
