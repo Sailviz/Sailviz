@@ -7,7 +7,7 @@ import { authMiddleware } from "../middleware";
 const os = implement(ORPCcontract);
 
 export async function updateUserById(
-  user: Types.UserType
+  user: Types.UserType,
 ): Promise<Types.UserType> {
   const { id, ...updateData } = user;
   const updatedUser = await prisma.user.update({
@@ -26,6 +26,7 @@ async function createUser(): Promise<Types.UserType> {
       createdAt: new Date(),
       updatedAt: new Date(),
       startPage: "dashboard",
+      profile: {},
     },
   });
   return newUser as Types.UserType;
@@ -78,4 +79,82 @@ export const user_delete = os.user.delete
       throw new ORPCError("BAD_REQUEST", { message: "Could not delete user" });
     }
     return deletedUser;
+  });
+
+export const user_profile_addFavourite = os.user.profile.addFavourite
+  .use(authMiddleware)
+  .handler(async ({ input, context }) => {
+    const session = context.session as any;
+    if (!session || !session.user) {
+      throw new ORPCError("UNAUTHORIZED", { message: "Login required" });
+    }
+    const userProfileId = session.user.profile.id;
+    const orgId = input.orgId;
+    const existingFavourite = await prisma.userFavouriteOrgs.findFirst({
+      where: {
+        userProfileId,
+        orgId,
+      },
+    });
+    if (existingFavourite) {
+      throw new ORPCError("BAD_REQUEST", {
+        message: "Favourite already exists.",
+      });
+    }
+    await prisma.userFavouriteOrgs.create({
+      data: {
+        userProfileId,
+        orgId,
+      },
+    });
+  });
+
+export const user_profile_removeFavourite = os.user.profile.removeFavourite
+  .use(authMiddleware)
+  .handler(async ({ input, context }) => {
+    const session = context.session as any;
+    if (!session || !session.user) {
+      throw new ORPCError("UNAUTHORIZED", { message: "Login required" });
+    }
+    const userProfileId = session.user.profile.id;
+    const orgId = input.orgId;
+    const existingFavourite = await prisma.userFavouriteOrgs.findFirst({
+      where: {
+        userProfileId,
+        orgId,
+      },
+    });
+    if (!existingFavourite) {
+      throw new ORPCError("BAD_REQUEST", {
+        message: "Favourite does not exist.",
+      });
+    }
+    await prisma.userFavouriteOrgs.delete({
+      where: {
+        id: existingFavourite.id,
+      },
+    });
+  });
+
+export const user_profile_find = os.user.profile.find
+  .use(authMiddleware)
+  .handler(async ({ context }) => {
+    const session = context.session as any;
+    if (!session || !session.user) {
+      throw new ORPCError("UNAUTHORIZED", { message: "Login required" });
+    }
+    const userProfileId = session.user.profile.id;
+    const userProfile = await prisma.userProfile.findUnique({
+      where: {
+        id: userProfileId,
+      },
+      include: {
+        userFavouriteOrgs: true,
+        signOnProfiles: true,
+      },
+    });
+    if (!userProfile) {
+      throw new ORPCError("NOT_FOUND", { message: "User profile not found." });
+    }
+    return userProfile as Types.UserProfile;
   });

@@ -9,6 +9,7 @@
   },
   "scripts": {
     "prismagenerate": "npx prisma generate",
+    "prismapush": "npx prisma db push",
     "generateConfig": "node scripts/generate-config.ts",
     "build": "tsc -p tsconfig.json && node scripts/copy-generated.cjs",
     "test": "echo \"Error: no test specified\" && exit 1"

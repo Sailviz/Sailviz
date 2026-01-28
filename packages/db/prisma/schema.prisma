@@ -19,23 +19,62 @@ model globalConfig {
 }
 
 model User {
-  id            String       @id @unique @default(uuid())
-  startPage     String
-  name          String       @default("")
-  email         String?      @unique
-  emailVerified Boolean
-  isAnonymous   Boolean      @default(false)
-  image         String?      @db.Text
-  createdAt     DateTime
-  updatedAt     DateTime
-  sessions      Session[]
-  accounts      Account[]
-  members       Member[]
-  invitations   Invitation[]
-  results       Result[]
-  teamMembers   teamMember[]
+  id             String          @id @unique @default(uuid())
+  startPage      String
+  name           String          @default("")
+  email          String?         @unique
+  emailVerified  Boolean
+  isAnonymous    Boolean         @default(false)
+  image          String?         @db.Text
+  createdAt      DateTime
+  updatedAt      DateTime
+  sessions       Session[]
+  accounts       Account[]
+  members        Member[]
+  invitations    Invitation[]
+  results        Result[]
+  teamMembers    teamMember[]
+  profile        UserProfile     @relation(fields: [userProfileId], references: [id])
+  signOnProfiles signOnProfile[]
+  userProfileId  String          @unique
 
   @@map("user")
+}
+
+model UserProfile {
+  id                String              @id @unique @default(uuid())
+  userId            String
+  user              User?
+  signOnProfiles    signOnProfile[]
+  userFavouriteOrgs UserFavouriteOrgs[]
+
+  @@index([userId(length: 191)])
+}
+
+model UserFavouriteOrgs {
+  id            String       @id @unique @default(uuid())
+  orgId         String
+  organization  Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  userProfile   UserProfile? @relation(fields: [userProfileId], references: [id])
+  userProfileId String?
+
+  @@index([orgId(length: 191)])
+}
+
+model signOnProfile {
+  id            String      @id @unique @default(uuid())
+  userId        String
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  orgId         String
+  Helm          String
+  Crew          String
+  SailNumber    String
+  Boat          Boat        @relation(fields: [boatId], references: [id])
+  boatId        String
+  userProfile   UserProfile @relation(fields: [userProfileId], references: [id])
+  userProfileId String
+
+  @@index([userId(length: 191)])
 }
 
 model Boat {
@@ -48,26 +87,28 @@ model Boat {
   organization     Organization    @relation(fields: [orgId], references: [id])
   results          Result[]
   fleets           FleetSettings[] @relation("BoatToFleetSettings")
+  signOnProfiles   signOnProfile[]
 
   @@index([orgId])
 }
 
 model Organization {
-  id               String       @id @unique @default(uuid())
-  name             String       @unique
-  slug             String
-  logo             String?
-  createdAt        DateTime
-  metadata         String?
-  boats            Boat[]
-  Buoy             Buoy[]
-  series           Series[]
-  Trackers         Tracker[]
-  stripe           Stripe?      @relation(fields: [stripeCustomerId], references: [customerId])
-  stripeCustomerId String?
-  members          Member[]
-  invitations      Invitation[]
-  teams            Team[]
+  id                String              @id @unique @default(uuid())
+  name              String              @unique
+  slug              String
+  logo              String?
+  createdAt         DateTime
+  metadata          String?             @db.Text
+  boats             Boat[]
+  Buoy              Buoy[]
+  series            Series[]
+  Trackers          Tracker[]
+  stripe            Stripe?             @relation(fields: [stripeCustomerId], references: [customerId])
+  stripeCustomerId  String?
+  members           Member[]
+  invitations       Invitation[]
+  teams             Team[]
+  userFavouriteOrgs UserFavouriteOrgs[]
 }
 
 model Member {

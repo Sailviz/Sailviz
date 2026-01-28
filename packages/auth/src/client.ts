@@ -26,6 +26,10 @@ export const client = createAuthClient({
           type: "string",
           required: true,
         },
+        profile: {
+          type: "json",
+          required: true,
+        },
       },
     }),
   ],

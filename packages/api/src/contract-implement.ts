@@ -39,7 +39,14 @@ import {
   org_session,
   org_update,
 } from "./routes/organization";
-import { user_create, user_delete, user_update } from "./routes/user";
+import {
+  user_create,
+  user_delete,
+  user_profile_addFavourite,
+  user_profile_find,
+  user_profile_removeFavourite,
+  user_update,
+} from "./routes/user";
 import {
   deleteStartSequenceStep,
   findStartSequence,
@@ -124,6 +131,11 @@ export const mainRouter = os.router({
     update: user_update,
     create: user_create,
     delete: user_delete,
+    profile: {
+      find: user_profile_find,
+      addFavourite: user_profile_addFavourite,
+      removeFavourite: user_profile_removeFavourite,
+    },
   },
   globalConfig: {
     find: globalConfig_find,

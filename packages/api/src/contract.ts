@@ -30,7 +30,7 @@ export const ORPCcontract = {
         z.object({
           seriesId: z.string(),
           startSequence: z.array(Types.StartSequenceStepSchema),
-        })
+        }),
       )
       .output(z.array(Types.StartSequenceStepSchema)),
   },
@@ -88,7 +88,7 @@ export const ORPCcontract = {
           py: z.number(),
           pursuitStartTime: z.number(),
           orgId: z.string(),
-        })
+        }),
       )
       .output(Types.BoatSchema),
     delete: oc.input(z.object({ boatId: z.string() })).output(Types.BoatSchema),
@@ -105,10 +105,10 @@ export const ORPCcontract = {
           page: z.number(),
           date: z.string(),
           historical: z.boolean(),
-        })
+        }),
       )
       .output(
-        z.object({ races: z.array(Types.RaceSchema), count: z.number() })
+        z.object({ races: z.array(Types.RaceSchema), count: z.number() }),
       ),
     update: oc
       .input(
@@ -119,7 +119,7 @@ export const ORPCcontract = {
           Duties: Types.DutySchema.optional(),
           Type: z.string().optional(),
           trackableEventId: z.string().nullable().optional(),
-        })
+        }),
       )
       .output(Types.RaceSchema),
     delete: oc.input(z.object({ id: z.string() })).output(Types.RaceSchema),
@@ -127,7 +127,7 @@ export const ORPCcontract = {
       .input(
         z.object({
           seriesId: z.string(),
-        })
+        }),
       )
       .output(Types.RaceSchema),
   },
@@ -142,6 +142,11 @@ export const ORPCcontract = {
     update: oc.input(Types.UserSchema).output(Types.UserSchema),
     create: oc.input(z.object({ orgId: z.string() })).output(Types.UserSchema),
     delete: oc.input(Types.UserSchema).output(Types.UserSchema),
+    profile: {
+      find: oc.output(Types.UserProfileSchema),
+      addFavourite: oc.input(z.object({ orgId: z.string() })),
+      removeFavourite: oc.input(z.object({ orgId: z.string() })),
+    },
   },
   globalConfig: {
     find: oc.output(Types.GlobalConfigSchema),
@@ -154,7 +159,7 @@ export const ORPCcontract = {
           z.object({
             eventId: z.string(),
             deviceId: z.string(),
-          })
+          }),
         )
         .output(z.any()),
     },

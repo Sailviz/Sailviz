@@ -38,6 +38,11 @@ export const auth = betterAuth({
         defaultValue: "/dashboard/me",
         required: true,
       },
+      profile: {
+        type: "json",
+        defaultValue: {},
+        required: true,
+      },
     },
   },
   database: prismaAdapter(prisma, {

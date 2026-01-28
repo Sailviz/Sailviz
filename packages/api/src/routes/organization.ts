@@ -29,7 +29,8 @@ export const org_all = os.organization.all.handler(async ({ input }) => {
     },
   });
   console.log(orgs);
-  return orgs as unknown as Types.Org[];
+  const filteredOrgs = orgs.filter((org) => org.id != "admin-id");
+  return filteredOrgs as unknown as Types.Org[];
 });
 
 export const org_create = os.organization.create.handler(async ({ input }) => {

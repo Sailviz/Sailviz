@@ -149,6 +149,17 @@ export const UserSchema = z.object({
 });
 export type UserType = z.infer<typeof UserSchema>;
 
+export const userFavouriteOrgsSchema = z.object({
+  orgId: z.string(),
+});
+export const UserProfileSchema = z.object({
+  id: z.string(),
+  userId: z.string(),
+  userFavouriteOrgs: z.array(userFavouriteOrgsSchema),
+  signOnProfiles: z.array(z.any()).optional(),
+});
+export type UserProfile = z.infer<typeof UserProfileSchema>;
+
 export const MemberSchema = z.object({
   user: UserSchema,
   id: z.string(),
