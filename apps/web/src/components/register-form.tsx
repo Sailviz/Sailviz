@@ -13,7 +13,8 @@ export function RegisterForm() {
             email: email,
             password: password,
             name: '',
-            startPage: ''
+            startPage: '',
+            profile: {}
         })
         console.log('Sign up response:', data, error)
         if (error) {
