@@ -285,3 +285,8 @@ h2 {
 
     letter-spacing: -0.025em;
 }
+
+html,
+body {
+    touch-action: pan-y;
+}
