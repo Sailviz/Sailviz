@@ -103,3 +103,14 @@ export const boat_session = os.boat.session
       throw new ORPCError("NOT_FOUND");
     }
   });
+
+export const boat_org = os.boat.org
+  .use(authMiddleware)
+  .handler(async ({ input }) => {
+    const boatsList = await findBoats(input.orgId);
+    if (boatsList) {
+      return boatsList;
+    } else {
+      throw new ORPCError("NOT_FOUND");
+    }
+  });

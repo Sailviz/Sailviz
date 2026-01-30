@@ -160,6 +160,16 @@ export const UserProfileSchema = z.object({
 });
 export type UserProfile = z.infer<typeof UserProfileSchema>;
 
+export const signOnProfileSchema = z.object({
+  userID: z.string(),
+  orgID: z.string(),
+  Helm: z.string(),
+  Crew: z.string(),
+  Boat: BoatSchema,
+  SailNumber: z.string(),
+});
+export type SignOnProfile = z.infer<typeof signOnProfileSchema>;
+
 export const MemberSchema = z.object({
   user: UserSchema,
   id: z.string(),

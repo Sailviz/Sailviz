@@ -19,6 +19,7 @@ import {
   boat_create,
   boat_delete,
   boat_find,
+  boat_org,
   boat_session,
   boat_update,
 } from "./routes/boats";
@@ -45,6 +46,7 @@ import {
   user_profile_addFavourite,
   user_profile_find,
   user_profile_removeFavourite,
+  user_results_all,
   user_update,
 } from "./routes/user";
 import {
@@ -126,6 +128,7 @@ export const mainRouter = os.router({
     update: boat_update,
     create: boat_create,
     delete: boat_delete,
+    org: boat_org,
   },
   user: {
     update: user_update,
@@ -135,6 +138,9 @@ export const mainRouter = os.router({
       find: user_profile_find,
       addFavourite: user_profile_addFavourite,
       removeFavourite: user_profile_removeFavourite,
+    },
+    results: {
+      all: user_results_all,
     },
   },
   globalConfig: {

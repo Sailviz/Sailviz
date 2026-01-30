@@ -19,7 +19,10 @@ const prisma = (globalForPrisma.prisma ||
           args.include = {
             ...args.include,
             profile: {
-              include: { userFavouriteOrgs: true, signOnProfiles: true },
+              include: {
+                userFavouriteOrgs: { include: { organization: true } },
+                signOnProfiles: { include: { Boat: true } },
+              },
             },
           };
           return query(args);
@@ -28,7 +31,10 @@ const prisma = (globalForPrisma.prisma ||
           args.include = {
             ...args.include,
             profile: {
-              include: { userFavouriteOrgs: true, signOnProfiles: true },
+              include: {
+                userFavouriteOrgs: { include: { organization: true } },
+                signOnProfiles: { include: { Boat: true } },
+              },
             },
           };
           return query(args);

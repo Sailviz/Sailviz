@@ -156,5 +156,22 @@ export const user_profile_find = os.user.profile.find
     if (!userProfile) {
       throw new ORPCError("NOT_FOUND", { message: "User profile not found." });
     }
+
     return userProfile as Types.UserProfile;
+  });
+
+export const user_results_all = os.user.results.all
+  .use(authMiddleware)
+  .handler(async ({ context }) => {
+    const session = context.session as any;
+    if (!session || !session.user) {
+      throw new ORPCError("UNAUTHORIZED", { message: "Login required" });
+    }
+    const userId = session.user.id;
+    const results = await prisma.result.findMany({
+      where: {
+        userId,
+      },
+    });
+    return results;
   });

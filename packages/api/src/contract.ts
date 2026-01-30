@@ -92,6 +92,9 @@ export const ORPCcontract = {
       )
       .output(Types.BoatSchema),
     delete: oc.input(z.object({ boatId: z.string() })).output(Types.BoatSchema),
+    org: oc
+      .input(z.object({ orgId: z.string() }))
+      .output(z.array(Types.BoatSchema)),
   },
   race: {
     find: oc.input(z.object({ raceId: z.string() })).output(Types.RaceSchema),
@@ -146,6 +149,9 @@ export const ORPCcontract = {
       find: oc.output(Types.UserProfileSchema),
       addFavourite: oc.input(z.object({ orgId: z.string() })),
       removeFavourite: oc.input(z.object({ orgId: z.string() })),
+    },
+    results: {
+      all: oc.output(z.array(Types.RaceSchema)),
     },
   },
   globalConfig: {
