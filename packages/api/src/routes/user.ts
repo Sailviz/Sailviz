@@ -272,6 +272,5 @@ export const user_favouriteOrgs = os.user.favouriteOrgs
         organization: true,
       },
     });
-    console.log("Fetched favourite organizations for user:", favouriteOrgs);
     return favouriteOrgs as Types.userFavouriteOrgsType[];
   });

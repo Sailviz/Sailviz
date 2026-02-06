@@ -128,8 +128,11 @@ export const boat_org_session = os.boat.org.session
   .use(authMiddleware)
   .handler(async ({ context }) => {
     const session = context.session as any; // this is because the session type is not quite correct
-    const clubId = session?.session.activeOrganizationId;
-    const boatsList = await findBoats(clubId);
+    const orgId = session?.session.activeOrganizationId;
+    if (!orgId) {
+      throw new ORPCError("UNAUTHORIZED", { message: "Login required" });
+    }
+    const boatsList = await findBoats(orgId);
     if (boatsList) {
       return boatsList;
     } else {
