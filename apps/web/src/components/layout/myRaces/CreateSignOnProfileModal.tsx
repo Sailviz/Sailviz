@@ -63,6 +63,9 @@ export default function CreateSignOnProfileModal({ boats }: { boats: Types.Stand
             setSailNumError(true)
             error = true
         }
+        if (error) {
+            return
+        }
         createProfile(helm, crew, selectedBoat.value, sailNumber)
         setOpen(false)
     }

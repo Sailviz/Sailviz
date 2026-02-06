@@ -10,7 +10,7 @@ export default function SignOnView() {
     const session: Session = useLoaderData({ from: `__root__` })
 
     const { data: todaysRaces } = useQuery(orpcClient.race.today.queryOptions({ input: { orgId: session.session.activeOrganizationId! } }))
-    const boats = useQuery(orpcClient.boat.session.queryOptions()).data as BoatType[]
+    const boats = useQuery(orpcClient.boat.org.session.queryOptions()).data as BoatType[]
 
     const metadata = JSON.parse(client.useActiveOrganization().data?.metadata || '{}')
     const { data: trackers } = useQuery(

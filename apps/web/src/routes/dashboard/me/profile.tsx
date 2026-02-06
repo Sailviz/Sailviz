@@ -5,7 +5,7 @@ import { useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 
 function Page() {
-    const { data: boats } = useQuery(orpcClient.boat.standard.queryOptions())
+    const { data: boats } = useQuery(orpcClient.boat.standard.all.queryOptions())
 
     return (
         <div>

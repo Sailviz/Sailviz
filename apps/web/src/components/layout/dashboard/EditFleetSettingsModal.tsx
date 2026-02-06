@@ -8,7 +8,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
 import * as Types from '@sailviz/types'
 export default function EditFleetSettingsDialog({ fleetSettings, seriesId }: { fleetSettings: FleetSettingsType; seriesId: string }) {
-    const { data: boats } = useQuery(orpcClient.boat.session.queryOptions())
+    const { data: boats } = useQuery(orpcClient.boat.org.session.queryOptions())
 
     const updateFleetSettingsMutation = useMutation(orpcClient.fleet.settings.update.mutationOptions())
     const queryClient = useQueryClient()

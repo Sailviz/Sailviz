@@ -47,13 +47,14 @@ const Action = ({ viewHref, raceId }: { viewHref: string; raceId: string }) => {
 
 const columnHelper = createColumnHelper<RaceType>()
 
-const UserRacesTable = ({ viewHref, userId }: { viewHref: string; userId: string }) => {
+const UserRacesTable = ({ viewHref }: { viewHref: string }) => {
     const [page, setPage] = useState(1)
 
     const { data: races } = useQuery(orpcClient.user.results.all.queryOptions())
-    const [data, setData] = useState<RaceType[]>([])
-    const [count, setCount] = useState(0)
+    const [count] = useState(0)
     const rowsPerPage = 10
+
+    const data = races || []
 
     const [pages, setPages] = useState(0)
 
@@ -75,13 +76,6 @@ const UserRacesTable = ({ viewHref, userId }: { viewHref: string; userId: string
             return newPageIndex
         })
     }
-
-    useEffect(() => {
-        if (races) {
-            setData(races.races)
-            setCount(races.count)
-        }
-    }, [races])
 
     var table = useReactTable({
         data,

@@ -32,7 +32,7 @@ export default function EditResultModal({
     const { data: fleet } = useQuery(orpcClient.fleet.find.queryOptions({ input: { fleetId: result?.fleetId || '' }, enabled: !!result }))
 
     const { theme } = useTheme()
-    const boats = useQuery(orpcClient.boat.session.queryOptions()).data as BoatType[]
+    const boats = useQuery(orpcClient.boat.org.session.queryOptions()).data as BoatType[]
 
     const updateResultMutation = useMutation(orpcClient.result.update.mutationOptions())
     const deleteResultMutation = useMutation(orpcClient.result.delete.mutationOptions())

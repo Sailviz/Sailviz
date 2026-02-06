@@ -22,7 +22,7 @@ function Page() {
     const session: Session = useLoaderData({ from: `__root__` })
 
     const race = useQuery(orpcClient.race.find.queryOptions({ input: { raceId: raceId! } })).data as RaceType
-    const { data: boats } = useQuery(orpcClient.boat.session.queryOptions())
+    const { data: boats } = useQuery(orpcClient.boat.org.session.queryOptions())
 
     const getRace = useMutation(orpcClient.race.find.mutationOptions())
     const getTodayRace = useMutation(orpcClient.race.today.mutationOptions())

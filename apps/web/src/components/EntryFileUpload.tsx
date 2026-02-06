@@ -11,7 +11,7 @@ export function EntryFileUpload({ raceId }: { raceId: string }) {
     const [progressMax, setProgressMax] = useState(0)
     const [progressOpen, setProgressOpen] = useState(false)
     const race = useQuery(orpcClient.race.find.queryOptions({ input: { raceId: raceId } })).data
-    const boats = useQuery(orpcClient.boat.session.queryOptions()).data as BoatType[]
+    const boats = useQuery(orpcClient.boat.org.session.queryOptions()).data as BoatType[]
 
     const queryClient = useQueryClient()
 

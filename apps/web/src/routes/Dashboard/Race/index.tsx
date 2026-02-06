@@ -26,7 +26,7 @@ function Page() {
             <div className='flex flex-row'>
                 <div className='px-3'>
                     <p className='text-2xl font-bold p-6'>Today</p>
-                    <UpcomingRacesTable />
+                    <UpcomingRacesTable orgId={orgId} />
                 </div>
                 <div className='px-3'>
                     <p className='text-2xl font-bold p-6'>Upcoming</p>

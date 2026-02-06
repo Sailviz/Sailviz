@@ -2,16 +2,12 @@ import { useState } from 'react'
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTrigger } from '@components/ui/dialog'
 import { Button } from '@components/ui/button'
 import { Input } from '@components/ui/input'
-import { useLoaderData } from '@tanstack/react-router'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
 import * as Types from '@sailviz/types'
-import type { Session } from '@sailviz/auth/client'
 
 export default function CreateBoatDialog() {
-    const session: Session = useLoaderData({ from: `__root__` })
-
-    const createBoatMutation = useMutation(orpcClient.boat.create.mutationOptions())
+    const createBoatMutation = useMutation(orpcClient.boat.standard.create.mutationOptions())
     const queryClient = useQueryClient()
 
     const [boatName, setBoatName] = useState('')
@@ -25,12 +21,10 @@ export default function CreateBoatDialog() {
         await createBoatMutation.mutateAsync({
             name: boat.name,
             crew: boat.crew,
-            py: boat.py,
-            pursuitStartTime: boat.pursuitStartTime,
-            orgId: session.session.activeOrganizationId!
+            py: boat.py
         })
         queryClient.invalidateQueries({
-            queryKey: orpcClient.boat.session.key({ type: 'query' })
+            queryKey: orpcClient.boat.org.session.key({ type: 'query' })
         })
         setOpen(false)
     }

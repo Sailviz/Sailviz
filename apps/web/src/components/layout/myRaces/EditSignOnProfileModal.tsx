@@ -4,7 +4,7 @@ import Select, { type CSSObjectWithLabel } from 'react-select'
 import { Dialog, DialogContent, DialogFooter, DialogHeader } from '@components/ui/dialog'
 import { Button } from '@components/ui/button'
 import { Input } from '@components/ui/input'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
 import * as Types from '@sailviz/types'
 

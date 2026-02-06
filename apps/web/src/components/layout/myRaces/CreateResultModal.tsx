@@ -11,7 +11,7 @@ import { orpcClient } from '@lib/orpc'
 import * as Types from '@sailviz/types'
 
 export default function CreateResultModal({ org }: { org: Types.Org }) {
-    const { data: boats } = useQuery(orpcClient.boat.org.queryOptions({ input: { orgId: org.id } }))
+    const { data: boats } = useQuery(orpcClient.boat.org.session.queryOptions({ input: { orgId: org.id } }))
     const { data: trackers } = useQuery({
         ...orpcClient.trackable.device.list.queryOptions({
             input: { orgId: org?.metadata?.trackable?.orgId || '' }
