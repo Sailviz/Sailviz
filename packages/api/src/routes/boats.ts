@@ -33,6 +33,35 @@ export async function findBoats(orgId: string) {
   return result;
 }
 
+export async function findBoat(
+  boatId: string,
+  orgId: string,
+): Promise<BoatType> {
+  var standard = await prisma.boat.findUnique({
+    where: {
+      id: boatId,
+    },
+  });
+  if (!standard) {
+    throw new ORPCError("NOT_FOUND");
+  }
+  var modification = await prisma.boatOverride.findFirst({
+    where: {
+      orgId: orgId,
+      boatId: boatId,
+    },
+  });
+  const boat = {
+    ...standard,
+    py: modification ? modification.py : standard.py,
+    crew: modification ? modification.crew : standard.crew,
+    pursuitStartTime: modification ? modification.pursuitStartTime : 0,
+    organizationId: orgId,
+  } as BoatType;
+
+  return boat;
+}
+
 export const boat_standard_create = os.boat.standard.create.handler(
   async ({ input }) => {
     const newBoat = await prisma.boat.create({
@@ -131,3 +160,80 @@ export const boat_standard_all = os.boat.standard.all.handler(async () => {
     throw new ORPCError("NOT_FOUND");
   }
 });
+
+export const boat_org_update = os.boat.org.update
+  .use(authMiddleware)
+  .handler(async ({ input, context }) => {
+    const session = context.session as any;
+    const clubId = session?.session.activeOrganizationId as string;
+    const boatOverride = await prisma.boatOverride.findFirst({
+      where: {
+        boatId: input.id,
+        orgId: clubId,
+      },
+    });
+    if (boatOverride) {
+      const updatedOverride = await prisma.boatOverride.update({
+        where: {
+          id: boatOverride.id,
+        },
+        data: {
+          py: input.py,
+          pursuitStartTime: input.pursuitStartTime,
+        },
+      });
+    } else {
+      const newOverride = await prisma.boatOverride.create({
+        data: {
+          boat: {
+            connect: {
+              id: input.id,
+            },
+          },
+          organization: {
+            connect: {
+              id: clubId,
+            },
+          },
+          py: input.py,
+          pursuitStartTime: input.pursuitStartTime,
+          crew: input.crew,
+        },
+      });
+    }
+    const boat = await findBoat(input.id, clubId);
+    if (boat) {
+      return boat;
+    } else {
+      throw new ORPCError("NOT_FOUND");
+    }
+  });
+
+export const boat_org_delete = os.boat.org.delete
+  .use(authMiddleware)
+  .handler(async ({ input, context }) => {
+    const session = context.session as any;
+    const clubId = session?.session.activeOrganizationId as string;
+    const boatOverride = await prisma.boatOverride.findFirst({
+      where: {
+        boatId: input.boatId,
+        orgId: clubId,
+      },
+    });
+    if (!boatOverride) {
+      throw new ORPCError("NOT_FOUND", {
+        message: "No customisation found for this boat",
+      });
+    }
+    await prisma.boatOverride.delete({
+      where: {
+        id: boatOverride.id,
+      },
+    });
+    const boat = await findBoat(input.boatId, clubId);
+    if (boat) {
+      return boat;
+    } else {
+      throw new ORPCError("NOT_FOUND");
+    }
+  });

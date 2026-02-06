@@ -1,14 +1,11 @@
-import { type ChangeEvent } from 'react'
 import { PageSkeleton } from '@components/layout/PageSkeleton'
-import Papa from 'papaparse'
 import BoatTable from '@components/tables/BoatTable'
 import { userHasPermission, AVAILABLE_PERMISSIONS } from '@components/helpers/users'
 import { title } from '@components/layout/home/primitaves'
 import { Button } from '@components/ui/button'
-import { Input } from '@components/ui/input'
 import { createFileRoute, useLoaderData } from '@tanstack/react-router'
 import CreateBoatDialog from '@components/layout/dashboard/CreateBoatModal'
-import { useMutation, useQuery } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
 import type { Session } from '@sailviz/auth/client'
 
@@ -18,57 +15,7 @@ function Page() {
     // const { boats, boatsIsError, boatsIsValidating, mutateBoats: mutateBoats } = Fetcher.Boats()
 
     const { data: club } = useQuery(orpcClient.organization.session.queryOptions())
-    const { data: boats } = useQuery(orpcClient.boat.session.queryOptions())
-
-    const createBoatMutation = useMutation(orpcClient.boat.create.mutationOptions())
-    const updateBoatMutation = useMutation(orpcClient.boat.update.mutationOptions())
-
-    const boatFileUploadHandler = async (e: ChangeEvent<HTMLInputElement>) => {
-        if (boats == undefined || club == undefined) return
-        Papa.parse(e.target.files![0]!, {
-            header: true,
-            skipEmptyLines: true,
-            complete: async function (incomingboats: any) {
-                console.log(incomingboats.data)
-                for (const boat of incomingboats.data) {
-                    //check if all fields are present
-                    if (boat.Name == undefined || boat.Crew == undefined || boat.PY == undefined) {
-                        alert('missing fields')
-                        return
-                    }
-                    let DBboat = boats.find(DBboat => DBboat.name == boat.Name)
-                    if (DBboat == undefined) {
-                        await createBoatMutation.mutateAsync({
-                            name: boat.Name,
-                            crew: parseInt(boat.Crew),
-                            py: parseInt(boat.PY),
-                            pursuitStartTime: parseInt(boat.pursuitStartTime || 0),
-                            orgId: club.id
-                        })
-                    } else {
-                        //check if uploaded boat is different from existing boat
-                        if (
-                            DBboat.name == boat.Name &&
-                            DBboat.crew == parseInt(boat.Crew) &&
-                            DBboat.py == parseInt(boat.PY) &&
-                            DBboat.pursuitStartTime == parseInt(boat.pursuitStartTime || 0)
-                        ) {
-                        } else {
-                            updateBoatMutation.mutateAsync({
-                                ...DBboat,
-                                name: boat.Name,
-                                crew: parseInt(boat.Crew),
-                                py: parseInt(boat.PY),
-                                pursuitStartTime: parseInt(boat.pursuitStartTime || 0)
-                            })
-                        }
-                    }
-                }
-                //mutate boats
-                alert('boats updated')
-            }
-        })
-    }
+    const { data: boats } = useQuery(orpcClient.boat.org.session.queryOptions())
 
     const downloadBoats = async () => {
         if (boats == undefined || club == undefined) return
@@ -119,10 +66,6 @@ function Page() {
             <div className='p-6'>
                 {userHasPermission(session.user, AVAILABLE_PERMISSIONS.editBoats) ? (
                     <div className='flex flex-row p-6 justify-around'>
-                        <Button className='mx-1' color='primary' onClick={() => document.getElementById('boatFileUpload')!.click()}>
-                            Upload Boat Data
-                        </Button>
-                        <Input id='boatFileUpload' type='file' accept='.csv' className='hidden' onChange={e => boatFileUploadHandler(e)} />
                         <Button className='mx-1' color='primary' onClick={downloadBoats}>
                             Download Boat Data
                         </Button>

@@ -17,7 +17,9 @@ import {
 } from "./routes/series";
 import {
   boat_org_all,
+  boat_org_delete,
   boat_org_session,
+  boat_org_update,
   boat_standard_all,
   boat_standard_create,
   boat_standard_delete,
@@ -138,6 +140,8 @@ export const mainRouter = os.router({
     org: {
       session: boat_org_session,
       all: boat_org_all,
+      update: boat_org_update,
+      delete: boat_org_delete,
     },
   },
   user: {

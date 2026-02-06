@@ -103,6 +103,10 @@ export const ORPCcontract = {
       all: oc
         .input(z.object({ orgId: z.string() }))
         .output(z.array(Types.BoatSchema)),
+      update: oc.input(Types.BoatSchema).output(Types.BoatSchema),
+      delete: oc
+        .input(z.object({ boatId: z.string() }))
+        .output(Types.BoatSchema),
     },
   },
   race: {
