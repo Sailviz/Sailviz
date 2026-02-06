@@ -14,37 +14,38 @@ function RouteComponent() {
     const session: Session = useLoaderData({ from: `__root__` })
     console.log('Session in clubs route:', session)
     const orgs = useQuery(orpcClient.organization.all.queryOptions()).data as Types.Org[]
-    const profile = useQuery(orpcClient.user.profile.find.queryOptions()).data as Types.UserProfile
 
-    const addFavouriteMutation = useMutation(orpcClient.user.profile.addFavourite.mutationOptions())
+    const favouriteOrgs = useQuery(orpcClient.user.favouriteOrgs.queryOptions()).data as Types.userFavouriteOrgsType[]
+
+    const addFavouriteMutation = useMutation(orpcClient.user.addFavourite.mutationOptions())
 
     const addFavourite = async (orgId: string) => {
         console.log('Adding favourite organization:', orgId)
         try {
             await addFavouriteMutation.mutateAsync({ orgId })
-            queryClient.invalidateQueries({
-                queryKey: orpcClient.user.profile.find.key({ type: 'query' })
+            await queryClient.invalidateQueries({
+                queryKey: orpcClient.user.favouriteOrgs.key({ type: 'query' })
             })
         } catch (error) {
             console.error('Error adding favourite organization:', error)
         }
     }
 
-    const removeFavouriteMutation = useMutation(orpcClient.user.profile.removeFavourite.mutationOptions())
+    const removeFavouriteMutation = useMutation(orpcClient.user.removeFavourite.mutationOptions())
     const removeFavourite = async (orgId: string) => {
         console.log('Removing favourite organization:', orgId)
         try {
             await removeFavouriteMutation.mutateAsync({ orgId })
-            queryClient.invalidateQueries({
-                queryKey: orpcClient.user.profile.find.key({ type: 'query' })
+            await queryClient.invalidateQueries({
+                queryKey: orpcClient.user.favouriteOrgs.key({ type: 'query' })
             })
         } catch (error) {
             console.error('Error removing favourite organization:', error)
         }
     }
 
-    console.log('Favourite organizations:', profile)
-    if (!profile || !orgs) {
+    console.log('Favourite organizations:', session.user)
+    if (!session.user || !orgs) {
         return <div>Loading...</div>
     }
     return (
@@ -52,7 +53,7 @@ function RouteComponent() {
             <h1 className='text-2xl font-bold mb-4 px-6'>My Clubs</h1>
             <div className='flex flex-row flex-wrap px-6'>
                 {orgs
-                    ?.filter(org => profile.userFavouriteOrgs?.flatMap((org: any) => org.orgId).includes(org.id))
+                    ?.filter(org => favouriteOrgs?.flatMap((org: any) => org.orgId).includes(org.id))
                     .sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()))
                     .map((club: Types.Org) => (
                         <div key={club.id} className='p-4 w-96 '>
@@ -81,7 +82,7 @@ function RouteComponent() {
             <h1 className='text-2xl font-bold my-4 px-6'>All Clubs</h1>
             <div className='flex flex-row flex-wrap px-6'>
                 {orgs
-                    ?.filter(org => !profile.userFavouriteOrgs?.flatMap((org: any) => org.orgId).includes(org.id))
+                    ?.filter(org => !favouriteOrgs?.flatMap((org: any) => org.orgId).includes(org.id))
                     .sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()))
                     .map((club: Types.Org) => (
                         <div key={club.id} className='p-3 w-96 '>

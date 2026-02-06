@@ -166,6 +166,14 @@ export const AdminNavCollections: NavCollection[] = [
                 shortcut: ['p', 'p'],
                 isActive: false,
                 items: [] // No child items
+            },
+            {
+                title: 'Boats',
+                url: '/admin/boats',
+                icon: <RaceIcon />,
+                shortcut: ['p', 'p'],
+                isActive: false,
+                items: [] // No child items
             }
         ]
     },

@@ -21,6 +21,7 @@ import { Route as LogoutIndexRouteImport } from './routes/Logout/index'
 import { Route as DemoIndexRouteImport } from './routes/Demo/index'
 import { Route as DashboardHomeRouteImport } from './routes/dashboard/home'
 import { Route as AutoLoginUUIDRouteImport } from './routes/autoLogin/$UUID'
+import { Route as AdminBoatsRouteImport } from './routes/admin/boats'
 import { Route as PRaceRaceIdRouteImport } from './routes/PRace/$raceId'
 import { Route as HRaceRaceIdRouteImport } from './routes/HRace/$raceId'
 import { Route as CastControlClubIdRouteImport } from './routes/CastControl/$clubId'
@@ -112,6 +113,11 @@ const DashboardHomeRoute = DashboardHomeRouteImport.update({
 const AutoLoginUUIDRoute = AutoLoginUUIDRouteImport.update({
   id: '/autoLogin/$UUID',
   path: '/autoLogin/$UUID',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminBoatsRoute = AdminBoatsRouteImport.update({
+  id: '/admin/boats',
+  path: '/admin/boats',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PRaceRaceIdRoute = PRaceRaceIdRouteImport.update({
@@ -287,6 +293,7 @@ export interface FileRoutesByFullPath {
   '/CastControl/$clubId': typeof CastControlClubIdRoute
   '/HRace/$raceId': typeof HRaceRaceIdRoute
   '/PRace/$raceId': typeof PRaceRaceIdRoute
+  '/admin/boats': typeof AdminBoatsRoute
   '/autoLogin/$UUID': typeof AutoLoginUUIDRoute
   '/dashboard/home': typeof DashboardHomeRoute
   '/Demo': typeof DemoIndexRoute
@@ -333,6 +340,7 @@ export interface FileRoutesByTo {
   '/CastControl/$clubId': typeof CastControlClubIdRoute
   '/HRace/$raceId': typeof HRaceRaceIdRoute
   '/PRace/$raceId': typeof PRaceRaceIdRoute
+  '/admin/boats': typeof AdminBoatsRoute
   '/autoLogin/$UUID': typeof AutoLoginUUIDRoute
   '/dashboard/home': typeof DashboardHomeRoute
   '/Demo': typeof DemoIndexRoute
@@ -380,6 +388,7 @@ export interface FileRoutesById {
   '/CastControl/$clubId': typeof CastControlClubIdRoute
   '/HRace/$raceId': typeof HRaceRaceIdRoute
   '/PRace/$raceId': typeof PRaceRaceIdRoute
+  '/admin/boats': typeof AdminBoatsRoute
   '/autoLogin/$UUID': typeof AutoLoginUUIDRoute
   '/dashboard/home': typeof DashboardHomeRoute
   '/Demo/': typeof DemoIndexRoute
@@ -428,6 +437,7 @@ export interface FileRouteTypes {
     | '/CastControl/$clubId'
     | '/HRace/$raceId'
     | '/PRace/$raceId'
+    | '/admin/boats'
     | '/autoLogin/$UUID'
     | '/dashboard/home'
     | '/Demo'
@@ -474,6 +484,7 @@ export interface FileRouteTypes {
     | '/CastControl/$clubId'
     | '/HRace/$raceId'
     | '/PRace/$raceId'
+    | '/admin/boats'
     | '/autoLogin/$UUID'
     | '/dashboard/home'
     | '/Demo'
@@ -520,6 +531,7 @@ export interface FileRouteTypes {
     | '/CastControl/$clubId'
     | '/HRace/$raceId'
     | '/PRace/$raceId'
+    | '/admin/boats'
     | '/autoLogin/$UUID'
     | '/dashboard/home'
     | '/Demo/'
@@ -567,6 +579,7 @@ export interface RootRouteChildren {
   CastControlClubIdRoute: typeof CastControlClubIdRoute
   HRaceRaceIdRoute: typeof HRaceRaceIdRoute
   PRaceRaceIdRoute: typeof PRaceRaceIdRoute
+  AdminBoatsRoute: typeof AdminBoatsRoute
   AutoLoginUUIDRoute: typeof AutoLoginUUIDRoute
   DashboardHomeRoute: typeof DashboardHomeRoute
   DemoIndexRoute: typeof DemoIndexRoute
@@ -691,6 +704,13 @@ declare module '@tanstack/react-router' {
       path: '/autoLogin/$UUID'
       fullPath: '/autoLogin/$UUID'
       preLoaderRoute: typeof AutoLoginUUIDRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/boats': {
+      id: '/admin/boats'
+      path: '/admin/boats'
+      fullPath: '/admin/boats'
+      preLoaderRoute: typeof AdminBoatsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/PRace/$raceId': {
@@ -927,6 +947,7 @@ const rootRouteChildren: RootRouteChildren = {
   CastControlClubIdRoute: CastControlClubIdRoute,
   HRaceRaceIdRoute: HRaceRaceIdRoute,
   PRaceRaceIdRoute: PRaceRaceIdRoute,
+  AdminBoatsRoute: AdminBoatsRoute,
   AutoLoginUUIDRoute: AutoLoginUUIDRoute,
   DashboardHomeRoute: DashboardHomeRoute,
   DemoIndexRoute: DemoIndexRoute,

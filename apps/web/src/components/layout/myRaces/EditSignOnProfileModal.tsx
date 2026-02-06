@@ -10,52 +10,52 @@ import * as Types from '@sailviz/types'
 
 export default function EditSignOnProfileModal({
     open,
+    boats,
     profile,
-    advancedEdit,
     onClose
 }: {
     open: boolean
-    profile: Types.SignOnProfile | undefined
-    advancedEdit: boolean
+    boats: Types.StandardBoatType[] | undefined
+    profile: Types.SignOnProfile
     onClose: () => void
 }) {
     const { theme } = useTheme()
-    const boats = useQuery(orpcClient.boat.session.queryOptions()).data as Types.BoatType[]
 
-    const updateProfileMutation = useMutation(orpcClient.user.profile.update.mutationOptions())
-    const deleteProfileMutation = useMutation(orpcClient.user.profile.delete.mutationOptions())
+    const updateProfileMutation = useMutation(orpcClient.user.signOnProfile.update.mutationOptions())
+    const deleteProfileMutation = useMutation(orpcClient.user.signOnProfile.delete.mutationOptions())
 
     const queryClient = useQueryClient()
 
-    const [boatOption, setBoatOption] = useState({ label: '', value: {} as Types.BoatType })
+    const [boatOption, setBoatOption] = useState({ label: '', value: {} as Types.StandardBoatType })
 
     const [helm, setHelm] = useState('')
     const [crew, setCrew] = useState('')
-    const [boat, setBoat] = useState<Types.BoatType>({} as Types.BoatType)
+    const [boat, setBoat] = useState<Types.StandardBoatType>({} as Types.StandardBoatType)
     const [sailNumber, setSailNumber] = useState('')
 
-    let options: { label: string; value: Types.BoatType }[] = []
-    boats?.forEach((boat: Types.BoatType) => {
-        options.push({ value: boat as Types.BoatType, label: boat.name })
+    let options: { label: string; value: Types.StandardBoatType }[] = []
+    boats?.forEach((boat: Types.StandardBoatType) => {
+        options.push({ value: boat as Types.StandardBoatType, label: boat.name })
     })
 
     const submit = async () => {
         await updateProfileMutation.mutateAsync({
+            ...profile,
             Helm: helm,
             Crew: crew,
-            boat: boat,
+            Boat: boat,
             SailNumber: sailNumber
         })
 
         await queryClient.invalidateQueries({
-            queryKey: orpcClient.fleet.find.key({ type: 'query', input: { fleetId: fleet!.id } })
+            queryKey: orpcClient.user.signOnProfile.all.key({ type: 'query' })
         })
 
         onClose()
     }
 
-    const onDelete = async (profile: Types.Profile) => {
-        await deleteProfileMutation.mutateAsync({ id: profile.id })
+    const onDelete = async (profile: Types.SignOnProfile) => {
+        await deleteProfileMutation.mutateAsync(profile)
         onClose()
     }
 
@@ -67,13 +67,14 @@ export default function EditSignOnProfileModal({
         setHelm(profile.Helm)
         setCrew(profile.Crew)
         setBoat(profile.Boat)
+        setBoatOption({ label: profile.Boat.name, value: profile.Boat })
         setSailNumber(profile.SailNumber)
     }, [profile])
 
     return (
         <Dialog open={open} onOpenChange={() => onClose()}>
             <DialogContent className='max-w-8/12' title='Edit Result'>
-                <DialogHeader className='flex flex-col gap-1 text-2xl w-96'>Edit Result</DialogHeader>
+                <DialogHeader className='flex flex-col gap-1 text-2xl w-96'>Edit Profile</DialogHeader>
                 <div className='flex flex-col w-full'>
                     <div className='flex flex-row w-full'>
                         <div className='flex flex-col px-6 w-full'>
@@ -152,13 +153,10 @@ export default function EditSignOnProfileModal({
                     </div>
                 </div>
                 <DialogFooter>
-                    {advancedEdit ? (
-                        <Button color='danger' onClick={() => onDelete(profile!)}>
-                            Remove
-                        </Button>
-                    ) : (
-                        <></>
-                    )}
+                    <Button color='danger' onClick={() => onDelete(profile!)}>
+                        Remove
+                    </Button>
+
                     <Button color='primary' onClick={submit}>
                         Save
                     </Button>

@@ -3,9 +3,9 @@ import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, typ
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
 import { Button } from '../ui/button'
 import * as Types from '@sailviz/types'
-import { type Session } from '@sailviz/auth/client'
-import { useLoaderData } from '@tanstack/react-router'
 import EditSignOnProfileModal from '@components/layout/myRaces/EditSignOnProfileModal'
+import { useQuery } from '@tanstack/react-query'
+import { orpcClient } from '@lib/orpc'
 
 const Action = ({ profile, onClick }: { profile: Types.SignOnProfile; onClick: (member: Types.SignOnProfile) => void }) => {
     return (
@@ -15,13 +15,15 @@ const Action = ({ profile, onClick }: { profile: Types.SignOnProfile; onClick: (
     )
 }
 
+const Boat = ({ boat }: { boat: Types.StandardBoatType }) => {
+    return <div>{boat.name}</div>
+}
+
 const columnHelper = createColumnHelper<Types.SignOnProfile>()
 
-const SignOnProfileTable = () => {
-    const session: Session = useLoaderData({ from: `__root__` })
-
-    const [data] = useState<Types.SignOnProfile[]>(session.user.profile.signOnProfiles)
-
+const SignOnProfileTable = ({ boats }: { boats: Types.StandardBoatType[] | undefined }) => {
+    const { data: profile } = useQuery(orpcClient.user.signOnProfile.all.queryOptions())
+    const data = profile || []
     const [modalIsOpen, setModalIsOpen] = useState(false)
     const [modalData, setModalData] = useState<Types.SignOnProfile | undefined>(undefined)
 
@@ -29,13 +31,6 @@ const SignOnProfileTable = () => {
         setModalData(member)
         setModalIsOpen(true)
     }
-
-    const [sorting, setSorting] = useState<SortingState>([
-        {
-            id: 'number',
-            desc: false
-        }
-    ])
 
     var table = useReactTable({
         data,
@@ -52,27 +47,24 @@ const SignOnProfileTable = () => {
             }),
             columnHelper.accessor(profile => profile.Boat, {
                 id: 'Boat',
-                header: 'Action'
+                header: 'Boat',
+                cell: props => <Boat boat={props.row.original.Boat} />
             }),
-            columnHelper.accessor(profile => profile.Helm, {
+            columnHelper.accessor(profile => profile.SailNumber, {
                 id: 'Sail Number',
-                header: 'Action'
+                header: 'Sail Number'
             }),
-            columnHelper.accessor(profile => profile.userID, {
+            columnHelper.accessor(profile => profile.userId, {
                 header: 'Action',
                 cell: props => <Action profile={props.row.original} onClick={onEdit} />
             })
         ],
-        state: {
-            sorting
-        },
-        onSortingChange: setSorting,
         getCoreRowModel: getCoreRowModel(),
         getSortedRowModel: getSortedRowModel()
     })
     return (
         <div className='rounded-md border w-full'>
-            <EditSignOnProfileModal open={modalIsOpen} profile={modalData!} onClose={() => setModalIsOpen(false)} />
+            <EditSignOnProfileModal boats={boats} open={modalIsOpen} profile={modalData!} onClose={() => setModalIsOpen(false)} />
             <Table aria-label='Profiles Table'>
                 <TableHeader>
                     <TableRow>

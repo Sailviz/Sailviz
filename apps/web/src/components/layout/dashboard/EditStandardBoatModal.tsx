@@ -6,20 +6,19 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
 import * as Types from '@sailviz/types'
 
-export default function EditBoatDialog({ boat, open, onClose }: { boat: Types.BoatType | undefined; open: boolean; onClose?: () => void }) {
+export default function EditStandardBoatDialog({ boat, open, onClose }: { boat: Types.StandardBoatType | undefined; open: boolean; onClose?: () => void }) {
     const [boatName, setBoatName] = useState('')
     const [PY, setPY] = useState(0)
     const [Crew, setCrew] = useState(0)
-    const [pursuitStartTime, setPursuitStartTime] = useState(0)
 
-    const boatUpdateMutation = useMutation(orpcClient.boat.update.mutationOptions())
-    const boatDeleteMutation = useMutation(orpcClient.boat.delete.mutationOptions())
+    const boatUpdateMutation = useMutation(orpcClient.boat.standard.update.mutationOptions())
+    const boatDeleteMutation = useMutation(orpcClient.boat.standard.delete.mutationOptions())
     const queryClient = useQueryClient()
 
-    const editBoat = async (boat: Types.BoatType) => {
+    const editBoat = async (boat: Types.StandardBoatType) => {
         await boatUpdateMutation.mutateAsync(boat)
         queryClient.invalidateQueries({
-            queryKey: orpcClient.boat.session.key({ type: 'query' })
+            queryKey: orpcClient.boat.standard.all.key({ type: 'query' })
         })
         onClose && onClose()
     }
@@ -28,7 +27,7 @@ export default function EditBoatDialog({ boat, open, onClose }: { boat: Types.Bo
         if (confirm('Are you sure you want to delete this boat?')) {
             await boatDeleteMutation.mutateAsync({ boatId: boatId })
             queryClient.invalidateQueries({
-                queryKey: orpcClient.boat.session.key({ type: 'query' })
+                queryKey: orpcClient.boat.standard.all.key({ type: 'query' })
             })
             onClose && onClose()
         }
@@ -39,7 +38,6 @@ export default function EditBoatDialog({ boat, open, onClose }: { boat: Types.Bo
         setBoatName(boat.name)
         setPY(boat.py)
         setCrew(boat.crew)
-        setPursuitStartTime(boat.pursuitStartTime)
     }, [boat])
 
     return (
@@ -60,22 +58,12 @@ export default function EditBoatDialog({ boat, open, onClose }: { boat: Types.Bo
                         <p className='text-2xl font-bold'>Crew</p>
                         <Input id='crew' type='number' value={Crew.toString()} onChange={e => setCrew(parseInt(e.target.value))} autoComplete='off' />
                     </div>
-                    <div className='flex flex-col px-6 w-full'>
-                        <p className='text-xl font-bold'>Pursuit Start Time (s)</p>
-                        <Input
-                            id='starttime'
-                            type='number'
-                            value={pursuitStartTime.toString()}
-                            onChange={e => setPursuitStartTime(parseInt(e.target.value))}
-                            autoComplete='off'
-                        />
-                    </div>
                 </div>
                 <DialogFooter>
                     <Button variant={'red'} onClick={deleteBoat(boat?.id || '')}>
                         Delete
                     </Button>
-                    <Button onClick={() => editBoat({ ...boat!, name: boatName, py: PY, crew: Crew, pursuitStartTime: pursuitStartTime })}>Save</Button>
+                    <Button onClick={() => editBoat({ ...boat!, name: boatName, py: PY, crew: Crew })}>Save</Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>

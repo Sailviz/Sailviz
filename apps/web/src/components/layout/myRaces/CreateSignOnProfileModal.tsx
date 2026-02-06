@@ -8,9 +8,8 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
 import * as Types from '@sailviz/types'
 
-export default function CreateSignOnProfileModal({ boats }: { boats: Types.BoatType[] }) {
-    const createProfileMutation = useMutation(orpcClient.user.profile.create.mutationOptions())
-    const updateProfileMutation = useMutation(orpcClient.user.profile.update.mutationOptions())
+export default function CreateSignOnProfileModal({ boats }: { boats: Types.StandardBoatType[] | undefined }) {
+    const createProfileMutation = useMutation(orpcClient.user.signOnProfile.create.mutationOptions())
 
     const [open, setOpen] = useState(false)
     const [helm, setHelm] = useState('')
@@ -22,18 +21,18 @@ export default function CreateSignOnProfileModal({ boats }: { boats: Types.BoatT
     const { theme } = useTheme()
     let submitDisabled = false
 
-    const [selectedBoat, setSelectedBoat] = useState({ label: '', value: {} as Types.BoatType })
+    const [selectedBoat, setSelectedBoat] = useState({ label: '', value: {} as Types.StandardBoatType })
 
     const [helmError, setHelmError] = useState(false)
     const [boatError, setBoatError] = useState(false)
     const [sailNumError, setSailNumError] = useState(false)
 
-    let options: { label: string; value: Types.BoatType }[] = []
+    let options: { label: string; value: Types.StandardBoatType }[] = []
 
     //set the first boat as the selected boat
     if (boats && boats.length > 0) {
-        boats.forEach((boat: Types.BoatType) => {
-            options.push({ value: boat as Types.BoatType, label: boat.name })
+        boats.forEach((boat: Types.StandardBoatType) => {
+            options.push({ value: boat as Types.StandardBoatType, label: boat.name })
         })
     }
 
@@ -68,11 +67,11 @@ export default function CreateSignOnProfileModal({ boats }: { boats: Types.BoatT
         setOpen(false)
     }
 
-    const createProfile = async (helm: string, crew: string, boat: Types.BoatType, sailNum: string) => {
-        console.log('createResult', helm, crew, boat, sailNum)
-        //create a result for each fleet
-        let profile = await createProfileMutation.mutateAsync({ userId })
-        await updateProfileMutation.mutateAsync({ ...profile, Helm: helm, Crew: crew, boat: boat, SailNumber: sailNum })
+    const createProfile = async (helm: string, crew: string, boat: Types.StandardBoatType, sailNum: string) => {
+        await createProfileMutation.mutateAsync({ Helm: helm, Crew: crew, boatId: boat.id, sailNumber: sailNum })
+        await queryClient.invalidateQueries({
+            queryKey: orpcClient.user.signOnProfile.all.key({ type: 'query' })
+        })
     }
 
     const clearFields = async () => {

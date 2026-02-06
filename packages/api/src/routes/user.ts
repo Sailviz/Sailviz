@@ -26,7 +26,7 @@ async function createUser(): Promise<Types.UserType> {
       createdAt: new Date(),
       updatedAt: new Date(),
       startPage: "dashboard",
-      profile: {},
+      userProfileId: null,
     },
   });
   return newUser as Types.UserType;
@@ -81,18 +81,18 @@ export const user_delete = os.user.delete
     return deletedUser;
   });
 
-export const user_profile_addFavourite = os.user.profile.addFavourite
+export const user_addFavourite = os.user.addFavourite
   .use(authMiddleware)
   .handler(async ({ input, context }) => {
     const session = context.session as any;
     if (!session || !session.user) {
       throw new ORPCError("UNAUTHORIZED", { message: "Login required" });
     }
-    const userProfileId = session.user.profile.id;
+    const userId = session.user.id;
     const orgId = input.orgId;
     const existingFavourite = await prisma.userFavouriteOrgs.findFirst({
       where: {
-        userProfileId,
+        userId,
         orgId,
       },
     });
@@ -103,24 +103,24 @@ export const user_profile_addFavourite = os.user.profile.addFavourite
     }
     await prisma.userFavouriteOrgs.create({
       data: {
-        userProfileId,
+        userId,
         orgId,
       },
     });
   });
 
-export const user_profile_removeFavourite = os.user.profile.removeFavourite
+export const user_removeFavourite = os.user.removeFavourite
   .use(authMiddleware)
   .handler(async ({ input, context }) => {
     const session = context.session as any;
     if (!session || !session.user) {
       throw new ORPCError("UNAUTHORIZED", { message: "Login required" });
     }
-    const userProfileId = session.user.profile.id;
+    const userId = session.user.id;
     const orgId = input.orgId;
     const existingFavourite = await prisma.userFavouriteOrgs.findFirst({
       where: {
-        userProfileId,
+        userId,
         orgId,
       },
     });
@@ -134,30 +134,6 @@ export const user_profile_removeFavourite = os.user.profile.removeFavourite
         id: existingFavourite.id,
       },
     });
-  });
-
-export const user_profile_find = os.user.profile.find
-  .use(authMiddleware)
-  .handler(async ({ context }) => {
-    const session = context.session as any;
-    if (!session || !session.user) {
-      throw new ORPCError("UNAUTHORIZED", { message: "Login required" });
-    }
-    const userProfileId = session.user.profile.id;
-    const userProfile = await prisma.userProfile.findUnique({
-      where: {
-        id: userProfileId,
-      },
-      include: {
-        userFavouriteOrgs: true,
-        signOnProfiles: true,
-      },
-    });
-    if (!userProfile) {
-      throw new ORPCError("NOT_FOUND", { message: "User profile not found." });
-    }
-
-    return userProfile as Types.UserProfile;
   });
 
 export const user_results_all = os.user.results.all
@@ -174,4 +150,128 @@ export const user_results_all = os.user.results.all
       },
     });
     return results;
+  });
+
+export const user_signOnProfile_create = os.user.signOnProfile.create
+  .use(authMiddleware)
+  .handler(async ({ context, input }) => {
+    console.log("Creating sign-on profile with input:", input);
+    const session = context.session as any;
+    const userId = session.user.id;
+    const newSignOnProfile = await prisma.signOnProfile.create({
+      data: {
+        user: {
+          connect: {
+            id: userId,
+          },
+        },
+        Helm: input.Helm,
+        Crew: input.Crew,
+        SailNumber: input.sailNumber,
+        Boat: {
+          connect: {
+            id: input.boatId,
+          },
+        },
+      },
+      include: {
+        Boat: true,
+      },
+    });
+    if (!newSignOnProfile) {
+      throw new ORPCError("BAD_REQUEST", {
+        message: "Could not create user profile",
+      });
+    }
+    return newSignOnProfile as Types.SignOnProfile;
+  });
+export const user_signOnProfile_update = os.user.signOnProfile.update
+  .use(authMiddleware)
+  .handler(async ({ input, context }) => {
+    const session = context.session as any;
+    if (!session || !session.user) {
+      throw new ORPCError("UNAUTHORIZED", { message: "Login required" });
+    }
+    const updatedUserProfile = await prisma.signOnProfile.update({
+      where: { id: input.id },
+      data: {
+        Helm: input.Helm,
+        Crew: input.Crew,
+        SailNumber: input.SailNumber,
+        Boat: {
+          connect: {
+            id: input.Boat.id,
+          },
+        },
+      },
+      include: {
+        Boat: true,
+      },
+    });
+    if (!updatedUserProfile) {
+      throw new ORPCError("BAD_REQUEST", {
+        message: "Could not update user profile",
+      });
+    }
+    return updatedUserProfile as Types.SignOnProfile;
+  });
+
+export const user_signOnProfile_delete = os.user.signOnProfile.delete
+  .use(authMiddleware)
+  .handler(async ({ input, context }) => {
+    const session = context.session as any;
+    if (!session || !session.user) {
+      throw new ORPCError("UNAUTHORIZED", { message: "Login required" });
+    }
+    const deletedUserProfile = await prisma.signOnProfile.delete({
+      where: { id: input.id },
+      include: {
+        Boat: true,
+      },
+    });
+    if (!deletedUserProfile) {
+      throw new ORPCError("BAD_REQUEST", {
+        message: "Could not delete user profile",
+      });
+    }
+    return deletedUserProfile as Types.SignOnProfile;
+  });
+
+export const user_signOnProfile_all = os.user.signOnProfile.all
+  .use(authMiddleware)
+  .handler(async ({ context }) => {
+    const session = context.session as any;
+    if (!session || !session.user) {
+      throw new ORPCError("UNAUTHORIZED", { message: "Login required" });
+    }
+    const userId = session.user.id;
+    const profiles = await prisma.signOnProfile.findMany({
+      where: {
+        userId,
+      },
+      include: {
+        Boat: true,
+      },
+    });
+    return profiles as Types.SignOnProfile[];
+  });
+
+export const user_favouriteOrgs = os.user.favouriteOrgs
+  .use(authMiddleware)
+  .handler(async ({ context }) => {
+    const session = context.session as any;
+    if (!session || !session.user) {
+      throw new ORPCError("UNAUTHORIZED", { message: "Login required" });
+    }
+    const userId = session.user.id;
+    const favouriteOrgs = await prisma.userFavouriteOrgs.findMany({
+      where: {
+        userId,
+      },
+      include: {
+        organization: true,
+      },
+    });
+    console.log("Fetched favourite organizations for user:", favouriteOrgs);
+    return favouriteOrgs as Types.userFavouriteOrgsType[];
   });

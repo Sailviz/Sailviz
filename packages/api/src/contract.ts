@@ -77,24 +77,33 @@ export const ORPCcontract = {
     },
   },
   boat: {
-    find: oc.input(z.object({ boatId: z.string() })).output(Types.BoatSchema),
-    session: oc.output(z.array(Types.BoatSchema)),
-    update: oc.input(Types.BoatSchema).output(Types.BoatSchema),
-    create: oc
-      .input(
-        z.object({
-          name: z.string(),
-          crew: z.number(),
-          py: z.number(),
-          pursuitStartTime: z.number(),
-          orgId: z.string(),
-        }),
-      )
-      .output(Types.BoatSchema),
-    delete: oc.input(z.object({ boatId: z.string() })).output(Types.BoatSchema),
-    org: oc
-      .input(z.object({ orgId: z.string() }))
-      .output(z.array(Types.BoatSchema)),
+    standard: {
+      all: oc.output(z.array(Types.StandardBoatSchema)),
+      find: oc
+        .input(z.object({ boatId: z.string() }))
+        .output(Types.StandardBoatSchema),
+      update: oc
+        .input(Types.StandardBoatSchema)
+        .output(Types.StandardBoatSchema),
+      create: oc
+        .input(
+          z.object({
+            name: z.string(),
+            crew: z.number(),
+            py: z.number(),
+          }),
+        )
+        .output(Types.StandardBoatSchema),
+      delete: oc
+        .input(z.object({ boatId: z.string() }))
+        .output(Types.StandardBoatSchema),
+    },
+    org: {
+      session: oc.output(z.array(Types.BoatSchema)),
+      all: oc
+        .input(z.object({ orgId: z.string() }))
+        .output(z.array(Types.BoatSchema)),
+    },
   },
   race: {
     find: oc.input(z.object({ raceId: z.string() })).output(Types.RaceSchema),
@@ -145,10 +154,27 @@ export const ORPCcontract = {
     update: oc.input(Types.UserSchema).output(Types.UserSchema),
     create: oc.input(z.object({ orgId: z.string() })).output(Types.UserSchema),
     delete: oc.input(Types.UserSchema).output(Types.UserSchema),
-    profile: {
-      find: oc.output(Types.UserProfileSchema),
-      addFavourite: oc.input(z.object({ orgId: z.string() })),
-      removeFavourite: oc.input(z.object({ orgId: z.string() })),
+    favouriteOrgs: oc.output(z.array(Types.userFavouriteOrgsSchema)),
+    addFavourite: oc.input(z.object({ orgId: z.string() })),
+    removeFavourite: oc.input(z.object({ orgId: z.string() })),
+    signOnProfile: {
+      all: oc.output(z.array(Types.signOnProfileSchema)),
+      create: oc
+        .input(
+          z.object({
+            Helm: z.string(),
+            Crew: z.string(),
+            sailNumber: z.string(),
+            boatId: z.string(),
+          }),
+        )
+        .output(Types.signOnProfileSchema),
+      update: oc
+        .input(Types.signOnProfileSchema)
+        .output(Types.signOnProfileSchema),
+      delete: oc
+        .input(Types.signOnProfileSchema)
+        .output(Types.signOnProfileSchema),
     },
     results: {
       all: oc.output(z.array(Types.RaceSchema)),

@@ -19,77 +19,69 @@ model globalConfig {
 }
 
 model User {
-  id             String          @id @unique @default(uuid())
-  startPage      String
-  name           String          @default("")
-  email          String?         @unique
-  emailVerified  Boolean
-  isAnonymous    Boolean         @default(false)
-  image          String?         @db.Text
-  createdAt      DateTime
-  updatedAt      DateTime
-  sessions       Session[]
-  accounts       Account[]
-  members        Member[]
-  invitations    Invitation[]
-  results        Result[]
-  teamMembers    teamMember[]
-  profile        UserProfile     @relation(fields: [userProfileId], references: [id])
-  signOnProfiles signOnProfile[]
-  userProfileId  String          @unique
+  id                String              @id @unique @default(uuid())
+  startPage         String
+  name              String              @default("")
+  email             String?             @unique
+  emailVerified     Boolean
+  isAnonymous       Boolean             @default(false)
+  image             String?             @db.Text
+  createdAt         DateTime
+  updatedAt         DateTime
+  sessions          Session[]
+  accounts          Account[]
+  members           Member[]
+  invitations       Invitation[]
+  results           Result[]
+  teamMembers       teamMember[]
+  userFavouriteOrgs UserFavouriteOrgs[]
+  signOnProfiles    signOnProfile[]
+  userProfileId     String              @unique
 
   @@map("user")
 }
 
-model UserProfile {
-  id                String              @id @unique @default(uuid())
-  userId            String
-  user              User?
-  signOnProfiles    signOnProfile[]
-  userFavouriteOrgs UserFavouriteOrgs[]
-
-  @@index([userId(length: 191)])
-}
-
 model UserFavouriteOrgs {
-  id            String       @id @unique @default(uuid())
-  orgId         String
-  organization  Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
-  userProfile   UserProfile? @relation(fields: [userProfileId], references: [id])
-  userProfileId String?
-
-  @@index([orgId(length: 191)])
+  id           String       @id @unique @default(uuid())
+  orgId        String
+  organization Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  user         User?        @relation(fields: [userId], references: [id])
+  userId       String?
 }
 
 model signOnProfile {
-  id            String      @id @unique @default(uuid())
-  userId        String
-  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  orgId         String
-  Helm          String
-  Crew          String
-  SailNumber    String
-  Boat          Boat        @relation(fields: [boatId], references: [id])
-  boatId        String
-  userProfile   UserProfile @relation(fields: [userProfileId], references: [id])
-  userProfileId String
-
-  @@index([userId(length: 191)])
+  id         String @id @unique @default(uuid())
+  userId     String
+  user       User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  Helm       String
+  Crew       String
+  SailNumber String
+  Boat       Boat   @relation(fields: [boatId], references: [id])
+  boatId     String
 }
 
 model Boat {
-  id               String          @id @unique @default(uuid())
-  name             String
+  id             String          @id @unique @default(uuid())
+  name           String
+  crew           Int
+  py             Int
+  results        Result[]
+  fleets         FleetSettings[] @relation("BoatToFleetSettings")
+  signOnProfiles signOnProfile[]
+  organization   Organization?   @relation(fields: [organizationId], references: [id])
+  organizationId String?
+  boatOverrides  BoatOverride[]
+}
+
+model BoatOverride {
+  id               String       @id @unique @default(uuid())
+  boatId           String
+  boat             Boat         @relation(fields: [boatId], references: [id], onDelete: Cascade)
   crew             Int
   py               Int
   pursuitStartTime Int
   orgId            String
-  organization     Organization    @relation(fields: [orgId], references: [id])
-  results          Result[]
-  fleets           FleetSettings[] @relation("BoatToFleetSettings")
-  signOnProfiles   signOnProfile[]
-
-  @@index([orgId])
+  organization     Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
 }
 
 model Organization {
@@ -109,6 +101,7 @@ model Organization {
   invitations       Invitation[]
   teams             Team[]
   userFavouriteOrgs UserFavouriteOrgs[]
+  boatOverrides     BoatOverride[]
 }
 
 model Member {
@@ -120,8 +113,6 @@ model Member {
   role           String       @db.Text
   createdAt      DateTime
 
-  @@index([organizationId(length: 191)])
-  @@index([userId(length: 191)])
   @@map("member")
 }
 
@@ -157,8 +148,6 @@ model Invitation {
   inviterId      String
   user           User         @relation(fields: [inviterId], references: [id], onDelete: Cascade)
 
-  @@index([organizationId(length: 191)])
-  @@index([email(length: 191)])
   @@map("invitation")
 }
 
@@ -182,8 +171,6 @@ model Series {
   races          Race[]
   organization   Organization    @relation(fields: [orgId], references: [id], onDelete: Cascade)
   startSequences StartSequence[]
-
-  @@index([orgId])
 }
 
 model StartSequence {
@@ -210,8 +197,6 @@ model Race {
   Duties           Json
   fleets           Fleet[]
   series           Series  @relation(fields: [seriesId], references: [id], onDelete: Cascade)
-
-  @@index([seriesId])
 }
 
 model FleetSettings {
@@ -221,8 +206,6 @@ model FleetSettings {
   fleets   Fleet[]
   series   Series  @relation(fields: [seriesId], references: [id], onDelete: Cascade)
   boats    Boat[]  @relation("BoatToFleetSettings")
-
-  @@index([seriesId])
 }
 
 model Fleet {
@@ -233,9 +216,6 @@ model Fleet {
   race          Race          @relation(fields: [raceId], references: [id], onDelete: Cascade)
   fleetSettings FleetSettings @relation(fields: [settingsId], references: [id])
   results       Result[]
-
-  @@index([raceId])
-  @@index([settingsId])
 }
 
 model Result {
@@ -257,10 +237,6 @@ model Result {
   fleet            Fleet?  @relation(fields: [fleetId], references: [id], onDelete: Cascade)
   userId           String?
   user             User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([fleetId])
-  @@index([boatId])
-  @@index([userId])
 }
 
 model Lap {
@@ -269,8 +245,6 @@ model Lap {
   time      Int
   isDeleted Boolean
   result    Result  @relation(fields: [resultId], references: [id])
-
-  @@index([resultId])
 }
 
 model Tracker {
@@ -278,8 +252,6 @@ model Tracker {
   orgId        String
   name         String
   organization Organization @relation(fields: [orgId], references: [id])
-
-  @@index([orgId])
 }
 
 model Buoy {
@@ -290,8 +262,6 @@ model Buoy {
   isMoveable   Boolean
   trackerID    String
   organization Organization @relation(fields: [orgId], references: [id])
-
-  @@index([orgId])
 }
 
 model Session {

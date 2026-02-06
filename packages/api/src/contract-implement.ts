@@ -16,12 +16,13 @@ import {
   seriesbyClubId,
 } from "./routes/series";
 import {
-  boat_create,
-  boat_delete,
-  boat_find,
-  boat_org,
-  boat_session,
-  boat_update,
+  boat_org_all,
+  boat_org_session,
+  boat_standard_all,
+  boat_standard_create,
+  boat_standard_delete,
+  boat_standard_find,
+  boat_standard_update,
 } from "./routes/boats";
 import {
   createFleetSettings,
@@ -43,11 +44,15 @@ import {
 import {
   user_create,
   user_delete,
-  user_profile_addFavourite,
-  user_profile_find,
-  user_profile_removeFavourite,
+  user_addFavourite,
+  user_removeFavourite,
   user_results_all,
+  user_signOnProfile_create,
+  user_signOnProfile_update,
   user_update,
+  user_signOnProfile_delete,
+  user_signOnProfile_all,
+  user_favouriteOrgs,
 } from "./routes/user";
 import {
   deleteStartSequenceStep,
@@ -123,21 +128,30 @@ export const mainRouter = os.router({
     findByStripeCustomerId: org_findByStripeCustomerId,
   },
   boat: {
-    find: boat_find,
-    session: boat_session,
-    update: boat_update,
-    create: boat_create,
-    delete: boat_delete,
-    org: boat_org,
+    standard: {
+      find: boat_standard_find,
+      update: boat_standard_update,
+      create: boat_standard_create,
+      delete: boat_standard_delete,
+      all: boat_standard_all,
+    },
+    org: {
+      session: boat_org_session,
+      all: boat_org_all,
+    },
   },
   user: {
     update: user_update,
     create: user_create,
     delete: user_delete,
-    profile: {
-      find: user_profile_find,
-      addFavourite: user_profile_addFavourite,
-      removeFavourite: user_profile_removeFavourite,
+    favouriteOrgs: user_favouriteOrgs,
+    addFavourite: user_addFavourite,
+    removeFavourite: user_removeFavourite,
+    signOnProfile: {
+      all: user_signOnProfile_all,
+      create: user_signOnProfile_create,
+      update: user_signOnProfile_update,
+      delete: user_signOnProfile_delete,
     },
     results: {
       all: user_results_all,

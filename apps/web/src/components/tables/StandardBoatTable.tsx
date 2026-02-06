@@ -4,29 +4,19 @@ import EditStandardBoatDialog from '../layout/dashboard/EditStandardBoatModal'
 import { useQuery } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
 import { useState } from 'react'
-import type { BoatType } from '@sailviz/types'
+import * as Types from '@sailviz/types'
 
-const columnHelper = createColumnHelper<BoatType>()
+const columnHelper = createColumnHelper<Types.StandardBoatType>()
 
 const Text = ({ value }: { value: string }) => {
     return <div>{value}</div>
 }
 
-const StartTime = ({ value }: { value: number }) => {
-    //change to minutes:seconds
-    const time = new Date(Math.abs(value) * 1000).toISOString().substr(14, 5)
-    if (value >= 0) {
-        return <div>+{time}</div>
-    } else {
-        return <div>-{time}</div>
-    }
-}
-
-const BoatTable = () => {
-    const { data: boats } = useQuery(orpcClient.boat.session.queryOptions({ input: { boatId: '' } }))
+const StandardBoatTable = () => {
+    const { data: boats } = useQuery(orpcClient.boat.standard.all.queryOptions({ input: { boatId: '' } }))
 
     const [modalIsOpen, setModalIsOpen] = useState(false)
-    const [modalData, setModalData] = useState<BoatType | undefined>(undefined)
+    const [modalData, setModalData] = useState<Types.StandardBoatType | undefined>(undefined)
 
     const data = boats || []
 
@@ -52,12 +42,6 @@ const BoatTable = () => {
                 id: 'py',
                 header: 'PY',
                 cell: props => <Text value={props.getValue().toString()} />,
-                enableColumnFilter: false
-            }),
-            columnHelper.accessor('pursuitStartTime', {
-                id: 'pursuitStartTime',
-                header: () => <span>Pursuit Start Time</span>,
-                cell: props => <StartTime value={props.getValue()} />,
                 enableColumnFilter: false
             })
         ],
@@ -105,4 +89,4 @@ const BoatTable = () => {
     )
 }
 
-export default BoatTable
+export default StandardBoatTable

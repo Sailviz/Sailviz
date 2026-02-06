@@ -18,24 +18,16 @@ const prisma = (globalForPrisma.prisma ||
         async findUnique({ args, query }) {
           args.include = {
             ...args.include,
-            profile: {
-              include: {
-                userFavouriteOrgs: { include: { organization: true } },
-                signOnProfiles: { include: { Boat: true } },
-              },
-            },
+            userFavouriteOrgs: true,
+            signOnProfiles: true,
           };
           return query(args);
         },
         async findFirst({ args, query }) {
           args.include = {
             ...args.include,
-            profile: {
-              include: {
-                userFavouriteOrgs: { include: { organization: true } },
-                signOnProfiles: { include: { Boat: true } },
-              },
-            },
+            userFavouriteOrgs: true,
+            signOnProfiles: true,
           };
           return query(args);
         },

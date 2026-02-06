@@ -1,4 +1,5 @@
 import z from "zod";
+import { id } from "zod/locales";
 
 export const DutySchema = z.any();
 export type DutyType = z.infer<typeof DutySchema>;
@@ -123,9 +124,16 @@ export const BoatSchema = z.object({
   crew: z.number(),
   py: z.number(),
   pursuitStartTime: z.number(),
-  orgId: z.string(),
 });
 export type BoatType = z.infer<typeof BoatSchema>;
+
+export const StandardBoatSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  crew: z.number(),
+  py: z.number(),
+});
+export type StandardBoatType = z.infer<typeof StandardBoatSchema>;
 
 export const OrgSchema = z.object({
   id: z.string(),
@@ -151,21 +159,16 @@ export type UserType = z.infer<typeof UserSchema>;
 
 export const userFavouriteOrgsSchema = z.object({
   orgId: z.string(),
+  organization: OrgSchema,
 });
-export const UserProfileSchema = z.object({
-  id: z.string(),
-  userId: z.string(),
-  userFavouriteOrgs: z.array(userFavouriteOrgsSchema),
-  signOnProfiles: z.array(z.any()).optional(),
-});
-export type UserProfile = z.infer<typeof UserProfileSchema>;
+export type userFavouriteOrgsType = z.infer<typeof userFavouriteOrgsSchema>;
 
 export const signOnProfileSchema = z.object({
-  userID: z.string(),
-  orgID: z.string(),
+  id: z.string(),
+  userId: z.string(),
   Helm: z.string(),
   Crew: z.string(),
-  Boat: BoatSchema,
+  Boat: StandardBoatSchema,
   SailNumber: z.string(),
 });
 export type SignOnProfile = z.infer<typeof signOnProfileSchema>;

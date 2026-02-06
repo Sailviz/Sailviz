@@ -6,84 +6,88 @@ import { authMiddleware } from "../middleware";
 const os = implement(ORPCcontract);
 
 export async function findBoats(orgId: string) {
-  var result = await prisma.boat.findMany({
-    where: {
-      orgId: orgId,
-    },
+  var standardBoats = await prisma.boat.findMany({
     orderBy: {
       name: "asc",
     },
   });
-  return result;
-}
-
-export async function updateBoatById(boat: BoatType) {
-  const updatedBoat = await prisma.boat.update({
-    where: { id: boat.id },
-    data: boat,
-  });
-  return updatedBoat;
-}
-
-export async function findBoat(boatId: string) {
-  var result = await prisma.boat.findUnique({
+  var modifications = await prisma.boatOverride.findMany({
     where: {
-      id: boatId,
+      orgId: orgId,
     },
+  });
+  //go through boats, and apply any modifications
+  var result: BoatType[] = [];
+  standardBoats.forEach((boat) => {
+    var modifiedBoat = modifications.find((mod) => mod.boatId === boat.id);
+    if (modifiedBoat) {
+      result.push({
+        ...boat,
+        py: modifiedBoat.py,
+        pursuitStartTime: modifiedBoat.pursuitStartTime,
+      });
+    } else {
+      result.push({ ...boat, pursuitStartTime: 0 });
+    }
   });
   return result;
 }
 
-export const boat_create = os.boat.create.handler(async ({ input }) => {
-  const newBoat = await prisma.boat.create({
-    data: {
-      name: input.name,
-      crew: input.crew,
-      py: input.py,
-      pursuitStartTime: input.pursuitStartTime,
-      organization: {
-        connect: {
-          id: input.orgId,
-        },
+export const boat_standard_create = os.boat.standard.create.handler(
+  async ({ input }) => {
+    const newBoat = await prisma.boat.create({
+      data: {
+        name: input.name,
+        crew: input.crew,
+        py: input.py,
       },
-    },
-  });
-  if (newBoat) {
-    return newBoat;
-  } else {
-    throw new ORPCError("Boat not created");
-  }
-});
+    });
+    if (newBoat) {
+      return newBoat;
+    } else {
+      throw new ORPCError("Boat not created");
+    }
+  },
+);
 
-export const boat_delete = os.boat.delete.handler(async ({ input }) => {
-  const deletedBoat = await prisma.boat.delete({
-    where: { id: input.boatId },
-  });
-  if (deletedBoat) {
-    return deletedBoat;
-  } else {
-    throw new ORPCError("BAD_REQUEST");
-  }
-});
+export const boat_standard_delete = os.boat.standard.delete.handler(
+  async ({ input }) => {
+    const deletedBoat = await prisma.boat.delete({
+      where: { id: input.boatId },
+    });
+    if (deletedBoat) {
+      return deletedBoat;
+    } else {
+      throw new ORPCError("BAD_REQUEST");
+    }
+  },
+);
 
-export const boat_update = os.boat.update
+export const boat_standard_update = os.boat.standard.update
   .use(authMiddleware)
   .handler(async ({ input, context }) => {
     const session = context.session as any;
     if (!session || !session.user) {
       throw new ORPCError("UNAUTHORIZED", { message: "Login required" });
     }
-    const updatedBoat = await updateBoatById(input);
+    const updatedBoat = await prisma.boat.update({
+      where: { id: input.id },
+      data: input,
+    });
     if (!updatedBoat) {
       throw new ORPCError("BAD_REQUEST", { message: "Could not update boat" });
     }
     return updatedBoat;
   });
 
-export const boat_find = os.boat.find
+export const boat_standard_find = os.boat.standard.find
   .use(authMiddleware)
   .handler(async ({ input }) => {
-    const boat = await findBoat(input.boatId);
+    const boat = await prisma.boat.findUnique({
+      where: {
+        id: input.boatId,
+      },
+    });
     if (boat) {
       return boat;
     } else {
@@ -91,7 +95,7 @@ export const boat_find = os.boat.find
     }
   });
 
-export const boat_session = os.boat.session
+export const boat_org_session = os.boat.org.session
   .use(authMiddleware)
   .handler(async ({ context }) => {
     const session = context.session as any; // this is because the session type is not quite correct
@@ -104,7 +108,7 @@ export const boat_session = os.boat.session
     }
   });
 
-export const boat_org = os.boat.org
+export const boat_org_all = os.boat.org.all
   .use(authMiddleware)
   .handler(async ({ input }) => {
     const boatsList = await findBoats(input.orgId);
@@ -114,3 +118,16 @@ export const boat_org = os.boat.org
       throw new ORPCError("NOT_FOUND");
     }
   });
+
+export const boat_standard_all = os.boat.standard.all.handler(async () => {
+  const boatsList = await prisma.boat.findMany({
+    orderBy: {
+      name: "asc",
+    },
+  });
+  if (boatsList) {
+    return boatsList;
+  } else {
+    throw new ORPCError("NOT_FOUND");
+  }
+});
