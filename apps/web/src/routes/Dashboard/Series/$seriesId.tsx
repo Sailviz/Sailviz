@@ -3,7 +3,6 @@ import SeriesRaceTable from '@components/tables/SeriesRaceTable'
 import FleetTable from '@components/tables/FleetTable'
 import { AVAILABLE_PERMISSIONS, userHasPermission } from '@components/helpers/users'
 import { ToCountSelect } from '@components/ToCountSelect'
-import { AddRaceButton } from '@components/AddRaceButton'
 import { Button } from '@components/ui/button'
 import StartSequenceManager from '@components/StartSequenceManager'
 import { PageSkeleton } from '@components/layout/PageSkeleton'
@@ -12,6 +11,7 @@ import { useLoaderData, createFileRoute } from '@tanstack/react-router'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
 import { client, type Session } from '@sailviz/auth/client'
+import { ActionButton } from '@components/ui/action-button'
 
 function Page() {
     const session: Session = useLoaderData({ from: `__root__` })
@@ -20,6 +20,9 @@ function Page() {
     const { data: org } = client.useActiveOrganization()
 
     const FleetSettingsCreation = useMutation(orpcClient.fleet.settings.create.mutationOptions())
+    const createRaceMutation = useMutation(orpcClient.race.create.mutationOptions())
+    const createEventMutation = useMutation(orpcClient.trackable.event.create.mutationOptions())
+    const updateRaceMutation = useMutation(orpcClient.race.update.mutationOptions())
     const queryClient = useQueryClient()
 
     const stripeFetchQuery = useMutation(orpcClient.stripe.org.mutationOptions())
@@ -38,21 +41,42 @@ function Page() {
         }
     }
 
+    const createRace = async () => {
+        const race = await createRaceMutation.mutateAsync({ seriesId })
+        if (JSON.parse(org?.metadata).trackable.enabled || false) {
+            // create event in trackable
+            const event = await createEventMutation.mutateAsync({
+                orgId: JSON.parse(org!.metadata).trackable.orgId || '',
+                name: race.series?.name + ' - ' + race.number.toString()
+            })
+            await updateRaceMutation.mutateAsync({
+                ...race,
+                trackableEventId: event.id
+            })
+        }
+        await queryClient.invalidateQueries({
+            queryKey: orpcClient.series.find.key({ type: 'query', input: { seriesId: seriesId } })
+        })
+    }
+
     if (!session || series == undefined || startSequence == undefined || org == undefined) {
         console.log('Series', series)
         // If the user is not authenticated, redirect to the login page
         return <PageSkeleton />
     }
-    console.log('Series:', series)
+
     return (
         <>
-            {/* <EditFleetModal isOpen={editFleetSettingsModal.isOpen} fleetSettings={activeFleetSettings} onSubmit={editFleetSettings} onClose={editFleetSettingsModal.onClose} /> */}
             <div id='series' className='w-full'>
                 <p className='text-6xl font-extrabold p-6'>{series?.name}</p>
                 <div className='p-6'>
                     <SeriesRaceTable seriesId={seriesId} />
                 </div>
-                {userHasPermission(session.user, AVAILABLE_PERMISSIONS.editRaces) ? <AddRaceButton seriesId={seriesId} /> : <> </>}
+                {userHasPermission(session.user, AVAILABLE_PERMISSIONS.editRaces) ? (
+                    <ActionButton before={'Add Race'} during={'Adding'} after={'Done'} action={createRace} />
+                ) : (
+                    <> </>
+                )}
 
                 <p className='text-6xl font-extrabold p-6'>Fleets</p>
                 <div className='p-6'>
