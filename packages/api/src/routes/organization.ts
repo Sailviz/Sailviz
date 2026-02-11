@@ -10,6 +10,10 @@ const os = implement(ORPCcontract);
 export async function getOrg(orgId: string) {
   const org = await prisma.organization.findUnique({
     where: { id: orgId },
+    omit: {
+      stripeCustomerId: true,
+      createdAt: true,
+    },
   });
   return org as unknown as Types.Org; //have to do unknown as settings isn't typed in db
 }
@@ -116,6 +120,7 @@ export const org_session = os.organization.session
     if (!club) {
       throw new ORPCError("NOT_FOUND");
     }
+    console.log("org session", club);
     return club;
   });
 

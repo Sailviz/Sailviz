@@ -9,8 +9,11 @@ import { Button } from '@components/ui/button'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
 import * as Types from '@sailviz/types'
+import type { Session } from '@lib/session'
+import { useLoaderData } from '@tanstack/react-router'
 
 export default function CreateResultModal({ org }: { org: Types.Org }) {
+    const session: Session = useLoaderData({ from: `__root__` })
     const { data: boats } = useQuery(orpcClient.boat.org.all.queryOptions({ input: { orgId: org.id } }))
     const { data: trackers } = useQuery({
         ...orpcClient.trackable.device.list.queryOptions({
@@ -136,7 +139,15 @@ export default function CreateResultModal({ org }: { org: Types.Org }) {
         console.log('createResult', fleetId, helm, crew, boat, sailNum)
         //create a result for each fleet
         let result = await createResultMutation.mutateAsync({ fleetId: fleetId })
-        await updateResultMutation.mutateAsync({ ...result, Helm: helm, Crew: crew, boat: boat, SailNumber: sailNum, trackableParticipantId: participantId })
+        await updateResultMutation.mutateAsync({
+            ...result,
+            Helm: helm,
+            Crew: crew,
+            boat: boat,
+            SailNumber: sailNum,
+            trackableParticipantId: participantId,
+            userId: session.user.id
+        })
 
         console.log(helm, crew, boat, sailNum, fleetId)
     }

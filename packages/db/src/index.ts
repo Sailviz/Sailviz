@@ -32,6 +32,30 @@ const prisma = (globalForPrisma.prisma ||
           return query(args);
         },
       },
+      organization: {
+        async findUnique({ args, query }) {
+          args.include = {
+            ...args.include,
+            orgData: {
+              include: {
+                duties: true,
+              },
+            },
+          };
+          return query(args);
+        },
+        async findFirst({ args, query }) {
+          args.include = {
+            ...args.include,
+            orgData: {
+              include: {
+                duties: true,
+              },
+            },
+          };
+          return query(args);
+        },
+      },
     },
   })) as PrismaClient;
 

@@ -8,7 +8,7 @@ import { StartSequenceStepType } from "packages/types/src/types";
 const os = implement(ORPCcontract);
 
 const stripe = new Stripe(STRIPE_SECRET_KEY, {
-  apiVersion: "2025-09-30.clover",
+  apiVersion: "2025-10-29.clover",
 });
 export async function createStripeCustomer(orgId: string) {
   const org = await prisma.organization.findUnique({

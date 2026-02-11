@@ -102,6 +102,27 @@ model Organization {
   teams             Team[]
   userFavouriteOrgs UserFavouriteOrgs[]
   boatOverrides     BoatOverride[]
+  orgData           orgData?
+  orgDataId         String?             @unique
+}
+
+model orgData {
+  id                   String       @id @unique @default(uuid())
+  planName             String?
+  subscriptionStatus   String?
+  defaultPursuitLength Int          @default(60)
+  trackableEnabled     Boolean
+  trackableOrgId       String?
+  duties               Duties[]
+  organization         Organization @relation(references: [id], fields: [organizationId])
+  organizationId       String       @unique
+}
+
+model Duties {
+  id        String  @id @unique @default(uuid())
+  orgDataId String
+  name      String
+  orgData   orgData @relation(fields: [orgDataId], references: [id])
 }
 
 model Member {

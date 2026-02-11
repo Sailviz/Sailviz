@@ -2,46 +2,40 @@ import { createFileRoute, useLoaderData } from '@tanstack/react-router'
 import { PageSkeleton } from '@components/layout/PageSkeleton'
 import { AVAILABLE_PERMISSIONS, userHasPermission } from '@components/helpers/users'
 import { title } from '@components/layout/home/primitaves'
-import { client, type Session } from '@sailviz/auth/client'
+import { type Session } from '@sailviz/auth/client'
 import { useEffect, useState } from 'react'
 import { Input } from '@components/ui/input'
 import { ActionButton } from '@components/ui/action-button'
+import { useMutation, useQuery } from '@tanstack/react-query'
+import { orpcClient } from '@lib/orpc'
 
 function Page() {
     const session: Session = useLoaderData({ from: `__root__` })
 
-    const [trackableOrgId, setTrackableOrgId] = useState<string>('')
-    const [org, setOrg] = useState<any>(null)
-    const [metadata, setMetadata] = useState<any>(null)
-    useEffect(() => {
-        async function fetchActiveOrg() {
-            const { data: org } = await client.organization.getFullOrganization()
+    const { data: org } = useQuery(orpcClient.organization.session.queryOptions())
 
-            const metadata = JSON.parse(org!.metadata)
-            console.log('Org metadata:', metadata)
-            setMetadata(metadata)
-            setTrackableOrgId(metadata.trackable.orgId || '')
-            setOrg(org)
-        }
-        fetchActiveOrg()
-    }, [])
+    const orgUpdateMutation = useMutation(orpcClient.organization.update.mutationOptions())
+
+    const [trackableOrgId, setTrackableOrgId] = useState<string>('')
 
     const updateOrgIg = async () => {
-        const updatedMetadata = metadata
-        updatedMetadata.trackable.orgId = trackableOrgId
-        await client.organization.update({
-            data: {
-                metadata: updatedMetadata
-            },
-            organizationId: org.id
-        })
+        if (!org) return
+        const updatedOrg = org
+        updatedOrg.orgData!.trackableOrgId = trackableOrgId
+        await orgUpdateMutation.mutateAsync(updatedOrg)
     }
+
+    useEffect(() => {
+        if (org) {
+            setTrackableOrgId(org.orgData!.trackableOrgId || '')
+        }
+    }, [org])
 
     if (session == undefined || org == null) {
         return <PageSkeleton />
     }
 
-    if (!metadata.trackable.enabled) {
+    if (!org.orgData!.trackableEnabled) {
         return (
             <div>
                 <p>Trackable is not enabled for your club, contact support for more information</p>

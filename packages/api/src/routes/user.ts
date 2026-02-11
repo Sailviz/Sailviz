@@ -149,7 +149,31 @@ export const user_results_all = os.user.results.all
         userId,
       },
     });
-    return results;
+    console.log("User results:", results);
+    const fleets = await prisma.fleet.findMany({
+      where: {
+        id: {
+          in: results.map((result) => result.fleetId),
+        },
+      },
+    });
+    console.log("Fleets for user results:", fleets);
+    const races = await prisma.race.findMany({
+      where: {
+        id: {
+          in: fleets.map((fleet) => fleet.raceId),
+        },
+      },
+      include: {
+        fleets: {
+          include: {
+            fleetSettings: true,
+          },
+        },
+        series: true,
+      },
+    });
+    return races as Types.RaceType[];
   });
 
 export const user_signOnProfile_create = os.user.signOnProfile.create

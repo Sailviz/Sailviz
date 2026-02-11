@@ -2,8 +2,7 @@ import prisma from "@sailviz/db";
 import dayjs from "dayjs";
 import { implement, ORPCError } from "@orpc/server";
 import { ORPCcontract } from "../contract";
-import { ClubSettingsType, RaceType } from "packages/types/src/types";
-import { Race } from "packages/db/src/generated";
+import { RaceType } from "packages/types/src/types";
 import { findOrgSeries } from "./series";
 
 const os = implement(ORPCcontract);
@@ -53,7 +52,7 @@ export async function findRaces(
   skip: number,
   take: number,
   date: string,
-  historical: boolean
+  historical: boolean,
 ) {
   var result = await prisma.race.findMany({
     skip: skip,
@@ -107,7 +106,7 @@ export async function findRacesForUser(
   skip = 0,
   take = 50,
   date = dayjs().toISOString(),
-  historical = false
+  historical = false,
 ) {
   const where: any = {
     fleets: {
@@ -205,7 +204,7 @@ export async function findTodaysRacesScoped(scope: {
 export async function countRaces(
   seriesId: string[],
   date: string,
-  historical: boolean
+  historical: boolean,
 ) {
   var result = await prisma.race.count({
     where: {
@@ -241,7 +240,7 @@ export const updateRace = os.race.update.handler(
     } else {
       throw new ORPCError("BAD_REQUEST");
     }
-  }
+  },
 );
 
 export const race_delete = os.race.delete.handler(async ({ input }) => {
@@ -281,10 +280,13 @@ export const race_create = os.race.create.handler(async ({ input }) => {
 
   let dutiesarray = JSON.parse(club.metadata).duties as string[];
   console.log("duties array:", dutiesarray);
-  let duties = dutiesarray!.reduce((obj, key, index) => {
-    obj[key] = "";
-    return obj;
-  }, {} as { [key: string]: any });
+  let duties = dutiesarray!.reduce(
+    (obj, key, index) => {
+      obj[key] = "";
+      return obj;
+    },
+    {} as { [key: string]: any },
+  );
 
   var races: RaceType[] = await prisma.race.findMany({
     where: {
@@ -354,7 +356,7 @@ export const race_create = os.race.create.handler(async ({ input }) => {
       });
       console.log("created fleet: ");
       console.log(newFleet);
-    })
+    }),
   );
 
   const race = await findRace(newRace.id);
@@ -377,14 +379,14 @@ export const race_org = os.race.org.handler(async ({ input }) => {
   const count = await countRaces(
     series.map((s) => s.id),
     input.date,
-    input.historical
+    input.historical,
   );
   const races = await findRaces(
     series.map((s) => s.id),
     input.page ?? 0,
     100,
     input.date,
-    input.historical ?? false
+    input.historical ?? false,
   );
   return { races, count };
 });

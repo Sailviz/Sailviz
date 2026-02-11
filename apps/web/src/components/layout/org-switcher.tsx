@@ -33,7 +33,8 @@ export function OrgSwitcher() {
                 id: org.id,
                 slug: org.slug,
                 stripeCustomerId: '',
-                metadata: {}
+                metadata: {},
+                orgData: {} as Types.OrgDataType
             })
         })
         setOrgList(organizations)
@@ -53,6 +54,7 @@ export function OrgSwitcher() {
                     id: org.data.id,
                     slug: org.data.slug,
                     metadata: {},
+                    orgData: {} as Types.OrgDataType,
                     stripeCustomerId: ''
                 })
             } catch (error) {

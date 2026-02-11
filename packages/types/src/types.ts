@@ -103,20 +103,6 @@ export type RaceSettingsType = {
   numberToCount: number;
 };
 
-export const ClubSettingsSchema = z.object({
-  clockIP: z.string(),
-  hornIP: z.string(),
-  pursuitLength: z.number(),
-  clockOffset: z.number(),
-  duties: z.array(z.string()),
-  trackable: z.object({
-    enabled: z.boolean(),
-    orgID: z.string(),
-  }),
-});
-
-export type ClubSettingsType = z.infer<typeof ClubSettingsSchema>;
-
 export const BoatSchema = z.object({
   id: z.string(),
   name: z.string(),
@@ -134,13 +120,28 @@ export const StandardBoatSchema = z.object({
 });
 export type StandardBoatType = z.infer<typeof StandardBoatSchema>;
 
+export const OrgDataSchema = z.object({
+  id: z.string(),
+  planName: z.string().nullable(),
+  subscriptionStatus: z.string().nullable(),
+  defaultPursuitLength: z.number(),
+  trackableEnabled: z.boolean(),
+  trackableOrgId: z.string(),
+  organizationId: z.string(),
+  duties: z.array(z.any()),
+});
+
+export type OrgDataType = z.infer<typeof OrgDataSchema>;
+
 export const OrgSchema = z.object({
   id: z.string(),
   name: z.string(),
   logo: z.string().nullable(),
-  slug: z.string(),
   metadata: z.any(),
+  slug: z.string(),
   stripeCustomerId: z.string().optional().nullable(),
+  orgDataId: z.string().optional(),
+  orgData: OrgDataSchema.optional(),
 });
 export type Org = z.infer<typeof OrgSchema>;
 
