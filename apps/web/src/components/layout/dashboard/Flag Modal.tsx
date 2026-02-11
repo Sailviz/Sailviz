@@ -8,11 +8,13 @@ export default function FlagDialog({
     isOpen,
     currentFlagStatus,
     nextFlagStatus,
+    raceTime,
     onClose
 }: {
     isOpen: boolean
     currentFlagStatus: boolean[]
     nextFlagStatus: boolean[]
+    raceTime: number
     onClose: () => void
 }) {
     return (
@@ -24,6 +26,18 @@ export default function FlagDialog({
         >
             <DialogContent>
                 <DialogHeader className='flex flex-col'></DialogHeader>
+                <h1 className='text-center'>
+                    <>
+                        -
+                        {Math.floor(raceTime / 60)
+                            .toString()
+                            .padStart(2, '00')}
+                        :
+                        {Math.floor(raceTime % 60) // Ensure seconds are rounded up, looks nicer
+                            .toString()
+                            .padStart(2, '00')}
+                    </>
+                </h1>
                 <div className='flex flex-row w-full justify-around'>
                     <div className='text-2xl font-bold'>Current</div>
                     <div className='text-2xl font-bold'>Next</div>

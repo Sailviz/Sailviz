@@ -95,6 +95,8 @@ function Page() {
         fleetId: ''
     })
 
+    const [raceTime, setRaceTime] = useState<number>(0)
+
     const startRaceButton = async () => {
         //use time for button
         let lastStartTime = Math.floor(new Date().getTime() / 1000 + startSequence.reduce((max, step) => (step.time > max ? step.time : max), 0))
@@ -566,7 +568,7 @@ function Page() {
             <main className='flex items-stretch w-full h-full'>
                 <RetireModal isOpen={retireModal} onSubmit={retireBoat} result={activeResult} onClose={() => setRetireModal(false)} />
                 <FleetSelectDialog mode={selectMode} isOpen={fleetSelectModal} onSubmit={setFleetMode} onClose={() => setFleetSelectModal(false)} fleets={race.fleets} />
-                <FlagModal isOpen={flagModal} currentFlagStatus={flagStatus} nextFlagStatus={nextFlagStatus} onClose={() => setFlagModal(false)} />
+                <FlagModal isOpen={flagModal} currentFlagStatus={flagStatus} nextFlagStatus={nextFlagStatus} onClose={() => setFlagModal(false)} raceTime={raceTime} />
                 <audio id='Beep' src='/Beep-6.mp3'></audio>
                 <audio id='Countdown' src='/Countdown.mp3'></audio>
                 <div className='w-full flex flex-col items-center justify-start panel-height'>
@@ -589,6 +591,7 @@ function Page() {
                                     onSequenceEnd={handleSequenceEnd}
                                     onWarning={handleWarning}
                                     onFleetStart={handleFleetStart}
+                                    onTimeUpdate={(time: number) => setRaceTime(time)}
                                 />
                             </div>
                             <div className='p-2 w-1/4' id='RaceStateButton'>

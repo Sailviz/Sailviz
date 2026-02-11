@@ -9,9 +9,10 @@ interface RaceTimerProps {
     onFleetStart: (fleetSettingsId: string) => void
     timerActive: boolean
     reset: boolean
+    onTimeUpdate: (time: number) => void
 }
 
-const RaceTimer: React.FC<RaceTimerProps> = ({ sequence, startTime, onFlagChange, onHoot, onSequenceEnd, onWarning, onFleetStart, timerActive, reset }) => {
+const RaceTimer: React.FC<RaceTimerProps> = ({ sequence, startTime, onFlagChange, onHoot, onSequenceEnd, onWarning, onFleetStart, timerActive, reset, onTimeUpdate }) => {
     const largestStep = sequence.reduce((max, step) => (step.time > max ? step.time : max), 0) // Find the largest time in the sequence
 
     // Initialize timeLeft with the largest step time
@@ -67,6 +68,8 @@ const RaceTimer: React.FC<RaceTimerProps> = ({ sequence, startTime, onFlagChange
                     onSequenceEnd()
                 }
             }
+            // Add a prop to pass the updated time to the parent component
+            onTimeUpdate(time.time)
         }, 100)
 
         return () => clearTimeout(timer)
