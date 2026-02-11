@@ -36,10 +36,12 @@ function Page() {
     return (
         <div className='h-full overflow-y-auto p-6' ref={contentRef}>
             {race!.fleets.map((fleet: FleetType, index: number) => {
+                const raceTime = race.Time ? dayjs(race.Time).format('DD/MM/YYYY HH:mm') : 'Invalid Date'
+
                 return (
                     <div key={'fleetResults' + index}>
                         <p className='text-2xl'>
-                            {race.series!.name} - Race {race.number} ({dayjs(race.Time).format('DD/MM/YYYY HH:mm')}) - {fleet.fleetSettings.name}
+                            {race.series!.name} - Race {race.number} ({raceTime}) - {fleet.fleetSettings.name}
                         </p>
                         {race.Type == 'Handicap' ? (
                             <HandicapPaperResultsTable fleet={fleet} />
