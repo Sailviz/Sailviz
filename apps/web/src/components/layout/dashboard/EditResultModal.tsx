@@ -90,6 +90,9 @@ export default function EditResultModal({
 
     const onDelete = async (result: ResultType) => {
         await deleteResultMutation.mutateAsync({ id: result.id })
+        await queryClient.invalidateQueries({
+            queryKey: orpcClient.fleet.find.key({ type: 'query', input: { fleetId: fleet!.id } })
+        })
         onClose()
     }
 
