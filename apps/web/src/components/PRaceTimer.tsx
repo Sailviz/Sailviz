@@ -13,7 +13,8 @@ const CountdownTimer = ({
     onGo,
     onEnd,
     onWarning,
-    reset
+    reset,
+    onTimeUpdate
 }: {
     startTime: number
     endTime: number | null
@@ -25,6 +26,7 @@ const CountdownTimer = ({
     onEnd: any
     onWarning: any
     reset: boolean
+    onTimeUpdate: (time: number) => void
 }) => {
     const [timeLeft, setTimeLeft] = useState({ minutes: 5, seconds: 15, countingUp: false })
 
@@ -118,6 +120,7 @@ const CountdownTimer = ({
                     hootFlag = true
                 }
             }
+            onTimeUpdate(time.minutes * 60 + time.seconds)
         }, 100)
 
         return () => clearTimeout(timer)

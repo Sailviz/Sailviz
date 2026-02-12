@@ -40,7 +40,7 @@ function Page() {
     const [retireModal, setRetireModal] = useState(false)
     const [flagModal, setFlagModal] = useState(false)
 
-    const startLength = 315 //5 mins 15 seconds in seconds
+    const startLength = 30 //315 is 5 mins 15 seconds in seconds
 
     var [seriesName, setSeriesName] = useState('')
 
@@ -73,6 +73,8 @@ function Page() {
 
     const [firstLoad, setFirstLoad] = useState(true)
 
+    const [raceTime, setRaceTime] = useState<number>(0)
+
     const startRaceButton = async () => {
         let localTime = Math.floor(new Date().getTime() / 1000 + startLength)
 
@@ -95,7 +97,7 @@ function Page() {
         setFlagStatus([false, false])
         setNextFlagStatus([true, false])
 
-        queryClient.invalidateQueries({ queryKey: raceQueryOptions.queryKey })
+        queryClient.invalidateQueries({ queryKey: orpcClient.race.find.key({ type: 'query' }) })
         startRace()
     }
 
@@ -514,7 +516,7 @@ function Page() {
             console.log(race)
             if (race.fleets[0]!.startTime == 0) {
                 setRaceState(raceStateType.reset)
-            } else if (race.fleets[0]!.startTime + club.metadata!.pursuitLength * 60 < Math.floor(new Date().getTime() / 1000)) {
+            } else if (race.fleets[0]!.startTime + series.settings.pursuitLength * 60 < Math.floor(new Date().getTime() / 1000)) {
                 setRaceState(raceStateType.calculate)
                 setTableView(true)
             } else {
@@ -562,7 +564,7 @@ function Page() {
             <main className='flex items-stretch w-full h-full'>
                 <RetireModal isOpen={retireModal} onSubmit={retireBoat} result={activeResult} onClose={() => setRetireModal(false)} />
 
-                <FlagModal isOpen={flagModal} currentFlagStatus={flagStatus} nextFlagStatus={nextFlagStatus} onClose={() => setFlagModal(false)} />
+                <FlagModal isOpen={flagModal} currentFlagStatus={flagStatus} nextFlagStatus={nextFlagStatus} onClose={() => setFlagModal(false)} raceTime={raceTime} />
 
                 <audio id='Beep' src='/Beep-6.mp3'></audio>
                 <audio id='Countdown' src='/Countdown.mp3'></audio>
@@ -587,6 +589,7 @@ function Page() {
                                     onEnd={endRace}
                                     onWarning={handleWarning}
                                     reset={raceState == raceStateType.reset}
+                                    onTimeUpdate={(time: number) => setRaceTime(time)}
                                 />
                             </div>
                         )}

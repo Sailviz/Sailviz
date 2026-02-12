@@ -17,7 +17,7 @@ function Page() {
     const session: Session = useLoaderData({ from: `__root__` })
     const { seriesId } = Route.useParams()
 
-    const { data: org } = client.useActiveOrganization()
+    const { data: org } = useQuery(orpcClient.organization.find.queryOptions({ input: { orgId: session.session.activeOrganizationId! } }))
 
     const FleetSettingsCreation = useMutation(orpcClient.fleet.settings.create.mutationOptions())
     const createRaceMutation = useMutation(orpcClient.race.create.mutationOptions())
@@ -43,10 +43,10 @@ function Page() {
 
     const createRace = async () => {
         const race = await createRaceMutation.mutateAsync({ seriesId })
-        if (JSON.parse(org?.metadata).trackable.enabled || false) {
+        if (org?.orgData?.trackableEnabled) {
             // create event in trackable
             const event = await createEventMutation.mutateAsync({
-                orgId: JSON.parse(org!.metadata).trackable.orgId || '',
+                orgId: org.orgData.trackableOrgId,
                 name: race.series?.name + ' - ' + race.number.toString()
             })
             await updateRaceMutation.mutateAsync({

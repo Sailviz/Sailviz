@@ -278,15 +278,14 @@ export const race_create = os.race.create.handler(async ({ input }) => {
     where: { id: series.orgId },
   });
 
-  let dutiesarray = JSON.parse(club.metadata).duties as string[];
-  console.log("duties array:", dutiesarray);
-  let duties = dutiesarray!.reduce(
-    (obj, key, index) => {
-      obj[key] = "";
-      return obj;
-    },
-    {} as { [key: string]: any },
-  );
+  let duties = await prisma.duties.findMany({
+    where: { orgDataId: club?.orgDataId },
+  });
+  //create json with key value pairs of duty name and duty id
+  let dutiesJson: { [key: string]: string } = {};
+  duties.forEach((d) => {
+    dutiesJson[d.name] = "";
+  });
 
   var races: RaceType[] = await prisma.race.findMany({
     where: {
@@ -312,7 +311,7 @@ export const race_create = os.race.create.handler(async ({ input }) => {
       number: number,
       Time: dayjs().toISOString(),
       Type: "Handicap",
-      Duties: duties,
+      Duties: dutiesJson,
       series: {
         connect: {
           id: input.seriesId,
