@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import PursuitTimer from '@components/PRaceTimer'
 import { PageSkeleton } from '@components/layout/PageSkeleton'
 import PursuitTable from '@components/layout/race/PursuitTable'
 import RetireModal from '@components/layout/dashboard/RetireModal'
@@ -11,6 +10,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
 import BackButton from '@components/layout/backButton'
 import * as Types from '@sailviz/types'
+import RaceTimer from '@components/layout/race/raceTimer'
 
 enum raceStateType {
     running,
@@ -51,7 +51,8 @@ function Page() {
     // Capture race query options for consistent queryKey usage in optimistic updates
     const raceQueryOptions = orpcClient.race.find.queryOptions({ input: { raceId: raceId }, results: true, boats: true })
     const race = useQuery(raceQueryOptions).data as Types.RaceType
-    const series = useQuery(orpcClient.series.find.queryOptions({ input: { seriesId: race!.seriesId } })).data as Types.SeriesType
+    const series = useQuery(orpcClient.series.find.queryOptions({ input: { seriesId: race?.seriesId } })).data as Types.SeriesType
+    const startSequence = useQuery(orpcClient.startSequence.find.queryOptions({ input: { seriesId: race?.seriesId } })).data as StartSequenceStep[]
 
     const updateFleetMutation = useMutation(orpcClient.fleet.update.mutationOptions())
     const updateResultMutation = useMutation(orpcClient.result.update.mutationOptions())
@@ -97,18 +98,42 @@ function Page() {
         setFlagStatus([false, false])
         setNextFlagStatus([true, false])
 
-        queryClient.invalidateQueries({ queryKey: orpcClient.race.find.key({ type: 'query' }) })
-        startRace()
-    }
-
-    const startRace = async () => {
+        //modify racestate to running for all fleets
         setRaceState(raceStateType.running)
-        //start countdown timer
 
         let sound = document.getElementById('Beep') as HTMLAudioElement
         sound!.currentTime = 0
         sound!.play()
     }
+
+    const handleFlagChange = (flags: FlagStatusType[], next?: FlagStatusType[]) => {
+        console.log(`Flag changed to: ${flags.map(flag => `${flag.flag}:${flag.status}`).join(', ')}`)
+        setFlagStatus([flags[0]!.status, flags[1]!.status])
+        if (next) {
+            setNextFlagStatus([next[0]!.status, next[1]!.status])
+        }
+    }
+
+    const handleSequenceEnd = () => {
+        setRaceState(raceStateType.running)
+        setFlagModal(false)
+    }
+
+    const handleHoot = (time: number) => {
+        //sound horn
+        fetch('https://' + club.metadata!.hornIP + `/hoot?startTime=${time}`, {
+            signal: controller.signal,
+            headers: new Headers({ 'content-type': 'text/plain' })
+        }).catch(err => {
+            console.log('horn not connected')
+            console.log(err)
+        })
+
+        let sound = document.getElementById('Beep') as HTMLAudioElement
+        sound!.currentTime = 0
+        sound!.play()
+    }
+
     const handleWarning = () => {
         console.log('Warning')
 
@@ -120,84 +145,6 @@ function Page() {
             signal: controller.signal,
             headers: new Headers({ 'content-type': 'text/plain' })
         })
-    }
-
-    const handleFiveMinutes = () => {
-        console.log('5 minutes left')
-        setFlagStatus([true, false])
-        setNextFlagStatus([true, true])
-
-        //sound horn
-        fetch('https://' + club.metadata!.hornIP + '/hoot?startTime=300', {
-            signal: controller.signal,
-            headers: new Headers({ 'content-type': 'text/plain' })
-        }).catch(err => {
-            console.log('horn not connected')
-            console.log(err)
-        })
-
-        let sound = document.getElementById('Beep') as HTMLAudioElement
-        sound!.currentTime = 0
-        sound!.play()
-    }
-    const handleFourMinutes = () => {
-        console.log('4 minutes left')
-        setFlagStatus([true, true])
-        setNextFlagStatus([true, false])
-
-        //sound horn
-        fetch('https://' + club.metadata!.hornIP + '/hoot?startTime=300', {
-            signal: controller.signal,
-            headers: new Headers({ 'content-type': 'text/plain' })
-        }).catch(err => {
-            console.log('horn not connected')
-            console.log(err)
-        })
-
-        let sound = document.getElementById('Beep') as HTMLAudioElement
-        sound!.currentTime = 0
-        sound!.play()
-    }
-
-    const handleOneMinute = () => {
-        console.log('1 minute left')
-        setFlagStatus([true, false])
-        setNextFlagStatus([false, false])
-
-        //sound horn
-        fetch('https://' + club.metadata!.hornIP + '/hoot?startTime=500', {
-            signal: controller.signal,
-            headers: new Headers({ 'content-type': 'text/plain' })
-        }).catch(err => {
-            console.log('horn not connected')
-            console.log(err)
-        })
-
-        let sound = document.getElementById('Beep') as HTMLAudioElement
-        sound!.currentTime = 0
-        sound!.play()
-    }
-
-    const handleGo = () => {
-        console.log('GO!')
-        setFlagStatus([false, false])
-        setNextFlagStatus([false, false])
-        setFlagModal(false)
-
-        //sound horn
-        fetch('https://' + club.metadata!.hornIP + '/hoot?startTime=300', {
-            signal: controller.signal,
-            headers: new Headers({ 'content-type': 'text/plain' })
-        }).catch(err => {
-            console.log('horn not connected')
-            console.log(err)
-        })
-
-        let sound = document.getElementById('Beep') as HTMLAudioElement
-        sound!.currentTime = 0
-        sound!.play()
-
-        setRaceState(raceStateType.running)
     }
 
     const stopRace = async () => {
@@ -400,6 +347,7 @@ function Page() {
     }
 
     const endRace = async () => {
+        setRaceState(raceStateType.calculate)
         console.log('ending race')
         //sound horn
         fetch('http://' + club.metadata!.hornIP + '/hoot?startTime=300', {
@@ -428,7 +376,10 @@ function Page() {
             if (a.numberLaps != b.numberLaps) {
                 return a.numberLaps - b.numberLaps
             } else {
-                return a.laps.slice(-1)[0]!.time - b.laps.slice(-1)[0]!.time
+                const aLastLapTime = a.laps.length > 0 ? a.laps.slice(-1)[0]!.time : Infinity
+                const bLastLapTime = b.laps.length > 0 ? b.laps.slice(-1)[0]!.time : Infinity
+
+                return aLastLapTime - bLastLapTime
             }
         })
 
@@ -447,7 +398,6 @@ function Page() {
 
         await queryClient.invalidateQueries({ queryKey: raceQueryOptions.queryKey })
 
-        setRaceState(raceStateType.calculate)
         setTableView(true)
     }
 
@@ -510,6 +460,17 @@ function Page() {
 
     const controller = new AbortController()
 
+    const [hasWarned, setHasWarned] = useState(false)
+    useEffect(() => {
+        if (raceTime > series?.settings.pursuitLength * 60 - 5 && raceState == raceStateType.running && !hasWarned) {
+            handleWarning()
+            setHasWarned(true)
+        }
+        if (raceTime > series?.settings.pursuitLength * 60 && raceState == raceStateType.running) {
+            endRace()
+        }
+    }, [raceTime])
+
     useEffect(() => {
         const loadRace = async () => {
             //check state of race and set ui accordingly
@@ -547,7 +508,7 @@ function Page() {
         }
     }, [])
 
-    if (race == undefined) {
+    if (race == undefined || club == undefined || startSequence == undefined) {
         return <PageSkeleton />
     }
 
@@ -578,7 +539,7 @@ function Page() {
                         ) : (
                             <div className='w-1/4 p-2 m-2 border-4 rounded-lg text-lg font-medium'>
                                 Race Time:{' '}
-                                <PursuitTimer
+                                {/* <PursuitTimer
                                     startTime={race.fleets[0]!.startTime}
                                     endTime={series?.settings.pursuitLength}
                                     timerActive={raceState == raceStateType.running}
@@ -588,6 +549,18 @@ function Page() {
                                     onGo={handleGo}
                                     onEnd={endRace}
                                     onWarning={handleWarning}
+                                    reset={raceState == raceStateType.reset}
+                                    onTimeUpdate={(time: number) => setRaceTime(time)}
+                                /> */}
+                                <RaceTimer
+                                    sequence={startSequence}
+                                    startTime={race.fleets[0]!.startTime}
+                                    onFlagChange={handleFlagChange}
+                                    onHoot={handleHoot}
+                                    onSequenceEnd={handleSequenceEnd}
+                                    onWarning={handleWarning}
+                                    onFleetStart={() => null}
+                                    timerActive={raceState == raceStateType.running}
                                     reset={raceState == raceStateType.reset}
                                     onTimeUpdate={(time: number) => setRaceTime(time)}
                                 />

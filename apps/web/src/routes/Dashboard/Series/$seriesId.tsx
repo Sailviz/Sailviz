@@ -10,7 +10,7 @@ import { SeriesPursuitLength } from '@components/seriesPursuitLength'
 import { useLoaderData, createFileRoute } from '@tanstack/react-router'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
-import { client, type Session } from '@sailviz/auth/client'
+import { type Session } from '@sailviz/auth/client'
 import { ActionButton } from '@components/ui/action-button'
 
 function Page() {
