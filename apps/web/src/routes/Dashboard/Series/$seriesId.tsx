@@ -84,7 +84,7 @@ function Page() {
                 </div>
                 {userHasPermission(session?.user, AVAILABLE_PERMISSIONS.editFleets) ? (
                     <>
-                        <Button onClick={createFleetSettings} disabled={org.metadata.planName != 'SailViz Pro'}>
+                        <Button onClick={createFleetSettings} disabled={org.orgData!.planName != 'SailViz Pro'}>
                             Add Fleet
                         </Button>
                         <StartSequenceManager initialSequence={startSequence} seriesId={seriesId} key={startSequence?.length} />

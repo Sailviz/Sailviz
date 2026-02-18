@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { createFileRoute, useLoaderData } from '@tanstack/react-router'
 import { PageSkeleton } from '@components/layout/PageSkeleton'
 import { AVAILABLE_PERMISSIONS, userHasPermission } from '@components/helpers/users'
@@ -6,8 +6,7 @@ import { title } from '@components/layout/home/primitaves'
 import { Input } from '@components/ui/input'
 import { useQuery } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
-import { ActionButton } from '@components/ui/action-button'
-import { client, type Session } from '@sailviz/auth/client'
+import { type Session } from '@sailviz/auth/client'
 
 function Page() {
     const session: Session = useLoaderData({ from: `__root__` })
@@ -16,24 +15,6 @@ function Page() {
     const [clockIP, setClockIP] = useState('')
     const [clockOffset, setClockOffset] = useState('')
     const [hornIP, setHornIP] = useState('')
-
-    const saveClubSettings = async () => {
-        if (org == undefined) {
-            throw new Error('Club is undefined')
-        }
-        client.organization.update({
-            data: {
-                metadata: { ...JSON.parse(org.metadata), hardware: { clockIP: clockIP, clockOffset: parseInt(clockOffset), hornIP: hornIP } }
-            }
-        })
-    }
-
-    useEffect(() => {
-        if (org == undefined) return
-        setClockIP(JSON.parse(org.metadata).hardware.clockIP)
-        setClockOffset(JSON.parse(org.metadata).hardware.clockOffset.toString())
-        setHornIP(JSON.parse(org.metadata).hardware.hornIP)
-    }, [org])
 
     if (org == undefined || session == undefined) {
         return <PageSkeleton />
@@ -69,9 +50,6 @@ function Page() {
                     <div className='w-2/3'>
                         <Input type='text' value={hornIP} onChange={e => setHornIP(e.target.value)} />
                     </div>
-                </div>
-                <div className='flex flex-col p-6 w-full'>
-                    <ActionButton action={saveClubSettings} before='Save' during='Saving...' after='Saved' />
                 </div>
             </div>
         )

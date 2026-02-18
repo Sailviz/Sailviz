@@ -59,6 +59,13 @@ export const ORPCcontract = {
     findByStripeCustomerId: oc
       .input(z.object({ stripeCustomerId: z.string() }))
       .output(Types.OrgSchema),
+    orgData: {
+      update: oc.input(Types.OrgDataSchema).output(Types.OrgDataSchema),
+    },
+    duties: {
+      create: oc.output(Types.DutySchema),
+      update: oc.input(Types.DutySchema).output(Types.DutySchema),
+    },
   },
   fleet: {
     find: oc

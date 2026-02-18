@@ -33,7 +33,6 @@ export function OrgSwitcher() {
                 id: org.id,
                 slug: org.slug,
                 stripeCustomerId: '',
-                metadata: {},
                 orgData: {} as Types.OrgDataType
             })
         })
@@ -53,7 +52,6 @@ export function OrgSwitcher() {
                     logo: org.data.logo || '',
                     id: org.data.id,
                     slug: org.data.slug,
-                    metadata: {},
                     orgData: {} as Types.OrgDataType,
                     stripeCustomerId: ''
                 })

@@ -35,6 +35,8 @@ import {
   fleet_update,
 } from "./routes/fleet";
 import {
+  duty_create,
+  duty_update,
   org_all,
   org_create,
   org_find,
@@ -71,6 +73,7 @@ import {
   trackable_event_create,
   trackable_participant_create,
 } from "./routes/trackable";
+import { orgData_update } from "./routes/organization";
 
 const os = implement(ORPCcontract);
 
@@ -128,6 +131,13 @@ export const mainRouter = os.router({
     find: org_find,
     name: org_name,
     findByStripeCustomerId: org_findByStripeCustomerId,
+    orgData: {
+      update: orgData_update,
+    },
+    duties: {
+      create: duty_create,
+      update: duty_update,
+    },
   },
   boat: {
     standard: {

@@ -79,14 +79,14 @@ function Page() {
     const startRaceButton = async () => {
         let localTime = Math.floor(new Date().getTime() / 1000 + startLength)
 
-        //start the timer
-        fetch('https://' + club.metadata!.clockIP + '/set?startTime=' + (localTime - club.metadata!.clockOffset).toString(), {
-            signal: controller.signal,
-            mode: 'no-cors'
-        }).catch(err => {
-            console.log('clock not connected')
-            console.log(err)
-        })
+        //start the clock
+        // fetch('https://' + club.metadata!.clockIP + '/set?startTime=' + (localTime - club.metadata!.clockOffset).toString(), {
+        //     signal: controller.signal,
+        //     mode: 'no-cors'
+        // }).catch(err => {
+        //     console.log('clock not connected')
+        //     console.log(err)
+        // })
 
         //Update database
         race.fleets.forEach(async fleet => {
@@ -121,13 +121,7 @@ function Page() {
 
     const handleHoot = (time: number) => {
         //sound horn
-        fetch('https://' + club.metadata!.hornIP + `/hoot?startTime=${time}`, {
-            signal: controller.signal,
-            headers: new Headers({ 'content-type': 'text/plain' })
-        }).catch(err => {
-            console.log('horn not connected')
-            console.log(err)
-        })
+        time = time
 
         let sound = document.getElementById('Beep') as HTMLAudioElement
         sound!.currentTime = 0
@@ -140,34 +134,14 @@ function Page() {
         let sound = document.getElementById('Countdown') as HTMLAudioElement
         sound!.currentTime = 0
         sound!.play()
-        //this is to cache the horn TLS so that when it needs to hoot it is quicker.
-        fetch('https://' + club.metadata!.hornIP + '/reset', {
-            signal: controller.signal,
-            headers: new Headers({ 'content-type': 'text/plain' })
-        })
     }
 
     const stopRace = async () => {
         setRaceState(raceStateType.stopped)
-        const timeoutId = setTimeout(() => controller.abort(), 2000)
-        fetch('https://' + club.metadata!.clockIP + '/reset', { signal: controller.signal, mode: 'no-cors' })
-            .then(_ => {
-                clearTimeout(timeoutId)
-            })
-            .catch(function (err) {
-                console.log('Clock not connected: ', err)
-            })
     }
 
     const resetRace = async () => {
-        const timeoutId = setTimeout(() => controller.abort(), 2000)
-        fetch('https://' + club.metadata!.clockIP + '/reset', { signal: controller.signal, mode: 'no-cors' })
-            .then(_ => {
-                clearTimeout(timeoutId)
-            })
-            .catch(function (err) {
-                console.log('Clock not connected: ', err)
-            })
+        // reset clock
         //Update database
         race.fleets.forEach(fleet => {
             fleet.startTime = 0
@@ -350,14 +324,7 @@ function Page() {
         setRaceState(raceStateType.calculate)
         console.log('ending race')
         //sound horn
-        fetch('http://' + club.metadata!.hornIP + '/hoot?startTime=300', {
-            signal: controller.signal,
-            mode: 'no-cors',
-            headers: new Headers({ 'content-type': 'text/plain', 'Access-Control-Allow-Methods': 'POST' })
-        }).catch(err => {
-            console.log('horn not connected')
-            console.log(err)
-        })
+
         let sound = document.getElementById('Beep') as HTMLAudioElement
         sound!.currentTime = 0
         sound!.play()
@@ -457,8 +424,6 @@ function Page() {
 
         queryClient.invalidateQueries({ queryKey: raceQueryOptions.queryKey })
     }
-
-    const controller = new AbortController()
 
     const [hasWarned, setHasWarned] = useState(false)
     useEffect(() => {

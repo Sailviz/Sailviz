@@ -6,30 +6,11 @@ import { orpcClient } from '@lib/orpc'
 import MembersTable from '@components/tables/MembersTable'
 import TeamsTable from '@components/tables/TeamsTable'
 import CreateTeamModal from '@components/layout/dashboard/createTeamModal'
-import { Button } from '@components/ui/button'
-import { client } from '@sailviz/auth/client'
 function Page() {
     const { orgId } = Route.useParams()
 
     const club = useQuery(orpcClient.organization.find.queryOptions({ input: { orgId: orgId } })).data
     const stripe = useQuery(orpcClient.stripe.org.queryOptions({ input: { orgId: orgId } })).data
-
-    const updateMetadata = async () => {
-        await client.organization.update({
-            data: {
-                // required
-                metadata: {
-                    planName: '',
-                    subscriptionStatus: '',
-                    hardware: { clockOffset: 0, hornIP: '', clockIP: '' },
-                    trackable: { enabled: false, orgId: '' },
-                    duties: ['Race Officer', 'Assistant Race Officer', 'Safety Officer', 'Assistant Safety Officer', 'Duty Officer'],
-                    pursuitLength: 60
-                }
-            },
-            organizationId: orgId
-        })
-    }
 
     if (!club || !stripe) {
         return <div>Loading...</div>
@@ -63,7 +44,6 @@ function Page() {
                 <TeamsTable orgId={orgId!} />
                 <CreateTeamModal orgId={orgId!} />
             </div>
-            <Button onClick={updateMetadata}>Update Metadata</Button>
         </div>
     )
 }

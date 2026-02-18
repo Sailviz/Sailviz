@@ -5,18 +5,18 @@ import { useLoaderData } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
 import type { BoatType } from '@sailviz/types'
-import { client, type Session } from '@sailviz/auth/client'
+import { type Session } from '@sailviz/auth/client'
 export default function SignOnView() {
     const session: Session = useLoaderData({ from: `__root__` })
 
     const { data: todaysRaces } = useQuery(orpcClient.race.today.queryOptions({ input: { orgId: session.session.activeOrganizationId! } }))
     const boats = useQuery(orpcClient.boat.org.session.queryOptions()).data as BoatType[]
+    const { data: org } = useQuery(orpcClient.organization.session.queryOptions())
 
-    const metadata = JSON.parse(client.useActiveOrganization().data?.metadata || '{}')
     const { data: trackers } = useQuery(
         orpcClient.trackable.device.list.queryOptions({
-            input: { orgId: metadata.trackable.orgId || '' },
-            enabled: metadata !== undefined
+            input: { orgId: org?.orgData?.trackableOrgId || '' },
+            enabled: org !== undefined
         })
     )
     if (todaysRaces === undefined) {

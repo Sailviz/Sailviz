@@ -128,7 +128,7 @@ export const OrgDataSchema = z.object({
   trackableEnabled: z.boolean(),
   trackableOrgId: z.string(),
   organizationId: z.string(),
-  duties: z.array(z.any()),
+  duties: z.array(DutySchema),
 });
 
 export type OrgDataType = z.infer<typeof OrgDataSchema>;
@@ -137,7 +137,6 @@ export const OrgSchema = z.object({
   id: z.string(),
   name: z.string(),
   logo: z.string().nullable(),
-  metadata: z.any(),
   slug: z.string(),
   stripeCustomerId: z.string().optional().nullable(),
   orgDataId: z.string().optional(),

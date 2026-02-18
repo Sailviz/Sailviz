@@ -44,20 +44,7 @@ export const org_create = os.organization.create.handler(async ({ input }) => {
       name: input.name,
       createdAt: new Date(),
       slug: input.name,
-      metadata: JSON.stringify({
-        duties: [
-          "Race Officer",
-          "Assistant Race Officer",
-          "Safety Officer",
-          "Assistant Safety Officer",
-          "Duty Officer",
-        ],
-        hornIP: "",
-        clockIP: "",
-        trackable: { orgID: "", enabled: false },
-        clockOffset: 1,
-        pursuitLength: 60,
-      }),
+      metadata: "",
     },
   });
 
@@ -137,3 +124,64 @@ export const org_update = os.organization.update
     }
     return updatedClub;
   });
+
+// ORG DATA
+export const orgData_update = os.organization.orgData.update.handler(
+  async ({ input }) => {
+    const updatedOrgData = await prisma.orgData.update({
+      where: {
+        id: input.id,
+      },
+      data: {
+        defaultPursuitLength: input.defaultPursuitLength,
+        trackableOrgId: input.trackableOrgId,
+      },
+      include: {
+        duties: true,
+      },
+    });
+    if (!updatedOrgData) {
+      throw new ORPCError("Failed to update organization data");
+    }
+    return updatedOrgData;
+  },
+);
+
+// DUTIES
+
+export const duty_create = os.organization.duties.create
+  .use(authMiddleware)
+  .handler(async ({ input, context }) => {
+    const session = context.session as any;
+    const newDuty = await prisma.duties.create({
+      data: {
+        orgData: {
+          connect: {
+            id: session.session.activeOrganizationId!,
+          },
+        },
+        name: "Duty",
+      },
+    });
+    if (!newDuty) {
+      throw new ORPCError("Failed to create duty");
+    }
+    return newDuty;
+  });
+
+export const duty_update = os.organization.duties.update.handler(
+  async ({ input }) => {
+    const updatedDuty = await prisma.duties.update({
+      where: {
+        id: input.id,
+      },
+      data: {
+        name: input.name,
+      },
+    });
+    if (!updatedDuty) {
+      throw new ORPCError("Failed to update duty");
+    }
+    return updatedDuty;
+  },
+);

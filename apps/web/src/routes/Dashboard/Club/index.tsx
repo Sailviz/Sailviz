@@ -9,42 +9,40 @@ import { useMutation, useQuery } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
 import { ActionButton } from '@components/ui/action-button'
 import type { Session } from '@sailviz/auth/client'
+import * as Types from '@sailviz/types'
 
 function Page() {
     const session: Session = useLoaderData({ from: `__root__` })
 
     const { data: org } = useQuery(orpcClient.organization.session.queryOptions())
 
-    const orgMutation = useMutation(orpcClient.organization.update.mutationOptions())
+    const orgDataMutation = useMutation(orpcClient.organization.orgData.update.mutationOptions())
+    const createDutyMutation = useMutation(orpcClient.organization.duties.create.mutationOptions())
+    const updateDutyMutation = useMutation(orpcClient.organization.duties.update.mutationOptions())
 
     const [pursuitLength, setPursuitLength] = useState(0)
 
     useEffect(() => {
         if (org == undefined) return
-        setPursuitLength(JSON.parse(org.metadata).pursuitLength)
+        setPursuitLength(org.orgData!.defaultPursuitLength)
     }, [org])
 
     const savePursuitLength = async (pursuitLength: number) => {
         if (org == undefined) {
             throw new Error('Club is undefined')
         }
-        await orgMutation.mutateAsync({ ...org, metadata: { ...org.metadata!, pursuitLength: pursuitLength } })
+        await orgDataMutation.mutateAsync({ ...org.orgData!, defaultPursuitLength: pursuitLength })
     }
 
     const addDuty = async () => {
         if (org == undefined) {
             throw new Error('Club is undefined')
         }
-        await orgMutation.mutateAsync({ ...org, metadata: { ...org.metadata!, duties: [...org.metadata!.duties, 'Duty'] } })
+        await createDutyMutation.mutateAsync({})
     }
 
-    const editDuty = async (index: number, value: string) => {
-        if (org == undefined) {
-            throw new Error('Club is undefined')
-        }
-        let newDuties = org.metadata!.duties
-        newDuties[index] = value
-        await orgMutation.mutateAsync({ ...org, metadata: { ...org.metadata!, duties: newDuties } })
+    const editDuty = async (duty: Types.DutyType, value: string) => {
+        await updateDutyMutation.mutateAsync({ ...duty, name: value })
     }
 
     if (org == undefined || session == undefined) {
@@ -62,14 +60,14 @@ function Page() {
                 <p className='text-2xl font-bold p-6'>Duties</p>
                 <Table>
                     <TableBody>
-                        {JSON.parse(org.metadata)!.duties.map((row: string, index: number) => (
+                        {org.orgData!.duties.map((row: Types.DutyType) => (
                             <TableRow key={row}>
                                 <TableCell>
                                     <div className='grow justify-self-start'>
                                         <Input
-                                            defaultValue={row}
+                                            defaultValue={row.name}
                                             onBlur={(e: any) => {
-                                                editDuty(index, e.target.value)
+                                                editDuty(row, e.target.value)
                                             }}
                                         ></Input>
                                     </div>

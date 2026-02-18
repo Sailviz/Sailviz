@@ -17,7 +17,7 @@ export default function CreateResultModal({ org }: { org: Types.Org }) {
     const { data: boats } = useQuery(orpcClient.boat.org.all.queryOptions({ input: { orgId: org.id } }))
     const { data: trackers } = useQuery({
         ...orpcClient.trackable.device.list.queryOptions({
-            input: { orgId: org?.metadata?.trackable?.orgId || '' }
+            input: { orgId: org?.orgData?.trackableOrgId || '' }
         }),
         enabled: org instanceof Promise
     })

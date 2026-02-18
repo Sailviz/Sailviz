@@ -2,12 +2,13 @@ import { Button } from '@components/ui/button'
 
 import { useLoaderData } from '@tanstack/react-router'
 import { PageSkeleton } from '../PageSkeleton'
-import { client, type Session } from '@sailviz/auth/client'
+import { type Session } from '@sailviz/auth/client'
+import { orpcClient } from '@lib/orpc'
+import { useQuery } from '@tanstack/react-query'
 
 export default function HornTestButton() {
-    const controller = new AbortController()
     const session: Session = useLoaderData({ from: `__root__` })
-    const { data: org } = client.useActiveOrganization()
+    const { data: org } = useQuery(orpcClient.organization.session.queryOptions())
 
     console.log('Session:', session)
     if (!session || !org) {
@@ -16,10 +17,7 @@ export default function HornTestButton() {
     }
 
     const hornTest = async () => {
-        fetch('https://' + org.metadata.settings.hornIP + '/hoot?startTime=100', {
-            signal: controller.signal,
-            headers: new Headers({ 'content-type': 'text/plain' })
-        })
+        //hoot
     }
     return (
         <Button
