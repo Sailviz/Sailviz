@@ -2,5 +2,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 fn main() {
-  app_lib::run();
+    let args: Vec<String> = std::env::args().collect();
+    let fullscreen = args.contains(&"--fullscreen".to_string());
+    app_lib::run(fullscreen);
 }

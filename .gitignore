@@ -9,3 +9,4 @@ packages/api/src/config.ts
 packages/auth/src/config.ts
 packages/db/src/config.ts
 /packages/types/dist
+~/.tauri/myapp.key
