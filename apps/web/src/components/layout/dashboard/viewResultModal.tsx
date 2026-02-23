@@ -22,7 +22,7 @@ export default function ViewResultDialog({ open, result, onClose }: { open: bool
                         </div>
                         <div className='flex flex-col px-6 w-full'>
                             <p className='text-2xl font-bold'>Class</p>
-                            <Input type='text' value={result?.boat.name} />
+                            <Input type='text' value={result?.boat?.name} />
                         </div>
                         <div className='flex flex-col px-6 w-full'>
                             <p className='text-2xl font-bold'>Sail Number</p>

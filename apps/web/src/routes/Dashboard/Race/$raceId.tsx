@@ -93,6 +93,9 @@ function Page() {
             number: race.number
         })
         // mutateRace()
+        queryClient.invalidateQueries({
+            queryKey: orpcClient.race.find.key({ type: 'query' })
+        })
     }
 
     const downloadResults = async () => {

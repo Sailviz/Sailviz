@@ -4,6 +4,7 @@ import { orpcClient } from '@lib/orpc'
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 import * as Types from '@sailviz/types'
+import { Footer } from '@components/layout/home/footer'
 
 const Page = async () => {
     const orgs = useQuery(orpcClient.organization.all.queryOptions()).data as Types.Org[]
@@ -11,7 +12,7 @@ const Page = async () => {
     return (
         <>
             <HomeNav />
-            <div className='flex flex-row flex-wrap px-6'>
+            <div className='flex flex-row flex-wrap px-6 h-screen'>
                 {orgs
                     ?.sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()))
                     .map((club: Types.Org) => (
@@ -20,6 +21,7 @@ const Page = async () => {
                         </div>
                     ))}
             </div>
+            <Footer />
         </>
     )
 }

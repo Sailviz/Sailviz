@@ -128,6 +128,22 @@ function Page() {
         sound!.play()
     }
 
+    const handleWarning = () => {
+        console.log('Warning')
+
+        let sound = document.getElementById('Countdown') as HTMLAudioElement
+        sound!.currentTime = 0
+        sound!.play()
+    }
+
+    const handleHoot = (time: number) => {
+        time = time
+
+        let sound = document.getElementById('Beep') as HTMLAudioElement
+        sound!.currentTime = 0
+        sound!.play()
+    }
+
     const handleFlagChange = (flags: FlagStatusType[], next?: FlagStatusType[]) => {
         console.log(`Flag changed to: ${flags.map(flag => `${flag.flag}:${flag.status}`).join(', ')}`)
         setFlagStatus([flags[0]!.status, flags[1]!.status])
@@ -531,11 +547,11 @@ function Page() {
                                     // start time is the max start time of all fleets, so that the timer starts at the latest start time.
                                     startTime={race.fleets.reduce((max, step) => (step.startTime > max ? step.startTime : max), 0)}
                                     onFlagChange={handleFlagChange}
-                                    onHoot={() => null}
+                                    onHoot={handleHoot}
                                     timerActive={raceState == raceStateType.running}
                                     reset={raceState == raceStateType.reset}
                                     onSequenceEnd={handleSequenceEnd}
-                                    onWarning={() => null}
+                                    onWarning={handleWarning}
                                     onFleetStart={handleFleetStart}
                                     onTimeUpdate={(time: number) => setRaceTime(time)}
                                 />

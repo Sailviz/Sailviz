@@ -32,7 +32,7 @@ export default function EditResultModal({
     const { data: fleet } = useQuery(orpcClient.fleet.find.queryOptions({ input: { fleetId: result?.fleetId || '' }, enabled: !!result }))
 
     const { theme } = useTheme()
-    const boats = useQuery(orpcClient.boat.org.session.queryOptions()).data as BoatType[]
+    const boats = useQuery(orpcClient.boat.standard.all.queryOptions()).data as BoatType[]
 
     const updateResultMutation = useMutation(orpcClient.result.update.mutationOptions())
     const deleteResultMutation = useMutation(orpcClient.result.delete.mutationOptions())
@@ -113,7 +113,7 @@ export default function EditResultModal({
         setNumberLaps(result.numberLaps)
         setBasicElapsed(new Date(Math.max(0, (result.finishTime - fleet.startTime) * 1000)).toISOString().substring(11, 19))
         if (result.boat != null) {
-            setBoatOption({ label: result.boat.name, value: result.boat })
+            setBoatOption({ label: result.boat?.name, value: result.boat })
         } else {
             setBoatOption({ label: '', value: {} as BoatType })
         }

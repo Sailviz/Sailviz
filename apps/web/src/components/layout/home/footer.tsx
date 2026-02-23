@@ -24,7 +24,7 @@ export const Footer = () => {
                         <p className='text-sm text-gray-400'>Email: admin@sailviz.com</p>
                     </div>
                 </div>
-                <div className='mt-10 text-center text-sm text-gray-500'>© 2025 SailViz. All rights reserved.</div>
+                <div className='mt-10 text-center text-sm text-gray-500'>© 2026 SailViz. All rights reserved.</div>
             </div>
         </div>
     )
