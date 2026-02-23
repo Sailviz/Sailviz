@@ -5,10 +5,13 @@ import { PageSkeleton } from '../PageSkeleton'
 import { type Session } from '@sailviz/auth/client'
 import { orpcClient } from '@lib/orpc'
 import { useQuery } from '@tanstack/react-query'
+import { ws_server } from '@components/URL'
+import useWebSocket from '@hooks/use-ws'
 
 export default function HornTestButton() {
     const session: Session = useLoaderData({ from: `__root__` })
     const { data: org } = useQuery(orpcClient.organization.session.queryOptions())
+    const { sendMessage } = useWebSocket(ws_server)
 
     console.log('Session:', session)
     if (!session || !org) {
@@ -18,6 +21,7 @@ export default function HornTestButton() {
 
     const hornTest = async () => {
         //hoot
+        sendMessage(JSON.stringify({ type: 'hootRequest', length: 200 }))
     }
     return (
         <Button

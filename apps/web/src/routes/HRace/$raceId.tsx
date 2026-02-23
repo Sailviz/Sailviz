@@ -13,6 +13,8 @@ import { orpcClient } from '@lib/orpc'
 import BackButton from '@components/layout/backButton'
 import * as Types from '@sailviz/types'
 import type { Session } from '@sailviz/auth/client'
+import useWebSocket from '@hooks/use-ws'
+import { ws_server } from '@components/URL'
 
 // these options are the same across all fleets
 enum raceStateType {
@@ -34,6 +36,7 @@ function Page() {
     const { raceId } = Route.useParams()
 
     const navigate = useNavigate()
+    const { sendMessage } = useWebSocket(ws_server)
 
     const session: Session = useLoaderData({ from: `__root__` })
 
@@ -148,7 +151,7 @@ function Page() {
 
     const handleHoot = (time: number) => {
         //sound horn
-        time = time
+        sendMessage(JSON.stringify({ type: 'hootRequest', length: time }))
 
         let sound = document.getElementById('Beep') as HTMLAudioElement
         sound!.currentTime = 0

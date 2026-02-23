@@ -5,13 +5,14 @@ import { mainRouter } from "./contract-implement";
 import { toNodeHandler } from "better-auth/node";
 import { RequestHeadersPlugin } from "@orpc/server/plugins";
 
-import { ORIGIN_URL } from "./config";
+import * as config from "./config";
 import { auth } from "@sailviz/auth/auth";
+import { generateServer } from "./ws";
 
 const app = express();
 app.use(
   cors({
-    origin: ORIGIN_URL,
+    origin: config.ORIGIN_URL,
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   }),
@@ -42,3 +43,12 @@ app.all("{/*path}", async (req, res, next) => {
 app.listen(3000, "0.0.0.0", () => {
   console.log("🚀 oRPC server listening on http://0.0.0.0:3000");
 });
+
+const wsserver = generateServer();
+wsserver
+  .once("error", (err) => {
+    console.error("WebSocket server error:", err);
+  })
+  .listen(config.WS_URL.split(":")[2], () => {
+    console.log(`> Ready on ${config.WS_URL}`);
+  });
