@@ -2,7 +2,7 @@ import { Button } from '@components/ui/button'
 import { Input } from '@components/ui/input'
 import { useEffect, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
-import { signIn, getSession } from '@sailviz/auth/client'
+import { signIn, getSession, client } from '@sailviz/auth/client'
 import { isTauriRuntime } from '../is-tauri'
 import { Github, Loader2 } from 'lucide-react'
 import { useNavigate } from '@tanstack/react-router'
@@ -134,7 +134,7 @@ export function LoginForm() {
             })
             .then(async ({ data, error }) => {
                 console.log('SignIn response:', data, error)
-                const { data: session } = await getSession()
+                let { data: session } = await getSession()
                 console.log('Session with custom fields:', session)
                 if (session.error != undefined) {
                     alert('Login failed. Please check your username and password.')
@@ -143,6 +143,20 @@ export function LoginForm() {
                 console.log('Session:', session)
                 // Make the fresh session immediately available to consumers
                 // so guards/beforeLoad can read it synchronously from cache.
+
+                // if the user has a start page of dashboard/home, we need to set the active org
+                if (session.user.startPage != 'dashboard/me') {
+                    const { data } = await client.organization.list()
+                    if (data) {
+                        await client.organization.setActive({
+                            organizationId: data[0].id,
+                            organizationSlug: data[0].slug
+                        })
+                    }
+
+                    session = (await getSession()).data
+                    console.log('updated session:', session)
+                }
                 try {
                     queryClient.setQueryData(sessionQueryKey, session)
                 } catch {}

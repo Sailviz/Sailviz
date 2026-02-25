@@ -17,17 +17,21 @@ function Page() {
         fetchActiveOrg()
     }, [])
 
+    if (org == null) {
+        return <div>Loading...</div>
+    }
+
     return (
         <div>
             <div className='p-6'>
-                <h1>{org?.name}</h1>
+                <h1>{org.name}</h1>
             </div>
             <div className='flex flex-row'>
                 <div>
                     <div>
                         <p className='text-2xl font-bold p-6 pb-1'>Today&apos;s Races</p>
                         <div className='p-6 pt-1'>
-                            <UpcomingRacesTable orgId={org?.id} />
+                            <UpcomingRacesTable orgId={org.id} />
                         </div>
                     </div>
 

@@ -11,56 +11,80 @@ import {
     DropdownMenuTrigger
 } from '@components/ui/dropdown-menu'
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from '@components/ui/sidebar'
-import { client } from '@sailviz/auth/client'
+import { client, type Session } from '@sailviz/auth/client'
 import * as Types from '@sailviz/types'
 import { useEffect } from 'react'
-import { useRouter } from '@tanstack/react-router'
+import { useLoaderData, useRouter } from '@tanstack/react-router'
 
 export function OrgSwitcher() {
     const { isMobile } = useSidebar()
     const router = useRouter()
     const [active, setActive] = React.useState<Types.Org | null>(null)
     const [orgList, setOrgList] = React.useState<Types.Org[]>([])
+    const [enabled, setEnabled] = React.useState(true)
 
     const orgs = client.useListOrganizations()
+    const session: Session = useLoaderData({ from: `__root__` })
 
     useEffect(() => {
         const organizations: Types.Org[] = []
-        orgs.data?.forEach(org => {
-            organizations.push({
-                name: org.name,
-                logo: org.logo || '',
-                id: org.id,
-                slug: org.slug,
-                stripeCustomerId: '',
-                orgData: {} as Types.OrgDataType
+        console.log('Session in OrgSwitcher:', session)
+        if (enabled) {
+            orgs.data?.forEach(org => {
+                organizations.push({
+                    name: org.name,
+                    logo: org.logo || '',
+                    id: org.id,
+                    slug: org.slug,
+                    stripeCustomerId: '',
+                    orgData: {} as Types.OrgDataType
+                })
             })
-        })
-        setOrgList(organizations)
-    }, [orgs])
+            setOrgList(organizations)
+        } else {
+            // set to first org in list if not on personal page and org list is enabled, otherwise set to null for personal
+            if (orgs.data && orgs.data.length > 0) {
+                console.log('Setting active org to first in list:', orgs)
+                setActive({
+                    name: orgs.data[0].name,
+                    logo: orgs.data[0].logo || '',
+                    id: orgs.data[0].id,
+                    slug: orgs.data[0].slug,
+                    stripeCustomerId: '',
+                    orgData: {} as Types.OrgDataType
+                })
+            }
+        }
+    }, [orgs, enabled])
 
     useEffect(() => {
         async function fetchActiveOrg() {
             try {
-                const org = await client.organization.getFullOrganization()
-                if (!org.data) {
-                    setActive(null)
-                    return
+                console.log('Fetching active organization for session:', session)
+                if (session.user.startPage == 'dashboard/me') {
+                    const org = await client.organization.getFullOrganization()
+                    if (!org.data) {
+                        setActive(null)
+                        return
+                    }
+                    setActive({
+                        name: org.data.name,
+                        logo: org.data.logo || '',
+                        id: org.data.id,
+                        slug: org.data.slug,
+                        orgData: {} as Types.OrgDataType,
+                        stripeCustomerId: ''
+                    })
+                } else {
+                    // disable changing org if the user has a specific start up page.
+                    setEnabled(false)
                 }
-                setActive({
-                    name: org.data.name,
-                    logo: org.data.logo || '',
-                    id: org.data.id,
-                    slug: org.data.slug,
-                    orgData: {} as Types.OrgDataType,
-                    stripeCustomerId: ''
-                })
             } catch (error) {
                 console.error('Error fetching active organization:', error)
             }
         }
         fetchActiveOrg()
-    }, [])
+    }, [session])
 
     function setActiveOrganization(org: Types.Org) {
         setActive(org)
@@ -124,14 +148,15 @@ export function OrgSwitcher() {
                     >
                         <DropdownMenuLabel className='text-muted-foreground text-xs'>Organisations</DropdownMenuLabel>
                         {/* Personal / Me option */}
-                        <DropdownMenuItem key={'personal'} onClick={() => setPersonal()} className={`gap-2 p-2 ${isPersonal ? 'font-semibold' : ''}`}>
-                            <div className='flex size-6 items-center justify-center rounded-sm border'>
-                                <div className='size-4' />
-                            </div>
-                            My Races
-                            <DropdownMenuShortcut>⌘0</DropdownMenuShortcut>
-                        </DropdownMenuItem>
-
+                        {enabled && (
+                            <DropdownMenuItem key={'personal'} onClick={() => setPersonal()} className={`gap-2 p-2 ${isPersonal ? 'font-semibold' : ''}`}>
+                                <div className='flex size-6 items-center justify-center rounded-sm border'>
+                                    <div className='size-4' />
+                                </div>
+                                My Races
+                                <DropdownMenuShortcut>⌘0</DropdownMenuShortcut>
+                            </DropdownMenuItem>
+                        )}
                         {orgList.map((org, index) => (
                             <DropdownMenuItem
                                 key={org.name}

@@ -21,33 +21,34 @@ export default function SignOnLayout({ children }: { children: React.ReactNode }
         return <div>Loading...</div>
     }
 
-    const backButton: NavCollection = userHasPermission(session!.user, AVAILABLE_PERMISSIONS.dashboardAccess)
-        ? {
-              title: 'Back to Dashboard',
-              items: [
-                  {
-                      title: 'Back to Dashboard',
-                      url: '/dashboard',
-                      icon: <SignOutIcon />,
-                      isActive: false,
-                      items: [],
-                      shortcut: []
-                  }
-              ]
-          }
-        : {
-              title: '',
-              items: [
-                  {
-                      title: 'Log Out',
-                      url: '/Logout',
-                      icon: <SignOutIcon />,
-                      shortcut: ['e', 'e'],
-                      isActive: false,
-                      items: [] // No child items
-                  }
-              ]
-          }
+    const backButton: NavCollection =
+        session.user.startPage.toLowerCase() != 'signon'
+            ? {
+                  title: 'Back to Dashboard',
+                  items: [
+                      {
+                          title: 'Back to Dashboard',
+                          url: '/dashboard',
+                          icon: <SignOutIcon />,
+                          isActive: false,
+                          items: [],
+                          shortcut: []
+                      }
+                  ]
+              }
+            : {
+                  title: '',
+                  items: [
+                      {
+                          title: 'Log Out',
+                          url: '/Logout',
+                          icon: <SignOutIcon />,
+                          shortcut: ['e', 'e'],
+                          isActive: false,
+                          items: [] // No child items
+                      }
+                  ]
+              }
 
     const todaysRacesItems: NavItem[] = todaysRaces.map(race => ({
         title: `SeriesName: ${race.number}`,
