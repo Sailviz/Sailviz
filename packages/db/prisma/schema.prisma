@@ -36,7 +36,6 @@ model User {
   teamMembers       teamMember[]
   userFavouriteOrgs UserFavouriteOrgs[]
   signOnProfiles    signOnProfile[]
-  userProfileId     String              @unique
 
   @@map("user")
 }
@@ -68,8 +67,6 @@ model Boat {
   results        Result[]
   fleets         FleetSettings[] @relation("BoatToFleetSettings")
   signOnProfiles signOnProfile[]
-  organization   Organization?   @relation(fields: [organizationId], references: [id])
-  organizationId String?
   boatOverrides  BoatOverride[]
 }
 
@@ -91,7 +88,6 @@ model Organization {
   logo              String?
   createdAt         DateTime
   metadata          String?             @db.Text
-  boats             Boat[]
   Buoy              Buoy[]
   series            Series[]
   Trackers          Tracker[]

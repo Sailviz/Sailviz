@@ -1,7 +1,6 @@
 import { type ChangeEvent } from 'react'
 import { PageSkeleton } from '@components/layout/PageSkeleton'
 import Papa from 'papaparse'
-import { userHasPermission, AVAILABLE_PERMISSIONS } from '@components/helpers/users'
 import { title } from '@components/layout/home/primitaves'
 import { Button } from '@components/ui/button'
 import { Input } from '@components/ui/input'
@@ -106,20 +105,16 @@ function Page() {
                 <h1 className={title({ color: 'blue' })}>Boats</h1>
             </div>
             <div className='p-6'>
-                {userHasPermission(session.user, AVAILABLE_PERMISSIONS.editBoats) ? (
-                    <div className='flex flex-row p-6 justify-around'>
-                        <Button className='mx-1' color='primary' onClick={() => document.getElementById('boatFileUpload')!.click()}>
-                            Upload Boat Data
-                        </Button>
-                        <Input id='boatFileUpload' type='file' accept='.csv' className='hidden' onChange={e => boatFileUploadHandler(e)} />
-                        <Button className='mx-1' color='primary' onClick={downloadBoats}>
-                            Download Boat Data
-                        </Button>
-                        <CreateBoatDialog />
-                    </div>
-                ) : (
-                    <></>
-                )}
+                <div className='flex flex-row p-6 justify-around'>
+                    <Button className='mx-1' color='primary' onClick={() => document.getElementById('boatFileUpload')!.click()}>
+                        Upload Boat Data
+                    </Button>
+                    <Input id='boatFileUpload' type='file' accept='.csv' className='hidden' onChange={e => boatFileUploadHandler(e)} />
+                    <Button className='mx-1' color='primary' onClick={downloadBoats}>
+                        Download Boat Data
+                    </Button>
+                    <CreateBoatDialog />
+                </div>
                 <StandardBoatTable />
             </div>
         </div>

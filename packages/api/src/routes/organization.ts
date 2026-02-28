@@ -30,6 +30,7 @@ export const org_all = os.organization.all.handler(async ({ input }) => {
   const orgs = await prisma.organization.findMany({
     omit: {
       stripeCustomerId: true,
+      createdAt: true,
     },
   });
   console.log(orgs);
@@ -152,12 +153,18 @@ export const orgData_update = os.organization.orgData.update.handler(
 export const duty_create = os.organization.duties.create
   .use(authMiddleware)
   .handler(async ({ input, context }) => {
+    console.log("Creating duty with input:", input);
     const session = context.session as any;
+    console.log("Session in duty_create:", session);
+    const org = await prisma.organization.findUnique({
+      where: { id: session.session.activeOrganizationId! },
+    });
+    console.log("orgDataId", org);
     const newDuty = await prisma.duties.create({
       data: {
         orgData: {
           connect: {
-            id: session.session.activeOrganizationId!,
+            id: org?.orgDataId!,
           },
         },
         name: "Duty",

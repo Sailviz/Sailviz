@@ -5,7 +5,7 @@ import { AVAILABLE_PERMISSIONS, userHasPermission } from '@components/helpers/us
 import { Input } from '@components/ui/input'
 import { Table, TableBody, TableCell, TableRow } from '@components/ui/table'
 import { Button } from '@components/ui/button'
-import { useMutation, useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
 import { ActionButton } from '@components/ui/action-button'
 import type { Session } from '@sailviz/auth/client'
@@ -13,7 +13,7 @@ import * as Types from '@sailviz/types'
 
 function Page() {
     const session: Session = useLoaderData({ from: `__root__` })
-
+    const queryClient = useQueryClient()
     const { data: org } = useQuery(orpcClient.organization.session.queryOptions())
 
     const orgDataMutation = useMutation(orpcClient.organization.orgData.update.mutationOptions())
@@ -39,6 +39,9 @@ function Page() {
             throw new Error('Club is undefined')
         }
         await createDutyMutation.mutateAsync({})
+        await queryClient.invalidateQueries({
+            queryKey: orpcClient.organization.session.key({ type: 'query' })
+        })
     }
 
     const editDuty = async (duty: Types.DutyType, value: string) => {

@@ -13,7 +13,6 @@ export default function CreateBoatDialog() {
     const [boatName, setBoatName] = useState('')
     const [PY, setPY] = useState(0)
     const [Crew, setCrew] = useState(0)
-    const [pursuitStartTime, setPursuitStartTime] = useState(0)
 
     const [open, setOpen] = useState(false)
 
@@ -24,7 +23,7 @@ export default function CreateBoatDialog() {
             py: boat.py
         })
         queryClient.invalidateQueries({
-            queryKey: orpcClient.boat.org.session.key({ type: 'query' })
+            queryKey: orpcClient.boat.standard.all.key({ type: 'query' })
         })
         setOpen(false)
     }
@@ -33,7 +32,6 @@ export default function CreateBoatDialog() {
         setBoatName('')
         setPY(0)
         setCrew(0)
-        setPursuitStartTime(0)
     }
 
     return (
@@ -63,19 +61,9 @@ export default function CreateBoatDialog() {
                         <p className='text-2xl font-bold'>Crew</p>
                         <Input id='crew' type='number' value={Crew.toString()} onChange={e => setCrew(parseInt(e.target.value))} autoComplete='off' />
                     </div>
-                    <div className='flex flex-col px-6 w-full'>
-                        <p className='text-xl font-bold'>Pursuit Start Time (s)</p>
-                        <Input
-                            id='starttime'
-                            type='number'
-                            value={pursuitStartTime.toString()}
-                            onChange={e => setPursuitStartTime(parseInt(e.target.value))}
-                            autoComplete='off'
-                        />
-                    </div>
                 </div>
                 <DialogFooter>
-                    <Button color='primary' onClick={() => createBoat({ name: boatName, py: PY, crew: Crew, pursuitStartTime: pursuitStartTime } as Types.BoatType)}>
+                    <Button color='primary' onClick={() => createBoat({ name: boatName, py: PY, crew: Crew } as Types.BoatType)}>
                         Create
                     </Button>
                 </DialogFooter>
