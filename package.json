@@ -4,6 +4,7 @@
     "dev:dev:desktop": "concurrently -n \"API,TAURI\" -c \"blue,magenta\" \"pnpm --filter api dev\" \"pnpm --filter desktop dev:dev:desktop\"",
     "dev:test:desktop": "pnpm --filter desktop dev:test:desktop",
     "bundle:test:desktop": "pnpm --filter web build:test && pnpm --filter desktop build:test:desktop && pnpm --filter desktop bundle:test:desktop",
+    "bundle:prod:desktop": "pnpm --filter web build:prod && pnpm --filter desktop build:prod:desktop && pnpm --filter desktop bundle:prod:desktop",
     "dev:api": "pnpm --filter api dev",
     "test:android": "pnpm --filter desktop android:test\"",
     "loadAndroid": "pnpm --filter desktop load",
@@ -14,6 +15,7 @@
     "build:test:api": "pnpm --filter @sailviz/api run build:test",
     "build:prod:api": "pnpm --filter @sailviz/api run build:prod",
     "build:test:desktop": "pnpm --filter web build:test && pnpm --filter desktop build:test:desktop",
+    "build:prod:desktop": "pnpm --filter web build:prod && pnpm --filter desktop build:prod:desktop",
     "prismagenerate": "pnpm --filter @sailviz/db run prismagenerate",
     "prismapush": "pnpm --filter @sailviz/db run prismapush"
   },

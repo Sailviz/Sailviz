@@ -15,7 +15,7 @@ function findPnpmMonorepoRoot(startDir = process.cwd()) {
   }
 
   throw new Error(
-    "pnpm-workspace.yaml not found. Are you sure this is a PNPM monorepo?"
+    "pnpm-workspace.yaml not found. Are you sure this is a PNPM monorepo?",
   );
 }
 
@@ -27,14 +27,14 @@ console.log(`NODE_ENV: ${process.env.NODE_ENV}`);
 const env = process.env.NODE_ENV || "development";
 const envPath = monorepoRoot + `/packages/auth/.env.${env}`;
 
-console.log(`Loading environment from: ${envPath}`);
+console.log(`Loading auth environment from: ${envPath}`);
 
 // Parse the env file
 const parsed = dotenv.config({ path: envPath }).parsed || {};
 
 // Generate TypeScript config file
 const lines = Object.entries(parsed).map(
-  ([key, value]) => `export const ${key} = ${JSON.stringify(value)};`
+  ([key, value]) => `export const ${key} = ${JSON.stringify(value)};`,
 );
 
 const output = `// AUTO-GENERATED FILE. Do not edit.
