@@ -208,8 +208,22 @@ export const ORPCcontract = {
     },
     event: {
       create: oc
-        .input(z.object({ orgId: z.string(), name: z.string() }))
-        .output(z.any()),
+        .input(
+          z.object({
+            orgId: z.string(),
+            name: z.string(),
+          }),
+        )
+        .output(Types.TEventSchema),
+      update: oc.input(
+        z.object({
+          id: z.string(),
+          name: z.string().optional(),
+          eventType: z.number().optional(),
+          isSailviz: z.boolean().optional(),
+          loop: z.boolean().optional(),
+        }),
+      ),
     },
     device: {
       list: oc

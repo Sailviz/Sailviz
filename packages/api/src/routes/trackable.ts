@@ -37,12 +37,26 @@ export const trackable_event_create = os.trackable.event.create.handler(
       orgId: input.orgId,
     });
     return res;
-  }
+  },
+);
+
+export const trackable_event_update = os.trackable.event.update.handler(
+  async ({ input, context }) => {
+    // Placeholder implementation
+    const res = trackableClient.event.update({
+      id: input.id,
+      name: input.name,
+      eventType: input.eventType,
+      isSailviz: input.isSailviz,
+      loop: input.loop,
+    });
+    return res;
+  },
 );
 
 export const trackable_device_list = os.trackable.device.list.handler(
   async ({ input, context }) => {
     const res = trackableClient.device.all({ orgId: input.orgId });
     return res;
-  }
+  },
 );

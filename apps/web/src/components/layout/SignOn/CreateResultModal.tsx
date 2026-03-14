@@ -318,7 +318,7 @@ export default function CreateResultModal({ todaysRaces, boats, trackers }: { to
                         })}
                     </div>
                     <div className='flex flex-col px-6'>
-                        <p className='text-2xl font-bold'>Tracker ID</p>
+                        <p className='text-2xl font-bold'>Tracker ID - Please ignore</p>
                         <Select<{ label: string; value: string }>
                             id='trackerId'
                             className=' w-56 text-3xl'
@@ -327,7 +327,6 @@ export default function CreateResultModal({ todaysRaces, boats, trackers }: { to
                             })}
                             value={{ label: trackers.find(t => t.id === trackerId)?.name || '', value: trackerId }}
                             onChange={choice => {
-                                setBoatError(false)
                                 setTrackerId(choice!.value)
                             }}
                             styles={{

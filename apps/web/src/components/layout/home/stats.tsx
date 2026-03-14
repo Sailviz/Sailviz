@@ -3,11 +3,10 @@ import { useQuery } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
 export function Stats() {
     const { data: laps } = useQuery(orpcClient.lap.global.queryOptions())
-    console.log('Laps:', laps)
 
-    // const { clubs, clubsIsError, clubsIsValidating } = Fetcher.Clubs()
-    // console.log('Clubs:', clubs)
-    // const clubCount = clubs ? clubs.length : 0
+    const { data: orgs } = useQuery(orpcClient.organization.all.queryOptions())
+
+    const orgCount = orgs ? orgs.length : 0
 
     return (
         <div className='w-full bg-white py-20 lg:py-40'>
@@ -30,7 +29,7 @@ export function Stats() {
                             </div>
                             <div className='flex gap-0 flex-col justify-between p-6 border rounded-md shadow-md'>
                                 <MoveUpRight className='w-6 h-6 mb-10 text-blue-500' />
-                                <h2 className='text-5xl tracking-tighter font-bold flex flex-row gap-4 items-end'>{23}</h2>
+                                <h2 className='text-5xl tracking-tighter font-bold flex flex-row gap-4 items-end'>{orgCount}</h2>
                                 <p className='text-base leading-relaxed tracking-tight text-muted-foreground'>Clubs Using SailViz</p>
                             </div>
                         </div>

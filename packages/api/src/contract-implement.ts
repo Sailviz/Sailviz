@@ -71,6 +71,7 @@ import { stripe_find, stripe_org, stripe_update } from "./routes/stripe";
 import {
   trackable_device_list,
   trackable_event_create,
+  trackable_event_update,
   trackable_participant_create,
 } from "./routes/trackable";
 import { orgData_update } from "./routes/organization";
@@ -181,6 +182,7 @@ export const mainRouter = os.router({
     },
     event: {
       create: trackable_event_create,
+      update: trackable_event_update,
     },
     device: {
       list: trackable_device_list,

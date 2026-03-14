@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import * as Types from "@sailviz/types";
 import { oc } from "@orpc/contract";
+import is from "zod/v4/locales/is.js";
 
 export const TrackableContract = {
   waypoint: {
@@ -14,7 +15,7 @@ export const TrackableContract = {
           name: z.string(),
           radius: z.number(),
           sequence: z.number(),
-        })
+        }),
       )
       .output(Types.WaypointSchema),
     update: oc
@@ -26,7 +27,7 @@ export const TrackableContract = {
           name: z.string(),
           radius: z.number(),
           sequence: z.number(),
-        })
+        }),
       )
       .output(Types.WaypointSchema),
     delete: oc
@@ -52,7 +53,14 @@ export const TrackableContract = {
       .output(z.array(Types.PositionSchema)),
   },
   event: {
-    create: oc.input(z.object({ name: z.string(), orgId: z.string() })),
+    create: oc
+      .input(
+        z.object({
+          name: z.string(),
+          orgId: z.string(),
+        }),
+      )
+      .output(Types.TEventSchema),
     update: oc.input(
       z.object({
         id: z.string(),
@@ -60,7 +68,7 @@ export const TrackableContract = {
         eventType: z.number().optional(),
         isSailviz: z.boolean().optional(),
         loop: z.boolean().optional(),
-      })
+      }),
     ),
     all: oc
       .input(z.object({ orgId: z.string() }))

@@ -22,6 +22,7 @@ function Page() {
     const FleetSettingsCreation = useMutation(orpcClient.fleet.settings.create.mutationOptions())
     const createRaceMutation = useMutation(orpcClient.race.create.mutationOptions())
     const createEventMutation = useMutation(orpcClient.trackable.event.create.mutationOptions())
+    const updateEventMutation = useMutation(orpcClient.trackable.event.update.mutationOptions())
     const updateRaceMutation = useMutation(orpcClient.race.update.mutationOptions())
     const queryClient = useQueryClient()
 
@@ -48,6 +49,13 @@ function Page() {
             const event = await createEventMutation.mutateAsync({
                 orgId: org.orgData.trackableOrgId,
                 name: race.series?.name + ' - ' + race.number.toString()
+            })
+            await updateEventMutation.mutateAsync({
+                id: event.id,
+                name: event.name,
+                eventType: 1, //force handicap for now.
+                isSailviz: true,
+                loop: true
             })
             await updateRaceMutation.mutateAsync({
                 ...race,

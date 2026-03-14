@@ -14,7 +14,7 @@ import BackButton from '@components/layout/backButton'
 import * as Types from '@sailviz/types'
 import type { Session } from '@sailviz/auth/client'
 import useWebSocket from '@hooks/use-ws'
-import { ws_server } from '@components/URL'
+import { ws_server, trackable_ws_server } from '@components/URL'
 
 // these options are the same across all fleets
 enum raceStateType {
@@ -37,6 +37,8 @@ function Page() {
 
     const navigate = useNavigate()
     const { sendMessage } = useWebSocket(ws_server)
+
+    const { sendMessage: sendTrackableMessage } = useWebSocket(trackable_ws_server)
 
     const session: Session = useLoaderData({ from: `__root__` })
 
@@ -111,6 +113,10 @@ function Page() {
         //     console.log('clock not connected')
         //     console.log(err)
         // })
+
+        if (race.trackableEventId != undefined) {
+            sendTrackableMessage(JSON.stringify({ type: 'startEventRequest', eventId: race.trackableEventId, posRate: 5000, statusRate: 60000 }))
+        }
 
         race.fleets.forEach(async fleet => {
             //find start time in start sequence
@@ -258,6 +264,10 @@ function Page() {
 
         setRaceState(raceStateType.reset)
 
+        if (race.trackableEventId != undefined) {
+            sendTrackableMessage(JSON.stringify({ type: 'stopEventRequest', eventId: race.trackableEventId }))
+        }
+
         //Update database
         race.fleets.forEach(async fleet => {
             fleet.startTime = 0
@@ -340,6 +350,10 @@ function Page() {
 
     const calculate = async () => {
         await calculateResults(race, updateResultMutation)
+
+        if (race.trackableEventId != undefined) {
+            sendTrackableMessage(JSON.stringify({ type: 'saveEventRequest', eventId: race.trackableEventId }))
+        }
         navigate({ to: '/dashboard/Race/' + race.id })
     }
 
