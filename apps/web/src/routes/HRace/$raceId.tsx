@@ -115,6 +115,7 @@ function Page() {
         // })
 
         if (race.trackableEventId != undefined) {
+            console.log('Sending Trackable start request')
             sendTrackableMessage(JSON.stringify({ type: 'startEventRequest', eventId: race.trackableEventId, posRate: 5000, statusRate: 60000 }))
         }
 
