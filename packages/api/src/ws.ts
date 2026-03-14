@@ -33,6 +33,25 @@ export const generateServer = () => {
     ws.addEventListener("message", (event) => {
       const data = JSON.parse(event.data.toString());
       console.log("Received data:", data);
+      if (data.type == "hootRequest") {
+        //modify this to request status for specific device
+        console.log(`hoot request received: ${data.orgId}, ${data.duration}`);
+        // convert deviceId from string to byte array
+        const orgId = hexStringToByteArray(data.orgId);
+        const duration = uintToByteArray(data.duration);
+        if (duration != undefined || data.duration < 1000) {
+          // bit of a safety check you know
+          //generate byte array with status request and device ID
+          const packet = new Uint8Array([0x02, ...orgId, ...duration]);
+
+          console.log("Sending status request:", packet);
+          wss.clients.forEach((client) => {
+            if (client.readyState === WebSocket.OPEN) {
+              client.send(packet, { binary: true });
+            }
+          });
+        }
+      }
     });
   });
   return wsserver;

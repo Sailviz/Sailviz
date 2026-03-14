@@ -21,7 +21,8 @@ export default function HornTestButton() {
 
     const hornTest = async () => {
         //hoot
-        sendMessage(JSON.stringify({ type: 'hootRequest', length: 200 }))
+        console.log('sending hoot request')
+        sendMessage(JSON.stringify({ type: 'hootRequest', orgId: org.id, duration: 200 }))
     }
     return (
         <Button

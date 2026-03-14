@@ -125,7 +125,7 @@ function Page() {
 
     const handleHoot = (time: number) => {
         //sound horn
-        sendMessage(JSON.stringify({ type: 'hootRequest', length: time }))
+        sendMessage(JSON.stringify({ type: 'hootRequest', orgId: club.id, duration: time }))
 
         let sound = document.getElementById('Beep') as HTMLAudioElement
         sound!.currentTime = 0
