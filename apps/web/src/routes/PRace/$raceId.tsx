@@ -12,7 +12,7 @@ import BackButton from '@components/layout/backButton'
 import * as Types from '@sailviz/types'
 import RaceTimer from '@components/layout/race/raceTimer'
 import useWebSocket from '@hooks/use-ws'
-import { ws_server } from '@components/URL'
+import { trackable_ws_server, ws_server } from '@components/URL'
 
 enum raceStateType {
     running,
@@ -38,6 +38,7 @@ function Page() {
     const navigate = useNavigate()
 
     const { sendMessage } = useWebSocket(ws_server)
+    const { sendMessage: sendTrackableMessage } = useWebSocket(trackable_ws_server)
 
     const [flagStatus, setFlagStatus] = useState<boolean[]>([false, false])
     const [nextFlagStatus, setNextFlagStatus] = useState<boolean[]>([false, false])
@@ -91,6 +92,11 @@ function Page() {
         //     console.log('clock not connected')
         //     console.log(err)
         // })
+
+        if (race.trackableEventId != undefined) {
+            console.log('Sending Trackable start request')
+            sendTrackableMessage(JSON.stringify({ type: 'startEventRequest', eventId: race.trackableEventId, posRate: 5000, statusRate: 60000 }))
+        }
 
         //Update database
         race.fleets.forEach(async fleet => {
