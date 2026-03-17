@@ -4,10 +4,12 @@ import { EditIcon } from '@components/icons/edit-icon'
 import { AVAILABLE_PERMISSIONS, userHasPermission } from '@components/helpers/users'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
 import { Link, useLoaderData } from '@tanstack/react-router'
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
 import type { BoatType, FleetType, RaceType, ResultType } from '@sailviz/types'
 import type { Session } from '@sailviz/auth/client'
+import EditResultModal from '@components/layout/SignOn/EditResultModal'
+import { DeleteIcon } from '@components/icons/delete-icon'
 const columnHelper = createColumnHelper<ResultType>()
 
 const SignOnTable = ({ raceId }: { raceId: string }) => {
@@ -39,16 +41,25 @@ const SignOnTable = ({ raceId }: { raceId: string }) => {
         )
     }
 
-    const Action = ({ ...props }: any) => {
-        if (userHasPermission(props.user, AVAILABLE_PERMISSIONS.editResults)) {
+    const Action = ({ id, user }: { id: string; user: any }) => {
+        const queryClient = useQueryClient()
+
+        const deleteResultMutation = useMutation(orpcClient.result.delete.mutationOptions())
+        const onDeleteClick = async () => {
+            if (confirm('are you sure you want to do this?')) {
+                await deleteResultMutation.mutateAsync({ id: id })
+                await queryClient.invalidateQueries({
+                    queryKey: orpcClient.race.find.key({ type: 'query' })
+                })
+            }
+        }
+        if (userHasPermission(user, AVAILABLE_PERMISSIONS.editResults)) {
             return (
-                <Link to={`/SignOn/editResult/${race.id}/${props.row.original.id}`}>
-                    <div className='relative flex items-center gap-2'>
-                        <span className='text-lg text-default-400 cursor-pointer active:opacity-50'>
-                            <EditIcon />
-                        </span>
-                    </div>
-                </Link>
+                <div className='relative flex items-center gap-2' onClick={onDeleteClick}>
+                    <span className='text-lg text-default-400 cursor-pointer text-red-500 active:opacity-50'>
+                        <DeleteIcon />
+                    </span>
+                </div>
             )
         } else {
             return <> </>
@@ -89,9 +100,9 @@ const SignOnTable = ({ raceId }: { raceId: string }) => {
                 enableSorting: false
             }),
             columnHelper.display({
-                id: 'Edit',
-                header: 'Edit',
-                cell: props => <Action {...props} user={session!.user} />
+                id: 'Remove',
+                header: 'Remove',
+                cell: props => <Action id={props.row.original.id} user={session!.user} />
             })
         ],
         state: {
