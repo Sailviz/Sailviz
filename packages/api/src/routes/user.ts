@@ -25,7 +25,7 @@ async function createUser(): Promise<Types.UserType> {
       emailVerified: false,
       createdAt: new Date(),
       updatedAt: new Date(),
-      startPage: "dashboard",
+      startPage: "dashboard/me",
     },
   });
   return newUser as Types.UserType;

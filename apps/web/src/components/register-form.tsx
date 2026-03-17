@@ -8,12 +8,12 @@ export function RegisterForm() {
     const [password, setPassword] = useState('')
     const [email, setEmail] = useState('')
 
-    const createClub = async () => {
+    const createUser = async () => {
         const { data, error } = await signUp.email({
             email: email,
             password: password,
             name: '',
-            startPage: ''
+            startPage: 'dashboard/me'
         })
         console.log('Sign up response:', data, error)
         if (error) {
@@ -49,7 +49,7 @@ export function RegisterForm() {
                         Password
                         <Input id='password' name='password' type='password' required value={password} onChange={e => setPassword(e.target.value)} />
                     </div>
-                    <Button type='submit' className='w-full' onClick={createClub}>
+                    <Button type='submit' className='w-full' onClick={createUser}>
                         <span>Create Account</span>
                     </Button>
                 </div>
