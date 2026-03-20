@@ -1,0 +1,12 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "target": "es2024",
+    // Use Node-style ESM resolution/output so emitted JS imports include
+    // ".js" extensions and Node can resolve them without changing source
+    // import statements. This avoids having to add extensions by hand.
+    "module": "nodenext",
+    "moduleResolution": "nodenext"
+  }
+}

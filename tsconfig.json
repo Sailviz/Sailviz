@@ -1,40 +1,15 @@
 {
-    "compilerOptions": {
-        "target": "ES2020",
-        "lib": ["dom", "dom.iterable", "esnext"],
-        "allowJs": true,
-        "skipLibCheck": true,
-        "strict": true,
-        "forceConsistentCasingInFileNames": true,
-        "noEmit": true,
-        "esModuleInterop": true,
-        "module": "esnext",
-        "moduleResolution": "node",
-        "resolveJsonModule": true,
-        "isolatedModules": true,
-        "jsx": "preserve",
-        "incremental": true,
-        "noUncheckedIndexedAccess": true,
-        "baseUrl": ".",
-        "paths": {
-            "@/*": ["./src/*"]
-        },
-        "plugins": [
-            {
-                "name": "next"
-            }
-        ]
-    },
-    "include": [
-        "next-env.d.ts",
-        "**/*.ts",
-        "**/*.tsx",
-        "**/*.js",
-        "src/components/ErrorBoundary.jsx",
-        "src/components/app.d.ts",
-        ".next/types/**/*.ts",
-        "next.config.mjs",
-        "postcss.config.mjs"
-    ],
-    "exclude": ["node_modules", "cypress"]
+  "compilerOptions": {
+    "module": "esnext", // or "nodenext"
+    "moduleResolution": "bundler", // or "node16" or "bundler
+    "baseUrl": ".",
+    "skipLibCheck": true,
+    "paths": {
+      "@sailviz/db": ["packages/db/src"],
+      "@sailviz/api/*": ["packages/api/src/*"],
+      "@sailviz/auth/*": ["packages/auth/src/*"],
+      "@sailviz/shared/*": ["packages/shared/*"],
+      "@sailviz/types": ["packages/types/"]
+    }
+  }
 }

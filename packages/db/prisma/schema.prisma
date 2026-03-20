@@ -1,0 +1,329 @@
+generator client {
+  provider      = "prisma-client-js"
+  output        = "../src/generated"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model globalConfig {
+  id           String  @id @unique @default(uuid())
+  active       Boolean
+  demoClubId   String
+  demoSeriesId String
+  demoDataId   String
+  demoUUID     String
+}
+
+model User {
+  id                String              @id @unique @default(uuid())
+  startPage         String
+  name              String              @default("")
+  email             String?             @unique
+  emailVerified     Boolean
+  isAnonymous       Boolean             @default(false)
+  image             String?             @db.Text
+  createdAt         DateTime
+  updatedAt         DateTime
+  sessions          Session[]
+  accounts          Account[]
+  members           Member[]
+  invitations       Invitation[]
+  results           Result[]
+  teamMembers       teamMember[]
+  userFavouriteOrgs UserFavouriteOrgs[]
+  signOnProfiles    signOnProfile[]
+
+  @@map("user")
+}
+
+model UserFavouriteOrgs {
+  id           String       @id @unique @default(uuid())
+  orgId        String
+  organization Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  user         User?        @relation(fields: [userId], references: [id])
+  userId       String?
+}
+
+model signOnProfile {
+  id         String @id @unique @default(uuid())
+  userId     String
+  user       User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  Helm       String
+  Crew       String
+  SailNumber String
+  Boat       Boat   @relation(fields: [boatId], references: [id])
+  boatId     String
+}
+
+model Boat {
+  id             String          @id @unique @default(uuid())
+  name           String
+  crew           Int
+  py             Int
+  results        Result[]
+  fleets         FleetSettings[] @relation("BoatToFleetSettings")
+  signOnProfiles signOnProfile[]
+  boatOverrides  BoatOverride[]
+}
+
+model BoatOverride {
+  id               String       @id @unique @default(uuid())
+  boatId           String
+  boat             Boat         @relation(fields: [boatId], references: [id], onDelete: Cascade)
+  crew             Int
+  py               Int
+  pursuitStartTime Int
+  orgId            String
+  organization     Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+}
+
+model Organization {
+  id                String              @id @unique @default(uuid())
+  name              String              @unique
+  slug              String
+  logo              String?
+  createdAt         DateTime
+  metadata          String?             @db.Text
+  Buoy              Buoy[]
+  series            Series[]
+  Trackers          Tracker[]
+  stripe            Stripe?             @relation(fields: [stripeCustomerId], references: [customerId])
+  stripeCustomerId  String?
+  members           Member[]
+  invitations       Invitation[]
+  teams             Team[]
+  userFavouriteOrgs UserFavouriteOrgs[]
+  boatOverrides     BoatOverride[]
+  orgData           orgData?
+  orgDataId         String?             @unique
+}
+
+model orgData {
+  id                   String       @id @unique @default(uuid())
+  planName             String?
+  subscriptionStatus   String?
+  defaultPursuitLength Int          @default(60)
+  trackableEnabled     Boolean
+  trackableOrgId       String?
+  duties               Duties[]
+  organization         Organization @relation(references: [id], fields: [organizationId])
+  organizationId       String       @unique
+}
+
+model Duties {
+  id        String  @id @unique @default(uuid())
+  orgDataId String
+  name      String
+  orgData   orgData @relation(fields: [orgDataId], references: [id])
+}
+
+model Member {
+  id             String       @id
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  userId         String
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role           String       @db.Text
+  createdAt      DateTime
+
+  @@map("member")
+}
+
+model Team {
+  id             String       @id @unique @default(uuid())
+  name           String
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime
+  teamMembers    teamMember[]
+}
+
+model teamMember {
+  id        String   @id @unique @default(uuid())
+  teamId    String
+  userId    String
+  createdAt DateTime @default(now())
+  team      Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Invitation {
+  id             String       @id
+  organizationId String
+  teamId         String?
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  email          String       @db.Text
+  role           String?      @db.Text
+  status         String       @db.Text
+  expiresAt      DateTime
+  createdAt      DateTime     @default(now())
+  inviterId      String
+  user           User         @relation(fields: [inviterId], references: [id], onDelete: Cascade)
+
+  @@map("invitation")
+}
+
+model Stripe {
+  customerId String @id @unique
+
+  subscriptionId     String?
+  productId          String?
+  planName           String?
+  subscriptionStatus String?
+  updatedAt          String?
+  organization       Organization[]
+}
+
+model Series {
+  id             String          @id @unique @default(uuid())
+  name           String
+  orgId          String
+  settings       Json
+  fleetSettings  FleetSettings[]
+  races          Race[]
+  organization   Organization    @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  startSequences StartSequence[]
+}
+
+model StartSequence {
+  id         String @id @unique @default(uuid())
+  series     Series @relation(fields: [seriesId], references: [id])
+  seriesId   String
+  time       Int
+  name       String
+  hoot       Int
+  fleetStart String
+  flagStatus Json
+  order      Int
+
+  // @@unique([seriesId, order]) // Ensures unique order numbers per race //this is commented out to allow multiple actions at the same time
+}
+
+model Race {
+  id               String  @id @unique @default(uuid())
+  trackableEventId String?
+  number           Int
+  Time             String
+  Type             String
+  seriesId         String
+  Duties           Json
+  fleets           Fleet[]
+  series           Series  @relation(fields: [seriesId], references: [id], onDelete: Cascade)
+}
+
+model FleetSettings {
+  id       String  @id @unique @default(uuid())
+  seriesId String
+  name     String
+  fleets   Fleet[]
+  series   Series  @relation(fields: [seriesId], references: [id], onDelete: Cascade)
+  boats    Boat[]  @relation("BoatToFleetSettings")
+}
+
+model Fleet {
+  id            String        @id @unique @default(uuid())
+  raceId        String
+  startTime     Int
+  settingsId    String
+  race          Race          @relation(fields: [raceId], references: [id], onDelete: Cascade)
+  fleetSettings FleetSettings @relation(fields: [settingsId], references: [id])
+  results       Result[]
+}
+
+model Result {
+  id               String  @id @unique @default(uuid())
+  fleetId          String?
+  Helm             String
+  Crew             String
+  boatId           String?
+  SailNumber       String
+  finishTime       Int
+  CorrectedTime    Float
+  HandicapPosition Int
+  PursuitPosition  Int
+  isDeleted        Boolean
+  resultCode       String
+  numberLaps       Int
+  laps             Lap[]
+  boat             Boat?   @relation(fields: [boatId], references: [id])
+  fleet            Fleet?  @relation(fields: [fleetId], references: [id], onDelete: Cascade)
+  userId           String?
+  user             User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Lap {
+  id        String  @id @unique @default(uuid())
+  resultId  String
+  time      Int
+  isDeleted Boolean
+  result    Result  @relation(fields: [resultId], references: [id])
+}
+
+model Tracker {
+  trackerID    String       @id @unique
+  orgId        String
+  name         String
+  organization Organization @relation(fields: [orgId], references: [id])
+}
+
+model Buoy {
+  id           String       @id @unique @default(uuid())
+  name         String
+  orgId        String
+  pos          Json
+  isMoveable   Boolean
+  trackerID    String
+  organization Organization @relation(fields: [orgId], references: [id])
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String
+  createdAt DateTime
+  updatedAt DateTime
+  ipAddress String?  @db.Text
+  userAgent String?  @db.Text
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  activeOrganizationId String? @db.Text
+
+  @@unique([token])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String    @db.Text
+  providerId            String    @db.Text
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?   @db.Text
+  refreshToken          String?   @db.Text
+  idToken               String?   @db.Text
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?   @db.Text
+  password              String?   @db.Text
+  createdAt             DateTime
+  updatedAt             DateTime
+
+  @@map("account")
+}
+
+model Verification {
+  id         String    @id
+  identifier String    @db.Text
+  value      String    @db.Text
+  expiresAt  DateTime
+  createdAt  DateTime?
+  updatedAt  DateTime?
+
+  @@map("verification")
+}

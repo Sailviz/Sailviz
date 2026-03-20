@@ -1,0 +1,21 @@
+{
+  "name": "desktop",
+  "version": "0.1.0",
+  "scripts": {
+    "dev:dev:desktop": "pnpm --filter web build:dev && pnpm tauri dev",
+    "dev:test:desktop": "pnpm --filter web build:test && pnpm tauri dev",
+    "build:dev:desktop": "pnpm --filter web build:dev && pnpm tauri build",
+    "build:test:desktop": "pnpm --filter web build:test && pnpm tauri build",
+    "build:prod:desktop": "pnpm --filter web build:prod && pnpm tauri build",
+    "bundle:test:desktop": "pnpm --filter web build:test && pnpm tauri bundle",
+    "bundle:prod:desktop": "pnpm --filter web build:prod && pnpm tauri bundle",
+    "android:test": "pnpm --filter web build:test && pnpm tauri android build --debug",
+    "android:prod": "pnpm --filter web build:prod && pnpm tauri android build --release",
+    "load:test": "adb install -r ./src-tauri/gen/android/app/build/outputs/apk/universal/debug/app-universal-debug.apk",
+    "load:prod": "adb install -r ./src-tauri/gen/android/app/build/outputs/apk/universal/release/app-universal-release.apk"
+  },
+  "packageManager": "pnpm@10.18.1+sha512.77a884a165cbba2d8d1c19e3b4880eee6d2fcabd0d879121e282196b80042351d5eb3ca0935fa599da1dc51265cc68816ad2bddd2a2de5ea9fdf92adbec7cd34",
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.8.4"
+  }
+}

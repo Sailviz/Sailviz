@@ -1,0 +1,359 @@
+import { useState, useEffect } from 'react'
+import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, useReactTable, type SortingState } from '@tanstack/react-table'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@components/ui/table'
+import { useQuery } from '@tanstack/react-query'
+import { orpcClient } from '@lib/orpc'
+import type { FleetType, RaceType, ResultType, SeriesType, BoatType } from '@sailviz/types'
+
+//not a db type, only used here
+type SeriesResultsType = {
+    Rank: number
+    Helm: string
+    Crew: string
+    Boat: BoatType
+    SailNumber: string
+    Total: number
+    Net: number
+    racePositions: { race: number; position: number; discarded: boolean; resultCode: string }[]
+}
+
+const Text = ({ text }: { text: string }) => {
+    return <div>{text}</div>
+}
+
+const Number = ({ value }: { value: number }) => {
+    return <div>{value}</div>
+}
+
+const Result = ({ position, discarded, resultCode }: { position: number; discarded: boolean; resultCode: string }) => {
+    if (resultCode != '') {
+        if (discarded) {
+            return (
+                <div className='text-center line-through'>
+                    {position}
+                    <br />
+                    {resultCode}
+                </div>
+            )
+        } else {
+            return (
+                <div className='text-center'>
+                    {position}
+                    <br />
+                    {resultCode}
+                </div>
+            )
+        }
+    }
+    if (discarded) {
+        return <div className='line-through text-center'>{position}</div>
+    } else if (position == 1) {
+        return <div className='text-white bg-yellow-400 text-center'>{position}</div>
+    } else if (position == 2) {
+        return <div className='text-white bg-gray-600 text-center'>{position}</div>
+    } else if (position == 3) {
+        return <div className='text-white bg-yellow-800 text-center'>{position}</div>
+    } else {
+        return <div className='text-center'>{position}</div>
+    }
+}
+
+const columnHelper = createColumnHelper<SeriesResultsType>()
+
+const FleetSeriesResultsTable = ({ seriesId, fleetSettingsId }: { seriesId: string; fleetSettingsId: string }) => {
+    // const { series, seriesIsError, seriesIsValidating } = Fetcher.Series(seriesId)
+    const series = useQuery(orpcClient.series.find.queryOptions({ input: { seriesId: seriesId } })).data as SeriesType
+
+    //calculate results table from data.
+    let [data, setData] = useState<SeriesResultsType[]>([])
+
+    const calcTable = () => {
+        if (series == undefined || series.races == undefined) {
+            console.log('seriesData is undefined')
+            return
+        }
+        let tempresults: SeriesResultsType[] = []
+        console.log('seriesData', series)
+        //collate results from same person.
+        series.races.forEach((race: RaceType) => {
+            let fleet = race.fleets.find((fleet: FleetType) => fleet.fleetSettings.id == fleetSettingsId)?.results
+            if (fleet == undefined) {
+                console.log('fleet is undefined')
+                return
+            }
+            fleet.forEach((result: ResultType) => {
+                //if new racer, add to tempresults
+                let index = tempresults.findIndex(function (t) {
+                    return t.Helm == result.Helm && t.Boat?.id == result.boat?.id && t.SailNumber == result.SailNumber
+                })
+                if (index == -1) {
+                    index = tempresults.push({
+                        //sets index to index of newly pushed element
+                        Rank: 0,
+                        Helm: result.Helm,
+                        Crew: result.Crew,
+                        Boat: result.boat,
+                        SailNumber: result.SailNumber,
+                        Total: 0,
+                        Net: 0,
+                        racePositions: Array(series.races!.length).fill({ position: 0, discarded: false, resultCode: '' })
+                    })
+                    index -= 1
+                }
+                //add result to tempresults
+                if (tempresults[index]) {
+                    tempresults[index]!.racePositions.splice(race.number - 1, 1, {
+                        race: race.number,
+                        position: result.HandicapPosition == 0 ? result.PursuitPosition : result.HandicapPosition,
+                        discarded: false,
+                        resultCode: result.resultCode
+                    })
+                } else {
+                    console.log('something went wrong')
+                }
+            })
+        })
+
+        //give duty team their average score if they have raced in the series
+        series.races.forEach((race: RaceType) => {
+            //loop through duty team on each race.
+            Object.entries(race.Duties).map(([_, name]) => {
+                let index = tempresults.findIndex(function (t) {
+                    return t.Helm == (name as unknown as string) //cast to unknown to avoid type error
+                })
+                if (index != -1) {
+                    //get average score
+                    let total = 0
+                    let count = 0
+                    tempresults[index]!.racePositions.forEach(position => {
+                        if (position.position != 0) {
+                            total += position.position
+                            count++
+                        }
+                    })
+                    let average = total / count
+                    tempresults[index]!.racePositions.splice(race.number - 1, 1, { race: race.number, position: average, discarded: false, resultCode: '' })
+                }
+            })
+        })
+
+        //fill dnc
+        tempresults.forEach((result, i) => {
+            result.racePositions.forEach((position, j) => {
+                if (position.position == 0) {
+                    //set to number of series entrants + 1
+                    tempresults[i]!.racePositions[j] = { race: j, position: tempresults.length + 1, discarded: false, resultCode: 'DNS' }
+                }
+            })
+        })
+        //calculate total
+        tempresults.forEach(result => {
+            result.Total = result.racePositions.reduce((partialSum, a) => partialSum + a.position, 0)
+        })
+        //calculate discards/net
+        tempresults.forEach(result => {
+            let sortedResult = JSON.parse(JSON.stringify(result)) as SeriesResultsType
+            sortedResult.racePositions.sort((a, b) => a.position - b.position)
+            let Net = 0
+            let modifiedResult = sortedResult.racePositions.map((position, index) => {
+                if (index < series.settings.numberToCount) {
+                    Net += position.position
+                    return { ...position, discarded: false } // Ensure discarded is false for counted positions
+                } else {
+                    return { ...position, discarded: true } // Mark position as discarded
+                }
+            })
+            result.Net = Net
+            //sort race positions by race number
+            result.racePositions = modifiedResult
+            result.racePositions.sort((a, b) => a.race - b.race)
+        })
+        console.log(tempresults)
+
+        //sort results by Net, split results if necessary
+        tempresults.sort((a: SeriesResultsType, b: SeriesResultsType) => {
+            if (a.Net < b.Net) {
+                return -1
+            } else if (a.Net > b.Net) {
+                return 1
+            } else {
+                //two results with same Net Score.
+                //loop through positions.
+                let result = 0
+                for (let i = 1; i < 1000; i++) {
+                    //calculate number of positions.
+                    let aNumber = a.racePositions.reduce((partialSum: number, position: { position: number; discarded: boolean }) => {
+                        if (position.position == i) {
+                            return partialSum + 1
+                        } else {
+                            return partialSum
+                        }
+                    }, 0)
+                    let bNumber = b.racePositions.reduce((partialSum: number, position: { position: number; discarded: boolean }) => {
+                        if (position.position == i) {
+                            return partialSum + 1
+                        } else {
+                            return partialSum
+                        }
+                    }, 0)
+                    if (aNumber < bNumber) {
+                        result = 1
+                        break
+                    } else if (aNumber > bNumber) {
+                        result = -1
+                        break
+                    }
+                }
+
+                return result
+            }
+        })
+
+        //set rank value.
+        tempresults.forEach((result, index) => {
+            result.Rank = index + 1
+        })
+
+        setData(tempresults)
+    }
+
+    useEffect(() => {
+        if (series != undefined) {
+            calcTable()
+            generateColumns()
+        }
+    }, [series])
+
+    const [columns, setColumns] = useState([
+        columnHelper.accessor('Rank', {
+            header: 'Rank',
+            cell: props => <Number value={props.getValue()} />,
+            enableSorting: true
+        }),
+        columnHelper.accessor('Helm', {
+            header: 'Helm',
+            size: 300,
+            cell: props => <Text text={props.getValue()} />,
+            enableSorting: false
+        }),
+        columnHelper.accessor('Crew', {
+            header: 'Crew',
+            size: 300,
+            cell: props => <Text text={props.getValue()} />,
+            enableSorting: false
+        }),
+        columnHelper.accessor(data => data.Boat?.name, {
+            header: 'Class',
+            size: 300,
+            id: 'Class',
+            cell: props => <Text text={props.getValue()} />,
+            enableSorting: false
+        }),
+        columnHelper.accessor(data => data.SailNumber, {
+            header: 'Sail Number',
+            cell: props => <Text text={props.getValue()} />,
+            enableSorting: false
+        })
+    ])
+
+    const generateColumns = () => {
+        if (series == undefined || series.races == undefined) {
+            console.log('seriesData is undefined')
+            return
+        }
+
+        series.races.sort((a: { number: number }, b: { number: number }) => a.number - b.number)
+        var newColumns: any[] = []
+        //add column for each race in series
+        series.races.forEach((race: RaceDataType, index: number) => {
+            const newColumn = columnHelper.accessor(data => data.racePositions[index], {
+                id: 'R' + race.number.toString(),
+                header: () => (
+                    <div
+                        style={{
+                            textAlign: 'center'
+                        }}
+                    >
+                        R{race.number.toString()}
+                    </div>
+                ),
+                cell: props => <Result position={props.getValue()!.position} discarded={props.getValue()!.discarded} resultCode={props.getValue()!.resultCode} />,
+                enableSorting: false
+            })
+            newColumns.push(newColumn)
+        })
+
+        setColumns([...columns.slice(0, 5), ...newColumns, ...columns.slice(6, 6)]) //insert after Helm, Crew, Class, Sail Number
+        console.log('columns', columns)
+    }
+
+    const totalColumn = columnHelper.accessor('Total', {
+        header: 'Total',
+        cell: props => <Number value={props.getValue()} />,
+        enableSorting: true
+    })
+
+    const netColumn = columnHelper.accessor('Net', {
+        header: 'Net',
+        cell: props => <Number value={props.getValue()} />,
+        enableSorting: true
+    })
+
+    columns.push(totalColumn)
+    columns.push(netColumn)
+
+    const [sorting, setSorting] = useState<SortingState>([
+        {
+            id: 'Rank',
+            desc: false
+        }
+    ])
+
+    let table = useReactTable({
+        data,
+        columns,
+        state: {
+            sorting
+        },
+        onSortingChange: setSorting,
+        getCoreRowModel: getCoreRowModel(),
+        getSortedRowModel: getSortedRowModel()
+    })
+
+    return (
+        <div className='w-full'>
+            <div className='rounded-md border'>
+                <Table>
+                    <TableHeader>
+                        {table.getHeaderGroups().map(headerGroup => (
+                            <TableRow key={headerGroup.id}>
+                                {headerGroup.headers.map(header => {
+                                    return (
+                                        <TableHead key={header.id}>{header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}</TableHead>
+                                    )
+                                })}
+                            </TableRow>
+                        ))}
+                    </TableHeader>
+                    <TableBody>
+                        {table.getRowModel().rows?.length ? (
+                            table.getRowModel().rows.map(row => (
+                                <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
+                                    {row.getVisibleCells().map(cell => (
+                                        <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
+                                    ))}
+                                </TableRow>
+                            ))
+                        ) : (
+                            <TableRow>
+                                <TableCell className='h-24 text-center'>No results.</TableCell>
+                            </TableRow>
+                        )}
+                    </TableBody>
+                </Table>
+            </div>
+        </div>
+    )
+}
+
+export default FleetSeriesResultsTable

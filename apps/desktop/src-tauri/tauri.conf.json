@@ -1,0 +1,43 @@
+{
+  "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
+  "productName": "sailviz",
+  "version": "0.1.0",
+  "identifier": "com.sailviz",
+  "build": {
+    "frontendDist": "../../../apps/web/dist",
+    "devUrl": "http://localhost:5173",
+    "beforeDevCommand": "pnpm --filter web run test"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "sailviz",
+        "fullscreen": false,
+        "url": "Login"
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "createUpdaterArtifacts": true
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEM0NDhDMDg3RDg4NTdBRApSV1N0VjRoOUNJeEVESW5QTmNrM2FGV1IxaDh1U1BZL0xYT2dncmdhV1E5L0tpMDN6TDNXc2J6bgo=",
+      "endpoints": [
+        "https://api.sailviz.com/desktop-update/{{current_version}}"
+      ]
+    }
+  }
+}

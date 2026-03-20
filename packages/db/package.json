@@ -1,0 +1,29 @@
+{
+  "name": "@sailviz/db",
+  "version": "1.0.0",
+  "description": "",
+  "type": "module",
+  "main": "src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "prismagenerate": "npx prisma generate",
+    "prismapush": "npx prisma db push",
+    "generateConfig": "node scripts/generate-config.ts",
+    "build": "tsc -p tsconfig.json && node scripts/copy-generated.cjs",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.18.1",
+  "dependencies": {
+    "@prisma/client": "^6.19.2",
+    "dotenv": "^17.2.3",
+    "prisma": "^6.19.2"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.0"
+  }
+}

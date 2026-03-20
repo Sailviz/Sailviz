@@ -1,0 +1,40 @@
+{
+  "name": "@sailviz/api",
+  "exports": {
+    "./router": "./src/router.ts"
+  },
+  "scripts": {
+    "generateConfig": "node scripts/generate-config.js && node ../../packages/auth/scripts/generate-config.js",
+    "predev": "cross-env NODE_ENV=development npm run generateConfig",
+    "dev": "tsx src/server.ts",
+    "prebuild": "node ../../packages/db/scripts/generate-config.js &&pnpm -w --filter @sailviz/db build && npm run generateConfig",
+    "build": "tsc --build && tsc-alias",
+    "postbuild": "node scripts/copy-db-generated.cjs",
+    "build:dev": "cross-env NODE_ENV=development npm run build",
+    "build:test": "cross-env NODE_ENV=test npm run build",
+    "build:prod": "cross-env NODE_ENV=production npm run build"
+  },
+  "packageManager": "pnpm@10.18.1+sha512.77a884a165cbba2d8d1c19e3b4880eee6d2fcabd0d879121e282196b80042351d5eb3ca0935fa599da1dc51265cc68816ad2bddd2a2de5ea9fdf92adbec7cd34",
+  "dependencies": {
+    "@orpc/client": "^1.9.3",
+    "@orpc/contract": "^1.13.2",
+    "@orpc/server": "^1.9.3",
+    "better-auth": "^1.4.10",
+    "cors": "^2.8.5",
+    "dayjs": "^1.11.18",
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "stripe": "^19.1.0",
+    "ws": "^8.13.0",
+    "zod": "^4.1.12"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.0",
+    "cross-env": "^7.0.3",
+    "ts-node": "^10.9.2",
+    "ts-node-dev": "^2.0.0",
+    "tsc-alias": "^1.8.16",
+    "tsx": "^4.20.6",
+    "typescript": "~5.9.3"
+  }
+}
