@@ -7,7 +7,7 @@
     "generateConfig": "node scripts/generate-config.js && node ../../packages/auth/scripts/generate-config.js",
     "predev": "cross-env NODE_ENV=development npm run generateConfig",
     "dev": "tsx src/server.ts",
-    "prebuild": "pnpm -w --filter @sailviz/db build && npm run generateConfig",
+    "prebuild": "node ../../packages/db/scripts/generate-config.js &&pnpm -w --filter @sailviz/db build && npm run generateConfig",
     "build": "tsc --build && tsc-alias",
     "postbuild": "node scripts/copy-db-generated.cjs",
     "build:dev": "cross-env NODE_ENV=development npm run build",
