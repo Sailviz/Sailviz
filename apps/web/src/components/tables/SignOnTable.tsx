@@ -1,14 +1,12 @@
 import { useState, useEffect } from 'react'
 import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, useReactTable, type SortingState } from '@tanstack/react-table'
-import { EditIcon } from '@components/icons/edit-icon'
 import { AVAILABLE_PERMISSIONS, userHasPermission } from '@components/helpers/users'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
-import { Link, useLoaderData } from '@tanstack/react-router'
+import { useLoaderData } from '@tanstack/react-router'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
 import type { BoatType, FleetType, RaceType, ResultType } from '@sailviz/types'
 import type { Session } from '@sailviz/auth/client'
-import EditResultModal from '@components/layout/SignOn/EditResultModal'
 import { DeleteIcon } from '@components/icons/delete-icon'
 const columnHelper = createColumnHelper<ResultType>()
 
