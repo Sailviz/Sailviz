@@ -37,11 +37,11 @@ function Page() {
                             </div>
                             {stripe.subscriptionStatus === 'active' && (
                                 // TODO: Replace 'null' with actual manage subscription URL
-                                <form action={'null'}>
+                                (<form action={'null'}>
                                     <Button type='submit' variant='outline'>
                                         Manage Subscription
                                     </Button>
-                                </form>
+                                </form>)
                             )}
                         </div>
                     </div>
@@ -52,6 +52,6 @@ function Page() {
     )
 }
 
-export const Route = createFileRoute('/dashboard/Subscription/')({
+export const Route = createFileRoute('/Dashboard/Subscription/')({
     component: Page
 })

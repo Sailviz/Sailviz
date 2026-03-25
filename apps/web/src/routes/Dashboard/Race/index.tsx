@@ -41,6 +41,6 @@ function Page() {
     )
 }
 
-export const Route = createFileRoute('/dashboard/Race/')({
+export const Route = createFileRoute('/Dashboard/Race/')({
     component: Page
 })

@@ -42,7 +42,7 @@ export const generateServer = () => {
         if (duration != undefined || data.duration < 1000) {
           // bit of a safety check you know
           //generate byte array with status request and device ID
-          const packet = new Uint8Array([0x02, ...orgId, ...duration]);
+          const packet = new Uint8Array([0x02, ...duration]);
 
           console.log("Sending status request:", packet);
           wss.clients.forEach((client) => {

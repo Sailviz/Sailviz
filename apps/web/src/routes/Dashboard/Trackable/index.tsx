@@ -62,6 +62,6 @@ function Page() {
     )
 }
 
-export const Route = createFileRoute('/dashboard/Trackable/')({
+export const Route = createFileRoute('/Dashboard/Trackable/')({
     component: Page
 })

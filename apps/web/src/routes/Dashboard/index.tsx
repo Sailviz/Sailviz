@@ -1,6 +1,6 @@
 import { createFileRoute, redirect } from '@tanstack/react-router'
 
-export const Route = createFileRoute('/dashboard/')({
+export const Route = createFileRoute('/Dashboard/')({
     beforeLoad: async ({ context }) => {
         const session = context?.auth
         console.log('Dashboard route beforeLoad, session:', session)

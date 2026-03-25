@@ -15,8 +15,8 @@ enum pageModes {
 function Page() {
     const { orgName } = Route.useParams()
     const org = useQuery(orpcClient.organization.name.queryOptions({ input: { orgName: orgName! } })).data as Types.Org
-    const stripe = useQuery(orpcClient.stripe.org.queryOptions({ input: { orgId: org?.id }, queryKey: [org] })).data
-    const races = useQuery(orpcClient.race.today.queryOptions({ input: { orgId: org?.id }, queryKey: [org] })).data
+    const stripe = useQuery(orpcClient.stripe.org.queryOptions({ input: { orgId: org?.id } })).data
+    const races = useQuery(orpcClient.race.today.queryOptions({ input: { orgId: org?.id } })).data
 
     const queryClient = useQueryClient()
 
@@ -36,40 +36,23 @@ function Page() {
     var [mode, setMode] = useState<pageModes>(pageModes.notLive)
 
     const checkActive = (race: Types.RaceType) => {
-        if (race.fleets == undefined) {
-            console.error('no fleets found')
-            return false
-        }
-        if (race.fleets.length == 0) {
+        if (race.fleets!.length == 0) {
             console.error('no fleets found')
         }
 
         //if any fleets have been started
-        if (race.fleets.some(fleet => fleet.startTime != 0)) {
+        if (race.fleets!.some(fleet => fleet.startTime != 0)) {
             //race has started, check if all boats have finished
-            return !race.fleets
-                .flatMap(fleet => fleet.results)
+            return !race
+                .fleets!.flatMap(fleet => fleet.results)
                 .every(result => {
-                    console.log('checking result', result)
-                    if (result == undefined) {
-                        return true
-                    }
-                    if (result.finishTime != 0 || result.resultCode != '') {
+                    if (result!.finishTime != 0 || result!.resultCode != '') {
                         return true
                     }
                 })
         }
         return false
     }
-
-    useEffect(() => {
-        races?.forEach(race => {
-            if (checkActive(race)) {
-                setMode(pageModes.live)
-                setActiveRace(race)
-            }
-        })
-    }, [races])
 
     useEffect(() => {
         const timer1 = setTimeout(async () => {
@@ -82,16 +65,16 @@ function Page() {
                 })
                 return
             }
+            console.log(races)
             //check if any of the races are active
-            for (let race of races) {
+            races.forEach(async race => {
                 race = await findRaceMutation.mutateAsync({ raceId: race.id })
                 if (checkActive(race)) {
                     setMode(pageModes.live)
                     setActiveRace(race)
                     activeFlag = true
-                    break
                 }
-            }
+            })
             if (!activeFlag) {
                 setMode(pageModes.notLive)
             }
@@ -157,6 +140,6 @@ function Page() {
     )
 }
 
-export const Route = createFileRoute('/club/$clubName/LiveResults/')({
+export const Route = createFileRoute('/club/$orgName/LiveResults/')({
     component: Page
 })

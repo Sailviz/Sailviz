@@ -5,7 +5,7 @@ import { createFileRoute, Link, useLoaderData } from '@tanstack/react-router'
 import * as Types from '@sailviz/types'
 import { Button } from '@components/ui/button'
 import { StarIcon } from 'lucide-react'
-export const Route = createFileRoute('/dashboard/me/clubs')({
+export const Route = createFileRoute('/Dashboard/me/clubs')({
     component: RouteComponent
 })
 

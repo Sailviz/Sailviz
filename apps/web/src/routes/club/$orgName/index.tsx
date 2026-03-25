@@ -97,6 +97,6 @@ function Page() {
     )
 }
 
-export const Route = createFileRoute('/club/$clubName/')({
+export const Route = createFileRoute('/club/$orgName/')({
     component: Page
 })
