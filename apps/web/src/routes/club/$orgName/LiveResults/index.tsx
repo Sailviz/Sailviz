@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 
 import { createFileRoute } from '@tanstack/react-router'
 import LiveFleetResultsTable from '@components/tables/LiveFleetResultsTable'
@@ -35,54 +35,53 @@ function Page() {
 
     var [mode, setMode] = useState<pageModes>(pageModes.notLive)
 
-    const checkActive = (race: Types.RaceType) => {
-        if (race.fleets!.length == 0) {
+    const checkActive = useCallback((race: Types.RaceType) => {
+        if (!race.fleets || race.fleets.length === 0) {
             console.error('no fleets found')
+            return false
         }
 
-        //if any fleets have been started
-        if (race.fleets!.some(fleet => fleet.startTime != 0)) {
-            //race has started, check if all boats have finished
-            return !race
-                .fleets!.flatMap(fleet => fleet.results)
+        // Check if any fleets have started and not all boats have finished
+        return (
+            race.fleets.some(fleet => fleet.startTime !== 0) &&
+            !race.fleets
+                .flatMap(fleet => fleet.results)
                 .every(result => {
-                    if (result!.finishTime != 0 || result!.resultCode != '') {
-                        return true
-                    }
+                    return result?.finishTime !== 0 || result?.resultCode !== ''
                 })
-        }
-        return false
-    }
+        )
+    }, [])
 
     useEffect(() => {
-        const timer1 = setTimeout(async () => {
+        const timer1 = setInterval(async () => {
             let activeFlag = false
-            console.log('refreshing results')
-            if (races == undefined) {
-                console.error('races undefined')
+
+            if (!races) {
                 queryClient.invalidateQueries({
                     queryKey: orpcClient.race.today.key({ type: 'query' })
                 })
                 return
             }
-            console.log(races)
-            //check if any of the races are active
-            races.forEach(async race => {
-                race = await findRaceMutation.mutateAsync({ raceId: race.id })
-                if (checkActive(race)) {
+
+            for (const race of races) {
+                const updatedRace = await findRaceMutation.mutateAsync({ raceId: race.id })
+
+                if (checkActive(updatedRace)) {
                     setMode(pageModes.live)
-                    setActiveRace(race)
+                    setActiveRace(updatedRace)
+
                     activeFlag = true
+                    break
                 }
-            })
+            }
+
             if (!activeFlag) {
                 setMode(pageModes.notLive)
             }
         }, 5000)
-        return () => {
-            clearTimeout(timer1)
-        }
-    }, [races, activeRace])
+
+        return () => clearInterval(timer1)
+    }, [races, checkActive, findRaceMutation, queryClient])
 
     return (
         <div>
@@ -90,44 +89,34 @@ function Page() {
                 switch (mode) {
                     case pageModes.live:
                         return (
-                            <div key={JSON.stringify(activeRace)}>
-                                {activeRace.fleets?.map(fleet => {
-                                    //change this to select the active race.
-                                    return (
-                                        <>
-                                            <div className='w-1/4 p-2 m-2 border-4 rounded-lg bg-white text-lg font-medium'>
-                                                <div key={fleet.id}>
-                                                    Race Time:{' '}
-                                                    <RaceTimer
-                                                        fleetId={fleet.id}
-                                                        startTime={fleet.startTime}
-                                                        timerActive={true}
-                                                        onFiveMinutes={null}
-                                                        onFourMinutes={null}
-                                                        onOneMinute={null}
-                                                        onGo={null}
-                                                        onWarning={null}
-                                                        reset={false}
-                                                    />
-                                                </div>
-                                            </div>
-                                            <div className='m-6' key={activeRace.id}>
-                                                <div className='text-4xl font-extrabold text-gray-700 p-6'>
-                                                    {activeRace.series!.name}: {activeRace.number} - {fleet.fleetSettings.name}
-                                                </div>
-                                                <LiveFleetResultsTable fleet={fleet} startTime={fleet.startTime} handicap={activeRace.Type} />
-                                            </div>
-                                        </>
-                                    )
-                                })}
+                            <div>
+                                <div className='w-1/4 p-2 m-2 border-4 rounded-lg bg-white text-lg font-medium'>
+                                    Race Time:{' '}
+                                    <RaceTimer
+                                        fleetId={activeRace.fleets[0].id}
+                                        startTime={activeRace.fleets[0].startTime}
+                                        timerActive={true}
+                                        onFiveMinutes={null}
+                                        onFourMinutes={null}
+                                        onOneMinute={null}
+                                        onGo={null}
+                                        onWarning={null}
+                                        reset={false}
+                                    />
+                                </div>
+                                <div className='m-6'>
+                                    <div className='text-4xl font-extrabold text-gray-700 p-6'>
+                                        {activeRace.series?.name}: {activeRace.number} - {activeRace.fleets[0].fleetSettings.name}
+                                    </div>
+                                    <LiveFleetResultsTable raceId={activeRace.id} startTime={activeRace.fleets[0].startTime} handicap={activeRace.Type} />
+                                </div>
                             </div>
                         )
-                    default: //includes notLive state
+                    default:
                         return (
                             <div>
                                 <p className='text-6xl font-extrabold text-gray-700 p-6'>{org?.name}</p>
-                                {/* this backwards case is so that the upgrade message isn't shown during page load. */}
-                                {stripe?.planName != 'SailViz' ? (
+                                {stripe?.planName !== 'SailViz' ? (
                                     <p className='text-2xl font-extrabold text-gray-700 p-6'>No Races Currently Active</p>
                                 ) : (
                                     <p className='text-2xl font-extrabold text-gray-700 p-6'>Upgrade to Sailviz Pro to enable Live Results</p>

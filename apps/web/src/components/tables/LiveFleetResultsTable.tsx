@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, useReactTable, type SortingState } from '@tanstack/react-table'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
 import type { FleetType, ResultType } from '@sailviz/types'
+import { useQuery } from '@tanstack/react-query'
+import { orpcClient } from '@lib/orpc'
 
 const Text = ({ ...props }) => {
     const value = props.getValue()
@@ -41,6 +43,10 @@ const Time = ({ ...props }) => {
 }
 
 const calculateHandicapResults = (fleet: FleetType) => {
+    console.log(fleet)
+    if (fleet == undefined) {
+        return { fleet, results: [] }
+    }
     //most nuber of laps.
     const maxLaps = Math.max.apply(
         null,
@@ -57,7 +63,7 @@ const calculateHandicapResults = (fleet: FleetType) => {
         }
         let seconds = result.laps[result.laps.length - 1]!.time - fleet.startTime
         result.CorrectedTime = (seconds * 1000 * (maxLaps / result.laps.length)) / result.boat.py
-        console.log(result.CorrectedTime)
+        console.log(result.Helm, result.laps.length, result.CorrectedTime)
     })
 
     //calculate finish position
@@ -97,8 +103,9 @@ const calculatePursuitResults = (fleet: FleetType) => {
 
 const columnHelper = createColumnHelper<ResultType>()
 
-const LiveResultsTable = ({ fleet, startTime, handicap }: { fleet: FleetType; startTime: number; handicap: string }) => {
-    const results = handicap == 'Handicap' ? calculateHandicapResults(fleet).results! : calculatePursuitResults(fleet).results!
+const LiveResultsTable = ({ raceId, startTime, handicap }: { raceId: string; startTime: number; handicap: string }) => {
+    const race = useQuery(orpcClient.race.find.queryOptions({ input: { raceId: raceId }, refetchInterval: 5000 })).data
+    const results = handicap == 'Handicap' ? calculateHandicapResults(race?.fleets[0]!).results! : calculatePursuitResults(race?.fleets[0]!).results!
     let maxLaps = 0
     results.forEach(result => {
         if (result.laps.length > maxLaps) {
