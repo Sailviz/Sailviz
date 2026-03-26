@@ -48,17 +48,6 @@ export function EntryFileUpload({ raceId }: { raceId: string }) {
                         return
                     }
                     let result: ResultType = {} as ResultType
-                    if (line.Fleet == undefined) {
-                        if (race.fleets.length > 1) {
-                            alert("fleets aren't defined and there is more than one fleet in race")
-                            return
-                        } else {
-                            result = await createResultMutation.mutateAsync({ fleetId: race.fleets[0]!.id })
-                        }
-                    } else {
-                        //fleet is defined
-                        result = await createResultMutation.mutateAsync({ fleetId: race.fleets.find(fleet => fleet.fleetSettings.name == line.Fleet)!.id })
-                    }
                     result.Helm = line.Helm
                     result.Crew = line.Crew
                     result.SailNumber = line.SailNumber
@@ -66,10 +55,34 @@ export function EntryFileUpload({ raceId }: { raceId: string }) {
                     let boat = boats.find(boat => boat.name.toUpperCase() == boatName.toUpperCase())
                     if (boat == undefined) {
                         console.error('Boat ' + boatName + ' not found')
+                        return
                     } else {
                         result.boat = boat
                     }
                     console.log(result)
+                    if (line.Fleet == undefined) {
+                        if (race.fleets.length > 1) {
+                            alert("fleets aren't defined and there is more than one fleet in race")
+                            return
+                        } else {
+                            result = await createResultMutation.mutateAsync({
+                                fleetId: race.fleets[0]!.id,
+                                helm: line.Helm,
+                                crew: line.Crew,
+                                boat: boat,
+                                sailNumber: line.SailNumber
+                            })
+                        }
+                    } else {
+                        //fleet is defined
+                        result = await createResultMutation.mutateAsync({
+                            fleetId: race.fleets.find(fleet => fleet.fleetSettings.name == line.Fleet)!.id,
+                            helm: line.Helm,
+                            crew: line.Crew,
+                            boat: boat,
+                            sailNumber: line.SailNumber
+                        })
+                    }
                     //update with info
                     await updateResultMutation.mutateAsync(result)
                 }

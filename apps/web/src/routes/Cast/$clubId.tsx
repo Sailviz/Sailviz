@@ -314,7 +314,7 @@ function Page() {
                                             </div>
 
                                             <div className='m-6' key={activeRaceData.id}>
-                                                <LiveFleetResultsTable fleet={fleet} startTime={fleet.startTime} handicap={activeRaceData.Type} />
+                                                <LiveFleetResultsTable raceId={fleet.raceId} startTime={fleet.startTime} handicap={activeRaceData.Type} />
                                             </div>
                                         </>
                                     )

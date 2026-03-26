@@ -4,7 +4,7 @@
     "version": "0.0.0",
     "type": "module",
     "scripts": {
-        "dev": " cross-env NODE_ENV=development vite --mode development",
+        "dev": "set NODE_ENV=development&& tsc -b && node ../../packages/auth/scripts/generate-config.js && vite --mode development",
         "test": " cross-env NODE_ENV=test vite --mode test",
         "lint": "eslint .",
         "preview": "vite preview",

@@ -138,7 +138,7 @@ export default function CreateResultModal({ org }: { org: Types.Org }) {
     const createResult = async (fleetId: string, helm: string, crew: string, boat: Types.BoatType, sailNum: string, participantId: string) => {
         console.log('createResult', fleetId, helm, crew, boat, sailNum)
         //create a result for each fleet
-        let result = await createResultMutation.mutateAsync({ fleetId: fleetId })
+        let result = await createResultMutation.mutateAsync({ fleetId: fleetId, helm: helm, crew: crew, boat: { id: boat.id }, sailNumber: sailNum })
         await updateResultMutation.mutateAsync({
             ...result,
             Helm: helm,

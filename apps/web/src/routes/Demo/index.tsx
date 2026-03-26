@@ -54,9 +54,11 @@ function Page() {
                 demoData
                     .fleets!.flatMap((fleet: FleetType) => fleet.results!)
                     .map((result: ResultType) => {
-                        return createResultMutation.mutateAsync({ fleetId: newRace.fleets![0]!.id }).then(newResult => {
-                            updateResultMutation.mutateAsync({ ...newResult, Helm: result.Helm, Crew: result.Crew, boat: result.boat, SailNumber: result.SailNumber })
-                        })
+                        return createResultMutation
+                            .mutateAsync({ fleetId: newRace.fleets![0]!.id, helm: result.Helm, crew: result.Crew, boat: result.boat, sailNumber: result.SailNumber })
+                            .then(newResult => {
+                                updateResultMutation.mutateAsync({ ...newResult, Helm: result.Helm, Crew: result.Crew, boat: result.boat, SailNumber: result.SailNumber })
+                            })
                     })
             )
             setStatusText('Done')
