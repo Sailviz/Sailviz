@@ -63,7 +63,7 @@ export default function CreateResultDialog({ race, boats }: { race: RaceType; bo
         }
         if (error) return
 
-        let result = await createResult.mutateAsync({ fleetId: selectedFleet })
+        let result = await createResult.mutateAsync({ fleetId: selectedFleet, helm: helm, crew: crew, boat: selectedBoat.value, sailNumber: sailNumber })
         if (result == null) {
             console.error('Error creating result')
             return

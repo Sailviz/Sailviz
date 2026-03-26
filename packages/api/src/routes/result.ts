@@ -6,11 +6,23 @@ const os = implement(ORPCcontract);
 
 export const createResult = os.result.create.handler(
   async ({ input, context }) => {
+    // check that a similar result doesn't already exist for the same fleet and boat
+    const existingResult = await prisma.result.findFirst({
+      where: {
+        fleetId: input.fleetId,
+        boatId: input.boat.id,
+        SailNumber: input.sailNumber,
+        isDeleted: false,
+      },
+    });
+    if (existingResult) {
+      throw new ORPCError("CONFLICT");
+    }
     const newResult = await prisma.result.create({
       data: {
-        Helm: "",
-        Crew: "",
-        SailNumber: "",
+        Helm: input.helm,
+        Crew: input.crew,
+        SailNumber: input.sailNumber,
         finishTime: 0,
         CorrectedTime: 0,
         PursuitPosition: 0,
@@ -21,7 +33,11 @@ export const createResult = os.result.create.handler(
             id: input.fleetId,
           },
         },
-        boat: {},
+        boat: {
+          connect: {
+            id: input.boat.id,
+          },
+        },
         laps: {},
         numberLaps: 0,
         resultCode: "",
@@ -36,7 +52,7 @@ export const createResult = os.result.create.handler(
     } else {
       throw new ORPCError("BAD_REQUEST");
     }
-  }
+  },
 );
 
 export const updateResult = os.result.update.handler(
@@ -78,7 +94,7 @@ export const updateResult = os.result.update.handler(
     } else {
       throw new ORPCError("BAD_REQUEST");
     }
-  }
+  },
 );
 
 export const deleteResult = os.result.delete.handler(async ({ input }) => {

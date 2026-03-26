@@ -156,7 +156,15 @@ export const ORPCcontract = {
   },
   result: {
     create: oc
-      .input(z.object({ fleetId: z.string() }))
+      .input(
+        z.object({
+          fleetId: z.string(),
+          helm: z.string(),
+          crew: z.string(),
+          boat: z.object({ id: z.string() }),
+          sailNumber: z.string(),
+        }),
+      )
       .output(Types.ResultSchema),
     update: oc.input(Types.ResultSchema).output(Types.ResultSchema),
     delete: oc.input(z.object({ id: z.string() })).output(Types.ResultSchema),

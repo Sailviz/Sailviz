@@ -309,7 +309,7 @@ export const race_create = os.race.create.handler(async ({ input }) => {
   const newRace = await prisma.race.create({
     data: {
       number: number,
-      Time: dayjs().toISOString(),
+      Time: dayjs().format("YYYY-MM-DD HH:mm:ss.SSS"),
       Type: "Handicap",
       Duties: dutiesJson,
       series: {

@@ -11,7 +11,14 @@ import { orpcClient } from '@lib/orpc'
 import * as Types from '@sailviz/types'
 
 export default function CreateResultModal({ todaysRaces, boats, trackers }: { todaysRaces: Types.RaceType[]; boats: Types.BoatType[]; trackers: Types.Device[] }) {
-    const createResultMutation = useMutation(orpcClient.result.create.mutationOptions())
+    const createResultMutation = useMutation(
+        orpcClient.result.create.mutationOptions({
+            onError: _ => {
+                setBoatError(true)
+                setSailNumError(true)
+            }
+        })
+    )
     const updateResultMutation = useMutation(orpcClient.result.update.mutationOptions())
     const createParticipantMutation = useMutation(orpcClient.trackable.participant.create.mutationOptions())
 
@@ -125,7 +132,8 @@ export default function CreateResultModal({ todaysRaces, boats, trackers }: { to
     const createResult = async (fleetId: string, helm: string, crew: string, boat: Types.BoatType, sailNum: string, participantId: string) => {
         console.log('createResult', fleetId, helm, crew, boat, sailNum)
         //create a result for each fleet
-        let result = await createResultMutation.mutateAsync({ fleetId: fleetId })
+        let result = await createResultMutation.mutateAsync({ fleetId: fleetId, helm: helm, crew: crew, boat: boat, sailNumber: sailNum })
+        console.log('result', result)
         await updateResultMutation.mutateAsync({ ...result, Helm: helm, Crew: crew, boat: boat, SailNumber: sailNum, trackableParticipantId: participantId })
 
         console.log(helm, crew, boat, sailNum, fleetId)
@@ -133,6 +141,9 @@ export default function CreateResultModal({ todaysRaces, boats, trackers }: { to
 
     const clearFields = async () => {
         console.log('clearing fields')
+        setHelmError(false)
+        setBoatError(false)
+        setSailNumError(false)
         setHelm('')
         setCrew('')
         setTrackerId('')
@@ -333,7 +344,7 @@ export default function CreateResultModal({ todaysRaces, boats, trackers }: { to
                                 control: provided =>
                                     ({
                                         ...provided,
-                                        border: boatError ? '2px solid #f31260' : 'none',
+                                        border: 'none',
                                         padding: '0.5rem',
                                         fontSize: '1rem',
                                         borderRadius: '0.5rem',
