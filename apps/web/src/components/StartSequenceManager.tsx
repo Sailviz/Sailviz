@@ -106,7 +106,7 @@ const StartSequenceManager = ({ initialSequence, seriesId }: { initialSequence: 
                         onBlur={e => updateStepOrder(index, 'time', parseInt(e.target.value))}
                         className='border p-1 w-16'
                     />
-                    <input type='text' value={step.name} onChange={e => updateStep(index, 'name', e.target.value)} className='border p-1 flex-grow' />
+                    <input type='text' value={step.name} onChange={e => updateStep(index, 'name', e.target.value)} className='border p-1 grow' />
                     <input
                         type='number'
                         value={step.hoot}
@@ -132,7 +132,7 @@ const StartSequenceManager = ({ initialSequence, seriesId }: { initialSequence: 
                             })
                             updateStep(index, 'flagStatus', flags)
                         }}
-                        className='border p-1 flex-grow'
+                        className='border p-1 grow'
                         placeholder='Flag Status (e.g., flag1:true, flag2:false)'
                     />
                     <button onClick={() => moveStep(index, -1)} disabled={index === 0}>

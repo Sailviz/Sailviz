@@ -2,6 +2,7 @@ import { implement, ORPCError } from "@orpc/server";
 import prisma from "@sailviz/db";
 import { ORPCcontract } from "../contract";
 import { getOrg } from "./organization";
+import { start } from "node:repl";
 
 const os = implement(ORPCcontract);
 
@@ -75,6 +76,31 @@ export const createSeries = os.series.create.handler(async ({ input }) => {
   });
   console.log(newSeries);
   if (newSeries) {
+    // create a default fleet setting for the series
+    const fleetSettings = await prisma.fleetSettings.create({
+      data: {
+        name: "Main Fleet",
+        series: {
+          connect: {
+            id: newSeries.id,
+          },
+        },
+      },
+    });
+    const startSequence = getFiveStartSequence(fleetSettings.id);
+    startSequence.forEach(async (step: any) => {
+      await prisma.startSequence.create({
+        data: {
+          seriesId: newSeries.id,
+          time: step.time,
+          name: step.name,
+          order: step.order,
+          hoot: step.hoot,
+          flagStatus: step.flagStatus,
+          fleetStart: step.fleetStart,
+        },
+      });
+    });
     return newSeries;
   } else {
     throw new ORPCError("BAD_REQUEST");
@@ -140,3 +166,63 @@ export const series_update = os.series.update.handler(
     }
   },
 );
+
+function getFiveStartSequence(fleetId: string) {
+  return [
+    {
+      time: 315,
+      name: "warning",
+      order: 0,
+      hoot: 0,
+      flagStatus: [
+        { flag: "h", status: false },
+        { flag: "p", status: false },
+      ],
+      fleetStart: "",
+    },
+    {
+      time: 300,
+      name: "5 minutes",
+      order: 1,
+      hoot: 300,
+      flagStatus: [
+        { flag: "h", status: true },
+        { flag: "p", status: false },
+      ],
+      fleetStart: "",
+    },
+    {
+      time: 240,
+      name: "4 minutes",
+      order: 2,
+      hoot: 300,
+      flagStatus: [
+        { flag: "h", status: true },
+        { flag: "p", status: true },
+      ],
+      fleetStart: "",
+    },
+    {
+      time: 60,
+      name: "1 minute",
+      order: 3,
+      hoot: 500,
+      flagStatus: [
+        { flag: "h", status: true },
+        { flag: "p", status: false },
+      ],
+      fleetStart: "",
+    },
+    {
+      time: 0,
+      name: "Start",
+      order: 4,
+      hoot: 300,
+      flagStatus: [
+        { flag: "h", status: false },
+        { flag: "p", status: false },
+      ],
+      fleetStart: fleetId,
+    },
+  ];
+}
