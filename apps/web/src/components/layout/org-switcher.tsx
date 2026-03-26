@@ -29,6 +29,10 @@ export function OrgSwitcher() {
     useEffect(() => {
         const organizations: Types.Org[] = []
         console.log('Session in OrgSwitcher:', session)
+        if ((session as any).error) {
+            router.navigate({ to: '/' })
+            return
+        }
         if (enabled) {
             orgs.data?.forEach(org => {
                 organizations.push({

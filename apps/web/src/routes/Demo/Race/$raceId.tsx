@@ -41,7 +41,7 @@ function Page() {
     return (
         <>
             <div className='bg-green-500 text-center p-3 font-bold grid grid-cols-3 justify-items-start text-xl'>
-                <BackButton route={'/'} />
+                <BackButton route={'/dashboard/home'} />
                 <div className='my-auto text-center justify-self-stretch'>Demo Mode</div>
             </div>
 

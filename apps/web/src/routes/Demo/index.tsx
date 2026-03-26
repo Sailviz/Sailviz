@@ -1,13 +1,16 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { createFileRoute, useLoaderData, useNavigate } from '@tanstack/react-router'
 import { client, type Session } from '@sailviz/auth/client'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
 import type { FleetType, RaceType, ResultType } from '@sailviz/types'
+import { Spinner } from '@components/ui/spinner'
 
 function Page() {
     const navigate = useNavigate()
     const session: Session = useLoaderData({ from: `__root__` })
+
+    const [statusText, setStatusText] = useState('Initializing...')
 
     const GlobalConfig = useQuery(orpcClient.globalConfig.find.queryOptions()).data as GlobalConfigType
 
@@ -30,6 +33,7 @@ function Page() {
             if (session == null) {
                 await sendLoginRequest()
             }
+            setStatusText('Creating demo race')
             //create a new race for the demo
             let newRace: RaceType = (await createRaceMutation.mutateAsync({ seriesId: GlobalConfig.demoSeriesId })) as RaceType
             console.log(newRace)
@@ -37,6 +41,7 @@ function Page() {
                 console.log('no fleets in new race, something went wrong')
                 return
             }
+            setStatusText('Loading demo data')
             //load demo data into the new race
             const demoData: RaceType = (await findRaceMutation.mutateAsync({ raceId: GlobalConfig.demoDataId })) as RaceType
             console.log('loaded demo data:')
@@ -44,6 +49,7 @@ function Page() {
             //update race data
             await updateRaceMutation.mutateAsync({ ...demoData, id: newRace.id, Type: 'Handicap' })
             //add results data
+            setStatusText('Adding Racers')
             await Promise.all(
                 demoData
                     .fleets!.flatMap((fleet: FleetType) => fleet.results!)
@@ -53,7 +59,8 @@ function Page() {
                         })
                     })
             )
-            console.log('created demo race')
+            setStatusText('Done')
+
             // Redirect to another page
             navigate({ to: `/Demo/Race/${newRace.id}` })
         }
@@ -64,8 +71,10 @@ function Page() {
     }, [GlobalConfig])
 
     return (
-        <div>
+        <div className='flex flex-col items-center justify-center h-screen gap-4'>
             <p>Setting up practice Mode</p>
+            <Spinner size={'large'} />
+            <p>{statusText}</p>
         </div>
     )
 }
