@@ -107,7 +107,8 @@ function Page() {
 
     const calculate = async () => {
         setCalculatingResults(true)
-        await calculateResults(race, updateResultMutation)
+        const racedata = await getRace.mutateAsync({ raceId: race.id })
+        await calculateResults(racedata, updateResultMutation)
         for (const fleet of race.fleets) {
             await queryClient.invalidateQueries({
                 queryKey: orpcClient.fleet.find.key({ type: 'query', input: { fleetId: fleet!.id } })
