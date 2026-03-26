@@ -50,7 +50,7 @@ export default function SignOnLayout({ children }: { children: React.ReactNode }
               }
 
     const todaysRacesItems: NavItem[] = todaysRaces.map(race => ({
-        title: `SeriesName: ${race.number}`,
+        title: `${race.series?.name}: ${race.number}`,
         url: `/SignOn/Race/${race.id}?`,
         icon: <RaceIcon />,
         shortcut: ['e', 'e'],
