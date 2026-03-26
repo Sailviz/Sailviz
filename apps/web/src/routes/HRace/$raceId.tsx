@@ -353,7 +353,7 @@ function Page() {
         await calculateResults(race, updateResultMutation)
 
         if (race.trackableEventId != undefined) {
-            sendTrackableMessage(JSON.stringify({ type: 'saveEventRequest', eventId: race.trackableEventId }))
+            sendTrackableMessage(JSON.stringify({ type: 'stopEventRequest', eventId: race.trackableEventId }))
         }
         navigate({ to: '/dashboard/Race/' + race.id })
     }
