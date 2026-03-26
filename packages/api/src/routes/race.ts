@@ -225,6 +225,7 @@ export const updateRace = os.race.update.handler(
         Duties: input.Duties,
         Time: input.Time,
         Type: input.Type,
+        trackableEventId: input.trackableEventId,
       },
       include: {
         series: true,

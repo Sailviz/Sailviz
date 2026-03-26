@@ -57,6 +57,7 @@ function Page() {
                 isSailviz: true,
                 loop: true
             })
+            console.log('created event', event)
             await updateRaceMutation.mutateAsync({
                 ...race,
                 trackableEventId: event.id
