@@ -2,6 +2,8 @@ import { useMutation, useQuery } from '@tanstack/react-query'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select'
 import { orpcClient } from '@lib/orpc'
 import type { RaceType, SeriesType } from '@sailviz/types'
+import { queryClient } from '@lib/queryClient'
+
 export function ToCountSelect({ seriesId }: { seriesId: string }) {
     const series = useQuery(orpcClient.series.find.queryOptions({ input: { seriesId } })).data as SeriesType
 
@@ -16,7 +18,9 @@ export function ToCountSelect({ seriesId }: { seriesId: string }) {
         console.log(newSeriesData)
         newSeriesData.settings['numberToCount'] = value
         await updateSeriesMutation.mutateAsync(newSeriesData)
-        // mutateSeries()
+        queryClient.invalidateQueries({
+            queryKey: orpcClient.series.find.key({ type: 'query', input: { seriesId } })
+        })
     }
 
     if (!series) {
