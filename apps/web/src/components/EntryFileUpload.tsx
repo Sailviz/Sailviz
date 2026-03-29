@@ -84,7 +84,7 @@ export function EntryFileUpload({ raceId }: { raceId: string }) {
                         })
                     }
                     //update with info
-                    await updateResultMutation.mutateAsync(result)
+                    // await updateResultMutation.mutateAsync(result)
                 }
                 // After all mutations are finished, invalidate affected fleet queries so tables refetch
 

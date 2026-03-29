@@ -45,8 +45,6 @@ function Page() {
     const [retireModal, setRetireModal] = useState(false)
     const [flagModal, setFlagModal] = useState(false)
 
-    const startLength = 30 //315 is 5 mins 15 seconds in seconds
-
     var [seriesName, setSeriesName] = useState('')
 
     const queryClient = useQueryClient()
@@ -82,7 +80,7 @@ function Page() {
     const [raceTime, setRaceTime] = useState<number>(0)
 
     const startRaceButton = async () => {
-        let localTime = Math.floor(new Date().getTime() / 1000 + startLength)
+        let lastStartTime = Math.floor(new Date().getTime() / 1000 + startSequence.reduce((max, step) => (step.time > max ? step.time : max), 0))
 
         //start the clock
         // fetch('https://' + club.metadata!.clockIP + '/set?startTime=' + (localTime - club.metadata!.clockOffset).toString(), {
@@ -100,7 +98,14 @@ function Page() {
 
         //Update database
         race.fleets.forEach(async fleet => {
-            fleet.startTime = localTime
+            //find start time in start sequence
+            let startTimeStep = startSequence.find(step => step.fleetStart == fleet.fleetSettings.id)
+            if (startTimeStep == undefined) {
+                console.error('No start time found for fleet: ' + fleet.id)
+                return
+            }
+            fleet.startTime = lastStartTime - startTimeStep.time
+            console.log('Setting start time for fleet ' + fleet.id + ' to ' + fleet.startTime)
             await updateFleetMutation.mutateAsync(fleet)
         })
         setFlagModal(true)
@@ -388,7 +393,7 @@ function Page() {
                 }
                 await updateResultMutation.mutateAsync(result)
             })
-        navigate({ to: '/Race/' + race.id })
+        navigate({ to: '/dashboard/Race/' + race.id })
     }
 
     const showRetireModal = (resultId: string) => {
@@ -514,22 +519,10 @@ function Page() {
                         ) : (
                             <div className='w-1/4 p-2 m-2 border-4 rounded-lg text-lg font-medium'>
                                 Race Time:{' '}
-                                {/* <PursuitTimer
-                                    startTime={race.fleets[0]!.startTime}
-                                    endTime={series?.settings.pursuitLength}
-                                    timerActive={raceState == raceStateType.running}
-                                    onFiveMinutes={handleFiveMinutes}
-                                    onFourMinutes={handleFourMinutes}
-                                    onOneMinute={handleOneMinute}
-                                    onGo={handleGo}
-                                    onEnd={endRace}
-                                    onWarning={handleWarning}
-                                    reset={raceState == raceStateType.reset}
-                                    onTimeUpdate={(time: number) => setRaceTime(time)}
-                                /> */}
                                 <RaceTimer
+                                    key={race.fleets.reduce((max, step) => (step.startTime > max ? step.startTime : max), 0)}
                                     sequence={startSequence}
-                                    startTime={race.fleets[0]!.startTime}
+                                    startTime={race.fleets.reduce((max, step) => (step.startTime > max ? step.startTime : max), 0)}
                                     onFlagChange={handleFlagChange}
                                     onHoot={handleHoot}
                                     onSequenceEnd={handleSequenceEnd}
