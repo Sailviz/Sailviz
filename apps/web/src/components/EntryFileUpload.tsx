@@ -16,7 +16,6 @@ export function EntryFileUpload({ raceId }: { raceId: string }) {
     const queryClient = useQueryClient()
 
     const createResultMutation = useMutation(orpcClient.result.create.mutationOptions())
-    const updateResultMutation = useMutation(orpcClient.result.update.mutationOptions())
 
     const entryFileUploadHandler = async (e: ChangeEvent<HTMLInputElement>) => {
         if (race == null) {
