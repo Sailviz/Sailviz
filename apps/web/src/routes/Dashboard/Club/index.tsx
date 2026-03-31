@@ -63,7 +63,7 @@ function Page() {
                 <p className='text-2xl font-bold p-6'>Duties</p>
                 <Table>
                     <TableBody>
-                        {org.orgData!.duties.map((row: Types.DutyType) => (
+                        {org.orgData!.duties?.map((row: Types.DutyType) => (
                             <TableRow key={row}>
                                 <TableCell>
                                     <div className='grow justify-self-start'>

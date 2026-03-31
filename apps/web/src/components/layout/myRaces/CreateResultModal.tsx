@@ -15,12 +15,12 @@ import { useLoaderData } from '@tanstack/react-router'
 export default function CreateResultModal({ org }: { org: Types.Org }) {
     const session: Session = useLoaderData({ from: `__root__` })
     const { data: boats } = useQuery(orpcClient.boat.org.all.queryOptions({ input: { orgId: org.id } }))
-    const { data: trackers } = useQuery({
-        ...orpcClient.trackable.device.list.queryOptions({
-            input: { orgId: org?.orgData?.trackableOrgId || '' }
-        }),
-        enabled: org instanceof Promise
-    })
+    const { data: trackers } = useQuery(
+        orpcClient.trackable.device.list.queryOptions({
+            input: { orgId: org?.orgData?.trackableOrgId || '' },
+            enabled: org !== undefined
+        })
+    )
 
     const { data: signOnProfiles } = useQuery(orpcClient.user.signOnProfile.all.queryOptions())
     const { data: todaysRaces } = useQuery(orpcClient.race.today.queryOptions({ input: { orgId: org.id } }))

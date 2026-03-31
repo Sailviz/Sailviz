@@ -292,7 +292,14 @@ export const user_favouriteOrgs = os.user.favouriteOrgs
         userId,
       },
       include: {
-        organization: true,
+        organization: {
+          include: {
+            orgData: true,
+          },
+          omit: {
+            stripeCustomerId: true,
+          },
+        },
       },
     });
     return favouriteOrgs as Types.userFavouriteOrgsType[];

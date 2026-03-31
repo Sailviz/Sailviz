@@ -128,7 +128,7 @@ export const OrgDataSchema = z.object({
   trackableEnabled: z.boolean(),
   trackableOrgId: z.string(),
   organizationId: z.string(),
-  duties: z.array(DutySchema),
+  duties: z.array(DutySchema).optional(),
 });
 
 export type OrgDataType = z.infer<typeof OrgDataSchema>;
