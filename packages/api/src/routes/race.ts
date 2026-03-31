@@ -89,9 +89,19 @@ export async function findRace(id: string) {
         include: {
           fleetSettings: true,
           results: {
+            where: {
+              isDeleted: false,
+            },
             include: {
               boat: true,
-              laps: true,
+              laps: {
+                where: {
+                  isDeleted: false,
+                },
+                orderBy: {
+                  time: "asc",
+                },
+              },
             },
           },
         },
