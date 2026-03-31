@@ -1,11 +1,9 @@
-import { forwardRef, useState } from 'react'
+import { forwardRef, useEffect, useState } from 'react'
 import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, useReactTable, type SortingState, type ColumnDef } from '@tanstack/react-table'
-import type { ResultType } from '@sailviz/types'
+import * as Types from '@sailviz/types'
 
-const Text = ({ ...props }) => {
-    const value = props.getValue()
-
-    return <div className=' text-center'>{value}</div>
+const Text = ({ text }: { text: string }) => {
+    return <div className=' text-center'>{text}</div>
 }
 
 const Time = ({ ...props }) => {
@@ -28,13 +26,26 @@ const Empty = () => {
     return <div />
 }
 
-const columnHelper = createColumnHelper<ResultType>()
+const columnHelper = createColumnHelper<Types.ResultType>()
 
-const PursuitPaperResultsTable = forwardRef((results: ResultType[], ref: any) => {
-    //create 3 empty lines on sheet
-    results.push({} as ResultType)
-    results.push({} as ResultType)
-    results.push({} as ResultType)
+const PursuitPaperResultsTable = forwardRef((props: { fleet: Types.FleetType }, ref: any) => {
+    let [results, setResults] = useState<Types.ResultType[]>([])
+    const fleet = props.fleet
+    console.log('fleet in PursuitPaperResultsTable', fleet)
+
+    let allFinished = true
+    results.forEach(data => {
+        if (data.PursuitPosition == 0) {
+            allFinished = false
+        }
+    })
+
+    if (!allFinished) {
+        //create 3 empty lines on an empty sheet only
+        results.push({} as Types.ResultType)
+        results.push({} as Types.ResultType)
+        results.push({} as Types.ResultType)
+    }
 
     //sets sorting to position by default
     const [sorting, setSorting] = useState<SortingState>([
@@ -44,26 +55,34 @@ const PursuitPaperResultsTable = forwardRef((results: ResultType[], ref: any) =>
         }
     ])
 
-    let columns: ColumnDef<ResultType, any>[] = [
+    useEffect(() => {
+        if (fleet.results == undefined) {
+            console.error('Fleet results undefined in HandicapPaperResultsTable')
+            return
+        }
+        setResults(fleet.results)
+    }, [fleet])
+
+    let columns: ColumnDef<Types.ResultType, any>[] = [
         columnHelper.accessor('Helm', {
             header: 'Helm',
-            cell: props => <Text {...props} />,
+            cell: props => <Text text={props.getValue()} />,
             enableSorting: false
         }),
         columnHelper.accessor('Crew', {
             header: 'Crew',
-            cell: props => <Text {...props} />,
+            cell: props => <Text text={props.getValue()} />,
             enableSorting: false
         }),
         columnHelper.accessor(data => data.boat?.name, {
             header: 'Class',
             id: 'Class',
-            cell: props => <Text {...props} />,
+            cell: props => <Text text={props.getValue()} />,
             enableSorting: false
         }),
         columnHelper.accessor(data => data.SailNumber, {
             header: 'Sail Number',
-            cell: props => <Text {...props} />,
+            cell: props => <Text text={props.getValue()} />,
             enableSorting: false
         })
     ]
@@ -76,21 +95,23 @@ const PursuitPaperResultsTable = forwardRef((results: ResultType[], ref: any) =>
     })
     columns.push(startTime)
 
-    // add column for each lap
-    for (let i = 0; i < 6; i++) {
-        const newColumn = columnHelper.display({
-            header: (i + 1).toString(),
-            size: 40,
-            cell: () => <Empty />,
-            enableSorting: false
-        })
-        columns.push(newColumn)
+    if (!allFinished) {
+        // add column for each lap
+        for (let i = 0; i < 6; i++) {
+            const newColumn = columnHelper.display({
+                header: (i + 1).toString(),
+                size: 40,
+                cell: _ => <Empty />,
+                enableSorting: false
+            })
+            columns.push(newColumn)
+        }
     }
 
-    const Position = columnHelper.display({
+    const Position = columnHelper.accessor('PursuitPosition', {
         header: 'Position',
-        cell: () => <Empty />,
-        enableSorting: false
+        cell: props => <Text text={props.getValue() == 0 ? '' : props.getValue()?.toString() || ''} />,
+        enableSorting: true
     })
     columns.push(Position)
 

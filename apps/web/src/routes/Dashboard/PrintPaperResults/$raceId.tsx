@@ -43,11 +43,7 @@ function Page() {
                         <p className='text-2xl'>
                             {race.series!.name} - Race {race.number} ({raceTime}) - {fleet.fleetSettings.name}
                         </p>
-                        {race.Type == 'Handicap' ? (
-                            <HandicapPaperResultsTable fleet={fleet} />
-                        ) : (
-                            <PursuitPaperResultsTable {...race.fleets.flatMap(fleet => fleet.results!)} />
-                        )}
+                        {race.Type == 'Handicap' ? <HandicapPaperResultsTable fleet={fleet} /> : <PursuitPaperResultsTable fleet={fleet} />}
                     </div>
                 )
             })}
