@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import dayjs from 'dayjs'
 import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, type SortingState, useReactTable } from '@tanstack/react-table'
-import { useNavigate } from '@tanstack/react-router'
+import { Link } from '@tanstack/react-router'
 import { Button } from '../ui/button'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
 import { useQuery } from '@tanstack/react-query'
@@ -22,21 +22,17 @@ const Time = ({ ...props }: any) => {
     )
 }
 
-const Action = ({ ...props }: any) => {
-    const navigate = useNavigate()
-
+const Action = ({ viewHref, raceId }: { viewHref: string; raceId: string }) => {
     return (
-        <>
-            <Button color='success' onClick={() => navigate({ to: '/dashboard/Race/' + props.row.original.id })}>
-                Open
-            </Button>
-        </>
+        <Link to={viewHref + raceId} className='text-default-900 cursor-pointer'>
+            <Button color='success'>Open</Button>
+        </Link>
     )
 }
 
 const columnHelper = createColumnHelper<RaceType>()
 
-const UpcomingRacesTable = ({ orgId }: { orgId: string }) => {
+const UpcomingRacesTable = ({ orgId, viewHref }: { orgId: string; viewHref: string }) => {
     const { data: todaysRaces } = useQuery(orpcClient.race.today.queryOptions({ input: { orgId } }))
 
     const [sorting, setSorting] = useState<SortingState>([{ id: 'number', desc: false }])
@@ -67,7 +63,7 @@ const UpcomingRacesTable = ({ orgId }: { orgId: string }) => {
             columnHelper.accessor('id', {
                 id: 'action',
                 header: 'Actions',
-                cell: props => <Action {...props} id={props.row.original.id} />
+                cell: props => <Action raceId={props.row.original.id} viewHref={viewHref} />
             })
         ],
         state: {

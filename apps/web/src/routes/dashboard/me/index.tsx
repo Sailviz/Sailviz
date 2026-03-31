@@ -72,7 +72,7 @@ function Page() {
             {favouriteOrgs?.map((org: any) => (
                 <div>
                     <h1 key={org.orgId}> {org.organization.name} </h1>
-                    <UpcomingRacesTable orgId={org.orgId} />
+                    <UpcomingRacesTable orgId={org.orgId} viewHref={`/club/${org.organization.name}/Race/`} />
                     <div className='mt-2 text-center max-h-[5vh] overflow-hidden'>
                         <CreateResultModal org={org.organization} />
                     </div>

@@ -31,7 +31,7 @@ function Page() {
                     <div>
                         <p className='text-2xl font-bold p-6 pb-1'>Today&apos;s Races</p>
                         <div className='p-6 pt-1'>
-                            <UpcomingRacesTable orgId={org.id} />
+                            <UpcomingRacesTable orgId={org.id} viewHref={`/dashboard/Race/`} />
                         </div>
                     </div>
 
