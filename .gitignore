@@ -10,3 +10,4 @@ packages/auth/src/config.ts
 packages/db/src/config.ts
 /packages/types/dist
 ~/.tauri/myapp.key
+apps/desktop/src-tauri/gen/android/keystore.properties

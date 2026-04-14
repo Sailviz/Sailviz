@@ -7,6 +7,7 @@
     "bundle:prod:desktop": "pnpm --filter web build:prod && pnpm --filter desktop build:prod:desktop && pnpm --filter desktop bundle:prod:desktop",
     "dev:api": "pnpm --filter api dev",
     "build:android:test": "pnpm --filter desktop android:test\"",
+    "build:android:prod": "pnpm --filter desktop android:prod\"",
     "load:android:test": "pnpm --filter desktop load:test",
     "build:dev:web": "pnpm --filter web build:dev",
     "build:test:web": "pnpm --filter web build:test",
