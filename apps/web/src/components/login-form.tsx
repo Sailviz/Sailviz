@@ -144,7 +144,7 @@ export function LoginForm() {
                 // Make the fresh session immediately available to consumers
                 // so guards/beforeLoad can read it synchronously from cache.
 
-                // if the user has a start page of dashboard/home, we need to set the active org
+                // if the user has a start page of dashboard/me, we need to set the active org
                 if (session.user.startPage != 'dashboard/me') {
                     const { data } = await client.organization.list()
                     if (data) {

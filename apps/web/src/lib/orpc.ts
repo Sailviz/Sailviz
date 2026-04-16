@@ -4,16 +4,19 @@ import { type ContractRouterClient } from '@orpc/contract'
 import { ORPCcontract } from '@sailviz/api/contract'
 import { createTanstackQueryUtils } from '@orpc/tanstack-query'
 
-console.log('API URL:', import.meta.env.VITE_API_URL)
 if (import.meta.env.VITE_API_URL == undefined) {
     throw new Error('API_URL is not defined in environment variables')
 }
 const link = new RPCLink({
     url: import.meta.env.VITE_API_URL,
     fetch: (url, options) => {
+        const token = localStorage.getItem('bearer_token')
         return fetch(url, {
             ...options,
-            credentials: 'include'
+            credentials: 'include',
+            headers: {
+                Authorization: token ? `Bearer ${token}` : ''
+            }
         })
     },
     interceptors: [

