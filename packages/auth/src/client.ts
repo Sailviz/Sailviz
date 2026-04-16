@@ -29,18 +29,6 @@ export const client = createAuthClient({
       },
     }),
   ],
-  fetchOptions: {
-    auth: {
-      type: "Bearer",
-      token: () => localStorage.getItem("bearer_token") || "",
-    },
-    onSuccess: (ctx) => {
-      const authToken = ctx.response.headers.get("set-auth-token");
-      if (authToken) {
-        localStorage.setItem("bearer_token", authToken || "");
-      }
-    },
-  },
 });
 
 // Destructure core methods but provide a thin, typed wrapper for `useSession`

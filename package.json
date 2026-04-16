@@ -9,6 +9,7 @@
     "build:android:test": "pnpm --filter desktop android:test\"",
     "build:android:prod": "pnpm --filter desktop android:prod\"",
     "load:android:test": "pnpm --filter desktop load:test",
+    "load:android:prod": "pnpm --filter desktop load:prod",
     "build:dev:web": "pnpm --filter web build:dev",
     "build:test:web": "pnpm --filter web build:test",
     "build:prod:web": "pnpm --filter web build:prod",
