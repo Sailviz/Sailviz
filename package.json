@@ -1,7 +1,7 @@
 {
   "scripts": {
     "dev:dev:web": "concurrently -n \"API,WEB\" -c \"blue,green\" \"pnpm --filter api dev\" \"pnpm --filter web dev\"",
-    "dev:dev:desktop": "concurrently -n \"API,TAURI\" -c \"blue,magenta\" \"pnpm --filter api dev\" \"pnpm --filter desktop dev:dev:desktop\"",
+    "dev:dev:desktop": "concurrently -n \"API,TAURI\" -c \"blue,magenta\" \"pnpm --filter api dev\" \"pnpm --filter desktop dev:desktop\"",
     "dev:test:desktop": "pnpm --filter desktop dev:test:desktop",
     "bundle:test:desktop": "pnpm --filter web build:test && pnpm --filter desktop build:test:desktop && pnpm --filter desktop bundle:test:desktop",
     "bundle:prod:desktop": "pnpm --filter web build:prod && pnpm --filter desktop build:prod:desktop && pnpm --filter desktop bundle:prod:desktop",

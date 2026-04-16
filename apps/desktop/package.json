@@ -2,7 +2,7 @@
   "name": "desktop",
   "version": "0.1.0",
   "scripts": {
-    "dev:dev:desktop": "pnpm --filter web build:dev && pnpm tauri dev",
+    "dev:desktop": "pnpm --filter web build:dev && pnpm tauri dev",
     "dev:test:desktop": "pnpm --filter web build:test && pnpm tauri dev",
     "build:dev:desktop": "pnpm --filter web build:dev && pnpm tauri build",
     "build:test:desktop": "pnpm --filter web build:test && pnpm tauri build",

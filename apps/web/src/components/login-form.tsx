@@ -170,10 +170,11 @@ export function LoginForm() {
     }
 
     const handleGitHubLogin = async () => {
+        const callbackURL = window.location.origin + '/dashboard/me'
         await signIn
             .social({
                 provider: 'github',
-                callbackURL: import.meta.env.VITE_BASE_URL + '/dashboard/me',
+                callbackURL: callbackURL,
                 fetchOptions: {
                     redirect: 'manual'
                 }
