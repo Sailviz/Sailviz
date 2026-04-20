@@ -132,7 +132,11 @@ export const getSeries = os.series.find.handler(async ({ input }) => {
         include: {
           fleets: {
             include: {
-              results: true,
+              results: {
+                include: {
+                  boat: true,
+                },
+              },
               fleetSettings: true,
             },
           },
