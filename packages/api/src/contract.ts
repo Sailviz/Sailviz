@@ -34,6 +34,19 @@ export const ORPCcontract = {
       )
       .output(z.array(Types.StartSequenceStepSchema)),
   },
+  buoy: {
+    session: oc.output(z.array(Types.BuoySchema)),
+    update: oc.input(Types.BuoySchema).output(Types.BuoySchema),
+    delete: oc.input(z.object({ boatId: z.string() })).output(Types.BuoySchema),
+    create: oc
+      .input(
+        z.object({
+          name: z.string(),
+          isMoveable: z.boolean(),
+        }),
+      )
+      .output(Types.BuoySchema),
+  },
   series: {
     find: oc
       .input(z.object({ seriesId: z.string() }))

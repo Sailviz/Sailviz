@@ -75,6 +75,12 @@ import {
   trackable_participant_create,
 } from "./routes/trackable";
 import { orgData_update } from "./routes/organization";
+import {
+  buoy_create,
+  buoy_delete,
+  buoy_session,
+  buoy_update,
+} from "./routes/bouy";
 
 const os = implement(ORPCcontract);
 
@@ -175,6 +181,12 @@ export const mainRouter = os.router({
   globalConfig: {
     find: globalConfig_find,
     update: globalConfig_update,
+  },
+  buoy: {
+    create: buoy_create,
+    session: buoy_session,
+    update: buoy_update,
+    delete: buoy_delete,
   },
   trackable: {
     participant: {

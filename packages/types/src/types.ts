@@ -133,6 +133,18 @@ export const OrgDataSchema = z.object({
 
 export type OrgDataType = z.infer<typeof OrgDataSchema>;
 
+export const BuoySchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  orgId: z.string(),
+  lat: z.number(),
+  lon: z.number(),
+  isMoveable: z.boolean(),
+  trackerId: z.string().nullable(),
+});
+
+export type BuoyType = z.infer<typeof BuoySchema>;
+
 export const OrgSchema = z.object({
   id: z.string(),
   name: z.string(),

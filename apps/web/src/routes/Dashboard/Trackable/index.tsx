@@ -8,6 +8,8 @@ import { Input } from '@components/ui/input'
 import { ActionButton } from '@components/ui/action-button'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
+import BuoyTable from '@components/tables/BuoyTable'
+import CreateBuoyDialog from '@components/layout/dashboard/CreateBuoyModal'
 
 function Page() {
     const session: Session = useLoaderData({ from: `__root__` })
@@ -58,6 +60,8 @@ function Page() {
             </div>
             <Input className='mx-6 mb-4' placeholder='Trackable Org Id' value={trackableOrgId} onChange={v => setTrackableOrgId(v.target.value)} />
             <ActionButton before='Save' during='Saving' after='Saved' action={updateOrgIg} />
+            <BuoyTable />
+            <CreateBuoyDialog />
         </div>
     )
 }

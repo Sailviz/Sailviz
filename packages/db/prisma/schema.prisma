@@ -265,7 +265,7 @@ model Lap {
 }
 
 model Tracker {
-  trackerID    String       @id @unique
+  trackerId    String       @id @unique
   orgId        String
   name         String
   organization Organization @relation(fields: [orgId], references: [id])
@@ -275,9 +275,10 @@ model Buoy {
   id           String       @id @unique @default(uuid())
   name         String
   orgId        String
-  pos          Json
+  lat          Float
+  lon          Float
   isMoveable   Boolean
-  trackerID    String
+  trackerId    String
   organization Organization @relation(fields: [orgId], references: [id])
 }
 
