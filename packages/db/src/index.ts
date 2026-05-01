@@ -6,7 +6,7 @@ const globalForPrisma = global as unknown as { prisma?: PrismaClient };
 
 const prisma = (globalForPrisma.prisma ||
   new PrismaClient({
-    log: ["warn", "error", "info", "query"],
+    log: ["warn", "error", "info"],
     datasources: {
       db: {
         url: DATABASE_URL,

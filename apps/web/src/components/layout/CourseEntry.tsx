@@ -25,11 +25,13 @@ export default function CourseEntry({ raceId }: { raceId: string }) {
         }
     }, [race])
 
-    const addBuoyMutation = useMutation(orpcClient.race.course.add.mutationOptions({}))
-    const updateBuoyMutation = useMutation(orpcClient.race.course.update.mutationOptions({}))
-    const deleteBuoyMutation = useMutation(orpcClient.race.course.delete.mutationOptions({}))
+    const addBuoyMutation = useMutation(orpcClient.race.course.add.mutationOptions())
+    const updateBuoyMutation = useMutation(orpcClient.race.course.update.mutationOptions())
+    const deleteBuoyMutation = useMutation(orpcClient.race.course.delete.mutationOptions())
     const getTodayRace = useMutation(orpcClient.race.today.mutationOptions())
     const getRace = useMutation(orpcClient.race.find.mutationOptions())
+
+    const updateEventWaypoints = useMutation(orpcClient.trackable.waypoint.setEvent.mutationOptions())
 
     const addBuoy = () => {
         const newBuoy = { buoyId: buoys[0].id, order: courseBuoys.length, side: 'port', raceId }
@@ -62,6 +64,11 @@ export default function CourseEntry({ raceId }: { raceId: string }) {
                 onSuccess: () => {
                     setCourseBuoys(prev => prev.map(b => (b.id === courseBuoyId ? { ...b, buoy, side, order } : b)))
                     queryClient.invalidateQueries(orpcClient.race.find.queryOptions({ input: { raceId } }))
+                    console.log('Buoy added, updating event waypoints...')
+                    updateEventWaypoints.mutate({
+                        eventId: race.trackableEventId!,
+                        waypoints: [...courseBuoys.map(cb => ({ order: cb.order, name: cb.buoy.name, lat: cb.buoy.lat, lon: cb.buoy.lon }))]
+                    })
                 }
             }
         )

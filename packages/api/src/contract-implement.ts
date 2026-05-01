@@ -76,6 +76,7 @@ import {
   trackable_event_create,
   trackable_event_update,
   trackable_participant_create,
+  trackable_waypoint_setEvent,
 } from "./routes/trackable";
 import { orgData_update } from "./routes/organization";
 import {
@@ -209,6 +210,9 @@ export const mainRouter = os.router({
     },
     device: {
       list: trackable_device_list,
+    },
+    waypoint: {
+      setEvent: trackable_waypoint_setEvent,
     },
   },
 });

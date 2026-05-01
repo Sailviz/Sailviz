@@ -271,5 +271,20 @@ export const ORPCcontract = {
         .input(z.object({ orgId: z.string() }))
         .output(z.array(Types.DeviceSchema)),
     },
+    waypoint: {
+      setEvent: oc.input(
+        z.object({
+          waypoints: z.array(
+            z.object({
+              order: z.number(),
+              name: z.string(),
+              lat: z.number(),
+              lon: z.number(),
+            }),
+          ),
+          eventId: z.string(),
+        }),
+      ),
+    },
   },
 } as const;

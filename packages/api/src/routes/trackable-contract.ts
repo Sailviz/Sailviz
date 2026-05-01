@@ -39,6 +39,19 @@ export const TrackableContract = {
     find: oc
       .input(z.object({ waypointId: z.string() }))
       .output(Types.WaypointSchema),
+    setEvent: oc.input(
+      z.object({
+        waypoints: z.array(
+          z.object({
+            order: z.number(),
+            name: z.string(),
+            lat: z.number(),
+            lon: z.number(),
+          }),
+        ),
+        eventId: z.string(),
+      }),
+    ),
   },
   device: {
     create: oc.input(z.object({ id: z.string(), productId: z.string() })),

@@ -22,20 +22,14 @@ const trackableClient: ContractRouterClient<typeof TrackableContract> =
 
 export const trackable_participant_create =
   os.trackable.participant.create.handler(async ({ input, context }) => {
-    const res = trackableClient.participant.create({
-      eventId: input.eventId,
-      deviceId: input.deviceId,
-    });
+    const res = trackableClient.participant.create(input);
     return res;
   });
 
 export const trackable_event_create = os.trackable.event.create.handler(
   async ({ input, context }) => {
     // Placeholder implementation
-    const res = trackableClient.event.create({
-      name: input.name,
-      orgId: input.orgId,
-    });
+    const res = trackableClient.event.create(input);
     return res;
   },
 );
@@ -43,20 +37,21 @@ export const trackable_event_create = os.trackable.event.create.handler(
 export const trackable_event_update = os.trackable.event.update.handler(
   async ({ input, context }) => {
     // Placeholder implementation
-    const res = trackableClient.event.update({
-      id: input.id,
-      name: input.name,
-      eventType: input.eventType,
-      isSailviz: input.isSailviz,
-      loop: input.loop,
-    });
+    const res = trackableClient.event.update(input);
     return res;
   },
 );
 
 export const trackable_device_list = os.trackable.device.list.handler(
   async ({ input, context }) => {
-    const res = trackableClient.device.all({ orgId: input.orgId });
+    const res = trackableClient.device.all(input);
     return res;
   },
 );
+
+export const trackable_waypoint_setEvent =
+  os.trackable.waypoint.setEvent.handler(async ({ input, context }) => {
+    const res = trackableClient.waypoint.setEvent(input);
+    console.log("Waypoints updated for event", input.eventId);
+    return res;
+  });
