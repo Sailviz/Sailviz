@@ -193,7 +193,7 @@ export const duty_update = os.organization.duties.update.handler(
   },
 );
 
-export const buoy_session = os.organization.bouys.session
+export const buoy_session = os.organization.buoys.session
   .use(authMiddleware)
   .handler(async ({ context }) => {
     const session = context.session as any;
@@ -201,8 +201,8 @@ export const buoy_session = os.organization.bouys.session
       throw new ORPCError("UNAUTHORIZED", { message: "Login required" });
     }
     const orgId = session.session.activeOrganizationId;
-    const bouys = await prisma.buoy.findMany({
+    const buoys = await prisma.buoy.findMany({
       where: { orgId: orgId },
     });
-    return bouys as unknown as Types.BuoyType[];
+    return buoys as unknown as Types.BuoyType[];
   });

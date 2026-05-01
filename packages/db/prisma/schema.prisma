@@ -211,11 +211,11 @@ model Race {
   seriesId         String
   Duties           Json
   fleets           Fleet[]
-  courseBouys      CourseBouy[]
+  courseBuoys      CourseBuoy[]
   series           Series       @relation(fields: [seriesId], references: [id], onDelete: Cascade)
 }
 
-model CourseBouy {
+model CourseBuoy {
   id     String @id @unique @default(uuid())
   raceId String
   order  Int
@@ -290,7 +290,7 @@ model Buoy {
   isStartLine  Boolean
   trackerId    String
   organization Organization @relation(fields: [orgId], references: [id])
-  courseBouys  CourseBouy[]
+  courseBuoys  CourseBuoy[]
 }
 
 model Session {

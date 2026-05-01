@@ -85,9 +85,12 @@ export async function findRace(id: string) {
     },
     include: {
       series: true,
-      courseBouys: {
+      courseBuoys: {
         include: {
           buoy: true,
+        },
+        orderBy: {
+          order: "asc",
         },
       },
 
@@ -417,13 +420,13 @@ export const race_find = os.race.find.handler(async ({ input }) => {
 });
 
 export const race_course_add = os.race.course.add.handler(async ({ input }) => {
-  const newCourseBouy = await prisma.courseBouy.create({
+  const newCourseBuoy = await prisma.courseBuoy.create({
     data: {
       side: input.side,
       order: input.order,
       buoy: {
         connect: {
-          id: input.bouyId,
+          id: input.buoyId,
         },
       },
       race: {
@@ -436,5 +439,42 @@ export const race_course_add = os.race.course.add.handler(async ({ input }) => {
       buoy: true,
     },
   });
-  return newCourseBouy;
+  return newCourseBuoy;
 });
+
+export const race_course_update = os.race.course.update.handler(
+  async ({ input }) => {
+    const updatedCourseBuoy = await prisma.courseBuoy.update({
+      where: {
+        id: input.id,
+      },
+      data: {
+        side: input.side,
+        order: input.order,
+        buoy: {
+          connect: {
+            id: input.buoy.id,
+          },
+        },
+      },
+      include: {
+        buoy: true,
+      },
+    });
+    return updatedCourseBuoy;
+  },
+);
+
+export const race_course_delete = os.race.course.delete.handler(
+  async ({ input }) => {
+    const deletedCourseBuoy = await prisma.courseBuoy.delete({
+      where: {
+        id: input.courseBuoyId,
+      },
+      include: {
+        buoy: true,
+      },
+    });
+    return deletedCourseBuoy;
+  },
+);

@@ -80,7 +80,7 @@ export const ORPCcontract = {
       create: oc.output(Types.DutySchema),
       update: oc.input(Types.DutySchema).output(Types.DutySchema),
     },
-    bouys: {
+    buoys: {
       session: oc.output(z.array(Types.BuoySchema)),
     },
   },
@@ -174,13 +174,17 @@ export const ORPCcontract = {
       add: oc
         .input(
           z.object({
-            bouyId: z.string(),
+            buoyId: z.string(),
             order: z.number(),
             raceId: z.string(),
             side: z.string(),
           }),
         )
-        .output(Types.courseBouySchema),
+        .output(Types.courseBuoySchema),
+      update: oc.input(Types.courseBuoySchema).output(Types.courseBuoySchema),
+      delete: oc
+        .input(z.object({ courseBuoyId: z.string() }))
+        .output(Types.courseBuoySchema),
     },
   },
   result: {

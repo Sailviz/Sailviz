@@ -2,6 +2,8 @@ import { implement, ORPCError } from "@orpc/server";
 import { ORPCcontract } from "./contract";
 import {
   race_course_add,
+  race_course_delete,
+  race_course_update,
   race_create,
   race_delete,
   race_find,
@@ -81,7 +83,7 @@ import {
   buoy_delete,
   buoy_session,
   buoy_update,
-} from "./routes/bouy";
+} from "./routes/buoy";
 
 const os = implement(ORPCcontract);
 
@@ -115,6 +117,8 @@ export const mainRouter = os.router({
     create: race_create,
     course: {
       add: race_course_add,
+      update: race_course_update,
+      delete: race_course_delete,
     },
   },
   series: {
@@ -149,7 +153,7 @@ export const mainRouter = os.router({
       create: duty_create,
       update: duty_update,
     },
-    bouys: {
+    buoys: {
       session: buoy_session,
     },
   },

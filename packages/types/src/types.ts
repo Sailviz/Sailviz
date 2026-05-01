@@ -23,14 +23,14 @@ export const BuoySchema = z.object({
 
 export type BuoyType = z.infer<typeof BuoySchema>;
 
-export const courseBouySchema = z.object({
+export const courseBuoySchema = z.object({
   id: z.string(),
   order: z.number(),
   side: z.string(),
   buoy: BuoySchema,
 });
 
-export type CourseBuoyType = z.infer<typeof courseBouySchema>;
+export type CourseBuoyType = z.infer<typeof courseBuoySchema>;
 
 export const ResultSchema = z.object({
   id: z.string(),
@@ -80,7 +80,7 @@ export const RaceSchema = z.object({
   seriesId: z.string(),
   trackableEventId: z.string().nullable().optional(),
   series: z.lazy(() => SeriesSchema.optional()),
-  courseBouys: z.array(courseBouySchema).optional(),
+  courseBuoys: z.array(courseBuoySchema).optional(),
 });
 export type RaceType = z.infer<typeof RaceSchema>;
 
