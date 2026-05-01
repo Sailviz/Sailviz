@@ -177,7 +177,7 @@ function Page() {
                             })}
                             <div className='w-1/4 mr-4 pb-4 pt-6'>
                                 <Button color='warning' onClick={copyFromPrevious}>
-                                    Copy from previous race
+                                    Copy From Previous Race
                                 </Button>
                             </div>
                         </div>
