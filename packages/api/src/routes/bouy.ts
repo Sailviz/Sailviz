@@ -17,6 +17,7 @@ export const buoy_create = os.buoy.create
       data: {
         name: input.name,
         isMoveable: input.isMoveable,
+        isStartLine: input.isStartLine,
         lat: 0,
         lon: 0,
         trackerId: "",
@@ -41,7 +42,6 @@ export const buoy_session = os.buoy.session
         orgId,
       },
     });
-    console.log("buoys", result);
     return result;
   });
 

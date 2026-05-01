@@ -200,12 +200,10 @@ model StartSequence {
   fleetStart String
   flagStatus Json
   order      Int
-
-  // @@unique([seriesId, order]) // Ensures unique order numbers per race //this is commented out to allow multiple actions at the same time
 }
 
 model Race {
-  id               String  @id @unique @default(uuid())
+  id               String       @id @unique @default(uuid())
   trackableEventId String?
   number           Int
   Time             String
@@ -213,7 +211,18 @@ model Race {
   seriesId         String
   Duties           Json
   fleets           Fleet[]
-  series           Series  @relation(fields: [seriesId], references: [id], onDelete: Cascade)
+  courseBouys      CourseBouy[]
+  series           Series       @relation(fields: [seriesId], references: [id], onDelete: Cascade)
+}
+
+model CourseBouy {
+  id     String @id @unique @default(uuid())
+  raceId String
+  order  Int
+  side   String
+  buoy   Buoy   @relation(fields: [buoyId], references: [id])
+  race   Race   @relation(fields: [raceId], references: [id])
+  buoyId String
 }
 
 model FleetSettings {
@@ -278,8 +287,10 @@ model Buoy {
   lat          Float
   lon          Float
   isMoveable   Boolean
+  isStartLine  Boolean
   trackerId    String
   organization Organization @relation(fields: [orgId], references: [id])
+  courseBouys  CourseBouy[]
 }
 
 model Session {

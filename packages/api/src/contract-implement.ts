@@ -1,6 +1,7 @@
 import { implement, ORPCError } from "@orpc/server";
 import { ORPCcontract } from "./contract";
 import {
+  race_course_add,
   race_create,
   race_delete,
   race_find,
@@ -112,6 +113,9 @@ export const mainRouter = os.router({
     update: updateRace,
     delete: race_delete,
     create: race_create,
+    course: {
+      add: race_course_add,
+    },
   },
   series: {
     find: getSeries,
@@ -144,6 +148,9 @@ export const mainRouter = os.router({
     duties: {
       create: duty_create,
       update: duty_update,
+    },
+    bouys: {
+      session: buoy_session,
     },
   },
   boat: {

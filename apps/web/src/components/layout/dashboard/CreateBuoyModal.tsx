@@ -12,13 +12,15 @@ export default function CreateBuoyDialog() {
 
     const [name, setName] = useState('')
     const [isMoveable, setIsMoveable] = useState(false)
+    const [isStartLine, setIsStartLine] = useState(false)
 
     const [open, setOpen] = useState(false)
 
     const createBoat = async () => {
         await createBuoyMutation.mutateAsync({
             name,
-            isMoveable
+            isMoveable,
+            isStartLine
         })
         queryClient.invalidateQueries({
             queryKey: orpcClient.buoy.session.key({ type: 'query' })
@@ -29,6 +31,7 @@ export default function CreateBuoyDialog() {
     const clearFields = () => {
         setName('')
         setIsMoveable(false)
+        setIsStartLine(false)
     }
 
     return (
@@ -53,6 +56,10 @@ export default function CreateBuoyDialog() {
                     <div className='flex flex-col px-6 w-full'>
                         <p className='text-2xl font-bold'>Moveable</p>
                         <Switch checked={isMoveable} onCheckedChange={setIsMoveable} className='mt-2' />
+                    </div>
+                    <div className='flex flex-col px-6 w-full'>
+                        <p className='text-2xl font-bold'>StartLine</p>
+                        <Switch checked={isStartLine} onCheckedChange={setIsStartLine} className='mt-2' />
                     </div>
                 </div>
                 <DialogFooter>

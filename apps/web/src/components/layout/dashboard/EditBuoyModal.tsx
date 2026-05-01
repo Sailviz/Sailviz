@@ -53,15 +53,15 @@ export default function EditBuoyDialog({ buoy, open, onClose }: { buoy: Types.Bu
                     <div className='flex flex-col px-6 w-full'>
                         <p className='text-2xl font-bold'>Name</p>
 
-                        <Input id='name' disabled type='text' value={name} onChange={e => setName(e.target.value)} placeholder='J Bloggs' autoComplete='off' />
+                        <Input id='name' type='text' value={name} onChange={e => setName(e.target.value)} placeholder='J Bloggs' autoComplete='off' />
                     </div>
                     <div className='flex flex-col px-6 w-full'>
                         <p className='text-2xl font-bold'>Lat</p>
-                        <Input id='py' type='number' value={lat.toString()} onChange={e => setLat(parseInt(e.target.value))} autoComplete='off' />
+                        <Input id='py' type='number' value={lat.toString()} onChange={e => setLat(parseFloat(e.target.value))} autoComplete='off' />
                     </div>
                     <div className='flex flex-col px-6 w-full'>
                         <p className='text-2xl font-bold'>Lon</p>
-                        <Input id='crew' disabled type='number' value={lon.toString()} onChange={e => setLon(parseInt(e.target.value))} autoComplete='off' />
+                        <Input id='crew' type='number' value={lon.toString()} onChange={e => setLon(parseFloat(e.target.value))} autoComplete='off' />
                     </div>
                     <div className='flex flex-col px-6 w-full'>
                         <p className='text-xl font-bold'>Moveable</p>

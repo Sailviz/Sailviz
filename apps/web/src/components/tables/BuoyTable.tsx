@@ -18,7 +18,7 @@ const BuoyTable = () => {
     const [modalIsOpen, setModalIsOpen] = useState(false)
     const [modalData, setModalData] = useState<Types.BuoyType | undefined>(undefined)
 
-    const data = buoys || []
+    const data = buoys?.sort((a, b) => (a.name < b.name ? -1 : 1)) || []
 
     const onRowClick = (row: any) => {
         setModalData(row.original)
@@ -35,6 +35,11 @@ const BuoyTable = () => {
             }),
             columnHelper.accessor('isMoveable', {
                 header: 'Moveable',
+                cell: props => <Text value={props.getValue() ? 'yes' : 'no'} />,
+                enableColumnFilter: false
+            }),
+            columnHelper.accessor('isStartLine', {
+                header: 'Start Line',
                 cell: props => <Text value={props.getValue() ? 'yes' : 'no'} />,
                 enableColumnFilter: false
             }),

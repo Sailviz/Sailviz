@@ -16,6 +16,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
 import type { RaceType } from '@sailviz/types'
 import type { Session } from '@sailviz/auth/client'
+import CourseEntry from '@components/layout/CourseEntry'
 
 function Page() {
     const { raceId } = Route.useParams()
@@ -203,6 +204,9 @@ function Page() {
                             {userHasPermission(session.user, AVAILABLE_PERMISSIONS.UploadEntires) ? <EntryFileUpload raceId={race.id} /> : <></>}
                             {userHasPermission(session.user, AVAILABLE_PERMISSIONS.DownloadResults) ? <Button onClick={downloadResults}>Download Results</Button> : <></>}
                         </div>
+                    </div>
+                    <div className='py-4 w-full'>
+                        <CourseEntry raceId={race.id} />
                     </div>
                     <div className='py-4 w-full'>
                         {race!.fleets.map((fleet: any, index: number) => {

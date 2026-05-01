@@ -43,6 +43,7 @@ export const ORPCcontract = {
         z.object({
           name: z.string(),
           isMoveable: z.boolean(),
+          isStartLine: z.boolean(),
         }),
       )
       .output(Types.BuoySchema),
@@ -78,6 +79,9 @@ export const ORPCcontract = {
     duties: {
       create: oc.output(Types.DutySchema),
       update: oc.input(Types.DutySchema).output(Types.DutySchema),
+    },
+    bouys: {
+      session: oc.output(z.array(Types.BuoySchema)),
     },
   },
   fleet: {
@@ -166,6 +170,18 @@ export const ORPCcontract = {
         }),
       )
       .output(Types.RaceSchema),
+    course: {
+      add: oc
+        .input(
+          z.object({
+            bouyId: z.string(),
+            order: z.number(),
+            raceId: z.string(),
+            side: z.string(),
+          }),
+        )
+        .output(Types.courseBouySchema),
+    },
   },
   result: {
     create: oc

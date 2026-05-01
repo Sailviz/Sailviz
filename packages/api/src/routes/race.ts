@@ -85,6 +85,12 @@ export async function findRace(id: string) {
     },
     include: {
       series: true,
+      courseBouys: {
+        include: {
+          buoy: true,
+        },
+      },
+
       fleets: {
         include: {
           fleetSettings: true,
@@ -408,4 +414,27 @@ export const race_find = os.race.find.handler(async ({ input }) => {
   } else {
     throw new ORPCError("NOT_FOUND");
   }
+});
+
+export const race_course_add = os.race.course.add.handler(async ({ input }) => {
+  const newCourseBouy = await prisma.courseBouy.create({
+    data: {
+      side: input.side,
+      order: input.order,
+      buoy: {
+        connect: {
+          id: input.bouyId,
+        },
+      },
+      race: {
+        connect: {
+          id: input.raceId,
+        },
+      },
+    },
+    include: {
+      buoy: true,
+    },
+  });
+  return newCourseBouy;
 });

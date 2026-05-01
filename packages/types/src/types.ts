@@ -10,6 +10,28 @@ export const LapSchema = z.object({
 });
 export type LapType = z.infer<typeof LapSchema>;
 
+export const BuoySchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  orgId: z.string(),
+  lat: z.number(),
+  lon: z.number(),
+  isMoveable: z.boolean(),
+  isStartLine: z.boolean(),
+  trackerId: z.string().nullable(),
+});
+
+export type BuoyType = z.infer<typeof BuoySchema>;
+
+export const courseBouySchema = z.object({
+  id: z.string(),
+  order: z.number(),
+  side: z.string(),
+  buoy: BuoySchema,
+});
+
+export type CourseBuoyType = z.infer<typeof courseBouySchema>;
+
 export const ResultSchema = z.object({
   id: z.string(),
   fleetId: z.string(),
@@ -58,6 +80,7 @@ export const RaceSchema = z.object({
   seriesId: z.string(),
   trackableEventId: z.string().nullable().optional(),
   series: z.lazy(() => SeriesSchema.optional()),
+  courseBouys: z.array(courseBouySchema).optional(),
 });
 export type RaceType = z.infer<typeof RaceSchema>;
 
@@ -132,18 +155,6 @@ export const OrgDataSchema = z.object({
 });
 
 export type OrgDataType = z.infer<typeof OrgDataSchema>;
-
-export const BuoySchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  orgId: z.string(),
-  lat: z.number(),
-  lon: z.number(),
-  isMoveable: z.boolean(),
-  trackerId: z.string().nullable(),
-});
-
-export type BuoyType = z.infer<typeof BuoySchema>;
 
 export const OrgSchema = z.object({
   id: z.string(),
