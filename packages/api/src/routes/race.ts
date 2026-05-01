@@ -402,7 +402,7 @@ export const race_org = os.race.org.handler(async ({ input }) => {
   );
   const races = await findRaces(
     series.map((s) => s.id),
-    input.page ?? 0,
+    input.page ? input.page - 1 : 0,
     100,
     input.date,
     input.historical ?? false,
