@@ -7,8 +7,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import EventMap from './EventMap'
 import { Switch } from '@components/ui/switch'
 import { useState, useEffect } from 'react'
+import dayjs from 'dayjs'
+import type { Session } from '@lib/session'
+import { useLoaderData } from '@tanstack/react-router'
 
 export default function CourseEntry({ raceId }: { raceId: string }) {
+    const session: Session = useLoaderData({ from: `__root__` })
+
     const race = useQuery(orpcClient.race.find.queryOptions({ input: { raceId: raceId! } })).data as Types.RaceType
     const buoys = useQuery(orpcClient.organization.buoys.session.queryOptions({})).data as Types.BuoyType[]
     const [courseBuoys, setCourseBuoys] = useState<Types.CourseBuoyType[]>([])
@@ -23,6 +28,8 @@ export default function CourseEntry({ raceId }: { raceId: string }) {
     const addBuoyMutation = useMutation(orpcClient.race.course.add.mutationOptions({}))
     const updateBuoyMutation = useMutation(orpcClient.race.course.update.mutationOptions({}))
     const deleteBuoyMutation = useMutation(orpcClient.race.course.delete.mutationOptions({}))
+    const getTodayRace = useMutation(orpcClient.race.today.mutationOptions())
+    const getRace = useMutation(orpcClient.race.find.mutationOptions())
 
     const addBuoy = () => {
         const newBuoy = { buoyId: buoys[0].id, order: courseBuoys.length, side: 'port', raceId }
@@ -60,6 +67,50 @@ export default function CourseEntry({ raceId }: { raceId: string }) {
         )
     }
 
+    const copyFromPreviousRace = async () => {
+        let today = await getTodayRace.mutateAsync({ orgId: session.session.activeOrganizationId! })
+        if (today == undefined) {
+            alert('unable to get previous data')
+            return
+        }
+        //sort by time, oldest first
+        today.sort((a, b) => dayjs(a.Time).unix() - dayjs(b.Time).unix())
+        console.log(today)
+        //get index of current race
+        let index = today.findIndex(tod => {
+            return tod.id == race.id
+        })
+        console.log(index)
+        // select race before current
+        let previousRace = today[index - 1]
+        if (previousRace == undefined) {
+            alert('No previous race found')
+            return
+        }
+
+        //we have a course to copy, so remove any existing course in this race
+        race.courseBuoys?.forEach(buoy => {
+            deleteBuoyMutation.mutate({ courseBuoyId: buoy.id })
+        })
+        let previousRaceData = (await getRace.mutateAsync({ raceId: previousRace.id })) as Types.RaceType
+        //copy duties
+        let newCourseBuoys = previousRaceData.courseBuoys
+        //update DB
+        if (newCourseBuoys == undefined) {
+            alert('No course found in previous race')
+            return
+        }
+        await Promise.all(
+            newCourseBuoys.map(buoy => {
+                return addBuoyMutation.mutateAsync({ buoyId: buoy.buoy.id, order: buoy.order, side: buoy.side, raceId })
+            })
+        )
+        // mutateRace()
+        queryClient.invalidateQueries({
+            queryKey: orpcClient.race.find.key({ type: 'query' })
+        })
+    }
+
     return (
         <div className='w-full border rounded-md p-4 flex flex-row'>
             <div className='flex items-center justify-between w-full mb-4'>
@@ -90,7 +141,7 @@ export default function CourseEntry({ raceId }: { raceId: string }) {
                     <Button variant='green' className='m-2' onClick={() => addBuoy()}>
                         Add Buoy
                     </Button>
-                    <Button disabled className='m-2' onClick={() => addBuoy()}>
+                    <Button className='m-2' onClick={() => copyFromPreviousRace()}>
                         Copy From Previous Race
                     </Button>
                     <Button className='m-2' onClick={() => removeBuoy()}>
