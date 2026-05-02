@@ -65,9 +65,22 @@ export default function CourseEntry({ raceId }: { raceId: string }) {
                     setCourseBuoys(prev => prev.map(b => (b.id === courseBuoyId ? { ...b, buoy, side, order } : b)))
                     queryClient.invalidateQueries(orpcClient.race.find.queryOptions({ input: { raceId } }))
                     console.log('Buoy added, updating event waypoints...')
+                    const inner = buoys.find(b => b.name == 'INNER')
+                    const outer = buoys.find(b => b.name == 'OUTER')
+                    if (!inner || !outer) {
+                        alert('INNER or OUTER buoy not found, cannot update waypoints')
+                        return
+                    }
+                    const startLine = { order: 0, name: 'Start Line', lat: inner.lat, lon: inner.lon, blat: outer.lat, blon: outer.lon }
                     updateEventWaypoints.mutate({
                         eventId: race.trackableEventId!,
-                        waypoints: [...courseBuoys.map(cb => ({ order: cb.order, name: cb.buoy.name, lat: cb.buoy.lat, lon: cb.buoy.lon }))]
+                        waypoints: [
+                            startLine,
+                            ...courseBuoys
+                                // Update the changed buoy in the waypoints list as state does not update immediately
+                                .map(b => (b.id === courseBuoyId ? { ...b, buoy, side, order } : b))
+                                .map(cb => ({ order: cb.order + 1, name: cb.buoy.name, lat: cb.buoy.lat, lon: cb.buoy.lon }))
+                        ]
                     })
                 }
             }
@@ -112,7 +125,6 @@ export default function CourseEntry({ raceId }: { raceId: string }) {
                 return addBuoyMutation.mutateAsync({ buoyId: buoy.buoy.id, order: buoy.order, side: buoy.side, raceId })
             })
         )
-        // mutateRace()
         queryClient.invalidateQueries({
             queryKey: orpcClient.race.find.key({ type: 'query' })
         })

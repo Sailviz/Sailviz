@@ -47,6 +47,8 @@ export const TrackableContract = {
             name: z.string(),
             lat: z.number(),
             lon: z.number(),
+            blat: z.number().optional(),
+            blon: z.number().optional(),
           }),
         ),
         eventId: z.string(),
