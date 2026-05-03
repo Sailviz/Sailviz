@@ -291,17 +291,33 @@ function Page() {
     }
 
     const retireBoat = async (resultCode: string) => {
-        // retireModal.onClose()
         let tempdata = activeResult
         tempdata.resultCode = resultCode
-        await updateResultMutation.mutateAsync(tempdata)
-
-        // refresh race query
-        queryClient.invalidateQueries({ queryKey: raceQueryOptions.queryKey })
-
+        let optimisticData: Types.RaceType = window.structuredClone(race)
+        //update optimistic data with new lap
+        optimisticData.fleets.forEach((fleet: Types.FleetType) => {
+            fleet.results!.forEach(res => {
+                if (res.id == activeResult.id) {
+                    res.resultCode = resultCode
+                }
+            })
+        })
+        // optimistic update via TanStack Query
+        // const previousRace = queryClient.getQueryData<Types.RaceType>(raceQueryOptions.queryKey)
+        queryClient.setQueryData(raceQueryOptions.queryKey, optimisticData)
+        try {
+            await updateResultMutation.mutateAsync(tempdata)
+        } finally {
+            // refresh race query
+            queryClient.invalidateQueries({ queryKey: raceQueryOptions.queryKey })
+        }
         //change back to lap mode
         setRetireModal(false)
-        setRaceState(lastRaceState)
+        if (checkAllFinished(optimisticData.fleets.flatMap(fleet => fleet.results!))) {
+            setRaceState(raceStateType.calculate)
+        } else {
+            setRaceState(lastRaceState)
+        }
     }
 
     const lapBoat = async (resultId: string) => {
@@ -321,7 +337,6 @@ function Page() {
         //save state for undo
         setLastAction({ type: 'lap', resultId: resultId })
 
-        // await DB.CreateLap(resultId, Math.floor(new Date().getTime() / 1000))
         //load back race data
         let optimisticData: Types.RaceType = window.structuredClone(race)
         //update optimistic data with new lap
