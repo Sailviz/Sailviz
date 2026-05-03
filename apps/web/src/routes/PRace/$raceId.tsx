@@ -355,8 +355,8 @@ function Page() {
                 return -1
             }
             //sort by nubmer of laps then last lap time
-            if (a.numberLaps != b.numberLaps) {
-                return a.numberLaps - b.numberLaps
+            if (a.laps.length != b.laps.length) {
+                return b.laps.length - a.laps.length
             } else {
                 const aLastLapTime = a.laps.length > 0 ? a.laps.slice(-1)[0]!.time : Infinity
                 const bLastLapTime = b.laps.length > 0 ? b.laps.slice(-1)[0]!.time : Infinity
@@ -384,15 +384,6 @@ function Page() {
     }
 
     const submitResults = async () => {
-        //copy lap data into final result
-        race.fleets
-            .flatMap(fleet => fleet.results!)
-            .forEach(async result => {
-                if (result.numberLaps == 0) {
-                    result.numberLaps = result.laps.length
-                }
-                await updateResultMutation.mutateAsync(result)
-            })
         navigate({ to: '/dashboard/Race/' + race.id })
     }
 
