@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, useReactTable, type SortingState } from '@tanstack/react-table'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
 import type { FleetType, ResultType } from '@sailviz/types'
@@ -105,15 +105,21 @@ const columnHelper = createColumnHelper<ResultType>()
 
 const LiveResultsTable = ({ raceId, startTime, handicap }: { raceId: string; startTime: number; handicap: string }) => {
     const race = useQuery(orpcClient.race.find.queryOptions({ input: { raceId: raceId }, refetchInterval: 5000 })).data
-    const results = handicap == 'Handicap' ? calculateHandicapResults(race?.fleets[0]!).results! : calculatePursuitResults(race?.fleets[0]!).results!
-    let maxLaps = 0
-    results.forEach(result => {
-        if (result.laps.length > maxLaps) {
-            maxLaps = result.laps.length
-        }
-    })
 
-    console.log(results)
+    const [results, setResults] = useState<ResultType[]>()
+    const [maxLaps, setMaxLaps] = useState(0)
+
+    useEffect(() => {
+        if (race === undefined) return
+        const res = handicap == 'Handicap' ? calculateHandicapResults(race.fleets[0]).results : calculatePursuitResults(race.fleets[0]).results
+        setResults(res)
+        res?.forEach(result => {
+            if (result.laps.length > maxLaps) {
+                setMaxLaps(result.laps.length)
+            }
+        })
+        console.log(res)
+    }, [race])
 
     //sets sorting to position by default
     const [sorting, setSorting] = useState<SortingState>([
@@ -164,7 +170,7 @@ const LiveResultsTable = ({ raceId, startTime, handicap }: { raceId: string; sta
 
     const Correctedtime = columnHelper.accessor(data => data.CorrectedTime, {
         header: 'Corrected Time',
-        cell: props => <CorrectedTime {...props} result={results.find(result => result.id == props.row.original.id)} />,
+        cell: props => <CorrectedTime {...props} result={results?.find(result => result.id == props.row.original.id)} />,
         enableSorting: false
     })
 
@@ -179,7 +185,7 @@ const LiveResultsTable = ({ raceId, startTime, handicap }: { raceId: string; sta
     columns.push(Position)
 
     let table = useReactTable({
-        data: results,
+        data: results ? results : [],
         columns,
         state: {
             sorting
