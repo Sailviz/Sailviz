@@ -536,7 +536,11 @@ function Page() {
         if (race == undefined) return
 
         setRaceState(raceStateType.reset)
-        dynamicSort(race.fleets.flatMap(fleet => fleet.results!))
+        if (raceMode.length > 1) {
+            dynamicSort(race.fleets.flatMap(fleet => fleet.results!))
+        } else {
+            sortByLastLap(race.fleets.flatMap(fleet => fleet.results!))
+        }
 
         //check for all fleets finished?
         if (checkAllFinished(race.fleets.flatMap(fleet => fleet.results!))) {
