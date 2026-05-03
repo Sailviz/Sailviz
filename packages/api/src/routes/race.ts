@@ -117,6 +117,31 @@ export async function findRace(id: string) {
       },
     },
   });
+
+  var modifications = await prisma.boatOverride.findMany({
+    where: {
+      orgId: result.series.orgId,
+    },
+  });
+  result.fleets.forEach((fleet, i) =>
+    fleet.results.forEach((res, index) => {
+      var modifiedBoat = modifications.find(
+        (mod) => mod.boatId === res.boat.id,
+      );
+      if (modifiedBoat) {
+        result.fleets[i].results[index].boat = {
+          ...res.boat,
+          py: modifiedBoat.py,
+          pursuitStartTime: modifiedBoat.pursuitStartTime,
+        } as any;
+      } else {
+        result.fleets[i].results[index].boat = {
+          ...res.boat,
+          pursuitStartTime: 0,
+        } as any;
+      }
+    }),
+  );
   return result;
 }
 
