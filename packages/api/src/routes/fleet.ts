@@ -14,7 +14,11 @@ export async function findFleet(id: string) {
     include: {
       results: {
         include: {
-          laps: true,
+          laps: {
+            orderBy: {
+              time: "asc",
+            },
+          },
           boat: true,
         },
       },
@@ -82,7 +86,7 @@ export const createFleetSettings = os.fleet.settings.create.handler(
     } else {
       throw new ORPCError("BAD_REQUEST");
     }
-  }
+  },
 );
 
 export const fleet_settings_find = os.fleet.settings.find.handler(
@@ -96,7 +100,7 @@ export const fleet_settings_find = os.fleet.settings.find.handler(
       },
     });
     return fleetSettings;
-  }
+  },
 );
 
 export const fleet_settings_delete = os.fleet.settings.delete.handler(
@@ -109,7 +113,7 @@ export const fleet_settings_delete = os.fleet.settings.delete.handler(
     } else {
       throw new ORPCError("BAD_REQUEST");
     }
-  }
+  },
 );
 
 export const fleet_settings_update = os.fleet.settings.update.handler(
@@ -135,7 +139,7 @@ export const fleet_settings_update = os.fleet.settings.update.handler(
     } else {
       throw new ORPCError("BAD_REQUEST");
     }
-  }
+  },
 );
 
 export const fleet_find = os.fleet.find.handler(async ({ input }) => {
