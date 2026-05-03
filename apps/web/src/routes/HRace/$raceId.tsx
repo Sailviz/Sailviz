@@ -366,6 +366,11 @@ function Page() {
 
     const calculate = async () => {
         await calculateResults(race, updateResultMutation)
+        for (const fleet of race.fleets) {
+            await queryClient.invalidateQueries({
+                queryKey: orpcClient.fleet.find.key({ type: 'query', input: { fleetId: fleet!.id } })
+            })
+        }
 
         if (race.trackableEventId != undefined) {
             sendTrackableMessage(JSON.stringify({ type: 'stopEventRequest', eventId: race.trackableEventId }))
