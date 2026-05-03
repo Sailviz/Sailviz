@@ -84,7 +84,7 @@ export default function EventMap({ raceId, windowHeight }: { raceId: string; win
 
     return (
         // wrapper ensures positioned button sits above the map and can be full-screened
-        <div ref={wrapperRef} style={{ position: 'relative', height: windowHeight, width: '100%' }}>
+        <div ref={wrapperRef} style={{ position: 'relative', height: windowHeight, width: '100%', zIndex: 2 }}>
             <FullscreenButton wrapper={wrapperRef} />
             <MapContainer center={[51.6, -1.9]} zoom={ZOOM_LEVEL} style={{ height: '100%', width: '100%' }}>
                 <TileLayer
