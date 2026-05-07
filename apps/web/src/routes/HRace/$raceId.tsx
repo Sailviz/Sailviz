@@ -366,11 +366,9 @@ function Page() {
 
     const calculate = async () => {
         await calculateResults(race, updateResultMutation)
-        for (const fleet of race.fleets) {
-            await queryClient.invalidateQueries({
-                queryKey: orpcClient.fleet.find.key({ type: 'query', input: { fleetId: fleet!.id } })
-            })
-        }
+        queryClient.invalidateQueries({
+            queryKey: orpcClient.fleet.find.key({ type: 'query' })
+        })
 
         if (race.trackableEventId != undefined) {
             sendTrackableMessage(JSON.stringify({ type: 'stopEventRequest', eventId: race.trackableEventId }))
@@ -533,6 +531,9 @@ function Page() {
         } else if (raceMode.length == 1 && raceMode[0] == raceModeType.Lap) {
             //this doesn't work on first load as the results are not loaded yet
             dynamicSort(race.fleets.flatMap(fleet => fleet.results!))
+            console.log('Sorting with dynamic sort')
+        } else {
+            dynamicSort(race.fleets.flatMap(fleet => fleet.results!))
         }
     }, [raceMode])
 
@@ -541,7 +542,7 @@ function Page() {
         if (race == undefined) return
 
         setRaceState(raceStateType.reset)
-        if (raceMode.length > 1) {
+        if (raceMode.length == 1 && raceMode[0] == raceModeType.Lap) {
             dynamicSort(race.fleets.flatMap(fleet => fleet.results!))
         } else {
             sortByLastLap(race.fleets.flatMap(fleet => fleet.results!))

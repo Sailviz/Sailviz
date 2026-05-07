@@ -11,7 +11,7 @@ export async function calculateResults(race: RaceType, updateResultMutation: { m
         const maxLaps = Math.max.apply(
             null,
             fleet.results.map(function (o: ResultType) {
-                return o.numberLaps
+                return o.numberLaps == 0 ? o.laps.length : o.numberLaps
             })
         )
         console.log(maxLaps)
@@ -39,6 +39,7 @@ export async function calculateResults(race: RaceType, updateResultMutation: { m
             let seconds = result.finishTime - fleet.startTime
             result.CorrectedTime = (seconds * 1000 * (maxLaps / result.numberLaps)) / result.boat.py
             result.CorrectedTime = Math.round(result.CorrectedTime * 10) / 10
+            console.log(result.CorrectedTime)
         }
 
         //calculate finish position
