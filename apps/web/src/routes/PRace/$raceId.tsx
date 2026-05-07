@@ -269,12 +269,22 @@ function Page() {
         // there is just one fleet so grab the first one
         let start = race.fleets[0]!.startTime
         data.fleets[0]!.results!.sort((a: Types.ResultType, b: Types.ResultType) => {
-            //if done a lap, predicted is sum of lap times + last lap.
-            //if no lap done, predicted is py.
-            let aPredicted =
-                a.laps.length > 0 ? a.laps[a.laps.length - 1]!.time + a.laps[a.laps.length - 1]!.time - (a.laps[a.laps.length - 2]?.time || start) : a.boat.pursuitStartTime
-            let bPredicted =
-                b.laps.length > 0 ? b.laps[b.laps.length - 1]!.time + b.laps[b.laps.length - 1]!.time - (b.laps[b.laps.length - 2]?.time || start) : b.boat.pursuitStartTime
+            //if done one lap, predicted time of last lap plus the difference between the time of the last lap minus the race start time and the boat's start time.
+            //if done more than one lap, predicted time of last lap plus the difference between the time of the last lap and the second to last lap.
+            //if no lap done, predicted is the boat's start time.
+            let aPredicted = 0
+            let bPredicted = 0
+            if (a.laps.length > 0) {
+                aPredicted = a.laps[a.laps.length - 1]!.time + a.laps[a.laps.length - 1]!.time - (a.laps[a.laps.length - 2]?.time || start + a.boat.pursuitStartTime)
+            } else {
+                aPredicted = a.boat.pursuitStartTime
+            }
+            if (b.laps.length > 0) {
+                bPredicted = b.laps[b.laps.length - 1]!.time + b.laps[b.laps.length - 1]!.time - (b.laps[b.laps.length - 2]?.time || start + b.boat.pursuitStartTime)
+            } else {
+                bPredicted = b.boat.pursuitStartTime
+            }
+
             //force resultcodes to the end
             if (a.resultCode != '') {
                 aPredicted = Number.MAX_SAFE_INTEGER
