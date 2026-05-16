@@ -112,7 +112,7 @@ export default function CreateResultModal({ todaysRaces, boats, trackers }: { to
                 const race = todaysRaces.filter(race => race.fleets.some(f => f.id == selectedFleets[i]))[0]!
                 console.log(race)
                 if (race.trackableEventId != null) {
-                    const participant = await createParticipantMutation.mutateAsync({ eventId: race.trackableEventId, deviceId: trackerId })
+                    const participant = await createParticipantMutation.mutateAsync({ eventId: race.trackableEventId, deviceId: trackerId, name: `${sailNumber}  ${helm}` })
                     participantId = participant.id
                 } else {
                     console.log("trackable event id is null, can't create participant")

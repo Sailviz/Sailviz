@@ -243,6 +243,7 @@ export const ORPCcontract = {
           z.object({
             eventId: z.string(),
             deviceId: z.string(),
+            name: z.string().optional(),
           }),
         )
         .output(z.any()),

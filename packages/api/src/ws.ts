@@ -44,7 +44,7 @@ export const generateServer = () => {
           //generate byte array with status request and device ID
           const packet = new Uint8Array([0x02, ...duration]);
 
-          console.log("Sending status request:", packet);
+          console.log("Sending hoot request:", packet);
           wss.clients.forEach((client) => {
             if (client.readyState === WebSocket.OPEN) {
               client.send(packet, { binary: true });

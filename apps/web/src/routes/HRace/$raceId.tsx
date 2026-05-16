@@ -143,6 +143,9 @@ function Page() {
         //modify racestate to running for all fleets
         setRaceState(raceStateType.running)
 
+        //0 time hoot to check horn is connected
+        sendMessage(JSON.stringify({ type: 'hootRequest', orgId: club.id, duration: 0 }))
+
         let sound = document.getElementById('Beep') as HTMLAudioElement
         sound!.currentTime = 0
         sound!.play()
@@ -158,6 +161,7 @@ function Page() {
 
     const handleHoot = (time: number) => {
         //sound horn
+        console.log(`Hoot for ${time} seconds`)
         sendMessage(JSON.stringify({ type: 'hootRequest', orgId: club.id, duration: time }))
 
         let sound = document.getElementById('Beep') as HTMLAudioElement
