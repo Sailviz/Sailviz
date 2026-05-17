@@ -2,7 +2,7 @@ import { signOut } from '@sailviz/auth/client'
 import { createFileRoute, useNavigate, useRouter } from '@tanstack/react-router'
 import { useEffect } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
-import { sessionQueryKey } from 'src/lib/session'
+import { sessionQueryKey } from '@lib/session'
 import { isTauriRuntime } from '../../is-tauri'
 import { api_server } from '@components/URL'
 

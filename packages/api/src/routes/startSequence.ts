@@ -1,7 +1,7 @@
 import { implement, ORPCError } from "@orpc/server";
 import prisma from "@sailviz/db";
 import { ORPCcontract } from "../contract";
-import { StartSequenceStepType } from "packages/types/src/types";
+import * as Types from "@sailviz/types";
 
 const os = implement(ORPCcontract);
 
@@ -12,11 +12,11 @@ export const findStartSequence = os.startSequence.find.handler(
       orderBy: { order: "asc" },
     });
     if (sequence) {
-      return sequence as unknown as StartSequenceStepType[]; // prisma not fully typed for this
+      return sequence as unknown as Types.StartSequenceStepType[]; // prisma not fully typed for this
     } else {
       throw new ORPCError("BAD_REQUEST");
     }
-  }
+  },
 );
 
 export const deleteStartSequenceStep = os.startSequence.delete.handler(
@@ -25,11 +25,11 @@ export const deleteStartSequenceStep = os.startSequence.delete.handler(
       where: { id: input.stepId },
     });
     if (deletedStep) {
-      return deletedStep as unknown as StartSequenceStepType; // prisma not fully typed for this
+      return deletedStep as unknown as Types.StartSequenceStepType; // prisma not fully typed for this
     } else {
       throw new ORPCError("BAD_REQUEST");
     }
-  }
+  },
 );
 
 export const startSequence_update = os.startSequence.update.handler(
@@ -85,6 +85,6 @@ export const startSequence_update = os.startSequence.update.handler(
       where: { seriesId: input.seriesId },
       orderBy: { order: "asc" },
     });
-    return sequence as unknown as StartSequenceStepType[]; // prisma not fully typed for this
-  }
+    return sequence as unknown as Types.StartSequenceStepType[]; // prisma not fully typed for this
+  },
 );

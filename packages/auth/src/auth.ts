@@ -4,7 +4,6 @@ import prisma from "@sailviz/db";
 import { anonymous, bearer, organization, username } from "better-auth/plugins";
 import * as config from "./config";
 import { myPlugin } from "./plugin";
-import { userFavouriteOrgsSchema } from "packages/types/src/types";
 
 export const auth = betterAuth({
   trustedOrigins: [

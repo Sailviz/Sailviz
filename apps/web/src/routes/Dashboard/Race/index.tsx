@@ -1,11 +1,13 @@
-import RacesTable from '@components/tables/RacesTable'
-import { title } from '@components/layout/home/primitaves'
 import UpcomingRacesTable from '@components/tables/UpcomingRacesTable'
-
 import { PageSkeleton } from '@components/layout/PageSkeleton'
-
 import { createFileRoute, useLoaderData } from '@tanstack/react-router'
 import type { Session } from '@sailviz/auth/client'
+import { useRaceTableFilters } from '@features/race/race-table/use-race-table-filters'
+import { Suspense } from 'react'
+import { DataTableSkeleton } from '@components/ui/table/data-table-skeleton'
+import PageContainer from '@components/layout/page-container'
+import { Heading } from '@components/ui/heading'
+import RaceTable from '@features/race/race-table'
 
 function Page() {
     const session: Session = useLoaderData({ from: `__root__` })
@@ -19,25 +21,29 @@ function Page() {
     }
 
     return (
-        <div>
-            <div className='p-6'>
-                <h1 className={title({ color: 'blue' })}>Races</h1>
-            </div>
-            <div className='flex flex-row'>
+        <PageContainer scrollable={false}>
+            <div className='flex flex-1 flex-col space-y-4'>
+                <div className='flex items-start justify-between'>
+                    <Heading title='Races' description='Manage races' />
+                </div>
                 <div className='px-3'>
                     <p className='text-2xl font-bold p-6'>Today</p>
                     <UpcomingRacesTable orgId={orgId} viewHref={`/dashboard/Race/`} />
                 </div>
-                <div className='px-3'>
+                <div className='px-3 h-full'>
                     <p className='text-2xl font-bold p-6'>Upcoming</p>
-                    <RacesTable orgId={orgId} date={new Date()} historical={false} viewHref='/dashboard/Race/' />
+                    <Suspense fallback={<DataTableSkeleton columnCount={3} rowCount={10} />}>
+                        <RaceTable historical={false} filters={useRaceTableFilters()} orgId={orgId} date={new Date()} />
+                    </Suspense>
                 </div>
                 <div className='px-3'>
                     <p className='text-2xl font-bold p-6'>Recent</p>
-                    <RacesTable orgId={orgId} date={new Date()} historical={true} viewHref='/dashboard/Race/' />
+                    <Suspense fallback={<DataTableSkeleton columnCount={3} rowCount={10} />}>
+                        <RaceTable historical={true} filters={useRaceTableFilters()} orgId={orgId} date={new Date()} />
+                    </Suspense>
                 </div>
             </div>
-        </div>
+        </PageContainer>
     )
 }
 

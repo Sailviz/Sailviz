@@ -1,8 +1,8 @@
 import prisma from "@sailviz/db";
-import { BoatType } from "packages/types/src/types";
 import { implement, ORPCError } from "@orpc/server";
 import { ORPCcontract } from "../contract";
 import { authMiddleware } from "../middleware";
+import * as Types from "@sailviz/types";
 const os = implement(ORPCcontract);
 
 export async function findBoats(orgId: string) {
@@ -17,7 +17,7 @@ export async function findBoats(orgId: string) {
     },
   });
   //go through boats, and apply any modifications
-  var result: BoatType[] = [];
+  var result: Types.BoatType[] = [];
   standardBoats.forEach((boat) => {
     var modifiedBoat = modifications.find((mod) => mod.boatId === boat.id);
     if (modifiedBoat) {
@@ -36,7 +36,7 @@ export async function findBoats(orgId: string) {
 export async function findBoat(
   boatId: string,
   orgId: string,
-): Promise<BoatType> {
+): Promise<Types.BoatType> {
   var standard = await prisma.boat.findUnique({
     where: {
       id: boatId,
@@ -57,7 +57,7 @@ export async function findBoat(
     crew: modification ? modification.crew : standard.crew,
     pursuitStartTime: modification ? modification.pursuitStartTime : 0,
     organizationId: orgId,
-  } as BoatType;
+  } as Types.BoatType;
 
   return boat;
 }

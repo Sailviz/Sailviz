@@ -2,8 +2,7 @@ import prisma from "@sailviz/db";
 import dayjs from "dayjs";
 import { implement, ORPCError } from "@orpc/server";
 import { ORPCcontract } from "../contract";
-import { RaceType } from "packages/types/src/types";
-import { findOrgSeries } from "./series";
+import * as Types from "@sailviz/types";
 
 const os = implement(ORPCcontract);
 
@@ -41,7 +40,11 @@ export async function findTodaysRace(orgId: string) {
           fleetSettings: true,
         },
       },
-      series: true,
+      series: {
+        include: {
+          tags: true,
+        },
+      },
     },
   });
   return result;
@@ -79,12 +82,16 @@ export async function findRaces(
 }
 
 export async function findRace(id: string) {
-  var result = await prisma.race.findUnique({
+  var race = await prisma.race.findUnique({
     where: {
       id: id,
     },
     include: {
-      series: true,
+      series: {
+        include: {
+          tags: true,
+        },
+      },
       courseBuoys: {
         include: {
           buoy: true,
@@ -118,31 +125,35 @@ export async function findRace(id: string) {
     },
   });
 
+  if (!race) {
+    throw new ORPCError("NOT_FOUND");
+  }
+
   var modifications = await prisma.boatOverride.findMany({
     where: {
-      orgId: result.series.orgId,
+      orgId: race.series.orgId,
     },
   });
-  result.fleets.forEach((fleet, i) =>
+  race.fleets.forEach((fleet, i) =>
     fleet.results.forEach((res, index) => {
       var modifiedBoat = modifications.find(
-        (mod) => mod.boatId === res.boat.id,
+        (mod) => mod.boatId === res.boat!.id,
       );
       if (modifiedBoat) {
-        result.fleets[i].results[index].boat = {
+        race!.fleets[i].results[index].boat = {
           ...res.boat,
           py: modifiedBoat.py,
           pursuitStartTime: modifiedBoat.pursuitStartTime,
         } as any;
       } else {
-        result.fleets[i].results[index].boat = {
+        race!.fleets[i].results[index].boat = {
           ...res.boat,
           pursuitStartTime: 0,
         } as any;
       }
     }),
   );
-  return result;
+  return race;
 }
 
 export async function findRacesForUser(
@@ -261,32 +272,34 @@ export async function countRaces(
   return result;
 }
 
-export const updateRace = os.race.update.handler(
-  async ({ input }: { input: any }) => {
-    const updatedRace = await prisma.race.update({
-      where: { id: input.id },
-      data: {
-        Duties: input.Duties,
-        Time: input.Time,
-        Type: input.Type,
-        trackableEventId: input.trackableEventId,
-      },
-      include: {
-        series: true,
-        fleets: {
-          include: {
-            fleetSettings: true,
-          },
+export const updateRace = os.race.update.handler(async ({ input }) => {
+  const updatedRace = await prisma.race.update({
+    where: { id: input.id },
+    data: {
+      Duties: input.Duties,
+      Time: input.Time,
+      Type: input.Type,
+      trackableEventId: input.trackableEventId,
+    },
+    include: {
+      series: {
+        include: {
+          tags: true,
         },
       },
-    });
-    if (updatedRace) {
-      return updatedRace;
-    } else {
-      throw new ORPCError("BAD_REQUEST");
-    }
-  },
-);
+      fleets: {
+        include: {
+          fleetSettings: true,
+        },
+      },
+    },
+  });
+  if (updatedRace) {
+    return updatedRace;
+  } else {
+    throw new ORPCError("BAD_REQUEST");
+  }
+});
 
 export const race_delete = os.race.delete.handler(async ({ input }) => {
   const deletedRace = await prisma.race.delete({
@@ -297,7 +310,11 @@ export const race_delete = os.race.delete.handler(async ({ input }) => {
           fleetSettings: true,
         },
       },
-      series: true,
+      series: {
+        include: {
+          tags: true,
+        },
+      },
     },
   });
   if (deletedRace) {
@@ -321,10 +338,17 @@ export const race_create = os.race.create.handler(async ({ input }) => {
   }
   const club = await prisma.organization.findUnique({
     where: { id: series.orgId },
+    include: {
+      orgData: true,
+    },
   });
 
+  if (!club) {
+    throw new ORPCError("Club not found");
+  }
+
   let duties = await prisma.duties.findMany({
-    where: { orgDataId: club?.orgDataId },
+    where: { orgDataId: club.orgData!.id },
   });
   //create json with key value pairs of duty name and duty id
   let dutiesJson: { [key: string]: string } = {};
@@ -332,12 +356,16 @@ export const race_create = os.race.create.handler(async ({ input }) => {
     dutiesJson[d.name] = "";
   });
 
-  var races: RaceType[] = await prisma.race.findMany({
+  var races: Types.RaceType[] = await prisma.race.findMany({
     where: {
       seriesId: input.seriesId,
     },
     include: {
-      series: true,
+      series: {
+        include: {
+          tags: true,
+        },
+      },
       fleets: {
         include: {
           fleetSettings: true,
@@ -364,7 +392,11 @@ export const race_create = os.race.create.handler(async ({ input }) => {
       },
     },
     include: {
-      series: true,
+      series: {
+        include: {
+          tags: true,
+        },
+      },
       fleets: {
         include: {
           fleetSettings: true,
@@ -407,38 +439,58 @@ export const race_create = os.race.create.handler(async ({ input }) => {
   console.log(race);
 
   if (race) {
-    return race;
+    return race as Types.RaceType;
   } else {
     throw new ORPCError("BAD_REQUEST");
   }
 });
 
 export const race_org = os.race.org.handler(async ({ input }) => {
-  const series = await findOrgSeries(input.orgId, true);
-
-  if (!series || series.length === 0) {
-    throw new ORPCError("NOT_FOUND");
-  }
-
-  const count = await countRaces(
-    series.map((s) => s.id),
-    input.date,
-    input.historical,
-  );
-  const races = await findRaces(
-    series.map((s) => s.id),
-    input.page ? input.page - 1 : 0,
-    100,
-    input.date,
-    input.historical ?? false,
-  );
+  const races = await prisma.race.findMany({
+    skip: (input.page - 1) * input.pageSize,
+    take: input.pageSize,
+    where: {
+      series: {
+        orgId: input.orgId,
+      },
+      ...(input.historical
+        ? { Time: { lte: input.date } }
+        : { Time: { gte: input.date } }),
+    },
+    orderBy: {
+      Time: input.historical ? "desc" : "asc",
+    },
+    include: {
+      series: {
+        include: {
+          tags: true,
+        },
+      },
+      fleets: {
+        include: {
+          fleetSettings: true,
+        },
+      },
+    },
+  });
+  const count = await prisma.race.count({
+    where: {
+      series: {
+        orgId: input.orgId,
+      },
+      ...(input.historical
+        ? { Time: { lte: input.date } }
+        : { Time: { gte: input.date } }),
+    },
+  });
   return { races, count };
 });
 
 export const race_find = os.race.find.handler(async ({ input }) => {
   const race = await findRace(input.raceId);
+  console.log(race);
   if (race) {
-    return race as RaceType;
+    return race as Types.RaceType;
   } else {
     throw new ORPCError("NOT_FOUND");
   }

@@ -11,7 +11,7 @@ export const authMiddleware = os
   .$context<ORPCContext>()
   .middleware(async ({ context, next }) => {
     // Get session from Better Auth
-    const session = await auth.api.getSession({ headers: context.reqHeaders });
+    const session = await auth.api.getSession({ headers: context.reqHeaders! });
     // Optionally enforce authentication
     if (!session) {
       throw new ORPCError("UNAUTHORIZED");

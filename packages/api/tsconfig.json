@@ -1,7 +1,8 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "outDir": "dist",
+    "outDir": "./dist",
+    "rootDir": "../",
     "target": "es2024",
     // Use Node-style ESM resolution/output so emitted JS imports include
     // ".js" extensions and Node can resolve them without changing source

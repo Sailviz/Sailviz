@@ -5,7 +5,7 @@ import { Input } from '@components/ui/input'
 import { useEffect, useState } from 'react'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
-import { ensureAdmin } from 'src/lib/session'
+import { ensureAdmin } from '@lib/session'
 function Page() {
     const [demoClubId, setDemoClubId] = useState('')
     const [demoSeriesId, setDemoSeriesId] = useState('')

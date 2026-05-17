@@ -2,17 +2,55 @@ import { implement, ORPCError } from "@orpc/server";
 import prisma from "@sailviz/db";
 import { ORPCcontract } from "../contract";
 import { getOrg } from "./organization";
-import { start } from "node:repl";
 
 const os = implement(ORPCcontract);
 
 //TODO change this to return count of races per series, don't need all the data when loading this many series.
-export async function findOrgSeries(orgId: string, includeRaces: boolean) {
+export async function findOrgSeries(
+  orgId: string,
+  take: number,
+  skip: number,
+  search: string | null,
+  includeRaces: boolean,
+  tagNames: string[] | undefined,
+) {
+  const count = await prisma.series.count({
+    where: {
+      orgId: orgId,
+      name: search
+        ? {
+            contains: search,
+          }
+        : undefined,
+      AND:
+        tagNames && tagNames.length > 0
+          ? tagNames.map((tagName) => ({
+              tags: { some: { name: tagName } },
+            }))
+          : undefined,
+    },
+  });
+
   var result = await prisma.series.findMany({
     where: {
       orgId: orgId,
+      name: search
+        ? {
+            contains: search,
+          }
+        : undefined,
+      AND:
+        tagNames && tagNames.length > 0
+          ? tagNames.map((tagName) => ({
+              tags: { some: { name: tagName } },
+            }))
+          : undefined,
     },
+    take: take,
+    skip: skip,
     include: {
+      fleetSettings: true,
+      tags: true,
       ...(includeRaces
         ? {
             races: {
@@ -26,10 +64,9 @@ export async function findOrgSeries(orgId: string, includeRaces: boolean) {
             },
           }
         : {}),
-      fleetSettings: true,
     },
   });
-  return result;
+  return { seriesCount: count, series: result };
 }
 
 export async function findSeries(id: string, includeRaces: boolean) {
@@ -46,8 +83,16 @@ export async function findSeries(id: string, includeRaces: boolean) {
 }
 
 export const seriesbyClubId = os.series.club.handler(async ({ input }) => {
-  console.log(input);
-  const series = await findOrgSeries(input.orgId, input.includeRaces);
+  const tags = input.tags ? input.tags.split(".") : undefined;
+  console.log("tags", tags);
+  const series = await findOrgSeries(
+    input.orgId,
+    input.pageSize,
+    (input.page - 1) * input.pageSize,
+    input.search,
+    false,
+    tags,
+  );
   if (series) {
     return series;
   } else {
@@ -72,6 +117,7 @@ export const createSeries = os.series.create.handler(async ({ input }) => {
     },
     include: {
       fleetSettings: true,
+      tags: true,
     },
   });
   console.log(newSeries);
@@ -114,6 +160,7 @@ export const deleteSeries = os.series.delete.handler(async ({ input }) => {
     },
     include: {
       fleetSettings: true,
+      tags: true,
     },
   });
   if (deletedSeries) {
@@ -128,6 +175,7 @@ export const getSeries = os.series.find.handler(async ({ input }) => {
     where: { id: input.seriesId },
     include: {
       fleetSettings: true,
+      tags: true,
       races: {
         include: {
           fleets: {
@@ -151,23 +199,87 @@ export const getSeries = os.series.find.handler(async ({ input }) => {
   }
 });
 
-export const series_update = os.series.update.handler(
-  async ({ input }: { input: any }) => {
-    const updatedSeries = await prisma.series.update({
-      where: { id: input.id },
+export const series_update = os.series.update.handler(async ({ input }) => {
+  const updatedSeries = await prisma.series.update({
+    where: { id: input.id },
+    data: {
+      settings: input.settings,
+      name: input.name,
+    },
+    include: {
+      fleetSettings: true,
+      tags: true,
+    },
+  });
+  if (updatedSeries) {
+    return updatedSeries;
+  } else {
+    throw new ORPCError("BAD_REQUEST");
+  }
+});
+
+export const series_tags_update = os.series.tags.update.handler(
+  async ({ input }) => {
+    const series = await prisma.series.findUnique({
+      where: { id: input.seriesId },
+      include: {
+        tags: true,
+      },
+    });
+    if (!series) {
+      throw new ORPCError("NOT_FOUND");
+    }
+    //get tags for an org
+    const availableTags = await prisma.tag.findMany({
+      where: {
+        orgId: input.orgId,
+      },
+    });
+    //check if any of the tags in the input don't have an id, if they don't find them in the available tags and connect them, if they don't exist create them and connect them
+    const tagsToConnect = [];
+    for (const tag of input.tags) {
+      const existingTag = availableTags.find((t) => t.name === tag);
+      if (existingTag) {
+        tagsToConnect.push({ id: existingTag.id });
+      } else {
+        const newTag = await prisma.tag.create({
+          data: {
+            name: tag,
+            organization: {
+              connect: {
+                id: input.orgId,
+              },
+            },
+          },
+        });
+        tagsToConnect.push({ id: newTag.id });
+      }
+    }
+
+    console.log("tagsToConnect", tagsToConnect);
+
+    await prisma.series.update({
+      where: { id: input.seriesId },
       data: {
-        settings: input.settings,
-        name: input.name,
+        tags: {
+          set: [],
+        },
+      },
+    });
+
+    const updatedSeries = await prisma.series.update({
+      where: { id: input.seriesId },
+      data: {
+        tags: {
+          connect: tagsToConnect,
+        },
       },
       include: {
         fleetSettings: true,
+        tags: true,
       },
     });
-    if (updatedSeries) {
-      return updatedSeries;
-    } else {
-      throw new ORPCError("BAD_REQUEST");
-    }
+    return updatedSeries;
   },
 );
 

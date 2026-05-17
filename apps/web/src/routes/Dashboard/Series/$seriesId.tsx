@@ -12,6 +12,9 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
 import { type Session } from '@sailviz/auth/client'
 import { ActionButton } from '@components/ui/action-button'
+import { Tagger } from '@components/tagger'
+import { useEffect, useState } from 'react'
+import { CATEGORY_OPTIONS } from '@features/race/race-table/use-race-table-filters'
 
 function Page() {
     const session: Session = useLoaderData({ from: `__root__` })
@@ -27,6 +30,9 @@ function Page() {
     const queryClient = useQueryClient()
 
     const stripeFetchQuery = useMutation(orpcClient.stripe.org.mutationOptions())
+    const updateSeriesTagsMutation = useMutation(orpcClient.series.tags.update.mutationOptions())
+
+    const [tagFilter, setTagFilter] = useState<string>('')
 
     const { data: series } = useQuery(orpcClient.series.find.queryOptions({ input: { seriesId: seriesId } }))
     const { data: startSequence } = useQuery(orpcClient.startSequence.find.queryOptions({ input: { seriesId: seriesId } }))
@@ -40,6 +46,18 @@ function Page() {
                 queryKey: orpcClient.series.find.key({ type: 'query', input: { seriesId: seriesId } })
             })
         }
+    }
+
+    const updateTags = async (tags: string) => {
+        setTagFilter(tags)
+        await updateSeriesTagsMutation.mutateAsync({
+            seriesId: seriesId!,
+            orgId: org!.id,
+            tags: tags ? tags.split('.') : []
+        })
+        queryClient.invalidateQueries({
+            queryKey: orpcClient.series.find.key({ type: 'query', input: { seriesId: seriesId } })
+        })
     }
 
     const createRace = async () => {
@@ -68,6 +86,11 @@ function Page() {
         })
     }
 
+    useEffect(() => {
+        if (!session || !series || !startSequence) return
+        setTagFilter(series.tags.map(tag => tag.name).join('.'))
+    }, [series, session, startSequence])
+
     if (!session || series == undefined || startSequence == undefined || org == undefined) {
         console.log('Series', series)
         // If the user is not authenticated, redirect to the login page
@@ -79,6 +102,7 @@ function Page() {
             <div id='series' className='w-full'>
                 <p className='text-6xl font-extrabold p-6'>{series?.name}</p>
                 <div className='p-6'>
+                    <Tagger filterKey='tag' title='Tag' options={CATEGORY_OPTIONS} setFilterValue={updateTags} filterValue={tagFilter} />
                     <SeriesRaceTable seriesId={seriesId} />
                 </div>
                 {userHasPermission(session.user, AVAILABLE_PERMISSIONS.editRaces) ? (

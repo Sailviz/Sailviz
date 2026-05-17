@@ -53,8 +53,21 @@ export const ORPCcontract = {
       .input(z.object({ seriesId: z.string() }))
       .output(Types.SeriesSchema),
     club: oc
-      .input(z.object({ orgId: z.string(), includeRaces: z.boolean() }))
-      .output(z.array(Types.SeriesSchema)),
+      .input(
+        z.object({
+          orgId: z.string(),
+          page: z.number(),
+          pageSize: z.number(),
+          search: z.string().nullable(),
+          tags: z.string().nullable(),
+        }),
+      )
+      .output(
+        z.object({
+          seriesCount: z.number(),
+          series: z.array(Types.SeriesSchema),
+        }),
+      ),
     create: oc
       .input(z.object({ orgId: z.string(), name: z.string() }))
       .output(Types.SeriesSchema),
@@ -62,6 +75,17 @@ export const ORPCcontract = {
       .input(z.object({ seriesId: z.string() }))
       .output(Types.SeriesSchema),
     update: oc.input(Types.SeriesSchema).output(Types.SeriesSchema),
+    tags: {
+      update: oc
+        .input(
+          z.object({
+            seriesId: z.string(),
+            orgId: z.string(),
+            tags: z.string().array(),
+          }),
+        )
+        .output(Types.SeriesSchema),
+    },
   },
   organization: {
     session: oc.output<typeof Types.OrgSchema>(Types.OrgSchema),
@@ -143,6 +167,7 @@ export const ORPCcontract = {
         z.object({
           orgId: z.string(),
           page: z.number(),
+          pageSize: z.number(),
           date: z.string(),
           historical: z.boolean(),
         }),

@@ -3,7 +3,15 @@ const fs = require("fs");
 const path = require("path");
 
 const src = path.join(__dirname, "..", "..", "db", "dist", "generated");
-const dest = path.join(__dirname, "..", "dist", "db", "src", "generated");
+const dest = path.join(
+  __dirname,
+  "..",
+  "dist",
+  "packages",
+  "db",
+  "src",
+  "generated",
+);
 
 function copyRecursiveSync(src, dest) {
   if (!fs.existsSync(src)) return;

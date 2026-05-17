@@ -2,14 +2,13 @@
   "compilerOptions": {
     "module": "esnext", // or "nodenext"
     "moduleResolution": "bundler", // or "node16" or "bundler
-    "baseUrl": ".",
     "skipLibCheck": true,
     "paths": {
-      "@sailviz/db": ["packages/db/src"],
-      "@sailviz/api/*": ["packages/api/src/*"],
-      "@sailviz/auth/*": ["packages/auth/src/*"],
-      "@sailviz/shared/*": ["packages/shared/*"],
-      "@sailviz/types": ["packages/types/"]
+      "@sailviz/db": ["./packages/db/src"],
+      "@sailviz/api/*": ["./packages/api/src/*"],
+      "@sailviz/auth/*": ["./packages/auth/src/*"],
+      "@sailviz/shared/*": ["./packages/shared/*"],
+      "@sailviz/types": ["./packages/types/"]
     }
   }
 }

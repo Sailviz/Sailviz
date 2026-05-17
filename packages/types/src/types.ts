@@ -67,6 +67,12 @@ export const SeriesSchema = z.object({
   settings: z.any().optional(),
   races: z.any().optional(),
   fleetSettings: z.any().optional(),
+  tags: z
+    .object({
+      id: z.string(),
+      name: z.string(),
+    })
+    .array(),
 });
 export type SeriesType = z.infer<typeof SeriesSchema>;
 
@@ -162,7 +168,6 @@ export const OrgSchema = z.object({
   logo: z.string().nullable(),
   slug: z.string(),
   stripeCustomerId: z.string().optional().nullable(),
-  orgDataId: z.string().optional().nullable(),
   orgData: OrgDataSchema.optional(),
 });
 export type Org = z.infer<typeof OrgSchema>;

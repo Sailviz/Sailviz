@@ -2,8 +2,7 @@ import { createRootRouteWithContext, Outlet, useRouterState } from '@tanstack/re
 import { QueryClientProvider, type QueryClient } from '@tanstack/react-query'
 import { SidebarInset, SidebarProvider } from '@components/ui/sidebar'
 import AppSidebar from '@components/layout/app-sidebar'
-import { ScrollArea } from '@components/ui/scroll-area'
-import { AdminNavCollections, meCollections, navCollections } from 'src/constants/navCollections'
+import { AdminNavCollections, meCollections, navCollections } from '../../src/constants/navCollections'
 import ErrorBoundary from '@components/ErrorBoundary'
 import { ThemeProvider as NextThemesProvider, type ThemeProviderProps } from 'next-themes'
 import { getSession, type Session } from '@sailviz/auth/client'
@@ -24,7 +23,7 @@ export const ThemeProvider = (props: ThemeProviderProps): React.JSX.Element => {
 }
 
 // Use the shared QueryClient provided at the app root
-import { queryClient } from 'src/lib/queryClient'
+import { queryClient } from '@lib/queryClient'
 export const Route = createRootRouteWithContext<MyRouterContext>()({
     beforeLoad: async () => {
         try {
@@ -100,13 +99,13 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 
         let sidebar: boolean = false
         let collection
-        if (path.startsWith('/dashboard/me')) {
+        if (path.toLowerCase().startsWith('/dashboard/me')) {
             collection = meCollections
             sidebar = true
-        } else if (path.startsWith('/dashboard')) {
+        } else if (path.toLowerCase().startsWith('/dashboard')) {
             collection = navCollections
             sidebar = true
-        } else if (path.startsWith('/admin')) {
+        } else if (path.toLowerCase().startsWith('/admin')) {
             collection = AdminNavCollections
             sidebar = true
         }
@@ -121,11 +120,7 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
                                 <SidebarInset>
                                     {/* page main content */}
                                     <Header />
-                                    <ScrollArea className='h-full'>
-                                        <div className='flex flex-1 p-4 md:px-6'>
-                                            <Outlet />
-                                        </div>
-                                    </ScrollArea>
+                                    <Outlet />
                                     {/* page main content ends */}
                                 </SidebarInset>
                             </SidebarProvider>

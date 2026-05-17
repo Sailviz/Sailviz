@@ -5,7 +5,7 @@ import { orpcClient } from '@lib/orpc'
 import type { Session } from '@sailviz/auth/client'
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute, useLoaderData } from '@tanstack/react-router'
-import { Page as PricingPage } from 'src/routes/Pricing'
+import { Page as PricingPage } from '../../Pricing'
 
 function Page() {
     const session: Session = useLoaderData({ from: `__root__` })
@@ -37,11 +37,11 @@ function Page() {
                             </div>
                             {stripe.subscriptionStatus === 'active' && (
                                 // TODO: Replace 'null' with actual manage subscription URL
-                                (<form action={'null'}>
+                                <form action={'null'}>
                                     <Button type='submit' variant='outline'>
                                         Manage Subscription
                                     </Button>
-                                </form>)
+                                </form>
                             )}
                         </div>
                     </div>

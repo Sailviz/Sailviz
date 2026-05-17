@@ -100,6 +100,7 @@ model Organization {
   boatOverrides     BoatOverride[]
   orgData           orgData?
   orgDataId         String?             @unique
+  tags              Tag[]
 }
 
 model orgData {
@@ -179,10 +180,19 @@ model Stripe {
   organization       Organization[]
 }
 
+model Tag {
+  id           String       @id @unique @default(uuid())
+  name         String
+  orgId        String
+  organization Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  series       Series[]
+}
+
 model Series {
   id             String          @id @unique @default(uuid())
   name           String
   orgId          String
+  tags           Tag[]
   settings       Json
   fleetSettings  FleetSettings[]
   races          Race[]

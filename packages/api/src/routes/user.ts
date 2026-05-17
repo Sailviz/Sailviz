@@ -1,9 +1,9 @@
 import prisma from "@sailviz/db";
 import * as Types from "@sailviz/types";
-
-const { implement, ORPCError } = require("@orpc/server");
+import { implement, ORPCError } from "@orpc/server";
 import { ORPCcontract } from "../contract";
 import { authMiddleware } from "../middleware";
+import { Middleware } from "better-auth";
 const os = implement(ORPCcontract);
 
 export async function updateUserById(
@@ -169,7 +169,11 @@ export const user_results_all = os.user.results.all
             fleetSettings: true,
           },
         },
-        series: true,
+        series: {
+          include: {
+            tags: true,
+          },
+        },
       },
     });
     return races as Types.RaceType[];

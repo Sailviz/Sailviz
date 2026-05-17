@@ -1,6 +1,7 @@
 import { Button } from '@components/ui/button'
 import { Dialog, DialogContent, DialogFooter, DialogTitle, DialogTrigger } from '@components/ui/dialog'
 import { Input } from '@components/ui/input'
+import { Plus } from 'lucide-react'
 import { useState } from 'react'
 
 export default function CreateSeriesDialog({ onSubmit, allowCreate }: { onSubmit: (name: string) => void; allowCreate?: boolean }) {
@@ -17,6 +18,7 @@ export default function CreateSeriesDialog({ onSubmit, allowCreate }: { onSubmit
             >
                 <DialogTrigger asChild>
                     <Button aria-label='new series' disabled={!allowCreate}>
+                        <Plus className='mr-2 h-4 w-4' />
                         Create New Series
                     </Button>
                 </DialogTrigger>

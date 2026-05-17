@@ -1,7 +1,5 @@
 import { useEffect, useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
-import RacesTable from '@components/tables/RacesTable'
-import ClubTable from '@components/tables/ClubTable'
 import { PageSkeleton } from '@components/layout/PageSkeleton'
 import { title } from '@components/layout/home/primitaves'
 import { Banner, BannerAction, BannerClose, BannerIcon, BannerTitle } from '@components/ui/shadcn-io/banner'
@@ -12,6 +10,10 @@ import { orpcClient } from '@lib/orpc'
 import HomeNav from '@components/layout/home/navbar'
 import * as Types from '@sailviz/types'
 import UpcomingRacesTable from '@components/tables/UpcomingRacesTable'
+import SeriesTable from '@features/series/series-table'
+import { useSeriesTableFilters } from '@features/series/series-table/use-series-table-filters'
+import RaceTable from '@features/race/race-table'
+import { useRaceTableFilters } from '@features/race/race-table/use-race-table-filters'
 
 //club page should contain:
 //list of current series
@@ -27,6 +29,10 @@ function Page() {
     const findRaceMutation = useMutation(orpcClient.race.find.mutationOptions())
 
     const [showLiveBanner, setShowLiveBanner] = useState(false)
+
+    // Ensure hooks are called in a consistent order
+    const raceTableFilters = useRaceTableFilters()
+    const seriesTableFilters = useSeriesTableFilters()
 
     const checkActive = (race: Types.RaceType) => {
         if (race.fleets!.length == 0) {
@@ -87,17 +93,19 @@ function Page() {
                     </div>
                     <UpcomingRacesTable orgId={club.id} viewHref={`/club/${orgName}/Race/`} />
                 </div>
+            </div>
+            <div className='flex flex-row'>
                 <div className='flex-col w-1/2 px-4'>
                     <div className='py-4'>
                         <div className={title({ color: 'blue' })}>Latest Races:</div>
                     </div>
-                    <RacesTable orgId={club.id} date={new Date()} historical={true} viewHref={`/club/${orgName}/Race/`} />
+                    <RaceTable historical={true} filters={raceTableFilters} date={new Date()} orgId={club.id} />
                 </div>
                 <div className='flex-col w-1/2 px-4'>
                     <div className='py-4'>
-                        <div className={title({ color: 'blue' })}>Latest Series:</div>
+                        <div className={title({ color: 'blue' })}>Series:</div>
                     </div>
-                    <ClubTable viewHref={`/club/${orgName}/Series/`} orgId={club.id} />
+                    <SeriesTable filters={seriesTableFilters} orgId={club.id} />
                 </div>
             </div>
         </>

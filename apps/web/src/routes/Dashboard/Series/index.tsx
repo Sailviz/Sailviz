@@ -1,13 +1,16 @@
 import { createFileRoute, useLoaderData } from '@tanstack/react-router'
-import ClubTable from '@components/tables/ClubTable'
 import CreateSeriesModal from '@components/layout/dashboard/CreateSeriesModal'
-import { AVAILABLE_PERMISSIONS, userHasPermission } from '@components/helpers/users'
-import { title } from '@components/layout/home/primitaves'
 import { PageSkeleton } from '@components/layout/PageSkeleton'
-import { useEffect, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
 import { type Session } from '@sailviz/auth/client'
+import SeriesTable from '@features/series/series-table'
+import { useSeriesTableFilters } from '@features/series/series-table/use-series-table-filters'
+import PageContainer from '@components/layout/page-container'
+import { Heading } from '@components/ui/heading'
+import { Separator } from '@components/ui/separator'
+import { Suspense } from 'react'
+import { DataTableSkeleton } from '@components/ui/table/data-table-skeleton'
 
 function Page() {
     const session: Session = useLoaderData({ from: `__root__` })
@@ -16,8 +19,6 @@ function Page() {
     const queryClient = useQueryClient()
 
     const seriesCreation = useMutation(orpcClient.series.create.mutationOptions())
-
-    const [allowCreate, setAllowCreate] = useState(false)
 
     const createSeries = async (seriesName: string) => {
         await seriesCreation.mutateAsync({
@@ -29,46 +30,23 @@ function Page() {
         })
     }
 
-    useEffect(() => {
-        const checkSubscription = async () => {
-            console.log('Session:', session)
-            if (org?.orgData!.subscriptionStatus !== 'active') {
-                //check how many series the user has
-                let { data: series } = useQuery(orpcClient.series.club.queryOptions({ input: { orgId: session.session.activeOrganizationId!, includeRaces: false } }))
-                if (series == undefined) {
-                    series = []
-                }
-                setAllowCreate(series.length == 0)
-
-                // if not active, only allow a single series to be created
-            } else {
-                //if the user has an active subscription, allow them to create multiple series
-                setAllowCreate(true)
-            }
-        }
-        checkSubscription()
-    }, [session])
-
-    if (!session) {
+    if (!session || !org) {
         return <PageSkeleton />
     }
 
     return (
-        <div>
-            <div className='p-6'>
-                <h1 className={title({ color: 'blue' })}>Series</h1>
-            </div>
-            {userHasPermission(session.user, AVAILABLE_PERMISSIONS.editSeries) ? (
-                <div className='p-6'>
-                    <CreateSeriesModal onSubmit={createSeries} allowCreate={allowCreate} />
+        <PageContainer scrollable={false}>
+            <div className='flex flex-1 flex-col space-y-4'>
+                <div className='flex items-start justify-between'>
+                    <Heading title='Series' description='Manage events' />
+                    <CreateSeriesModal onSubmit={createSeries} allowCreate={true} />
                 </div>
-            ) : (
-                <></>
-            )}
-            <div className='p-6'>
-                <ClubTable viewHref='/dashboard/Series/' />
+                <Separator />
+                <Suspense fallback={<DataTableSkeleton columnCount={3} rowCount={10} />}>
+                    <SeriesTable filters={useSeriesTableFilters()} orgId={org.id} />
+                </Suspense>
             </div>
-        </div>
+        </PageContainer>
     )
 }
 

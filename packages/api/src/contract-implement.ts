@@ -15,6 +15,7 @@ import {
   createSeries,
   deleteSeries,
   getSeries,
+  series_tags_update,
   series_update,
   seriesbyClubId,
 } from "./routes/series";
@@ -128,6 +129,9 @@ export const mainRouter = os.router({
     create: createSeries,
     delete: deleteSeries,
     update: series_update,
+    tags: {
+      update: series_tags_update,
+    },
   },
   fleet: {
     find: fleet_find,

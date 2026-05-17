@@ -3,7 +3,7 @@ import { useLoaderData, createFileRoute, redirect } from '@tanstack/react-router
 import { PageSkeleton } from '@components/layout/PageSkeleton'
 import TableOfClubs from '@components/tables/TableOfClubs'
 import CreateClubModal from '@components/layout/dashboard/CreateClubModal'
-import { ensureAdmin } from 'src/lib/session'
+import { ensureAdmin } from '@lib/session'
 import type { Session } from '@sailviz/auth/client'
 
 function Page() {

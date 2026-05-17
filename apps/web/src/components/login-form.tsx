@@ -7,7 +7,7 @@ import { isTauriRuntime } from '../is-tauri'
 import { Github, Loader2 } from 'lucide-react'
 import { useNavigate } from '@tanstack/react-router'
 import { useRouter } from '@tanstack/react-router'
-import { sessionQueryKey } from 'src/lib/session'
+import { sessionQueryKey } from '@lib/session'
 export function LoginForm() {
     const navigate = useNavigate()
     const router = useRouter()

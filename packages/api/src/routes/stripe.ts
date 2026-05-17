@@ -3,7 +3,6 @@ import Stripe from "stripe";
 import { STRIPE_SECRET_KEY } from "../config";
 import { implement, ORPCError } from "@orpc/server";
 import { ORPCcontract } from "../contract";
-import { StartSequenceStepType } from "packages/types/src/types";
 
 const os = implement(ORPCcontract);
 
