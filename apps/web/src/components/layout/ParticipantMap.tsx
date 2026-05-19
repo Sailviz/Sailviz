@@ -21,6 +21,7 @@ export default function ParticipantMap({ raceId, windowHeight, participantId }: 
     const [isPlaying, setIsPlaying] = useState(false)
     const [playbackSpeed, setPlaybackSpeed] = useState(1) // Playback speed multiplier
     const [scrubIndex, setScrubIndex] = useState(0) // Current index for scrubbing
+    const [boundsSet, setBoundsSet] = useState(false) // Track if bounds have been set
 
     async function fetchParticipantPositions(participant: Types.Participant, live: boolean): Promise<Types.Participant> {
         console.log(event)
@@ -106,15 +107,19 @@ export default function ParticipantMap({ raceId, windowHeight, participantId }: 
         const map = useMap()
 
         useEffect(() => {
-            if (!buoys || buoys.length === 0) return
+            // Ensure buoys exist, are not empty, and bounds haven't been set yet
+            if (!buoys || buoys.length === 0 || boundsSet) return
 
-            // Create an array of LatLng objects from the buoy data
+            // Create LatLng objects from buoy data
             const buoyPoints = buoys.map(b => L.latLng(b.lat, b.lon))
 
-            // Create a LatLngBounds object from all marker positions
+            // Create bounds and fit them to the map
             const bounds = L.latLngBounds(buoyPoints)
             map.fitBounds(bounds, { padding: [50, 50] }) // padding in pixels
-        }, [buoys, map])
+
+            // Mark bounds as set
+            setBoundsSet(true)
+        }, [buoys]) // Dependency on `buoys` ensures it checks for initial data
 
         return null
     }
@@ -188,7 +193,7 @@ export default function ParticipantMap({ raceId, windowHeight, participantId }: 
                     <Circle
                         center={currentPosition}
                         radius={5} // Small circle radius
-                        pathOptions={{ color: 'blue', fillColor: 'blue', fillOpacity: 1 }}
+                        pathOptions={{ color: 'red', fillColor: 'red', fillOpacity: 1 }}
                     />
                 )}
                 {race?.courseBuoys?.flatMap(waypoint => {
