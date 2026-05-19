@@ -10,7 +10,7 @@ export default function MapDialog({ open, result, onClose }: { open: boolean; re
     return (
         <Dialog open={open} onOpenChange={onClose}>
             <DialogContent className='max-w-8/12'>
-                <ParticipantMap participantId={result?.trackableParticipantId || ''} raceId={fleet?.raceId || ''} windowHeight={400} />
+                <ParticipantMap participantId={result?.trackableParticipantId || ''} raceId={fleet?.raceId || ''} windowHeight={600} />
             </DialogContent>
         </Dialog>
     )

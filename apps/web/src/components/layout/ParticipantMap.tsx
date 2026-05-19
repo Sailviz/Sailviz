@@ -1,7 +1,7 @@
 import { Fragment, useEffect, useRef, useState } from 'react'
 import { orpcClient } from '@lib/orpc'
 import { Circle, MapContainer, Marker, Polyline, TileLayer, useMap } from 'react-leaflet'
-import { Icon } from 'leaflet'
+import { Icon, type LatLngExpression } from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import L from 'leaflet'
@@ -17,6 +17,10 @@ export default function ParticipantMap({ raceId, windowHeight, participantId }: 
     const getParticipantPositionsMutation = useMutation(orpcClient.trackable.device.positions.mutationOptions())
     const { data: participant } = useQuery(orpcClient.trackable.participant.find.queryOptions({ input: { participantId } }))
     const [participantData, setParticipantData] = useState<Types.Participant>({} as Types.Participant)
+    const [currentPosition, setCurrentPosition] = useState<LatLngExpression | null>(null)
+    const [isPlaying, setIsPlaying] = useState(false)
+    const [playbackSpeed, setPlaybackSpeed] = useState(1) // Playback speed multiplier
+    const [scrubIndex, setScrubIndex] = useState(0) // Current index for scrubbing
 
     async function fetchParticipantPositions(participant: Types.Participant, live: boolean): Promise<Types.Participant> {
         console.log(event)
@@ -128,11 +132,48 @@ export default function ParticipantMap({ raceId, windowHeight, participantId }: 
 
     const markerIcon = new Icon({ iconUrl: '/marker-icon.png', iconSize: [25, 41], iconAnchor: [13, 41] })
 
+    useEffect(() => {
+        let interval: NodeJS.Timeout
+        if (isPlaying && participantData.position) {
+            const positions = participantData.position.map((pos: any) => [pos.lat, pos.lon] as LatLngExpression)
+            let index = scrubIndex
+
+            interval = setInterval(() => {
+                if (index < positions.length) {
+                    setCurrentPosition(positions[index])
+                    setScrubIndex(index)
+                    index++
+                } else {
+                    clearInterval(interval)
+                    setIsPlaying(false)
+                }
+            }, 1000 / playbackSpeed) // Adjust interval based on playback speed
+        }
+
+        return () => clearInterval(interval)
+    }, [isPlaying, participantData.position, playbackSpeed, scrubIndex])
+
+    const handleScrubChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const newIndex = parseInt(event.target.value, 10)
+        setScrubIndex(newIndex)
+        if (participantData.position) {
+            const positions = participantData.position.map((pos: any) => [pos.lat, pos.lon] as LatLngExpression)
+            setCurrentPosition(positions[newIndex])
+        }
+    }
+
+    const togglePlaybackSpeed = () => {
+        const speeds = [1, 2, 4, 8, 16]
+        const currentIndex = speeds.indexOf(playbackSpeed)
+        const nextIndex = (currentIndex + 1) % speeds.length
+        setPlaybackSpeed(speeds[nextIndex])
+    }
+
     return (
         // wrapper ensures positioned button sits above the map and can be full-screened
         <div ref={wrapperRef} style={{ position: 'relative', height: windowHeight, width: '100%', zIndex: 2 }}>
             <FullscreenButton wrapper={wrapperRef} />
-            <MapContainer center={[51.6, -1.9]} zoom={ZOOM_LEVEL} style={{ height: '100%', width: '100%' }}>
+            <MapContainer center={[51.6, -1.9]} zoom={ZOOM_LEVEL} style={{ height: '80%', width: '100%' }}>
                 <TileLayer
                     maxZoom={20}
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -143,6 +184,13 @@ export default function ParticipantMap({ raceId, windowHeight, participantId }: 
                         const points: any[] = participantData.position.map((pos: any) => [pos.lat, pos.lon]) || []
                         return <Polyline key={participantData.id} positions={points} pathOptions={{ color: '#FF00FF', weight: 4 }} />
                     })()}
+                {currentPosition && (
+                    <Circle
+                        center={currentPosition}
+                        radius={5} // Small circle radius
+                        pathOptions={{ color: 'blue', fillColor: 'blue', fillOpacity: 1 }}
+                    />
+                )}
                 {race?.courseBuoys?.flatMap(waypoint => {
                     if (!waypoint.buoy.isStartLine) {
                         return (
@@ -221,6 +269,23 @@ export default function ParticipantMap({ raceId, windowHeight, participantId }: 
                 )}
                 <FitBounds buoys={race?.courseBuoys?.map(m => m.buoy)} />
             </MapContainer>
+            <div className='controls-container' style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', padding: '10px' }}>
+                <button onClick={() => setIsPlaying(!isPlaying)} className='control-button play-pause' style={{ fontSize: '1.5rem', padding: '10px' }}>
+                    {isPlaying ? '⏸' : '▶️'}
+                </button>
+                <input
+                    type='range'
+                    min='0'
+                    max={participantData.position ? participantData.position.length - 1 : 0}
+                    value={scrubIndex}
+                    onChange={handleScrubChange}
+                    className='control-slider'
+                    style={{ flex: 1, margin: '0 10px', height: '10px' }}
+                />
+                <button onClick={togglePlaybackSpeed} className='control-button speed-toggle' style={{ fontSize: '1.5rem', padding: '10px' }}>
+                    {playbackSpeed}x
+                </button>
+            </div>
         </div>
     )
 }
