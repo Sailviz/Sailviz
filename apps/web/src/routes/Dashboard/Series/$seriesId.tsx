@@ -14,7 +14,8 @@ import { type Session } from '@sailviz/auth/client'
 import { ActionButton } from '@components/ui/action-button'
 import { Tagger } from '@components/tagger'
 import { useEffect, useState } from 'react'
-import { CATEGORY_OPTIONS } from '@features/race/race-table/use-race-table-filters'
+import { CATEGORY_OPTIONS } from '@features/series/series-table/use-series-table-filters'
+import PageContainer from '@components/layout/page-container'
 
 function Page() {
     const session: Session = useLoaderData({ from: `__root__` })
@@ -98,7 +99,7 @@ function Page() {
     }
 
     return (
-        <>
+        <PageContainer scrollable={true}>
             <div id='series' className='w-full'>
                 <p className='text-6xl font-extrabold p-6'>{series?.name}</p>
                 <div className='p-6'>
@@ -139,7 +140,7 @@ function Page() {
                     })}
                 </div>
             </div>
-        </>
+        </PageContainer>
     )
 }
 export const Route = createFileRoute('/Dashboard/Series/$seriesId')({

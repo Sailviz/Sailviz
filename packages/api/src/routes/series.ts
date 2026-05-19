@@ -84,7 +84,6 @@ export async function findSeries(id: string, includeRaces: boolean) {
 
 export const seriesbyClubId = os.series.club.handler(async ({ input }) => {
   const tags = input.tags ? input.tags.split(".") : undefined;
-  console.log("tags", tags);
   const series = await findOrgSeries(
     input.orgId,
     input.pageSize,

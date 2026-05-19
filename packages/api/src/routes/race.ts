@@ -134,8 +134,16 @@ export async function findRace(id: string) {
       orgId: race.series.orgId,
     },
   });
-  race.fleets.forEach((fleet, i) =>
+  race.fleets.forEach((fleet, i) => {
+    if (!fleet.results) {
+      console.error(`Fleet ${i} has no results`);
+      return;
+    }
     fleet.results.forEach((res, index) => {
+      if (!res.boat) {
+        console.error(`Result ${index} in fleet ${i} has no boat`);
+        return;
+      }
       var modifiedBoat = modifications.find(
         (mod) => mod.boatId === res.boat!.id,
       );
@@ -151,8 +159,8 @@ export async function findRace(id: string) {
           pursuitStartTime: 0,
         } as any;
       }
-    }),
-  );
+    });
+  });
   return race;
 }
 
@@ -488,7 +496,6 @@ export const race_org = os.race.org.handler(async ({ input }) => {
 
 export const race_find = os.race.find.handler(async ({ input }) => {
   const race = await findRace(input.raceId);
-  console.log(race);
   if (race) {
     return race as Types.RaceType;
   } else {

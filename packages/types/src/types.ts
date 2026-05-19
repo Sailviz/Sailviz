@@ -38,7 +38,7 @@ export const ResultSchema = z.object({
   Helm: z.string(),
   Crew: z.string(),
   userId: z.string().nullable().optional(),
-  trackableParticipantId: z.string().nullable().optional(),
+  trackableParticipantId: z.string().nullable(),
   SailNumber: z.string(),
   finishTime: z.number(),
   numberLaps: z.number(),
@@ -312,3 +312,14 @@ export const TEventSchema = z.object({
   isDeleted: z.boolean(),
 });
 export type TEvent = z.infer<typeof TEventSchema>;
+
+export const ParticipantSchema = z.object({
+  id: z.string(),
+  eventId: z.string(),
+  name: z.string().nullable(),
+  data: z.any(),
+  isDeleted: z.boolean(),
+  Device: DeviceSchema,
+  position: z.array(PositionSchema).optional(),
+});
+export type Participant = z.infer<typeof ParticipantSchema>;

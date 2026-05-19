@@ -1,15 +1,9 @@
 import { createFileRoute } from '@tanstack/react-router'
-import FleetHandicapResultsTable from '@components/tables/FleetHandicapResultsTable'
-import FleetPursuitResultsTable from '@components/tables/FleetPursuitResultsTable'
-import { title } from '@components/layout/home/primitaves'
-import { useQuery } from '@tanstack/react-query'
-import { orpcClient } from '@lib/orpc'
 import HomeNav from '@components/layout/home/navbar'
+import RaceViewPage from '@features/club/race-view-page'
 
 function Page() {
-    const { raceId } = Route.useParams()
-
-    const race = useQuery(orpcClient.race.find.queryOptions({ input: { raceId: raceId! } })).data
+    const { raceId, orgName } = Route.useParams()
 
     // list of current series
     //list of
@@ -17,22 +11,7 @@ function Page() {
     return (
         <>
             <HomeNav />
-            <div className='py-4 w-full'>
-                <div className='py-4'>
-                    <div className={title({ color: 'blue' })}>{race?.series?.name}</div>
-                </div>
-                {race?.fleets!.map((fleet, index) => {
-                    return (
-                        <div key={'fleetResults' + index}>
-                            {race.Type == 'Handicap' ? (
-                                <FleetHandicapResultsTable showTime={true} editable={false} fleetId={fleet.id} advancedEdit={false} />
-                            ) : (
-                                <FleetPursuitResultsTable editable={false} advancedEdit={false} fleetId={fleet.id} />
-                            )}
-                        </div>
-                    )
-                })}
-            </div>
+            <RaceViewPage raceId={raceId!} orgName={orgName!} />
         </>
     )
 }

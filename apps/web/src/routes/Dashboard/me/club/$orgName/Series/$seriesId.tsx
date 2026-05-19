@@ -1,5 +1,4 @@
 import { createFileRoute } from '@tanstack/react-router'
-import HomeNav from '@components/layout/home/navbar'
 import SeriesViewPage from '@features/club/series-view-page'
 
 function Page() {
@@ -10,12 +9,10 @@ function Page() {
 
     return (
         <>
-            <HomeNav />
             <SeriesViewPage seriesId={seriesId!} orgName={orgName} />
         </>
     )
 }
-
-export const Route = createFileRoute('/club/$orgName/Series/$seriesId')({
+export const Route = createFileRoute('/Dashboard/me/club/$orgName/Series/$seriesId')({
     component: Page
 })

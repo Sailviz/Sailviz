@@ -272,6 +272,9 @@ export const ORPCcontract = {
           }),
         )
         .output(z.any()),
+      find: oc
+        .input(z.object({ participantId: z.string() }))
+        .output(Types.ParticipantSchema),
     },
     event: {
       create: oc
@@ -291,11 +294,24 @@ export const ORPCcontract = {
           loop: z.boolean().optional(),
         }),
       ),
+      find: oc
+        .input(z.object({ eventId: z.string() }))
+        .output(Types.TEventSchema),
     },
     device: {
       list: oc
         .input(z.object({ orgId: z.string() }))
         .output(z.array(Types.DeviceSchema)),
+      positions: oc
+        .input(
+          z.object({
+            deviceId: z.string(),
+            start: z.string(),
+            stop: z.string(),
+            highres: z.boolean(),
+          }),
+        )
+        .output(z.array(Types.PositionSchema)),
     },
     waypoint: {
       setEvent: oc.input(

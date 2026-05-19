@@ -11,7 +11,7 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
 
     return (
         <>
-            <Button className=' cursor-pointer' onClick={() => router.navigate({ to: `/Dashboard/race/${data.id}` })}>
+            <Button className=' cursor-pointer' onClick={() => router.navigate({ to: `race/${data.id}` })}>
                 Open
             </Button>
         </>

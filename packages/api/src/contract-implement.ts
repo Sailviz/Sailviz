@@ -74,9 +74,12 @@ import { lap_global } from "./routes/globalLaps";
 import { stripe_find, stripe_org, stripe_update } from "./routes/stripe";
 import {
   trackable_device_list,
+  trackable_device_positions,
   trackable_event_create,
+  trackable_event_find,
   trackable_event_update,
   trackable_participant_create,
+  trackable_participant_find,
   trackable_waypoint_setEvent,
 } from "./routes/trackable";
 import { orgData_update } from "./routes/organization";
@@ -207,13 +210,16 @@ export const mainRouter = os.router({
   trackable: {
     participant: {
       create: trackable_participant_create,
+      find: trackable_participant_find,
     },
     event: {
       create: trackable_event_create,
       update: trackable_event_update,
+      find: trackable_event_find,
     },
     device: {
       list: trackable_device_list,
+      positions: trackable_device_positions,
     },
     waypoint: {
       setEvent: trackable_waypoint_setEvent,

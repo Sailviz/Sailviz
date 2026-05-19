@@ -54,6 +54,10 @@ import { Route as DashboardPrintPaperResultsRaceIdRouteImport } from './routes/D
 import { Route as ClubOrgNameLiveResultsIndexRouteImport } from './routes/club/$orgName/LiveResults/index'
 import { Route as ClubOrgNameSeriesSeriesIdRouteImport } from './routes/club/$orgName/Series/$seriesId'
 import { Route as ClubOrgNameRaceRaceIdRouteImport } from './routes/club/$orgName/Race/$raceId'
+import { Route as DashboardMeClubOrgNameIndexRouteImport } from './routes/Dashboard/me/club/$orgName/index'
+import { Route as DashboardMeClubOrgNameLiveResultsIndexRouteImport } from './routes/Dashboard/me/club/$orgName/LiveResults/index'
+import { Route as DashboardMeClubOrgNameSeriesSeriesIdRouteImport } from './routes/Dashboard/me/club/$orgName/Series/$seriesId'
+import { Route as DashboardMeClubOrgNameRaceRaceIdRouteImport } from './routes/Dashboard/me/club/$orgName/Race/$raceId'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/Login',
@@ -285,6 +289,30 @@ const ClubOrgNameRaceRaceIdRoute = ClubOrgNameRaceRaceIdRouteImport.update({
   path: '/club/$orgName/Race/$raceId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DashboardMeClubOrgNameIndexRoute =
+  DashboardMeClubOrgNameIndexRouteImport.update({
+    id: '/Dashboard/me/club/$orgName/',
+    path: '/Dashboard/me/club/$orgName/',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const DashboardMeClubOrgNameLiveResultsIndexRoute =
+  DashboardMeClubOrgNameLiveResultsIndexRouteImport.update({
+    id: '/Dashboard/me/club/$orgName/LiveResults/',
+    path: '/Dashboard/me/club/$orgName/LiveResults/',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const DashboardMeClubOrgNameSeriesSeriesIdRoute =
+  DashboardMeClubOrgNameSeriesSeriesIdRouteImport.update({
+    id: '/Dashboard/me/club/$orgName/Series/$seriesId',
+    path: '/Dashboard/me/club/$orgName/Series/$seriesId',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const DashboardMeClubOrgNameRaceRaceIdRoute =
+  DashboardMeClubOrgNameRaceRaceIdRouteImport.update({
+    id: '/Dashboard/me/club/$orgName/Race/$raceId',
+    path: '/Dashboard/me/club/$orgName/Race/$raceId',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -332,6 +360,10 @@ export interface FileRoutesByFullPath {
   '/club/$orgName/Race/$raceId': typeof ClubOrgNameRaceRaceIdRoute
   '/club/$orgName/Series/$seriesId': typeof ClubOrgNameSeriesSeriesIdRoute
   '/club/$orgName/LiveResults': typeof ClubOrgNameLiveResultsIndexRoute
+  '/Dashboard/me/club/$orgName': typeof DashboardMeClubOrgNameIndexRoute
+  '/Dashboard/me/club/$orgName/Race/$raceId': typeof DashboardMeClubOrgNameRaceRaceIdRoute
+  '/Dashboard/me/club/$orgName/Series/$seriesId': typeof DashboardMeClubOrgNameSeriesSeriesIdRoute
+  '/Dashboard/me/club/$orgName/LiveResults': typeof DashboardMeClubOrgNameLiveResultsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -379,6 +411,10 @@ export interface FileRoutesByTo {
   '/club/$orgName/Race/$raceId': typeof ClubOrgNameRaceRaceIdRoute
   '/club/$orgName/Series/$seriesId': typeof ClubOrgNameSeriesSeriesIdRoute
   '/club/$orgName/LiveResults': typeof ClubOrgNameLiveResultsIndexRoute
+  '/Dashboard/me/club/$orgName': typeof DashboardMeClubOrgNameIndexRoute
+  '/Dashboard/me/club/$orgName/Race/$raceId': typeof DashboardMeClubOrgNameRaceRaceIdRoute
+  '/Dashboard/me/club/$orgName/Series/$seriesId': typeof DashboardMeClubOrgNameSeriesSeriesIdRoute
+  '/Dashboard/me/club/$orgName/LiveResults': typeof DashboardMeClubOrgNameLiveResultsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -427,6 +463,10 @@ export interface FileRoutesById {
   '/club/$orgName/Race/$raceId': typeof ClubOrgNameRaceRaceIdRoute
   '/club/$orgName/Series/$seriesId': typeof ClubOrgNameSeriesSeriesIdRoute
   '/club/$orgName/LiveResults/': typeof ClubOrgNameLiveResultsIndexRoute
+  '/Dashboard/me/club/$orgName/': typeof DashboardMeClubOrgNameIndexRoute
+  '/Dashboard/me/club/$orgName/Race/$raceId': typeof DashboardMeClubOrgNameRaceRaceIdRoute
+  '/Dashboard/me/club/$orgName/Series/$seriesId': typeof DashboardMeClubOrgNameSeriesSeriesIdRoute
+  '/Dashboard/me/club/$orgName/LiveResults/': typeof DashboardMeClubOrgNameLiveResultsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -476,6 +516,10 @@ export interface FileRouteTypes {
     | '/club/$orgName/Race/$raceId'
     | '/club/$orgName/Series/$seriesId'
     | '/club/$orgName/LiveResults'
+    | '/Dashboard/me/club/$orgName'
+    | '/Dashboard/me/club/$orgName/Race/$raceId'
+    | '/Dashboard/me/club/$orgName/Series/$seriesId'
+    | '/Dashboard/me/club/$orgName/LiveResults'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -523,6 +567,10 @@ export interface FileRouteTypes {
     | '/club/$orgName/Race/$raceId'
     | '/club/$orgName/Series/$seriesId'
     | '/club/$orgName/LiveResults'
+    | '/Dashboard/me/club/$orgName'
+    | '/Dashboard/me/club/$orgName/Race/$raceId'
+    | '/Dashboard/me/club/$orgName/Series/$seriesId'
+    | '/Dashboard/me/club/$orgName/LiveResults'
   id:
     | '__root__'
     | '/'
@@ -570,6 +618,10 @@ export interface FileRouteTypes {
     | '/club/$orgName/Race/$raceId'
     | '/club/$orgName/Series/$seriesId'
     | '/club/$orgName/LiveResults/'
+    | '/Dashboard/me/club/$orgName/'
+    | '/Dashboard/me/club/$orgName/Race/$raceId'
+    | '/Dashboard/me/club/$orgName/Series/$seriesId'
+    | '/Dashboard/me/club/$orgName/LiveResults/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -618,6 +670,10 @@ export interface RootRouteChildren {
   ClubOrgNameRaceRaceIdRoute: typeof ClubOrgNameRaceRaceIdRoute
   ClubOrgNameSeriesSeriesIdRoute: typeof ClubOrgNameSeriesSeriesIdRoute
   ClubOrgNameLiveResultsIndexRoute: typeof ClubOrgNameLiveResultsIndexRoute
+  DashboardMeClubOrgNameIndexRoute: typeof DashboardMeClubOrgNameIndexRoute
+  DashboardMeClubOrgNameRaceRaceIdRoute: typeof DashboardMeClubOrgNameRaceRaceIdRoute
+  DashboardMeClubOrgNameSeriesSeriesIdRoute: typeof DashboardMeClubOrgNameSeriesSeriesIdRoute
+  DashboardMeClubOrgNameLiveResultsIndexRoute: typeof DashboardMeClubOrgNameLiveResultsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -937,6 +993,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ClubOrgNameRaceRaceIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/Dashboard/me/club/$orgName/': {
+      id: '/Dashboard/me/club/$orgName/'
+      path: '/Dashboard/me/club/$orgName'
+      fullPath: '/Dashboard/me/club/$orgName'
+      preLoaderRoute: typeof DashboardMeClubOrgNameIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/Dashboard/me/club/$orgName/LiveResults/': {
+      id: '/Dashboard/me/club/$orgName/LiveResults/'
+      path: '/Dashboard/me/club/$orgName/LiveResults'
+      fullPath: '/Dashboard/me/club/$orgName/LiveResults'
+      preLoaderRoute: typeof DashboardMeClubOrgNameLiveResultsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/Dashboard/me/club/$orgName/Series/$seriesId': {
+      id: '/Dashboard/me/club/$orgName/Series/$seriesId'
+      path: '/Dashboard/me/club/$orgName/Series/$seriesId'
+      fullPath: '/Dashboard/me/club/$orgName/Series/$seriesId'
+      preLoaderRoute: typeof DashboardMeClubOrgNameSeriesSeriesIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/Dashboard/me/club/$orgName/Race/$raceId': {
+      id: '/Dashboard/me/club/$orgName/Race/$raceId'
+      path: '/Dashboard/me/club/$orgName/Race/$raceId'
+      fullPath: '/Dashboard/me/club/$orgName/Race/$raceId'
+      preLoaderRoute: typeof DashboardMeClubOrgNameRaceRaceIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -986,6 +1070,12 @@ const rootRouteChildren: RootRouteChildren = {
   ClubOrgNameRaceRaceIdRoute: ClubOrgNameRaceRaceIdRoute,
   ClubOrgNameSeriesSeriesIdRoute: ClubOrgNameSeriesSeriesIdRoute,
   ClubOrgNameLiveResultsIndexRoute: ClubOrgNameLiveResultsIndexRoute,
+  DashboardMeClubOrgNameIndexRoute: DashboardMeClubOrgNameIndexRoute,
+  DashboardMeClubOrgNameRaceRaceIdRoute: DashboardMeClubOrgNameRaceRaceIdRoute,
+  DashboardMeClubOrgNameSeriesSeriesIdRoute:
+    DashboardMeClubOrgNameSeriesSeriesIdRoute,
+  DashboardMeClubOrgNameLiveResultsIndexRoute:
+    DashboardMeClubOrgNameLiveResultsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

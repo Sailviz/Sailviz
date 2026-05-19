@@ -3,7 +3,7 @@ const fs = require("fs");
 const path = require("path");
 
 const src = path.join(__dirname, "..", "..", "db", "dist", "generated");
-const dest = path.join(
+const dest1 = path.join(
   __dirname,
   "..",
   "dist",
@@ -12,6 +12,8 @@ const dest = path.join(
   "src",
   "generated",
 );
+
+const dest2 = path.join(__dirname, "..", "dist", "db", "src", "generated");
 
 function copyRecursiveSync(src, dest) {
   if (!fs.existsSync(src)) return;
@@ -26,5 +28,7 @@ function copyRecursiveSync(src, dest) {
   }
 }
 
-copyRecursiveSync(src, dest);
-console.log(`Copied generated prisma client from ${src} to ${dest}`);
+copyRecursiveSync(src, dest1);
+console.log(`Copied generated prisma client from ${src} to ${dest1}`);
+copyRecursiveSync(src, dest2);
+console.log(`Copied generated prisma client from ${src} to ${dest2}`);

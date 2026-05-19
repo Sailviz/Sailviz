@@ -7,6 +7,8 @@ import { orpcClient } from '@lib/orpc'
 import type { ResultType } from '@sailviz/types'
 import EditResultDialog from '@components/layout/dashboard/EditResultModal'
 import ViewResultDialog from '@components/layout/dashboard/viewResultModal'
+import { MapPin } from 'lucide-react'
+import MapDialog from '@components/layout/dashboard/MapModal'
 
 const Text = ({ value }: { value: string }) => {
     return <div className=' text-center'>{value}</div>
@@ -45,6 +47,7 @@ const FleetHandicapResultsTable = ({ fleetId, editable, advancedEdit, showTime }
 
     const [editModalOpen, setEditModalOpen] = useState(false)
     const [viewModalOpen, setViewModalOpen] = useState(false)
+    const [mapModalOpen, setMapModalOpen] = useState(false)
     const [modalData, setModalData] = useState<ResultType | undefined>(undefined)
 
     let [startTime, setStartTime] = useState(fleet?.startTime || 0)
@@ -118,6 +121,7 @@ const FleetHandicapResultsTable = ({ fleetId, editable, advancedEdit, showTime }
 
     const editColumn = columnHelper.accessor('id', {
         id: 'Edit',
+        header: '',
         cell: props => (
             <Button
                 onClick={() => {
@@ -132,6 +136,7 @@ const FleetHandicapResultsTable = ({ fleetId, editable, advancedEdit, showTime }
 
     const viewColumn = columnHelper.accessor('id', {
         id: 'View',
+        header: '',
         cell: props => (
             <Button
                 onClick={() => {
@@ -144,11 +149,31 @@ const FleetHandicapResultsTable = ({ fleetId, editable, advancedEdit, showTime }
         )
     })
 
+    const trackableColumn = columnHelper.accessor('id', {
+        id: 'Trackable',
+        header: 'Map',
+        cell: props =>
+            props.row.original.trackableParticipantId ? (
+                <Button
+                    onClick={() => {
+                        setMapModalOpen(true)
+                        setModalData(props.row.original)
+                    }}
+                >
+                    <MapPin />
+                </Button>
+            ) : (
+                <div className='text-center'>-</div>
+            )
+    })
+
     if (editable) {
         columns.push(editColumn)
     } else {
         columns.push(viewColumn)
     }
+
+    columns.push(trackableColumn)
 
     let table = useReactTable({
         data: fleet?.results || [],
@@ -164,6 +189,7 @@ const FleetHandicapResultsTable = ({ fleetId, editable, advancedEdit, showTime }
         <div className='w-full'>
             <EditResultDialog open={editModalOpen} result={modalData} advancedEdit={advancedEdit} onClose={() => setEditModalOpen(false)} />
             <ViewResultDialog open={viewModalOpen} result={modalData} onClose={() => setViewModalOpen(false)} />
+            <MapDialog open={mapModalOpen} result={modalData} onClose={() => setMapModalOpen(false)} />
 
             <div className='flex items-center py-4'>
                 <h1>

@@ -1,17 +1,16 @@
 import { createFileRoute } from '@tanstack/react-router'
 import ClubViewPage from '@features/club/club-view-page'
-import HomeNav from '@components/layout/home/navbar'
 
 function Page() {
     const { orgName } = Route.useParams()
 
     return (
         <>
-            <HomeNav />
             <ClubViewPage orgName={orgName!} />
         </>
     )
 }
-export const Route = createFileRoute('/club/$orgName/')({
+
+export const Route = createFileRoute('/Dashboard/me/club/$orgName/')({
     component: Page
 })

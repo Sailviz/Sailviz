@@ -255,24 +255,25 @@ model Fleet {
 }
 
 model Result {
-  id               String  @id @unique @default(uuid())
-  fleetId          String?
-  Helm             String
-  Crew             String
-  boatId           String?
-  SailNumber       String
-  finishTime       Int
-  CorrectedTime    Float
-  HandicapPosition Int
-  PursuitPosition  Int
-  isDeleted        Boolean
-  resultCode       String
-  numberLaps       Int
-  laps             Lap[]
-  boat             Boat?   @relation(fields: [boatId], references: [id])
-  fleet            Fleet?  @relation(fields: [fleetId], references: [id], onDelete: Cascade)
-  userId           String?
-  user             User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                     String  @id @unique @default(uuid())
+  fleetId                String?
+  Helm                   String
+  Crew                   String
+  boatId                 String?
+  SailNumber             String
+  finishTime             Int
+  CorrectedTime          Float
+  HandicapPosition       Int
+  PursuitPosition        Int
+  isDeleted              Boolean
+  resultCode             String
+  numberLaps             Int
+  laps                   Lap[]
+  boat                   Boat?   @relation(fields: [boatId], references: [id])
+  fleet                  Fleet?  @relation(fields: [fleetId], references: [id], onDelete: Cascade)
+  userId                 String?
+  user                   User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  trackableParticipantId String?
 }
 
 model Lap {

@@ -57,7 +57,7 @@ function RouteComponent() {
                     .sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()))
                     .map((club: Types.Org) => (
                         <div key={club.id} className='p-4 w-96 '>
-                            <Link to={'/club/' + club.name}>
+                            <Link to={'/dashboard/me/club/' + club.name}>
                                 <div className='flex flex-col justify-center p-6 border-2  rounded shadow-xl cursor-pointer h-64 w-96 m-4'>
                                     <div className='inline-block relative'>
                                         <Button
@@ -86,7 +86,7 @@ function RouteComponent() {
                     .sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()))
                     .map((club: Types.Org) => (
                         <div key={club.id} className='p-3 w-96 '>
-                            <Link to={'/club/' + club.name}>
+                            <Link to={'/dashboard/me/club/' + club.name}>
                                 <div className='flex flex-col justify-center p-6 border-2  rounded shadow-xl cursor-pointer h-64 w-96 m-4'>
                                     <div className='inline-block relative'>
                                         <Button

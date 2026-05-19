@@ -26,6 +26,13 @@ export const trackable_participant_create =
     return res;
   });
 
+export const trackable_participant_find = os.trackable.participant.find.handler(
+  async ({ input, context }) => {
+    const res = trackableClient.participant.find(input);
+    return res;
+  },
+);
+
 export const trackable_event_create = os.trackable.event.create.handler(
   async ({ input, context }) => {
     // Placeholder implementation
@@ -42,9 +49,24 @@ export const trackable_event_update = os.trackable.event.update.handler(
   },
 );
 
+export const trackable_event_find = os.trackable.event.find.handler(
+  async ({ input, context }) => {
+    // Placeholder implementation
+    const res = trackableClient.event.find(input);
+    return res;
+  },
+);
+
 export const trackable_device_list = os.trackable.device.list.handler(
   async ({ input, context }) => {
     const res = trackableClient.device.all(input);
+    return res;
+  },
+);
+
+export const trackable_device_positions = os.trackable.device.positions.handler(
+  async ({ input, context }) => {
+    const res = trackableClient.device.positions(input);
     return res;
   },
 );

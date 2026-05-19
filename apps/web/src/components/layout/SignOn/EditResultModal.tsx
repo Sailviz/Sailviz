@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader } from '@components/u
 import { Button } from '@components/ui/button'
 import { Tabs, TabsList, TabsTrigger } from '@components/ui/tabs'
 import { Input } from '@components/ui/input'
-import type { BoatType, FleetType } from '@sailviz/types'
+import type { BoatType } from '@sailviz/types'
 
 export default function EditResultModal({
     result,
@@ -188,7 +188,7 @@ export default function EditResultModal({
                             >
                                 {/* show buttons for each fleet in a series */}
                                 <TabsList>
-                                    {race.fleets.map((fleet: FleetType) => {
+                                    {race.fleets.map(fleet => {
                                         return (
                                             <TabsTrigger key={fleet.id + 'select'} value={fleet.id}>
                                                 {fleet?.fleetSettings?.name}
