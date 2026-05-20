@@ -83,6 +83,7 @@ export const updateResult = os.result.update.handler(
         fleetId: input.fleetId,
         numberLaps: input.numberLaps,
         userId: input.userId,
+        trackableParticipantId: input.trackableParticipantId,
       },
       include: {
         laps: true,
