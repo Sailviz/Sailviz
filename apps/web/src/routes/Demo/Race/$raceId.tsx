@@ -55,8 +55,8 @@ function Page() {
                         </div>
                         <div className='py-4 w-4/5'>
                             <div className='flex flex-wrap justify-center'>
-                                <Button className='mx-1' onClick={() => openRacePanel()}>
-                                    Race
+                                <Button className='mx-1' onClick={() => openRacePanel()} variant={'green'}>
+                                    Race Mode
                                 </Button>
                                 <Button className='mx-1'>Add Entry</Button>
                                 <Button disabled className='mx-1'>
