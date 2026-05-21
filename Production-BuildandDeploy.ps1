@@ -1,4 +1,7 @@
 # this updates the test server with the latest build of the api and web packages
+
+$env:TAURI_SIGNING_PRIVATE_KEY="Z:\Sailviz\~\.tauri\myapp.key"
+
 pnpm run build:prod:api
 if ($LASTEXITCODE -ne 0) {
     Write-Error "API build failed. Exiting script."
