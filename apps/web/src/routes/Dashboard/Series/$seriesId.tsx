@@ -63,7 +63,7 @@ function Page() {
 
     const createRace = async () => {
         const race = await createRaceMutation.mutateAsync({ seriesId })
-        if (org?.orgData?.trackableEnabled) {
+        if (org?.orgData?.trackableEnabled && org.orgData.trackableOrgId) {
             // create event in trackable
             const event = await createEventMutation.mutateAsync({
                 orgId: org.orgData.trackableOrgId,

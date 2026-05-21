@@ -155,7 +155,7 @@ export const OrgDataSchema = z.object({
   subscriptionStatus: z.string().nullable(),
   defaultPursuitLength: z.number(),
   trackableEnabled: z.boolean(),
-  trackableOrgId: z.string(),
+  trackableOrgId: z.string().nullable(),
   organizationId: z.string(),
   duties: z.array(DutySchema).optional(),
 });
