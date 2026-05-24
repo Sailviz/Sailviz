@@ -2,9 +2,9 @@
   "name": "@sailviz/types",
   "version": "1.0.0",
   "description": "",
-  "main": "src/types.ts",
+  "main": "src/index.ts",
   "exports": {
-    ".": "./src/types.ts"
+    ".": "./src/index.ts"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json"
