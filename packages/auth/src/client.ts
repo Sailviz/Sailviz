@@ -5,7 +5,7 @@ import {
   organizationClient,
 } from "better-auth/client/plugins";
 import { createAuthClient } from "better-auth/react";
-import { BASE_URL } from "./config";
+import { BASE_URL } from "./config.js";
 import * as Types from "@sailviz/types";
 
 export const client = createAuthClient({

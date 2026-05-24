@@ -2,8 +2,8 @@ import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import prisma from "@sailviz/db";
 import { anonymous, bearer, organization, username } from "better-auth/plugins";
-import * as config from "./config";
-import { myPlugin } from "./plugin";
+import * as config from "./config.js";
+import { myPlugin } from "./plugin.js";
 
 export const auth = betterAuth({
   trustedOrigins: [

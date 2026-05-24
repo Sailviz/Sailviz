@@ -1,7 +1,7 @@
 // scripts/generate-config.js
-import fs from "fs";
-import path from "path";
-import dotenv from "dotenv";
+const fs = require("fs");
+const path = require("path");
+const dotenv = require("dotenv");
 
 // Decide which env file to load
 console.log("Generating config.ts from .env files...");

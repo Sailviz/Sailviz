@@ -1,12 +1,30 @@
 {
   "name": "@sailviz/auth",
-  "main": "src/auth.ts",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "exports": {
-    "./client": "./src/client.ts",
-    "./auth": "./src/auth.ts"
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./client": {
+      "types": "./dist/client.d.ts",
+      "default": "./dist/client.js"
+    },
+    "./auth": {
+      "types": "./dist/auth.d.ts",
+      "default": "./dist/auth.js"
+    }
   },
-  "types": "src/index.ts",
+  "scripts": {
+    "prebuild": "node ../../packages/db/scripts/generate-config.js && pnpm -w --filter @sailviz/types build && pnpm -w --filter @sailviz/db build && npm run generateConfig",
+    "generateConfig": "node scripts/generate-config.js",
+    "build": "tsc -p tsconfig.json"
+  },
   "dependencies": {
+    "@sailviz/db": "workspace:*",
+    "@sailviz/types": "workspace:*",
     "@orpc/server": "^1.9.3",
     "better-auth": "^1.4.10",
     "@better-auth/utils": "^0.3.0"

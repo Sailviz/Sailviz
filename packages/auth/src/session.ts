@@ -1,4 +1,4 @@
-import { auth } from "./auth";
+import { auth } from "./auth.js";
 import type { Session } from "better-auth";
 
 export const getSession = async (req: Request): Promise<Session | null> => {
