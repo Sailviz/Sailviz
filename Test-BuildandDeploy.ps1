@@ -16,7 +16,6 @@ scp -r apps/web/dist/* root@192.168.3.42:/var/www/web/release
 
 # send api files to server
 Write-Host "Deploying API files to server..."
-ssh root@192.168.3.185 "rm -rf /api/node_modules /api/package-lock.json"
 scp -r packages/api/dist/* root@192.168.3.185:/api
 
 # restart api server
