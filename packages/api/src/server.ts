@@ -8,6 +8,7 @@ import { RequestHeadersPlugin } from "@orpc/server/plugins";
 import * as config from "./config";
 import { auth } from "@sailviz/auth/auth";
 import { generateServer } from "./ws";
+import { registerUpdaterRoutes } from "./routes/updater";
 
 const app = express();
 app.use(
@@ -26,6 +27,7 @@ app.all("/api/auth/*splat", toNodeHandler(auth));
 
 // parse JSON bodies (oRPC may expect JSON payloads)
 app.use(express.json());
+registerUpdaterRoutes(app);
 // use a catch-all to let the RPC handler inspect all requests
 app.all("{/*path}", async (req, res, next) => {
   const { matched } = await mainHandler.handle(req, res, {

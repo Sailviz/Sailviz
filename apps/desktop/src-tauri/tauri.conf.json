@@ -1,7 +1,7 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "sailviz",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "identifier": "com.sailviz",
   "build": {
     "frontendDist": "../../../apps/web/dist",
@@ -34,6 +34,9 @@
   },
   "plugins": {
     "updater": {
+      "windows": {
+        "installMode": "passive"
+      },
       "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEM0NDhDMDg3RDg4NTdBRApSV1N0VjRoOUNJeEVESW5QTmNrM2FGV1IxaDh1U1BZL0xYT2dncmdhV1E5L0tpMDN6TDNXc2J6bgo=",
       "endpoints": [
         "https://api.sailviz.com/desktop-update/{{current_version}}"

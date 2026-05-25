@@ -1,4 +1,5 @@
 use tauri::Manager;
+use tauri_plugin_updater::UpdaterExt;
 
 #[cfg(not(any(target_os = "android", target_os = "ios")))]
 pub fn run(fullscreen: bool) {
@@ -17,11 +18,15 @@ pub fn run(fullscreen: bool) {
     }
 
     builder
-        .setup(move |app_handle| {
-            if let Some(window) = app_handle.get_webview_window("main") {
+        .setup(move |app| {
+            if let Some(window) = app.get_webview_window("main") {
                 if fullscreen {
                     window.set_fullscreen(true).unwrap();
                 }
+                let handle = app.handle().clone();
+                tauri::async_runtime::spawn(async move {
+                    update(handle).await.unwrap();
+                });
             }
             Ok(())
         })
@@ -67,4 +72,29 @@ async fn toggle_fullscreen(window: tauri::Window) -> Result<(), String> {
             .map_err(|e| e.to_string())?;
         Ok(())
     }
+}
+
+#[tauri::command]
+async fn update(app: tauri::AppHandle) -> tauri_plugin_updater::Result<()> {
+  if let Some(update) = app.updater()?.check().await? {
+    let mut downloaded = 0;
+
+    // alternatively we could also call update.download() and update.install() separately
+    update
+      .download_and_install(
+        |chunk_length, content_length| {
+          downloaded += chunk_length;
+          println!("downloaded {downloaded} from {content_length:?}");
+        },
+        || {
+          println!("download finished");
+        },
+      )
+      .await?;
+
+    println!("update installed");
+    app.restart();
+  }
+
+  Ok(())
 }
