@@ -99,9 +99,9 @@ export default function CreateSignOnProfileModal({ boats }: { boats: Types.Stand
                     Create Profile
                 </Button>
             </DialogTrigger>
-            <DialogContent className='max-w-8/12'>
+            <DialogContent className='md:max-w-8/12'>
                 <DialogHeader className='flex flex-col gap-1'>Create New Entry</DialogHeader>
-                <div className='flex w-full'>
+                <div className='flex w-full flex-col md:flex-row'>
                     <div className='flex flex-col px-6 w-full'>
                         <p className='text-2xl font-bold'>Helm</p>
 

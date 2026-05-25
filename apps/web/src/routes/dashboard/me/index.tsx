@@ -9,6 +9,7 @@ import * as Types from '@sailviz/types'
 import { Banner, BannerAction, BannerClose, BannerIcon, BannerTitle } from '@components/ui/shadcn-io/banner'
 import { CircleAlert } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import PageContainer from '@components/layout/page-container'
 
 function Page() {
     const session: Session = useLoaderData({ from: `__root__` })
@@ -57,28 +58,30 @@ function Page() {
     }
     console.log(favouriteOrgs)
     return (
-        <div>
-            <Banner className='mb-4 bg-red-600' visible={showLiveBanner} onClose={() => setShowLiveBanner(false)}>
-                <BannerIcon icon={CircleAlert} />
-                <BannerTitle>View Live Race</BannerTitle>
-                <Link to={'/club/' + favouriteOrgs[0].organization.name + '/LiveResults'}>
-                    <BannerAction variant='outline'>Watch Now</BannerAction>
-                </Link>
-                <BannerClose />
-            </Banner>
-            Hello {session?.user.name}
-            <div> Pending Invitations:</div>
-            <InvitationsTable />
-            {favouriteOrgs?.map((org: any) => (
-                <div>
-                    <h1 key={org.orgId}> {org.organization.name} </h1>
-                    <UpcomingRacesTable orgId={org.orgId} viewHref={`/club/${org.organization.name}/Race/`} />
-                    <div className='mt-2 text-center max-h-[5vh] overflow-hidden'>
-                        <CreateResultModal org={org.organization} />
+        <PageContainer scrollable={true}>
+            <div className='flex flex-1 flex-col space-y-4'>
+                <Banner className='mb-4 bg-red-600' visible={showLiveBanner} onClose={() => setShowLiveBanner(false)}>
+                    <BannerIcon icon={CircleAlert} />
+                    <BannerTitle>View Live Race</BannerTitle>
+                    <Link to={'/club/' + favouriteOrgs[0].organization.name + '/LiveResults'}>
+                        <BannerAction variant='outline'>Watch Now</BannerAction>
+                    </Link>
+                    <BannerClose />
+                </Banner>
+                Hello {session?.user.name}
+                <div> Pending Invitations:</div>
+                <InvitationsTable />
+                {favouriteOrgs?.map((org: any) => (
+                    <div>
+                        <h1 key={org.orgId}> {org.organization.name} </h1>
+                        <UpcomingRacesTable orgId={org.orgId} viewHref={`/club/${org.organization.name}/Race/`} />
+                        <div className='mt-2 text-center max-h-[5vh] overflow-hidden'>
+                            <CreateResultModal org={org.organization} />
+                        </div>
                     </div>
-                </div>
-            ))}
-        </div>
+                ))}
+            </div>
+        </PageContainer>
     )
 }
 

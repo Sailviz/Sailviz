@@ -73,10 +73,10 @@ export default function EditSignOnProfileModal({
 
     return (
         <Dialog open={open} onOpenChange={() => onClose()}>
-            <DialogContent className='max-w-8/12' title='Edit Result'>
-                <DialogHeader className='flex flex-col gap-1 text-2xl w-96'>Edit Profile</DialogHeader>
+            <DialogContent className='md:max-w-8/12' title='Edit Result'>
+                <DialogHeader className='flex flex-col gap-1 text-2xl md:w-96'>Edit Profile</DialogHeader>
                 <div className='flex flex-col w-full'>
-                    <div className='flex flex-row w-full'>
+                    <div className='flex md:flex-row flex-col w-full'>
                         <div className='flex flex-col px-6 w-full'>
                             <p className='text-2xl font-bold'>Helm</p>
 
