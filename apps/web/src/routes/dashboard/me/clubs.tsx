@@ -53,14 +53,14 @@ function RouteComponent() {
         <PageContainer scrollable={true}>
             <div className='flex flex-1 flex-col space-y-4'>
                 <h1 className='text-2xl font-bold mb-4 px-6'>My Clubs</h1>
-                <div className='flex flex-row flex-wrap px-6'>
+                <div className='flex flex-row flex-wrap'>
                     {orgs
                         ?.filter(org => favouriteOrgs?.flatMap((org: any) => org.orgId).includes(org.id))
                         .sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()))
                         .map((club: Types.Org) => (
-                            <div key={club.id} className='p-4 w-96 '>
+                            <div key={club.id} className='w-96 '>
                                 <Link to={'/dashboard/me/club/' + club.name}>
-                                    <div className='flex flex-col justify-center p-6 border-2  rounded shadow-xl cursor-pointer h-64 w-96 m-4'>
+                                    <div className='flex flex-col justify-center p-6 border-2  rounded shadow-xl cursor-pointer md:h-64 md:w-96 px-auto h-48 m-4'>
                                         <div className='inline-block relative'>
                                             <Button
                                                 variant='outline'
