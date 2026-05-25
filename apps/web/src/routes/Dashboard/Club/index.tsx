@@ -10,6 +10,7 @@ import { orpcClient } from '@lib/orpc'
 import { ActionButton } from '@components/ui/action-button'
 import type { Session } from '@sailviz/auth/client'
 import * as Types from '@sailviz/types'
+import { ImageUpload } from '@components/ImageUpload'
 
 function Page() {
     const session: Session = useLoaderData({ from: `__root__` })
@@ -79,10 +80,10 @@ function Page() {
                         ))}
                     </TableBody>
                 </Table>
-
                 <p className='text-2xl font-bold p-6'>
                     <Button onClick={addDuty}>Add Duty</Button>
                 </p>
+                <ImageUpload buttonText='upload Banner' />
             </div>
         )
     else

@@ -350,3 +350,18 @@ model Verification {
 
   @@map("verification")
 }
+
+enum ImageOwnerType {
+  user
+  organisation
+  public
+}
+
+model Image {
+  id        String         @id @unique @default(uuid())
+  ownerType ImageOwnerType
+  ownerId   String?
+  category  String
+  s3Key     String
+  createdAt DateTime       @default(now())
+}

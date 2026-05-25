@@ -1,11 +1,12 @@
+import PageContainer from '@components/layout/page-container'
 import UserRacesTable from '@components/tables/UserRacesTable'
 import { createFileRoute } from '@tanstack/react-router'
 
 function Page() {
     return (
-        <div>
+        <PageContainer scrollable={true}>
             <UserRacesTable viewHref='' />
-        </div>
+        </PageContainer>
     )
 }
 

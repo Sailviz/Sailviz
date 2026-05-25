@@ -17,7 +17,7 @@ const Page = async () => {
                     ?.sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()))
                     .map((club: Types.Org) => (
                         <div key={club.id} className='p-3 w-96 '>
-                            <ClubCard name={club.name} link={'/club/' + club.name}></ClubCard>
+                            <ClubCard clubId={club.id} name={club.name} link={'/club/' + club.name}></ClubCard>
                         </div>
                     ))}
             </div>

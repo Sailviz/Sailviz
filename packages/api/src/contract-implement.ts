@@ -89,6 +89,11 @@ import {
   buoy_session,
   buoy_update,
 } from "./routes/buoy";
+import {
+  image_createUploadUrl,
+  image_orgBanner,
+  image_saveMetadata,
+} from "./routes/image";
 
 const os = implement(ORPCcontract);
 
@@ -164,6 +169,11 @@ export const mainRouter = os.router({
     buoys: {
       session: buoy_session,
     },
+  },
+  image: {
+    createUploadUrl: image_createUploadUrl,
+    saveMetadata: image_saveMetadata,
+    orgBanner: image_orgBanner,
   },
   boat: {
     standard: {

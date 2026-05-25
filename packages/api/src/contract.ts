@@ -108,6 +108,37 @@ export const ORPCcontract = {
       session: oc.output(z.array(Types.BuoySchema)),
     },
   },
+  image: {
+    createUploadUrl: oc
+      .input(
+        z.object({
+          ownerType: z.enum(["user", "organisation", "public"]),
+          ownerId: z.string().nullable(),
+          category: z.enum(["flag", "banner", "logo"]),
+        }),
+      )
+      .output(
+        z.object({
+          uploadUrl: z.string(),
+          id: z.string(),
+          key: z.string(),
+        }),
+      ),
+    saveMetadata: oc
+      .input(
+        z.object({
+          id: z.string(),
+          s3key: z.string(),
+          ownerType: z.enum(["user", "organisation", "public"]),
+          ownerId: z.string().optional(),
+          category: z.enum(["flag", "banner", "logo"]),
+        }),
+      )
+      .output(z.any()),
+    orgBanner: oc
+      .input(z.object({ orgId: z.string() }))
+      .output(z.string().nullable()),
+  },
   fleet: {
     find: oc
       .input(z.object({ fleetId: z.string() }))
