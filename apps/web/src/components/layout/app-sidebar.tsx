@@ -15,19 +15,16 @@ import {
     SidebarMenuSubItem,
     SidebarRail
 } from '@components/ui/sidebar'
-import { ChevronRight, GalleryVerticalEnd } from 'lucide-react'
+import { ChevronRight } from 'lucide-react'
 import { Link } from '@tanstack/react-router'
 import { SailVizIcon } from '../icons/sailviz-icon'
 import { ThemeSwitcher } from '../ui/ThemeSwitcher'
 import { OrgSwitcher } from './org-switcher'
-
-export const company = {
-    name: 'Acme Inc',
-    logo: GalleryVerticalEnd,
-    plan: 'Enterprise'
-}
+import { useTauriVersion } from '@hooks/use-tauri-version'
 
 export default function AppSidebar({ navCollections }: { navCollections: NavCollection[] }) {
+    const tauriVersion = useTauriVersion()
+
     const pathname = window.location.pathname
 
     return (
@@ -89,6 +86,7 @@ export default function AppSidebar({ navCollections }: { navCollections: NavColl
                                         </SidebarMenuItem>
                                     )
                                 })}
+                                <SidebarMenuItem key={'tauriVersion'}></SidebarMenuItem>
                             </SidebarMenu>
                         </SidebarGroup>
                     )
@@ -98,6 +96,7 @@ export default function AppSidebar({ navCollections }: { navCollections: NavColl
                 <div className='text-center'>
                     <ThemeSwitcher />
                 </div>
+                {tauriVersion && <span className='text-center text-sm text-muted-foreground'>Version: {tauriVersion}</span>}
             </SidebarFooter>
             <SidebarRail />
         </Sidebar>
