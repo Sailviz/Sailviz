@@ -1,4 +1,6 @@
 use tauri::Manager;
+
+#[cfg(not(any(target_os = "android", target_os = "ios")))]
 use tauri_plugin_updater::UpdaterExt;
 
 #[cfg(not(any(target_os = "android", target_os = "ios")))]
@@ -75,11 +77,10 @@ async fn toggle_fullscreen(window: tauri::Window) -> Result<(), String> {
 }
 
 #[tauri::command]
+#[cfg(not(any(target_os = "android", target_os = "ios")))]
 async fn update(app: tauri::AppHandle) -> tauri_plugin_updater::Result<()> {
   if let Some(update) = app.updater()?.check().await? {
     let mut downloaded = 0;
-
-    // alternatively we could also call update.download() and update.install() separately
     update
       .download_and_install(
         |chunk_length, content_length| {
