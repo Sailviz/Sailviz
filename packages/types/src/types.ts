@@ -274,10 +274,9 @@ export type Waypoint = z.infer<typeof WaypointSchema>;
 export const DeviceSchema = z.object({
   id: z.string(),
   name: z.string(),
-  orgId: z.string().nullable(),
   isDeleted: z.boolean(),
   product: z.any().nullable(),
-  firmwareVersion: z.any().nullable(),
+  firmwareVersion: z.any().optional().nullable(),
 });
 export type Device = z.infer<typeof DeviceSchema>;
 
