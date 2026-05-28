@@ -275,7 +275,7 @@ export const DeviceSchema = z.object({
   id: z.string(),
   name: z.string(),
   isDeleted: z.boolean(),
-  product: z.any().nullable(),
+  product: z.any().optional().nullable(),
   firmwareVersion: z.any().optional().nullable(),
 });
 export type Device = z.infer<typeof DeviceSchema>;
