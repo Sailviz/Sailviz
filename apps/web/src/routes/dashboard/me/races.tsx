@@ -5,7 +5,7 @@ import { createFileRoute } from '@tanstack/react-router'
 function Page() {
     return (
         <PageContainer scrollable={true}>
-            <UserRacesTable viewHref='' />
+            <UserRacesTable />
         </PageContainer>
     )
 }

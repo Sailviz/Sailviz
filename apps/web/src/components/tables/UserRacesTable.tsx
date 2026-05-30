@@ -35,9 +35,9 @@ const Race = ({ ...props }: any) => {
     )
 }
 
-const Action = ({ viewHref, raceId }: { viewHref: string; raceId: string }) => {
+const Action = ({ raceId }: { raceId: string }) => {
     return (
-        <Link to={viewHref + raceId} className='text-default-900 cursor-pointer'>
+        <Link to={'/Dashboard/me/race/' + raceId} className='text-default-900 cursor-pointer'>
             <Button variant='outline' className='w-16 h-8 p-0'>
                 View
             </Button>
@@ -47,7 +47,7 @@ const Action = ({ viewHref, raceId }: { viewHref: string; raceId: string }) => {
 
 const columnHelper = createColumnHelper<RaceType>()
 
-const UserRacesTable = ({ viewHref }: { viewHref: string }) => {
+const UserRacesTable = () => {
     const [page, setPage] = useState(1)
 
     const { data: races } = useQuery(orpcClient.user.results.all.queryOptions())
@@ -96,7 +96,7 @@ const UserRacesTable = ({ viewHref }: { viewHref: string }) => {
             columnHelper.accessor('id', {
                 id: 'action',
                 header: '',
-                cell: props => <Action raceId={props.row.original.id} viewHref={viewHref} />
+                cell: props => <Action raceId={props.row.original.id} />
             })
         ],
         manualPagination: true,
