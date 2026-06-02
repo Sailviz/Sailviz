@@ -55,7 +55,6 @@ function Page() {
     const raceQueryOptions = orpcClient.race.find.queryOptions({ input: { raceId: raceId }, results: true, boats: true })
     const race = useQuery(raceQueryOptions).data as Types.RaceType
     const series = useQuery(orpcClient.series.find.queryOptions({ input: { seriesId: race?.seriesId } })).data as Types.SeriesType
-    const startSequence = useQuery(orpcClient.startSequence.find.queryOptions({ input: { seriesId: race?.seriesId } })).data as StartSequenceStep[]
 
     const updateFleetMutation = useMutation(orpcClient.fleet.update.mutationOptions())
     const updateResultMutation = useMutation(orpcClient.result.update.mutationOptions())
@@ -80,8 +79,6 @@ function Page() {
     const [raceTime, setRaceTime] = useState<number>(0)
 
     const startRaceButton = async () => {
-        let lastStartTime = Math.floor(new Date().getTime() / 1000 + startSequence.reduce((max, step) => (step.time > max ? step.time : max), 0))
-
         //start the clock
         // fetch('https://' + club.metadata!.clockIP + '/set?startTime=' + (localTime - club.metadata!.clockOffset).toString(), {
         //     signal: controller.signal,
@@ -96,18 +93,6 @@ function Page() {
             sendTrackableMessage(JSON.stringify({ type: 'startEventRequest', eventId: race.trackableEventId, posRate: 5000, statusRate: 60000 }))
         }
 
-        //Update database
-        race.fleets.forEach(async fleet => {
-            //find start time in start sequence
-            let startTimeStep = startSequence.find(step => step.fleetStart == fleet.fleetSettings.id)
-            if (startTimeStep == undefined) {
-                console.error('No start time found for fleet: ' + fleet.id)
-                return
-            }
-            fleet.startTime = lastStartTime - startTimeStep.time
-            console.log('Setting start time for fleet ' + fleet.id + ' to ' + fleet.startTime)
-            await updateFleetMutation.mutateAsync(fleet)
-        })
         setFlagModal(true)
         //set flag status to false
         setFlagStatus([false, false])
@@ -149,6 +134,18 @@ function Page() {
         let sound = document.getElementById('Countdown') as HTMLAudioElement
         sound!.currentTime = 0
         sound!.play()
+    }
+
+    const handleFleetStart = async (fleetSettingsId: string) => {
+        const time = new Date().getTime() / 1000
+        let index = race.fleets.findIndex(fleet => fleet.fleetSettings.id == fleetSettingsId)
+        if (index == -1) {
+            console.error('Fleet not found with settings: ' + fleetSettingsId)
+            return
+        }
+        race.fleets[index].startTime = time
+        console.log('Setting start time for fleet ' + race.fleets[index].id + ' to ' + race.fleets[index].startTime)
+        await updateFleetMutation.mutateAsync(race.fleets[index])
     }
 
     const stopRace = async () => {
@@ -489,7 +486,7 @@ function Page() {
         }
     }, [])
 
-    if (race == undefined || club == undefined || startSequence == undefined) {
+    if (race == undefined || club == undefined || race.series == undefined) {
         return <PageSkeleton />
     }
 
@@ -522,13 +519,13 @@ function Page() {
                                 Race Time:{' '}
                                 <RaceTimer
                                     key={race.fleets.reduce((max, step) => (step.startTime > max ? step.startTime : max), 0)}
-                                    sequence={startSequence}
+                                    sequence={race.series.startSequence}
                                     startTime={race.fleets.reduce((max, step) => (step.startTime > max ? step.startTime : max), 0)}
                                     onFlagChange={handleFlagChange}
                                     onHoot={handleHoot}
                                     onSequenceEnd={handleSequenceEnd}
                                     onWarning={handleWarning}
-                                    onFleetStart={() => null}
+                                    onFleetStart={handleFleetStart}
                                     timerActive={raceState == raceStateType.running}
                                     reset={raceState == raceStateType.reset}
                                     onTimeUpdate={(time: number) => setRaceTime(time)}

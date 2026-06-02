@@ -37,6 +37,7 @@ type SeriesDataType = {
 type FleetSettingsType = {
     id: string
     name: string
+    start: number
     boats: BoatDataType[]
     fleets: FleetDataType[]
 }

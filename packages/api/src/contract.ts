@@ -18,22 +18,6 @@ export const ORPCcontract = {
     update: oc.input(Types.stripeSchema).output(Types.stripeSchema),
     org: oc.input(z.object({ orgId: z.string() })).output(Types.stripeSchema),
   },
-  startSequence: {
-    find: oc
-      .input(z.object({ seriesId: z.string() }))
-      .output(z.array(Types.StartSequenceStepSchema)),
-    delete: oc
-      .input(z.object({ stepId: z.string() }))
-      .output(Types.StartSequenceStepSchema),
-    update: oc
-      .input(
-        z.object({
-          seriesId: z.string(),
-          startSequence: z.array(Types.StartSequenceStepSchema),
-        }),
-      )
-      .output(z.array(Types.StartSequenceStepSchema)),
-  },
   buoy: {
     session: oc.output(z.array(Types.BuoySchema)),
     update: oc.input(Types.BuoySchema).output(Types.BuoySchema),
@@ -69,12 +53,27 @@ export const ORPCcontract = {
         }),
       ),
     create: oc
-      .input(z.object({ orgId: z.string(), name: z.string() }))
+      .input(
+        z.object({
+          orgId: z.string(),
+          name: z.string(),
+          startSequence: z.string().optional(),
+        }),
+      )
       .output(Types.SeriesSchema),
     delete: oc
       .input(z.object({ seriesId: z.string() }))
       .output(Types.SeriesSchema),
-    update: oc.input(Types.SeriesSchema).output(Types.SeriesSchema),
+    update: oc
+      .input(
+        z.object({
+          id: z.string(),
+          settings: z.any().optional(),
+          name: z.string().optional(),
+          startSequence: z.string().optional(),
+        }),
+      )
+      .output(Types.SeriesSchema),
     tags: {
       update: oc
         .input(

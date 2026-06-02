@@ -55,6 +55,7 @@ export const FleetSchema = z.object({
   id: z.string(),
   raceId: z.string(),
   startTime: z.number(),
+  recalls: z.number(),
   fleetSettings: z.any(),
   results: z.array(ResultSchema).optional(),
 });
@@ -67,6 +68,7 @@ export const SeriesSchema = z.object({
   settings: z.any().optional(),
   races: z.any().optional(),
   fleetSettings: z.any().optional(),
+  startSequence: z.string(),
   tags: z
     .object({
       id: z.string(),
@@ -101,12 +103,14 @@ export type GlobalConfigInputType = z.infer<typeof GlobalConfigSchema>;
 export const SeriesSettingsSchema = z.object({
   numberToCount: z.number(),
   pursuitLength: z.number(),
+  recallToBack: z.boolean(),
 });
 export type SeriesSettingsInputType = z.infer<typeof SeriesSettingsSchema>;
 
 export const FleetSettingsSchema = z.object({
   id: z.string(),
   name: z.string(),
+  start: z.number(),
   boats: z.array(z.any()),
 });
 export type FleetSettingsType = z.infer<typeof FleetSettingsSchema>;
@@ -116,17 +120,6 @@ export const FlagStatusSchema = z.object({
   status: z.boolean(),
 });
 export type FlagStatusInputType = z.infer<typeof FlagStatusSchema>;
-
-export const StartSequenceStepSchema = z.object({
-  id: z.string().optional(), // Optional for new steps
-  time: z.number(),
-  name: z.string(), // e.g., 'start', 'horn', 'clock'
-  hoot: z.number(),
-  order: z.number(), // Order of the step in the sequence
-  fleetStart: z.string(),
-  flagStatus: z.array(FlagStatusSchema),
-});
-export type StartSequenceStepType = z.infer<typeof StartSequenceStepSchema>;
 
 export type RaceSettingsType = {
   numberToCount: number;

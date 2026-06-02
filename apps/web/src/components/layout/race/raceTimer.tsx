@@ -1,26 +1,57 @@
+import { getFiveStartSequence, getThreeStartSequence } from '@components/helpers/startSequence'
 import { useState, useEffect } from 'react'
+import * as Types from '@sailviz/types'
 interface RaceTimerProps {
-    sequence: StartSequenceStep[]
     startTime?: number // Unix timestamp when race starts
+    race: Types.RaceType
     onFlagChange: (flag: FlagStatusType[], next: FlagStatusType[]) => void
     onHoot: (time: number) => void
     onSequenceEnd: () => void
     onWarning: () => void
     onFleetStart: (fleetSettingsId: string) => void
+    onFleetCountdownStart: (fleetId: string) => void
     timerActive: boolean
     reset: boolean
     onTimeUpdate: (time: number) => void
 }
 
-const RaceTimer: React.FC<RaceTimerProps> = ({ sequence, startTime, onFlagChange, onHoot, onSequenceEnd, onWarning, onFleetStart, timerActive, reset, onTimeUpdate }) => {
-    const largestStep = sequence.reduce((max, step) => (step.time > max ? step.time : max), 0) // Find the largest time in the sequence
+const RaceTimer: React.FC<RaceTimerProps> = ({
+    race,
+    startTime,
+    onFlagChange,
+    onHoot,
+    onSequenceEnd,
+    onWarning,
+    onFleetStart,
+    onFleetCountdownStart,
+    timerActive,
+    reset,
+    onTimeUpdate
+}) => {
+    let largestStep = 0
+    switch (race.series!.startSequence) {
+        case '541go':
+            largestStep = 5 * 60 + 15
+            break
+        case '321go':
+            largestStep = 75 //3 * 60 + 15
+    }
+
+    race.fleets.sort((a, b) => a.fleetSettings.start - b.fleetSettings.start)
+
+    const [sequenceSteps, setSequenceSteps] = useState<StartSequenceStep[]>(
+        race.series?.startSequence === '541go' ? getFiveStartSequence(race.fleets[0].id) : getThreeStartSequence(race.fleets[0].id)
+    )
+
+    const [fleetStep, setFleetStep] = useState<number>(0)
 
     // Initialize timeLeft with the largest step time
     const [timeLeft, setTimeLeft] = useState({ time: largestStep, countingUp: false })
     // Initialize currentStep to the highest order in the sequence
-    const [currentStep, setCurrentStep] = useState<StartSequenceStep>(sequence[1]!) // Assuming the first step is always the initial step
+    const [currentStep, setCurrentStep] = useState<StartSequenceStep>(sequenceSteps[1]!) // Assuming the first step is always the initial step
     const [warningCompleted, setWarningCompleted] = useState(false)
     const [sequenceFinished, setSequenceFinished] = useState(false)
+    const [fleetOffset, setFleetOffset] = useState(0)
 
     const calculateTimeLeft = () => {
         let countingUp = false
@@ -45,27 +76,50 @@ const RaceTimer: React.FC<RaceTimerProps> = ({ sequence, startTime, onFlagChange
 
             setTimeLeft(time)
             //warning signals
-            if (currentStep.time + 6 >= time.time && warningCompleted === false && time.countingUp == false && !sequenceFinished) {
+            if (currentStep.time + 6 >= Math.abs(time.time - fleetOffset) && warningCompleted === false && !sequenceFinished) {
                 onWarning()
                 setWarningCompleted(true)
             }
             // Check if any sequence step matches the current time
-            if (currentStep.time + 1 >= time.time && time.countingUp == false && !sequenceFinished) {
+            if (currentStep.time + 1 >= Math.abs(time.time - fleetOffset) && !sequenceFinished) {
                 if (currentStep.hoot > 0) {
                     onHoot(currentStep.hoot)
                 }
                 if (currentStep.fleetStart) {
                     onFleetStart(currentStep.fleetStart)
                 }
-                const nextStep = sequence.find(step => step.order == currentStep.order + 1)
-                onFlagChange(currentStep.flagStatus, nextStep?.flagStatus!)
-                console.log(`Current step: ${JSON.stringify(currentStep)}, Next step: ${nextStep ? JSON.stringify(nextStep) : 'None'}`)
+                const nextStep = sequenceSteps.find(step => step.order == currentStep.order + 1)
                 if (nextStep) {
+                    onFlagChange(currentStep.flagStatus, nextStep.flagStatus)
+                    console.log(`Current step: ${JSON.stringify(currentStep)}, Next step: ${nextStep ? JSON.stringify(nextStep) : 'None'}`)
                     setCurrentStep(nextStep)
                     setWarningCompleted(false)
                 } else {
-                    setSequenceFinished(true)
-                    onSequenceEnd()
+                    if (fleetStep < race.fleets.length - 1) {
+                        console.log('new Fleet step', fleetStep + 1)
+                        const newSequenceSteps =
+                            race.series?.startSequence === '541go' ? getFiveStartSequence(race.fleets[fleetStep + 1].id) : getThreeStartSequence(race.fleets[fleetStep + 1].id)
+                        console.log('New sequence steps', newSequenceSteps)
+                        setSequenceSteps(newSequenceSteps)
+                        const nextStep =
+                            race.series?.startSequence === '541go'
+                                ? getFiveStartSequence(race.fleets[fleetStep + 1].id)[2]
+                                : getThreeStartSequence(race.fleets[fleetStep + 1].id)[2]
+                        console.log('Next step', nextStep)
+                        setCurrentStep(nextStep)
+
+                        const newFleetOffset = race.series!.startSequence === '541go' ? 5 * 60 * (fleetStep + 1) : 1 * 60 * (fleetStep + 1)
+                        console.log('New fleet offset', newFleetOffset)
+                        setFleetOffset(newFleetOffset)
+                        onFleetCountdownStart(race.fleets[fleetStep + 1].id)
+
+                        setFleetStep(fleetStep + 1)
+                        setWarningCompleted(false)
+                    } else {
+                        console.log('Sequence finished')
+                        setSequenceFinished(true)
+                        onSequenceEnd()
+                    }
                 }
             }
             // Add a prop to pass the updated time to the parent component

@@ -113,11 +113,6 @@ export const mainRouter = os.router({
     update: updateResult,
     delete: deleteResult,
   },
-  startSequence: {
-    find: findStartSequence,
-    delete: deleteStartSequenceStep,
-    update: startSequence_update,
-  },
   race: {
     today: race_today,
     org: race_org,

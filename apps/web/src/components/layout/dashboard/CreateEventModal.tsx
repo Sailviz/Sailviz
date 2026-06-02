@@ -6,7 +6,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import dayjs from 'dayjs'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@components/ui/table'
 import { createColumnHelper, flexRender, getCoreRowModel, getFilteredRowModel, useReactTable } from '@tanstack/react-table'
-import { getFiveStartSequence, getThreeStartSequence } from '@components/helpers/startSequence'
 import { useLoaderData } from '@tanstack/react-router'
 import { useMutation } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
@@ -124,7 +123,6 @@ export default function CreateEventDialog() {
 
     const createSeriesMutation = useMutation(orpcClient.series.create.mutationOptions())
     const findSeriesMutation = useMutation(orpcClient.series.find.mutationOptions())
-    const updateStartSequenceMutation = useMutation(orpcClient.startSequence.update.mutationOptions())
     const createRaceMutation = useMutation(orpcClient.race.create.mutationOptions())
     const updateRaceMutation = useMutation(orpcClient.race.update.mutationOptions())
 
@@ -162,7 +160,7 @@ export default function CreateEventDialog() {
     const createEvent = async (events: Race[]) => {
         console.log('Creating event', events)
         //create series
-        const res = await createSeriesMutation.mutateAsync({ orgId: session.session.activeOrganizationId!, name: name }) // this adds a single fleet to the series by default
+        const res = await createSeriesMutation.mutateAsync({ orgId: session.session.activeOrganizationId!, name: name, startSequence: startSequence }) // this adds a single fleet to the series by default
         if (!res) {
             console.error('Failed to create series')
             return
@@ -174,15 +172,7 @@ export default function CreateEventDialog() {
             return
         }
         console.log('Fetched series', series)
-        // set start sequence for series
-        if (startSequence === 'Five') {
-            await updateStartSequenceMutation.mutateAsync({ seriesId: series.id, startSequence: getFiveStartSequence(series.fleetSettings[0]?.id || '') })
-        } else if (startSequence === 'Three') {
-            await updateStartSequenceMutation.mutateAsync({ seriesId: series.id, startSequence: getThreeStartSequence(series.fleetSettings[0]?.id || '') })
-        } else {
-            console.error('Invalid start sequence')
-            return
-        }
+
         //create each race
         for (const event of events) {
             const dbrace: RaceType = await createRaceMutation.mutateAsync({ seriesId: series.id })

@@ -15,9 +15,11 @@ import * as Types from '@sailviz/types'
 import type { Session } from '@sailviz/auth/client'
 import useWebSocket from '@hooks/use-ws'
 import { ws_server, trackable_ws_server } from '@components/URL'
+import RecallDialog, { RecallType } from '@components/layout/dashboard/RecallModal'
 
 // these options are the same across all fleets
 enum raceStateType {
+    countdown,
     running,
     stopped,
     reset,
@@ -50,8 +52,6 @@ function Page() {
     const raceQueryOptions = orpcClient.race.find.queryOptions({ input: { raceId: raceId }, results: true, boats: true })
     const race = useQuery(raceQueryOptions).data as Types.RaceType
 
-    const startSequence = useQuery(orpcClient.startSequence.find.queryOptions({ input: { seriesId: race?.seriesId } })).data as StartSequenceStep[]
-
     const updateFleetMutation = useMutation(orpcClient.fleet.update.mutationOptions())
     const updateResultMutation = useMutation(orpcClient.result.update.mutationOptions())
 
@@ -61,13 +61,16 @@ function Page() {
 
     const [retireModal, setRetireModal] = useState(false)
     const [fleetSelectModal, setFleetSelectModal] = useState(false)
+    const [recallModal, setRecallModal] = useState(false)
     const [selectMode, setSelectMode] = useState<raceModeType>(raceModeType.None)
     const [flagModal, setFlagModal] = useState(false)
     const [flagStatus, setFlagStatus] = useState<boolean[]>([false, false])
     const [nextFlagStatus, setNextFlagStatus] = useState<boolean[]>([false, false])
+    const [countdownFleet, setCountdownFleet] = useState<Types.FleetType | null>(null)
 
     var [lastAction, setLastAction] = useState<{ type: string; resultId: string }>({ type: '', resultId: '' })
 
+    const [startTime, setStartTime] = useState<number>(0)
     const [raceState, setRaceState] = useState<raceStateType>(raceStateType.reset)
     const [lastRaceState, setLastRaceState] = useState<raceStateType>(raceStateType.reset)
     const [raceMode, setRaceMode] = useState<raceModeType[]>([])
@@ -104,8 +107,6 @@ function Page() {
     const [raceTime, setRaceTime] = useState<number>(0)
 
     const startRaceButton = async () => {
-        //use time for button
-        let lastStartTime = Math.floor(new Date().getTime() / 1000 + startSequence.reduce((max, step) => (step.time > max ? step.time : max), 0))
         //start the timer
         // fetch('https://' + club.metadata!.clockIP + '/set?startTime=' + (lastStartTime - club.metadata!.clockOffset).toString(), {
         //     signal: controller.signal,
@@ -120,29 +121,17 @@ function Page() {
             sendTrackableMessage(JSON.stringify({ type: 'startEventRequest', eventId: race.trackableEventId, posRate: 5000, statusRate: 60000 }))
         }
 
-        race.fleets.forEach(async fleet => {
-            //find start time in start sequence
-            let startTimeStep = startSequence.find(step => step.fleetStart == fleet.fleetSettings.id)
-            if (startTimeStep == undefined) {
-                console.error('No start time found for fleet: ' + fleet.id)
-                return
-            }
-            fleet.startTime = lastStartTime - startTimeStep.time
-            console.log('Setting start time for fleet ' + fleet.id + ' to ' + fleet.startTime)
-            await updateFleetMutation.mutateAsync(fleet)
-        })
+        setStartTime(new Date().getTime() / 1000 + 15 + (race.series?.startSequence == '541go' ? 5 * 60 : 60)) // add buffer to ensure timer starts correctly
+
+        handleFleetCountdownStart(race.fleets.sort((a, b) => a.fleetSettings.start - b.fleetSettings.start)[0].id) // start countdown for first fleet
 
         setFlagModal(true)
         //set flag status to false
         setFlagStatus([false, false])
         setNextFlagStatus([true, false])
-        //send to DB
-        startRace()
-    }
 
-    const startRace = async () => {
         //modify racestate to running for all fleets
-        setRaceState(raceStateType.running)
+        setRaceState(raceStateType.countdown)
 
         //0 time hoot to check horn is connected
         sendMessage(JSON.stringify({ type: 'hootRequest', orgId: club.id, duration: 0 }))
@@ -162,7 +151,7 @@ function Page() {
 
     const handleHoot = (time: number) => {
         //sound horn
-        console.log(`Hoot for ${time} seconds`)
+        console.log(`Hoot for ${time} milliseconds`)
         sendMessage(JSON.stringify({ type: 'hootRequest', orgId: club.id, duration: time }))
 
         let sound = document.getElementById('Beep') as HTMLAudioElement
@@ -180,16 +169,50 @@ function Page() {
 
     const handleSequenceEnd = () => {
         setFlagModal(false)
+        setRaceState(raceStateType.running)
     }
 
-    const handleFleetStart = (fleetSettingsId: string) => {
-        //set fleet running
-        let index = race.fleets.findIndex(fleet => fleet.fleetSettings.id == fleetSettingsId)
+    const handleFleetCountdownStart = (fleetId: string) => {
+        let index = race.fleets.findIndex(fleet => fleet.id == fleetId)
         if (index == -1) {
-            console.error('Fleet not found with settings: ' + fleetSettingsId)
+            console.error('Fleet not found with id: ' + fleetId)
             return
         }
+        setCountdownFleet(race.fleets[index])
+    }
+
+    const handleFleetStart = async (fleetId: string) => {
+        const time = new Date().getTime() / 1000
+        let index = race.fleets.findIndex(fleet => fleet.id == fleetId)
+        if (index == -1) {
+            console.error('Fleet not found with id: ' + fleetId)
+            return
+        }
+        race.fleets[index].startTime = time
+        console.log('Setting start time for fleet ' + race.fleets[index].id + ' to ' + race.fleets[index].startTime)
+        await updateFleetMutation.mutateAsync(race.fleets[index])
+        //set fleet running
         setRaceMode([...raceMode.slice(0, index), raceModeType.Lap, ...raceMode.slice(index + 1)])
+    }
+
+    const handleRecall = (recall: RecallType) => {
+        console.log('Recall type: ' + recall)
+        if (recall == RecallType.None) {
+            //do nothing
+            setRecallModal(false)
+        } else if (recall == RecallType.Individual) {
+            // don't need to do anything
+            setRecallModal(false)
+        } else if (recall == RecallType.General) {
+            if (race.series?.settings.recallToBack) {
+                // the fleet is pushed to the back of the start sequence
+                // update the start sequence to reflect this change.
+                // this is not persisted in the database
+            } else {
+                // the fleet keeps its place in the start sequence
+            }
+            setRecallModal(false)
+        }
     }
 
     const dynamicSort = async (results: Types.ResultType[]) => {
@@ -578,7 +601,7 @@ function Page() {
         })
     }, [race])
 
-    if (race == undefined || club == undefined || session == undefined || startSequence == undefined) {
+    if (race == undefined || club == undefined || session == undefined || race.series == undefined) {
         return <PageSkeleton />
     }
 
@@ -595,7 +618,16 @@ function Page() {
             <main className='flex items-stretch w-full h-full'>
                 <RetireModal isOpen={retireModal} onSubmit={retireBoat} result={activeResult} onClose={() => setRetireModal(false)} />
                 <FleetSelectDialog mode={selectMode} isOpen={fleetSelectModal} onSubmit={setFleetMode} onClose={() => setFleetSelectModal(false)} fleets={race.fleets} />
-                <FlagModal isOpen={flagModal} currentFlagStatus={flagStatus} nextFlagStatus={nextFlagStatus} onClose={() => setFlagModal(false)} raceTime={raceTime} />
+                <FlagModal
+                    isOpen={flagModal}
+                    currentFlagStatus={flagStatus}
+                    nextFlagStatus={nextFlagStatus}
+                    countdownFleet={countdownFleet}
+                    onClose={() => setFlagModal(false)}
+                    raceTime={raceTime}
+                    raceState={raceState}
+                />
+                <RecallDialog isOpen={recallModal} onClose={handleRecall} />
                 <audio id='Beep' src='/Beep-6.mp3'></audio>
                 <audio id='Countdown' src='/Countdown.mp3'></audio>
                 <div className='w-full flex flex-col items-center justify-start panel-height'>
@@ -607,17 +639,16 @@ function Page() {
                             <div className='w-1/4 p-2 m-2 border-4 rounded-lg text-lg font-medium'>
                                 Race Time:
                                 <RaceTimer
-                                    key={race.fleets.reduce((max, step) => (step.startTime > max ? step.startTime : max), 0)}
-                                    sequence={startSequence}
-                                    // start time is the max start time of all fleets, so that the timer starts at the latest start time.
-                                    startTime={race.fleets.reduce((max, step) => (step.startTime > max ? step.startTime : max), 0)}
+                                    race={race}
+                                    startTime={startTime}
                                     onFlagChange={handleFlagChange}
                                     onHoot={handleHoot}
-                                    timerActive={raceState == raceStateType.running}
+                                    timerActive={raceState == raceStateType.running || raceState == raceStateType.countdown}
                                     reset={raceState == raceStateType.reset}
                                     onSequenceEnd={handleSequenceEnd}
                                     onWarning={handleWarning}
                                     onFleetStart={handleFleetStart}
+                                    onFleetCountdownStart={handleFleetCountdownStart}
                                     onTimeUpdate={(time: number) => setRaceTime(time)}
                                 />
                             </div>
@@ -631,6 +662,7 @@ function Page() {
                                                 </Button>
                                             )
                                         case raceStateType.running:
+                                        case raceStateType.countdown:
                                             return (
                                                 <Button
                                                     onClick={_ => {

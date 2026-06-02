@@ -16,6 +16,7 @@ import { Tagger } from '@components/tagger'
 import { useEffect, useState } from 'react'
 import { CATEGORY_OPTIONS } from '@features/series/series-table/use-series-table-filters'
 import PageContainer from '@components/layout/page-container'
+import { SeriesMaintainSequence } from '@components/seriesMaintainSequence'
 
 function Page() {
     const session: Session = useLoaderData({ from: `__root__` })
@@ -36,7 +37,6 @@ function Page() {
     const [tagFilter, setTagFilter] = useState<string>('')
 
     const { data: series } = useQuery(orpcClient.series.find.queryOptions({ input: { seriesId: seriesId } }))
-    const { data: startSequence } = useQuery(orpcClient.startSequence.find.queryOptions({ input: { seriesId: seriesId } }))
 
     const createFleetSettings = async () => {
         //only create fleet settings if the club has pro subscription
@@ -44,7 +44,7 @@ function Page() {
         if (customer.planName == 'SailViz Pro' && customer.subscriptionStatus == 'active') {
             await FleetSettingsCreation.mutateAsync({ seriesId: seriesId })
             queryClient.invalidateQueries({
-                queryKey: orpcClient.series.find.key({ type: 'query', input: { seriesId: seriesId } })
+                queryKey: orpcClient.fleet.settings.find.key({ type: 'query', input: { seriesId: seriesId } })
             })
         }
     }
@@ -88,11 +88,11 @@ function Page() {
     }
 
     useEffect(() => {
-        if (!session || !series || !startSequence) return
+        if (!session || !series) return
         setTagFilter(series.tags.map(tag => tag.name).join('.'))
-    }, [series, session, startSequence])
+    }, [series, session])
 
-    if (!session || series == undefined || startSequence == undefined || org == undefined) {
+    if (!session || series == undefined || org == undefined) {
         console.log('Series', series)
         // If the user is not authenticated, redirect to the login page
         return <PageSkeleton />
@@ -121,14 +121,16 @@ function Page() {
                         <Button onClick={createFleetSettings} disabled={org.orgData!.planName != 'SailViz Pro'}>
                             Add Fleet
                         </Button>
-                        <StartSequenceManager initialSequence={startSequence} seriesId={seriesId} key={startSequence?.length} />
+                        <StartSequenceManager initialSequence={series.startSequence} seriesId={seriesId} />
 
                         <ToCountSelect seriesId={seriesId} />
                         <SeriesPursuitLength seriesId={seriesId} />
+                        <SeriesMaintainSequence seriesId={seriesId} />
                     </>
                 ) : (
                     <> </>
                 )}
+                <br />
                 <div className='mb-6'>
                     {series.fleetSettings.map((fleetSettings: FleetSettingsType, index: any) => {
                         return (

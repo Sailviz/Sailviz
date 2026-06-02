@@ -1,7 +1,7 @@
 import { implement, ORPCError } from "@orpc/server";
 import prisma from "@sailviz/db";
 import { ORPCcontract } from "../contract";
-import { FleetSettingsType, StartSequenceStepType } from "@sailviz/types";
+import { FleetSettingsType } from "@sailviz/types";
 import { findSeries } from "./series";
 
 const os = implement(ORPCcontract);
@@ -52,6 +52,7 @@ export const fleet_update = os.fleet.update.handler(async ({ input }) => {
     where: { id: input.id },
     data: {
       startTime: input.startTime,
+      recalls: input.recalls,
     },
     include: {
       fleetSettings: true,
@@ -122,6 +123,7 @@ export const fleet_settings_update = os.fleet.settings.update.handler(
       where: { id: input.id },
       data: {
         name: input.name,
+        start: input.start,
         boats: {
           set: [
             ...input.boats.map((boat) => ({

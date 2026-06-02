@@ -14,6 +14,7 @@ export default function EditFleetSettingsDialog({ fleetSettings, seriesId }: { f
     const queryClient = useQueryClient()
 
     const [name, setName] = useState('')
+    const [start, setStart] = useState(0)
     const [selectedBoats, setSelectedBoats] = useState([{ label: '', value: {} as Types.BoatType }])
     const [options, setOptions] = useState([{ label: '', value: {} as Types.BoatType }])
 
@@ -32,6 +33,7 @@ export default function EditFleetSettingsDialog({ fleetSettings, seriesId }: { f
         if (fleetSettings == undefined) return
         console.log(fleetSettings)
         setName(fleetSettings.name)
+        setStart(fleetSettings.start)
         setSelectedBoats(fleetSettings.boats.map(x => ({ value: x, label: x.name })))
     }, [fleetSettings])
 
@@ -65,6 +67,12 @@ export default function EditFleetSettingsDialog({ fleetSettings, seriesId }: { f
                         <Input type='text' value={name} onChange={e => setName(e.target.value)} />
                     </div>
                 </div>
+                <div className='flex w-full'>
+                    <div className='flex flex-col px-6 w-full'>
+                        <p className='text-2xl font-bold'>Start</p>
+                        <Input type='text' value={start} onChange={e => setStart(parseInt(e.target.value))} />
+                    </div>
+                </div>
                 <div>
                     <p className='text-6xl font-extrabold p-6'>Boats</p>
                     <div className='flex flex-col px-6 w-full'>
@@ -83,7 +91,7 @@ export default function EditFleetSettingsDialog({ fleetSettings, seriesId }: { f
                     </div>
                 </div>
                 <DialogFooter>
-                    <Button color='primary' onClick={() => onSubmit({ ...fleetSettings!, name: name, boats: selectedBoats.flatMap(boats => boats.value) })}>
+                    <Button color='primary' onClick={() => onSubmit({ ...fleetSettings!, name: name, boats: selectedBoats.flatMap(boats => boats.value), start: start })}>
                         Save
                     </Button>
                 </DialogFooter>

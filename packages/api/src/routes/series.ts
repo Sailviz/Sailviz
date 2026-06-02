@@ -106,6 +106,7 @@ export const createSeries = os.series.create.handler(async ({ input }) => {
       name: input.name,
       settings: {
         numberToCount: 0,
+        recallToBack: 0,
         pursuitLength: club.orgData!.defaultPursuitLength,
       },
       organization: {
@@ -131,20 +132,6 @@ export const createSeries = os.series.create.handler(async ({ input }) => {
           },
         },
       },
-    });
-    const startSequence = getFiveStartSequence(fleetSettings.id);
-    startSequence.forEach(async (step: any) => {
-      await prisma.startSequence.create({
-        data: {
-          seriesId: newSeries.id,
-          time: step.time,
-          name: step.name,
-          order: step.order,
-          hoot: step.hoot,
-          flagStatus: step.flagStatus,
-          fleetStart: step.fleetStart,
-        },
-      });
     });
     return newSeries;
   } else {
@@ -204,6 +191,7 @@ export const series_update = os.series.update.handler(async ({ input }) => {
     data: {
       settings: input.settings,
       name: input.name,
+      startSequence: input.startSequence,
     },
     include: {
       fleetSettings: true,

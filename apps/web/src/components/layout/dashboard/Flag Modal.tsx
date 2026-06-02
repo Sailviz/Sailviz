@@ -1,7 +1,16 @@
 import { Dialog, DialogContent, DialogHeader } from '@components/ui/dialog'
-
+import * as Types from '@sailviz/types'
 const imageStyle = {
     border: '2px solid #000000'
+}
+
+enum raceStateType {
+    countdown,
+    running,
+    stopped,
+    reset,
+    calculate,
+    retire
 }
 
 export default function FlagDialog({
@@ -9,12 +18,16 @@ export default function FlagDialog({
     currentFlagStatus,
     nextFlagStatus,
     raceTime,
+    raceState,
+    countdownFleet,
     onClose
 }: {
     isOpen: boolean
     currentFlagStatus: boolean[]
     nextFlagStatus: boolean[]
     raceTime: number
+    raceState: raceStateType
+    countdownFleet: Types.FleetType | null
     onClose: () => void
 }) {
     return (
@@ -27,8 +40,11 @@ export default function FlagDialog({
             <DialogContent>
                 <DialogHeader className='flex flex-col'></DialogHeader>
                 <h1 className='text-center'>
+                    <>{countdownFleet?.fleetSettings.name}</>
+                </h1>
+                <h1 className='text-center'>
                     <>
-                        -
+                        {raceState == raceStateType.countdown ? '-' : '+'}
                         {Math.floor(raceTime / 60)
                             .toString()
                             .padStart(2, '00')}
@@ -54,16 +70,7 @@ export default function FlagDialog({
                                 <img src='/H_Flag.png' width={200} height={200} alt='flag1' style={imageStyle} />
                             </div>
                         )}
-                        <div className='h-full flex flex-col justify-evenly'>
-                            <div>
-                                <div className='text-8xl text-center'>⬆</div>
-                                <div className='text-2xl font-bold text-center'>Up</div>
-                            </div>
-                            <div>
-                                <div className='text-2xl font-bold text-center'>Down</div>
-                                <div className='text-8xl text-center'>⬇</div>
-                            </div>
-                        </div>
+
                         {currentFlagStatus[1] ? (
                             <div className='h-full flex flex-col justify-start'>
                                 <img src='/P_Flag.png' width={200} height={200} alt='flag1' style={imageStyle} />
@@ -74,7 +81,16 @@ export default function FlagDialog({
                             </div>
                         )}
                     </div>
-                    <div className='w-0.5 h-full border-2 border-dashed mx-4 border-black'></div>
+                    <div className='h-full flex flex-col justify-evenly'>
+                        <div>
+                            <div className='text-8xl text-center'>⬆</div>
+                            <div className='text-2xl font-bold text-center'>Up</div>
+                        </div>
+                        <div>
+                            <div className='text-2xl font-bold text-center'>Down</div>
+                            <div className='text-8xl text-center'>⬇</div>
+                        </div>
+                    </div>
                     <div className='flex w-full flex-row h-full justify-evenly'>
                         {nextFlagStatus[0] ? (
                             <div className='h-full flex flex-col justify-start'>
@@ -85,16 +101,7 @@ export default function FlagDialog({
                                 <img src='/H_Flag.png' width={200} height={200} alt='flag1' style={imageStyle} />
                             </div>
                         )}
-                        <div className='h-full flex flex-col justify-evenly'>
-                            <div>
-                                <div className='text-8xl text-center'>⬆</div>
-                                <div className='text-2xl font-bold text-center'>Up</div>
-                            </div>
-                            <div>
-                                <div className='text-2xl font-bold text-center'>Down</div>
-                                <div className='text-8xl text-center'>⬇</div>
-                            </div>
-                        </div>
+
                         {nextFlagStatus[1] ? (
                             <div className='h-full flex flex-col justify-start'>
                                 <img src='/P_Flag.png' width={200} height={200} alt='flag1' style={imageStyle} />

@@ -43,8 +43,6 @@ function Page() {
     const raceQueryOptions = orpcClient.race.find.queryOptions({ input: { raceId: raceId }, results: true, boats: true })
     const race = useQuery(raceQueryOptions).data as Types.RaceType
 
-    const startSequence = useQuery(orpcClient.startSequence.find.queryOptions({ input: { seriesId: race?.seriesId } })).data as StartSequenceStep[]
-
     const updateFleetMutation = useMutation(orpcClient.fleet.update.mutationOptions())
     const updateResultMutation = useMutation(orpcClient.result.update.mutationOptions())
 
@@ -97,30 +95,11 @@ function Page() {
     const [raceTime, setRaceTime] = useState<number>(0)
 
     const startRaceButton = async () => {
-        //use time for button
-        let lastStartTime = Math.floor(new Date().getTime() / 1000 + startSequence.reduce((max, step) => (step.time > max ? step.time : max), 0))
-
-        race.fleets.forEach(async fleet => {
-            //find start time in start sequence
-            let startTimeStep = startSequence.find(step => step.fleetStart == fleet.fleetSettings.id)
-            if (startTimeStep == undefined) {
-                console.error('No start time found for fleet: ' + fleet.id)
-                return
-            }
-            fleet.startTime = lastStartTime - startTimeStep.time
-            console.log('Setting start time for fleet ' + fleet.id + ' to ' + fleet.startTime)
-            await updateFleetMutation.mutateAsync(fleet)
-        })
-
         setFlagModal(true)
         //set flag status to false
         setFlagStatus([false, false])
         setNextFlagStatus([true, false])
-        //send to DB
-        startRace()
-    }
 
-    const startRace = async () => {
         //modify racestate to running for all fleets
         setRaceState(raceStateType.running)
 
@@ -157,13 +136,17 @@ function Page() {
         setFlagModal(false)
     }
 
-    const handleFleetStart = (fleetSettingsId: string) => {
-        //set fleet running
+    const handleFleetStart = async (fleetSettingsId: string) => {
+        const time = new Date().getTime() / 1000
         let index = race.fleets.findIndex(fleet => fleet.fleetSettings.id == fleetSettingsId)
         if (index == -1) {
             console.error('Fleet not found with settings: ' + fleetSettingsId)
             return
         }
+        race.fleets[index].startTime = time
+        console.log('Setting start time for fleet ' + race.fleets[index].id + ' to ' + race.fleets[index].startTime)
+        await updateFleetMutation.mutateAsync(race.fleets[index])
+        //set fleet running
         setRaceMode([...raceMode.slice(0, index), raceModeType.Lap, ...raceMode.slice(index + 1)])
     }
 
@@ -514,7 +497,7 @@ function Page() {
         })
     }, [race])
 
-    if (race == undefined || session == undefined || startSequence == undefined) {
+    if (race == undefined || session == undefined || race.series == undefined) {
         return <PageSkeleton />
     }
 
@@ -544,7 +527,7 @@ function Page() {
                                 Race Time:
                                 <RaceTimer
                                     key={race.fleets.reduce((max, step) => (step.startTime > max ? step.startTime : max), 0)}
-                                    sequence={startSequence}
+                                    sequence={race.series.startSequence}
                                     // start time is the max start time of all fleets, so that the timer starts at the latest start time.
                                     startTime={race.fleets.reduce((max, step) => (step.startTime > max ? step.startTime : max), 0)}
                                     onFlagChange={handleFlagChange}

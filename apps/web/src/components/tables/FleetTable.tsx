@@ -83,6 +83,10 @@ const FleetTable = ({ seriesId }: { seriesId: string }) => {
     var table = useReactTable({
         data,
         columns: [
+            columnHelper.accessor('start', {
+                id: 'start',
+                cell: info => info.getValue()
+            }),
             columnHelper.accessor('name', {
                 id: 'name',
                 cell: info => info.getValue()

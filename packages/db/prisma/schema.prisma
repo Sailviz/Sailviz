@@ -189,27 +189,15 @@ model Tag {
 }
 
 model Series {
-  id             String          @id @unique @default(uuid())
-  name           String
-  orgId          String
-  tags           Tag[]
-  settings       Json
-  fleetSettings  FleetSettings[]
-  races          Race[]
-  organization   Organization    @relation(fields: [orgId], references: [id], onDelete: Cascade)
-  startSequences StartSequence[]
-}
-
-model StartSequence {
-  id         String @id @unique @default(uuid())
-  series     Series @relation(fields: [seriesId], references: [id])
-  seriesId   String
-  time       Int
-  name       String
-  hoot       Int
-  fleetStart String
-  flagStatus Json
-  order      Int
+  id            String          @id @unique @default(uuid())
+  name          String
+  orgId         String
+  tags          Tag[]
+  settings      Json
+  fleetSettings FleetSettings[]
+  races         Race[]
+  organization  Organization    @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  startSequence String          @default("541go") // can be "321go", "541go"
 }
 
 model Race {
@@ -239,6 +227,7 @@ model FleetSettings {
   id       String  @id @unique @default(uuid())
   seriesId String
   name     String
+  start    Int     @default(0)
   fleets   Fleet[]
   series   Series  @relation(fields: [seriesId], references: [id], onDelete: Cascade)
   boats    Boat[]  @relation("BoatToFleetSettings")
@@ -248,6 +237,7 @@ model Fleet {
   id            String        @id @unique @default(uuid())
   raceId        String
   startTime     Int
+  recalls       Int           @default(0)
   settingsId    String
   race          Race          @relation(fields: [raceId], references: [id], onDelete: Cascade)
   fleetSettings FleetSettings @relation(fields: [settingsId], references: [id])
