@@ -51,12 +51,20 @@ export const ResultSchema = z.object({
 });
 export type ResultType = z.infer<typeof ResultSchema>;
 
+export const FleetSettingsSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  start: z.number(),
+  boats: z.array(z.any()),
+});
+export type FleetSettingsType = z.infer<typeof FleetSettingsSchema>;
+
 export const FleetSchema = z.object({
   id: z.string(),
   raceId: z.string(),
   startTime: z.number(),
   recalls: z.number(),
-  fleetSettings: z.any(),
+  fleetSettings: FleetSettingsSchema,
   results: z.array(ResultSchema).optional(),
 });
 export type FleetType = z.infer<typeof FleetSchema>;
@@ -106,14 +114,6 @@ export const SeriesSettingsSchema = z.object({
   recallToBack: z.boolean(),
 });
 export type SeriesSettingsInputType = z.infer<typeof SeriesSettingsSchema>;
-
-export const FleetSettingsSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  start: z.number(),
-  boats: z.array(z.any()),
-});
-export type FleetSettingsType = z.infer<typeof FleetSettingsSchema>;
 
 export const FlagStatusSchema = z.object({
   flag: z.string(),

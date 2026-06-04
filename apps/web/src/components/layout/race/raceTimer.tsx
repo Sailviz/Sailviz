@@ -37,13 +37,11 @@ const RaceTimer: React.FC<RaceTimerProps> = ({
             largestStep = 75 //3 * 60 + 15
     }
 
-    race.fleets.sort((a, b) => a.fleetSettings.start - b.fleetSettings.start)
+    race.fleets.sort((a, b) => a.startTime - b.startTime)
 
     const [sequenceSteps, setSequenceSteps] = useState<StartSequenceStep[]>(
         race.series?.startSequence === '541go' ? getFiveStartSequence(race.fleets[0].id) : getThreeStartSequence(race.fleets[0].id)
     )
-
-    const [fleetStep, setFleetStep] = useState<number>(0)
 
     // Initialize timeLeft with the largest step time
     const [timeLeft, setTimeLeft] = useState({ time: largestStep, countingUp: false })
@@ -95,31 +93,26 @@ const RaceTimer: React.FC<RaceTimerProps> = ({
                     setCurrentStep(nextStep)
                     setWarningCompleted(false)
                 } else {
-                    if (fleetStep < race.fleets.length - 1) {
-                        console.log('new Fleet step', fleetStep + 1)
-                        const newSequenceSteps =
-                            race.series?.startSequence === '541go' ? getFiveStartSequence(race.fleets[fleetStep + 1].id) : getThreeStartSequence(race.fleets[fleetStep + 1].id)
-                        console.log('New sequence steps', newSequenceSteps)
-                        setSequenceSteps(newSequenceSteps)
-                        const nextStep =
-                            race.series?.startSequence === '541go'
-                                ? getFiveStartSequence(race.fleets[fleetStep + 1].id)[2]
-                                : getThreeStartSequence(race.fleets[fleetStep + 1].id)[2]
-                        console.log('Next step', nextStep)
-                        setCurrentStep(nextStep)
-
-                        const newFleetOffset = race.series!.startSequence === '541go' ? 5 * 60 * (fleetStep + 1) : 1 * 60 * (fleetStep + 1)
-                        console.log('New fleet offset', newFleetOffset)
-                        setFleetOffset(newFleetOffset)
-                        onFleetCountdownStart(race.fleets[fleetStep + 1].id)
-
-                        setFleetStep(fleetStep + 1)
-                        setWarningCompleted(false)
-                    } else {
-                        console.log('Sequence finished')
+                    const currentTime = new Date().getTime() / 1000
+                    const nextFleet = race.fleets.find(fleet => fleet.startTime > currentTime + 20) // add buffer to ensure we don't accidently grab the current fleet
+                    if (nextFleet == undefined) {
+                        console.log('No more fleets to start, finishing sequence')
                         setSequenceFinished(true)
                         onSequenceEnd()
+                        return
                     }
+                    const newSequenceSteps = race.series?.startSequence === '541go' ? getFiveStartSequence(nextFleet.id) : getThreeStartSequence(nextFleet.id)
+                    console.log('New sequence steps', newSequenceSteps)
+                    setSequenceSteps(newSequenceSteps)
+                    const nextStep = newSequenceSteps[2]
+                    console.log('Next step', nextStep)
+                    setCurrentStep(nextStep)
+                    const numberFleetsStarted = race.fleets.filter(fleet => fleet.startTime < currentTime + 20).length
+                    const newFleetOffset = race.series!.startSequence === '541go' ? 5 * 60 * numberFleetsStarted : 1 * 60 * numberFleetsStarted
+                    setFleetOffset(newFleetOffset)
+                    onFleetCountdownStart(nextFleet.id)
+
+                    setWarningCompleted(false)
                 }
             }
             // Add a prop to pass the updated time to the parent component

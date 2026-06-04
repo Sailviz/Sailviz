@@ -72,6 +72,7 @@ function Page() {
 
     const [startTime, setStartTime] = useState<number>(0)
     const [raceState, setRaceState] = useState<raceStateType>(raceStateType.reset)
+    const [raceStateCopy, setRaceStateCopy] = useState<raceStateType>(raceStateType.reset)
     const [lastRaceState, setLastRaceState] = useState<raceStateType>(raceStateType.reset)
     const [raceMode, setRaceMode] = useState<raceModeType[]>([])
     const [activeResult, setActiveResult] = useState<Types.ResultType>({
@@ -121,7 +122,16 @@ function Page() {
             sendTrackableMessage(JSON.stringify({ type: 'startEventRequest', eventId: race.trackableEventId, posRate: 5000, statusRate: 60000 }))
         }
 
+        const sequenceStartTime = new Date().getTime() / 1000 + 15 // add buffer to ensure timer starts correctly
+
         setStartTime(new Date().getTime() / 1000 + 15 + (race.series?.startSequence == '541go' ? 5 * 60 : 60)) // add buffer to ensure timer starts correctly
+
+        race.fleets.forEach(async fleet => {
+            let startDelay = fleet.fleetSettings.start * (race.series!.startSequence === '541go' ? 5 * 60 : 1 * 60)
+            fleet.startTime = sequenceStartTime + startDelay
+            console.log('Setting start time for fleet ' + fleet.id + ' to ' + fleet.startTime)
+            await updateFleetMutation.mutateAsync(fleet)
+        })
 
         handleFleetCountdownStart(race.fleets.sort((a, b) => a.fleetSettings.start - b.fleetSettings.start)[0].id) // start countdown for first fleet
 
@@ -132,6 +142,7 @@ function Page() {
 
         //modify racestate to running for all fleets
         setRaceState(raceStateType.countdown)
+        setRaceStateCopy(raceStateType.countdown)
 
         //0 time hoot to check horn is connected
         sendMessage(JSON.stringify({ type: 'hootRequest', orgId: club.id, duration: 0 }))
@@ -193,6 +204,7 @@ function Page() {
         await updateFleetMutation.mutateAsync(race.fleets[index])
         //set fleet running
         setRaceMode([...raceMode.slice(0, index), raceModeType.Lap, ...raceMode.slice(index + 1)])
+        setRaceStateCopy(raceStateType.running)
     }
 
     const handleRecall = (recall: RecallType) => {
@@ -569,6 +581,8 @@ function Page() {
     useEffect(() => {
         if (race == undefined) return
 
+        setStartTime(race.fleets.reduce((min, fleet) => (fleet.startTime != 0 && fleet.startTime < min ? fleet.startTime : min), Number.MAX_SAFE_INTEGER))
+
         setRaceState(raceStateType.reset)
         if (raceMode.length == 1 && raceMode[0] == raceModeType.Lap) {
             dynamicSort(race.fleets.flatMap(fleet => fleet.results!))
@@ -625,7 +639,7 @@ function Page() {
                     countdownFleet={countdownFleet}
                     onClose={() => setFlagModal(false)}
                     raceTime={raceTime}
-                    raceState={raceState}
+                    raceState={raceStateCopy}
                 />
                 <RecallDialog isOpen={recallModal} onClose={handleRecall} />
                 <audio id='Beep' src='/Beep-6.mp3'></audio>
