@@ -180,17 +180,18 @@ const FleetSeriesResultsTable = ({ seriesId, fleetSettingsId }: { seriesId: stri
                 //two results with same Net Score.
                 //loop through positions.
                 let result = 0
+                let differenceFound = false
                 for (let i = 1; i < 1000; i++) {
                     //calculate number of positions.
                     let aNumber = a.racePositions.reduce((partialSum: number, position: { position: number; discarded: boolean }) => {
-                        if (position.position == i) {
+                        if (position.position == i && position.discarded == false) {
                             return partialSum + 1
                         } else {
                             return partialSum
                         }
                     }, 0)
                     let bNumber = b.racePositions.reduce((partialSum: number, position: { position: number; discarded: boolean }) => {
-                        if (position.position == i) {
+                        if (position.position == i && position.discarded == false) {
                             return partialSum + 1
                         } else {
                             return partialSum
@@ -198,10 +199,23 @@ const FleetSeriesResultsTable = ({ seriesId, fleetSettingsId }: { seriesId: stri
                     }, 0)
                     if (aNumber < bNumber) {
                         result = 1
+                        differenceFound = true
                         break
                     } else if (aNumber > bNumber) {
                         result = -1
+                        differenceFound = true
                         break
+                    }
+                }
+
+                if (!differenceFound) {
+                    let aLast = a.racePositions[a.racePositions.length - 1].position
+                    let bLast = b.racePositions[b.racePositions.length - 1].position
+                    if (aLast < bLast) {
+                        result = -1
+                    }
+                    if (aLast > bLast) {
+                        result = 1
                     }
                 }
 
