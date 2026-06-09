@@ -15,6 +15,7 @@ import useWebSocket from '@hooks/use-ws'
 import { trackable_ws_server, ws_server } from '@components/URL'
 
 enum raceStateType {
+    countdown,
     running,
     stopped,
     reset,
@@ -44,6 +45,8 @@ function Page() {
     const [nextFlagStatus, setNextFlagStatus] = useState<boolean[]>([false, false])
     const [retireModal, setRetireModal] = useState(false)
     const [flagModal, setFlagModal] = useState(false)
+
+    const [countdownFleet, setCountdownFleet] = useState<Types.FleetType | null>(null)
 
     var [seriesName, setSeriesName] = useState('')
 
@@ -134,6 +137,15 @@ function Page() {
         let sound = document.getElementById('Countdown') as HTMLAudioElement
         sound!.currentTime = 0
         sound!.play()
+    }
+
+    const handleFleetCountdownStart = (fleetId: string) => {
+        let index = race.fleets.findIndex(fleet => fleet.id == fleetId)
+        if (index == -1) {
+            console.error('Fleet not found with id: ' + fleetId)
+            return
+        }
+        setCountdownFleet(race.fleets[index])
     }
 
     const handleFleetStart = async (fleetSettingsId: string) => {
@@ -503,7 +515,15 @@ function Page() {
             <main className='flex items-stretch w-full h-full'>
                 <RetireModal isOpen={retireModal} onSubmit={retireBoat} result={activeResult} onClose={() => setRetireModal(false)} />
 
-                <FlagModal isOpen={flagModal} currentFlagStatus={flagStatus} nextFlagStatus={nextFlagStatus} onClose={() => setFlagModal(false)} raceTime={raceTime} />
+                <FlagModal
+                    isOpen={flagModal}
+                    countdownFleet={countdownFleet}
+                    raceState={raceState}
+                    currentFlagStatus={flagStatus}
+                    nextFlagStatus={nextFlagStatus}
+                    onClose={() => setFlagModal(false)}
+                    raceTime={raceTime}
+                />
 
                 <audio id='Beep' src='/Beep-6.mp3'></audio>
                 <audio id='Countdown' src='/Countdown.mp3'></audio>
@@ -518,17 +538,17 @@ function Page() {
                             <div className='w-1/4 p-2 m-2 border-4 rounded-lg text-lg font-medium'>
                                 Race Time:{' '}
                                 <RaceTimer
-                                    key={race.fleets.reduce((max, step) => (step.startTime > max ? step.startTime : max), 0)}
-                                    sequence={race.series.startSequence}
                                     startTime={race.fleets.reduce((max, step) => (step.startTime > max ? step.startTime : max), 0)}
                                     onFlagChange={handleFlagChange}
                                     onHoot={handleHoot}
+                                    race={race}
                                     onSequenceEnd={handleSequenceEnd}
                                     onWarning={handleWarning}
                                     onFleetStart={handleFleetStart}
                                     timerActive={raceState == raceStateType.running}
                                     reset={raceState == raceStateType.reset}
                                     onTimeUpdate={(time: number) => setRaceTime(time)}
+                                    onFleetCountdownStart={handleFleetCountdownStart}
                                 />
                             </div>
                         )}

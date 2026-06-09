@@ -210,6 +210,7 @@ export const ORPCcontract = {
         z.object({
           id: z.string(),
           number: z.number().optional(),
+          sequenceStartTime: z.number().optional(),
           Time: z.string().optional(),
           Duties: Types.DutySchema.optional(),
           Type: z.string().optional(),

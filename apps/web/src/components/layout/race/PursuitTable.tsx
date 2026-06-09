@@ -10,6 +10,7 @@ import { useQuery } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
 
 enum raceStateType {
+    countdown,
     running,
     stopped,
     reset,

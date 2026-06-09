@@ -54,6 +54,7 @@ function Page() {
 
     const updateFleetMutation = useMutation(orpcClient.fleet.update.mutationOptions())
     const updateResultMutation = useMutation(orpcClient.result.update.mutationOptions())
+    const updateRaceMutation = useMutation(orpcClient.race.update.mutationOptions())
 
     const createLapMutation = useMutation(orpcClient.lap.create.mutationOptions())
 
@@ -67,6 +68,8 @@ function Page() {
     const [flagStatus, setFlagStatus] = useState<boolean[]>([false, false])
     const [nextFlagStatus, setNextFlagStatus] = useState<boolean[]>([false, false])
     const [countdownFleet, setCountdownFleet] = useState<Types.FleetType | null>(null)
+
+    const [recallFleetId, setRecallFleetId] = useState<string>('')
 
     var [lastAction, setLastAction] = useState<{ type: string; resultId: string }>({ type: '', resultId: '' })
 
@@ -124,14 +127,18 @@ function Page() {
 
         const sequenceStartTime = new Date().getTime() / 1000 + 15 // add buffer to ensure timer starts correctly
 
-        setStartTime(new Date().getTime() / 1000 + 15 + (race.series?.startSequence == '541go' ? 5 * 60 : 60)) // add buffer to ensure timer starts correctly
+        setStartTime(new Date().getTime() / 1000 + (race.series?.startSequence == '541go' ? 5 * 60 : 60)) // add buffer to ensure timer starts correctly
 
-        race.fleets.forEach(async fleet => {
-            let startDelay = fleet.fleetSettings.start * (race.series!.startSequence === '541go' ? 5 * 60 : 1 * 60)
-            fleet.startTime = sequenceStartTime + startDelay
-            console.log('Setting start time for fleet ' + fleet.id + ' to ' + fleet.startTime)
-            await updateFleetMutation.mutateAsync(fleet)
-        })
+        await updateRaceMutation.mutateAsync({ ...race, sequenceStartTime: sequenceStartTime })
+
+        await Promise.all(
+            race.fleets.map(async fleet => {
+                let startDelay = fleet.fleetSettings.start * (race.series!.startSequence === '541go' ? 5 * 60 : 1 * 60)
+                fleet.startTime = sequenceStartTime + startDelay
+                console.log('Setting start time for fleet ' + fleet.id + ' to ' + fleet.startTime)
+                await updateFleetMutation.mutateAsync(fleet)
+            })
+        )
 
         handleFleetCountdownStart(race.fleets.sort((a, b) => a.fleetSettings.start - b.fleetSettings.start)[0].id) // start countdown for first fleet
 
@@ -150,6 +157,7 @@ function Page() {
         let sound = document.getElementById('Beep') as HTMLAudioElement
         sound!.currentTime = 0
         sound!.play()
+        queryClient.invalidateQueries({ queryKey: raceQueryOptions.queryKey })
     }
 
     const handleFlagChange = (flags: FlagStatusType[], next?: FlagStatusType[]) => {
@@ -205,9 +213,12 @@ function Page() {
         //set fleet running
         setRaceMode([...raceMode.slice(0, index), raceModeType.Lap, ...raceMode.slice(index + 1)])
         setRaceStateCopy(raceStateType.running)
+
+        setRecallModal(true)
+        setRecallFleetId(fleetId)
     }
 
-    const handleRecall = (recall: RecallType) => {
+    const handleRecall = async (recall: RecallType) => {
         console.log('Recall type: ' + recall)
         if (recall == RecallType.None) {
             //do nothing
@@ -216,12 +227,48 @@ function Page() {
             // don't need to do anything
             setRecallModal(false)
         } else if (recall == RecallType.General) {
-            if (race.series?.settings.recallToBack) {
+            console.log(race)
+            if (race.series?.settings.maintainSequence) {
+                console.log('maintaining sequence, rerunning fleet')
+                // the fleet keeps its place in the start sequence
+                let index = race.fleets.findIndex(fleet => fleet.id == recallFleetId)
+                if (index == -1) {
+                    console.error('Fleet not found with id: ' + recallFleetId)
+                    return
+                }
+                race.fleets[index].recalls += 1
+                race.fleets[index].startTime = race.fleets[index].startTime + race.series!.startSequence == '541go' ? 5 * 60 : 1 * 60
+
+                // filter the fleets that haven't started yet
+                let fleetsToUpdate = race.fleets.filter(fleet => fleet.startTime > new Date().getTime() / 1000)
+                // update the start time for fleets not yet started
+                fleetsToUpdate = fleetsToUpdate.map(fleet => {
+                    fleet.startTime = fleet.startTime + race.series!.startSequence == '541go' ? 5 * 60 : 1 * 60
+                    return fleet
+                })
+                console.log(race.fleets)
+
+                await Promise.all(fleetsToUpdate.map(fleet => updateFleetMutation.mutateAsync(fleet)))
+                queryClient.invalidateQueries({ queryKey: raceQueryOptions.queryKey })
+            } else {
                 // the fleet is pushed to the back of the start sequence
                 // update the start sequence to reflect this change.
                 // this is not persisted in the database
-            } else {
-                // the fleet keeps its place in the start sequence
+                console.log('Not maintaining sequence, pushing fleet to back')
+                let index = race.fleets.findIndex(fleet => fleet.id == recallFleetId)
+                if (index == -1) {
+                    console.error('Fleet not found with id: ' + recallFleetId)
+                    return
+                }
+
+                race.fleets[index].recalls += 1
+                const maxStartTime = race.fleets.reduce((max, fleet) => (fleet.startTime > max ? fleet.startTime : max), 0)
+                console.log('Max start time: ' + maxStartTime)
+                race.fleets[index].startTime = maxStartTime + (race.series!.startSequence == '541go' ? 5 * 60 : 1 * 60)
+                console.log('Setting start time for fleet ' + race.fleets[index].id + ' to ' + race.fleets[index].startTime)
+                console.log(race.fleets)
+                await updateFleetMutation.mutateAsync(race.fleets[index])
+                queryClient.invalidateQueries({ queryKey: raceQueryOptions.queryKey })
             }
             setRecallModal(false)
         }
@@ -564,6 +611,7 @@ function Page() {
     }
 
     useEffect(() => {
+        if (race == undefined) return
         //sort by last lap when finish mode with single fleet
         //if there is more than one fleet, we don't sort by last lap as it would get confusing
         if (raceMode.length == 1 && raceMode[0] == raceModeType.Finish) {
@@ -580,10 +628,8 @@ function Page() {
     //on page
     useEffect(() => {
         if (race == undefined) return
-
-        setStartTime(race.fleets.reduce((min, fleet) => (fleet.startTime != 0 && fleet.startTime < min ? fleet.startTime : min), Number.MAX_SAFE_INTEGER))
-
-        setRaceState(raceStateType.reset)
+        console.log(race)
+        setStartTime(race.sequenceStartTime + (race.series?.startSequence == '541go' ? 5 * 60 : 60))
         if (raceMode.length == 1 && raceMode[0] == raceModeType.Lap) {
             dynamicSort(race.fleets.flatMap(fleet => fleet.results!))
         } else {
@@ -645,7 +691,7 @@ function Page() {
                 <audio id='Beep' src='/Beep-6.mp3'></audio>
                 <audio id='Countdown' src='/Countdown.mp3'></audio>
                 <div className='w-full flex flex-col items-center justify-start panel-height'>
-                    <div className='flex w-full flex-col justify-around' key={JSON.stringify(raceState)}>
+                    <div className='flex w-full flex-col justify-around'>
                         <div className='flex flex-row'>
                             <div className='w-1/4 p-2 m-2 border-4 rounded-lg  text-lg font-medium'>
                                 Event: {race?.series?.name} - {race?.number}

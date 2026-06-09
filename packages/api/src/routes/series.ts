@@ -106,7 +106,7 @@ export const createSeries = os.series.create.handler(async ({ input }) => {
       name: input.name,
       settings: {
         numberToCount: 0,
-        recallToBack: 0,
+        maintainSequence: 0,
         pursuitLength: club.orgData!.defaultPursuitLength,
       },
       organization: {

@@ -287,6 +287,7 @@ export const updateRace = os.race.update.handler(async ({ input }) => {
       Duties: input.Duties,
       Time: input.Time,
       Type: input.Type,
+      sequenceStartTime: input.sequenceStartTime,
       trackableEventId: input.trackableEventId,
     },
     include: {

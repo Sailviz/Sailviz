@@ -16,6 +16,7 @@ import type { Session } from '@sailviz/auth/client'
 
 // these options are the same across all fleets
 enum raceStateType {
+    countdown,
     running,
     stopped,
     reset,
@@ -56,6 +57,8 @@ function Page() {
     const [flagModal, setFlagModal] = useState(false)
     const [flagStatus, setFlagStatus] = useState<boolean[]>([false, false])
     const [nextFlagStatus, setNextFlagStatus] = useState<boolean[]>([false, false])
+
+    const [countdownFleet, setCountdownFleet] = useState<Types.FleetType | null>(null)
 
     var [lastAction, setLastAction] = useState<{ type: string; resultId: string }>({ type: '', resultId: '' })
 
@@ -130,6 +133,15 @@ function Page() {
         if (next) {
             setNextFlagStatus([next[0]!.status, next[1]!.status])
         }
+    }
+
+    const handleFleetCountdownStart = (fleetId: string) => {
+        let index = race.fleets.findIndex(fleet => fleet.id == fleetId)
+        if (index == -1) {
+            console.error('Fleet not found with id: ' + fleetId)
+            return
+        }
+        setCountdownFleet(race.fleets[index])
     }
 
     const handleSequenceEnd = () => {
@@ -514,7 +526,15 @@ function Page() {
             <main className='flex items-stretch w-full h-full'>
                 <RetireModal isOpen={retireModal} onSubmit={retireBoat} result={activeResult} onClose={() => setRetireModal(false)} />
                 <FleetSelectDialog mode={selectMode} isOpen={fleetSelectModal} onSubmit={setFleetMode} onClose={() => setFleetSelectModal(false)} fleets={race.fleets} />
-                <FlagModal isOpen={flagModal} currentFlagStatus={flagStatus} nextFlagStatus={nextFlagStatus} onClose={() => setFlagModal(false)} raceTime={raceTime} />
+                <FlagModal
+                    countdownFleet={countdownFleet}
+                    isOpen={flagModal}
+                    raceState={raceState}
+                    currentFlagStatus={flagStatus}
+                    nextFlagStatus={nextFlagStatus}
+                    onClose={() => setFlagModal(false)}
+                    raceTime={raceTime}
+                />
                 <audio id='Beep' src='/Beep-6.mp3'></audio>
                 <audio id='Countdown' src='/Countdown.mp3'></audio>
                 <div className='w-full flex flex-col items-center justify-start panel-height'>
@@ -526,11 +546,10 @@ function Page() {
                             <div className='w-1/4 p-2 m-2 border-4 rounded-lg text-lg font-medium'>
                                 Race Time:
                                 <RaceTimer
-                                    key={race.fleets.reduce((max, step) => (step.startTime > max ? step.startTime : max), 0)}
-                                    sequence={race.series.startSequence}
                                     // start time is the max start time of all fleets, so that the timer starts at the latest start time.
                                     startTime={race.fleets.reduce((max, step) => (step.startTime > max ? step.startTime : max), 0)}
                                     onFlagChange={handleFlagChange}
+                                    race={race}
                                     onHoot={handleHoot}
                                     timerActive={raceState == raceStateType.running}
                                     reset={raceState == raceStateType.reset}
@@ -538,6 +557,7 @@ function Page() {
                                     onWarning={handleWarning}
                                     onFleetStart={handleFleetStart}
                                     onTimeUpdate={(time: number) => setRaceTime(time)}
+                                    onFleetCountdownStart={handleFleetCountdownStart}
                                 />
                             </div>
                             <div className='p-2 w-1/4' id='RaceStateButton'>

@@ -55,7 +55,7 @@ export const FleetSettingsSchema = z.object({
   id: z.string(),
   name: z.string(),
   start: z.number(),
-  boats: z.array(z.any()),
+  boats: z.array(z.any()).optional(),
 });
 export type FleetSettingsType = z.infer<typeof FleetSettingsSchema>;
 
@@ -89,6 +89,7 @@ export type SeriesType = z.infer<typeof SeriesSchema>;
 export const RaceSchema = z.object({
   id: z.string(),
   number: z.number(),
+  sequenceStartTime: z.number(),
   Time: z.string(),
   Duties: DutySchema.optional(),
   Type: z.string(),
