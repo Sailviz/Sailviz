@@ -140,7 +140,7 @@ const FleetSeriesResultsTable = ({ seriesId, fleetSettingsId }: { seriesId: stri
         //fill dnc
         tempresults.forEach((result, i) => {
             result.racePositions.forEach((position, j) => {
-                if (position.position == 0) {
+                if (position.position == 0 || position.resultCode == 'DNS') {
                     //set to number of series entrants + 1
                     tempresults[i]!.racePositions[j] = { race: j, position: tempresults.length + 1, discarded: false, resultCode: 'DNS' }
                 }
