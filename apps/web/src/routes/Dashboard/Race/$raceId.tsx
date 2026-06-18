@@ -33,7 +33,7 @@ function Page() {
 
     const updateResultMutation = useMutation(orpcClient.result.update.mutationOptions())
 
-    const [resultsUpdated, setResultsUpdated] = React.useState(true)
+    const [calculateEnabled, setCalculateEnabled] = React.useState(false)
     const [calculatingResults, setCalculatingResults] = React.useState(false)
 
     //Capitalise the first letter of each word, and maintain cursor pos.
@@ -115,13 +115,12 @@ function Page() {
                 queryKey: orpcClient.fleet.find.key({ type: 'query', input: { fleetId: fleet!.id } })
             })
         }
-        setResultsUpdated(true)
+        setCalculateEnabled(false)
         setCalculatingResults(false)
     }
 
     useEffect(() => {
         if (race == undefined) return
-        console.log(race.fleets)
         //if any of the results have an  incorrect corrected time, then we need to tell user to recalculate
         race.fleets.forEach((fleet: any) => {
             const maxLaps = Math.max.apply(
@@ -131,13 +130,15 @@ function Page() {
                 })
             )
             fleet.results.forEach((result: any) => {
-                //calculate what the corrected time should be
-                let seconds = result.finishTime - fleet.startTime
-                let correctedTime = (seconds * 1000 * (maxLaps / result.numberLaps)) / result.boat?.py
-                correctedTime = Math.round(correctedTime * 10) / 10
-                if (result.CorrectedTime != correctedTime) {
-                    setResultsUpdated(false)
-                    return
+                if (result.finishTime != 0) {
+                    //calculate what the corrected time should be
+                    let seconds = result.finishTime - fleet.startTime
+                    let correctedTime = (seconds * 1000 * (maxLaps / result.numberLaps)) / result.boat?.py
+                    correctedTime = Math.round(correctedTime * 10) / 10
+                    if (result.CorrectedTime != correctedTime) {
+                        setCalculateEnabled(true)
+                        return
+                    }
                 }
             })
         })
@@ -191,7 +192,7 @@ function Page() {
                             </Link>
                             <CreateResultModal race={race} boats={boats} />
                             {race.Type == 'Handicap' ? (
-                                <Button onClick={calculate} className='mx-1 w-24' variant={resultsUpdated ? 'default' : 'green'}>
+                                <Button onClick={calculate} className='mx-1 w-24' variant={calculateEnabled ? 'green' : 'default'} disabled={!calculateEnabled}>
                                     {calculatingResults ? <SmoothSpinner /> : 'Calculate'}
                                 </Button>
                             ) : (
