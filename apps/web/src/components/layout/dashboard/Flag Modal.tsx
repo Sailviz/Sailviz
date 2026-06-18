@@ -4,29 +4,18 @@ const imageStyle = {
     border: '2px solid #000000'
 }
 
-enum raceStateType {
-    countdown,
-    running,
-    stopped,
-    reset,
-    calculate,
-    retire
-}
-
 export default function FlagDialog({
     isOpen,
     currentFlagStatus,
     nextFlagStatus,
-    raceTime,
-    raceState,
+    fleetTime,
     countdownFleet,
     onClose
 }: {
     isOpen: boolean
     currentFlagStatus: boolean[]
     nextFlagStatus: boolean[]
-    raceTime: number
-    raceState: raceStateType
+    fleetTime: number
     countdownFleet: Types.FleetType | null
     onClose: () => void
 }) {
@@ -42,14 +31,14 @@ export default function FlagDialog({
                 <h1 className='text-center'>
                     <>{countdownFleet?.fleetSettings.name}</>
                 </h1>
+
                 <h1 className='text-center'>
                     <>
-                        {raceState == raceStateType.countdown ? '-' : '+'}
-                        {Math.floor(raceTime / 60)
+                        {Math.floor(fleetTime / 60)
                             .toString()
                             .padStart(2, '00')}
                         :
-                        {Math.floor(raceTime % 60) // Ensure seconds are rounded up, looks nicer
+                        {Math.floor(fleetTime % 60) // Ensure seconds are rounded up, looks nicer
                             .toString()
                             .padStart(2, '00')}
                     </>

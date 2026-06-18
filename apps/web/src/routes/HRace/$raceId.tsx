@@ -20,6 +20,7 @@ import RecallDialog, { RecallType } from '@components/layout/dashboard/RecallMod
 // these options are the same across all fleets
 enum raceStateType {
     countdown,
+    sequenceHold,
     running,
     stopped,
     reset,
@@ -75,7 +76,6 @@ function Page() {
 
     const [startTime, setStartTime] = useState<number>(0)
     const [raceState, setRaceState] = useState<raceStateType>(raceStateType.reset)
-    const [raceStateCopy, setRaceStateCopy] = useState<raceStateType>(raceStateType.reset)
     const [lastRaceState, setLastRaceState] = useState<raceStateType>(raceStateType.reset)
     const [raceMode, setRaceMode] = useState<raceModeType[]>([])
     const [activeResult, setActiveResult] = useState<Types.ResultType>({
@@ -108,7 +108,7 @@ function Page() {
         trackableParticipantId: null
     })
 
-    const [raceTime, setRaceTime] = useState<number>(0)
+    const [fleetTime, setFleetTime] = useState<number>(0)
 
     const startRaceButton = async () => {
         //start the timer
@@ -140,8 +140,6 @@ function Page() {
             })
         )
 
-        handleFleetCountdownStart(race.fleets.sort((a, b) => a.fleetSettings.start - b.fleetSettings.start)[0].id) // start countdown for first fleet
-
         setFlagModal(true)
         //set flag status to false
         setFlagStatus([false, false])
@@ -149,7 +147,6 @@ function Page() {
 
         //modify racestate to running for all fleets
         setRaceState(raceStateType.countdown)
-        setRaceStateCopy(raceStateType.countdown)
 
         //0 time hoot to check horn is connected
         sendMessage(JSON.stringify({ type: 'hootRequest', orgId: club.id, duration: 0 }))
@@ -212,7 +209,6 @@ function Page() {
         await updateFleetMutation.mutateAsync(race.fleets[index])
         //set fleet running
         setRaceMode([...raceMode.slice(0, index), raceModeType.Lap, ...raceMode.slice(index + 1)])
-        setRaceStateCopy(raceStateType.running)
 
         setRecallModal(true)
         setRecallFleetId(fleetId)
@@ -237,19 +233,22 @@ function Page() {
                     return
                 }
                 race.fleets[index].recalls += 1
-                race.fleets[index].startTime = race.fleets[index].startTime + race.series!.startSequence == '541go' ? 5 * 60 : 1 * 60
+                race.fleets[index].startTime = 0
+
+                await updateFleetMutation.mutateAsync(race.fleets[index])
 
                 // filter the fleets that haven't started yet
                 let fleetsToUpdate = race.fleets.filter(fleet => fleet.startTime > new Date().getTime() / 1000)
                 // update the start time for fleets not yet started
                 fleetsToUpdate = fleetsToUpdate.map(fleet => {
-                    fleet.startTime = fleet.startTime + race.series!.startSequence == '541go' ? 5 * 60 : 1 * 60
+                    fleet.startTime = 0
                     return fleet
                 })
                 console.log(race.fleets)
-
                 await Promise.all(fleetsToUpdate.map(fleet => updateFleetMutation.mutateAsync(fleet)))
-                queryClient.invalidateQueries({ queryKey: raceQueryOptions.queryKey })
+                await queryClient.invalidateQueries({ queryKey: raceQueryOptions.queryKey })
+                setRaceState(raceStateType.sequenceHold)
+                setFlagModal(false)
             } else {
                 // the fleet is pushed to the back of the start sequence
                 // update the start sequence to reflect this change.
@@ -268,10 +267,49 @@ function Page() {
                 console.log('Setting start time for fleet ' + race.fleets[index].id + ' to ' + race.fleets[index].startTime)
                 console.log(race.fleets)
                 await updateFleetMutation.mutateAsync(race.fleets[index])
-                queryClient.invalidateQueries({ queryKey: raceQueryOptions.queryKey })
+                await queryClient.invalidateQueries({ queryKey: raceQueryOptions.queryKey })
             }
             setRecallModal(false)
         }
+    }
+
+    const handleSequenceResume = async () => {
+        console.log('Resuming sequence')
+        console.log(race)
+        // filter the fleets that haven't started yet
+        let fleetsToStart = race.fleets.filter(fleet => fleet.startTime == 0)
+        let fleetsStarted = race.fleets.filter(fleet => fleet.startTime > 0)
+
+        // update the start time for fleets not yet started
+
+        const newSequenceStartTime = new Date().getTime() / 1000 + 15 // add buffer to ensure timer starts correctly
+
+        await Promise.all(
+            fleetsToStart.map(async fleet => {
+                let startDelay = (fleet.fleetSettings.start - fleetsStarted.length) * (race.series!.startSequence === '541go' ? 5 * 60 : 1 * 60)
+                fleet.startTime = newSequenceStartTime + startDelay
+                console.log('Setting start time for fleet ' + fleet.id + ' to ' + fleet.startTime)
+                await updateFleetMutation.mutateAsync(fleet)
+            })
+        )
+        await queryClient.invalidateQueries({ queryKey: raceQueryOptions.queryKey })
+
+        console.log(race)
+
+        setFlagModal(true)
+        //set flag status to false
+        setFlagStatus([false, false])
+        setNextFlagStatus([true, false])
+
+        //0 time hoot to check horn is connected
+        sendMessage(JSON.stringify({ type: 'hootRequest', orgId: club.id, duration: 0 }))
+
+        let sound = document.getElementById('Beep') as HTMLAudioElement
+        sound!.currentTime = 0
+        sound!.play()
+
+        //modify racestate to running for all fleets
+        setRaceState(raceStateType.countdown)
     }
 
     const dynamicSort = async (results: Types.ResultType[]) => {
@@ -639,8 +677,12 @@ function Page() {
         //check for all fleets finished?
         if (checkAllFinished(race.fleets.flatMap(fleet => fleet.results!))) {
             setRaceState(raceStateType.calculate)
-        } else if (race.fleets.some(fleet => fleet.startTime != 0)) {
+        } else if (race.fleets.every(fleet => fleet.startTime != 0)) {
+            //all fleets have a start time so we should be running
             setRaceState(raceStateType.running)
+        } else if (race.fleets.some(fleet => fleet.startTime != 0)) {
+            //only some of the fleets have a start time so we must be in sequence hold
+            setRaceState(raceStateType.sequenceHold)
         }
 
         // check individual fleet states
@@ -684,35 +726,33 @@ function Page() {
                     nextFlagStatus={nextFlagStatus}
                     countdownFleet={countdownFleet}
                     onClose={() => setFlagModal(false)}
-                    raceTime={raceTime}
-                    raceState={raceStateCopy}
+                    fleetTime={fleetTime}
                 />
                 <RecallDialog isOpen={recallModal} onClose={handleRecall} />
                 <audio id='Beep' src='/Beep-6.mp3'></audio>
                 <audio id='Countdown' src='/Countdown.mp3'></audio>
                 <div className='w-full flex flex-col items-center justify-start panel-height'>
                     <div className='flex w-full flex-col justify-around'>
-                        <div className='flex flex-row'>
-                            <div className='w-1/4 p-2 m-2 border-4 rounded-lg  text-lg font-medium'>
+                        <div className='flex md:flex-row flex-col'>
+                            <div className='md:w-1/4 p-2 m-2 border-4 rounded-lg  text-lg font-medium'>
                                 Event: {race?.series?.name} - {race?.number}
                             </div>
-                            <div className='w-1/4 p-2 m-2 border-4 rounded-lg text-lg font-medium'>
+                            <div className='md:w-1/4 p-2 m-2 border-4 rounded-lg text-lg font-medium'>
                                 Race Time:
                                 <RaceTimer
                                     race={race}
                                     startTime={startTime}
                                     onFlagChange={handleFlagChange}
                                     onHoot={handleHoot}
-                                    timerActive={raceState == raceStateType.running || raceState == raceStateType.countdown}
-                                    reset={raceState == raceStateType.reset}
+                                    raceState={raceState}
                                     onSequenceEnd={handleSequenceEnd}
                                     onWarning={handleWarning}
                                     onFleetStart={handleFleetStart}
                                     onFleetCountdownStart={handleFleetCountdownStart}
-                                    onTimeUpdate={(time: number) => setRaceTime(time)}
+                                    onTimeUpdate={(time: number) => setFleetTime(time)}
                                 />
                             </div>
-                            <div className='p-2 w-1/4' id='RaceStateButton'>
+                            <div className='md:w-1/4 p-2' id='RaceStateButton'>
                                 {(() => {
                                     switch (raceState) {
                                         case raceStateType.reset:
@@ -732,6 +772,12 @@ function Page() {
                                                     variant={'red'}
                                                 >
                                                     Stop
+                                                </Button>
+                                            )
+                                        case raceStateType.sequenceHold:
+                                            return (
+                                                <Button onClick={() => handleSequenceResume()} size='big' variant={'green'}>
+                                                    Resume
                                                 </Button>
                                             )
                                         case raceStateType.stopped:
@@ -759,13 +805,13 @@ function Page() {
                             </div>
                         </div>
                     </div>
-                    <div className='flex w-full shrink flex-row justify-around'>
-                        <div className='w-1/5 p-2'>
+                    <div className='flex w-full shrink md:flex-row flex-col  justify-around'>
+                        <div className='md:w-1/5 p-2'>
                             <Button onClick={() => undo()} size='big' variant={'warning'}>
                                 Undo Last Action
                             </Button>
                         </div>
-                        <div className='w-1/5 p-2' id='RetireModeButton'>
+                        <div className='md:w-1/5 p-2' id='RetireModeButton'>
                             {raceState == raceStateType.retire ? (
                                 <Button onClick={() => setRaceState(lastRaceState)} size='big' variant={'blue'}>
                                     Cancel Retirement
@@ -783,12 +829,12 @@ function Page() {
                                 </Button>
                             )}
                         </div>
-                        <div className='w-1/5 p-2' id='LapModeButton'>
+                        <div className='md:w-1/5 p-2' id='LapModeButton'>
                             <Button onClick={lapModeClick} size='big' variant={'blue'}>
                                 Lap Mode
                             </Button>
                         </div>
-                        <div className='w-1/5 p-2' id='FinishModeButton'>
+                        <div className='md:w-1/5 p-2' id='FinishModeButton'>
                             <Button onClick={finishModeClick} size='big' variant={'blue'}>
                                 Finish Mode
                             </Button>

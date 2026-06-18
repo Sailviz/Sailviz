@@ -1,6 +1,17 @@
 import { getFiveStartSequence, getThreeStartSequence } from '@components/helpers/startSequence'
 import { useState, useEffect } from 'react'
 import * as Types from '@sailviz/types'
+
+enum raceStateType {
+    countdown,
+    sequenceHold,
+    running,
+    stopped,
+    reset,
+    calculate,
+    retire
+}
+
 interface RaceTimerProps {
     startTime?: number // Unix timestamp when race starts
     race: Types.RaceType
@@ -10,8 +21,7 @@ interface RaceTimerProps {
     onWarning: () => void
     onFleetStart: (fleetSettingsId: string) => void
     onFleetCountdownStart: (fleetId: string) => void
-    timerActive: boolean
-    reset: boolean
+    raceState: raceStateType
     onTimeUpdate: (time: number) => void
 }
 
@@ -24,8 +34,7 @@ const RaceTimer: React.FC<RaceTimerProps> = ({
     onWarning,
     onFleetStart,
     onFleetCountdownStart,
-    timerActive,
-    reset,
+    raceState,
     onTimeUpdate
 }) => {
     let largestStep = 0
@@ -67,8 +76,9 @@ const RaceTimer: React.FC<RaceTimerProps> = ({
     }
 
     useEffect(() => {
-        if (!timerActive) return
+        if (!(raceState == raceStateType.running || raceState == raceStateType.countdown)) return
         race.fleets.sort((a, b) => a.startTime - b.startTime)
+        console.log(race.fleets)
         const currentTime = new Date().getTime() / 1000
 
         const nextFleet = race.fleets.find(fleet => fleet.startTime > currentTime)
@@ -77,23 +87,26 @@ const RaceTimer: React.FC<RaceTimerProps> = ({
             setSequenceFinished(true)
             return
         }
-        setSequenceSteps(race.series?.startSequence === '541go' ? getFiveStartSequence(nextFleet.id) : getThreeStartSequence(nextFleet.id))
-    }, [timerActive])
+        onFleetCountdownStart(nextFleet.id)
+        const steps = race.series?.startSequence === '541go' ? getFiveStartSequence(nextFleet.id) : getThreeStartSequence(nextFleet.id)
+        setSequenceSteps(steps)
+        setCurrentStep(steps[1]!) // Assuming the first step is always the initial step
+    }, [raceState, race])
 
     useEffect(() => {
-        if (!timerActive) return
+        if (!(raceState == raceStateType.running || raceState == raceStateType.countdown || raceState == raceStateType.sequenceHold)) return
         const timer = setTimeout(() => {
             //this is offset by 1 second to account for rounding issues
             const time = calculateTimeLeft()
 
             setTimeLeft(time)
             //warning signals
-            if (currentStep.time + 6 >= Math.abs(time.time - fleetOffset) && warningCompleted === false && !sequenceFinished) {
+            if (currentStep.time + 6 >= Math.abs(time.time - fleetOffset) && warningCompleted === false && !sequenceFinished && raceState == raceStateType.running) {
                 onWarning()
                 setWarningCompleted(true)
             }
             // Check if any sequence step matches the current time
-            if (currentStep.time + 1 >= Math.abs(time.time - fleetOffset) && !sequenceFinished) {
+            if (currentStep.time + 1 >= Math.abs(time.time - fleetOffset) && !sequenceFinished && raceState == raceStateType.running) {
                 if (currentStep.hoot > 0) {
                     onHoot(currentStep.hoot)
                 }
@@ -135,17 +148,17 @@ const RaceTimer: React.FC<RaceTimerProps> = ({
                 }
             }
             // Add a prop to pass the updated time to the parent component
-            onTimeUpdate(time.time)
+            onTimeUpdate(Math.abs(time.time - fleetOffset))
         }, 100)
 
         return () => clearTimeout(timer)
-    }, [timerActive, timeLeft, startTime])
+    }, [raceState, timeLeft, startTime])
 
     useEffect(() => {
-        if (reset) {
+        if (raceState == raceStateType.reset) {
             setTimeLeft({ time: largestStep, countingUp: false })
         }
-    }, [reset])
+    }, [raceState])
 
     return (
         <>{`${timeLeft.countingUp ? '+' : '-'}${Math.floor(timeLeft.time / 60)
