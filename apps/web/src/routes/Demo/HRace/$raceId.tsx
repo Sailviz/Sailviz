@@ -16,8 +16,8 @@ import type { Session } from '@sailviz/auth/client'
 
 // these options are the same across all fleets
 enum raceStateType {
-    countdown,
     running,
+    sequenceHold,
     stopped,
     reset,
     calculate,
@@ -529,11 +529,10 @@ function Page() {
                 <FlagModal
                     countdownFleet={countdownFleet}
                     isOpen={flagModal}
-                    raceState={raceState}
                     currentFlagStatus={flagStatus}
                     nextFlagStatus={nextFlagStatus}
                     onClose={() => setFlagModal(false)}
-                    raceTime={raceTime}
+                    fleetTime={raceTime}
                 />
                 <audio id='Beep' src='/Beep-6.mp3'></audio>
                 <audio id='Countdown' src='/Countdown.mp3'></audio>
@@ -551,8 +550,7 @@ function Page() {
                                     onFlagChange={handleFlagChange}
                                     race={race}
                                     onHoot={handleHoot}
-                                    timerActive={raceState == raceStateType.running}
-                                    reset={raceState == raceStateType.reset}
+                                    raceState={raceState}
                                     onSequenceEnd={handleSequenceEnd}
                                     onWarning={handleWarning}
                                     onFleetStart={handleFleetStart}

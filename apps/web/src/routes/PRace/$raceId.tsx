@@ -15,8 +15,8 @@ import useWebSocket from '@hooks/use-ws'
 import { trackable_ws_server, ws_server } from '@components/URL'
 
 enum raceStateType {
-    countdown,
     running,
+    sequenceHold,
     stopped,
     reset,
     calculate,
@@ -518,11 +518,10 @@ function Page() {
                 <FlagModal
                     isOpen={flagModal}
                     countdownFleet={countdownFleet}
-                    raceState={raceState}
                     currentFlagStatus={flagStatus}
                     nextFlagStatus={nextFlagStatus}
                     onClose={() => setFlagModal(false)}
-                    raceTime={raceTime}
+                    fleetTime={raceTime}
                 />
 
                 <audio id='Beep' src='/Beep-6.mp3'></audio>
@@ -545,8 +544,7 @@ function Page() {
                                     onSequenceEnd={handleSequenceEnd}
                                     onWarning={handleWarning}
                                     onFleetStart={handleFleetStart}
-                                    timerActive={raceState == raceStateType.running}
-                                    reset={raceState == raceStateType.reset}
+                                    raceState={raceState}
                                     onTimeUpdate={(time: number) => setRaceTime(time)}
                                     onFleetCountdownStart={handleFleetCountdownStart}
                                 />

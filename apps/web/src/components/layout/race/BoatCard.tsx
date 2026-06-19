@@ -5,9 +5,8 @@ import { useEffect, useRef, useState } from 'react'
 
 // these options are the same across all fleets
 enum raceStateType {
-    countdown,
-    sequenceHold,
     running,
+    sequenceHold,
     stopped,
     reset,
     calculate,

@@ -19,9 +19,8 @@ import RecallDialog, { RecallType } from '@components/layout/dashboard/RecallMod
 
 // these options are the same across all fleets
 enum raceStateType {
-    countdown,
-    sequenceHold,
     running,
+    sequenceHold,
     stopped,
     reset,
     calculate,
@@ -146,7 +145,7 @@ function Page() {
         setNextFlagStatus([true, false])
 
         //modify racestate to running for all fleets
-        setRaceState(raceStateType.countdown)
+        setRaceState(raceStateType.running)
 
         //0 time hoot to check horn is connected
         sendMessage(JSON.stringify({ type: 'hootRequest', orgId: club.id, duration: 0 }))
@@ -309,7 +308,7 @@ function Page() {
         sound!.play()
 
         //modify racestate to running for all fleets
-        setRaceState(raceStateType.countdown)
+        setRaceState(raceStateType.running)
     }
 
     const dynamicSort = async (results: Types.ResultType[]) => {
@@ -762,7 +761,6 @@ function Page() {
                                                 </Button>
                                             )
                                         case raceStateType.running:
-                                        case raceStateType.countdown:
                                             return (
                                                 <Button
                                                     onClick={_ => {
