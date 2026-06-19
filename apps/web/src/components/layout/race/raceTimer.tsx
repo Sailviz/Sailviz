@@ -103,6 +103,7 @@ const RaceTimer: React.FC<RaceTimerProps> = ({
             console.log('current time', now)
             setFleetOffset(offset)
             setSequenceFinished(false) // just in case it was the last fleet was recalled
+            setWarningCompleted(false)
         } else {
             //assume we are at the start of the race
             setFleetOffset(0)
