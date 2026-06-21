@@ -32,16 +32,24 @@ const ClubViewPage = ({ orgName }: { orgName: string }) => {
             console.error('no fleets found')
         }
 
-        //if any fleets have been started
-        if (race.fleets!.some(fleet => fleet.startTime != 0)) {
-            //race has started, check if all boats have finished
-            return !race
-                .fleets!.flatMap(fleet => fleet.results)
-                .every(result => {
-                    if (result!.finishTime != 0 || result!.resultCode != '') {
-                        return true
-                    }
-                })
+        if (race.Type == 'Handicap') {
+            //if any fleets have been started
+            if (race.fleets!.some(fleet => fleet.startTime != 0)) {
+                //race has started, check if all boats have finished
+                return !race
+                    .fleets!.flatMap(fleet => fleet.results)
+                    .every(result => {
+                        if (result!.finishTime != 0 || result!.resultCode != '') {
+                            return true
+                        }
+                    })
+            }
+        } else if (race.Type == 'Pursuit') {
+            //if any fleets have been started
+            if (race.fleets!.some(fleet => fleet.startTime != 0)) {
+                //this returns true if the race is still running, and false if the race has finished.
+                return race.fleets[0]!.startTime + race.series?.settings.pursuitLength * 60 > Math.floor(new Date().getTime() / 1000)
+            }
         }
         return false
     }
