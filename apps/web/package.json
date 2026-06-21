@@ -61,6 +61,7 @@
         "cmdk": "^1.1.1",
         "csvtojson": "^2.0.10",
         "dayjs": "^1.11.7",
+        "fast-xml-parser": "^5.9.3",
         "framer-motion": "^11.3.8",
         "jsonwebtoken": "^9.0.2",
         "leaflet": "^1.9.4",

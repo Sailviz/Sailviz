@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, type ChangeEvent } from 'react'
 import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, useReactTable, type SortingState } from '@tanstack/react-table'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@components/ui/table'
 import { Button } from '@components/ui/button'
@@ -7,8 +7,12 @@ import { orpcClient } from '@lib/orpc'
 import type { ResultType } from '@sailviz/types'
 import EditResultDialog from '@components/layout/dashboard/EditResultModal'
 import ViewResultDialog from '@components/layout/dashboard/viewResultModal'
-import { MapPin } from 'lucide-react'
+import { MapPin, Upload } from 'lucide-react'
 import MapDialog from '@components/layout/dashboard/MapModal'
+import type { Session } from '@lib/session'
+import { useLoaderData } from '@tanstack/react-router'
+import { Input } from '@components/ui/input'
+import { XMLParser } from 'fast-xml-parser'
 
 const Text = ({ value }: { value: string }) => {
     return <div className=' text-center'>{value}</div>
@@ -44,6 +48,7 @@ const columnHelper = createColumnHelper<ResultType>()
 
 const FleetHandicapResultsTable = ({ fleetId, editable, advancedEdit, showTime }: { fleetId: string; editable: boolean; advancedEdit: boolean; showTime: boolean }) => {
     const { data: fleet } = useQuery(orpcClient.fleet.find.queryOptions({ input: { fleetId } }))
+    const session: Session = useLoaderData({ from: `__root__` })
 
     const [editModalOpen, setEditModalOpen] = useState(false)
     const [viewModalOpen, setViewModalOpen] = useState(false)
@@ -149,22 +154,94 @@ const FleetHandicapResultsTable = ({ fleetId, editable, advancedEdit, showTime }
         )
     })
 
+    const processGPX = async (text: string, resultId: string) => {
+        const parser = new XMLParser({
+            ignoreAttributes: false,
+            attributeNamePrefix: ''
+        })
+        const jsonObj = parser.parse(text)
+        const trackPoints = jsonObj.gpx.trk.trkseg.trkpt
+        console.log('trackPoints', trackPoints)
+        const rows = trackPoints.map((pt: any) => ({
+            timestamp: Math.floor(new Date(pt.time).getTime() / 1000),
+            lat: parseFloat(pt.lat),
+            lon: parseFloat(pt.lon),
+            accelerometer: { x: 0, y: 0, z: 0 },
+            gyro: { x: 0, y: 0, z: 0 }
+        }))
+
+        // check if result has an associated participant in trackable, if not, create one.
+        const result = fleet?.results?.find(r => r.id == resultId)
+        if (!result) {
+            console.error('Result not found for id', resultId)
+            return
+        }
+        if (!result.trackableParticipantId) {
+            // create a new trackable participant for this result
+        }
+
+        const url = import.meta.env.VITE_API_URL + `/api/tracker/high-res-data?deviceId=`
+
+        const res = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(rows)
+        })
+
+        if (!res.ok) {
+            console.error('Upload failed', await res.text())
+            return
+        }
+
+        console.log('Upload OK')
+    }
+
+    const entryFileUploadHandler = async (e: ChangeEvent<HTMLInputElement>, resultId: string) => {
+        const inputEl = e.target
+        const file = inputEl.files?.[0]
+        if (!file) {
+            return
+        }
+        // Reset the input so selecting the same file again will fire onChange
+        inputEl.value = ''
+        const reader = new FileReader()
+        reader.onload = async () => {
+            const text = reader.result as string
+            await processGPX(text, resultId)
+        }
+        reader.readAsText(file)
+    }
+
     const trackableColumn = columnHelper.accessor('id', {
         id: 'Trackable',
         header: 'Map',
-        cell: props =>
-            props.row.original.trackableParticipantId ? (
-                <Button
-                    onClick={() => {
-                        setMapModalOpen(true)
-                        setModalData(props.row.original)
-                    }}
-                >
-                    <MapPin />
-                </Button>
-            ) : (
-                <div className='text-center'>-</div>
-            )
+        cell: props => {
+            if (props.row.original.trackableParticipantId) {
+                return (
+                    <Button
+                        onClick={() => {
+                            setMapModalOpen(true)
+                            setModalData(props.row.original)
+                        }}
+                    >
+                        <MapPin />
+                    </Button>
+                )
+            } else if (props.row.original.userId == session.user.id) {
+                return (
+                    <div className='flex flex-row'>
+                        <Button className='mx-1 w-1/4' onClick={() => document.getElementById('entryFileUpload')!.click()}>
+                            <Upload />
+                        </Button>
+                        <Input id='entryFileUpload' type='file' accept='.gpx' onChange={e => entryFileUploadHandler(e, props.row.original.id)} className='hidden' />
+                    </div>
+                )
+            } else {
+                return <div className='text-center'>-</div>
+            }
+        }
     })
 
     if (editable) {
