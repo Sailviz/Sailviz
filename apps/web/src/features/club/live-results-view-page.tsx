@@ -101,12 +101,14 @@ const LiveResultsViewPage = ({ orgName }: { orgName: string }) => {
                                         reset={false}
                                     />
                                 </div>
-                                <div className='m-6'>
-                                    <div className='text-4xl font-extrabold text-gray-700 p-6'>
-                                        {activeRace.series?.name}: {activeRace.number} - {activeRace.fleets[0].fleetSettings.name}
+                                {activeRace.fleets.map(fleet => (
+                                    <div className='m-6'>
+                                        <div className='text-4xl font-extrabold text-gray-700 p-6'>
+                                            {activeRace.series?.name}: {activeRace.number} - {fleet.fleetSettings.name}
+                                        </div>
+                                        <LiveFleetResultsTable fleetId={fleet.id} startTime={fleet.startTime} handicap={activeRace.Type} />
                                     </div>
-                                    <LiveFleetResultsTable raceId={activeRace.id} startTime={activeRace.fleets[0].startTime} handicap={activeRace.Type} />
-                                </div>
+                                ))}
                             </div>
                         )
                     default:

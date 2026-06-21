@@ -103,15 +103,15 @@ const calculatePursuitResults = (fleet: FleetType) => {
 
 const columnHelper = createColumnHelper<ResultType>()
 
-const LiveResultsTable = ({ raceId, startTime, handicap }: { raceId: string; startTime: number; handicap: string }) => {
-    const race = useQuery(orpcClient.race.find.queryOptions({ input: { raceId: raceId }, refetchInterval: 5000 })).data
+const LiveResultsTable = ({ fleetId, startTime, handicap }: { fleetId: string; startTime: number; handicap: string }) => {
+    const fleet = useQuery(orpcClient.fleet.find.queryOptions({ input: { fleetId: fleetId }, refetchInterval: 5000 })).data
 
     const [results, setResults] = useState<ResultType[]>()
     const [maxLaps, setMaxLaps] = useState(0)
 
     useEffect(() => {
-        if (race === undefined) return
-        const res = handicap == 'Handicap' ? calculateHandicapResults(race.fleets[0]).results : calculatePursuitResults(race.fleets[0]).results
+        if (fleet === undefined) return
+        const res = handicap == 'Handicap' ? calculateHandicapResults(fleet).results : calculatePursuitResults(fleet).results
         setResults(res)
         res?.forEach(result => {
             if (result.laps.length > maxLaps) {
@@ -119,7 +119,7 @@ const LiveResultsTable = ({ raceId, startTime, handicap }: { raceId: string; sta
             }
         })
         console.log(res)
-    }, [race])
+    }, [fleet])
 
     //sets sorting to position by default
     const [sorting, setSorting] = useState<SortingState>([
