@@ -10,7 +10,7 @@ import SignOnLayout from '@components/layout/SignOn/layout'
 function Page() {
     const { seriesId } = Route.useParams()
 
-    const series = useQuery(orpcClient.series.find.queryOptions({ input: { seriesId } })).data as SeriesType
+    const series = useQuery(orpcClient.series.find.queryOptions({ input: { seriesId }, refetchInterval: 30000 })).data as SeriesType
 
     if (series == undefined) {
         return <PageSkeleton />

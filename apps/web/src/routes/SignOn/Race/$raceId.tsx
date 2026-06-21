@@ -11,7 +11,7 @@ import SignOnLayout from '@components/layout/SignOn/layout'
 function Page() {
     const { raceId } = Route.useParams()
 
-    const race = useQuery(orpcClient.race.find.queryOptions({ input: { raceId } })).data as Types.RaceType
+    const race = useQuery(orpcClient.race.find.queryOptions({ input: { raceId }, refetchInterval: 30000 })).data as Types.RaceType
 
     if (race == undefined) {
         return <PageSkeleton />
