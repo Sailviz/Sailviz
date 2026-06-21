@@ -88,12 +88,11 @@ const RaceTimer: React.FC<RaceTimerProps> = ({
             return
         }
         console.log('Starting fleet ' + nextFleet.fleetSettings.name)
-        console.log('starting at ' + new Date(nextFleet.startTime * 1000).toLocaleString())
-        console.log('current time ' + new Date(currentTime * 1000).toLocaleString())
         onFleetCountdownStart(nextFleet.id)
         const steps = race.series?.startSequence === '541go' ? getFiveStartSequence(nextFleet.id) : getThreeStartSequence(nextFleet.id)
         setSequenceSteps(steps)
-        setCurrentStep(steps[1]!) // Assuming the first step is always the initial step
+        if (race.series?.settings.maintainSequence == false) return // only continue if we are maintaining the sequence.
+        setCurrentStep(steps[1]!) // Assuming the first step is always the pre start warning
         if (pendingChanges) {
             //calculate the offset from the race start
             const now = new Date().getTime() / 1000
