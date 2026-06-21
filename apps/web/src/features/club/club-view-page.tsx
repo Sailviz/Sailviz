@@ -69,33 +69,35 @@ const ClubViewPage = ({ orgName }: { orgName: string }) => {
 
     return (
         <PageContainer scrollable={false}>
-            <Banner className='mb-4 bg-red-600' visible={showLiveBanner} onClose={() => setShowLiveBanner(false)}>
-                <BannerIcon icon={CircleAlert} />
-                <BannerTitle>View Live Race</BannerTitle>
-                <Link to={'club/' + orgName + '/LiveResults'}>
-                    <BannerAction variant='outline'>Watch Now</BannerAction>
-                </Link>
-                <BannerClose />
-            </Banner>
             <div className='flex flex-1 flex-col space-y-4'>
-                <div className='flex items-start justify-between'>
-                    <Heading title={orgName} description={'tag line'} />
-                </div>
-                <Separator />
-                <div className='flex flex-row'>
-                    <div className='flex-col w-1/2 px-4'>
-                        <Heading title={'Races Today'} description={''} />
-                        <UpcomingRacesTable orgId={club.id} viewHref={`Race/`} />
+                <Banner className='mb-4 bg-red-600' visible={showLiveBanner} onClose={() => setShowLiveBanner(false)}>
+                    <BannerIcon icon={CircleAlert} />
+                    <BannerTitle>View Live Race</BannerTitle>
+                    <Link to={'/club/' + orgName + '/LiveResults'}>
+                        <BannerAction variant='outline'>Watch Now</BannerAction>
+                    </Link>
+                    <BannerClose />
+                </Banner>
+                <div className='flex flex-1 flex-col space-y-4'>
+                    <div className='flex items-start justify-between'>
+                        <Heading title={orgName} description={'tag line'} />
                     </div>
-                </div>
-                <div className='flex flex-row'>
-                    <div className='flex-col w-1/2 px-4'>
-                        <Heading title={'Latest Races'} description={''} />
-                        <RaceTable historical={true} filters={raceTableFilters} date={new Date()} orgId={club.id} />
+                    <Separator />
+                    <div className='flex flex-row'>
+                        <div className='flex-col w-1/2 px-4'>
+                            <Heading title={'Races Today'} description={''} />
+                            <UpcomingRacesTable orgId={club.id} viewHref={`Race/`} />
+                        </div>
                     </div>
-                    <div className='flex-col w-1/2 px-4'>
-                        <Heading title={'Series'} description={''} />
-                        <SeriesTable filters={seriesTableFilters} orgId={club.id} />
+                    <div className='flex flex-row'>
+                        <div className='flex-col w-1/2 px-4'>
+                            <Heading title={'Latest Races'} description={''} />
+                            <RaceTable historical={true} filters={raceTableFilters} date={new Date()} orgId={club.id} />
+                        </div>
+                        <div className='flex-col w-1/2 px-4'>
+                            <Heading title={'Series'} description={''} />
+                            <SeriesTable filters={seriesTableFilters} orgId={club.id} />
+                        </div>
                     </div>
                 </div>
             </div>
