@@ -25,7 +25,17 @@ const Number = ({ value }: { value: number }) => {
     return <div>{value}</div>
 }
 
-const Result = ({ position, discarded, resultCode }: { position: number; discarded: boolean; resultCode: string }) => {
+const medalDelayFromSeed = (seed: string) => {
+    let hash = 0
+
+    for (let i = 0; i < seed.length; i++) {
+        hash = (hash * 31 + seed.charCodeAt(i)) >>> 0
+    }
+
+    return `${(hash % 3200) / 1000}s`
+}
+
+const Result = ({ position, discarded, resultCode, seed }: { position: number; discarded: boolean; resultCode: string; seed: string }) => {
     if (resultCode != '') {
         if (discarded) {
             return (
@@ -48,11 +58,23 @@ const Result = ({ position, discarded, resultCode }: { position: number; discard
     if (discarded) {
         return <div className='line-through text-center'>{position}</div>
     } else if (position == 1) {
-        return <div className='text-white bg-yellow-400 text-center'>{position}</div>
+        return (
+            <div className='medal-glisten medal-gold text-center text-white' style={{ animationDelay: medalDelayFromSeed(seed) }}>
+                {position}
+            </div>
+        )
     } else if (position == 2) {
-        return <div className='text-white bg-gray-600 text-center'>{position}</div>
+        return (
+            <div className='medal-glisten medal-silver text-center text-white' style={{ animationDelay: medalDelayFromSeed(seed) }}>
+                {position}
+            </div>
+        )
     } else if (position == 3) {
-        return <div className='text-white bg-yellow-800 text-center'>{position}</div>
+        return (
+            <div className='medal-glisten medal-bronze text-center text-white' style={{ animationDelay: medalDelayFromSeed(seed) }}>
+                {position}
+            </div>
+        )
     } else {
         return <div className='text-center'>{position}</div>
     }
@@ -277,7 +299,14 @@ const FleetSeriesResultsTable = ({ seriesId, fleetSettingsId }: { seriesId: stri
                         R{race.number.toString()}
                     </div>
                 ),
-                cell: props => <Result position={props.getValue()!.position} discarded={props.getValue()!.discarded} resultCode={props.getValue()!.resultCode} />,
+                cell: props => (
+                    <Result
+                        position={props.getValue()!.position}
+                        discarded={props.getValue()!.discarded}
+                        resultCode={props.getValue()!.resultCode}
+                        seed={`${props.row.original.Helm}-${props.row.original.SailNumber}-${race.number}-${index}-${props.getValue()!.position}-${props.getValue()!.resultCode}`}
+                    />
+                ),
                 enableSorting: false
             })
             newColumns.push(newColumn)

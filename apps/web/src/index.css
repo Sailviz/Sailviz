@@ -238,6 +238,58 @@
     }
 }
 
+@layer components {
+    .medal-glisten {
+        position: relative;
+        overflow: hidden;
+        isolation: isolate;
+    }
+
+    .medal-glisten::before {
+        content: '';
+        position: absolute;
+        inset: -20% -60%;
+        background: linear-gradient(115deg, transparent 40%, rgba(255, 255, 255, 0.9) 50%, transparent 60%);
+        transform: translateX(-120%) skewX(-18deg);
+        animation: medal-glisten-wipe 3.2s ease-in-out infinite;
+        animation-delay: inherit;
+        pointer-events: none;
+        mix-blend-mode: screen;
+    }
+
+    .medal-gold {
+        background: linear-gradient(135deg, #facc15 0%, #f59e0b 55%, #eab308 100%);
+    }
+
+    .medal-silver {
+        background: linear-gradient(135deg, #e5e7eb 0%, #9ca3af 55%, #6b7280 100%);
+    }
+
+    .medal-bronze {
+        background: linear-gradient(135deg, #f59e0b 0%, #b45309 55%, #92400e 100%);
+    }
+}
+
+@keyframes medal-glisten-wipe {
+    0% {
+        transform: translateX(-120%) skewX(-18deg);
+        opacity: 0;
+    }
+    15% {
+        opacity: 0.85;
+    }
+    50% {
+        opacity: 1;
+    }
+    85% {
+        opacity: 0.85;
+    }
+    100% {
+        transform: translateX(120%) skewX(-18deg);
+        opacity: 0;
+    }
+}
+
 @layer base {
     :root {
         --sidebar-background: 0 0% 98%;
