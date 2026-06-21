@@ -148,7 +148,7 @@ const LiveResultsTable = ({ raceId, startTime, handicap }: { raceId: string; sta
         }),
         columnHelper.accessor(data => data.SailNumber, {
             header: 'Sail Number',
-            cell: props => <Number {...props} />,
+            cell: props => <Text {...props} />,
             enableSorting: false
         }),
         columnHelper.accessor(data => data.laps.length, {
