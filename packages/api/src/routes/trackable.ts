@@ -74,6 +74,11 @@ export const trackable_device_positions = os.trackable.device.positions.handler(
 export const trackable_waypoint_setEvent =
   os.trackable.waypoint.setEvent.handler(async ({ input, context }) => {
     const res = trackableClient.waypoint.setEvent(input);
-    console.log("Waypoints updated for event", input.eventId);
+    return res;
+  });
+
+export const trackable_participant_positions =
+  os.trackable.participant.positions.handler(async ({ input, context }) => {
+    const res = trackableClient.participant.positions(input);
     return res;
   });

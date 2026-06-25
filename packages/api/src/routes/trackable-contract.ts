@@ -94,7 +94,19 @@ export const TrackableContract = {
     find: oc.input(z.string()).output(Types.TrackerSchema),
   },
   participant: {
-    create: oc.input(z.object({ eventId: z.string(), deviceId: z.string() })),
+    create: oc.input(
+      z.object({ eventId: z.string(), deviceId: z.string().nullable() }),
+    ),
     find: oc.input(z.object({ participantId: z.string() })),
+    positions: oc
+      .input(
+        z.object({
+          participantId: z.string(),
+          start: z.string(),
+          stop: z.string(),
+          highres: z.boolean(),
+        }),
+      )
+      .output(z.array(Types.PositionSchema)),
   },
 };

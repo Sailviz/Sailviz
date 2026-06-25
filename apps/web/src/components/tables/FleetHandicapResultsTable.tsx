@@ -2,7 +2,7 @@ import React, { useEffect, useState, type ChangeEvent } from 'react'
 import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, useReactTable, type SortingState } from '@tanstack/react-table'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@components/ui/table'
 import { Button } from '@components/ui/button'
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
 import type { ResultType } from '@sailviz/types'
 import EditResultDialog from '@components/layout/dashboard/EditResultModal'
@@ -48,7 +48,10 @@ const columnHelper = createColumnHelper<ResultType>()
 
 const FleetHandicapResultsTable = ({ fleetId, editable, advancedEdit, showTime }: { fleetId: string; editable: boolean; advancedEdit: boolean; showTime: boolean }) => {
     const { data: fleet } = useQuery(orpcClient.fleet.find.queryOptions({ input: { fleetId } }))
+    const { data: race } = useQuery(orpcClient.race.find.queryOptions({ input: { raceId: fleet?.raceId || '' }, enabled: fleet !== undefined }))
     const session: Session = useLoaderData({ from: `__root__` })
+
+    const createParticipantMutation = useMutation(orpcClient.trackable.participant.create.mutationOptions())
 
     const [editModalOpen, setEditModalOpen] = useState(false)
     const [viewModalOpen, setViewModalOpen] = useState(false)
@@ -176,11 +179,20 @@ const FleetHandicapResultsTable = ({ fleetId, editable, advancedEdit, showTime }
             console.error('Result not found for id', resultId)
             return
         }
-        if (!result.trackableParticipantId) {
+        if (!race?.trackableEventId) {
+            console.error('Race not found for fleet', fleetId)
+            return
+        }
+        let participantId = result.trackableParticipantId
+        if (participantId == null) {
+            //get the id of a tracker that hasn't been used for the event yet
+
             // create a new trackable participant for this result
+            const participant = await createParticipantMutation.mutateAsync({ eventId: race.trackableEventId, deviceId: null, name: `${result.SailNumber}  ${result.Helm}` })
+            participantId = participant.id
         }
 
-        const url = import.meta.env.VITE_API_URL + `/api/tracker/high-res-data?deviceId=`
+        const url = import.meta.env.VITE_TRACKABLE_URL + `/api/tracker/high-res-data?participantId=${participantId}`
 
         const res = await fetch(url, {
             method: 'POST',
@@ -229,7 +241,7 @@ const FleetHandicapResultsTable = ({ fleetId, editable, advancedEdit, showTime }
                         <MapPin />
                     </Button>
                 )
-            } else if (props.row.original.userId == session.user.id) {
+            } else if (props.row.original.userId == session.user.id && race?.trackableEventId != null) {
                 return (
                     <div className='flex flex-row'>
                         <Button className='mx-1 w-1/4' onClick={() => document.getElementById('entryFileUpload')!.click()}>

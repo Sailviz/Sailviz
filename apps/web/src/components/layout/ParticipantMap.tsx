@@ -14,7 +14,7 @@ export default function ParticipantMap({ raceId, windowHeight, participantId }: 
     const race = useQuery(orpcClient.race.find.queryOptions({ input: { raceId } })).data
     const event = useQuery(orpcClient.trackable.event.find.queryOptions({ input: { eventId: race!.trackableEventId! } })).data
 
-    const getParticipantPositionsMutation = useMutation(orpcClient.trackable.device.positions.mutationOptions())
+    const getParticipantPositionsMutation = useMutation(orpcClient.trackable.participant.positions.mutationOptions())
     const { data: participant } = useQuery(orpcClient.trackable.participant.find.queryOptions({ input: { participantId } }))
     const [participantData, setParticipantData] = useState<Types.Participant>({} as Types.Participant)
     const [currentPosition, setCurrentPosition] = useState<LatLngExpression | null>(null)
@@ -28,17 +28,17 @@ export default function ParticipantMap({ raceId, windowHeight, participantId }: 
         console.log(participant)
         let positions = await getParticipantPositionsMutation.mutateAsync(
             {
-                deviceId: participant.Device.id,
+                participantId: participant.id,
                 start: live ? '-10m' : dayjs(event?.startTime! * 1000).toISOString(),
                 stop: live ? dayjs().toISOString() : dayjs(event?.endTime! * 1000).toISOString(),
                 highres: false
             },
             {
                 onSuccess(positions) {
-                    console.log(`Fetched positions for ${participant.Device.id}:`, positions)
+                    console.log(`Fetched positions for ${participant.id}:`, positions)
                 },
                 onError(error) {
-                    console.log('Failed to fetch positions for ' + participant.Device.id, error)
+                    console.log('Failed to fetch positions for ' + participant.id, error)
                 }
             }
         )

@@ -62,11 +62,6 @@ import {
   user_signOnProfile_all,
   user_favouriteOrgs,
 } from "./routes/user";
-import {
-  deleteStartSequenceStep,
-  findStartSequence,
-  startSequence_update,
-} from "./routes/startSequence";
 import { createResult, deleteResult, updateResult } from "./routes/result";
 import { globalConfig_find, globalConfig_update } from "./routes/globalConfig";
 import { lap_create, lap_delete } from "./routes/lap";
@@ -80,6 +75,7 @@ import {
   trackable_event_update,
   trackable_participant_create,
   trackable_participant_find,
+  trackable_participant_positions,
   trackable_waypoint_setEvent,
 } from "./routes/trackable";
 import { orgData_update } from "./routes/organization";
@@ -216,6 +212,7 @@ export const mainRouter = os.router({
     participant: {
       create: trackable_participant_create,
       find: trackable_participant_find,
+      positions: trackable_participant_positions,
     },
     event: {
       create: trackable_event_create,

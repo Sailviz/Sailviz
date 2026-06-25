@@ -298,7 +298,7 @@ export const ORPCcontract = {
         .input(
           z.object({
             eventId: z.string(),
-            deviceId: z.string(),
+            deviceId: z.string().nullable(),
             name: z.string().optional(),
           }),
         )
@@ -306,6 +306,16 @@ export const ORPCcontract = {
       find: oc
         .input(z.object({ participantId: z.string() }))
         .output(Types.ParticipantSchema),
+      positions: oc
+        .input(
+          z.object({
+            participantId: z.string(),
+            start: z.string(),
+            stop: z.string(),
+            highres: z.boolean(),
+          }),
+        )
+        .output(z.array(Types.PositionSchema)),
     },
     event: {
       create: oc
