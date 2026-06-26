@@ -87,9 +87,22 @@ import {
 } from "./routes/buoy";
 import {
   image_createUploadUrl,
+  image_getURL,
   image_orgBanner,
   image_saveMetadata,
 } from "./routes/image";
+import {
+  flag_create,
+  flag_custom_create,
+  flag_custom_delete,
+  flag_custom_update,
+  flag_delete,
+  flag_find,
+  flag_org_all,
+  flag_org_custom,
+  flag_standard_all,
+  flag_update,
+} from "./routes/flag";
 
 const os = implement(ORPCcontract);
 
@@ -164,6 +177,7 @@ export const mainRouter = os.router({
   image: {
     createUploadUrl: image_createUploadUrl,
     saveMetadata: image_saveMetadata,
+    getURL: image_getURL,
     orgBanner: image_orgBanner,
   },
   boat: {
@@ -207,6 +221,22 @@ export const mainRouter = os.router({
     session: buoy_session,
     update: buoy_update,
     delete: buoy_delete,
+  },
+  flag: {
+    standard: {
+      all: flag_standard_all,
+      create: flag_create,
+      update: flag_update,
+      delete: flag_delete,
+      find: flag_find,
+    },
+    org: {
+      all: flag_org_all,
+      custom: flag_org_custom,
+      update: flag_custom_update,
+      delete: flag_custom_delete,
+      create: flag_custom_create,
+    },
   },
   trackable: {
     participant: {

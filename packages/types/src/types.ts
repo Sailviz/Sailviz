@@ -251,6 +251,13 @@ export const invitationSchema = z.object({
 });
 export type Invitation = z.infer<typeof invitationSchema>;
 
+export const flagSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  s3key: z.string(),
+});
+export type Flag = z.infer<typeof flagSchema>;
+
 ////////// Trackable types //////////
 
 export const WaypointSchema = z.object({

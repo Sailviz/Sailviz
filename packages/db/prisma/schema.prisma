@@ -101,6 +101,7 @@ model Organization {
   orgData           orgData?
   orgDataId         String?             @unique
   tags              Tag[]
+  customFlags       CustomFlag[]
 }
 
 model orgData {
@@ -355,4 +356,18 @@ model Image {
   category  String
   s3Key     String
   createdAt DateTime       @default(now())
+}
+
+model Flag {
+  id    String @id @unique @default(uuid())
+  name  String
+  s3key String
+}
+
+model CustomFlag {
+  id           String       @id @unique @default(uuid())
+  name         String
+  s3key        String
+  orgId        String
+  organization Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
 }

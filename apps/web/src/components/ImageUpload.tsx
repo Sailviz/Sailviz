@@ -6,7 +6,19 @@ import { orpcClient } from '@lib/orpc'
 import type { Session } from '@lib/session'
 import { useLoaderData } from '@tanstack/react-router'
 
-export function ImageUpload({ buttonText }: { buttonText: string }) {
+export enum ImageCategory {
+    Banner = 'banner',
+    Logo = 'logo',
+    flag = 'flag'
+}
+
+export enum OwnerType {
+    organization = 'organisation',
+    user = 'user',
+    public = 'public'
+}
+
+export function ImageUpload({ buttonText, category, owner, s3key }: { buttonText: string; category: ImageCategory; owner: OwnerType; s3key: (s3key: string) => void }) {
     const session: Session = useLoaderData({ from: `__root__` })
 
     const uploadUrlMutation = useMutation(orpcClient.image.createUploadUrl.mutationOptions())
@@ -22,8 +34,8 @@ export function ImageUpload({ buttonText }: { buttonText: string }) {
         inputEl.value = ''
 
         const uploadUrl = await uploadUrlMutation.mutateAsync({
-            ownerType: 'organisation',
-            category: 'banner',
+            ownerType: owner,
+            category: category,
             ownerId: session.session.activeOrganizationId ?? null
         })
         console.log(uploadUrl)
@@ -40,10 +52,12 @@ export function ImageUpload({ buttonText }: { buttonText: string }) {
         await saveMetadataMutation.mutateAsync({
             id: uploadUrl.id,
             s3key: uploadUrl.key,
-            ownerType: 'organisation',
-            category: 'banner',
+            ownerType: owner,
+            category: category,
             ownerId: session.session.activeOrganizationId
         })
+
+        s3key(uploadUrl.key)
     }
 
     return (

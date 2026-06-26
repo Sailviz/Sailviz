@@ -6,6 +6,7 @@ import { SeriesIcon } from '@components/icons/series-icon'
 import { SettingsIcon } from '@components/icons/settings-icon'
 import { SignOnIcon } from '@components/icons/sign-on'
 import { SignOutIcon } from '@components/icons/sign-out'
+import { Flag } from 'lucide-react'
 
 //Info: The following data is used for the sidebar navigation and Cmd K bar.
 export const navCollections: NavCollection[] = [
@@ -91,6 +92,14 @@ export const navCollections: NavCollection[] = [
                         items: []
                     },
                     {
+                        title: 'Flags',
+                        shortcut: ['l', 'l'],
+                        url: '/dashboard/Flags',
+                        icon: <Flag />,
+                        isActive: false,
+                        items: []
+                    },
+                    {
                         title: 'Hardware',
                         shortcut: ['l', 'l'],
                         url: '/dashboard/Hardware',
@@ -171,6 +180,14 @@ export const AdminNavCollections: NavCollection[] = [
                 title: 'Boats',
                 url: '/admin/boats',
                 icon: <RaceIcon />,
+                shortcut: ['p', 'p'],
+                isActive: false,
+                items: [] // No child items
+            },
+            {
+                title: 'Flags',
+                url: '/admin/flags',
+                icon: <Flag />,
                 shortcut: ['p', 'p'],
                 isActive: false,
                 items: [] // No child items

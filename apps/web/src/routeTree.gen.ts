@@ -20,10 +20,12 @@ import { Route as LogoutIndexRouteImport } from './routes/Logout/index'
 import { Route as DemoIndexRouteImport } from './routes/Demo/index'
 import { Route as DashboardIndexRouteImport } from './routes/Dashboard/index'
 import { Route as AutoLoginUUIDRouteImport } from './routes/autoLogin/$UUID'
+import { Route as AdminFlagsRouteImport } from './routes/admin/flags'
 import { Route as AdminBoatsRouteImport } from './routes/admin/boats'
 import { Route as PRaceRaceIdRouteImport } from './routes/PRace/$raceId'
 import { Route as HRaceRaceIdRouteImport } from './routes/HRace/$raceId'
 import { Route as DashboardHomeRouteImport } from './routes/Dashboard/home'
+import { Route as DashboardFlagsRouteImport } from './routes/Dashboard/flags'
 import { Route as CastControlClubIdRouteImport } from './routes/CastControl/$clubId'
 import { Route as CastClubIdRouteImport } from './routes/Cast/$clubId'
 import { Route as ClubOrgNameIndexRouteImport } from './routes/club/$orgName/index'
@@ -115,6 +117,11 @@ const AutoLoginUUIDRoute = AutoLoginUUIDRouteImport.update({
   path: '/autoLogin/$UUID',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminFlagsRoute = AdminFlagsRouteImport.update({
+  id: '/admin/flags',
+  path: '/admin/flags',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminBoatsRoute = AdminBoatsRouteImport.update({
   id: '/admin/boats',
   path: '/admin/boats',
@@ -133,6 +140,11 @@ const HRaceRaceIdRoute = HRaceRaceIdRouteImport.update({
 const DashboardHomeRoute = DashboardHomeRouteImport.update({
   id: '/Dashboard/home',
   path: '/Dashboard/home',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardFlagsRoute = DashboardFlagsRouteImport.update({
+  id: '/Dashboard/flags',
+  path: '/Dashboard/flags',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CastControlClubIdRoute = CastControlClubIdRouteImport.update({
@@ -325,10 +337,12 @@ export interface FileRoutesByFullPath {
   '/Login': typeof LoginRoute
   '/Cast/$clubId': typeof CastClubIdRoute
   '/CastControl/$clubId': typeof CastControlClubIdRoute
+  '/Dashboard/flags': typeof DashboardFlagsRoute
   '/Dashboard/home': typeof DashboardHomeRoute
   '/HRace/$raceId': typeof HRaceRaceIdRoute
   '/PRace/$raceId': typeof PRaceRaceIdRoute
   '/admin/boats': typeof AdminBoatsRoute
+  '/admin/flags': typeof AdminFlagsRoute
   '/autoLogin/$UUID': typeof AutoLoginUUIDRoute
   '/Dashboard': typeof DashboardIndexRoute
   '/Demo': typeof DemoIndexRoute
@@ -377,10 +391,12 @@ export interface FileRoutesByTo {
   '/Login': typeof LoginRoute
   '/Cast/$clubId': typeof CastClubIdRoute
   '/CastControl/$clubId': typeof CastControlClubIdRoute
+  '/Dashboard/flags': typeof DashboardFlagsRoute
   '/Dashboard/home': typeof DashboardHomeRoute
   '/HRace/$raceId': typeof HRaceRaceIdRoute
   '/PRace/$raceId': typeof PRaceRaceIdRoute
   '/admin/boats': typeof AdminBoatsRoute
+  '/admin/flags': typeof AdminFlagsRoute
   '/autoLogin/$UUID': typeof AutoLoginUUIDRoute
   '/Dashboard': typeof DashboardIndexRoute
   '/Demo': typeof DemoIndexRoute
@@ -430,10 +446,12 @@ export interface FileRoutesById {
   '/Login': typeof LoginRoute
   '/Cast/$clubId': typeof CastClubIdRoute
   '/CastControl/$clubId': typeof CastControlClubIdRoute
+  '/Dashboard/flags': typeof DashboardFlagsRoute
   '/Dashboard/home': typeof DashboardHomeRoute
   '/HRace/$raceId': typeof HRaceRaceIdRoute
   '/PRace/$raceId': typeof PRaceRaceIdRoute
   '/admin/boats': typeof AdminBoatsRoute
+  '/admin/flags': typeof AdminFlagsRoute
   '/autoLogin/$UUID': typeof AutoLoginUUIDRoute
   '/Dashboard/': typeof DashboardIndexRoute
   '/Demo/': typeof DemoIndexRoute
@@ -484,10 +502,12 @@ export interface FileRouteTypes {
     | '/Login'
     | '/Cast/$clubId'
     | '/CastControl/$clubId'
+    | '/Dashboard/flags'
     | '/Dashboard/home'
     | '/HRace/$raceId'
     | '/PRace/$raceId'
     | '/admin/boats'
+    | '/admin/flags'
     | '/autoLogin/$UUID'
     | '/Dashboard'
     | '/Demo'
@@ -536,10 +556,12 @@ export interface FileRouteTypes {
     | '/Login'
     | '/Cast/$clubId'
     | '/CastControl/$clubId'
+    | '/Dashboard/flags'
     | '/Dashboard/home'
     | '/HRace/$raceId'
     | '/PRace/$raceId'
     | '/admin/boats'
+    | '/admin/flags'
     | '/autoLogin/$UUID'
     | '/Dashboard'
     | '/Demo'
@@ -588,10 +610,12 @@ export interface FileRouteTypes {
     | '/Login'
     | '/Cast/$clubId'
     | '/CastControl/$clubId'
+    | '/Dashboard/flags'
     | '/Dashboard/home'
     | '/HRace/$raceId'
     | '/PRace/$raceId'
     | '/admin/boats'
+    | '/admin/flags'
     | '/autoLogin/$UUID'
     | '/Dashboard/'
     | '/Demo/'
@@ -641,10 +665,12 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   CastClubIdRoute: typeof CastClubIdRoute
   CastControlClubIdRoute: typeof CastControlClubIdRoute
+  DashboardFlagsRoute: typeof DashboardFlagsRoute
   DashboardHomeRoute: typeof DashboardHomeRoute
   HRaceRaceIdRoute: typeof HRaceRaceIdRoute
   PRaceRaceIdRoute: typeof PRaceRaceIdRoute
   AdminBoatsRoute: typeof AdminBoatsRoute
+  AdminFlagsRoute: typeof AdminFlagsRoute
   AutoLoginUUIDRoute: typeof AutoLoginUUIDRoute
   DashboardIndexRoute: typeof DashboardIndexRoute
   DemoIndexRoute: typeof DemoIndexRoute
@@ -768,6 +794,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AutoLoginUUIDRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/flags': {
+      id: '/admin/flags'
+      path: '/admin/flags'
+      fullPath: '/admin/flags'
+      preLoaderRoute: typeof AdminFlagsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/boats': {
       id: '/admin/boats'
       path: '/admin/boats'
@@ -794,6 +827,13 @@ declare module '@tanstack/react-router' {
       path: '/Dashboard/home'
       fullPath: '/Dashboard/home'
       preLoaderRoute: typeof DashboardHomeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/Dashboard/flags': {
+      id: '/Dashboard/flags'
+      path: '/Dashboard/flags'
+      fullPath: '/Dashboard/flags'
+      preLoaderRoute: typeof DashboardFlagsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/CastControl/$clubId': {
@@ -1049,10 +1089,12 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   CastClubIdRoute: CastClubIdRoute,
   CastControlClubIdRoute: CastControlClubIdRoute,
+  DashboardFlagsRoute: DashboardFlagsRoute,
   DashboardHomeRoute: DashboardHomeRoute,
   HRaceRaceIdRoute: HRaceRaceIdRoute,
   PRaceRaceIdRoute: PRaceRaceIdRoute,
   AdminBoatsRoute: AdminBoatsRoute,
+  AdminFlagsRoute: AdminFlagsRoute,
   AutoLoginUUIDRoute: AutoLoginUUIDRoute,
   DashboardIndexRoute: DashboardIndexRoute,
   DemoIndexRoute: DemoIndexRoute,

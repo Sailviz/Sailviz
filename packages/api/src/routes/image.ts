@@ -76,8 +76,15 @@ export const image_orgBanner = os.image.orgBanner.handler(async ({ input }) => {
   const presignedUrl = await minioClient.presignedGetObject(
     config.MINIO_BUCKET_SAILVIZ,
     image.s3Key,
-    60 * 60, // 1 hour
   );
 
+  return presignedUrl;
+});
+
+export const image_getURL = os.image.getURL.handler(async ({ input }) => {
+  const presignedUrl = await minioClient.presignedGetObject(
+    config.MINIO_BUCKET_SAILVIZ,
+    input.s3key,
+  );
   return presignedUrl;
 });

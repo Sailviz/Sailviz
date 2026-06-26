@@ -134,6 +134,13 @@ export const ORPCcontract = {
         }),
       )
       .output(z.any()),
+    getURL: oc
+      .input(
+        z.object({
+          s3key: z.string(),
+        }),
+      )
+      .output(z.string()),
     orgBanner: oc
       .input(z.object({ orgId: z.string() }))
       .output(z.string().nullable()),
@@ -291,6 +298,42 @@ export const ORPCcontract = {
   globalConfig: {
     find: oc.output(Types.GlobalConfigSchema),
     update: oc.input(Types.GlobalConfigSchema).output(Types.GlobalConfigSchema),
+  },
+  flag: {
+    standard: {
+      all: oc.output(z.array(Types.flagSchema)),
+      find: oc.input(z.object({ flagId: z.string() })).output(Types.flagSchema),
+      update: oc.input(Types.flagSchema).output(Types.flagSchema),
+      create: oc
+        .input(
+          z.object({
+            name: z.string(),
+            s3key: z.string(),
+          }),
+        )
+        .output(Types.flagSchema),
+      delete: oc
+        .input(z.object({ flagId: z.string() }))
+        .output(Types.flagSchema),
+    },
+    org: {
+      custom: oc.output(z.array(Types.flagSchema)),
+      all: oc
+        .input(z.object({ orgId: z.string() }))
+        .output(z.array(Types.flagSchema)),
+      update: oc.input(Types.flagSchema).output(Types.flagSchema),
+      delete: oc
+        .input(z.object({ flagId: z.string() }))
+        .output(Types.flagSchema),
+      create: oc
+        .input(
+          z.object({
+            name: z.string(),
+            s3key: z.string(),
+          }),
+        )
+        .output(Types.flagSchema),
+    },
   },
   trackable: {
     participant: {
