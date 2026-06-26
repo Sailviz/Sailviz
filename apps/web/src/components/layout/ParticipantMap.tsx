@@ -7,6 +7,7 @@ import { useMutation, useQuery } from '@tanstack/react-query'
 import L from 'leaflet'
 import * as Types from '@sailviz/types'
 import dayjs from 'dayjs'
+import { Switch } from '@components/ui/switch'
 
 export default function ParticipantMap({ raceId, windowHeight, participantId }: { raceId: string; windowHeight: number; participantId: string }) {
     const ZOOM_LEVEL = 9
@@ -23,6 +24,8 @@ export default function ParticipantMap({ raceId, windowHeight, participantId }: 
     const [scrubIndex, setScrubIndex] = useState(0) // Current index for scrubbing
     const [boundsSet, setBoundsSet] = useState(false) // Track if bounds have been set
 
+    const [highres, setHighres] = useState(true)
+
     async function fetchParticipantPositions(participant: Types.Participant, live: boolean): Promise<Types.Participant> {
         console.log(event)
         console.log(participant)
@@ -31,7 +34,7 @@ export default function ParticipantMap({ raceId, windowHeight, participantId }: 
                 participantId: participant.id,
                 start: live ? '-10m' : dayjs(event?.startTime! * 1000).toISOString(),
                 stop: live ? dayjs().toISOString() : dayjs(event?.endTime! * 1000).toISOString(),
-                highres: false
+                highres: highres
             },
             {
                 onSuccess(positions) {
@@ -61,7 +64,7 @@ export default function ParticipantMap({ raceId, windowHeight, participantId }: 
             // initial fetch and then interval
             fetchAll()
         }
-    }, [event, participant])
+    }, [event, participant, highres])
 
     // ref to the outer wrapper so fullscreen can be toggled on that element
     const wrapperRef = useRef<HTMLDivElement | null>(null)
@@ -275,6 +278,7 @@ export default function ParticipantMap({ raceId, windowHeight, participantId }: 
                 <FitBounds buoys={race?.courseBuoys?.map(m => m.buoy)} />
             </MapContainer>
             <div className='controls-container' style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', padding: '10px' }}>
+                <Switch className='data-[state=checked]:bg-green-500 data-[state=unchecked]:bg-gray-500' checked={highres} onCheckedChange={setHighres} />
                 <button onClick={() => setIsPlaying(!isPlaying)} className='control-button play-pause' style={{ fontSize: '1.5rem', padding: '10px' }}>
                     {isPlaying ? '⏸' : '▶️'}
                 </button>

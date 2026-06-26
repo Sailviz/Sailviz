@@ -2,7 +2,7 @@ import React, { useEffect, useState, type ChangeEvent } from 'react'
 import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, useReactTable, type SortingState } from '@tanstack/react-table'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@components/ui/table'
 import { Button } from '@components/ui/button'
-import { useMutation, useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
 import type { ResultType } from '@sailviz/types'
 import EditResultDialog from '@components/layout/dashboard/EditResultModal'
@@ -51,7 +51,9 @@ const FleetHandicapResultsTable = ({ fleetId, editable, advancedEdit, showTime }
     const { data: race } = useQuery(orpcClient.race.find.queryOptions({ input: { raceId: fleet?.raceId || '' }, enabled: fleet !== undefined }))
     const session: Session = useLoaderData({ from: `__root__` })
 
+    const queryClient = useQueryClient()
     const createParticipantMutation = useMutation(orpcClient.trackable.participant.create.mutationOptions())
+    const updateResultMutation = useMutation(orpcClient.result.update.mutationOptions())
 
     const [editModalOpen, setEditModalOpen] = useState(false)
     const [viewModalOpen, setViewModalOpen] = useState(false)
@@ -166,7 +168,7 @@ const FleetHandicapResultsTable = ({ fleetId, editable, advancedEdit, showTime }
         const trackPoints = jsonObj.gpx.trk.trkseg.trkpt
         console.log('trackPoints', trackPoints)
         const rows = trackPoints.map((pt: any) => ({
-            timestamp: Math.floor(new Date(pt.time).getTime() / 1000),
+            timestamp: Math.floor(new Date(pt.time).getTime()),
             lat: parseFloat(pt.lat),
             lon: parseFloat(pt.lon),
             accelerometer: { x: 0, y: 0, z: 0 },
@@ -190,6 +192,8 @@ const FleetHandicapResultsTable = ({ fleetId, editable, advancedEdit, showTime }
             // create a new trackable participant for this result
             const participant = await createParticipantMutation.mutateAsync({ eventId: race.trackableEventId, deviceId: null, name: `${result.SailNumber}  ${result.Helm}` })
             participantId = participant.id
+
+            await updateResultMutation.mutateAsync({ ...result, trackableParticipantId: participantId })
         }
 
         const url = import.meta.env.VITE_TRACKABLE_URL + `/api/tracker/high-res-data?participantId=${participantId}`
@@ -208,6 +212,7 @@ const FleetHandicapResultsTable = ({ fleetId, editable, advancedEdit, showTime }
         }
 
         console.log('Upload OK')
+        queryClient.invalidateQueries({ queryKey: orpcClient.fleet.find.queryKey({ input: { fleetId } }) })
     }
 
     const entryFileUploadHandler = async (e: ChangeEvent<HTMLInputElement>, resultId: string) => {

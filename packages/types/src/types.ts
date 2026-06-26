@@ -312,7 +312,7 @@ export const ParticipantSchema = z.object({
   name: z.string().nullable(),
   data: z.any(),
   isDeleted: z.boolean(),
-  Device: DeviceSchema,
+  Device: DeviceSchema.nullable(),
   position: z.array(PositionSchema).optional(),
 });
 export type Participant = z.infer<typeof ParticipantSchema>;
