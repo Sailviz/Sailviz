@@ -103,7 +103,13 @@ export async function findRace(id: string) {
 
       fleets: {
         include: {
-          fleetSettings: true,
+          fleetSettings: {
+            include: {
+              boats: true,
+              classFlag: true,
+              preparatoryFlag: true,
+            },
+          },
           results: {
             where: {
               isDeleted: false,
@@ -298,7 +304,13 @@ export const updateRace = os.race.update.handler(async ({ input }) => {
       },
       fleets: {
         include: {
-          fleetSettings: true,
+          fleetSettings: {
+            include: {
+              boats: true,
+              classFlag: true,
+              preparatoryFlag: true,
+            },
+          },
         },
       },
     },

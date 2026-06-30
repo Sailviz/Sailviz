@@ -41,8 +41,8 @@ function Page() {
     const { sendMessage } = useWebSocket(ws_server)
     const { sendMessage: sendTrackableMessage } = useWebSocket(trackable_ws_server)
 
-    const [flagStatus, setFlagStatus] = useState<boolean[]>([false, false])
-    const [nextFlagStatus, setNextFlagStatus] = useState<boolean[]>([false, false])
+    const [flagStatus, setFlagStatus] = useState<FlagStatusType[]>([])
+    const [nextFlagStatus, setNextFlagStatus] = useState<FlagStatusType[]>([])
     const [retireModal, setRetireModal] = useState(false)
     const [flagModal, setFlagModal] = useState(false)
 
@@ -98,8 +98,8 @@ function Page() {
 
         setFlagModal(true)
         //set flag status to false
-        setFlagStatus([false, false])
-        setNextFlagStatus([true, false])
+        setFlagStatus([])
+        setNextFlagStatus([])
 
         //modify racestate to running for all fleets
         setRaceState(raceStateType.running)
@@ -109,11 +109,10 @@ function Page() {
         sound!.play()
     }
 
-    const handleFlagChange = (flags: FlagStatusType[], next?: FlagStatusType[]) => {
-        console.log(`Flag changed to: ${flags.map(flag => `${flag.flag}:${flag.status}`).join(', ')}`)
-        setFlagStatus([flags[0]!.status, flags[1]!.status])
-        if (next) {
-            setNextFlagStatus([next[0]!.status, next[1]!.status])
+    const handleFlagChange = (currentClass: FlagStatusType, currentPrep: FlagStatusType, nextClass?: FlagStatusType, nextPrep?: FlagStatusType) => {
+        setFlagStatus([currentClass, currentPrep])
+        if (nextClass && nextPrep) {
+            setNextFlagStatus([nextClass, nextPrep])
         }
     }
 

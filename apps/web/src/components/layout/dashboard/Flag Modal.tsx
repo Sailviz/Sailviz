@@ -1,8 +1,7 @@
 import { Dialog, DialogContent, DialogHeader } from '@components/ui/dialog'
+import { orpcClient } from '@lib/orpc'
 import * as Types from '@sailviz/types'
-const imageStyle = {
-    border: '2px solid #000000'
-}
+import { useQuery } from '@tanstack/react-query'
 
 export default function FlagDialog({
     isOpen,
@@ -13,12 +12,28 @@ export default function FlagDialog({
     onClose
 }: {
     isOpen: boolean
-    currentFlagStatus: boolean[]
-    nextFlagStatus: boolean[]
+    currentFlagStatus: FlagStatusType[]
+    nextFlagStatus: FlagStatusType[]
     fleetTime: number
     countdownFleet: Types.FleetType | null
     onClose: () => void
 }) {
+    const currentClassFlagUrlQuery = useQuery({
+        ...orpcClient.image.getURL.queryOptions({ input: { s3key: currentFlagStatus[0]?.flag.s3key }, enabled: currentFlagStatus[1] !== undefined })
+    })
+
+    const currentPrepFlagUrlQuery = useQuery({
+        ...orpcClient.image.getURL.queryOptions({ input: { s3key: currentFlagStatus[1]?.flag.s3key }, enabled: currentFlagStatus[1] !== undefined })
+    })
+
+    const nextClassFlagUrlQuery = useQuery({
+        ...orpcClient.image.getURL.queryOptions({ input: { s3key: nextFlagStatus[0]?.flag.s3key }, enabled: nextFlagStatus[0] !== undefined })
+    })
+
+    const nextPrepFlagUrlQuery = useQuery({
+        ...orpcClient.image.getURL.queryOptions({ input: { s3key: nextFlagStatus[1]?.flag.s3key }, enabled: nextFlagStatus[1] !== undefined })
+    })
+
     return (
         <Dialog
             open={isOpen}
@@ -50,23 +65,23 @@ export default function FlagDialog({
 
                 <div className='flex flex-row w-full h-full divide-dashed'>
                     <div className='flex w-full flex-row h-full justify-evenly'>
-                        {currentFlagStatus[0] ? (
+                        {currentFlagStatus[0]?.status ? (
                             <div className='h-full flex flex-col justify-start'>
-                                <img src='/H_Flag.png' width={200} height={200} alt='flag1' style={imageStyle} />
+                                {currentClassFlagUrlQuery.data && <img src={currentClassFlagUrlQuery.data} alt='' width={200} height={200} className='border-2'></img>}
                             </div>
                         ) : (
                             <div className='h-full flex flex-col justify-end'>
-                                <img src='/H_Flag.png' width={200} height={200} alt='flag1' style={imageStyle} />
+                                {currentClassFlagUrlQuery.data && <img src={currentClassFlagUrlQuery.data} alt='' width={200} height={200} className='border-2'></img>}
                             </div>
                         )}
 
-                        {currentFlagStatus[1] ? (
+                        {currentFlagStatus[1]?.status ? (
                             <div className='h-full flex flex-col justify-start'>
-                                <img src='/P_Flag.png' width={200} height={200} alt='flag1' style={imageStyle} />
+                                {currentPrepFlagUrlQuery.data && <img src={currentPrepFlagUrlQuery.data} alt='' width={200} height={200} className='border-2'></img>}
                             </div>
                         ) : (
                             <div className='h-full flex flex-col justify-end'>
-                                <img src='/P_Flag.png' width={200} height={200} alt='flag1' style={imageStyle} />
+                                {currentPrepFlagUrlQuery.data && <img src={currentPrepFlagUrlQuery.data} alt='' width={200} height={200} className='border-2'></img>}
                             </div>
                         )}
                     </div>
@@ -81,23 +96,23 @@ export default function FlagDialog({
                         </div>
                     </div>
                     <div className='flex w-full flex-row h-full justify-evenly'>
-                        {nextFlagStatus[0] ? (
+                        {nextFlagStatus[0]?.status ? (
                             <div className='h-full flex flex-col justify-start'>
-                                <img src='/H_Flag.png' width={200} height={200} alt='flag1' style={imageStyle} />
+                                {nextClassFlagUrlQuery.data && <img src={nextClassFlagUrlQuery.data} alt='' width={200} height={200} className='border-2'></img>}
                             </div>
                         ) : (
                             <div className='h-full flex flex-col justify-end'>
-                                <img src='/H_Flag.png' width={200} height={200} alt='flag1' style={imageStyle} />
+                                {nextClassFlagUrlQuery.data && <img src={nextClassFlagUrlQuery.data} alt='' width={200} height={200} className='border-2'></img>}
                             </div>
                         )}
 
-                        {nextFlagStatus[1] ? (
+                        {nextFlagStatus[1]?.status ? (
                             <div className='h-full flex flex-col justify-start'>
-                                <img src='/P_Flag.png' width={200} height={200} alt='flag1' style={imageStyle} />
+                                {nextPrepFlagUrlQuery.data && <img src={nextPrepFlagUrlQuery.data} alt='' width={200} height={200} className='border-2'></img>}
                             </div>
                         ) : (
                             <div className='h-full flex flex-col justify-end'>
-                                <img src='/P_Flag.png' width={200} height={200} alt='flag1' style={imageStyle} />
+                                {nextPrepFlagUrlQuery.data && <img src={nextPrepFlagUrlQuery.data} alt='' width={200} height={200} className='border-2'></img>}
                             </div>
                         )}
                     </div>

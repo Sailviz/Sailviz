@@ -14,7 +14,7 @@ enum raceStateType {
 interface RaceTimerProps {
     startTime?: number // Unix timestamp when race starts
     race: Types.RaceType
-    onFlagChange: (flag: FlagStatusType[], next: FlagStatusType[]) => void
+    onFlagChange: (currentClass: FlagStatusType, currentPrep: FlagStatusType, nextClass?: FlagStatusType, nextPrep?: FlagStatusType) => void
     onHoot: (time: number) => void
     onSequenceEnd: () => void
     onWarning: () => void
@@ -48,7 +48,9 @@ const RaceTimer: React.FC<RaceTimerProps> = ({
     race.fleets.sort((a, b) => a.startTime - b.startTime)
 
     const [sequenceSteps, setSequenceSteps] = useState<StartSequenceStep[]>(
-        race.series?.startSequence === '541go' ? getFiveStartSequence(race.fleets[0].id) : getThreeStartSequence(race.fleets[0].id)
+        race.series?.startSequence === '541go'
+            ? getFiveStartSequence(race.fleets[0].id, race.fleets[0].fleetSettings.classFlag, race.fleets[0].fleetSettings.preparatoryFlag)
+            : getThreeStartSequence(race.fleets[0].id, race.fleets[0].fleetSettings.classFlag, race.fleets[0].fleetSettings.preparatoryFlag)
     )
 
     // Initialize timeLeft with the largest step time
@@ -89,10 +91,14 @@ const RaceTimer: React.FC<RaceTimerProps> = ({
         }
         console.log('Starting fleet ' + nextFleet.fleetSettings.name)
         onFleetCountdownStart(nextFleet.id)
-        const steps = race.series?.startSequence === '541go' ? getFiveStartSequence(nextFleet.id) : getThreeStartSequence(nextFleet.id)
+        const steps =
+            race.series?.startSequence === '541go'
+                ? getFiveStartSequence(nextFleet.id, nextFleet.fleetSettings.classFlag, nextFleet.fleetSettings.preparatoryFlag)
+                : getThreeStartSequence(nextFleet.id, nextFleet.fleetSettings.classFlag, nextFleet.fleetSettings.preparatoryFlag)
         setSequenceSteps(steps)
         if (race.series?.settings.maintainSequence == false) return // only continue if we are maintaining the sequence.
         setCurrentStep(steps[1]!) // Assuming the first step is always the pre start warning
+        onFlagChange(steps[0].classFlagStatus, steps[0].prepFlagStatus, steps[1].classFlagStatus, steps[1].prepFlagStatus)
         if (pendingChanges) {
             //calculate the offset from the race start
             const now = new Date().getTime() / 1000
@@ -141,7 +147,7 @@ const RaceTimer: React.FC<RaceTimerProps> = ({
                 }
                 const nextStep = sequenceSteps.find(step => step.order == currentStep.order + 1)
                 if (nextStep != undefined) {
-                    onFlagChange(currentStep.flagStatus, nextStep.flagStatus)
+                    onFlagChange(currentStep.classFlagStatus, currentStep.prepFlagStatus, nextStep.classFlagStatus, nextStep.prepFlagStatus)
                     console.log(`Current step: ${JSON.stringify(currentStep)}, Next step: ${nextStep ? JSON.stringify(nextStep) : 'None'}`)
                     setCurrentStep(nextStep)
                     setWarningCompleted(false)
@@ -156,7 +162,10 @@ const RaceTimer: React.FC<RaceTimerProps> = ({
                         return
                     }
                     console.log('Starting fleet ' + nextFleet.fleetSettings.name)
-                    const newSequenceSteps = race.series?.startSequence === '541go' ? getFiveStartSequence(nextFleet.id) : getThreeStartSequence(nextFleet.id)
+                    const newSequenceSteps =
+                        race.series?.startSequence === '541go'
+                            ? getFiveStartSequence(nextFleet.id, nextFleet.fleetSettings.classFlag, nextFleet.fleetSettings.preparatoryFlag)
+                            : getThreeStartSequence(nextFleet.id, nextFleet.fleetSettings.classFlag, nextFleet.fleetSettings.preparatoryFlag)
                     console.log('New sequence steps', newSequenceSteps)
                     setSequenceSteps(newSequenceSteps)
                     const nextStep = newSequenceSteps[2]

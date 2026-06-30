@@ -57,11 +57,12 @@ type StartSequenceStep = {
     hoot: number
     order: number // Order of the step in the sequence
     fleetStart: string
-    flagStatus: FlagStatusType[]
+    classFlagStatus: FlagStatusType
+    prepFlagStatus: FlagStatusType
 }
 
 type FlagStatusType = {
-    flag: string
+    flag: Types.Flag
     status: boolean
 }
 

@@ -233,10 +233,10 @@ model FleetSettings {
   fleets            Fleet[]
   series            Series  @relation(fields: [seriesId], references: [id], onDelete: Cascade)
   boats             Boat[]  @relation("BoatToFleetSettings")
-  preparatoryFlag   Flag?   @relation("FleetPreparatoryFlag", fields: [preparatoryFlagId], references: [id])
-  preparatoryFlagId String?
-  classFlag         Flag?   @relation("FleetClassFlag", fields: [classFlagId], references: [id])
-  classFlagId       String?
+  preparatoryFlag   Flag    @relation("FleetPreparatoryFlag", fields: [preparatoryFlagId], references: [id])
+  preparatoryFlagId String
+  classFlag         Flag    @relation("FleetClassFlag", fields: [classFlagId], references: [id])
+  classFlagId       String
 }
 
 model Fleet {

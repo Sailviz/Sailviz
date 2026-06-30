@@ -63,8 +63,8 @@ export const FleetSettingsSchema = z.object({
   name: z.string(),
   start: z.number(),
   boats: z.array(z.any()),
-  classFlag: flagSchema.nullable(),
-  preparatoryFlag: flagSchema.nullable(),
+  classFlag: flagSchema,
+  preparatoryFlag: flagSchema,
 });
 export type FleetSettingsType = z.infer<typeof FleetSettingsSchema>;
 

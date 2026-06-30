@@ -20,8 +20,8 @@ export default function EditFleetSettingsDialog({ fleetSettings, seriesId }: { f
     const [options, setOptions] = useState([{ label: '', value: {} as Types.BoatType }])
 
     const [flagOptions, setFlagOptions] = useState([{ label: '', value: {} as Types.Flag }])
-    const [selectedClassFlag, setSelectedClassFlag] = useState({ label: '', value: {} as Types.Flag | null })
-    const [selectedPreparatoryFlag, setSelectedPreparatoryFlag] = useState({ label: '', value: {} as Types.Flag | null })
+    const [selectedClassFlag, setSelectedClassFlag] = useState({ label: '', value: {} as Types.Flag })
+    const [selectedPreparatoryFlag, setSelectedPreparatoryFlag] = useState({ label: '', value: {} as Types.Flag })
 
     const [open, setOpen] = useState(false)
 
@@ -40,8 +40,8 @@ export default function EditFleetSettingsDialog({ fleetSettings, seriesId }: { f
         setName(fleetSettings.name)
         setStart(fleetSettings.start)
         setSelectedBoats(fleetSettings.boats.map(x => ({ value: x, label: x.name })))
-        setSelectedClassFlag({ value: fleetSettings.classFlag, label: fleetSettings.classFlag?.name || '' })
-        setSelectedPreparatoryFlag({ value: fleetSettings.preparatoryFlag, label: fleetSettings.preparatoryFlag?.name || '' })
+        setSelectedClassFlag({ value: fleetSettings.classFlag, label: fleetSettings.classFlag.name })
+        setSelectedPreparatoryFlag({ value: fleetSettings.preparatoryFlag, label: fleetSettings.preparatoryFlag.name })
     }, [fleetSettings])
 
     useEffect(() => {

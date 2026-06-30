@@ -101,11 +101,11 @@ const FleetTable = ({ seriesId }: { seriesId: string }) => {
                 cell: info => info.getValue()
             }),
             columnHelper.accessor(fleetSettings => fleetSettings.classFlag?.s3key, {
-                id: 'classFlag',
+                id: 'Class Flag',
                 cell: props => <Flag s3key={props.getValue()} />
             }),
             columnHelper.accessor(fleetSettings => fleetSettings.preparatoryFlag?.s3key, {
-                id: 'prnparatoryFlag',
+                id: 'Prep Flag',
                 cell: props => <Flag s3key={props.getValue()} />
             }),
             columnHelper.accessor('boats', {

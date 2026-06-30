@@ -22,7 +22,13 @@ export async function findFleet(id: string) {
           boat: true,
         },
       },
-      fleetSettings: true,
+      fleetSettings: {
+        include: {
+          boats: true,
+          classFlag: true,
+          preparatoryFlag: true,
+        },
+      },
     },
   });
   return result;
@@ -55,7 +61,13 @@ export const fleet_update = os.fleet.update.handler(async ({ input }) => {
       recalls: input.recalls,
     },
     include: {
-      fleetSettings: true,
+      fleetSettings: {
+        include: {
+          boats: true,
+          classFlag: true,
+          preparatoryFlag: true,
+        },
+      },
     },
   });
   if (updatedFleet) {

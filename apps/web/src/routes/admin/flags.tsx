@@ -22,7 +22,7 @@ function Page() {
                 <div className='flex flex-row p-6 justify-around'>
                     <CreateFlagDialog custom={false} />
                 </div>
-                <StandardFlagTable />
+                <StandardFlagTable allowEdit={true} />
             </div>
         </div>
     )

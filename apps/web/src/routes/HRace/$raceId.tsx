@@ -65,8 +65,8 @@ function Page() {
     const [recallModal, setRecallModal] = useState(false)
     const [selectMode, setSelectMode] = useState<raceModeType>(raceModeType.None)
     const [flagModal, setFlagModal] = useState(false)
-    const [flagStatus, setFlagStatus] = useState<boolean[]>([false, false])
-    const [nextFlagStatus, setNextFlagStatus] = useState<boolean[]>([false, false])
+    const [flagStatus, setFlagStatus] = useState<FlagStatusType[]>([])
+    const [nextFlagStatus, setNextFlagStatus] = useState<FlagStatusType[]>([])
     const [countdownFleet, setCountdownFleet] = useState<Types.FleetType | null>(null)
 
     const [recallFleetId, setRecallFleetId] = useState<string>('')
@@ -141,8 +141,8 @@ function Page() {
 
         setFlagModal(true)
         //set flag status to false
-        setFlagStatus([false, false])
-        setNextFlagStatus([true, false])
+        setFlagStatus([])
+        setNextFlagStatus([])
 
         //modify racestate to running for all fleets
         setRaceState(raceStateType.running)
@@ -156,11 +156,10 @@ function Page() {
         queryClient.invalidateQueries({ queryKey: raceQueryOptions.queryKey })
     }
 
-    const handleFlagChange = (flags: FlagStatusType[], next?: FlagStatusType[]) => {
-        console.log(`Flag changed to: ${flags.map(flag => `${flag.flag}:${flag.status}`).join(', ')}`)
-        setFlagStatus([flags[0]!.status, flags[1]!.status])
-        if (next) {
-            setNextFlagStatus([next[0]!.status, next[1]!.status])
+    const handleFlagChange = (currentClass: FlagStatusType, currentPrep: FlagStatusType, nextClass?: FlagStatusType, nextPrep?: FlagStatusType) => {
+        setFlagStatus([currentClass, currentPrep])
+        if (nextClass && nextPrep) {
+            setNextFlagStatus([nextClass, nextPrep])
         }
     }
 
@@ -297,8 +296,8 @@ function Page() {
 
         setFlagModal(true)
         //set flag status to false
-        setFlagStatus([false, false])
-        setNextFlagStatus([true, false])
+        setFlagStatus([])
+        setNextFlagStatus([])
 
         //0 time hoot to check horn is connected
         sendMessage(JSON.stringify({ type: 'hootRequest', orgId: club.id, duration: 0 }))

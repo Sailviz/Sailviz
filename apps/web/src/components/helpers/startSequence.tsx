@@ -1,14 +1,14 @@
-export function getFiveStartSequence(fleetId: string) {
+import * as Types from '@sailviz/types'
+
+export function getFiveStartSequence(fleetId: string, classFlag: Types.Flag, prepFlag: Types.Flag): StartSequenceStep[] {
     return [
         {
             time: 315,
             name: 'warning',
             order: 0,
             hoot: 0,
-            flagStatus: [
-                { flag: 'h', status: false },
-                { flag: 'p', status: false }
-            ],
+            classFlagStatus: { flag: classFlag, status: false },
+            prepFlagStatus: { flag: prepFlag, status: false },
             fleetStart: ''
         },
         {
@@ -16,10 +16,8 @@ export function getFiveStartSequence(fleetId: string) {
             name: '5 minutes',
             order: 1,
             hoot: 300,
-            flagStatus: [
-                { flag: 'h', status: true },
-                { flag: 'p', status: false }
-            ],
+            classFlagStatus: { flag: classFlag, status: true },
+            prepFlagStatus: { flag: prepFlag, status: false },
             fleetStart: ''
         },
         {
@@ -27,10 +25,8 @@ export function getFiveStartSequence(fleetId: string) {
             name: '4 minutes',
             order: 2,
             hoot: 300,
-            flagStatus: [
-                { flag: 'h', status: true },
-                { flag: 'p', status: true }
-            ],
+            classFlagStatus: { flag: classFlag, status: true },
+            prepFlagStatus: { flag: prepFlag, status: true },
             fleetStart: ''
         },
         {
@@ -38,10 +34,8 @@ export function getFiveStartSequence(fleetId: string) {
             name: '1 minute',
             order: 3,
             hoot: 500,
-            flagStatus: [
-                { flag: 'h', status: true },
-                { flag: 'p', status: false }
-            ],
+            classFlagStatus: { flag: classFlag, status: true },
+            prepFlagStatus: { flag: prepFlag, status: false },
             fleetStart: ''
         },
         {
@@ -49,26 +43,22 @@ export function getFiveStartSequence(fleetId: string) {
             name: 'Start',
             order: 4,
             hoot: 300,
-            flagStatus: [
-                { flag: 'h', status: false },
-                { flag: 'p', status: false }
-            ],
+            classFlagStatus: { flag: classFlag, status: false },
+            prepFlagStatus: { flag: prepFlag, status: false },
             fleetStart: fleetId
         }
     ]
 }
 
-// export function getThreeStartSequence(fleetId: string) {
+// export function getThreeStartSequence(fleetId: string, classFlag: Types.Flag, prepFlag: Types.Flag): StartSequenceStep[] {
 //     return [
 //         {
 //             time: 195,
 //             name: 'warning',
 //             order: 0,
 //             hoot: 0,
-//             flagStatus: [
-//                 { flag: 'h', status: false },
-//                 { flag: 'p', status: false }
-//             ],
+// classFlagStatus: { flag: classFlag, status: false },
+// prepFlagStatus: { flag: prepFlag, status: false },
 //             fleetStart: ''
 //         },
 //         {
@@ -76,10 +66,8 @@ export function getFiveStartSequence(fleetId: string) {
 //             name: '3 minutes',
 //             order: 1,
 //             hoot: 300,
-//             flagStatus: [
-//                 { flag: 'h', status: true },
-//                 { flag: 'p', status: false }
-//             ],
+// classFlagStatus: { flag: classFlag, status: true },
+// prepFlagStatus: { flag: prepFlag, status: false },
 //             fleetStart: ''
 //         },
 //         {
@@ -87,10 +75,8 @@ export function getFiveStartSequence(fleetId: string) {
 //             name: '2 minutes',
 //             order: 2,
 //             hoot: 300,
-//             flagStatus: [
-//                 { flag: 'h', status: true },
-//                 { flag: 'p', status: true }
-//             ],
+// classFlagStatus: { flag: classFlag, status: true },
+// prepFlagStatus: { flag: prepFlag, status: true },
 //             fleetStart: ''
 //         },
 //         {
@@ -98,10 +84,8 @@ export function getFiveStartSequence(fleetId: string) {
 //             name: '1 minute',
 //             order: 3,
 //             hoot: 500,
-//             flagStatus: [
-//                 { flag: 'h', status: true },
-//                 { flag: 'p', status: false }
-//             ],
+// classFlagStatus: { flag: classFlag, status: true },
+// prepFlagStatus: { flag: prepFlag, status: false },
 //             fleetStart: ''
 //         },
 //         {
@@ -109,26 +93,22 @@ export function getFiveStartSequence(fleetId: string) {
 //             name: 'Start',
 //             order: 4,
 //             hoot: 300,
-//             flagStatus: [
-//                 { flag: 'h', status: false },
-//                 { flag: 'p', status: false }
-//             ],
+// classFlagStatus: { flag: classFlag, status: false },
+// prepFlagStatus: { flag: prepFlag, status: false },
 //             fleetStart: fleetId
 //         }
 //     ]
 // }
 
-export function getThreeStartSequence(fleetId: string) {
+export function getThreeStartSequence(fleetId: string, classFlag: Types.Flag, prepFlag: Types.Flag): StartSequenceStep[] {
     return [
         {
             time: 75,
             name: 'warning',
             order: 0,
             hoot: 0,
-            flagStatus: [
-                { flag: 'h', status: false },
-                { flag: 'p', status: false }
-            ],
+            classFlagStatus: { flag: classFlag, status: false },
+            prepFlagStatus: { flag: prepFlag, status: false },
             fleetStart: ''
         },
         {
@@ -136,10 +116,8 @@ export function getThreeStartSequence(fleetId: string) {
             name: '3 minutes',
             order: 1,
             hoot: 300,
-            flagStatus: [
-                { flag: 'h', status: true },
-                { flag: 'p', status: false }
-            ],
+            classFlagStatus: { flag: classFlag, status: true },
+            prepFlagStatus: { flag: prepFlag, status: false },
             fleetStart: ''
         },
         {
@@ -147,10 +125,8 @@ export function getThreeStartSequence(fleetId: string) {
             name: '2 minutes',
             order: 2,
             hoot: 300,
-            flagStatus: [
-                { flag: 'h', status: true },
-                { flag: 'p', status: true }
-            ],
+            classFlagStatus: { flag: classFlag, status: true },
+            prepFlagStatus: { flag: prepFlag, status: true },
             fleetStart: ''
         },
         {
@@ -158,10 +134,8 @@ export function getThreeStartSequence(fleetId: string) {
             name: '1 minute',
             order: 3,
             hoot: 500,
-            flagStatus: [
-                { flag: 'h', status: true },
-                { flag: 'p', status: false }
-            ],
+            classFlagStatus: { flag: classFlag, status: true },
+            prepFlagStatus: { flag: prepFlag, status: false },
             fleetStart: ''
         },
         {
@@ -169,10 +143,8 @@ export function getThreeStartSequence(fleetId: string) {
             name: 'Start',
             order: 4,
             hoot: 300,
-            flagStatus: [
-                { flag: 'h', status: false },
-                { flag: 'p', status: false }
-            ],
+            classFlagStatus: { flag: classFlag, status: false },
+            prepFlagStatus: { flag: prepFlag, status: false },
             fleetStart: fleetId
         }
     ]

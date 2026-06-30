@@ -25,7 +25,7 @@ function Page() {
                 </div>
                 <CustomFlagTable />
                 Standard Flags
-                <StandardFlagTable />
+                <StandardFlagTable allowEdit={false} />
             </div>
         </div>
     )
