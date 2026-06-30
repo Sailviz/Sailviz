@@ -17,7 +17,7 @@ const Preview = ({ value }: { value: string }) => {
     return <img src={url} alt='' width={100} height={100} className='border-2'></img>
 }
 
-const StandardFlagTable = () => {
+const StandardFlagTable = ({ allowEdit }: { allowEdit: boolean }) => {
     const { data: flags } = useQuery(orpcClient.flag.standard.all.queryOptions())
 
     const [modalIsOpen, setModalIsOpen] = useState(false)
@@ -50,7 +50,7 @@ const StandardFlagTable = () => {
 
     return (
         <div className='w-full'>
-            <EditFlagDialog open={modalIsOpen} flag={modalData} onClose={() => setModalIsOpen(false)} />
+            {allowEdit && <EditFlagDialog open={modalIsOpen} flag={modalData} onClose={() => setModalIsOpen(false)} />}
             <div className='rounded-md border'>
                 <Table>
                     <TableHeader>

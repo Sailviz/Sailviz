@@ -2,9 +2,10 @@ import { Button } from '@components/ui/button'
 import { Dialog, DialogContent, DialogFooter, DialogTitle } from '@components/ui/dialog'
 import { Input } from '@components/ui/input'
 import { useEffect, useState } from 'react'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
 import * as Types from '@sailviz/types'
+import { ImageCategory, ImageUpload, OwnerType } from '@components/ImageUpload'
 
 export default function EditStandardFlagDialog({ flag, open, onClose }: { flag: Types.Flag | undefined; open: boolean; onClose?: () => void }) {
     const [name, setName] = useState('')
@@ -13,6 +14,11 @@ export default function EditStandardFlagDialog({ flag, open, onClose }: { flag: 
     const flagUpdateMutation = useMutation(orpcClient.flag.standard.update.mutationOptions())
     const flagDeleteMutation = useMutation(orpcClient.flag.standard.delete.mutationOptions())
     const queryClient = useQueryClient()
+
+    const imageUrlQuery = useQuery({
+        ...orpcClient.image.getURL.queryOptions({ input: { s3key } }),
+        enabled: s3key !== ''
+    })
 
     const editFlag = async (flag: Types.Flag) => {
         await flagUpdateMutation.mutateAsync(flag)
@@ -48,6 +54,8 @@ export default function EditStandardFlagDialog({ flag, open, onClose }: { flag: 
 
                         <Input id='name' type='text' value={name} onChange={e => setName(e.target.value)} placeholder='J Bloggs' autoComplete='off' />
                     </div>
+                    <ImageUpload buttonText='Replace Image' owner={OwnerType.public} category={ImageCategory.flag} s3key={setS3key} />
+                    {s3key !== '' && imageUrlQuery.data && <img src={imageUrlQuery.data} alt='' width={200} height={200} className='border-2'></img>}
                 </div>
                 <DialogFooter>
                     <Button variant={'red'} onClick={deleteFlag(flag?.id || '')}>

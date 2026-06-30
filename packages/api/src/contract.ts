@@ -318,9 +318,7 @@ export const ORPCcontract = {
     },
     org: {
       custom: oc.output(z.array(Types.flagSchema)),
-      all: oc
-        .input(z.object({ orgId: z.string() }))
-        .output(z.array(Types.flagSchema)),
+      all: oc.output(z.array(Types.flagSchema)),
       update: oc.input(Types.flagSchema).output(Types.flagSchema),
       delete: oc
         .input(z.object({ flagId: z.string() }))

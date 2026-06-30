@@ -35,7 +35,16 @@ const Boats = ({ ...props }: any) => {
     )
 }
 
-const Action = ({ user, fleetSettings, seriesId }: { user: UserType; fleetSettings: FleetSettingsType; seriesId: string }) => {
+const Flag = ({ s3key }: { s3key: string | undefined }) => {
+    if (s3key == undefined || s3key == '') {
+        return <div></div>
+    } else {
+        const url = useQuery(orpcClient.image.getURL.queryOptions({ input: { s3key } })).data
+        return <img src={url} alt='' width={100} height={100} className='border-2'></img>
+    }
+}
+
+const Action = ({ user, fleetSettings, seriesId }: { user: UserType; fleetSettings: Types.FleetSettingsType; seriesId: string }) => {
     const deleteFleetSettings = useMutation(orpcClient.fleet.settings.delete.mutationOptions())
     const queryClient = useQueryClient()
 
@@ -68,7 +77,7 @@ const Action = ({ user, fleetSettings, seriesId }: { user: UserType; fleetSettin
     )
 }
 
-const columnHelper = createColumnHelper<FleetSettingsType>()
+const columnHelper = createColumnHelper<Types.FleetSettingsType>()
 
 const FleetTable = ({ seriesId }: { seriesId: string }) => {
     const session: Session = useLoaderData({ from: `__root__` })
@@ -90,6 +99,14 @@ const FleetTable = ({ seriesId }: { seriesId: string }) => {
             columnHelper.accessor('name', {
                 id: 'name',
                 cell: info => info.getValue()
+            }),
+            columnHelper.accessor(fleetSettings => fleetSettings.classFlag?.s3key, {
+                id: 'classFlag',
+                cell: props => <Flag s3key={props.getValue()} />
+            }),
+            columnHelper.accessor(fleetSettings => fleetSettings.preparatoryFlag?.s3key, {
+                id: 'prnparatoryFlag',
+                cell: props => <Flag s3key={props.getValue()} />
             }),
             columnHelper.accessor('boats', {
                 id: 'boats',

@@ -1,6 +1,6 @@
 import { createColumnHelper, flexRender, getCoreRowModel, useReactTable, getFilteredRowModel } from '@tanstack/react-table'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
-import EditStandardBoatDialog from '../layout/dashboard/EditStandardBoatModal'
+import EditFlagDialog from '../layout/dashboard/EditFlagModal'
 import { useQuery } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
 import { useState } from 'react'
@@ -21,7 +21,7 @@ const CustomFlagTable = () => {
     const { data: flags } = useQuery(orpcClient.flag.org.custom.queryOptions())
 
     const [modalIsOpen, setModalIsOpen] = useState(false)
-    const [modalData, setModalData] = useState<Types.StandardBoatType | undefined>(undefined)
+    const [modalData, setModalData] = useState<Types.Flag | undefined>(undefined)
 
     const data = flags || []
 
@@ -50,7 +50,7 @@ const CustomFlagTable = () => {
 
     return (
         <div className='w-full'>
-            <EditStandardBoatDialog open={modalIsOpen} boat={modalData} onClose={() => setModalIsOpen(false)} />
+            <EditFlagDialog open={modalIsOpen} flag={modalData} onClose={() => setModalIsOpen(false)} />
             <div className='rounded-md border'>
                 <Table>
                     <TableHeader>

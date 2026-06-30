@@ -10,6 +10,13 @@ export const LapSchema = z.object({
 });
 export type LapType = z.infer<typeof LapSchema>;
 
+export const flagSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  s3key: z.string(),
+});
+export type Flag = z.infer<typeof flagSchema>;
+
 export const BuoySchema = z.object({
   id: z.string(),
   name: z.string(),
@@ -55,7 +62,9 @@ export const FleetSettingsSchema = z.object({
   id: z.string(),
   name: z.string(),
   start: z.number(),
-  boats: z.array(z.any()).optional(),
+  boats: z.array(z.any()),
+  classFlag: flagSchema.nullable(),
+  preparatoryFlag: flagSchema.nullable(),
 });
 export type FleetSettingsType = z.infer<typeof FleetSettingsSchema>;
 
@@ -250,13 +259,6 @@ export const invitationSchema = z.object({
   teamId: z.string().optional(),
 });
 export type Invitation = z.infer<typeof invitationSchema>;
-
-export const flagSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  s3key: z.string(),
-});
-export type Flag = z.infer<typeof flagSchema>;
 
 ////////// Trackable types //////////
 

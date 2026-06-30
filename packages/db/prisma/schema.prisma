@@ -101,7 +101,7 @@ model Organization {
   orgData           orgData?
   orgDataId         String?             @unique
   tags              Tag[]
-  customFlags       CustomFlag[]
+  flags             Flag[]
 }
 
 model orgData {
@@ -226,13 +226,17 @@ model CourseBuoy {
 }
 
 model FleetSettings {
-  id       String  @id @unique @default(uuid())
-  seriesId String
-  name     String
-  start    Int     @default(0)
-  fleets   Fleet[]
-  series   Series  @relation(fields: [seriesId], references: [id], onDelete: Cascade)
-  boats    Boat[]  @relation("BoatToFleetSettings")
+  id                String  @id @unique @default(uuid())
+  seriesId          String
+  name              String
+  start             Int     @default(0)
+  fleets            Fleet[]
+  series            Series  @relation(fields: [seriesId], references: [id], onDelete: Cascade)
+  boats             Boat[]  @relation("BoatToFleetSettings")
+  preparatoryFlag   Flag?   @relation("FleetPreparatoryFlag", fields: [preparatoryFlagId], references: [id])
+  preparatoryFlagId String?
+  classFlag         Flag?   @relation("FleetClassFlag", fields: [classFlagId], references: [id])
+  classFlagId       String?
 }
 
 model Fleet {
@@ -359,15 +363,11 @@ model Image {
 }
 
 model Flag {
-  id    String @id @unique @default(uuid())
-  name  String
-  s3key String
-}
-
-model CustomFlag {
-  id           String       @id @unique @default(uuid())
+  id           String          @id @unique @default(uuid())
   name         String
   s3key        String
-  orgId        String
-  organization Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  fleetsPrep   FleetSettings[] @relation("FleetPreparatoryFlag")
+  fleetsClass  FleetSettings[] @relation("FleetClassFlag")
+  orgId        String?
+  organization Organization?   @relation(fields: [orgId], references: [id], onDelete: Cascade)
 }

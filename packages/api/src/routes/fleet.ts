@@ -98,6 +98,8 @@ export const fleet_settings_find = os.fleet.settings.find.handler(
       },
       include: {
         boats: true,
+        classFlag: true,
+        preparatoryFlag: true,
       },
     });
     return fleetSettings;
@@ -131,9 +133,21 @@ export const fleet_settings_update = os.fleet.settings.update.handler(
             })),
           ],
         },
+        classFlag: {
+          connect: {
+            id: input.classFlag?.id,
+          },
+        },
+        preparatoryFlag: {
+          connect: {
+            id: input.preparatoryFlag?.id,
+          },
+        },
       },
       include: {
         boats: true,
+        classFlag: true,
+        preparatoryFlag: true,
       },
     });
     if (updatedFleetSettings) {

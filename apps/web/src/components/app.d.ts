@@ -34,14 +34,6 @@ type SeriesDataType = {
     fleetSettings: FleetSettingsType[]
 }
 
-type FleetSettingsType = {
-    id: string
-    name: string
-    start: number
-    boats: BoatDataType[]
-    fleets: FleetDataType[]
-}
-
 type ResultDataType = {
     id: string
     fleetId: string

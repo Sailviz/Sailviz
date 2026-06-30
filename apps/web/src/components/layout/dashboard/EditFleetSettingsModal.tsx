@@ -7,8 +7,9 @@ import { DialogTrigger } from '@radix-ui/react-dialog'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
 import * as Types from '@sailviz/types'
-export default function EditFleetSettingsDialog({ fleetSettings, seriesId }: { fleetSettings: FleetSettingsType; seriesId: string }) {
+export default function EditFleetSettingsDialog({ fleetSettings, seriesId }: { fleetSettings: Types.FleetSettingsType; seriesId: string }) {
     const { data: boats } = useQuery(orpcClient.boat.org.session.queryOptions())
+    const { data: flags } = useQuery(orpcClient.flag.org.all.queryOptions())
 
     const updateFleetSettingsMutation = useMutation(orpcClient.fleet.settings.update.mutationOptions())
     const queryClient = useQueryClient()
@@ -18,9 +19,13 @@ export default function EditFleetSettingsDialog({ fleetSettings, seriesId }: { f
     const [selectedBoats, setSelectedBoats] = useState([{ label: '', value: {} as Types.BoatType }])
     const [options, setOptions] = useState([{ label: '', value: {} as Types.BoatType }])
 
+    const [flagOptions, setFlagOptions] = useState([{ label: '', value: {} as Types.Flag }])
+    const [selectedClassFlag, setSelectedClassFlag] = useState({ label: '', value: {} as Types.Flag | null })
+    const [selectedPreparatoryFlag, setSelectedPreparatoryFlag] = useState({ label: '', value: {} as Types.Flag | null })
+
     const [open, setOpen] = useState(false)
 
-    const onSubmit = async (fleetSettings: FleetSettingsType) => {
+    const onSubmit = async (fleetSettings: Types.FleetSettingsType) => {
         await updateFleetSettingsMutation.mutateAsync(fleetSettings)
         console.log(seriesId)
         queryClient.invalidateQueries({
@@ -35,6 +40,8 @@ export default function EditFleetSettingsDialog({ fleetSettings, seriesId }: { f
         setName(fleetSettings.name)
         setStart(fleetSettings.start)
         setSelectedBoats(fleetSettings.boats.map(x => ({ value: x, label: x.name })))
+        setSelectedClassFlag({ value: fleetSettings.classFlag, label: fleetSettings.classFlag?.name || '' })
+        setSelectedPreparatoryFlag({ value: fleetSettings.preparatoryFlag, label: fleetSettings.preparatoryFlag?.name || '' })
     }, [fleetSettings])
 
     useEffect(() => {
@@ -47,6 +54,17 @@ export default function EditFleetSettingsDialog({ fleetSettings, seriesId }: { f
         })
         setOptions(tempoptions)
     }, [boats, selectedBoats])
+
+    useEffect(() => {
+        if (flags === undefined) return
+        let tempoptions: { label: string; value: Types.Flag }[] = []
+        flags.forEach(boat => {
+            // Check if the boat is already selected
+            tempoptions.push({ value: boat as Types.Flag, label: boat.name })
+        })
+        setFlagOptions(tempoptions)
+    }, [flags])
+
     return (
         <Dialog
             open={open}
@@ -73,6 +91,37 @@ export default function EditFleetSettingsDialog({ fleetSettings, seriesId }: { f
                         <Input type='text' value={start} onChange={e => setStart(parseInt(e.target.value))} />
                     </div>
                 </div>
+                <p className='text-6xl font-extrabold p-6'>Flags</p>
+                <div className='flex w-full flex-row'>
+                    <div className='flex flex-col px-6 w-full'>
+                        <p className='text-2xl font-bold'>Class</p>
+                        <div className='w-full p-2 mx-0 my-2'>
+                            <Select
+                                id='editClass'
+                                className=' w-full h-full text-3xl'
+                                options={flagOptions}
+                                isMulti={false}
+                                isClearable={false}
+                                value={selectedClassFlag}
+                                onChange={choice => setSelectedClassFlag(choice!)}
+                            />
+                        </div>
+                    </div>
+                    <div className='flex flex-col px-6 w-full'>
+                        <p className='text-2xl font-bold'>Preparatory</p>
+                        <div className='w-full p-2 mx-0 my-2'>
+                            <Select
+                                id='editClass'
+                                className=' w-full h-full text-3xl'
+                                options={flagOptions}
+                                isMulti={false}
+                                isClearable={false}
+                                value={selectedPreparatoryFlag}
+                                onChange={choice => setSelectedPreparatoryFlag(choice!)}
+                            />
+                        </div>
+                    </div>
+                </div>
                 <div>
                     <p className='text-6xl font-extrabold p-6'>Boats</p>
                     <div className='flex flex-col px-6 w-full'>
@@ -91,7 +140,19 @@ export default function EditFleetSettingsDialog({ fleetSettings, seriesId }: { f
                     </div>
                 </div>
                 <DialogFooter>
-                    <Button color='primary' onClick={() => onSubmit({ ...fleetSettings!, name: name, boats: selectedBoats.flatMap(boats => boats.value), start: start })}>
+                    <Button
+                        color='primary'
+                        onClick={() =>
+                            onSubmit({
+                                ...fleetSettings!,
+                                name: name,
+                                boats: selectedBoats.flatMap(boats => boats.value),
+                                start: start,
+                                classFlag: selectedClassFlag.value,
+                                preparatoryFlag: selectedPreparatoryFlag.value
+                            })
+                        }
+                    >
                         Save
                     </Button>
                 </DialogFooter>

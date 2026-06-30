@@ -5,6 +5,7 @@ import PageContainer from '@components/layout/page-container'
 import { Heading } from '@components/ui/heading'
 import { Separator } from '@components/ui/separator'
 import SeriesRaceTableMinimal from '@components/tables/SeriesRaceTableMinimal'
+import * as Types from '@sailviz/types'
 
 const SeriesViewPage = ({ seriesId, orgName }: { seriesId: string; orgName: string }) => {
     const series = useQuery(orpcClient.series.find.queryOptions({ input: { seriesId: seriesId! } })).data
@@ -26,7 +27,7 @@ const SeriesViewPage = ({ seriesId, orgName }: { seriesId: string; orgName: stri
 
                 <Heading title={'Series Results'} description={''} />
 
-                {series?.fleetSettings.map((fleetSettings: FleetSettingsType) => {
+                {series?.fleetSettings.map((fleetSettings: Types.FleetSettingsType) => {
                     return (
                         <>
                             <div>{fleetSettings.name}</div>

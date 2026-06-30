@@ -7,8 +7,12 @@ const os = implement(ORPCcontract);
 
 export async function findFlags(orgId: string) {
   // Fetch standard flags from the database
-  var standardFlags = await prisma.flag.findMany({});
-  var customFlags = await prisma.customFlag.findMany({
+  var standardFlags = await prisma.flag.findMany({
+    where: {
+      orgId: null,
+    },
+  });
+  var customFlags = await prisma.flag.findMany({
     where: {
       orgId: orgId,
     },
@@ -20,26 +24,16 @@ export async function findFlags(orgId: string) {
 }
 
 export async function findFlag(flagId: string): Promise<Types.Flag> {
-  var standard = await prisma.flag.findUnique({
+  var flag = await prisma.flag.findUnique({
     where: {
       id: flagId,
     },
   });
-  if (!standard) {
-    // probably a custom flag, check that
-    var custom = await prisma.customFlag.findUnique({
-      where: {
-        id: flagId,
-      },
-    });
-    if (!custom) {
-      throw new ORPCError("NOT_FOUND", {
-        message: "Flag not found",
-      });
-    }
-    return custom;
+  if (!flag) {
+    throw new ORPCError("NOT_FOUND", { message: "Flag not found" });
   }
-  return standard;
+
+  return flag;
 }
 
 export const flag_create = os.flag.standard.create.handler(
@@ -94,6 +88,7 @@ export const flag_find = os.flag.standard.find
     const flag = await prisma.flag.findUnique({
       where: {
         id: input.flagId,
+        orgId: null, // Ensure it's a standard flag
       },
     });
     if (flag) {
@@ -111,7 +106,7 @@ export const flag_org_custom = os.flag.org.custom
     if (!orgId) {
       throw new ORPCError("UNAUTHORIZED", { message: "Login required" });
     }
-    const flagsList = await prisma.customFlag.findMany({
+    const flagsList = await prisma.flag.findMany({
       where: {
         orgId: orgId,
       },
@@ -126,17 +121,27 @@ export const flag_org_custom = os.flag.org.custom
     }
   });
 
-export const flag_org_all = os.flag.org.all.handler(async ({ input }) => {
-  const flagsList = await findFlags(input.orgId);
-  if (flagsList) {
-    return flagsList;
-  } else {
-    throw new ORPCError("NOT_FOUND");
-  }
-});
+export const flag_org_all = os.flag.org.all
+  .use(authMiddleware)
+  .handler(async ({ context }) => {
+    const session = context.session as any; // this is because the session type is not quite correct
+    const orgId = session?.session.activeOrganizationId;
+    if (!orgId) {
+      throw new ORPCError("UNAUTHORIZED", { message: "Login required" });
+    }
+    const flagsList = await findFlags(orgId);
+    if (flagsList) {
+      return flagsList;
+    } else {
+      throw new ORPCError("NOT_FOUND");
+    }
+  });
 
 export const flag_standard_all = os.flag.standard.all.handler(async () => {
   const flagsList = await prisma.flag.findMany({
+    where: {
+      orgId: null,
+    },
     orderBy: {
       name: "asc",
     },
@@ -153,14 +158,14 @@ export const flag_custom_update = os.flag.org.update
   .handler(async ({ input, context }) => {
     const session = context.session as any;
     const clubId = session?.session.activeOrganizationId as string;
-    const flagToUpdate = await prisma.customFlag.findFirst({
+    const flagToUpdate = await prisma.flag.findFirst({
       where: {
         flagId: input.id,
         orgId: clubId,
       },
     });
     if (flagToUpdate) {
-      await prisma.customFlag.update({
+      await prisma.flag.update({
         where: {
           id: flagToUpdate.id,
         },
@@ -187,7 +192,7 @@ export const flag_custom_delete = os.flag.org.delete
   .handler(async ({ input, context }) => {
     const session = context.session as any;
     const clubId = session?.session.activeOrganizationId as string;
-    const flagToDelete = await prisma.customFlag.findFirst({
+    const flagToDelete = await prisma.flag.findFirst({
       where: {
         flagId: input.flagId,
         orgId: clubId,
@@ -198,7 +203,7 @@ export const flag_custom_delete = os.flag.org.delete
         message: "No customisation found for this flag",
       });
     }
-    await prisma.customFlag.delete({
+    await prisma.flag.delete({
       where: {
         id: flagToDelete.id,
       },
@@ -211,7 +216,7 @@ export const flag_custom_create = os.flag.org.create
   .handler(async ({ input, context }) => {
     const session = context.session as any;
     const clubId = session?.session.activeOrganizationId as string;
-    const newFlag = await prisma.customFlag.create({
+    const newFlag = await prisma.flag.create({
       data: {
         name: input.name,
         s3key: input.s3key,

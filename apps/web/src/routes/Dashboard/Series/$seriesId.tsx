@@ -17,6 +17,7 @@ import { useEffect, useState } from 'react'
 import { CATEGORY_OPTIONS } from '@features/series/series-table/use-series-table-filters'
 import PageContainer from '@components/layout/page-container'
 import { SeriesMaintainSequence } from '@components/seriesMaintainSequence'
+import * as Types from '@sailviz/types'
 
 function Page() {
     const session: Session = useLoaderData({ from: `__root__` })
@@ -132,7 +133,7 @@ function Page() {
                 )}
                 <br />
                 <div className='mb-6'>
-                    {series.fleetSettings.map((fleetSettings: FleetSettingsType, index: any) => {
+                    {series.fleetSettings.map((fleetSettings: Types.FleetSettingsType, index: any) => {
                         return (
                             <div key={fleetSettings.id + index} className='mb-6'>
                                 <div>{fleetSettings.name}</div>
