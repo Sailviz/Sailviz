@@ -105,15 +105,19 @@ model Organization {
 }
 
 model orgData {
-  id                   String       @id @unique @default(uuid())
-  planName             String?
-  subscriptionStatus   String?
-  defaultPursuitLength Int          @default(60)
-  trackableEnabled     Boolean
-  trackableOrgId       String?
-  duties               Duties[]
-  organization         Organization @relation(references: [id], fields: [organizationId])
-  organizationId       String       @unique
+  id                       String       @id @unique @default(uuid())
+  planName                 String?
+  subscriptionStatus       String?
+  defaultPursuitLength     Int          @default(60)
+  trackableEnabled         Boolean
+  trackableOrgId           String?
+  duties                   Duties[]
+  organization             Organization @relation(references: [id], fields: [organizationId])
+  organizationId           String       @unique
+  defaultClassFlag         Flag?        @relation("OrgDataDefaultClassFlag", fields: [defaultClassFlagId], references: [id])
+  defaultClassFlagId       String?
+  defaultPreparatoryFlag   Flag?        @relation("OrgDataDefaultPreparatoryFlag", fields: [defaultPreparatoryFlagId], references: [id])
+  defaultPreparatoryFlagId String?
 }
 
 model Duties {
@@ -370,4 +374,6 @@ model Flag {
   fleetsClass  FleetSettings[] @relation("FleetClassFlag")
   orgId        String?
   organization Organization?   @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  orgDataClass orgData[]       @relation("OrgDataDefaultClassFlag")
+  orgDataPrep  orgData[]       @relation("OrgDataDefaultPreparatoryFlag")
 }

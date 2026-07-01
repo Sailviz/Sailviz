@@ -3,6 +3,7 @@ import prisma from "@sailviz/db";
 import { ORPCcontract } from "../contract";
 import { FleetSettingsType } from "@sailviz/types";
 import { findSeries } from "./series";
+import { authMiddleware } from "../middleware";
 
 const os = implement(ORPCcontract);
 
@@ -77,14 +78,36 @@ export const fleet_update = os.fleet.update.handler(async ({ input }) => {
   }
 });
 
-export const createFleetSettings = os.fleet.settings.create.handler(
-  async ({ input }) => {
+export const createFleetSettings = os.fleet.settings.create
+  .use(authMiddleware)
+  .handler(async ({ input, context }) => {
+    const session = context.session as any;
+    const clubId = session?.session.activeOrganizationId as string;
+    const orgData = await prisma.orgData.findUnique({
+      where: {
+        organizationId: clubId,
+      },
+    });
+    if (!orgData) {
+      throw new ORPCError("NOT_FOUND");
+    }
     const newFleetSettings = await prisma.fleetSettings.create({
       data: {
         name: "Fleet",
         series: {
           connect: {
             id: input.seriesId,
+          },
+        },
+        start: 0,
+        classFlag: {
+          connect: {
+            id: orgData.defaultClassFlag.id,
+          },
+        },
+        preparatoryFlag: {
+          connect: {
+            id: orgData.defaultPreparatoryFlag.id,
           },
         },
       },
@@ -99,8 +122,7 @@ export const createFleetSettings = os.fleet.settings.create.handler(
     } else {
       throw new ORPCError("BAD_REQUEST");
     }
-  },
-);
+  });
 
 export const fleet_settings_find = os.fleet.settings.find.handler(
   async ({ input }) => {

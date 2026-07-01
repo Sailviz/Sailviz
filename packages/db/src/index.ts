@@ -39,6 +39,8 @@ const prisma = (globalForPrisma.prisma ||
             orgData: {
               include: {
                 duties: true,
+                defaultClassFlag: true,
+                defaultPreparatoryFlag: true,
               },
             },
           };
@@ -50,6 +52,8 @@ const prisma = (globalForPrisma.prisma ||
             orgData: {
               include: {
                 duties: true,
+                defaultClassFlag: true,
+                defaultPreparatoryFlag: true,
               },
             },
           };

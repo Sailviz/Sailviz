@@ -11,17 +11,30 @@ import { ActionButton } from '@components/ui/action-button'
 import type { Session } from '@sailviz/auth/client'
 import * as Types from '@sailviz/types'
 import { ImageCategory, ImageUpload, OwnerType } from '@components/ImageUpload'
+import Select from 'react-select'
 
 function Page() {
     const session: Session = useLoaderData({ from: `__root__` })
     const queryClient = useQueryClient()
     const { data: org } = useQuery(orpcClient.organization.session.queryOptions())
+    const { data: flags } = useQuery(orpcClient.flag.org.all.queryOptions())
 
     const orgDataMutation = useMutation(orpcClient.organization.orgData.update.mutationOptions())
     const createDutyMutation = useMutation(orpcClient.organization.duties.create.mutationOptions())
     const updateDutyMutation = useMutation(orpcClient.organization.duties.update.mutationOptions())
 
     const [pursuitLength, setPursuitLength] = useState(0)
+    const [flagOptions, setFlagOptions] = useState([{ label: '', value: {} as Types.Flag }])
+    const [selectedClassFlag, setSelectedClassFlag] = useState({ label: '', value: {} as Types.Flag })
+    const [selectedPreparatoryFlag, setSelectedPreparatoryFlag] = useState({ label: '', value: {} as Types.Flag })
+
+    const ClassFlagUrlQuery = useQuery({
+        ...orpcClient.image.getURL.queryOptions({ input: { s3key: selectedClassFlag.value.s3key }, enabled: selectedClassFlag.label !== '' })
+    })
+
+    const PrepFlagUrlQuery = useQuery({
+        ...orpcClient.image.getURL.queryOptions({ input: { s3key: selectedPreparatoryFlag.value.s3key }, enabled: selectedPreparatoryFlag.label !== '' })
+    })
 
     useEffect(() => {
         if (org == undefined) return
@@ -48,6 +61,23 @@ function Page() {
     const editDuty = async (duty: Types.DutyType, value: string) => {
         await updateDutyMutation.mutateAsync({ ...duty, name: value })
     }
+
+    useEffect(() => {
+        if (org == undefined || org.orgData == undefined) return
+
+        setSelectedClassFlag({ value: org.orgData.defaultClassFlag, label: org.orgData.defaultClassFlag.name })
+        setSelectedPreparatoryFlag({ value: org.orgData.defaultPreparatoryFlag, label: org.orgData.defaultPreparatoryFlag.name })
+    }, [org])
+
+    useEffect(() => {
+        if (flags === undefined) return
+        let tempoptions: { label: string; value: Types.Flag }[] = []
+        flags.forEach(boat => {
+            // Check if the boat is already selected
+            tempoptions.push({ value: boat as Types.Flag, label: boat.name })
+        })
+        setFlagOptions(tempoptions)
+    }, [flags])
 
     if (org == undefined || session == undefined) {
         return <PageSkeleton />
@@ -84,6 +114,38 @@ function Page() {
                     <Button onClick={addDuty}>Add Duty</Button>
                 </p>
                 <ImageUpload buttonText='upload Banner' owner={OwnerType.organization} category={ImageCategory.Banner} s3key={() => {}} />
+                <div className='flex flex-row p-6'>
+                    <div className='flex flex-col px-6 w-full'>
+                        <p className='text-2xl font-bold'>Class</p>
+                        <div className='w-full p-2 mx-0 my-2 flex flex-row'>
+                            <Select
+                                id='editClass'
+                                className=' w-full h-full text-3xl'
+                                options={flagOptions}
+                                isMulti={false}
+                                isClearable={false}
+                                value={selectedClassFlag}
+                                onChange={choice => setSelectedClassFlag(choice!)}
+                            />
+                        </div>
+                    </div>
+                    <img src={ClassFlagUrlQuery.data} alt='' width={200} height={200} className='border-2'></img>
+                    <div className='flex flex-col px-6 w-full'>
+                        <p className='text-2xl font-bold'>Prep</p>
+                        <div className='w-full p-2 mx-0 my-2 flex flex-row'>
+                            <Select
+                                id='editPrep'
+                                className=' w-full h-full text-3xl'
+                                options={flagOptions}
+                                isMulti={false}
+                                isClearable={false}
+                                value={selectedPreparatoryFlag}
+                                onChange={choice => setSelectedPreparatoryFlag(choice!)}
+                            />
+                        </div>
+                    </div>
+                    <img src={PrepFlagUrlQuery.data} alt='' width={200} height={200} className='border-2'></img>
+                </div>
             </div>
         )
     else

@@ -10,12 +10,21 @@ const os = implement(ORPCcontract);
 export async function getOrg(orgId: string) {
   const org = await prisma.organization.findUnique({
     where: { id: orgId },
+    include: {
+      orgData: {
+        include: {
+          defaultClassFlag: true,
+          defaultPreparatoryFlag: true,
+        },
+      },
+    },
     omit: {
       stripeCustomerId: true,
       createdAt: true,
     },
   });
-  return org as unknown as Types.Org; //have to do unknown as settings isn't typed in db
+  console.log("getOrg", org);
+  return org as Types.Org; //have to do unknown as settings isn't typed in db
 }
 
 export async function updateOrgById(input: any) {
@@ -23,7 +32,7 @@ export async function updateOrgById(input: any) {
     where: { id: input.id },
     data: input,
   });
-  return org as unknown as Types.Org;
+  return org as Types.Org;
 }
 
 export const org_all = os.organization.all.handler(async ({ input }) => {
@@ -35,7 +44,7 @@ export const org_all = os.organization.all.handler(async ({ input }) => {
   });
   console.log(orgs);
   const filteredOrgs = orgs.filter((org) => org.id != "admin-id");
-  return filteredOrgs as unknown as Types.Org[];
+  return filteredOrgs as Types.Org[];
 });
 
 export const org_create = os.organization.create.handler(async ({ input }) => {
@@ -53,7 +62,7 @@ export const org_create = os.organization.create.handler(async ({ input }) => {
   createStripeCustomer(newOrg.id);
 
   if (newOrg) {
-    return newOrg as unknown as Types.Org;
+    return newOrg as Types.Org;
   } else {
     throw new ORPCError("Org not created");
   }
@@ -64,7 +73,7 @@ export const org_find = os.organization.find.handler(async ({ input }) => {
     where: { id: input.orgId },
   });
   if (org) {
-    return org as unknown as Types.Org;
+    return org as Types.Org;
   } else {
     throw new ORPCError("Org not found");
   }
@@ -78,7 +87,7 @@ export const org_name = os.organization.name.handler(async ({ input }) => {
     },
   });
   if (org) {
-    return org as unknown as Types.Org;
+    return org as Types.Org;
   } else {
     throw new ORPCError("Org not found");
   }
@@ -90,7 +99,7 @@ export const org_findByStripeCustomerId =
       where: { stripeCustomerId: input.stripeCustomerId },
     });
     if (org) {
-      return org as unknown as Types.Org;
+      return org as Types.Org;
     } else {
       throw new ORPCError("Org not found");
     }
@@ -204,5 +213,5 @@ export const buoy_session = os.organization.buoys.session
     const buoys = await prisma.buoy.findMany({
       where: { orgId: orgId },
     });
-    return buoys as unknown as Types.BuoyType[];
+    return buoys as Types.BuoyType[];
   });
