@@ -156,11 +156,9 @@ function Page() {
         queryClient.invalidateQueries({ queryKey: raceQueryOptions.queryKey })
     }
 
-    const handleFlagChange = (currentClass: FlagStatusType, currentPrep: FlagStatusType, nextClass?: FlagStatusType, nextPrep?: FlagStatusType) => {
-        setFlagStatus([currentClass, currentPrep])
-        if (nextClass && nextPrep) {
-            setNextFlagStatus([nextClass, nextPrep])
-        }
+    const handleFlagChange = (current: FlagStatusType[], next: FlagStatusType[]) => {
+        setFlagStatus(current)
+        setNextFlagStatus(next)
     }
 
     const handleHoot = (time: number) => {

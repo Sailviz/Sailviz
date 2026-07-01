@@ -3,6 +3,20 @@ import { orpcClient } from '@lib/orpc'
 import * as Types from '@sailviz/types'
 import { useQuery } from '@tanstack/react-query'
 
+function FlagImage({ flagStatus }: { flagStatus: FlagStatusType }) {
+    const { data: src } = useQuery({
+        ...orpcClient.image.getURL.queryOptions({
+            input: { s3key: flagStatus.flag.s3key }
+        })
+    })
+
+    return (
+        <div className={`h-full flex flex-col ${flagStatus.status ? 'justify-start' : 'justify-end'}`}>
+            <img src={src} alt='' width={200} height={200} className='border-2'></img>
+        </div>
+    )
+}
+
 export default function FlagDialog({
     isOpen,
     currentFlagStatus,
@@ -18,22 +32,6 @@ export default function FlagDialog({
     countdownFleet: Types.FleetType | null
     onClose: () => void
 }) {
-    const currentClassFlagUrlQuery = useQuery({
-        ...orpcClient.image.getURL.queryOptions({ input: { s3key: currentFlagStatus[0]?.flag.s3key }, enabled: currentFlagStatus[1] !== undefined })
-    })
-
-    const currentPrepFlagUrlQuery = useQuery({
-        ...orpcClient.image.getURL.queryOptions({ input: { s3key: currentFlagStatus[1]?.flag.s3key }, enabled: currentFlagStatus[1] !== undefined })
-    })
-
-    const nextClassFlagUrlQuery = useQuery({
-        ...orpcClient.image.getURL.queryOptions({ input: { s3key: nextFlagStatus[0]?.flag.s3key }, enabled: nextFlagStatus[0] !== undefined })
-    })
-
-    const nextPrepFlagUrlQuery = useQuery({
-        ...orpcClient.image.getURL.queryOptions({ input: { s3key: nextFlagStatus[1]?.flag.s3key }, enabled: nextFlagStatus[1] !== undefined })
-    })
-
     return (
         <Dialog
             open={isOpen}
@@ -65,25 +63,9 @@ export default function FlagDialog({
 
                 <div className='flex flex-row w-full h-full divide-dashed'>
                     <div className='flex w-full flex-row h-full justify-evenly'>
-                        {currentFlagStatus[0]?.status ? (
-                            <div className='h-full flex flex-col justify-start'>
-                                {currentClassFlagUrlQuery.data && <img src={currentClassFlagUrlQuery.data} alt='' width={200} height={200} className='border-2'></img>}
-                            </div>
-                        ) : (
-                            <div className='h-full flex flex-col justify-end'>
-                                {currentClassFlagUrlQuery.data && <img src={currentClassFlagUrlQuery.data} alt='' width={200} height={200} className='border-2'></img>}
-                            </div>
-                        )}
-
-                        {currentFlagStatus[1]?.status ? (
-                            <div className='h-full flex flex-col justify-start'>
-                                {currentPrepFlagUrlQuery.data && <img src={currentPrepFlagUrlQuery.data} alt='' width={200} height={200} className='border-2'></img>}
-                            </div>
-                        ) : (
-                            <div className='h-full flex flex-col justify-end'>
-                                {currentPrepFlagUrlQuery.data && <img src={currentPrepFlagUrlQuery.data} alt='' width={200} height={200} className='border-2'></img>}
-                            </div>
-                        )}
+                        {currentFlagStatus.map((flagStatus, index) => (
+                            <FlagImage key={`${flagStatus.flag.s3key}-${index}`} flagStatus={flagStatus} />
+                        ))}
                     </div>
                     <div className='h-full flex flex-col justify-evenly'>
                         <div>
@@ -96,25 +78,9 @@ export default function FlagDialog({
                         </div>
                     </div>
                     <div className='flex w-full flex-row h-full justify-evenly'>
-                        {nextFlagStatus[0]?.status ? (
-                            <div className='h-full flex flex-col justify-start'>
-                                {nextClassFlagUrlQuery.data && <img src={nextClassFlagUrlQuery.data} alt='' width={200} height={200} className='border-2'></img>}
-                            </div>
-                        ) : (
-                            <div className='h-full flex flex-col justify-end'>
-                                {nextClassFlagUrlQuery.data && <img src={nextClassFlagUrlQuery.data} alt='' width={200} height={200} className='border-2'></img>}
-                            </div>
-                        )}
-
-                        {nextFlagStatus[1]?.status ? (
-                            <div className='h-full flex flex-col justify-start'>
-                                {nextPrepFlagUrlQuery.data && <img src={nextPrepFlagUrlQuery.data} alt='' width={200} height={200} className='border-2'></img>}
-                            </div>
-                        ) : (
-                            <div className='h-full flex flex-col justify-end'>
-                                {nextPrepFlagUrlQuery.data && <img src={nextPrepFlagUrlQuery.data} alt='' width={200} height={200} className='border-2'></img>}
-                            </div>
-                        )}
+                        {nextFlagStatus.map((flagStatus, index) => (
+                            <FlagImage key={`${flagStatus.flag.s3key}-${index}`} flagStatus={flagStatus} />
+                        ))}
                     </div>
                 </div>
             </DialogContent>
