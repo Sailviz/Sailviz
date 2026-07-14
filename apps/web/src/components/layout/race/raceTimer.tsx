@@ -57,6 +57,7 @@ const RaceTimer: React.FC<RaceTimerProps> = ({
     const warningCompletedRef = useRef(false)
     const sequenceFinishedRef = useRef(false)
     const pendingChangesRef = useRef(false)
+    const suppressNextHootRef = useRef(false)
     const raceRef = useRef(race)
     raceRef.current = race
 
@@ -77,6 +78,34 @@ const RaceTimer: React.FC<RaceTimerProps> = ({
         }
 
         return time
+    }
+
+    type FleetType = (typeof race.fleets)[number]
+
+    const getSequenceStepsForFleet = (fleet: FleetType) =>
+        race.series?.startSequence === '541go'
+            ? getFiveStartSequence(fleet.id, fleet.fleetSettings.classFlag, fleet.fleetSettings.preparatoryFlag)
+            : getThreeStartSequence(fleet.id, fleet.fleetSettings.classFlag, fleet.fleetSettings.preparatoryFlag)
+
+    const getSortedFleets = () => [...raceRef.current.fleets].sort((a, b) => a.startTime - b.startTime)
+
+    const getNextFleetAfter = (time: number) => getSortedFleets().find(fleet => fleet.startTime > time)
+
+    const buildFlagStatus = (flagStatus: FlagStatusType, status: boolean): FlagStatusType => ({
+        flag: flagStatus.flag,
+        status
+    })
+
+    const buildNextFlagStatuses = (nextStep: StartSequenceStep, followingFleet?: FleetType) => {
+        if (nextStep.fleetStart && followingFleet != undefined) {
+            return [
+                buildFlagStatus(nextStep.classFlagStatus, nextStep.classFlagStatus.status),
+                buildFlagStatus(nextStep.prepFlagStatus, nextStep.prepFlagStatus.status),
+                { flag: followingFleet.fleetSettings.classFlag, status: true }
+            ]
+        }
+
+        return [nextStep.classFlagStatus, nextStep.prepFlagStatus]
     }
 
     useEffect(() => {
@@ -115,13 +144,11 @@ const RaceTimer: React.FC<RaceTimerProps> = ({
                 lastSequenceStartTimeRef.current !== race.sequenceStartTime)
 
         if (shouldInitializeSequence) {
-            const currentRace = raceRef.current
-            const sortedFleets = [...currentRace.fleets].sort((a, b) => a.startTime - b.startTime)
             const currentTime = new Date().getTime() / 1000
 
-            const nextFleet = sortedFleets.find(fleet => fleet.startTime > currentTime)
+            const nextFleet = getNextFleetAfter(currentTime)
             if (!nextFleet) {
-                if (sortedFleets.some(fleet => fleet.startTime === 0)) {
+                if (getSortedFleets().some(fleet => fleet.startTime === 0)) {
                     lastRaceStateRef.current = raceState
                     return
                 }
@@ -134,10 +161,7 @@ const RaceTimer: React.FC<RaceTimerProps> = ({
             console.log('Starting fleet ' + nextFleet.fleetSettings.name)
             onFleetCountdownStart(nextFleet.id)
 
-            const steps =
-                race.series?.startSequence === '541go'
-                    ? getFiveStartSequence(nextFleet.id, nextFleet.fleetSettings.classFlag, nextFleet.fleetSettings.preparatoryFlag)
-                    : getThreeStartSequence(nextFleet.id, nextFleet.fleetSettings.classFlag, nextFleet.fleetSettings.preparatoryFlag)
+            const steps = getSequenceStepsForFleet(nextFleet)
 
             activeSequenceSteps = steps
             sequenceStepsRef.current = steps
@@ -201,7 +225,9 @@ const RaceTimer: React.FC<RaceTimerProps> = ({
                 raceState == raceStateType.running &&
                 activePendingChanges == false
             ) {
-                if (currentStepSnapshot.hoot > 0) {
+                if (suppressNextHootRef.current) {
+                    suppressNextHootRef.current = false
+                } else if (currentStepSnapshot.hoot > 0) {
                     onHoot(currentStepSnapshot.hoot)
                 }
                 if (currentStepSnapshot.fleetStart) {
@@ -210,22 +236,11 @@ const RaceTimer: React.FC<RaceTimerProps> = ({
                 const nextStep = activeSequenceSteps.find(step => step.order == currentStepSnapshot.order + 1)
                 if (nextStep != undefined) {
                     const currentRace = raceRef.current
-                    const sortedFleets = [...currentRace.fleets].sort((a, b) => a.startTime - b.startTime)
+                    const sortedFleets = getSortedFleets()
                     const currentFleet = nextStep.fleetStart ? currentRace.fleets.find(fleet => fleet.id == nextStep.fleetStart) : undefined
                     const followingFleet = currentFleet ? sortedFleets.find(fleet => fleet.startTime > currentFleet.startTime) : undefined
 
-                    if (nextStep.fleetStart && followingFleet != undefined) {
-                        onFlagChange(
-                            [currentStepSnapshot.classFlagStatus, currentStepSnapshot.prepFlagStatus],
-                            [
-                                { flag: nextStep.classFlagStatus.flag, status: nextStep.classFlagStatus.status },
-                                { flag: nextStep.prepFlagStatus.flag, status: nextStep.prepFlagStatus.status },
-                                { flag: followingFleet.fleetSettings.classFlag, status: true }
-                            ]
-                        )
-                    } else {
-                        onFlagChange([currentStepSnapshot.classFlagStatus, currentStepSnapshot.prepFlagStatus], [nextStep.classFlagStatus, nextStep.prepFlagStatus])
-                    }
+                    onFlagChange([currentStepSnapshot.classFlagStatus, currentStepSnapshot.prepFlagStatus], buildNextFlagStatuses(nextStep, followingFleet))
                     console.log(`Current step: ${JSON.stringify(currentStepSnapshot)}, Next step: ${nextStep ? JSON.stringify(nextStep) : 'None'}`)
                     activeCurrentStep = nextStep
                     currentStepRef.current = nextStep
@@ -233,7 +248,7 @@ const RaceTimer: React.FC<RaceTimerProps> = ({
                     warningCompletedRef.current = false
                 } else {
                     const now = new Date().getTime() / 1000
-                    const sortedFleets = [...raceRef.current.fleets].sort((a, b) => a.startTime - b.startTime)
+                    const sortedFleets = getSortedFleets()
                     const nextFleet = sortedFleets.find(fleet => fleet.startTime > now + 20) // add buffer to ensure we don't accidently grab the current fleet
                     if (nextFleet == undefined) {
                         console.log('No more fleets to start, finishing sequence')
@@ -243,22 +258,21 @@ const RaceTimer: React.FC<RaceTimerProps> = ({
                         return
                     }
                     console.log('Starting fleet ' + nextFleet.fleetSettings.name)
-                    const newSequenceSteps =
-                        race.series?.startSequence === '541go'
-                            ? getFiveStartSequence(nextFleet.id, nextFleet.fleetSettings.classFlag, nextFleet.fleetSettings.preparatoryFlag)
-                            : getThreeStartSequence(nextFleet.id, nextFleet.fleetSettings.classFlag, nextFleet.fleetSettings.preparatoryFlag)
+                    const newSequenceSteps = getSequenceStepsForFleet(nextFleet)
                     console.log('New sequence steps', newSequenceSteps)
                     activeSequenceSteps = newSequenceSteps
                     sequenceStepsRef.current = newSequenceSteps
-                    onFlagChange(
-                        [currentStepSnapshot.classFlagStatus, currentStepSnapshot.prepFlagStatus],
-                        [
-                            { flag: currentStepSnapshot.classFlagStatus.flag, status: false },
-                            { flag: currentStepSnapshot.prepFlagStatus.flag, status: false },
-                            { flag: nextFleet.fleetSettings.classFlag, status: true }
-                        ]
-                    )
-                    const nextStep = newSequenceSteps[2]
+                    const followingFleetAfterStart = sortedFleets.find(fleet => fleet.startTime > nextFleet.startTime)
+                    const activeFleetCurrentStep = newSequenceSteps[1]
+                    const activeFleetPreviewStep = newSequenceSteps[2]
+
+                    if (activeFleetCurrentStep != undefined && activeFleetPreviewStep != undefined) {
+                        onFlagChange(
+                            [activeFleetCurrentStep.classFlagStatus, activeFleetCurrentStep.prepFlagStatus],
+                            buildNextFlagStatuses(activeFleetPreviewStep, followingFleetAfterStart)
+                        )
+                    }
+                    const nextStep = activeFleetCurrentStep
                     console.log('Next step', nextStep)
                     activeCurrentStep = nextStep
                     currentStepRef.current = nextStep
@@ -269,9 +283,15 @@ const RaceTimer: React.FC<RaceTimerProps> = ({
                     activeFleetOffset = newFleetOffset
                     fleetOffsetRef.current = newFleetOffset
                     onFleetCountdownStart(nextFleet.id)
+                    suppressNextHootRef.current = true
 
-                    activeWarningCompleted = false
-                    warningCompletedRef.current = false
+                    if (nextStep != undefined) {
+                        activeCurrentStep = nextStep
+                        currentStepRef.current = nextStep
+                    }
+
+                    activeWarningCompleted = true
+                    warningCompletedRef.current = true
                 }
             }
             // Add a prop to pass the updated time to the parent component
