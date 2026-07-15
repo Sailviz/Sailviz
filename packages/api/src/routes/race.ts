@@ -127,6 +127,9 @@ export async function findRace(id: string) {
             },
           },
         },
+        orderBy: {
+          id: "asc",
+        },
       },
     },
   });

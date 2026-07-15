@@ -644,30 +644,17 @@ function Page() {
         setRaceMode(tempRaceMode)
     }
 
-    useEffect(() => {
-        if (race == undefined) return
-        //sort by last lap when finish mode with single fleet
-        //if there is more than one fleet, we don't sort by last lap as it would get confusing
-        if (raceMode.length == 1 && raceMode[0] == raceModeType.Finish) {
-            sortByLastLap(race.fleets.flatMap(fleet => fleet.results!))
-        } else if (raceMode.length == 1 && raceMode[0] == raceModeType.Lap) {
-            //this doesn't work on first load as the results are not loaded yet
-            dynamicSort(race.fleets.flatMap(fleet => fleet.results!))
-            console.log('Sorting with dynamic sort')
-        } else {
-            dynamicSort(race.fleets.flatMap(fleet => fleet.results!))
-        }
-    }, [raceMode])
-
     //on page
     useEffect(() => {
         if (race == undefined) return
         console.log(race)
         setStartTime(race.sequenceStartTime + (race.series?.startSequence == '541go' ? 5 * 60 : 60))
-        if (raceMode.length == 1 && raceMode[0] == raceModeType.Lap) {
+        if (raceMode.length > 1) {
             dynamicSort(race.fleets.flatMap(fleet => fleet.results!))
-        } else {
+        } else if (raceMode[0] == raceModeType.Finish) {
             sortByLastLap(race.fleets.flatMap(fleet => fleet.results!))
+        } else {
+            dynamicSort(race.fleets.flatMap(fleet => fleet.results!))
         }
 
         //check for all fleets finished?
@@ -688,7 +675,7 @@ function Page() {
                 // if any boat in the fleet has finished, the fleet must be in finish mode
                 setRaceMode([...raceMode.slice(0, index), raceModeType.Finish, ...raceMode.slice(index + 1)])
             } else {
-                if (race.fleets[0]!.startTime != 0) {
+                if (fleet.startTime != 0) {
                     // if the fleet has started, but no boat has finished it must be in lap mode
                     setRaceMode([...raceMode.slice(0, index), raceModeType.Lap, ...raceMode.slice(index + 1)])
                 } else {
