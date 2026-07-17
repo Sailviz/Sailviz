@@ -37,7 +37,13 @@ export async function findTodaysRace(orgId: string) {
     include: {
       fleets: {
         include: {
-          fleetSettings: true,
+          fleetSettings: {
+            include: {
+              classFlag: true,
+              preparatoryFlag: true,
+              boats: true,
+            },
+          },
         },
       },
       series: {
@@ -331,7 +337,13 @@ export const race_delete = os.race.delete.handler(async ({ input }) => {
     include: {
       fleets: {
         include: {
-          fleetSettings: true,
+          fleetSettings: {
+            include: {
+              classFlag: true,
+              preparatoryFlag: true,
+              boats: true,
+            },
+          },
         },
       },
       series: {
@@ -392,7 +404,13 @@ export const race_create = os.race.create.handler(async ({ input }) => {
       },
       fleets: {
         include: {
-          fleetSettings: true,
+          fleetSettings: {
+            include: {
+              classFlag: true,
+              preparatoryFlag: true,
+              boats: true,
+            },
+          },
         },
       },
     },
@@ -492,7 +510,13 @@ export const race_org = os.race.org.handler(async ({ input }) => {
       },
       fleets: {
         include: {
-          fleetSettings: true,
+          fleetSettings: {
+            include: {
+              classFlag: true,
+              preparatoryFlag: true,
+              boats: true,
+            },
+          },
         },
       },
     },

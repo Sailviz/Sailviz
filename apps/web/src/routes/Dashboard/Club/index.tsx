@@ -114,6 +114,7 @@ function Page() {
                     <Button onClick={addDuty}>Add Duty</Button>
                 </p>
                 <ImageUpload buttonText='upload Banner' owner={OwnerType.organization} category={ImageCategory.Banner} s3key={() => {}} />
+                <p className='text-2xl font-bold'>Default Class Flags</p>
                 <div className='flex flex-row p-6'>
                     <div className='flex flex-col px-6 w-full'>
                         <p className='text-2xl font-bold'>Class</p>

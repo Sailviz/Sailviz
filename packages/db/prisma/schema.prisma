@@ -114,10 +114,10 @@ model orgData {
   duties                   Duties[]
   organization             Organization @relation(references: [id], fields: [organizationId])
   organizationId           String       @unique
-  defaultClassFlag         Flag?        @relation("OrgDataDefaultClassFlag", fields: [defaultClassFlagId], references: [id])
-  defaultClassFlagId       String?
-  defaultPreparatoryFlag   Flag?        @relation("OrgDataDefaultPreparatoryFlag", fields: [defaultPreparatoryFlagId], references: [id])
-  defaultPreparatoryFlagId String?
+  defaultClassFlag         Flag         @relation("OrgDataDefaultClassFlag", fields: [defaultClassFlagId], references: [id])
+  defaultClassFlagId       String
+  defaultPreparatoryFlag   Flag         @relation("OrgDataDefaultPreparatoryFlag", fields: [defaultPreparatoryFlagId], references: [id])
+  defaultPreparatoryFlagId String
 }
 
 model Duties {

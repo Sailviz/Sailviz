@@ -160,7 +160,7 @@ export const flag_custom_update = os.flag.org.update
     const clubId = session?.session.activeOrganizationId as string;
     const flagToUpdate = await prisma.flag.findFirst({
       where: {
-        flagId: input.id,
+        id: input.id,
         orgId: clubId,
       },
     });
@@ -194,7 +194,7 @@ export const flag_custom_delete = os.flag.org.delete
     const clubId = session?.session.activeOrganizationId as string;
     const flagToDelete = await prisma.flag.findFirst({
       where: {
-        flagId: input.flagId,
+        id: input.flagId,
         orgId: clubId,
       },
     });

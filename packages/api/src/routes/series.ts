@@ -131,6 +131,16 @@ export const createSeries = os.series.create.handler(async ({ input }) => {
             id: newSeries.id,
           },
         },
+        classFlag: {
+          connect: {
+            id: club.orgData!.defaultClassFlag.id,
+          },
+        },
+        preparatoryFlag: {
+          connect: {
+            id: club.orgData!.defaultPreparatoryFlag.id,
+          },
+        },
       },
     });
     return newSeries;

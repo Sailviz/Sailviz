@@ -148,6 +148,8 @@ export const orgData_update = os.organization.orgData.update.handler(
       },
       include: {
         duties: true,
+        defaultClassFlag: true,
+        defaultPreparatoryFlag: true,
       },
     });
     if (!updatedOrgData) {

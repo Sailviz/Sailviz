@@ -163,10 +163,19 @@ export const user_results_all = os.user.results.all
           in: fleets.map((fleet) => fleet.raceId),
         },
       },
+      orderBy: {
+        sequenceStartTime: "desc",
+      },
       include: {
         fleets: {
           include: {
-            fleetSettings: true,
+            fleetSettings: {
+              include: {
+                classFlag: true,
+                preparatoryFlag: true,
+                boats: true,
+              },
+            },
           },
         },
         series: {
@@ -298,7 +307,12 @@ export const user_favouriteOrgs = os.user.favouriteOrgs
       include: {
         organization: {
           include: {
-            orgData: true,
+            orgData: {
+              include: {
+                defaultClassFlag: true,
+                defaultPreparatoryFlag: true,
+              },
+            },
           },
           omit: {
             stripeCustomerId: true,

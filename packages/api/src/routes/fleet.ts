@@ -102,12 +102,12 @@ export const createFleetSettings = os.fleet.settings.create
         start: 0,
         classFlag: {
           connect: {
-            id: orgData.defaultClassFlag.id,
+            id: orgData.defaultClassFlagId,
           },
         },
         preparatoryFlag: {
           connect: {
-            id: orgData.defaultPreparatoryFlag.id,
+            id: orgData.defaultPreparatoryFlagId,
           },
         },
       },
