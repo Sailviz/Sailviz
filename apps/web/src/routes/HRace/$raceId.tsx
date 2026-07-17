@@ -259,11 +259,24 @@ function Page() {
                 race.fleets[index].recalls += 1
                 const maxStartTime = race.fleets.reduce((max, fleet) => (fleet.startTime > max ? fleet.startTime : max), 0)
                 console.log('Max start time: ' + maxStartTime)
-                race.fleets[index].startTime = maxStartTime + (race.series!.startSequence == '541go' ? 5 * 60 : 1 * 60)
-                console.log('Setting start time for fleet ' + race.fleets[index].id + ' to ' + race.fleets[index].startTime)
-                console.log(race.fleets)
-                await updateFleetMutation.mutateAsync(race.fleets[index])
-                await queryClient.invalidateQueries({ queryKey: raceQueryOptions.queryKey })
+
+                if (race.fleets[index].startTime == maxStartTime) {
+                    // if the fleet recalled is the last fleet we need to go into sequence hold
+
+                    race.fleets[index].startTime = 0
+                    await updateFleetMutation.mutateAsync(race.fleets[index])
+
+                    await queryClient.invalidateQueries({ queryKey: raceQueryOptions.queryKey })
+
+                    setRaceState(raceStateType.sequenceHold)
+                    setFlagModal(false)
+                } else {
+                    race.fleets[index].startTime = maxStartTime + (race.series!.startSequence == '541go' ? 5 * 60 : 1 * 60)
+                    console.log('Setting start time for fleet ' + race.fleets[index].id + ' to ' + race.fleets[index].startTime)
+                    console.log(race.fleets)
+                    await updateFleetMutation.mutateAsync(race.fleets[index])
+                    await queryClient.invalidateQueries({ queryKey: raceQueryOptions.queryKey })
+                }
             }
             setRecallModal(false)
         }
