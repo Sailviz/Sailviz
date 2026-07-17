@@ -19,8 +19,8 @@ scp -r apps/web/dist/* root@192.168.3.16:/var/www/web/release
 
 # send api files to server
 Write-Host "Deploying API files to server..."
-scp -r packages/api/dist/* root@192.168.3.17:/api
+scp -r packages/api/dist/* root@192.168.3.15:/api
 
 # restart api server
 Write-Host "Restarting API server..."
-ssh root@192.168.3.17 "pm2 restart sailviz-api"
+ssh root@192.168.3.15 "pm2 restart sailviz-api"
