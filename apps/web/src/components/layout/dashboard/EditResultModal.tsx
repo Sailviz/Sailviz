@@ -122,10 +122,10 @@ export default function EditResultModal({
 
     return (
         <Dialog open={open} onOpenChange={() => onClose()}>
-            <DialogContent className='max-w-8/12' title='Edit Result'>
-                <DialogHeader className='flex flex-col gap-1 text-2xl w-96'>Edit Result</DialogHeader>
-                <div className='flex flex-col w-full'>
-                    <div className='flex flex-row w-full'>
+            <DialogContent className='max-w-full md:max-w-8/12 ' title='Edit Result'>
+                <DialogHeader className='flex flex-col gap-1'>Edit Result</DialogHeader>
+                <div className='-mx-4 no-scrollbar max-h-[50vh] overflow-y-auto px-4 md:max-h-full'>
+                    <div className='flex  w-full flex-col md:flex-row'>
                         <div className='flex flex-col px-6 w-full'>
                             <p className='text-2xl font-bold'>Helm</p>
 
@@ -206,7 +206,7 @@ export default function EditResultModal({
                                 <p className='text-2xl font-bold py-6'>Result Info</p>
                             </div>
 
-                            <div className='flex flex-row mt-2'>
+                            <div className='flex flex-col md:flex-row mt-2'>
                                 <div className='flex flex-col px-6 w-1/4'>
                                     <p className='text-2xl font-bold'>Finish Code</p>
 
@@ -304,7 +304,7 @@ export default function EditResultModal({
                                     )}
                                 </div>
                             </div>
-                            <div className='flex flex-row mt-2 px-6'>
+                            <div className='flex flex-col md:flex-row mt-2 px-6'>
                                 <Switch
                                     id={'AdvancedModeSwitch'}
                                     checked={viewLaps}
@@ -318,7 +318,7 @@ export default function EditResultModal({
                                 </label>
                             </div>
                             {viewLaps ? (
-                                <div className='flex flex-row w-full flex-wrap' id='LapData'>
+                                <div className='flex flex-col md:flex-row w-full flex-wrap' id='LapData'>
                                     {result?.laps.map((lap: LapDataType, index: number) => {
                                         return (
                                             <div className='flex flex-col px-6 w-min' key={lap.time + index}>

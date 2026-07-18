@@ -117,7 +117,7 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
                         {sidebar ? (
                             <SidebarProvider defaultOpen={true}>
                                 <AppSidebar navCollections={collection!} />
-                                <SidebarInset>
+                                <SidebarInset className='overflow-x-hidden'>
                                     {/* page main content */}
                                     <Header />
                                     <Outlet />

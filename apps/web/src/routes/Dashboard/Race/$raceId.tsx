@@ -3,7 +3,6 @@ import dayjs from 'dayjs'
 import FleetHandicapResultsTable from '@components/tables/FleetHandicapResultsTable'
 import FleetPursuitResultsTable from '@components/tables/FleetPursuitResultsTable'
 import { AVAILABLE_PERMISSIONS, userHasPermission } from '@components/helpers/users'
-import { Breadcrumbs } from '@components/breadcrumbs'
 import { Input } from '@components/ui/input'
 import { Button } from '@components/ui/button'
 import { createFileRoute, Link, useLoaderData } from '@tanstack/react-router'
@@ -17,6 +16,7 @@ import { orpcClient } from '@lib/orpc'
 import type { RaceType } from '@sailviz/types'
 import type { Session } from '@sailviz/auth/client'
 import CourseEntry from '@components/layout/CourseEntry'
+import PageContainer from '@components/layout/page-container'
 
 function Page() {
     const { raceId } = Route.useParams()
@@ -148,17 +148,16 @@ function Page() {
         return <PageSkeleton />
     }
     return (
-        <div id='race' className='h-full w-full overflow-y-auto'>
+        <PageContainer scrollable={false}>
             <div className='flex flex-wrap justify-center gap-4 w-full'>
                 <div className='flex flex-wrap px-4 divide-y divide-solid w-full justify-center'>
-                    <div className='py-4 w-3/5'>
-                        <Breadcrumbs />
+                    <div className='py-4 md:w-3/5 w-full'>
                         <p className='text-2xl'>{race.Type} Race</p>
                         <p className='text-2xl'>{dayjs(race.Time).format('DD/MM/YYYY HH:mm')}</p>
                     </div>
-                    <div className='py-4 w-3/5 justify-center'>
+                    <div className='py-4 md:w-3/5 w-full hidden  md:block justify-center'>
                         <p className='text-xl font-medium text-center'>Duty Team</p>
-                        <div className='flex flex-wrap justify-stretch'>
+                        <div className='flex flex-wrap justify-stretch md:flex-row flex-col'>
                             {Object.entries(race.Duties).map(([displayName, name], index) => {
                                 return (
                                     <div key={'duty' + index} className='flex-col w-1/3 pr-4'>
@@ -186,9 +185,7 @@ function Page() {
                     <div className='py-4 w-4/5'>
                         <div className='flex flex-wrap justify-center'>
                             <Link to={race.Type == 'Handicap' ? `/HRace/${race.id}` : `/PRace/${race.id}`}>
-                                <Button className='mx-1' variant={'green'}>
-                                    Race Mode
-                                </Button>
+                                <Button variant={'green'}>Race Mode</Button>
                             </Link>
                             <CreateResultModal race={race} boats={boats} />
                             {race.Type == 'Handicap' ? (
@@ -206,7 +203,7 @@ function Page() {
                             {userHasPermission(session.user, AVAILABLE_PERMISSIONS.DownloadResults) ? <Button onClick={downloadResults}>Download Results</Button> : <></>}
                         </div>
                     </div>
-                    <div className='py-4 w-full'>
+                    <div className='py-4 w-full hidden md:block'>
                         <CourseEntry raceId={race.id} />
                     </div>
                     <div className='py-4 w-full'>
@@ -233,7 +230,7 @@ function Page() {
                     </div>
                 </div>
             </div>
-        </div>
+        </PageContainer>
     )
 }
 

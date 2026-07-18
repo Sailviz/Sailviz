@@ -53,7 +53,7 @@ export function Breadcrumbs() {
             <Breadcrumb>
                 <BreadcrumbList>
                     <Fragment>
-                        <BreadcrumbItem className='hidden md:block'>
+                        <BreadcrumbItem>
                             {/* this is an invisible character to stop page moving when breadcrums is calculated */}
                             <BreadcrumbLink>{'\u00A0'}</BreadcrumbLink>
                         </BreadcrumbItem>
@@ -68,11 +68,11 @@ export function Breadcrumbs() {
                 {items.map((item, index) => (
                     <Fragment key={item.title}>
                         {index !== items.length - 1 && (
-                            <BreadcrumbItem className='hidden md:block'>
+                            <BreadcrumbItem>
                                 <BreadcrumbLink href={item.link}>{item.title}</BreadcrumbLink>
                             </BreadcrumbItem>
                         )}
-                        {index < items.length - 1 && <BreadcrumbSeparator className='hidden md:block'>&gt;</BreadcrumbSeparator>}
+                        {index < items.length - 1 && <BreadcrumbSeparator>&gt;</BreadcrumbSeparator>}
                         {index === items.length - 1 && <BreadcrumbPage>{item.title}</BreadcrumbPage>}
                     </Fragment>
                 ))}
