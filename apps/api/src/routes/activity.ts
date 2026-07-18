@@ -8,6 +8,7 @@ import { XMLParser } from "fast-xml-parser";
 import { Point } from "@influxdata/influxdb-client";
 import { influxQuery, influxWrite } from "./../influx";
 import * as Types from "@sailviz/types";
+import { analysisQueue } from "@sailviz/queue";
 
 const minioClient = new MinioClient({
   endPoint:
@@ -99,6 +100,10 @@ export const activity_saveMetadata = os.activity.saveMetadata.handler(
         endTime: endTime,
         type: "Sail",
       },
+    });
+
+    await analysisQueue.add("analyseActivity", {
+      activityId: newActivity.id,
     });
 
     return newActivity;

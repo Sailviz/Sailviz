@@ -5,7 +5,7 @@
   },
   "scripts": {
     "generateConfig": "node scripts/generate-config.js && node ../../packages/auth/scripts/generate-config.js",
-    "predev": "cross-env NODE_ENV=development && pnpm -w --filter @sailviz/auth build && npm run generateConfig",
+    "predev": "cross-env NODE_ENV=development && pnpm -w --filter @sailviz/auth build && pnpm -w --filter @sailviz/queue build && npm run generateConfig",
     "dev": "tsx src/server.ts",
     "postbuild": "node scripts/copy-db-generated.cjs",
     "prebuild": "cross-env NODE_ENV=development && pnpm -w --filter @sailviz/auth build && npm run generateConfig",
@@ -23,6 +23,7 @@
     "@sailviz/auth": "workspace:*",
     "@sailviz/db": "workspace:*",
     "@sailviz/types": "workspace:*",
+    "@sailviz/queue": "workspace:*",
     "better-auth": "^1.4.10",
     "cors": "^2.8.5",
     "dayjs": "^1.11.18",
