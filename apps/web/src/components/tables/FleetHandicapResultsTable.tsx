@@ -12,7 +12,7 @@ import MapDialog from '@components/layout/dashboard/MapModal'
 import type { Session } from '@lib/session'
 import { useLoaderData } from '@tanstack/react-router'
 import { Input } from '@components/ui/input'
-import { XMLParser } from 'fast-xml-parser'
+import { useUploadGPXFile } from '@features/activities/upload'
 
 const Text = ({ value }: { value: string }) => {
     return <div className=' text-center'>{value}</div>
@@ -52,8 +52,9 @@ const FleetHandicapResultsTable = ({ fleetId, editable, advancedEdit, showTime }
     const session: Session = useLoaderData({ from: `__root__` })
 
     const queryClient = useQueryClient()
-    const createParticipantMutation = useMutation(orpcClient.trackable.participant.create.mutationOptions())
-    const updateResultMutation = useMutation(orpcClient.result.update.mutationOptions())
+    const { uploadGPXFile } = useUploadGPXFile()
+
+    const linkActivityToResult = useMutation(orpcClient.activity.linkToResult.mutationOptions())
 
     const [editModalOpen, setEditModalOpen] = useState(false)
     const [viewModalOpen, setViewModalOpen] = useState(false)
@@ -159,83 +160,29 @@ const FleetHandicapResultsTable = ({ fleetId, editable, advancedEdit, showTime }
         )
     })
 
-    const processGPX = async (text: string, resultId: string) => {
-        const parser = new XMLParser({
-            ignoreAttributes: false,
-            attributeNamePrefix: ''
-        })
-        const jsonObj = parser.parse(text)
-        const trackPoints = jsonObj.gpx.trk.trkseg.trkpt
-        console.log('trackPoints', trackPoints)
-        const rows = trackPoints.map((pt: any) => ({
-            timestamp: Math.floor(new Date(pt.time).getTime()),
-            lat: parseFloat(pt.lat),
-            lon: parseFloat(pt.lon),
-            accelerometer: { x: 0, y: 0, z: 0 },
-            gyro: { x: 0, y: 0, z: 0 }
-        }))
-
-        // check if result has an associated participant in trackable, if not, create one.
-        const result = fleet?.results?.find(r => r.id == resultId)
-        if (!result) {
-            console.error('Result not found for id', resultId)
-            return
-        }
-        if (!race?.trackableEventId) {
-            console.error('Race not found for fleet', fleetId)
-            return
-        }
-        let participantId = result.trackableParticipantId
-        if (participantId == null) {
-            //get the id of a tracker that hasn't been used for the event yet
-
-            // create a new trackable participant for this result
-            const participant = await createParticipantMutation.mutateAsync({ eventId: race.trackableEventId, deviceId: null, name: `${result.SailNumber}  ${result.Helm}` })
-            participantId = participant.id
-
-            await updateResultMutation.mutateAsync({ ...result, trackableParticipantId: participantId })
-        }
-
-        const url = import.meta.env.VITE_TRACKABLE_URL + `/api/tracker/high-res-data?participantId=${participantId}`
-
-        const res = await fetch(url, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(rows)
-        })
-
-        if (!res.ok) {
-            console.error('Upload failed', await res.text())
-            return
-        }
-
-        console.log('Upload OK')
-        queryClient.invalidateQueries({ queryKey: orpcClient.fleet.find.queryKey({ input: { fleetId } }) })
-    }
-
     const entryFileUploadHandler = async (e: ChangeEvent<HTMLInputElement>, resultId: string) => {
         const inputEl = e.target
         const file = inputEl.files?.[0]
         if (!file) {
             return
         }
-        // Reset the input so selecting the same file again will fire onChange
-        inputEl.value = ''
-        const reader = new FileReader()
-        reader.onload = async () => {
-            const text = reader.result as string
-            await processGPX(text, resultId)
+
+        const activity = await uploadGPXFile(file, resultId)
+        if (!activity) {
+            console.error('Failed to upload activity')
+            return
         }
-        reader.readAsText(file)
+        await linkActivityToResult.mutateAsync({ activityId: activity.id, resultId })
+        // Reset the input so selecting the same file again will fire onChange
+
+        await queryClient.invalidateQueries({ queryKey: orpcClient.fleet.find.queryKey({ input: { fleetId } }) })
     }
 
     const trackableColumn = columnHelper.accessor('id', {
         id: 'Trackable',
         header: 'Map',
         cell: props => {
-            if (props.row.original.trackableParticipantId) {
+            if (props.row.original.trackableParticipantId || props.row.original.activityId) {
                 return (
                     <Button
                         onClick={() => {

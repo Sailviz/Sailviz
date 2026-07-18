@@ -46,6 +46,7 @@ export const ResultSchema = z.object({
   Crew: z.string(),
   userId: z.string().nullable().optional(),
   trackableParticipantId: z.string().nullable(),
+  activityId: z.string().nullable(),
   SailNumber: z.string(),
   finishTime: z.number(),
   numberLaps: z.number(),
@@ -239,6 +240,24 @@ export type TrackerDataType = {
   };
 };
 
+export const PositionSchema = z.object({
+  lat: z.number(),
+  lon: z.number(),
+  timestamp: z.number(),
+});
+export type Position = z.infer<typeof PositionSchema>;
+
+export const ActivitySchema = z.object({
+  id: z.string(),
+  s3Key: z.string(),
+  createdAt: z.date(),
+  startTime: z.number(),
+  endTime: z.number(),
+  type: z.string(),
+  position: z.array(PositionSchema).optional(),
+});
+export type Activity = z.infer<typeof ActivitySchema>;
+
 export const stripeSchema = z.object({
   customerId: z.string(),
   subscriptionId: z.string().nullable(),
@@ -284,13 +303,6 @@ export const DeviceSchema = z.object({
   firmwareVersion: z.any().optional().nullable(),
 });
 export type Device = z.infer<typeof DeviceSchema>;
-
-export const PositionSchema = z.object({
-  lat: z.number(),
-  lon: z.number(),
-  timestamp: z.number(),
-});
-export type Position = z.infer<typeof PositionSchema>;
 
 export const TrackerSchema = z.object({
   id: z.string(),

@@ -255,7 +255,7 @@ model Fleet {
 }
 
 model Result {
-  id                     String  @id @unique @default(uuid())
+  id                     String    @id @unique @default(uuid())
   fleetId                String?
   Helm                   String
   Crew                   String
@@ -269,11 +269,33 @@ model Result {
   resultCode             String
   numberLaps             Int
   laps                   Lap[]
-  boat                   Boat?   @relation(fields: [boatId], references: [id])
-  fleet                  Fleet?  @relation(fields: [fleetId], references: [id], onDelete: Cascade)
+  boat                   Boat?     @relation(fields: [boatId], references: [id])
+  fleet                  Fleet?    @relation(fields: [fleetId], references: [id], onDelete: Cascade)
   userId                 String?
-  user                   User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user                   User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
   trackableParticipantId String?
+  activity               Activity? @relation(fields: [activityId], references: [id])
+  activityId             String?   @unique
+}
+
+// This model is used to store the activities uploaded by users. Each activity can be linked to a result, but it doesn't need to be.
+model Activity {
+  id                 String            @id @unique @default(uuid())
+  type               String
+  result             Result?
+  s3Key              String
+  createdAt          DateTime          @default(now())
+  startTime          Int
+  endTime            Int
+  activityAnalyses   ActivityAnalysis? @relation(fields: [activityAnalysisId], references: [id])
+  activityAnalysisId String?           @unique
+}
+
+model ActivityAnalysis {
+  id       String    @id @unique @default(uuid())
+  activity Activity?
+  distance Float
+  MaxSpeed Float
 }
 
 model Lap {

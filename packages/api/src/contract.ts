@@ -345,6 +345,54 @@ export const ORPCcontract = {
         .output(Types.flagSchema),
     },
   },
+  activity: {
+    createUploadUrl: oc
+      .input(
+        z.object({
+          userId: z.string().nullable(),
+        }),
+      )
+      .output(
+        z.object({
+          uploadUrl: z.string(),
+          id: z.string(),
+          key: z.string(),
+        }),
+      ),
+    saveMetadata: oc
+      .input(
+        z.object({
+          id: z.string(),
+          s3key: z.string(),
+        }),
+      )
+      .output(Types.ActivitySchema),
+    linkToResult: oc
+      .input(
+        z.object({
+          activityId: z.string(),
+          resultId: z.string(),
+        }),
+      )
+      .output(z.any()),
+    getURL: oc
+      .input(
+        z.object({
+          s3key: z.string(),
+        }),
+      )
+      .output(z.string()),
+    find: oc
+      .input(z.object({ activityId: z.string() }))
+      .output(Types.ActivitySchema),
+    positions: oc
+      .input(
+        z.object({
+          activityId: z.string(),
+        }),
+      )
+      .output(z.array(Types.PositionSchema)),
+  },
   trackable: {
     participant: {
       create: oc

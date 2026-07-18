@@ -103,6 +103,14 @@ import {
   flag_standard_all,
   flag_update,
 } from "./routes/flag";
+import {
+  activity_createUploadUrl,
+  activity_find,
+  activity_getURL,
+  activity_linkToResult,
+  activity_positions,
+  activity_saveMetadata,
+} from "./routes/activity";
 
 const os = implement(ORPCcontract);
 
@@ -237,6 +245,14 @@ export const mainRouter = os.router({
       delete: flag_custom_delete,
       create: flag_custom_create,
     },
+  },
+  activity: {
+    createUploadUrl: activity_createUploadUrl,
+    saveMetadata: activity_saveMetadata,
+    find: activity_find,
+    positions: activity_positions,
+    linkToResult: activity_linkToResult,
+    getURL: activity_getURL,
   },
   trackable: {
     participant: {

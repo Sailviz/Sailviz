@@ -104,7 +104,8 @@ function Page() {
         HandicapPosition: 0,
         resultCode: '',
         fleetId: '',
-        trackableParticipantId: null
+        trackableParticipantId: null,
+        activityId: null
     })
 
     const [fleetTime, setFleetTime] = useState<number>(0)
