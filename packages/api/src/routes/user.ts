@@ -164,7 +164,7 @@ export const user_results_all = os.user.results.all
         },
       },
       orderBy: {
-        sequenceStartTime: "desc",
+        Time: "desc",
       },
       include: {
         fleets: {
