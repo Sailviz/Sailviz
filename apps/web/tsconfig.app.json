@@ -6,7 +6,7 @@
             "@features/*": ["./src/features/*"],
             "@lib/*": ["./src/lib/*"],
             "@sailviz/auth/*": ["../../packages/auth/src/*"],
-            "@sailviz/api/*": ["../../packages/api/src/*"],
+            "@sailviz/api/*": ["../../apps/api/src/*"],
             "@sailviz/types": ["../../packages/types/src/types"],
             "@hooks/*": ["./src/hooks/*"],
             "@documentation/*": ["./documentation/*"]

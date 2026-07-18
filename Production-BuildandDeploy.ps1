@@ -19,7 +19,7 @@ scp -r apps/web/dist/* root@192.168.3.16:/var/www/web/release
 
 # send api files to server
 Write-Host "Deploying API files to server..."
-scp -r packages/api/dist/* root@192.168.3.15:/api
+scp -r apps/api/dist/* root@192.168.3.15:/api
 
 # restart api server
 Write-Host "Restarting API server..."
