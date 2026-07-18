@@ -137,7 +137,7 @@ export const user_removeFavourite = os.user.removeFavourite
 
 export const user_results_all = os.user.results.all
   .use(authMiddleware)
-  .handler(async ({ context }) => {
+  .handler(async ({ context, input }) => {
     const session = context.session as any;
     if (!session || !session.user) {
       throw new ORPCError("UNAUTHORIZED", { message: "Login required" });
@@ -157,6 +157,7 @@ export const user_results_all = os.user.results.all
       },
     });
     console.log("Fleets for user results:", fleets);
+    const count = fleets.length;
     const races = await prisma.race.findMany({
       where: {
         id: {
@@ -166,6 +167,8 @@ export const user_results_all = os.user.results.all
       orderBy: {
         Time: "desc",
       },
+      take: input.pageSize,
+      skip: (input.page - 1) * input.pageSize,
       include: {
         fleets: {
           include: {
@@ -185,7 +188,7 @@ export const user_results_all = os.user.results.all
         },
       },
     });
-    return races as Types.RaceType[];
+    return { resultCount: count, results: races as Types.RaceType[] };
   });
 
 export const user_signOnProfile_create = os.user.signOnProfile.create

@@ -292,7 +292,19 @@ export const ORPCcontract = {
         .output(Types.signOnProfileSchema),
     },
     results: {
-      all: oc.output(z.array(Types.RaceSchema)),
+      all: oc
+        .input(
+          z.object({
+            page: z.number(),
+            pageSize: z.number(),
+          }),
+        )
+        .output(
+          z.object({
+            resultCount: z.number(),
+            results: z.array(Types.RaceSchema),
+          }),
+        ),
     },
   },
   globalConfig: {
