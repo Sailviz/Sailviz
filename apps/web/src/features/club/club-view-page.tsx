@@ -92,17 +92,17 @@ const ClubViewPage = ({ orgName }: { orgName: string }) => {
                     </div>
                     <Separator />
                     <div className='flex flex-row'>
-                        <div className='flex-col w-1/2 px-4'>
+                        <div className='flex-col md:w-1/2 px-4'>
                             <Heading title={'Races Today'} description={''} />
                             <UpcomingRacesTable orgId={club.id} viewHref={`Race/`} />
                         </div>
                     </div>
-                    <div className='flex flex-row'>
-                        <div className='flex-col w-1/2 px-4'>
+                    <div className='flex md:flex-row flex-col'>
+                        <div className='flex-col md:w-1/2 px-4'>
                             <Heading title={'Latest Races'} description={''} />
                             <RaceTable historical={true} filters={raceTableFilters} date={new Date()} orgId={club.id} />
                         </div>
-                        <div className='flex-col w-1/2 px-4'>
+                        <div className='flex-col md:w-1/2 px-4'>
                             <Heading title={'Series'} description={''} />
                             <SeriesTable filters={seriesTableFilters} orgId={club.id} />
                         </div>

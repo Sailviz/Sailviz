@@ -183,7 +183,7 @@ export default function CreateResultModal({ org }: { org: Types.Org }) {
             </DialogTrigger>
             <DialogContent className='max-w-full'>
                 <DialogHeader className='flex flex-col gap-1'>Create New Entry</DialogHeader>
-                <div className='-mx-4 no-scrollbar max-h-[50vh] overflow-y-auto px-4 md:max-h-full'>
+                <div className='-mx-4 no-scrollbar max-h-[65vh] overflow-y-auto px-4 md:max-h-full'>
                     {signOnProfiles?.map(profile => {
                         return (
                             <div

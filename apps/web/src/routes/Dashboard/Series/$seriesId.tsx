@@ -100,7 +100,7 @@ function Page() {
     }
 
     return (
-        <PageContainer scrollable={true}>
+        <PageContainer scrollable={false}>
             <div id='series' className='w-full'>
                 <p className='text-6xl font-extrabold p-6'>{series?.name}</p>
                 <div className='p-6'>

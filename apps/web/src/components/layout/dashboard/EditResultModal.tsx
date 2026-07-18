@@ -122,9 +122,9 @@ export default function EditResultModal({
 
     return (
         <Dialog open={open} onOpenChange={() => onClose()}>
-            <DialogContent className='max-w-full md:max-w-8/12 ' title='Edit Result'>
+            <DialogContent className='max-w-full md:max-w-8/12' title='Edit Result'>
                 <DialogHeader className='flex flex-col gap-1'>Edit Result</DialogHeader>
-                <div className='-mx-4 no-scrollbar max-h-[50vh] overflow-y-auto px-4 md:max-h-full'>
+                <div className='-mx-4 no-scrollbar max-h-[65vh] overflow-y-auto px-4 md:max-h-full'>
                     <div className='flex  w-full flex-col md:flex-row'>
                         <div className='flex flex-col px-6 w-full'>
                             <p className='text-2xl font-bold'>Helm</p>
