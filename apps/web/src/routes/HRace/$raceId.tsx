@@ -127,7 +127,7 @@ function Page() {
 
         const sequenceStartTime = new Date().getTime() / 1000 + 15 // add buffer to ensure timer starts correctly
 
-        setStartTime(new Date().getTime() / 1000 + (race.series?.startSequence == '541go' ? 5 * 60 : 60)) // add buffer to ensure timer starts correctly
+        setStartTime(new Date().getTime() / 1000 + (race.series?.startSequence == '541go' ? 5 * 60 : 60) + 15) // add buffer to ensure timer starts correctly
 
         await updateRaceMutation.mutateAsync({ ...race, sequenceStartTime: sequenceStartTime })
 
