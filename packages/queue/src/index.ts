@@ -1,2 +1,2 @@
 export * from "./redis";
-export * from "./analysisQueue";
+export { analysisQueue } from "./analysisQueue";

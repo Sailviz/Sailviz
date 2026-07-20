@@ -4,7 +4,7 @@
     "./router": "./src/router.ts"
   },
   "scripts": {
-    "generateConfig": "node scripts/generate-config.js && node ../../packages/auth/scripts/generate-config.js",
+    "generateConfig": "node scripts/generate-config.js && node ../../packages/auth/scripts/generate-config.js && node ../../packages/activity/scripts/generate-config.js",
     "predev": "cross-env NODE_ENV=development && pnpm -w --filter @sailviz/auth build && pnpm -w --filter @sailviz/queue build && npm run generateConfig",
     "dev": "tsx src/server.ts",
     "postbuild": "node scripts/copy-db-generated.cjs",

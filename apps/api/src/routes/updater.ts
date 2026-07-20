@@ -24,11 +24,7 @@ type S3Object = {
 };
 
 const updaterBucket = config.MINIO_BUCKET_NAME;
-const updaterBaseUrl = buildMinioBaseUrl(
-  config.MINIO_ENDPOINT,
-  config.MINIO_PORT,
-  config.MINIO_USE_SSL,
-);
+const updaterBaseUrl = buildMinioBaseUrl(config.MINIO_ENDPOINT, true);
 const updaterAccessKey = config.MINIO_ACCESS_KEY;
 const updaterSecretKey = config.MINIO_SECRET_KEY;
 const updaterRegion = "us-east-1";
@@ -317,13 +313,13 @@ function maxDate(left: Date | undefined, right: Date | undefined) {
   return left > right ? left : right;
 }
 
-function buildMinioBaseUrl(endpoint: string, port: string, useSsl: string) {
-  if (!endpoint || !port) {
+function buildMinioBaseUrl(endpoint: string, useSsl: boolean) {
+  if (!endpoint) {
     return null;
   }
 
-  const protocol = useSsl.trim().toLowerCase() === "true" ? "https" : "http";
-  return `${protocol}://${endpoint.replace(/^https?:\/\//, "")}:${port}`;
+  const protocol = useSsl ? "https" : "http";
+  return `${protocol}://${endpoint.replace(/^https?:\/\//, "")}`;
 }
 
 function buildPublicArtifactUrl(publicBaseUrl: string, key: string) {

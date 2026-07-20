@@ -11,14 +11,8 @@ import * as Types from "@sailviz/types";
 import { analysisQueue } from "@sailviz/queue";
 
 const minioClient = new MinioClient({
-  endPoint:
-    (config.MINIO_ENDPOINT as string) ||
-    process.env.MINIO_ENDPOINT ||
-    "localhost",
-  port: Number((config.MINIO_PORT as any) || process.env.MINIO_PORT || 9000),
-  useSSL:
-    ((config.MINIO_USE_SSL as any) || process.env.MINIO_USE_SSL) === "true" ||
-    false,
+  endPoint: config.MINIO_ENDPOINT as string,
+  useSSL: true,
   accessKey:
     (config.MINIO_ACCESS_KEY as string) || process.env.MINIO_ACCESS_KEY || "",
   secretKey:

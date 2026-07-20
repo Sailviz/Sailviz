@@ -295,7 +295,7 @@ model ActivityAnalysis {
   id       String    @id @unique @default(uuid())
   activity Activity?
   distance Float
-  MaxSpeed Float
+  maxSpeed Float
 }
 
 model Lap {

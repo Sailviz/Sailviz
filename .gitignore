@@ -12,3 +12,5 @@ packages/db/src/config.ts
 ~/.tauri/myapp.key
 apps/desktop/src-tauri/gen/android/keystore.properties
 /packages/auth/dist
+/packages/queue/dist
+packages/activity/src/config.ts

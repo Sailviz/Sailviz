@@ -20,9 +20,13 @@
   "license": "ISC",
   "packageManager": "pnpm@10.18.1",
   "dependencies": {
+    "@sailviz/db": "workspace:*",
+    "@sailviz/types": "workspace:*",
     "bullmq": "^5.80.8",
     "dotenv": "^17.2.3",
+    "fast-xml-parser": "^5.9.3",
     "ioredis": "^5.11.1",
+    "minio": "^8.0.5",
     "ts-node": "^10.9.2",
     "zod": "^4.1.12"
   }

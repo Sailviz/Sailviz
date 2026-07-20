@@ -1,5 +1,5 @@
 export interface ActivityAnalysis {
-  totalDistance: number;
+  distance: number;
   maxSpeed: number;
   avgSpeed: number;
   vmgUpwind: number | null;
@@ -8,11 +8,20 @@ export interface ActivityAnalysis {
   gybeCount: number;
   durationSeconds: number;
 }
+export interface TrackPoint {
+  lat: number;
+  lon: number;
+  time: Date;
+}
+
+export interface Track {
+  points: TrackPoint[];
+}
 
 export function computeAnalysis(track: Track): ActivityAnalysis {
   if (track.points.length < 2) {
     return {
-      totalDistance: 0,
+      distance: 0,
       maxSpeed: 0,
       avgSpeed: 0,
       vmgUpwind: null,
@@ -23,7 +32,7 @@ export function computeAnalysis(track: Track): ActivityAnalysis {
     };
   }
 
-  let totalDistance = 0;
+  let distance = 0;
   let maxSpeed = 0;
   let sumSpeed = 0;
   let tackCount = 0;
@@ -44,7 +53,7 @@ export function computeAnalysis(track: Track): ActivityAnalysis {
     if (dt <= 0) continue;
 
     const d = haversine(a.lat, a.lon, b.lat, b.lon);
-    totalDistance += d;
+    distance += d;
 
     const speed = d / dt;
     sumSpeed += speed;
@@ -82,7 +91,7 @@ export function computeAnalysis(track: Track): ActivityAnalysis {
     1000;
 
   return {
-    totalDistance,
+    distance,
     maxSpeed,
     avgSpeed: sumSpeed / track.points.length,
     vmgUpwind: upwindVmgSamples.length ? average(upwindVmgSamples) : null,
