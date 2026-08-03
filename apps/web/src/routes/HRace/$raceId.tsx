@@ -271,7 +271,7 @@ function Page() {
                     setRaceState(raceStateType.sequenceHold)
                     setFlagModal(false)
                 } else {
-                    race.fleets[index].startTime = maxStartTime + (race.series!.startSequence == '541go' ? 5 * 60 : 1 * 60)
+                    race.fleets[index].startTime = maxStartTime + (race.series!.startSequence == '541go' ? 5 * 60 : 3 * 60)
                     console.log('Setting start time for fleet ' + race.fleets[index].id + ' to ' + race.fleets[index].startTime)
                     console.log(race.fleets)
                     await updateFleetMutation.mutateAsync(race.fleets[index])
@@ -295,7 +295,7 @@ function Page() {
 
         await Promise.all(
             fleetsToStart.map(async fleet => {
-                let startDelay = (fleet.fleetSettings.start - fleetsStarted.length) * (race.series!.startSequence === '541go' ? 5 * 60 : 1 * 60)
+                let startDelay = (fleet.fleetSettings.start - fleetsStarted.length) * (race.series!.startSequence === '541go' ? 5 * 60 : 3 * 60)
                 fleet.startTime = newSequenceStartTime + startDelay
                 console.log('Setting start time for fleet ' + fleet.id + ' to ' + fleet.startTime)
                 await updateFleetMutation.mutateAsync(fleet)
@@ -657,11 +657,15 @@ function Page() {
         setRaceMode(tempRaceMode)
     }
 
+    useEffect(() => {
+        console.log('race state changed to: ' + raceState)
+    }, [raceState])
+
     //on page
     useEffect(() => {
         if (race == undefined) return
         console.log(race)
-        setStartTime(race.sequenceStartTime + (race.series?.startSequence == '541go' ? 5 * 60 : 60))
+        setStartTime(race.sequenceStartTime + (race.series?.startSequence == '541go' ? 5 * 60 : 3 * 60))
         if (raceMode.length > 1) {
             dynamicSort(race.fleets.flatMap(fleet => fleet.results!))
         } else if (raceMode[0] == raceModeType.Finish) {
