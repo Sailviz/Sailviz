@@ -46,6 +46,7 @@ function Page() {
 
     const updateFleetMutation = useMutation(orpcClient.fleet.update.mutationOptions())
     const updateResultMutation = useMutation(orpcClient.result.update.mutationOptions())
+    const updateRaceMutation = useMutation(orpcClient.race.update.mutationOptions())
 
     const createLapMutation = useMutation(orpcClient.lap.create.mutationOptions())
 
@@ -61,7 +62,7 @@ function Page() {
     const [countdownFleet, setCountdownFleet] = useState<Types.FleetType | null>(null)
 
     var [lastAction, setLastAction] = useState<{ type: string; resultId: string }>({ type: '', resultId: '' })
-
+    const [startTime, setStartTime] = useState<number>(0)
     const [raceState, setRaceState] = useState<raceStateType>(raceStateType.reset)
     const [lastRaceState, setLastRaceState] = useState<raceStateType>(raceStateType.reset)
     const [raceMode, setRaceMode] = useState<raceModeType[]>([])
@@ -98,6 +99,21 @@ function Page() {
     const [raceTime, setRaceTime] = useState<number>(0)
 
     const startRaceButton = async () => {
+        const sequenceStartTime = new Date().getTime() / 1000 + 15 // add buffer to ensure timer starts correctly
+
+        setStartTime(new Date().getTime() / 1000 + (race.series?.startSequence == '541go' ? 5 * 60 : 60) + 15) // add buffer to ensure timer starts correctly
+
+        await updateRaceMutation.mutateAsync({ ...race, sequenceStartTime: sequenceStartTime })
+
+        await Promise.all(
+            race.fleets.map(async fleet => {
+                let startDelay = fleet.fleetSettings.start * (race.series!.startSequence === '541go' ? 5 * 60 : 1 * 60)
+                fleet.startTime = sequenceStartTime + startDelay
+                console.log('Setting start time for fleet ' + fleet.id + ' to ' + fleet.startTime)
+                await updateFleetMutation.mutateAsync(fleet)
+            })
+        )
+
         setFlagModal(true)
         //set flag status to false
         setFlagStatus([])
@@ -315,7 +331,7 @@ function Page() {
 
     const calculate = async () => {
         await calculateResults(race, updateResultMutation)
-        navigate({ to: '/dashboard/Race/' + race.id })
+        navigate({ to: '/Demo/Race/' + race.id })
     }
 
     const finishBoat = async (resultId: string) => {
@@ -463,23 +479,18 @@ function Page() {
         setRaceMode(tempRaceMode)
     }
 
-    useEffect(() => {
-        //sort by last lap when finish mode with single fleet
-        //if there is more than one fleet, we don't sort by last lap as it would get confusing
-        if (raceMode.length == 1 && raceMode[0] == raceModeType.Finish) {
-            sortByLastLap(race.fleets.flatMap(fleet => fleet.results!))
-        } else if (raceMode.length == 1 && raceMode[0] == raceModeType.Lap) {
-            //this doesn't work on first load as the results are not loaded yet
-            dynamicSort(race.fleets.flatMap(fleet => fleet.results!))
-        }
-    }, [raceMode])
-
     //on page
     useEffect(() => {
         if (race == undefined) return
 
-        setRaceState(raceStateType.reset)
-        dynamicSort(race.fleets.flatMap(fleet => fleet.results!))
+        setStartTime(race.sequenceStartTime + (race.series?.startSequence == '541go' ? 5 * 60 : 60))
+        if (raceMode.length > 1) {
+            dynamicSort(race.fleets.flatMap(fleet => fleet.results!))
+        } else if (raceMode[0] == raceModeType.Finish) {
+            sortByLastLap(race.fleets.flatMap(fleet => fleet.results!))
+        } else {
+            dynamicSort(race.fleets.flatMap(fleet => fleet.results!))
+        }
 
         //check for all fleets finished?
         if (checkAllFinished(race.fleets.flatMap(fleet => fleet.results!))) {
@@ -543,7 +554,7 @@ function Page() {
                                 Race Time:
                                 <RaceTimer
                                     // start time is the max start time of all fleets, so that the timer starts at the latest start time.
-                                    startTime={race.fleets.reduce((max, step) => (step.startTime > max ? step.startTime : max), 0)}
+                                    startTime={startTime}
                                     onFlagChange={handleFlagChange}
                                     race={race}
                                     onHoot={handleHoot}
