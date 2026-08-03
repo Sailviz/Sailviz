@@ -16,6 +16,7 @@ import type { Session } from '@sailviz/auth/client'
 import useWebSocket from '@hooks/use-ws'
 import { ws_server, trackable_ws_server } from '@components/URL'
 import RecallDialog, { RecallType } from '@components/layout/dashboard/RecallModal'
+import { FlagIcon } from 'lucide-react'
 
 // these options are the same across all fleets
 enum raceStateType {
@@ -657,9 +658,9 @@ function Page() {
         setRaceMode(tempRaceMode)
     }
 
-    useEffect(() => {
-        console.log('race state changed to: ' + raceState)
-    }, [raceState])
+    const openFlagModal = () => {
+        setFlagModal(true)
+    }
 
     //on page
     useEffect(() => {
@@ -692,7 +693,7 @@ function Page() {
                 // if any boat in the fleet has finished, the fleet must be in finish mode
                 setRaceMode([...raceMode.slice(0, index), raceModeType.Finish, ...raceMode.slice(index + 1)])
             } else {
-                if (fleet.startTime != 0) {
+                if (fleet.startTime < new Date().getTime() / 1000 && fleet.startTime != 0) {
                     // if the fleet has started, but no boat has finished it must be in lap mode
                     setRaceMode([...raceMode.slice(0, index), raceModeType.Lap, ...raceMode.slice(index + 1)])
                 } else {
@@ -802,6 +803,13 @@ function Page() {
                                     }
                                 })()}
                             </div>
+                            <Button
+                                className='m-4 p-2'
+                                onClick={openFlagModal}
+                                hidden={raceState != raceStateType.running || !raceMode.some(mode => mode == raceModeType.None)}
+                            >
+                                <FlagIcon />
+                            </Button>
                         </div>
                     </div>
                     <div className='flex w-full shrink md:flex-row flex-col  justify-around'>
