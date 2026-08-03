@@ -126,13 +126,13 @@ function Page() {
 
         const sequenceStartTime = new Date().getTime() / 1000 + 15 // add buffer to ensure timer starts correctly
 
-        setStartTime(new Date().getTime() / 1000 + (race.series?.startSequence == '541go' ? 5 * 60 : 60) + 15) // add buffer to ensure timer starts correctly
+        setStartTime(new Date().getTime() / 1000 + (race.series?.startSequence == '541go' ? 5 * 60 : 3 * 60) + 15) // add buffer to ensure timer starts correctly
 
         await updateRaceMutation.mutateAsync({ ...race, sequenceStartTime: sequenceStartTime })
 
         await Promise.all(
             race.fleets.map(async fleet => {
-                let startDelay = fleet.fleetSettings.start * (race.series!.startSequence === '541go' ? 5 * 60 : 1 * 60)
+                let startDelay = fleet.fleetSettings.start * (race.series!.startSequence === '541go' ? 5 * 60 : 3 * 60)
                 fleet.startTime = sequenceStartTime + startDelay
                 console.log('Setting start time for fleet ' + fleet.id + ' to ' + fleet.startTime)
                 await updateFleetMutation.mutateAsync(fleet)

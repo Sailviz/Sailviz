@@ -42,7 +42,7 @@ const RaceTimer: React.FC<RaceTimerProps> = ({
             largestStep = 5 * 60 + 15
             break
         case '321go':
-            largestStep = 75 //3 * 60 + 15
+            largestStep = 3 * 60 + 15
     }
 
     race.fleets.sort((a, b) => a.startTime - b.startTime)
