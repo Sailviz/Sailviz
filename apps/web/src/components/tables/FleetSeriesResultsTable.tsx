@@ -153,7 +153,7 @@ const FleetSeriesResultsTable = ({ seriesId, fleetSettingsId }: { seriesId: stri
                             count++
                         }
                     })
-                    let average = total / count
+                    let average = Math.round(total / count)
                     tempresults[index]!.racePositions.splice(race.number - 1, 1, { race: race.number, position: average, discarded: false, resultCode: '' })
                 }
             })
