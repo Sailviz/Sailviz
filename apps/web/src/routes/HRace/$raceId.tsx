@@ -217,9 +217,14 @@ function Page() {
             //do nothing
             setRecallModal(false)
         } else if (recall == RecallType.Individual) {
-            // don't need to do anything
+            // just a single hoot:
+            sendMessage(JSON.stringify({ type: 'hootRequest', orgId: club.id, duration: 500 }))
             setRecallModal(false)
         } else if (recall == RecallType.General) {
+            sendMessage(JSON.stringify({ type: 'hootRequest', orgId: club.id, duration: 500 }))
+            setInterval(() => {
+                sendMessage(JSON.stringify({ type: 'hootRequest', orgId: club.id, duration: 500 }))
+            }, 1000)
             console.log(race)
             if (race.series?.settings.maintainSequence) {
                 console.log('maintaining sequence, rerunning fleet')
