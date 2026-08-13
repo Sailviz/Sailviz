@@ -153,14 +153,24 @@ const RaceTimer: React.FC<RaceTimerProps> = ({
             }
 
             console.log('Starting fleet ' + nextFleet.fleetSettings.name)
-            onFleetCountdownStart(nextFleet.id)
+            // onFleetCountdownStart(nextFleet.id)
+            activeFleetOffset = nextFleet.startTime - startTime!
 
             const steps = getSequenceStepsForFleet(nextFleet)
 
             activeSequenceSteps = steps
             sequenceStepsRef.current = steps
 
-            activeCurrentStep = steps[1]!
+            //this is bad, need to work out which step we are on based on the current time and the fleet offset
+            const timeLeft = calculateTimeLeft()
+            console.log('Time left', timeLeft)
+            console.log('Fleet offset', activeFleetOffset)
+            const fleetTime = Math.abs(timeLeft.time) - nextFleet.recalls * (race.series!.startSequence === '541go' ? 5 * 60 : 3 * 60) + activeFleetOffset
+            console.log(fleetTime)
+            const nextStep = steps.find(step => step.time + 1 < fleetTime) || steps[steps.length - 1]
+            console.log('Next step', nextStep)
+            activeCurrentStep = nextStep
+
             currentStepRef.current = activeCurrentStep
             onFlagChange([steps[0].classFlagStatus, steps[0].prepFlagStatus], [steps[1].classFlagStatus, steps[1].prepFlagStatus])
 
@@ -197,6 +207,7 @@ const RaceTimer: React.FC<RaceTimerProps> = ({
                 lastSequenceStartTimeRef.current !== race.sequenceStartTime)
 
         if (shouldInitializeSequence) {
+            console.log('Initializing sequence')
             initializeSequence()
         }
 
