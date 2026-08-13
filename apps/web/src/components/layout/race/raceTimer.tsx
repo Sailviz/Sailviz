@@ -168,11 +168,24 @@ const RaceTimer: React.FC<RaceTimerProps> = ({
             const fleetTime = Math.abs(timeLeft.time) - nextFleet.recalls * (race.series!.startSequence === '541go' ? 5 * 60 : 3 * 60) + activeFleetOffset
             console.log(fleetTime)
             const nextStep = steps.find(step => step.time + 1 < fleetTime) || steps[steps.length - 1]
+            const nextStepIndex = steps.findIndex(step => step.time + 1 < fleetTime) || steps.length - 1
             console.log('Next step', nextStep)
             activeCurrentStep = nextStep
 
             currentStepRef.current = activeCurrentStep
-            onFlagChange([steps[0].classFlagStatus, steps[0].prepFlagStatus], [steps[1].classFlagStatus, steps[1].prepFlagStatus])
+
+            if (nextStepIndex === steps.length - 1) {
+                console.log('No more steps, finishing sequence')
+                const sortedFleets = getSortedFleets()
+
+                const followingFleet = nextFleet ? sortedFleets.find(fleet => fleet.startTime > nextFleet.startTime) : undefined
+                onFlagChange([steps[nextStepIndex - 1].classFlagStatus, steps[nextStepIndex - 1].prepFlagStatus], buildNextFlagStatuses(nextStep, followingFleet))
+            } else {
+                onFlagChange(
+                    [steps[nextStepIndex - 1].classFlagStatus, steps[nextStepIndex - 1].prepFlagStatus],
+                    [steps[nextStepIndex].classFlagStatus, steps[nextStepIndex].prepFlagStatus]
+                )
+            }
 
             if (pendingChangesRef.current) {
                 const offset = timeLeftRef.current.time + 15 + (race.series!.startSequence === '541go' ? 5 * 60 : 3 * 60)
