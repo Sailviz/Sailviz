@@ -152,6 +152,8 @@ const RaceTimer: React.FC<RaceTimerProps> = ({
                 return
             }
 
+            onFleetCountdownStart(nextFleet.id)
+
             console.log('Starting fleet ' + nextFleet.fleetSettings.name)
             // onFleetCountdownStart(nextFleet.id)
             activeFleetOffset = nextFleet.startTime - startTime!
@@ -165,7 +167,7 @@ const RaceTimer: React.FC<RaceTimerProps> = ({
             const timeLeft = calculateTimeLeft()
             console.log('Time left', timeLeft)
             console.log('Fleet offset', activeFleetOffset)
-            const fleetTime = Math.abs(timeLeft.time) - nextFleet.recalls * (race.series!.startSequence === '541go' ? 5 * 60 : 3 * 60) + activeFleetOffset
+            const fleetTime = Math.abs(timeLeft.time - activeFleetOffset)
             console.log(fleetTime)
             const nextStep = steps.find(step => step.time + 1 < fleetTime) || steps[steps.length - 1]
             const nextStepIndex = steps.findIndex(step => step.time + 1 < fleetTime) || steps.length - 1
@@ -199,11 +201,11 @@ const RaceTimer: React.FC<RaceTimerProps> = ({
                 sequenceFinishedRef.current = false
                 warningCompletedRef.current = false
             } else if (race.series?.settings.maintainSequence == false) {
-                activeFleetOffset = 0
+                activeFleetOffset = nextFleet.startTime - startTime!
                 fleetOffsetRef.current = 0
                 pendingChangesRef.current = false
             } else {
-                activeFleetOffset = 0
+                activeFleetOffset = nextFleet.startTime - startTime!
                 fleetOffsetRef.current = 0
             }
 
