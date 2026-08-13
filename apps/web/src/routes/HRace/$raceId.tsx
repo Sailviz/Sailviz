@@ -222,7 +222,7 @@ function Page() {
             setRecallModal(false)
         } else if (recall == RecallType.General) {
             sendMessage(JSON.stringify({ type: 'hootRequest', orgId: club.id, duration: 500 }))
-            setInterval(() => {
+            setTimeout(() => {
                 sendMessage(JSON.stringify({ type: 'hootRequest', orgId: club.id, duration: 500 }))
             }, 1000)
             console.log(race)
