@@ -22,6 +22,7 @@
     "@orpc/client": "^1.9.3",
     "@orpc/contract": "^1.13.2",
     "@orpc/server": "^1.9.3",
+    "@influxdata/influxdb-client": "^1.35.0",
     "better-auth": "^1.4.10",
     "cors": "^2.8.5",
     "dayjs": "^1.11.18",
