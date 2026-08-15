@@ -4,4 +4,5 @@ export const redis = new Redis({
   host: REDIS_HOST, // your Redis LXC IP
   port: REDIS_PORT,
   family: 4,
+  maxRetriesPerRequest: null,
 });

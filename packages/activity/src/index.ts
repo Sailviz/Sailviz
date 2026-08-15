@@ -1,0 +1,1 @@
+export { analyseActivity } from "./analyseActivity";

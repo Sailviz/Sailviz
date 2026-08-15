@@ -1,105 +1,140 @@
+import * as Types from "@sailviz/types";
+
 export interface ActivityAnalysis {
   distance: number;
   maxSpeed: number;
-  avgSpeed: number;
-  vmgUpwind: number | null;
-  vmgDownwind: number | null;
-  tackCount: number;
-  gybeCount: number;
-  durationSeconds: number;
-}
-export interface TrackPoint {
-  lat: number;
-  lon: number;
-  time: Date;
+  segments: any;
+  laps: any;
 }
 
-export interface Track {
-  points: TrackPoint[];
-}
-
-export function computeAnalysis(track: Track): ActivityAnalysis {
-  if (track.points.length < 2) {
+export function computeAnalysis(
+  track: Types.Position[],
+  courseBuoys: Types.CourseBuoyType[],
+): ActivityAnalysis {
+  if (track.length < 2) {
     return {
       distance: 0,
       maxSpeed: 0,
-      avgSpeed: 0,
-      vmgUpwind: null,
-      vmgDownwind: null,
-      tackCount: 0,
-      gybeCount: 0,
-      durationSeconds: 0,
+      segments: {},
+      laps: {},
     };
   }
 
   let distance = 0;
   let maxSpeed = 0;
-  let sumSpeed = 0;
-  let tackCount = 0;
-  let gybeCount = 0;
+  let laps = {};
+  let segments = {};
 
-  // VMG buckets
-  let upwindVmgSamples: number[] = [];
-  let downwindVmgSamples: number[] = [];
+  const result = calculateDistanceAndSpeed(track);
+  distance = result.distance;
+  maxSpeed = result.maxSpeed;
 
-  // Detect tacks/gybes by heading change
-  let lastHeading = heading(track.points[0], track.points[1]);
+  laps = detectLaps(track, courseBuoys);
 
-  for (let i = 1; i < track.points.length; i++) {
-    const a = track.points[i - 1];
-    const b = track.points[i];
+  return {
+    distance,
+    maxSpeed,
+    segments,
+    laps,
+  };
+}
 
-    const dt = (b.time.getTime() - a.time.getTime()) / 1000;
+function calculateDistanceAndSpeed(points: Types.Position[]): {
+  distance: number;
+  maxSpeed: number;
+} {
+  let distance = 0;
+  let maxSpeed = 0;
+
+  for (let i = 1; i < points.length; i++) {
+    const a = points[i - 1];
+    const b = points[i];
+
+    const dt = (b.timestamp - a.timestamp) / 1000;
     if (dt <= 0) continue;
 
     const d = haversine(a.lat, a.lon, b.lat, b.lon);
     distance += d;
 
     const speed = d / dt;
-    sumSpeed += speed;
     maxSpeed = Math.max(maxSpeed, speed);
-
-    const h = heading(a, b);
-    const delta = angleDelta(lastHeading, h);
-
-    // Tack detection: crossing the wind direction (approx 45° change)
-    if (Math.abs(delta) > 45 && Math.abs(delta) < 135) {
-      tackCount++;
-    }
-
-    // Gybe detection: crossing dead downwind (approx 135° change)
-    if (Math.abs(delta) >= 135) {
-      gybeCount++;
-    }
-
-    lastHeading = h;
-
-    // VMG calculation (requires wind direction later)
-    // For now, assume wind is 0° (north) — replace later with real wind
-    const windDir = 0;
-    const vmg = speed * Math.cos(degToRad(angleDelta(h, windDir)));
-
-    if (vmg > 0) {
-      upwindVmgSamples.push(vmg);
-    } else {
-      downwindVmgSamples.push(Math.abs(vmg));
-    }
   }
+  return { distance, maxSpeed };
+}
 
-  const durationSeconds =
-    (track.points.at(-1)!.time.getTime() - track.points[0].time.getTime()) /
-    1000;
+function detectLaps(
+  track: Types.Position[],
+  courseBuoys: Types.CourseBuoyType[],
+): any {
+  //we should check if the race has any marks specified
+  const passes: Record<
+    string,
+    Array<{ time: number; direction?: string }>
+  > = {};
+  if (courseBuoys.length > 1) {
+    // If there are course buoys, we can detect laps based on the waypoints
+    for (const Buoy of courseBuoys) {
+      if (Buoy.buoy.isStartLine == false) {
+        // course mark.
+        // log time that the track
+        const roundings = detectCircleWaypointReached(track, Buoy.buoy);
+        console.log(
+          `Participant reached waypoint ${Buoy.buoy.name} at times:`,
+          roundings,
+        );
+        passes[Buoy.id] = roundings;
+      }
+    }
+    // start line crossings
+    const IDM = courseBuoys.find((b) => b.buoy.name == "IDM");
+    const ODM = courseBuoys.find((b) => b.buoy.name == "ODM");
+    if (IDM && ODM) {
+      const crossings = detectLineWaypointReached(track, IDM.buoy, ODM.buoy);
+      // filter crossings to only include those that are in the correct direction
+      const direction =
+        sideOfLine(
+          track[0], // we assume that the first point is downwind of the start line.
+          IDM.buoy,
+          ODM.buoy,
+        ) >= 0
+          ? "1→-1"
+          : "-1→1";
 
-  return {
-    distance,
-    maxSpeed,
-    avgSpeed: sumSpeed / track.points.length,
-    vmgUpwind: upwindVmgSamples.length ? average(upwindVmgSamples) : null,
-    vmgDownwind: downwindVmgSamples.length ? average(downwindVmgSamples) : null,
-    tackCount,
-    gybeCount,
-    durationSeconds,
-  };
+      const filteredCrossings = crossings.filter(
+        (c) => c.direction === direction,
+      );
+      console.log(
+        `Participant crossed the start line at times:`,
+        filteredCrossings,
+      );
+      passes[IDM.id] = filteredCrossings;
+    }
+    console.log(passes);
+    const merged = Object.entries(passes)
+      .flatMap(([waypoint, entries]) =>
+        entries.map((e) => ({ waypoint, ...e })),
+      )
+      .sort((a, b) => a.time - b.time);
+
+    console.log(merged);
+
+    if (IDM && ODM) {
+      // calculate lap times by taking the difference between each time they passed the first waypoint
+      const lapTimes = passes[IDM.id]
+        ?.map((entry, index, array) => {
+          if (index === 0) {
+            return null;
+          }
+          return entry.time - array[index - 1].time;
+        })
+        .filter((t) => t !== null);
+      console.log(`Participant lap times:`, lapTimes);
+      // calculate total time by taking the difference between the first time they passed the first waypoint and the last time they passed the first waypoint
+    }
+  } else {
+    // If there are no course buoys, we have to try and detect laps based on the track points themselves.
+    // This is a complex problem and may require advanced algorithms to detect loops in the track. For now, we will return an empty object.
+  }
 }
 
 //
@@ -136,7 +171,7 @@ function haversine(
   return R * c;
 }
 
-function heading(a: TrackPoint, b: TrackPoint): number {
+function heading(a: Types.Position, b: Types.Position): number {
   const dLon = degToRad(b.lon - a.lon);
   const lat1 = degToRad(a.lat);
   const lat2 = degToRad(b.lat);
@@ -153,4 +188,58 @@ function heading(a: TrackPoint, b: TrackPoint): number {
 function angleDelta(a: number, b: number): number {
   let d = ((b - a + 540) % 360) - 180;
   return d;
+}
+
+function detectCircleWaypointReached(
+  positions: Types.Position[],
+  waypoint: Types.BuoyType,
+) {
+  const roundings = [];
+  let inside = false;
+
+  for (const p of positions) {
+    const d = haversine(p.lat, p.lon, waypoint.lat, waypoint.lon);
+    const nowInside = d < 10; // 10 meters radius for rounding
+
+    if (!inside && nowInside) {
+      roundings.push({ time: p.timestamp });
+    }
+
+    inside = nowInside;
+  }
+
+  return roundings;
+}
+
+function sideOfLine(
+  p: Types.Position,
+  IDM: Types.BuoyType,
+  ODM: Types.BuoyType,
+): number {
+  return (
+    (ODM.lon - IDM.lon) * (p.lat - IDM.lat) -
+    (ODM.lat - IDM.lat) * (p.lon - IDM.lon)
+  );
+}
+
+function detectLineWaypointReached(
+  positions: Types.Position[],
+  IDM: Types.BuoyType,
+  ODM: Types.BuoyType,
+) {
+  const crossings = [];
+  let prevSign = null;
+
+  for (const p of positions) {
+    const s = sideOfLine(p, IDM, ODM);
+    const sign = s >= 0 ? 1 : -1;
+
+    if (prevSign !== null && sign !== prevSign) {
+      crossings.push({ time: p.timestamp, direction: `${prevSign}→${sign}` });
+    }
+
+    prevSign = sign;
+  }
+
+  return crossings;
 }

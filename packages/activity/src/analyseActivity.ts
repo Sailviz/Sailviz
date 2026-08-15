@@ -3,6 +3,7 @@ import { Client as MinioClient } from "minio";
 import { computeAnalysis } from "./computeAnalysis";
 import * as config from "./config";
 import { XMLParser } from "fast-xml-parser";
+import * as Types from "@sailviz/types";
 
 const minioClient = new MinioClient({
   endPoint: config.MINIO_ENDPOINT as string,
@@ -13,17 +14,7 @@ const minioClient = new MinioClient({
     (config.MINIO_SECRET_KEY as string) || process.env.MINIO_SECRET_KEY || "",
 });
 
-export interface TrackPoint {
-  lat: number;
-  lon: number;
-  time: Date;
-}
-
-export interface Track {
-  points: TrackPoint[];
-}
-
-async function parseGPX(buffer: Buffer): Promise<Track> {
+async function parseGPX(buffer: Buffer): Promise<Types.Position[]> {
   const parser = new XMLParser({
     ignoreAttributes: false,
     attributeNamePrefix: "",
@@ -31,7 +22,7 @@ async function parseGPX(buffer: Buffer): Promise<Track> {
   const xml = buffer.toString("utf8");
   const gpx = parser.parse(xml);
 
-  const points: TrackPoint[] = [];
+  const points: Types.Position[] = [];
 
   const trks = gpx.gpx?.trk ?? [];
   for (const trk of trks) {
@@ -41,21 +32,17 @@ async function parseGPX(buffer: Buffer): Promise<Track> {
       for (const p of trkpts) {
         const lat = parseFloat(p.$.lat);
         const lon = parseFloat(p.$.lon);
-        const timeStr = p.time?.[0];
+        const timestamp = parseInt(p.time?.[0]);
 
-        if (!timeStr) continue;
-
-        const time = new Date(timeStr);
-
-        points.push({ lat, lon, time });
+        points.push({ lat, lon, timestamp });
       }
     }
   }
 
   // sort by time just in case
-  points.sort((a, b) => a.time.getTime() - b.time.getTime());
+  points.sort((a, b) => a.timestamp - b.timestamp);
 
-  return { points };
+  return points;
 }
 
 export async function analyseActivity(activityId: string) {
@@ -64,7 +51,28 @@ export async function analyseActivity(activityId: string) {
   // Load activity metadata
   const activity = await prisma.activity.findUnique({
     where: { id: activityId },
+    include: {
+      result: {
+        include: {
+          fleet: {
+            include: {
+              race: {
+                include: {
+                  courseBuoys: {
+                    include: {
+                      buoy: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
   });
+
+  const courseBuoys = activity?.result?.fleet?.race?.courseBuoys || [];
 
   if (!activity) {
     throw new Error(`Activity ${activityId} not found`);
@@ -73,6 +81,10 @@ export async function analyseActivity(activityId: string) {
   if (!activity.s3Key) {
     throw new Error(`Activity ${activityId} has no s3Key`);
   }
+
+  const race = await prisma.race.findUnique({
+    where: { id: activity.result?.fleet?.raceId },
+  });
 
   // Download GPX file from MinIO
   console.log(`[analysis] Downloading GPX from MinIO: ${activity.s3Key}`);
@@ -85,7 +97,7 @@ export async function analyseActivity(activityId: string) {
 
   // Compute analysis (VMG, tacks, gybes, segments, stats)
   console.log(`[analysis] Computing analysis…`);
-  const analysis = computeAnalysis(track);
+  const analysis = computeAnalysis(track, courseBuoys);
 
   // Save ActivityAnalysis to DB
   console.log(`[analysis] Saving analysis to DB…`);

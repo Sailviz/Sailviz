@@ -14,3 +14,5 @@ apps/desktop/src-tauri/gen/android/keystore.properties
 /packages/auth/dist
 /packages/queue/dist
 packages/activity/src/config.ts
+/packages/activity/dist
+packages/queue/src/config.ts

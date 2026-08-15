@@ -2,27 +2,24 @@
   "name": "worker",
   "version": "1.0.0",
   "description": "",
-  "type": "module",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "default": "./dist/index.js"
-    }
-  },
   "scripts": {
-    "build": "tsc -p tsconfig.json"
+    "prebuild": "pnpm -w --filter @sailviz/queue build && pnpm -w --filter @sailviz/activity build",
+    "predev": "pnpm -w --filter @sailviz/queue build && pnpm -w --filter @sailviz/activity build",
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsx src/index.ts"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "packageManager": "pnpm@10.18.1",
   "dependencies": {
+    "@sailviz/activity": "workspace:*",
+    "@sailviz/queue": "workspace:*",
     "bullmq": "^5.80.8",
     "dotenv": "^17.2.3",
     "ioredis": "^5.11.1",
     "ts-node": "^10.9.2",
+    "tsx": "^4.20.6",
     "zod": "^4.1.12"
   }
 }

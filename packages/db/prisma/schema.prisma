@@ -296,6 +296,9 @@ model ActivityAnalysis {
   activity Activity?
   distance Float
   maxSpeed Float
+
+  segments Json @default("{}")
+  laps     Json @default("{}")
 }
 
 model Lap {

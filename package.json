@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "dev:dev:web": "concurrently -n \"API,WEB\" -c \"blue,green\" \"pnpm --filter api dev\" \"pnpm --filter web dev\"",
+    "dev:dev:web": "concurrently -n \"API,WEB,WORKER\" -c \"blue,green,red\" \"pnpm --filter api dev\" \"pnpm --filter web dev\" \"pnpm --filter worker dev\"",
     "dev:dev:desktop": "concurrently -n \"API,TAURI\" -c \"blue,magenta\" \"pnpm --filter api dev\" \"pnpm --filter desktop dev:desktop\"",
     "dev:test:desktop": "pnpm --filter desktop dev:test:desktop",
     "bundle:test:desktop": "pnpm --filter web build:test && pnpm --filter desktop build:test:desktop && pnpm --filter desktop bundle:test:desktop",
