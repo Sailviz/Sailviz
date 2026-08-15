@@ -16,6 +16,7 @@ import type { Session } from '@sailviz/auth/client'
 import useWebSocket from '@hooks/use-ws'
 import { ws_server, trackable_ws_server } from '@components/URL'
 import RecallDialog, { RecallType } from '@components/layout/dashboard/RecallModal'
+import { FlagIcon } from 'lucide-react'
 
 // these options are the same across all fleets
 enum raceStateType {
@@ -127,13 +128,13 @@ function Page() {
 
         const sequenceStartTime = new Date().getTime() / 1000 + 15 // add buffer to ensure timer starts correctly
 
-        setStartTime(new Date().getTime() / 1000 + (race.series?.startSequence == '541go' ? 5 * 60 : 60) + 15) // add buffer to ensure timer starts correctly
+        setStartTime(new Date().getTime() / 1000 + (race.series?.startSequence == '541go' ? 5 * 60 : 3 * 60) + 15) // add buffer to ensure timer starts correctly
 
         await updateRaceMutation.mutateAsync({ ...race, sequenceStartTime: sequenceStartTime })
 
         await Promise.all(
             race.fleets.map(async fleet => {
-                let startDelay = fleet.fleetSettings.start * (race.series!.startSequence === '541go' ? 5 * 60 : 1 * 60)
+                let startDelay = fleet.fleetSettings.start * (race.series!.startSequence === '541go' ? 5 * 60 : 3 * 60)
                 fleet.startTime = sequenceStartTime + startDelay
                 console.log('Setting start time for fleet ' + fleet.id + ' to ' + fleet.startTime)
                 await updateFleetMutation.mutateAsync(fleet)
@@ -217,9 +218,14 @@ function Page() {
             //do nothing
             setRecallModal(false)
         } else if (recall == RecallType.Individual) {
-            // don't need to do anything
+            // just a single hoot:
+            sendMessage(JSON.stringify({ type: 'hootRequest', orgId: club.id, duration: 500 }))
             setRecallModal(false)
         } else if (recall == RecallType.General) {
+            sendMessage(JSON.stringify({ type: 'hootRequest', orgId: club.id, duration: 500 }))
+            setTimeout(() => {
+                sendMessage(JSON.stringify({ type: 'hootRequest', orgId: club.id, duration: 500 }))
+            }, 1000)
             console.log(race)
             if (race.series?.settings.maintainSequence) {
                 console.log('maintaining sequence, rerunning fleet')
@@ -272,7 +278,7 @@ function Page() {
                     setRaceState(raceStateType.sequenceHold)
                     setFlagModal(false)
                 } else {
-                    race.fleets[index].startTime = maxStartTime + (race.series!.startSequence == '541go' ? 5 * 60 : 1 * 60)
+                    race.fleets[index].startTime = maxStartTime + (race.series!.startSequence == '541go' ? 5 * 60 : 3 * 60)
                     console.log('Setting start time for fleet ' + race.fleets[index].id + ' to ' + race.fleets[index].startTime)
                     console.log(race.fleets)
                     await updateFleetMutation.mutateAsync(race.fleets[index])
@@ -296,7 +302,7 @@ function Page() {
 
         await Promise.all(
             fleetsToStart.map(async fleet => {
-                let startDelay = (fleet.fleetSettings.start - fleetsStarted.length) * (race.series!.startSequence === '541go' ? 5 * 60 : 1 * 60)
+                let startDelay = (fleet.fleetSettings.start - fleetsStarted.length) * (race.series!.startSequence === '541go' ? 5 * 60 : 3 * 60)
                 fleet.startTime = newSequenceStartTime + startDelay
                 console.log('Setting start time for fleet ' + fleet.id + ' to ' + fleet.startTime)
                 await updateFleetMutation.mutateAsync(fleet)
@@ -658,11 +664,15 @@ function Page() {
         setRaceMode(tempRaceMode)
     }
 
+    const openFlagModal = () => {
+        setFlagModal(true)
+    }
+
     //on page
     useEffect(() => {
         if (race == undefined) return
         console.log(race)
-        setStartTime(race.sequenceStartTime + (race.series?.startSequence == '541go' ? 5 * 60 : 60))
+        setStartTime(race.sequenceStartTime + (race.series?.startSequence == '541go' ? 5 * 60 : 3 * 60))
         if (raceMode.length > 1) {
             dynamicSort(race.fleets.flatMap(fleet => fleet.results!))
         } else if (raceMode[0] == raceModeType.Finish) {
@@ -689,7 +699,7 @@ function Page() {
                 // if any boat in the fleet has finished, the fleet must be in finish mode
                 setRaceMode([...raceMode.slice(0, index), raceModeType.Finish, ...raceMode.slice(index + 1)])
             } else {
-                if (fleet.startTime != 0) {
+                if (fleet.startTime < new Date().getTime() / 1000 && fleet.startTime != 0) {
                     // if the fleet has started, but no boat has finished it must be in lap mode
                     setRaceMode([...raceMode.slice(0, index), raceModeType.Lap, ...raceMode.slice(index + 1)])
                 } else {
@@ -799,6 +809,13 @@ function Page() {
                                     }
                                 })()}
                             </div>
+                            <Button
+                                className='m-4 p-2'
+                                onClick={openFlagModal}
+                                hidden={raceState != raceStateType.running || !raceMode.some(mode => mode == raceModeType.None)}
+                            >
+                                <FlagIcon />
+                            </Button>
                         </div>
                     </div>
                     <div className='flex w-full shrink md:flex-row flex-col  justify-around'>

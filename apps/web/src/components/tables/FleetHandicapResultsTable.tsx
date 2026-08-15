@@ -193,15 +193,17 @@ const FleetHandicapResultsTable = ({ fleetId, editable, advancedEdit, showTime }
                         <MapPin />
                     </Button>
                 )
-            } else if (props.row.original.userId == session.user.id && race?.trackableEventId != null) {
-                return (
-                    <div className='flex flex-row'>
-                        <Button className='mx-1 w-1/4' onClick={() => document.getElementById('entryFileUpload')!.click()}>
-                            <Upload />
-                        </Button>
-                        <Input id='entryFileUpload' type='file' accept='.gpx' onChange={e => entryFileUploadHandler(e, props.row.original.id)} className='hidden' />
-                    </div>
-                )
+            } else if (!('error' in session)) {
+                if (props.row.original.userId == session.user.id && race?.trackableEventId != null) {
+                    return (
+                        <div className='flex flex-row'>
+                            <Button className='mx-1 w-1/4' onClick={() => document.getElementById('entryFileUpload')!.click()}>
+                                <Upload />
+                            </Button>
+                            <Input id='entryFileUpload' type='file' accept='.gpx' onChange={e => entryFileUploadHandler(e, props.row.original.id)} className='hidden' />
+                        </div>
+                    )
+                }
             } else {
                 return <div className='text-center'>-</div>
             }

@@ -61,12 +61,15 @@ function Page() {
 
     const updateFleetMutation = useMutation(orpcClient.fleet.update.mutationOptions())
     const updateResultMutation = useMutation(orpcClient.result.update.mutationOptions())
+    const updateRaceMutation = useMutation(orpcClient.race.update.mutationOptions())
 
     const findSeriesMutation = useMutation(orpcClient.series.find.mutationOptions())
 
     const createLapMutation = useMutation(orpcClient.lap.create.mutationOptions())
 
     const deleteLapMutation = useMutation(orpcClient.lap.delete.mutationOptions())
+
+    const [startTime, setStartTime] = useState<number>(0)
 
     var [raceState, setRaceState] = useState<raceStateType>(raceStateType.reset)
     const [lastRaceState, setLastRaceState] = useState<raceStateType>(raceStateType.reset)
@@ -95,6 +98,21 @@ function Page() {
             console.log('Sending Trackable start request')
             sendTrackableMessage(JSON.stringify({ type: 'startEventRequest', eventId: race.trackableEventId, posRate: 5000, statusRate: 60000 }))
         }
+
+        const sequenceStartTime = new Date().getTime() / 1000 + 15 // add buffer to ensure timer starts correctly
+
+        setStartTime(new Date().getTime() / 1000 + (race.series?.startSequence == '541go' ? 5 * 60 : 3 * 60) + 15) // add buffer to ensure timer starts correctly
+
+        await updateRaceMutation.mutateAsync({ ...race, sequenceStartTime: sequenceStartTime })
+
+        await Promise.all(
+            race.fleets.map(async fleet => {
+                let startDelay = fleet.fleetSettings.start * (race.series!.startSequence === '541go' ? 5 * 60 : 3 * 60)
+                fleet.startTime = sequenceStartTime + startDelay
+                console.log('Setting start time for fleet ' + fleet.id + ' to ' + fleet.startTime)
+                await updateFleetMutation.mutateAsync(fleet)
+            })
+        )
 
         setFlagModal(true)
         //set flag status to false
@@ -534,7 +552,7 @@ function Page() {
                             <div className='w-1/4 p-2 m-2 border-4 rounded-lg text-lg font-medium'>
                                 Race Time:{' '}
                                 <RaceTimer
-                                    startTime={race.fleets.reduce((max, step) => (step.startTime > max ? step.startTime : max), 0)}
+                                    startTime={startTime}
                                     onFlagChange={handleFlagChange}
                                     onHoot={handleHoot}
                                     race={race}

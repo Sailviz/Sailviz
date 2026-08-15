@@ -42,7 +42,7 @@ const RaceTimer: React.FC<RaceTimerProps> = ({
             largestStep = 5 * 60 + 15
             break
         case '321go':
-            largestStep = 75 //3 * 60 + 15
+            largestStep = 3 * 60 + 15
     }
 
     race.fleets.sort((a, b) => a.startTime - b.startTime)
@@ -135,15 +135,7 @@ const RaceTimer: React.FC<RaceTimerProps> = ({
         let activeSequenceFinished = sequenceFinishedRef.current
         let activeWarningCompleted = warningCompletedRef.current
         let activePendingChanges = pendingChangesRef.current
-
-        const shouldInitializeSequence =
-            raceState == raceStateType.running &&
-            (pendingChangesRef.current ||
-                currentStepRef.current == null ||
-                sequenceStepsRef.current.length === 0 ||
-                lastSequenceStartTimeRef.current !== race.sequenceStartTime)
-
-        if (shouldInitializeSequence) {
+        const initializeSequence = () => {
             const currentTime = new Date().getTime() / 1000
 
             const nextFleet = getNextFleetAfter(currentTime)
@@ -153,25 +145,52 @@ const RaceTimer: React.FC<RaceTimerProps> = ({
                     return
                 }
                 console.log('No upcoming fleets, finishing sequence')
+                activeSequenceFinished = true
+                activeCurrentStep = {} as StartSequenceStep
                 sequenceFinishedRef.current = true
                 lastSequenceStartTimeRef.current = race.sequenceStartTime
                 return
             }
 
-            console.log('Starting fleet ' + nextFleet.fleetSettings.name)
             onFleetCountdownStart(nextFleet.id)
+
+            console.log('Starting fleet ' + nextFleet.fleetSettings.name)
+            // onFleetCountdownStart(nextFleet.id)
+            activeFleetOffset = nextFleet.startTime - startTime!
 
             const steps = getSequenceStepsForFleet(nextFleet)
 
             activeSequenceSteps = steps
             sequenceStepsRef.current = steps
 
-            activeCurrentStep = steps[1]!
+            //this is bad, need to work out which step we are on based on the current time and the fleet offset
+            const timeLeft = calculateTimeLeft()
+            console.log('Time left', timeLeft)
+            console.log('Fleet offset', activeFleetOffset)
+            const fleetTime = Math.abs(timeLeft.time - activeFleetOffset)
+            console.log(fleetTime)
+            const nextStep = steps.find(step => step.time + 1 < fleetTime) || steps[steps.length - 1]
+            const nextStepIndex = steps.findIndex(step => step.time + 1 < fleetTime) || steps.length - 1
+            console.log('Next step', nextStep)
+            activeCurrentStep = nextStep
+
             currentStepRef.current = activeCurrentStep
-            onFlagChange([steps[0].classFlagStatus, steps[0].prepFlagStatus], [steps[1].classFlagStatus, steps[1].prepFlagStatus])
+
+            if (nextStepIndex === steps.length - 1) {
+                console.log('No more steps, finishing sequence')
+                const sortedFleets = getSortedFleets()
+
+                const followingFleet = nextFleet ? sortedFleets.find(fleet => fleet.startTime > nextFleet.startTime) : undefined
+                onFlagChange([steps[nextStepIndex - 1].classFlagStatus, steps[nextStepIndex - 1].prepFlagStatus], buildNextFlagStatuses(nextStep, followingFleet))
+            } else {
+                onFlagChange(
+                    [steps[nextStepIndex - 1].classFlagStatus, steps[nextStepIndex - 1].prepFlagStatus],
+                    [steps[nextStepIndex].classFlagStatus, steps[nextStepIndex].prepFlagStatus]
+                )
+            }
 
             if (pendingChangesRef.current) {
-                const offset = timeLeftRef.current.time + 15 + (race.series!.startSequence === '541go' ? 5 * 60 : 1 * 60)
+                const offset = timeLeftRef.current.time + 15 + (race.series!.startSequence === '541go' ? 5 * 60 : 3 * 60)
                 console.log('Setting fleet offset to', offset)
                 console.log('sequence start time', race.sequenceStartTime)
                 console.log('current time', currentTime)
@@ -182,17 +201,29 @@ const RaceTimer: React.FC<RaceTimerProps> = ({
                 sequenceFinishedRef.current = false
                 warningCompletedRef.current = false
             } else if (race.series?.settings.maintainSequence == false) {
-                activeFleetOffset = 0
+                activeFleetOffset = nextFleet.startTime - startTime!
                 fleetOffsetRef.current = 0
                 pendingChangesRef.current = false
             } else {
-                activeFleetOffset = 0
+                activeFleetOffset = nextFleet.startTime - startTime!
                 fleetOffsetRef.current = 0
             }
 
             activePendingChanges = false
             pendingChangesRef.current = false
             lastSequenceStartTimeRef.current = race.sequenceStartTime
+        }
+
+        const shouldInitializeSequence =
+            raceState == raceStateType.running &&
+            (pendingChangesRef.current ||
+                currentStepRef.current == null ||
+                sequenceStepsRef.current.length === 0 ||
+                lastSequenceStartTimeRef.current !== race.sequenceStartTime)
+
+        if (shouldInitializeSequence) {
+            console.log('Initializing sequence')
+            initializeSequence()
         }
 
         const timer = setInterval(() => {
@@ -278,7 +309,7 @@ const RaceTimer: React.FC<RaceTimerProps> = ({
                     currentStepRef.current = nextStep
                     const numberFleetsStarted = race.fleets.filter(fleet => fleet.startTime < now + 20).length + race.fleets.reduce((acc, curr) => curr.recalls + acc, 0)
                     console.log('Number of fleets started', numberFleetsStarted)
-                    const newFleetOffset = race.series!.startSequence === '541go' ? 5 * 60 + activeFleetOffset : 1 * 60 + activeFleetOffset
+                    const newFleetOffset = race.series!.startSequence === '541go' ? 5 * 60 + activeFleetOffset : 3 * 60 + activeFleetOffset
                     console.log('Setting fleet offset to', newFleetOffset)
                     activeFleetOffset = newFleetOffset
                     fleetOffsetRef.current = newFleetOffset
