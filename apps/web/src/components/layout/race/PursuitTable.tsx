@@ -1,11 +1,11 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, useReactTable, type SortingState } from '@tanstack/react-table'
 import { ChevronDownIcon } from '@components/icons/chevron-down-icon'
 import { ChevronUpIcon } from '@components/icons/chevron-up-icon'
 import { SmoothSpinner } from '@components/icons/smooth-spinner'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@components/ui/table'
 import { Button } from '@components/ui/button'
-import type { BoatType, FleetType, ResultType } from '@sailviz/types'
+import * as Types from '@sailviz/types'
 import { useQuery } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
 
@@ -27,7 +27,7 @@ const StartTime = ({ seconds }: { seconds: number }) => {
     return <div>{new Date(seconds * 1000).toISOString().substr(14, 5)}</div>
 }
 
-const Position = ({ text, result }: { text: string; result: ResultType }) => {
+const Position = ({ text, result }: { text: string; result: Types.ResultType }) => {
     if (result.resultCode != '') {
         text = result.resultCode
     }
@@ -38,11 +38,21 @@ const Laps = ({ laps }: { laps: LapDataType[] }) => {
     return <div>{laps.length}</div>
 }
 
-const Class = ({ boat }: { boat: BoatType }) => {
+const Class = ({ boat }: { boat: Types.BoatType }) => {
     return <div>{boat.name}</div>
 }
 
-const Sort = ({ result, max, moveUp, moveDown }: { result: ResultType; max: number; moveUp: (id: string) => Promise<void>; moveDown: (id: string) => Promise<void> }) => {
+const Sort = ({
+    result,
+    max,
+    moveUp,
+    moveDown
+}: {
+    result: Types.ResultType
+    max: number
+    moveUp: (id: string) => Promise<void>
+    moveDown: (id: string) => Promise<void>
+}) => {
     const [upLoading, setUpLoading] = useState(false)
     const [downLoading, setDownLoading] = useState(false)
     return (
@@ -72,7 +82,7 @@ const Sort = ({ result, max, moveUp, moveDown }: { result: ResultType; max: numb
     )
 }
 
-const Action = ({ raceState, result, showRetireModal }: { raceState: raceStateType; result: ResultType; showRetireModal: (id: string) => void }) => {
+const Action = ({ raceState, result, showRetireModal }: { raceState: raceStateType; result: Types.ResultType; showRetireModal: (id: string) => void }) => {
     if (raceState == raceStateType.retire) {
         return (
             <Button color='danger' onClick={() => showRetireModal(result.id)} disabled={result.resultCode != ''}>
@@ -84,7 +94,7 @@ const Action = ({ raceState, result, showRetireModal }: { raceState: raceStateTy
     }
 }
 
-const columnHelper = createColumnHelper<ResultType>()
+const columnHelper = createColumnHelper<Types.ResultType>()
 
 const PursuitTable = ({
     fleetId,
@@ -99,11 +109,10 @@ const PursuitTable = ({
     moveUp: (id: string) => Promise<void>
     moveDown: (id: string) => Promise<void>
 }) => {
-    const fleet = useQuery(orpcClient.fleet.find.queryOptions({ input: { fleetId } })).data as FleetType
-    let data = fleet.results //.filter(result => result.resultCode == '')
-    if (data == undefined) {
-        data = []
-    }
+    const fleet = useQuery(orpcClient.fleet.find.queryOptions({ input: { fleetId } })).data as Types.FleetType
+    const data = useMemo(() => {
+        return fleet?.results?.filter(r => r.resultCode === '') ?? []
+    }, [fleet])
 
     const [sorting, setSorting] = useState<SortingState>([
         {
@@ -112,50 +121,55 @@ const PursuitTable = ({
         }
     ])
 
-    let columns = [
-        columnHelper.accessor('PursuitPosition', {
-            header: 'Position',
-            cell: props => <Position text={props.getValue().toString()} result={props.row.original} />,
-            enableSorting: true
-        }),
-        columnHelper.display({
-            header: 'Adjust Position',
-            id: 'Sort',
-            // max is the number of boats without a result code
-            cell: props => <Sort result={props.row.original} moveUp={moveUp} moveDown={moveDown} max={data.filter((result: ResultType) => result.resultCode == '').length} />
-        }),
-        columnHelper.accessor('Helm', {
-            header: 'Helm',
-            cell: props => <Text text={props.getValue()} />
-        }),
-        columnHelper.accessor('Crew', {
-            header: 'Crew',
-            cell: props => <Text text={props.getValue()} />
-        }),
-        columnHelper.accessor('boat', {
-            header: 'Class',
-            id: 'Class',
-            size: 300,
-            cell: result => <Class boat={result.getValue()} />
-        }),
-        columnHelper.accessor('SailNumber', {
-            header: 'Sail Number',
-            cell: props => <Text text={props.getValue()} />
-        }),
-        columnHelper.accessor(result => (result.laps.slice(-1)[0]?.time || 0) - fleet.startTime, {
-            header: 'Last Lap',
-            id: 'lastLap',
-            cell: props => <StartTime seconds={props.getValue()} />
-        }),
-        columnHelper.accessor('laps', {
-            header: 'Laps',
-            cell: props => <Laps laps={props.getValue()} />
-        }),
-        columnHelper.accessor(result => result, {
-            header: 'Action',
-            cell: props => <Action raceState={raceState} showRetireModal={showRetireModal} result={props.getValue()} />
-        })
-    ]
+    const columns = useMemo(
+        () => [
+            columnHelper.accessor('PursuitPosition', {
+                header: 'Position',
+                cell: props => <Position text={props.getValue().toString()} result={props.row.original} />,
+                enableSorting: true
+            }),
+            columnHelper.display({
+                header: 'Adjust Position',
+                id: 'Sort',
+                // max is the number of boats without a result code
+                cell: props => (
+                    <Sort result={props.row.original} moveUp={moveUp} moveDown={moveDown} max={data.filter((result: Types.ResultType) => result.resultCode == '').length} />
+                )
+            }),
+            columnHelper.accessor('Helm', {
+                header: 'Helm',
+                cell: props => <Text text={props.getValue()} />
+            }),
+            columnHelper.accessor('Crew', {
+                header: 'Crew',
+                cell: props => <Text text={props.getValue()} />
+            }),
+            columnHelper.accessor('boat', {
+                header: 'Class',
+                id: 'Class',
+                size: 300,
+                cell: result => <Class boat={result.getValue()} />
+            }),
+            columnHelper.accessor('SailNumber', {
+                header: 'Sail Number',
+                cell: props => <Text text={props.getValue()} />
+            }),
+            columnHelper.accessor(result => (result.laps.slice(-1)[0]?.time || 0) - (fleet?.startTime || 0), {
+                header: 'Last Lap',
+                id: 'lastLap',
+                cell: props => <StartTime seconds={props.getValue()} />
+            }),
+            columnHelper.accessor('laps', {
+                header: 'Laps',
+                cell: props => <Laps laps={props.getValue()} />
+            }),
+            columnHelper.accessor(result => result, {
+                header: 'Action',
+                cell: props => <Action raceState={raceState} showRetireModal={showRetireModal} result={props.getValue()} />
+            })
+        ],
+        [moveUp, moveDown, raceState, showRetireModal]
+    )
 
     let table = useReactTable({
         data,

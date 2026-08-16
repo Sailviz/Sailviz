@@ -57,7 +57,7 @@ function Page() {
     // Capture race query options for consistent queryKey usage in optimistic updates
     const raceQueryOptions = orpcClient.race.find.queryOptions({ input: { raceId: raceId }, results: true, boats: true })
     const race = useQuery(raceQueryOptions).data as Types.RaceType
-    const series = useQuery(orpcClient.series.find.queryOptions({ input: { seriesId: race?.seriesId } })).data as Types.SeriesType
+    const series = useQuery(orpcClient.series.find.queryOptions({ input: { seriesId: race?.seriesId }, enabled: race != undefined })).data as Types.SeriesType
 
     const updateFleetMutation = useMutation(orpcClient.fleet.update.mutationOptions())
     const updateResultMutation = useMutation(orpcClient.result.update.mutationOptions())
@@ -163,11 +163,11 @@ function Page() {
         setCountdownFleet(race.fleets[index])
     }
 
-    const handleFleetStart = async (fleetSettingsId: string) => {
+    const handleFleetStart = async (fleetId: string) => {
         const time = new Date().getTime() / 1000
-        let index = race.fleets.findIndex(fleet => fleet.fleetSettings.id == fleetSettingsId)
+        let index = race.fleets.findIndex(fleet => fleet.id == fleetId)
         if (index == -1) {
-            console.error('Fleet not found with settings: ' + fleetSettingsId)
+            console.error('Fleet not found with id: ' + fleetId)
             return
         }
         race.fleets[index].startTime = time
@@ -412,7 +412,7 @@ function Page() {
             await updateResultMutation.mutateAsync(res)
         })
 
-        await queryClient.invalidateQueries({ queryKey: raceQueryOptions.queryKey })
+        await queryClient.invalidateQueries({ queryKey: orpcClient.fleet.find.key({ type: 'query' }) })
 
         setTableView(true)
     }
@@ -497,12 +497,12 @@ function Page() {
                 )
             }
         }
-        if (race != undefined && firstLoad) {
+        if (race != undefined && firstLoad && series != undefined) {
             loadRace()
             dynamicSort(race)
             setFirstLoad(false)
         }
-    }, [race])
+    }, [race, series])
 
     const [time, setTime] = useState('')
 
