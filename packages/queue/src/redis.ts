@@ -1,5 +1,5 @@
 import { Redis } from "ioredis";
-import { REDIS_HOST, REDIS_PORT } from "./config";
+import { REDIS_HOST, REDIS_PORT } from "./config.js";
 export const redis = new Redis({
   host: REDIS_HOST, // your Redis LXC IP
   port: REDIS_PORT,

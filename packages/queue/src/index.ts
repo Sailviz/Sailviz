@@ -1,3 +1,3 @@
-export * from "./redis";
-export { analysisQueue } from "./analysisQueue";
-export { redis } from "./redis";
+export * from "./redis.js";
+export { analysisQueue } from "./analysisQueue.js";
+export { redis } from "./redis.js";

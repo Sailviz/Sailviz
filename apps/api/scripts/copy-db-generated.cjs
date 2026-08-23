@@ -17,6 +17,10 @@ const packagesToVendor = [
     name: "db",
     sourceRoot: path.join(__dirname, "..", "..", "..", "packages", "db"),
   },
+  {
+    name: "queue",
+    sourceRoot: path.join(__dirname, "..", "..", "..", "packages", "queue"),
+  },
 ];
 
 function copyRecursiveSync(src, dest) {
