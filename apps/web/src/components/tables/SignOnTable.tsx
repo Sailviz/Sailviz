@@ -1,19 +1,20 @@
 import { useState, useEffect } from 'react'
 import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, useReactTable, type SortingState } from '@tanstack/react-table'
-import { AVAILABLE_PERMISSIONS, userHasPermission } from '@components/helpers/users'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
-import { useLoaderData } from '@tanstack/react-router'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
 import type { BoatType, FleetType, RaceType, ResultType } from '@sailviz/types'
-import type { Session } from '@sailviz/auth/client'
-import { DeleteIcon } from '@components/icons/delete-icon'
+import EditResultDialog from '@components/layout/dashboard/EditResultModal'
+import { Button } from '@components/ui/button'
+
 const columnHelper = createColumnHelper<ResultType>()
 
 const SignOnTable = ({ raceId }: { raceId: string }) => {
-    const session: Session = useLoaderData({ from: `__root__` })
     const race = useQuery(orpcClient.race.find.queryOptions({ input: { raceId: raceId } })).data as RaceType
     let [data, setData] = useState<ResultType[]>([])
+
+    const [editModalOpen, setEditModalOpen] = useState(false)
+    const [modalData, setModalData] = useState<ResultType | undefined>(undefined)
 
     const Text = ({ text }: { text: string }) => {
         return (
@@ -37,31 +38,6 @@ const SignOnTable = ({ raceId }: { raceId: string }) => {
                 <div>{boat.name}</div>
             </>
         )
-    }
-
-    const Action = ({ id, user }: { id: string; user: any }) => {
-        const queryClient = useQueryClient()
-
-        const deleteResultMutation = useMutation(orpcClient.result.delete.mutationOptions())
-        const onDeleteClick = async () => {
-            if (confirm('are you sure you want to do this?')) {
-                await deleteResultMutation.mutateAsync({ id: id })
-                await queryClient.invalidateQueries({
-                    queryKey: orpcClient.race.find.key({ type: 'query' })
-                })
-            }
-        }
-        if (userHasPermission(user, AVAILABLE_PERMISSIONS.editResults)) {
-            return (
-                <div className='relative flex items-center gap-2' onClick={onDeleteClick}>
-                    <span className='text-lg text-default-400 cursor-pointer text-red-500 active:opacity-50'>
-                        <DeleteIcon />
-                    </span>
-                </div>
-            )
-        } else {
-            return <> </>
-        }
     }
 
     const [sorting, setSorting] = useState<SortingState>([])
@@ -98,9 +74,18 @@ const SignOnTable = ({ raceId }: { raceId: string }) => {
                 enableSorting: false
             }),
             columnHelper.display({
-                id: 'Remove',
-                header: 'Remove',
-                cell: props => <Action id={props.row.original.id} user={session!.user} />
+                id: 'Edit',
+                header: 'Edit',
+                cell: props => (
+                    <Button
+                        onClick={() => {
+                            setEditModalOpen(true)
+                            setModalData(props.row.original)
+                        }}
+                    >
+                        Edit
+                    </Button>
+                )
             })
         ],
         state: {
@@ -112,6 +97,7 @@ const SignOnTable = ({ raceId }: { raceId: string }) => {
     })
     return (
         <div className='w-full max-h-[73vh] overflow-auto'>
+            <EditResultDialog open={editModalOpen} result={modalData} advancedEdit={false} onClose={() => setEditModalOpen(false)} />
             <div className='rounded-md border'>
                 <Table>
                     <TableHeader>

@@ -84,6 +84,9 @@ export default function EditResultModal({
         await queryClient.invalidateQueries({
             queryKey: orpcClient.fleet.find.key({ type: 'query', input: { fleetId: fleet!.id } })
         })
+        await queryClient.invalidateQueries({
+            queryKey: orpcClient.race.find.key({ type: 'query', input: { raceId: fleet!.raceId } })
+        })
 
         onClose()
     }
