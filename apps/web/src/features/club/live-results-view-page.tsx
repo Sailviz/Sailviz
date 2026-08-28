@@ -12,8 +12,8 @@ enum pageModes {
 
 const LiveResultsViewPage = ({ orgName }: { orgName: string }) => {
     const org = useQuery(orpcClient.organization.name.queryOptions({ input: { orgName: orgName! } })).data as Types.Org
-    const stripe = useQuery(orpcClient.stripe.org.queryOptions({ input: { orgId: org?.id } })).data
-    const races = useQuery(orpcClient.race.today.queryOptions({ input: { orgId: org?.id } })).data
+    const stripe = useQuery(orpcClient.stripe.org.queryOptions({ input: { orgId: org?.id }, enabled: org != undefined })).data
+    const races = useQuery(orpcClient.race.today.queryOptions({ input: { orgId: org?.id }, enabled: org != undefined })).data
 
     const queryClient = useQueryClient()
 
@@ -38,47 +38,61 @@ const LiveResultsViewPage = ({ orgName }: { orgName: string }) => {
             return false
         }
 
-        // Check if any fleets have started and not all boats have finished
-        return (
-            race.fleets.some(fleet => fleet.startTime !== 0) &&
-            !race.fleets
-                .flatMap(fleet => fleet.results)
-                .every(result => {
-                    return result?.finishTime !== 0 || result?.resultCode !== ''
-                })
-        )
+        if (race.Type == 'Handicap') {
+            //if any fleets have been started
+            if (race.fleets!.some(fleet => fleet.startTime != 0)) {
+                //race has started, check if all boats have finished
+                return !race
+                    .fleets!.flatMap(fleet => fleet.results)
+                    .every(result => {
+                        if (result!.finishTime != 0 || result!.resultCode != '') {
+                            return true
+                        }
+                    })
+            }
+        } else if (race.Type == 'Pursuit') {
+            //if any fleets have been started
+            if (race.fleets!.some(fleet => fleet.startTime != 0)) {
+                //this returns true if the race is still running, and false if the race has finished.
+                return race.fleets[0]!.startTime + race.series?.settings.pursuitLength * 60 > Math.floor(new Date().getTime() / 1000)
+            }
+        }
+        return false
     }, [])
 
+    const findActiveRace = async () => {
+        let activeFlag = false
+
+        if (!races) {
+            queryClient.invalidateQueries({
+                queryKey: orpcClient.race.today.key({ type: 'query' })
+            })
+            setTimeout(findActiveRace, 10000) // Check again in 10 seconds
+
+            return
+        }
+
+        for (const race of races) {
+            const updatedRace = await findRaceMutation.mutateAsync({ raceId: race.id })
+
+            if (checkActive(updatedRace)) {
+                setMode(pageModes.live)
+                setActiveRace(updatedRace)
+
+                activeFlag = true
+                break
+            }
+        }
+
+        if (!activeFlag) {
+            setMode(pageModes.notLive)
+        }
+        setTimeout(findActiveRace, 10000) // Check again in 10 seconds
+    }
+
     useEffect(() => {
-        const timer1 = setInterval(async () => {
-            let activeFlag = false
-
-            if (!races) {
-                queryClient.invalidateQueries({
-                    queryKey: orpcClient.race.today.key({ type: 'query' })
-                })
-                return
-            }
-
-            for (const race of races) {
-                const updatedRace = await findRaceMutation.mutateAsync({ raceId: race.id })
-
-                if (checkActive(updatedRace)) {
-                    setMode(pageModes.live)
-                    setActiveRace(updatedRace)
-
-                    activeFlag = true
-                    break
-                }
-            }
-
-            if (!activeFlag) {
-                setMode(pageModes.notLive)
-            }
-        }, 5000)
-
-        return () => clearInterval(timer1)
-    }, [races, checkActive, findRaceMutation, queryClient])
+        findActiveRace()
+    }, [races])
 
     return (
         <div>

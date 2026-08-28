@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, useReactTable, type SortingState } from '@tanstack/react-table'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
-import type { FleetType, ResultType } from '@sailviz/types'
+import * as Types from '@sailviz/types'
 import { useQuery } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
 
@@ -42,7 +42,7 @@ const Time = ({ ...props }) => {
     return <div className=' text-center'>{time}</div>
 }
 
-const calculateHandicapResults = (fleet: FleetType) => {
+const calculateHandicapResults = (fleet: Types.FleetType) => {
     console.log(fleet)
     if (fleet == undefined) {
         return { fleet, results: [] }
@@ -50,7 +50,7 @@ const calculateHandicapResults = (fleet: FleetType) => {
     //most nuber of laps.
     const maxLaps = Math.max.apply(
         null,
-        fleet.results!.map(function (o: ResultType) {
+        fleet.results!.map(function (o: Types.ResultType) {
             return o.laps.length
         })
     )
@@ -97,16 +97,39 @@ const calculateHandicapResults = (fleet: FleetType) => {
     return fleet
 }
 
-const calculatePursuitResults = (fleet: FleetType) => {
+const calculatePursuitResults = (fleet: Types.FleetType) => {
+    fleet.results?.sort((a: Types.ResultType, b: Types.ResultType) => {
+        // push retired to the bottom
+        if (a.resultCode != '') {
+            return 1
+        }
+        if (b.resultCode != '') {
+            return -1
+        }
+        //sort by nubmer of laps then last lap time
+        if (a.laps.length != b.laps.length) {
+            return b.laps.length - a.laps.length
+        } else {
+            const aLastLapTime = a.laps.length > 0 ? a.laps.slice(-1)[0]!.time : Infinity
+            const bLastLapTime = b.laps.length > 0 ? b.laps.slice(-1)[0]!.time : Infinity
+
+            return aLastLapTime - bLastLapTime
+        }
+    })
+
+    fleet.results?.forEach((result, index) => {
+        result.PursuitPosition = index + 1
+    })
+
     return fleet
 }
 
-const columnHelper = createColumnHelper<ResultType>()
+const columnHelper = createColumnHelper<Types.ResultType>()
 
 const LiveResultsTable = ({ fleetId, startTime, handicap }: { fleetId: string; startTime: number; handicap: string }) => {
     const fleet = useQuery(orpcClient.fleet.find.queryOptions({ input: { fleetId: fleetId }, refetchInterval: 5000 })).data
 
-    const [results, setResults] = useState<ResultType[]>()
+    const [results, setResults] = useState<Types.ResultType[]>()
     const [maxLaps, setMaxLaps] = useState(0)
 
     useEffect(() => {
@@ -175,13 +198,15 @@ const LiveResultsTable = ({ fleetId, startTime, handicap }: { fleetId: string; s
     })
 
     //results are ordered by corrected time so the index is the position
-    const Position = columnHelper.accessor(data => (handicap ? data.HandicapPosition : data.PursuitPosition), {
+    const Position = columnHelper.accessor(data => (handicap == 'handicap' ? data.HandicapPosition : data.PursuitPosition), {
         header: 'Position',
         cell: props => <Number {...props} />,
         enableSorting: true
     })
 
-    columns.push(Correctedtime)
+    if (handicap == 'Handicap') {
+        columns.push(Correctedtime)
+    }
     columns.push(Position)
 
     let table = useReactTable({
