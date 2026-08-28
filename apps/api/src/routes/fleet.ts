@@ -99,7 +99,7 @@ export const createFleetSettings = os.fleet.settings.create
             id: input.seriesId,
           },
         },
-        start: 0,
+        start: 1,
         classFlag: {
           connect: {
             id: orgData.defaultClassFlagId,

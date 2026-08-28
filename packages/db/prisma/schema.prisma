@@ -233,7 +233,7 @@ model FleetSettings {
   id                String  @id @unique @default(uuid())
   seriesId          String
   name              String
-  start             Int     @default(0)
+  start             Int     @default(1)
   fleets            Fleet[]
   series            Series  @relation(fields: [seriesId], references: [id], onDelete: Cascade)
   boats             Boat[]  @relation("BoatToFleetSettings")
