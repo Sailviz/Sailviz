@@ -10,6 +10,11 @@ import { auth } from "@sailviz/auth/auth";
 import { generateServer } from "./ws";
 import { registerUpdaterRoutes } from "./routes/updater";
 
+// import { analysisQueue } from "@sailviz/queue";
+// import { ExpressAdapter } from "@bull-board/express";
+// import { createBullBoard } from "@bull-board/api";
+// import { BullMQAdapter } from "@bull-board/api/bullMQAdapter";
+
 const app = express();
 app.use(
   cors({
@@ -24,6 +29,17 @@ const mainHandler = new RPCHandler(mainRouter, {
 });
 
 app.all("/api/auth/*splat", toNodeHandler(auth));
+
+// const serverAdapter = new ExpressAdapter();
+// serverAdapter.setBasePath("/admin/queues");
+
+// createBullBoard({
+//   queues: [new BullMQAdapter(analysisQueue)],
+//   serverAdapter,
+// });
+
+// // Mount BEFORE RPC catch-all
+// app.use("/admin/queues", serverAdapter.getRouter());
 
 // parse JSON bodies (oRPC may expect JSON payloads)
 app.use(express.json());

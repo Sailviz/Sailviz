@@ -24,15 +24,21 @@ async function parseGPX(buffer: Buffer): Promise<Types.Position[]> {
 
   const points: Types.Position[] = [];
 
-  const trks = gpx.gpx?.trk ?? [];
+  const toArray = (x: any) => (Array.isArray(x) ? x : x ? [x] : []);
+
+  const trks = toArray(gpx.gpx?.trk);
   for (const trk of trks) {
-    const segs = trk.trkseg ?? [];
+    const segs = toArray(trk.trkseg);
     for (const seg of segs) {
-      const trkpts = seg.trkpt ?? [];
+      const trkpts = toArray(seg.trkpt);
       for (const p of trkpts) {
-        const lat = parseFloat(p.$.lat);
-        const lon = parseFloat(p.$.lon);
-        const timestamp = parseInt(p.time?.[0]);
+        const lat = parseFloat(p.lat);
+        const lon = parseFloat(p.lon);
+        const timestamp = Math.floor(new Date(p.time).getTime());
+        console.log(`Parsing GPX point: time=${p.time}`);
+        console.log(
+          `Parsed GPX point: lat=${lat}, lon=${lon}, timestamp=${timestamp}`,
+        );
 
         points.push({ lat, lon, timestamp });
       }
@@ -98,6 +104,7 @@ export async function analyseActivity(activityId: string) {
   // Compute analysis (VMG, tacks, gybes, segments, stats)
   console.log(`[analysis] Computing analysis…`);
   const analysis = computeAnalysis(track, courseBuoys);
+  console.log(`[analysis] Analysis result:`, analysis);
 
   // Save ActivityAnalysis to DB
   console.log(`[analysis] Saving analysis to DB…`);

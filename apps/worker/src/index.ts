@@ -5,7 +5,7 @@ import { redis } from "@sailviz/queue";
 console.log("[worker] Starting Sailviz activity worker…");
 
 const worker = new Worker(
-  "activity",
+  "analyseActivity",
   async (job) => {
     console.log(
       `[worker] Received job ${job.id} for activity ${job.data.activityId}`,
@@ -20,7 +20,7 @@ const worker = new Worker(
   },
   {
     connection: redis,
-    concurrency: 1, // increase later if needed
+    concurrency: 1,
   },
 );
 

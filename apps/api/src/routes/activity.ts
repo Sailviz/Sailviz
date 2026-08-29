@@ -96,9 +96,13 @@ export const activity_saveMetadata = os.activity.saveMetadata.handler(
       },
     });
 
-    await analysisQueue.add("analyseActivity", {
-      activityId: newActivity.id,
-    });
+    await analysisQueue.add(
+      "analyseActivity",
+      {
+        activityId: newActivity.id,
+      },
+      { delay: 2000 },
+    ); // Delay the job to ensure the data is fully written to database
 
     return newActivity;
   },

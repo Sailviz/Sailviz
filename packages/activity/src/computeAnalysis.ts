@@ -26,6 +26,9 @@ export function computeAnalysis(
   let segments = {};
 
   const result = calculateDistanceAndSpeed(track);
+  console.log(
+    `[analysis] Calculated distance: ${result.distance}, maxSpeed: ${result.maxSpeed}`,
+  );
   distance = result.distance;
   maxSpeed = result.maxSpeed;
 
@@ -51,9 +54,13 @@ function calculateDistanceAndSpeed(points: Types.Position[]): {
     const b = points[i];
 
     const dt = (b.timestamp - a.timestamp) / 1000;
+    console.log(
+      `Calculating distance and speed between points ${i - 1} and ${i}: dt=${dt}s`,
+    );
     if (dt <= 0) continue;
 
     const d = haversine(a.lat, a.lon, b.lat, b.lon);
+    console.log(`Distance between points ${i - 1} and ${i}: ${d} meters`);
     distance += d;
 
     const speed = d / dt;
