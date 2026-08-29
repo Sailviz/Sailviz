@@ -94,6 +94,9 @@ export const activity_saveMetadata = os.activity.saveMetadata.handler(
         endTime: endTime,
         type: "Sail",
       },
+      include: {
+        activityAnalysis: true,
+      },
     });
 
     await analysisQueue.add(
@@ -120,6 +123,9 @@ export const activity_find = os.activity.find.handler(async ({ input }) => {
   const activity = await prisma.activity.findUnique({
     where: {
       id: input.activityId,
+    },
+    include: {
+      activityAnalysis: true,
     },
   });
   if (!activity) {

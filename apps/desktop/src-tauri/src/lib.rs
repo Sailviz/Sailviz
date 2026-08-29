@@ -9,7 +9,9 @@ pub fn run(fullscreen: bool) {
     use tauri_plugin_updater;
 
     #[cfg(not(any(target_os = "android", target_os = "ios")))]
-    let mut builder = tauri::Builder::default().plugin(tauri_plugin_updater::Builder::new().build());
+    let mut builder = tauri::Builder::default()
+        .plugin(tauri_plugin_fs::init())
+        .plugin(tauri_plugin_updater::Builder::new().build());
 
     if cfg!(debug_assertions) {
         builder = builder.plugin(
@@ -51,9 +53,7 @@ pub fn run() {
     }
 
     builder
-        .setup(move |_app_handle| {
-            Ok(())
-        })
+        .setup(move |_app_handle| Ok(()))
         .invoke_handler(tauri::generate_handler![toggle_fullscreen])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
@@ -79,23 +79,23 @@ async fn toggle_fullscreen(window: tauri::Window) -> Result<(), String> {
 #[tauri::command]
 #[cfg(not(any(target_os = "android", target_os = "ios")))]
 async fn update(app: tauri::AppHandle) -> tauri_plugin_updater::Result<()> {
-  if let Some(update) = app.updater()?.check().await? {
-    let mut downloaded = 0;
-    update
-      .download_and_install(
-        |chunk_length, content_length| {
-          downloaded += chunk_length;
-          println!("downloaded {downloaded} from {content_length:?}");
-        },
-        || {
-          println!("download finished");
-        },
-      )
-      .await?;
+    if let Some(update) = app.updater()?.check().await? {
+        let mut downloaded = 0;
+        update
+            .download_and_install(
+                |chunk_length, content_length| {
+                    downloaded += chunk_length;
+                    println!("downloaded {downloaded} from {content_length:?}");
+                },
+                || {
+                    println!("download finished");
+                },
+            )
+            .await?;
 
-    println!("update installed");
-    app.restart();
-  }
+        println!("update installed");
+        app.restart();
+    }
 
-  Ok(())
+    Ok(())
 }

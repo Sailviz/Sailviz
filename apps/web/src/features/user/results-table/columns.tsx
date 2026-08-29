@@ -1,6 +1,7 @@
 import { type ColumnDef } from '@tanstack/react-table'
 import * as Types from '@sailviz/types'
 import { CellAction } from './cell-action'
+import { Share } from './share'
 
 export const columns: ColumnDef<Types.RaceType>[] = [
     {
@@ -22,5 +23,9 @@ export const columns: ColumnDef<Types.RaceType>[] = [
     {
         id: 'actions',
         cell: ({ row }) => <CellAction data={row.original} />
+    },
+    {
+        id: 'share',
+        cell: ({ row }) => <Share data={row.original} />
     }
 ]

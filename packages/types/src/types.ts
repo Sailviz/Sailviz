@@ -247,6 +247,14 @@ export const PositionSchema = z.object({
 });
 export type Position = z.infer<typeof PositionSchema>;
 
+export const ActivityAnalysisSchema = z.object({
+  id: z.string(),
+  distance: z.number(),
+  maxSpeed: z.number(),
+  segments: z.any(),
+  laps: z.any(),
+});
+
 export const ActivitySchema = z.object({
   id: z.string(),
   s3Key: z.string(),
@@ -254,6 +262,7 @@ export const ActivitySchema = z.object({
   startTime: z.number(),
   endTime: z.number(),
   type: z.string(),
+  activityAnalysis: ActivityAnalysisSchema.nullable(),
   position: z.array(PositionSchema).optional(),
 });
 export type Activity = z.infer<typeof ActivitySchema>;
