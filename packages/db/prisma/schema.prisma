@@ -36,8 +36,22 @@ model User {
   teamMembers       teamMember[]
   userFavouriteOrgs UserFavouriteOrgs[]
   signOnProfiles    signOnProfile[]
+  followers         Follow[]            @relation("UserFollowers")
+  following         Follow[]            @relation("UserFollowing")
 
   @@map("user")
+}
+
+model Follow {
+  followerId  String
+  followingId String
+  createdAt   DateTime @default(now())
+
+  follower  User @relation("UserFollowing", fields: [followerId], references: [id])
+  following User @relation("UserFollowers", fields: [followingId], references: [id])
+
+  @@id([followerId, followingId])
+  @@map("follow")
 }
 
 model UserFavouriteOrgs {

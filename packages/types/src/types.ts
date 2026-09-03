@@ -190,6 +190,13 @@ export const UserSchema = z.object({
 });
 export type UserType = z.infer<typeof UserSchema>;
 
+export const ReducedUserSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  image: z.string().nullable().optional(),
+});
+export type ReducedUserType = z.infer<typeof ReducedUserSchema>;
+
 export const userFavouriteOrgsSchema = z.object({
   orgId: z.string(),
   organization: OrgSchema,
@@ -266,6 +273,12 @@ export const ActivitySchema = z.object({
   position: z.array(PositionSchema).optional(),
 });
 export type Activity = z.infer<typeof ActivitySchema>;
+
+export const FollowSchema = z.object({
+  following: UserSchema,
+  follower: UserSchema,
+});
+export type Follow = z.infer<typeof FollowSchema>;
 
 export const stripeSchema = z.object({
   customerId: z.string(),

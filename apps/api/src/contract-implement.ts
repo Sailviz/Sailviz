@@ -111,6 +111,13 @@ import {
   activity_positions,
   activity_saveMetadata,
 } from "./routes/activity";
+import {
+  follow_create,
+  follow_delete,
+  follow_getFollowers,
+  follow_getFollowing,
+} from "./routes/social/follow";
+import { social_findUsers } from "./routes/social/users";
 
 const os = implement(ORPCcontract);
 
@@ -253,6 +260,15 @@ export const mainRouter = os.router({
     positions: activity_positions,
     linkToResult: activity_linkToResult,
     getURL: activity_getURL,
+  },
+  social: {
+    follow: {
+      create: follow_create,
+      delete: follow_delete,
+      getFollowers: follow_getFollowers,
+      getFollowing: follow_getFollowing,
+    },
+    find_users: social_findUsers,
   },
   trackable: {
     participant: {

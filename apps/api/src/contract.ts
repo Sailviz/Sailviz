@@ -393,6 +393,31 @@ export const ORPCcontract = {
       )
       .output(z.array(Types.PositionSchema)),
   },
+  social: {
+    follow: {
+      create: oc
+        .input(z.object({ followerId: z.string(), followingId: z.string() }))
+        .output(z.any()),
+      delete: oc
+        .input(z.object({ followerId: z.string(), followingId: z.string() }))
+        .output(z.any()),
+      getFollowers: oc
+        .input(z.object({ userId: z.string() }))
+        .output(z.array(Types.ReducedUserSchema)),
+      getFollowing: oc
+        .input(z.object({ userId: z.string() }))
+        .output(z.array(Types.ReducedUserSchema)),
+    },
+    find_users: oc
+      .input(
+        z.object({
+          page: z.number(),
+          pageSize: z.number(),
+          search: z.string().nullable(),
+        }),
+      )
+      .output(Types.UserSchema.array()),
+  },
   trackable: {
     participant: {
       create: oc
