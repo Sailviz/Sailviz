@@ -1,4 +1,6 @@
 use tauri::Manager;
+use pcsc::*;
+use std::error::Error;
 
 #[cfg(not(any(target_os = "android", target_os = "ios")))]
 use tauri_plugin_updater::UpdaterExt;
@@ -35,6 +37,7 @@ pub fn run(fullscreen: bool) {
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![toggle_fullscreen])
+        .invoke_handler(tauri::generate_handler![scan_nfc])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
@@ -98,4 +101,106 @@ async fn update(app: tauri::AppHandle) -> tauri_plugin_updater::Result<()> {
     }
 
     Ok(())
+}
+
+
+fn read_block(card: &Card, block: u8) -> Result<Vec<u8>, Box<dyn Error>> {
+    // ISO15693 Read Binary:
+    // FF B0 <block_number> <number_of_blocks>
+    let apdu = [0xFF, 0x00, 0x00, 0x00,
+    0x03,
+    0x22, // Flags
+    0x20, block];
+    let mut buf = [0u8; 258];
+
+    // transmit() returns &[u8]
+    let rapdu = card.transmit(&apdu, &mut buf)?;
+    Ok(rapdu.to_vec())
+}
+
+
+#[tauri::command]
+fn scan_nfc() -> Result<String, String> {
+    // Establish a PC/SC context.
+    let ctx = match Context::establish(Scope::User) {
+        Ok(ctx) => ctx,
+        Err(err) => {
+            eprintln!("Failed to establish context: {}", err);
+            std::process::exit(1);
+        }
+    };
+
+    // List available readers.
+    let mut readers_buf = [0; 2048];
+    let mut readers = match ctx.list_readers(&mut readers_buf) {
+        Ok(readers) => readers,
+        Err(err) => {
+            eprintln!("Failed to list readers: {}", err);
+            std::process::exit(1);
+        }
+    };
+
+    // Use the first reader.
+    let reader = match readers.next() {
+        Some(reader) => reader,
+        None => {
+            println!("No readers are connected.");
+            return Ok("No readers are connected.".to_string());
+        }
+    };
+    println!("Using reader: {:?}", reader);
+
+    // Connect to the card.
+     // Wait for card
+    let card = ctx.connect(reader, ShareMode::Shared, Protocols::ANY)
+        .map_err(|e| format!("Failed to connect to card: {}", e))?;
+    println!("Tag detected");
+
+    // Read blocks containing TLV + NDEF
+    let apdu = [0xFF, 0xfb, 0x00, 0x02, 0x03, 0x23, 0x02, 0x06];
+    let mut tlv = [0u8; 258];
+
+    // transmit() returns &[u8]
+    let len = card.transmit(&apdu, &mut tlv).map_err(|e| format!("Failed to talk to card: {}", e))?;;
+
+    println!("Raw TLV bytes: {:02X?}", tlv);
+
+    // ---- Parse TLV ----
+    let mut i = 0;
+
+    // Skip NULL TLVs
+    while tlv[i] == 0x00 {
+        i += 1;
+    }
+
+    if tlv[i] != 0x03 {
+        println!("Not an NDEF TLV");
+    }
+
+    let ndef_len = tlv[i+1] as usize;
+    let ndef = &tlv[i+2 .. i+2+ndef_len];
+
+
+    println!("NDEF bytes: {:02X?}", ndef);
+
+    // ---- Parse NDEF Text Record ----
+    // D1 01 <len> 54 02 'e' 'n' <payload>
+    let tnf = ndef[0];
+    let type_len = ndef[1] as usize;
+    let payload_len = ndef[2] as usize;
+
+    let record_type = &ndef[3..3 + type_len];
+    let status = ndef[3 + type_len];
+    let lang_len = (status & 0x3F) as usize;
+
+    let lang = &ndef[4 + type_len .. 4 + type_len + lang_len];
+    let text = &ndef[4 + type_len + lang_len .. 3 + type_len + payload_len];
+
+    let serial = String::from_utf8_lossy(text);
+
+    println!("Language: {}", String::from_utf8_lossy(lang));
+    println!("Record Type: {}", String::from_utf8_lossy(record_type));
+    println!("Serial Number: {}", serial);
+
+    Ok(serial.to_string())
 }

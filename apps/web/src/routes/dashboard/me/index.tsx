@@ -10,6 +10,8 @@ import { Banner, BannerAction, BannerClose, BannerIcon, BannerTitle } from '@com
 import { CircleAlert } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import PageContainer from '@components/layout/page-container'
+import { Button } from '@components/ui/button'
+import { invoke } from '@tauri-apps/api/core'
 
 function Page() {
     const session: Session = useLoaderData({ from: `__root__` })
@@ -35,6 +37,11 @@ function Page() {
                 })
         }
         return false
+    }
+
+    const scanNFC = async () => {
+        let res = await invoke('scan_nfc')
+        console.log(res)
     }
     useEffect(() => {
         if (favouriteOrgs == undefined) return
@@ -79,6 +86,7 @@ function Page() {
                         <CreateResultModal org={org.organization} />
                     </div>
                 ))}
+                <Button onClick={scanNFC}>Scan NFC</Button>
             </div>
         </PageContainer>
     )
