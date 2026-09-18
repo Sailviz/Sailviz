@@ -1,6 +1,7 @@
-use tauri::Manager;
+use tauri::{Manager, AppHandle, Emitter};
 use pcsc::*;
 use std::error::Error;
+use std::ffi::CStr;
 
 #[cfg(not(any(target_os = "android", target_os = "ios")))]
 use tauri_plugin_updater::UpdaterExt;
@@ -36,8 +37,7 @@ pub fn run(fullscreen: bool) {
             }
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![toggle_fullscreen])
-        .invoke_handler(tauri::generate_handler![scan_nfc])
+        .invoke_handler(tauri::generate_handler![toggle_fullscreen, scan_nfc, start_nfc_events])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
@@ -103,20 +103,56 @@ async fn update(app: tauri::AppHandle) -> tauri_plugin_updater::Result<()> {
     Ok(())
 }
 
+static RUNNING: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
 
-fn read_block(card: &Card, block: u8) -> Result<Vec<u8>, Box<dyn Error>> {
-    // ISO15693 Read Binary:
-    // FF B0 <block_number> <number_of_blocks>
-    let apdu = [0xFF, 0x00, 0x00, 0x00,
-    0x03,
-    0x22, // Flags
-    0x20, block];
-    let mut buf = [0u8; 258];
+#[tauri::command]
+fn start_nfc_events(app: tauri::AppHandle) {
+        if RUNNING.swap(true, std::sync::atomic::Ordering::SeqCst) {
+        println!("NFC loop already running");
+        return;
+    }
+    tauri::async_runtime::spawn(async move {
+        use tauri::Manager;
 
-    // transmit() returns &[u8]
-    let rapdu = card.transmit(&apdu, &mut buf)?;
-    Ok(rapdu.to_vec())
+        let ctx = pcsc::Context::establish(pcsc::Scope::User).unwrap();
+
+        let mut readers_buf = [0; 2048];
+        let mut readers = ctx.list_readers(&mut readers_buf).unwrap();
+        let reader_name = readers.next().unwrap();
+
+        // Track the last FULL event_state, not just PRESENT
+        let mut last_state = pcsc::State::EMPTY;
+
+        loop {
+            // Use last_state instead of UNAWARE
+            let mut state = pcsc::ReaderState::new(reader_name, last_state);
+            let mut states = [state];
+
+            match ctx.get_status_change(None, &mut states) {
+                Ok(_) => {},
+                Err(e) => {
+                    println!("PCSC error: {:?}", e);
+                    continue; // ignore and wait again
+                }
+            }
+
+
+            let events = states[0].event_state();
+
+            let present_now = events.contains(pcsc::State::PRESENT);
+            let present_before = last_state.contains(pcsc::State::PRESENT);
+
+            // Emit ONLY when PRESENT transitions from false → true
+            if present_now && !present_before {
+                app.emit("nfc-event", "tag-detected").unwrap();
+            }
+
+            // Update last_state to the full event_state
+            last_state = events;
+        }
+    });
 }
+
 
 
 #[tauri::command]
@@ -161,7 +197,7 @@ fn scan_nfc() -> Result<String, String> {
     let mut tlv = [0u8; 258];
 
     // transmit() returns &[u8]
-    let len = card.transmit(&apdu, &mut tlv).map_err(|e| format!("Failed to talk to card: {}", e))?;;
+    card.transmit(&apdu, &mut tlv).map_err(|e| format!("Failed to talk to card: {}", e))?;;
 
     println!("Raw TLV bytes: {:02X?}", tlv);
 
