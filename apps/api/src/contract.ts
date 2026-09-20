@@ -306,6 +306,16 @@ export const ORPCcontract = {
           }),
         ),
     },
+    feed: {
+      get: oc
+        .input(
+          z.object({
+            userId: z.string(),
+            cursor: z.string(),
+          }),
+        )
+        .output(z.array(Types.ActivitySchema)),
+    },
   },
   globalConfig: {
     find: oc.output(Types.GlobalConfigSchema),

@@ -39,6 +39,8 @@ model User {
   followers         Follow[]            @relation("UserFollowers")
   following         Follow[]            @relation("UserFollowing")
 
+  activities Activity[]
+
   @@map("user")
 }
 
@@ -303,6 +305,8 @@ model Activity {
   endTime            Int
   activityAnalysis   ActivityAnalysis? @relation(fields: [activityAnalysisId], references: [id])
   activityAnalysisId String?           @unique
+  user               User?             @relation(fields: [userId], references: [id])
+  userId             String?
 }
 
 model ActivityAnalysis {

@@ -1,6 +1,5 @@
 import type { Session } from '@lib/session'
 import { createFileRoute, Link, useLoaderData } from '@tanstack/react-router'
-import InvitationsTable from '@components/tables/InvitationsTable'
 import UpcomingRacesTable from '@components/tables/UpcomingRacesTable'
 import CreateResultModal from '@components/layout/myRaces/CreateResultModal'
 import { useMutation, useQuery } from '@tanstack/react-query'
@@ -10,6 +9,7 @@ import { Banner, BannerAction, BannerClose, BannerIcon, BannerTitle } from '@com
 import { CircleAlert } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import PageContainer from '@components/layout/page-container'
+import { ActivityFeed } from '@features/activities/ActivityFeed'
 
 function Page() {
     const session: Session = useLoaderData({ from: `__root__` })
@@ -57,7 +57,21 @@ function Page() {
     if (favouriteOrgs == undefined) {
         return <div>Loading...</div>
     }
-    console.log(favouriteOrgs)
+
+    function OrgSection(org: any) {
+        const { data: todaysRaces } = useQuery(orpcClient.race.today.queryOptions({ input: { orgId: org.id } }))
+
+        if (!todaysRaces) return null
+
+        return (
+            <div>
+                <h1>{org.organization.name}</h1>
+                <UpcomingRacesTable orgId={org.orgId} viewHref={`/club/${org.organization.name}/Race/`} />
+                <CreateResultModal org={org.organization} />
+            </div>
+        )
+    }
+
     return (
         <PageContainer scrollable={true}>
             <div className='flex flex-1 flex-col space-y-4'>
@@ -70,16 +84,11 @@ function Page() {
                     <BannerClose />
                 </Banner>
                 Hello {session?.user.name}
-                <div> Pending Invitations:</div>
-                <InvitationsTable />
-                {favouriteOrgs?.map((org: any) => (
-                    <div>
-                        <h1 key={org.orgId}> {org.organization.name} </h1>
-                        <UpcomingRacesTable orgId={org.orgId} viewHref={`/club/${org.organization.name}/Race/`} />
-
-                        <CreateResultModal org={org.organization} />
-                    </div>
-                ))}
+                {favouriteOrgs?.map((org: any) => {
+                    ;<OrgSection key={org.orgId} org={org} />
+                })}
+                {/* infinite scrolling history of activities for user and people they follow */}
+                <ActivityFeed userId={session.user.id} />
             </div>
         </PageContainer>
     )

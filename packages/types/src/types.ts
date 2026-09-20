@@ -264,6 +264,7 @@ export const ActivityAnalysisSchema = z.object({
 
 export const ActivitySchema = z.object({
   id: z.string(),
+  userId: z.string(),
   s3Key: z.string(),
   createdAt: z.date(),
   startTime: z.number(),

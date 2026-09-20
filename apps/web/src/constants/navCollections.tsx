@@ -258,7 +258,15 @@ export const meCollections: NavCollection[] = [
         title: 'Main Menu',
         items: [
             {
-                title: 'Results',
+                title: 'My Activities',
+                url: '/dashboard/me/activities',
+                icon: <RaceIcon />,
+                shortcut: ['p', 'p'],
+                isActive: false,
+                items: [] // No child items
+            },
+            {
+                title: 'My Results',
                 url: '/dashboard/me/races',
                 icon: <RaceIcon />,
                 shortcut: ['p', 'p'],
@@ -266,7 +274,7 @@ export const meCollections: NavCollection[] = [
                 items: [] // No child items
             },
             {
-                title: 'My Clubs',
+                title: 'Clubs',
                 url: '/dashboard/me/clubs',
                 icon: <RaceIcon />,
                 shortcut: ['p', 'p'],

@@ -52,7 +52,7 @@ function RouteComponent() {
     return (
         <PageContainer scrollable={true}>
             <div className='flex flex-1 flex-col space-y-4'>
-                <h1 className='text-2xl font-bold mb-4 px-6'>My Clubs</h1>
+                <h1 className='text-2xl font-bold mb-4 px-6'>Starred Clubs</h1>
                 <div className='flex flex-row flex-wrap'>
                     {orgs
                         ?.filter(org => favouriteOrgs?.flatMap((org: any) => org.orgId).includes(org.id))

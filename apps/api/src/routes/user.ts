@@ -325,3 +325,39 @@ export const user_favouriteOrgs = os.user.favouriteOrgs
     });
     return favouriteOrgs as Types.userFavouriteOrgsType[];
   });
+
+export const user_feed_get = os.user.feed.get
+  .use(authMiddleware)
+  .handler(async ({ context, input }) => {
+    const session = context.session as any;
+    if (!session || !session.user) {
+      throw new ORPCError("UNAUTHORIZED", { message: "Login required" });
+    }
+    const userId = session.user.id;
+    const cursor = input.cursor || null;
+
+    const following = await prisma.follow.findMany({
+      where: {
+        followerId: input.userId,
+      },
+      include: {
+        following: true,
+      },
+    });
+
+    const followedUserIds = following.map((f) => f.followingId);
+    console.log("Followed user IDs:", followedUserIds);
+
+    const activities = await prisma.activity.findMany({
+      where: { userId: { in: [userId, ...followedUserIds] } },
+      orderBy: { createdAt: "desc" },
+      take: 2,
+      cursor: cursor ? { id: cursor } : undefined,
+      skip: cursor ? 1 : 0,
+      include: {
+        activityAnalysis: true,
+      },
+    });
+
+    return activities;
+  });
