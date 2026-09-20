@@ -7,6 +7,7 @@ import type { Session } from '@sailviz/auth/client'
 import { useEffect, useState } from 'react'
 import { client } from '@sailviz/auth/client'
 import { Input } from '@components/ui/input'
+import TeamsTable from '@components/tables/TeamsTable'
 
 function Page() {
     const session: Session = useLoaderData({ from: `__root__` })
@@ -47,6 +48,7 @@ function Page() {
                     ) : (
                         <></>
                     )}
+                    <TeamsTable orgId={session.session.activeOrganizationId!} />
                 </div>
             </>
         )

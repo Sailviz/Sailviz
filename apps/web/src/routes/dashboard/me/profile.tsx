@@ -1,6 +1,7 @@
 import CreateSignOnProfileModal from '@components/layout/myRaces/CreateSignOnProfileModal'
 import PageContainer from '@components/layout/page-container'
 import InvitationsTable from '@components/tables/InvitationsTable'
+import MembershipsTable from '@components/tables/MembershipsTable'
 import SignOnProfileTable from '@components/tables/SignOnProfileTable'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@components/ui/tabs'
 import FindSailorModal from '@features/social/follow/find-sailor-modal'
@@ -37,6 +38,7 @@ function Page() {
                         <FollowerTable userId={userId} filters={{ page: 1, searchQuery: null, tagFilter: null }} />
                     </TabsContent>
                     <TabsContent value='clubs'>
+                        <MembershipsTable userId={session.user.id} />
                         <div> Pending Invitations:</div>
                         <InvitationsTable />
                     </TabsContent>

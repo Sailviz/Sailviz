@@ -1,45 +1,51 @@
 import { useEffect, useState } from 'react'
 import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, type SortingState, useReactTable } from '@tanstack/react-table'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
-import { Button } from '../ui/button'
-import * as Types from '@sailviz/types'
 import { client } from '@sailviz/auth/client'
-import EditMemberDialog from '@components/layout/dashboard/EditMemberModal'
 
-const Action = ({ member, onClick }: { member: Types.Member; onClick: (member: Types.Member) => void }) => {
-    return (
-        <div className='relative flex items-center gap-2 cursor-pointer'>
-            <Button onClick={() => onClick(member)}>Edit</Button>
-        </div>
-    )
+type OrgMembership = {
+    id: string
+    name: string
+    organizationId: string
+    orgName: string
+    createdAt: Date
+    updatedAt?: Date | undefined
 }
 
-const columnHelper = createColumnHelper<Types.Member>()
+const columnHelper = createColumnHelper<OrgMembership>()
 
-const MembersTable = ({ orgId }: { orgId: string }) => {
-    const [data, setData] = useState<Types.Member[]>([])
+const MembershipsTable = ({ userId }: { userId: string }) => {
+    const [data, setData] = useState<OrgMembership[]>([])
 
     useEffect(() => {
         async function fetchUsers() {
-            const { data } = await client.organization.listMembers({
+            const { data } = await client.organization.listUserTeams({
                 query: {
-                    organizationId: orgId
+                    userId: userId
                 }
             })
 
-            console.log('Fetched members:', data?.members)
-            setData(data!.members)
+            console.log('Fetched members:', data)
+            if (!data) {
+                setData([])
+                return
+            }
+            const enriched = await Promise.all(
+                data.map(async membership => {
+                    const orgData = await client.organization.getFullOrganization({
+                        query: { organizationId: membership.organizationId }
+                    })
+
+                    return {
+                        ...membership,
+                        orgName: orgData.data?.name || 'Unknown'
+                    }
+                })
+            )
+            setData(enriched)
         }
         fetchUsers()
     }, [])
-
-    const [modalIsOpen, setModalIsOpen] = useState(false)
-    const [modalData, setModalData] = useState<Types.Member | undefined>(undefined)
-
-    function onEdit(member: Types.Member) {
-        setModalData(member)
-        setModalIsOpen(true)
-    }
 
     const [sorting, setSorting] = useState<SortingState>([
         {
@@ -51,20 +57,15 @@ const MembersTable = ({ orgId }: { orgId: string }) => {
     var table = useReactTable({
         data,
         columns: [
-            columnHelper.accessor(member => member.user.name, {
+            columnHelper.accessor(org => org.orgName, {
                 id: 'Name',
                 cell: info => info.getValue(),
                 enableSorting: true
             }),
-            columnHelper.accessor('role', {
+            columnHelper.accessor(org => org.name, {
                 id: 'Role',
                 cell: info => info.getValue(),
                 enableSorting: true
-            }),
-            columnHelper.accessor('id', {
-                id: 'Edit',
-                header: 'Action',
-                cell: props => <Action member={props.row.original} onClick={onEdit} />
             })
         ],
         state: {
@@ -76,7 +77,6 @@ const MembersTable = ({ orgId }: { orgId: string }) => {
     })
     return (
         <div className='rounded-md border w-full'>
-            <EditMemberDialog open={modalIsOpen} member={modalData!} onClose={() => setModalIsOpen(false)} />
             <Table aria-label='Members Table'>
                 <TableHeader>
                     <TableRow>
@@ -102,4 +102,4 @@ const MembersTable = ({ orgId }: { orgId: string }) => {
     )
 }
 
-export default MembersTable
+export default MembershipsTable
