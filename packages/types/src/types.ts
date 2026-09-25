@@ -270,8 +270,9 @@ export const ActivitySchema = z.object({
   startTime: z.number(),
   endTime: z.number(),
   type: z.string(),
-  activityAnalysis: ActivityAnalysisSchema.nullable(),
-  position: z.array(PositionSchema).optional(),
+  activityAnalysis: ActivityAnalysisSchema.nullable().optional(),
+  position: z.array(PositionSchema).nullable().optional(),
+  result: ResultSchema.nullable().optional(),
 });
 export type Activity = z.infer<typeof ActivitySchema>;
 

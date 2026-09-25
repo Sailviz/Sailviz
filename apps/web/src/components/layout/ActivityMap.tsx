@@ -7,10 +7,10 @@ import { useMutation, useQuery } from '@tanstack/react-query'
 import L from 'leaflet'
 import * as Types from '@sailviz/types'
 
-export default function ActivityMap({ raceId, windowHeight, activityId }: { raceId: string; windowHeight: number; activityId: string }) {
+export default function ActivityMap({ raceId, windowHeight, activityId }: { raceId: string | null; windowHeight: number; activityId: string }) {
     const ZOOM_LEVEL = 9
 
-    const race = useQuery(orpcClient.race.find.queryOptions({ input: { raceId } })).data
+    const race = useQuery({ ...orpcClient.race.find.queryOptions({ input: { raceId: raceId! } }), enabled: !!raceId }).data
 
     const getActivityPositionsMutation = useMutation(orpcClient.activity.positions.mutationOptions())
     const { data: activity } = useQuery(orpcClient.activity.find.queryOptions({ input: { activityId } }))

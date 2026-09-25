@@ -294,7 +294,7 @@ model Result {
   activityId             String?   @unique
 }
 
-// This model is used to store the activities uploaded by users. Each activity can be linked to a result, but it doesn't need to be.
+// Used to store the activities uploaded by users. Each activity can be linked to a result, but it doesn't need to be.
 model Activity {
   id                 String            @id @unique @default(uuid())
   type               String
@@ -305,8 +305,8 @@ model Activity {
   endTime            Int
   activityAnalysis   ActivityAnalysis? @relation(fields: [activityAnalysisId], references: [id])
   activityAnalysisId String?           @unique
-  user               User?             @relation(fields: [userId], references: [id])
-  userId             String?
+  user               User              @relation(fields: [userId], references: [id])
+  userId             String
 }
 
 model ActivityAnalysis {

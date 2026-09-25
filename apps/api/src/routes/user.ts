@@ -360,3 +360,32 @@ export const user_feed_get = os.user.feed.get
 
     return activities;
   });
+
+export const user_activities_all = os.user.activities.all
+  .use(authMiddleware)
+  .handler(async ({ context, input }) => {
+    const session = context.session as any;
+    if (!session || !session.user) {
+      throw new ORPCError("UNAUTHORIZED", { message: "Login required" });
+    }
+    const userId = session.user.id;
+    const activities = await prisma.activity.findMany({
+      where: { userId },
+      orderBy: { createdAt: "desc" },
+      take: input.pageSize,
+      skip: (input.page - 1) * input.pageSize,
+      include: {
+        result: {
+          include: {
+            laps: true,
+          },
+        },
+      },
+    });
+
+    const activityCount = await prisma.activity.count({
+      where: { userId },
+    });
+
+    return { activities, activityCount };
+  });

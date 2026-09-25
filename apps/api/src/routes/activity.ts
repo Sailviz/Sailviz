@@ -9,6 +9,7 @@ import { Point } from "@influxdata/influxdb-client";
 import { influxQuery, influxWrite } from "./../influx";
 import * as Types from "@sailviz/types";
 import { analysisQueue } from "@sailviz/queue";
+import { authMiddleware } from "../middleware";
 
 const minioClient = new MinioClient({
   endPoint: config.MINIO_ENDPOINT as string,
@@ -48,8 +49,11 @@ async function streamToString(stream: NodeJS.ReadableStream): Promise<string> {
   return Buffer.concat(chunks).toString("utf-8");
 }
 
-export const activity_saveMetadata = os.activity.saveMetadata.handler(
-  async ({ input }) => {
+export const activity_saveMetadata = os.activity.saveMetadata
+  .use(authMiddleware)
+  .handler(async ({ context, input }) => {
+    const session = context.session as any;
+
     const gpxStream = await minioClient.getObject(
       config.MINIO_BUCKET_SAILVIZ,
       input.s3key,
@@ -93,6 +97,7 @@ export const activity_saveMetadata = os.activity.saveMetadata.handler(
         startTime: startTime,
         endTime: endTime,
         type: "Sail",
+        userId: session.user.id,
       },
       include: {
         activityAnalysis: true,
@@ -108,8 +113,7 @@ export const activity_saveMetadata = os.activity.saveMetadata.handler(
     ); // Delay the job to ensure the data is fully written to database
 
     return newActivity;
-  },
-);
+  });
 
 export const activity_getURL = os.activity.getURL.handler(async ({ input }) => {
   const presignedUrl = await minioClient.presignedGetObject(

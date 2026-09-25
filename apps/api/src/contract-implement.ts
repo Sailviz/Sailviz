@@ -62,6 +62,7 @@ import {
   user_signOnProfile_all,
   user_favouriteOrgs,
   user_feed_get,
+  user_activities_all,
 } from "./routes/user";
 import { createResult, deleteResult, updateResult } from "./routes/result";
 import { globalConfig_find, globalConfig_update } from "./routes/globalConfig";
@@ -226,6 +227,9 @@ export const mainRouter = os.router({
     },
     results: {
       all: user_results_all,
+    },
+    activities: {
+      all: user_activities_all,
     },
     feed: {
       get: user_feed_get,

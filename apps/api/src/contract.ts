@@ -306,6 +306,21 @@ export const ORPCcontract = {
           }),
         ),
     },
+    activities: {
+      all: oc
+        .input(
+          z.object({
+            page: z.number(),
+            pageSize: z.number(),
+          }),
+        )
+        .output(
+          z.object({
+            activityCount: z.number(),
+            activities: z.array(Types.ActivitySchema),
+          }),
+        ),
+    },
     feed: {
       get: oc
         .input(
