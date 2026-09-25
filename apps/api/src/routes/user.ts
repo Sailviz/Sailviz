@@ -346,7 +346,6 @@ export const user_feed_get = os.user.feed.get
     });
 
     const followedUserIds = following.map((f) => f.followingId);
-    console.log("Followed user IDs:", followedUserIds);
 
     const activities = await prisma.activity.findMany({
       where: { userId: { in: [userId, ...followedUserIds] } },
