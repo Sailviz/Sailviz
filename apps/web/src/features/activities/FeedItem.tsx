@@ -16,6 +16,7 @@ export function FeedItem({ activity }: { activity: Types.Activity }) {
                 A new sailing session was uploaded.
                 <div className='mt-2 text-xs text-slate-400'>Session ID: {activity.id}</div>
             </div>
+            <div className='mt-2 text-xs text-slate-400'>Likes: {activity.likes?.length ?? 0}</div>
         </div>
     )
 }

@@ -262,6 +262,13 @@ export const ActivityAnalysisSchema = z.object({
   laps: z.any(),
 });
 
+export const ActivityLikeSchema = z.object({
+  id: z.string(),
+  activityId: z.string(),
+  userId: z.string(),
+  createdAt: z.date(),
+});
+
 export const ActivitySchema = z.object({
   id: z.string(),
   userId: z.string(),
@@ -273,6 +280,7 @@ export const ActivitySchema = z.object({
   activityAnalysis: ActivityAnalysisSchema.nullable().optional(),
   position: z.array(PositionSchema).nullable().optional(),
   result: ResultSchema.nullable().optional(),
+  likes: ActivityLikeSchema.array().nullable().optional(),
 });
 export type Activity = z.infer<typeof ActivitySchema>;
 
