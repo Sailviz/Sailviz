@@ -308,8 +308,8 @@ model Activity {
   activityAnalysisId String?           @unique
   user               User              @relation(fields: [userId], references: [id])
   userId             String
-  Title              String            @default("")
-  Description        String            @default("")
+  title              String            @default("")
+  description        String            @default("")
   likes              ActivityLike[]
 }
 

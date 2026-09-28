@@ -355,6 +355,13 @@ export const user_feed_get = os.user.feed.get
       skip: cursor ? 1 : 0,
       include: {
         activityAnalysis: true,
+        user: {
+          select: {
+            id: true,
+            name: true,
+            image: true,
+          },
+        },
       },
     });
 

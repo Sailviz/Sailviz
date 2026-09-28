@@ -19,13 +19,21 @@ function Page() {
     return (
         <PageContainer scrollable={true}>
             <div className='flex flex-1 flex-col space-y-4'>
-                <Tabs defaultValue='profiles' className='w-[400px]'>
+                <Tabs defaultValue='profiles' className=''>
                     <TabsList>
+                        <TabsTrigger value='me'>Me</TabsTrigger>
                         <TabsTrigger value='profiles'>Profiles</TabsTrigger>
                         <TabsTrigger value='following'>Following</TabsTrigger>
                         <TabsTrigger value='followers'>Followers</TabsTrigger>
                         <TabsTrigger value='clubs'>Clubs</TabsTrigger>
                     </TabsList>
+                    <TabsContent value='me'>
+                        <div>
+                            Name: {session.user.name} <br />
+                            Email: {session.user.email} <br />
+                            User ID: {session.user.id} <br />
+                        </div>
+                    </TabsContent>
                     <TabsContent value='profiles'>
                         <SignOnProfileTable boats={boats} />
                         <CreateSignOnProfileModal boats={boats} />

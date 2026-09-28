@@ -271,7 +271,7 @@ export const ActivityLikeSchema = z.object({
 
 export const ActivitySchema = z.object({
   id: z.string(),
-  userId: z.string(),
+  user: ReducedUserSchema,
   s3Key: z.string(),
   createdAt: z.date(),
   startTime: z.number(),
@@ -281,6 +281,8 @@ export const ActivitySchema = z.object({
   position: z.array(PositionSchema).nullable().optional(),
   result: ResultSchema.nullable().optional(),
   likes: ActivityLikeSchema.array().nullable().optional(),
+  title: z.string(),
+  description: z.string(),
 });
 export type Activity = z.infer<typeof ActivitySchema>;
 
