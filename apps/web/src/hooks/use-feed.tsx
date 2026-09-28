@@ -7,13 +7,14 @@ export function useFeed(userId: string) {
     const [items, setItems] = useState<Types.Activity[]>([])
     const [nextCursor, setNextCursor] = useState<string | null>(null)
     const [loading, setLoading] = useState(false)
+    const [hasMore, setHasMore] = useState(true)
 
     const bottomRef = useRef<HTMLDivElement | null>(null)
 
     const feedMutation = useMutation(orpcClient.user.feed.get.mutationOptions())
 
     const loadMore = async () => {
-        if (loading) return
+        if (loading || !hasMore) return
         if (nextCursor == null && items.length > 0) return
         console.log('Loading more feed items for user:', userId, 'with cursor:', nextCursor)
         setLoading(true)
@@ -22,6 +23,12 @@ export function useFeed(userId: string) {
             userId: userId,
             cursor: nextCursor || ''
         })
+
+        if (data.length === 0) {
+            setHasMore(false)
+            setLoading(false)
+            return
+        }
 
         setItems(prev => [...prev, ...data])
         setNextCursor(data.at(-1)?.id || null)
