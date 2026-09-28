@@ -16,7 +16,7 @@ function Page() {
     const favouriteOrgs = useQuery(orpcClient.user.favouriteOrgs.queryOptions()).data as Types.userFavouriteOrgsType[]
     const todaysRaces = useMutation(orpcClient.race.today.mutationOptions())
     const findRaceMutation = useMutation(orpcClient.race.find.mutationOptions())
-    const [showLiveBanner, setShowLiveBanner] = useState(false)
+    const [showLiveBanner, setShowLiveBanner] = useState<String | null>(null)
 
     const checkActive = (race: Types.RaceType) => {
         if (race.fleets!.length == 0) {
@@ -45,7 +45,7 @@ function Page() {
                     for (let i = 0; i < races.length; i++) {
                         findRaceMutation.mutateAsync({ raceId: races[i]!.id }).then(race => {
                             if (checkActive(race)) {
-                                setShowLiveBanner(true)
+                                setShowLiveBanner(org.organization.name)
                             }
                         })
                     }
@@ -75,10 +75,10 @@ function Page() {
     return (
         <PageContainer scrollable={true}>
             <div className='flex flex-1 flex-col space-y-4'>
-                <Banner className='mb-4 bg-red-600' visible={showLiveBanner} onClose={() => setShowLiveBanner(false)}>
+                <Banner className='mb-4 bg-red-600' visible={showLiveBanner != null} onClose={() => setShowLiveBanner(null)}>
                     <BannerIcon icon={CircleAlert} />
                     <BannerTitle>View Live Race</BannerTitle>
-                    <Link to={'/club/' + favouriteOrgs[0].organization.name + '/LiveResults'}>
+                    <Link to={'/club/' + showLiveBanner + '/LiveResults'}>
                         <BannerAction variant='outline'>Watch Now</BannerAction>
                     </Link>
                     <BannerClose />
