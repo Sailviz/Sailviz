@@ -66,7 +66,7 @@ export async function getSession(fetchOptions?: RequestInit) {
     : { fetchOptions: { credentials: "include" } };
   const res = await _getSession(opts as any);
   // If cookie session exists, return it unchanged.
-  if (res.data !== null) return res;
+  if (res.error == null) return res;
 
   // Try token stored in localStorage (set by Tauri login flow).
   try {

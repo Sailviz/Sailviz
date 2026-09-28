@@ -28,6 +28,10 @@ export function OrgSwitcher() {
 
     useEffect(() => {
         const organizations: Types.Org[] = []
+        if (!session) {
+            console.error('No session data available in OrgSwitcher')
+            return
+        }
         console.log('Session in OrgSwitcher:', session)
         if ((session as any).error) {
             router.navigate({ to: '/' })
