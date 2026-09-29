@@ -152,7 +152,7 @@ export const user_results_all = os.user.results.all
     const fleets = await prisma.fleet.findMany({
       where: {
         id: {
-          in: results.map((result) => result.fleetId),
+          in: results.map((result) => result.fleetId!),
         },
       },
     });
@@ -362,6 +362,17 @@ export const user_feed_get = os.user.feed.get
             image: true,
           },
         },
+        likes: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                image: true,
+              },
+            },
+          },
+        },
       },
     });
 
@@ -382,11 +393,18 @@ export const user_activities_all = os.user.activities.all
       take: input.pageSize,
       skip: (input.page - 1) * input.pageSize,
       include: {
-        result: {
+        likes: {
           include: {
-            laps: true,
+            user: {
+              select: {
+                id: true,
+                name: true,
+                image: true,
+              },
+            },
           },
         },
+        user: true,
       },
     });
 

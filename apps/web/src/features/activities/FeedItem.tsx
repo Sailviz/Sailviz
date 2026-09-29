@@ -1,6 +1,7 @@
 import { Avatar, AvatarImage } from '@components/ui/avatar'
 import * as Types from '@sailviz/types'
 import { formatDistanceToNow } from 'date-fns'
+import { LikeButton } from './LikeButton'
 
 export function FeedItem({ activity }: { activity: Types.Activity }) {
     const timeAgo = formatDistanceToNow(new Date(activity.createdAt), {
@@ -25,7 +26,23 @@ export function FeedItem({ activity }: { activity: Types.Activity }) {
                 {activity.description}
                 <div className='mt-2 text-xs text-slate-400'>Session ID: {activity.id}</div>
             </div>
-            <div className='mt-2 text-xs text-slate-400'>Likes: {activity.likes?.length ?? 0}</div>
+            <div className='mt-4 flex flex-row items-center justify-between'>
+                {activity.likes.length > 0 ? (
+                    <div className='flex flex-row items-center space-x-2'>
+                        <span className='text-xs text-slate-400'>Bravo from:</span>
+                        <div className='flex flex-row space-x-1'>
+                            {activity.likes?.map(like => (
+                                <Avatar key={like.id} className='size-6'>
+                                    <AvatarImage src={like.user.image || '/default-avatar.png'} title={like.user.name} />
+                                </Avatar>
+                            ))}
+                        </div>
+                    </div>
+                ) : (
+                    <span className='text-xs text-slate-400'>No Bravos yet</span>
+                )}
+                <LikeButton activityId={activity.id} />
+            </div>
         </div>
     )
 }

@@ -417,6 +417,15 @@ export const ORPCcontract = {
         }),
       )
       .output(z.array(Types.PositionSchema)),
+    like: {
+      create: oc
+        .input(
+          z.object({
+            activityId: z.string(),
+          }),
+        )
+        .output(Types.ActivityLikeSchema),
+    },
   },
   social: {
     follow: {

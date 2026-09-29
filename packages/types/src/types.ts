@@ -265,7 +265,7 @@ export const ActivityAnalysisSchema = z.object({
 export const ActivityLikeSchema = z.object({
   id: z.string(),
   activityId: z.string(),
-  userId: z.string(),
+  user: ReducedUserSchema,
   createdAt: z.date(),
 });
 
@@ -280,7 +280,7 @@ export const ActivitySchema = z.object({
   activityAnalysis: ActivityAnalysisSchema.nullable().optional(),
   position: z.array(PositionSchema).nullable().optional(),
   result: ResultSchema.nullable().optional(),
-  likes: ActivityLikeSchema.array().nullable().optional(),
+  likes: ActivityLikeSchema.array(),
   title: z.string(),
   description: z.string(),
 });
