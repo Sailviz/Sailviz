@@ -2,11 +2,15 @@ import { Avatar, AvatarImage } from '@components/ui/avatar'
 import * as Types from '@sailviz/types'
 import { formatDistanceToNow } from 'date-fns'
 import { LikeButton } from './LikeButton'
+import type { Session } from '@lib/session'
+import { useLoaderData } from '@tanstack/react-router'
 
 export function FeedItem({ activity }: { activity: Types.Activity }) {
     const timeAgo = formatDistanceToNow(new Date(activity.createdAt), {
         addSuffix: true
     })
+    const session: Session = useLoaderData({ from: `__root__` })
+    const userId = session.user.id
 
     return (
         <div className='rounded-xl border border-slate-700 bg-slate-800 p-4 text-white shadow-md'>
@@ -41,7 +45,7 @@ export function FeedItem({ activity }: { activity: Types.Activity }) {
                 ) : (
                     <span className='text-xs text-slate-400'>No Bravos yet</span>
                 )}
-                <LikeButton activityId={activity.id} />
+                {userId !== activity.user.id && <LikeButton activityId={activity.id} id={activity.likes.find(like => like.user.id == userId)?.id} />}
             </div>
         </div>
     )

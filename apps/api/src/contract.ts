@@ -425,6 +425,13 @@ export const ORPCcontract = {
           }),
         )
         .output(Types.ActivityLikeSchema),
+      delete: oc
+        .input(
+          z.object({
+            id: z.string(),
+          }),
+        )
+        .output(Types.ActivityLikeSchema),
     },
   },
   social: {

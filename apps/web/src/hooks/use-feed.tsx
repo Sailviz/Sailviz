@@ -1,53 +1,47 @@
-import { useState, useEffect, useRef } from 'react'
-import * as Types from '@sailviz/types'
-import { useMutation } from '@tanstack/react-query'
+import { useEffect, useRef } from 'react'
+import { useInfiniteQuery } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
 
 export function useFeed(userId: string) {
-    const [items, setItems] = useState<Types.Activity[]>([])
-    const [nextCursor, setNextCursor] = useState<string | null>(null)
-    const [loading, setLoading] = useState(false)
-    const [hasMore, setHasMore] = useState(true)
-
     const bottomRef = useRef<HTMLDivElement | null>(null)
 
-    const feedMutation = useMutation(orpcClient.user.feed.get.mutationOptions())
+    const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useInfiniteQuery({
+        queryKey: orpcClient.user.feed.get.key(),
+        initialPageParam: '',
+        queryFn: async ({ pageParam }) => {
+            return await orpcClient.user.feed.get.call({
+                userId,
+                cursor: pageParam
+            })
+        },
+        getNextPageParam: lastPage => {
+            if (lastPage.length === 0) {
+                return undefined
+            }
 
-    const loadMore = async () => {
-        if (loading || !hasMore) return
-        if (nextCursor == null && items.length > 0) return
-        console.log('Loading more feed items for user:', userId, 'with cursor:', nextCursor)
-        setLoading(true)
-
-        const data = await feedMutation.mutateAsync({
-            userId: userId,
-            cursor: nextCursor || ''
-        })
-
-        if (data.length === 0) {
-            setHasMore(false)
-            setLoading(false)
-            return
+            return lastPage.at(-1)?.id
         }
-
-        setItems(prev => [...prev, ...data])
-        setNextCursor(data.at(-1)?.id || null)
-        setLoading(false)
-    }
+    })
 
     useEffect(() => {
         const observer = new IntersectionObserver(([entry]) => {
-            if (entry.isIntersecting) loadMore()
+            if (entry.isIntersecting && hasNextPage && !isFetchingNextPage) {
+                fetchNextPage()
+            }
         })
 
-        if (bottomRef.current) observer.observe(bottomRef.current)
+        const element = bottomRef.current
+
+        if (element) {
+            observer.observe(element)
+        }
+
         return () => observer.disconnect()
-    }, [bottomRef.current, nextCursor, loading])
+    }, [fetchNextPage, hasNextPage, isFetchingNextPage])
 
-    useEffect(() => {
-        loadMore()
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [])
-
-    return { items, bottomRef, loading }
+    return {
+        items: data?.pages.flat() ?? [],
+        loading: isLoading || isFetchingNextPage,
+        bottomRef
+    }
 }

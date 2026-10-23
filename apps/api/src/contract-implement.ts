@@ -120,7 +120,10 @@ import {
   follow_getFollowing,
 } from "./routes/social/follow";
 import { social_findUsers } from "./routes/social/users";
-import { activity_like_create } from "./routes/social/activities";
+import {
+  activity_like_create,
+  activity_like_delete,
+} from "./routes/social/activities";
 
 const os = implement(ORPCcontract);
 
@@ -271,6 +274,7 @@ export const mainRouter = os.router({
     getURL: activity_getURL,
     like: {
       create: activity_like_create,
+      delete: activity_like_delete,
     },
   },
   social: {

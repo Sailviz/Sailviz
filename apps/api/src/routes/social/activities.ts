@@ -33,3 +33,31 @@ export const activity_like_create = os.activity.like.create
     });
     return like;
   });
+
+export const activity_like_delete = os.activity.like.delete
+  .use(authMiddleware)
+  .handler(async ({ input, context }) => {
+    const session = context.session as any; // this is because the session type is not quite correct
+    const userId = session?.user.id;
+    if (!userId) {
+      throw new ORPCError("UNAUTHORIZED", {
+        message: "User not authenticated",
+      });
+    }
+    //delete database entry
+    const like = await prisma.activityLike.delete({
+      where: {
+        id: input.id,
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            image: true,
+          },
+        },
+      },
+    });
+    return like;
+  });
