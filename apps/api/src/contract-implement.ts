@@ -106,6 +106,7 @@ import {
   flag_update,
 } from "./routes/flag";
 import {
+  activity_create,
   activity_createUploadUrl,
   activity_find,
   activity_getURL,
@@ -266,6 +267,7 @@ export const mainRouter = os.router({
     },
   },
   activity: {
+    create: activity_create,
     createUploadUrl: activity_createUploadUrl,
     saveMetadata: activity_saveMetadata,
     find: activity_find,

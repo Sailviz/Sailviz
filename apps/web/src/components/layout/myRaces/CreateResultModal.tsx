@@ -26,7 +26,12 @@ export default function CreateResultModal({ org }: { org: Types.Org }) {
 
     const { data: signOnProfiles } = useQuery(orpcClient.user.signOnProfile.all.queryOptions())
     const { data: todaysRaces } = useQuery(orpcClient.race.today.queryOptions({ input: { orgId: org.id } }))
+
     const createResultMutation = useMutation(orpcClient.result.create.mutationOptions())
+    const createActivityMutation = useMutation(orpcClient.activity.create.mutationOptions())
+
+    const linkActivityToResult = useMutation(orpcClient.activity.linkToResult.mutationOptions())
+
     const updateResultMutation = useMutation(orpcClient.result.update.mutationOptions())
     const createParticipantMutation = useMutation(orpcClient.trackable.participant.create.mutationOptions())
 
@@ -127,7 +132,9 @@ export default function CreateResultModal({ org }: { org: Types.Org }) {
                     console.log("trackable event id is null, can't create participant")
                 }
             }
-            await createResult(selectedFleets[i]!, helm, crew, selectedBoat.value, sailNumber, participantId)
+            const res = await createResult(selectedFleets[i]!, helm, crew, selectedBoat.value, sailNumber, participantId)
+            const act = await createActivity()
+            await linkActivityToResult.mutateAsync({ activityId: act.id, resultId: res.id })
         }
         todaysRaces?.forEach(race => {
             queryClient.invalidateQueries({
@@ -152,7 +159,13 @@ export default function CreateResultModal({ org }: { org: Types.Org }) {
             userId: session.user.id
         })
 
-        console.log(helm, crew, boat, sailNum, fleetId)
+        return result
+    }
+
+    const createActivity = async () => {
+        //create an activity for each fleet
+        let activity = await createActivityMutation.mutateAsync({ userId: session.user.id })
+        return activity
     }
 
     const clearFields = async () => {

@@ -2,7 +2,7 @@ import React, { useEffect, useState, type ChangeEvent } from 'react'
 import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, useReactTable, type SortingState } from '@tanstack/react-table'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@components/ui/table'
 import { Button } from '@components/ui/button'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
 import type { ResultType } from '@sailviz/types'
 import EditResultDialog from '@components/layout/dashboard/EditResultModal'
@@ -52,9 +52,7 @@ const FleetHandicapResultsTable = ({ fleetId, editable, advancedEdit, showTime }
     const session: Session = useLoaderData({ from: `__root__` })
 
     const queryClient = useQueryClient()
-    const { uploadGPXFile } = useUploadGPXFile()
-
-    const linkActivityToResult = useMutation(orpcClient.activity.linkToResult.mutationOptions())
+    const { uploadGPXFile } = useUploadGPXFile() // Pass an empty string for now, will be set in the entryFileUploadHandler
 
     const [editModalOpen, setEditModalOpen] = useState(false)
     const [viewModalOpen, setViewModalOpen] = useState(false)
@@ -160,19 +158,18 @@ const FleetHandicapResultsTable = ({ fleetId, editable, advancedEdit, showTime }
         )
     })
 
-    const entryFileUploadHandler = async (e: ChangeEvent<HTMLInputElement>, resultId: string) => {
+    const entryFileUploadHandler = async (e: ChangeEvent<HTMLInputElement>, userId: string, activityId: string) => {
         const inputEl = e.target
         const file = inputEl.files?.[0]
         if (!file) {
             return
         }
 
-        const activity = await uploadGPXFile(file, resultId)
+        const activity = await uploadGPXFile(file, userId, activityId)
         if (!activity) {
             console.error('Failed to upload activity')
             return
         }
-        await linkActivityToResult.mutateAsync({ activityId: activity.id, resultId })
         // Reset the input so selecting the same file again will fire onChange
 
         await queryClient.invalidateQueries({ queryKey: orpcClient.fleet.find.queryKey({ input: { fleetId } }) })
@@ -200,7 +197,13 @@ const FleetHandicapResultsTable = ({ fleetId, editable, advancedEdit, showTime }
                             <Button className='mx-1 w-1/4' onClick={() => document.getElementById('entryFileUpload')!.click()}>
                                 <Upload />
                             </Button>
-                            <Input id='entryFileUpload' type='file' accept='.gpx' onChange={e => entryFileUploadHandler(e, props.row.original.id)} className='hidden' />
+                            <Input
+                                id='entryFileUpload'
+                                type='file'
+                                accept='.gpx'
+                                onChange={e => entryFileUploadHandler(e, props.row.original.userId!, props.row.original.activityId!)} //these should exist
+                                className='hidden'
+                            />
                         </div>
                     )
                 }

@@ -5,9 +5,10 @@ export function useUploadGPXFile() {
     const uploadUrlMutation = useMutation(orpcClient.activity.createUploadUrl.mutationOptions())
     const saveMetadataMutation = useMutation(orpcClient.activity.saveMetadata.mutationOptions())
 
-    const uploadGPXFile = async (file: File, userId: string) => {
+    const uploadGPXFile = async (file: File, userId: string, activityId: string) => {
         const uploadUrl = await uploadUrlMutation.mutateAsync({
-            userId
+            userId,
+            activityId
         })
         console.log(uploadUrl)
         const res = await fetch(uploadUrl.uploadUrl, {
@@ -20,7 +21,7 @@ export function useUploadGPXFile() {
             return
         }
         const activity = await saveMetadataMutation.mutateAsync({
-            id: uploadUrl.id,
+            activityId: activityId,
             s3key: uploadUrl.key
         })
 

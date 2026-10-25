@@ -371,23 +371,34 @@ export const ORPCcontract = {
     },
   },
   activity: {
+    create: oc
+      .input(
+        z.object({
+          userId: z.string(),
+        }),
+      )
+      .output(
+        z.object({
+          id: z.string(),
+        }),
+      ),
     createUploadUrl: oc
       .input(
         z.object({
           userId: z.string().nullable(),
+          activityId: z.string(),
         }),
       )
       .output(
         z.object({
           uploadUrl: z.string(),
-          id: z.string(),
           key: z.string(),
         }),
       ),
     saveMetadata: oc
       .input(
         z.object({
-          id: z.string(),
+          activityId: z.string(),
           s3key: z.string(),
         }),
       )

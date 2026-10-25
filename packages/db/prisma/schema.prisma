@@ -300,10 +300,10 @@ model Activity {
   id                 String            @id @unique @default(uuid())
   type               String
   result             Result?
-  s3Key              String
+  s3Key              String?
   createdAt          DateTime          @default(now())
-  startTime          Int
-  endTime            Int
+  startTime          Int?
+  endTime            Int?
   activityAnalysis   ActivityAnalysis? @relation(fields: [activityAnalysisId], references: [id])
   activityAnalysisId String?           @unique
   user               User              @relation(fields: [userId], references: [id])

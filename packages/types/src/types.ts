@@ -272,10 +272,10 @@ export const ActivityLikeSchema = z.object({
 export const ActivitySchema = z.object({
   id: z.string(),
   user: ReducedUserSchema,
-  s3Key: z.string(),
+  s3Key: z.string().nullable(),
   createdAt: z.date(),
-  startTime: z.number(),
-  endTime: z.number(),
+  startTime: z.number().nullable(),
+  endTime: z.number().nullable(),
   type: z.string(),
   activityAnalysis: ActivityAnalysisSchema.nullable().optional(),
   position: z.array(PositionSchema).nullable().optional(),

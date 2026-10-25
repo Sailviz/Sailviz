@@ -24,8 +24,7 @@ const os = implement(ORPCcontract);
 
 export const activity_createUploadUrl = os.activity.createUploadUrl.handler(
   async ({ input }) => {
-    const id = randomUUID();
-    const key = `activity/${input.userId}/${id}`;
+    const key = `activity/${input.userId}/${input.activityId}`;
 
     const presigned = await minioClient.presignedPutObject(
       config.MINIO_BUCKET_SAILVIZ,
@@ -35,7 +34,6 @@ export const activity_createUploadUrl = os.activity.createUploadUrl.handler(
 
     return {
       uploadUrl: presigned,
-      id,
       key,
     };
   },
@@ -77,7 +75,7 @@ export const activity_saveMetadata = os.activity.saveMetadata
       const timestamp_ms = new Date(row.timestamp);
 
       const point = new Point("position")
-        .tag("activityId", input.id)
+        .tag("activityId", input.activityId)
         .stringField("pos", `{"lat":${row.lat},"lon":${row.lon}}`)
         .timestamp(timestamp_ms);
       influxWrite.writePoint(point);
@@ -89,11 +87,12 @@ export const activity_saveMetadata = os.activity.saveMetadata
 
     console.log("startTime", startTime, "endTime", endTime);
 
-    const newActivity = await prisma.activity.create({
+    const activity = await prisma.activity.update({
+      where: {
+        id: input.activityId,
+      },
       data: {
-        id: input.id,
         s3Key: input.s3key,
-        createdAt: new Date(),
         startTime: startTime,
         endTime: endTime,
         type: "Sail",
@@ -107,12 +106,26 @@ export const activity_saveMetadata = os.activity.saveMetadata
     await analysisQueue.add(
       "analyseActivity",
       {
-        activityId: newActivity.id,
+        activityId: activity.id,
       },
       { delay: 2000 },
     ); // Delay the job to ensure the data is fully written to database
 
-    return newActivity;
+    return activity;
+  });
+
+export const activity_create = os.activity.create
+  .use(authMiddleware)
+  .handler(async ({ input, context }) => {
+    const session = context.session as any;
+    const newActivity = await prisma.activity.create({
+      data: {
+        createdAt: new Date(),
+        userId: session.user.id,
+        type: "Sail",
+      },
+    });
+    return { id: newActivity.id };
   });
 
 export const activity_getURL = os.activity.getURL.handler(async ({ input }) => {
