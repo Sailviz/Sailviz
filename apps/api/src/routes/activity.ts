@@ -100,6 +100,12 @@ export const activity_saveMetadata = os.activity.saveMetadata
       },
       include: {
         activityAnalysis: true,
+        user: true,
+        likes: {
+          include: {
+            user: true,
+          },
+        },
       },
     });
 
@@ -143,6 +149,12 @@ export const activity_find = os.activity.find.handler(async ({ input }) => {
     },
     include: {
       activityAnalysis: true,
+      user: true,
+      likes: {
+        include: {
+          user: true,
+        },
+      },
     },
   });
   if (!activity) {
@@ -150,6 +162,38 @@ export const activity_find = os.activity.find.handler(async ({ input }) => {
   }
   return activity;
 });
+
+export const activity_update = os.activity.update
+  .use(authMiddleware)
+  .handler(async ({ input, context }) => {
+    const session = context.session as any;
+    const activity = await prisma.activity.findUnique({
+      where: {
+        id: input.id,
+      },
+    });
+    if (!activity) {
+      throw new ORPCError("NOT_FOUND");
+    }
+    return prisma.activity.update({
+      where: {
+        id: input.id,
+      },
+      data: {
+        title: input.title,
+        description: input.description,
+      },
+      include: {
+        activityAnalysis: true,
+        user: true,
+        likes: {
+          include: {
+            user: true,
+          },
+        },
+      },
+    });
+  });
 
 export const activity_positions = os.activity.positions.handler(
   async ({ input }) => {

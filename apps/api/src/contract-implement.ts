@@ -113,6 +113,7 @@ import {
   activity_linkToResult,
   activity_positions,
   activity_saveMetadata,
+  activity_update,
 } from "./routes/activity";
 import {
   follow_create,
@@ -268,6 +269,7 @@ export const mainRouter = os.router({
   },
   activity: {
     create: activity_create,
+    update: activity_update,
     createUploadUrl: activity_createUploadUrl,
     saveMetadata: activity_saveMetadata,
     find: activity_find,

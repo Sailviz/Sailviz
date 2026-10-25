@@ -259,7 +259,7 @@ export const meCollections: NavCollection[] = [
         items: [
             {
                 title: 'My Activities',
-                url: '/dashboard/me/activities',
+                url: '/dashboard/me/activity',
                 icon: <RaceIcon />,
                 shortcut: ['p', 'p'],
                 isActive: false,

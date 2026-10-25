@@ -2,11 +2,11 @@ import { Button } from '@components/ui/button'
 import { useRouter, useRouterState } from '@tanstack/react-router'
 import * as Types from '@sailviz/types'
 
-interface CellActionProps {
+interface OpenProps {
     data: Types.Activity
 }
 
-export const CellAction: React.FC<CellActionProps> = ({ data }) => {
+export const Open: React.FC<OpenProps> = ({ data }) => {
     const routerState = useRouterState()
     const router = useRouter()
 

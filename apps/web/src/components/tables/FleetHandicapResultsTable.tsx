@@ -52,7 +52,7 @@ const FleetHandicapResultsTable = ({ fleetId, editable, advancedEdit, showTime }
     const session: Session = useLoaderData({ from: `__root__` })
 
     const queryClient = useQueryClient()
-    const { uploadGPXFile } = useUploadGPXFile() // Pass an empty string for now, will be set in the entryFileUploadHandler
+    const { uploadGPXFile } = useUploadGPXFile()
 
     const [editModalOpen, setEditModalOpen] = useState(false)
     const [viewModalOpen, setViewModalOpen] = useState(false)

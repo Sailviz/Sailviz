@@ -382,6 +382,15 @@ export const ORPCcontract = {
           id: z.string(),
         }),
       ),
+    update: oc
+      .input(
+        z.object({
+          id: z.string(),
+          title: z.string().optional(),
+          description: z.string().optional(),
+        }),
+      )
+      .output(Types.ActivitySchema),
     createUploadUrl: oc
       .input(
         z.object({

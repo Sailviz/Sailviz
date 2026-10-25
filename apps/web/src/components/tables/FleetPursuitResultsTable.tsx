@@ -2,7 +2,7 @@ import { useState, type ChangeEvent } from 'react'
 import { createColumnHelper, flexRender, getCoreRowModel, getSortedRowModel, useReactTable, type SortingState } from '@tanstack/react-table'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@components/ui/table'
 import { Button } from '@components/ui/button'
-import { useMutation, useQuery } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
 import type { BoatType, ResultType } from '@sailviz/types'
 import EditResultModal from '@components/layout/dashboard/EditResultModal'
@@ -33,7 +33,6 @@ const FleetPursuitResultsTable = ({ fleetId, editable, advancedEdit }: { fleetId
     const [modalData, setModalData] = useState<ResultType | undefined>(undefined)
 
     const { uploadGPXFile } = useUploadGPXFile()
-    const linkActivityToResult = useMutation(orpcClient.activity.linkToResult.mutationOptions())
     const [mapModalOpen, setMapModalOpen] = useState(false)
 
     let data = fleet?.results
@@ -118,20 +117,18 @@ const FleetPursuitResultsTable = ({ fleetId, editable, advancedEdit }: { fleetId
         columns.push(viewColumn)
     }
 
-    const entryFileUploadHandler = async (e: ChangeEvent<HTMLInputElement>, resultId: string) => {
+    const entryFileUploadHandler = async (e: ChangeEvent<HTMLInputElement>, userId: string, activityId: string) => {
         const inputEl = e.target
         const file = inputEl.files?.[0]
         if (!file) {
             return
         }
 
-        const activity = await uploadGPXFile(file, resultId)
+        const activity = await uploadGPXFile(file, userId, activityId)
         if (!activity) {
             console.error('Failed to upload activity')
             return
         }
-        await linkActivityToResult.mutateAsync({ activityId: activity.id, resultId })
-        // Reset the input so selecting the same file again will fire onChange
 
         await queryClient.invalidateQueries({ queryKey: orpcClient.fleet.find.queryKey({ input: { fleetId } }) })
     }
@@ -158,7 +155,13 @@ const FleetPursuitResultsTable = ({ fleetId, editable, advancedEdit }: { fleetId
                             <Button className='mx-1 w-1/4' onClick={() => document.getElementById('entryFileUpload')!.click()}>
                                 <Upload />
                             </Button>
-                            <Input id='entryFileUpload' type='file' accept='.gpx' onChange={e => entryFileUploadHandler(e, props.row.original.id)} className='hidden' />
+                            <Input
+                                id='entryFileUpload'
+                                type='file'
+                                accept='.gpx'
+                                onChange={e => entryFileUploadHandler(e, props.row.original.userId!, props.row.original.activityId!)}
+                                className='hidden'
+                            />
                         </div>
                     )
                 }
