@@ -1,11 +1,12 @@
 import { Worker } from "bullmq";
 import { analyseActivity } from "@sailviz/activity";
 import { redis } from "@sailviz/queue";
+import * as config from "./config";
 
 console.log("[worker] Starting Sailviz activity worker…");
 
 const worker = new Worker(
-  "analyseActivity",
+  config.QUEUE_NAME_PREFIX + "analyseActivity",
   async (job) => {
     console.log(
       `[worker] Received job ${job.id} for activity ${job.data.activityId}`,
