@@ -31,3 +31,4 @@ ssh -i ~/.ssh/id_ed25519_api api@192.168.3.185 "pm2 restart sailviz-api"
 # send worker files to server
 Write-Host "Deploying worker files to server..."
 scp -i ~/.ssh/id_ed25519_worker -r apps/worker/dist/* worker@192.168.3.44:/home/worker
+ssh -i ~/.ssh/id_ed25519_worker worker@192.168.3.44 "pm2 restart worker"

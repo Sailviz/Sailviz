@@ -8,6 +8,7 @@
     "dev:api": "pnpm --filter api dev",
     "build:dev:worker": "pnpm --filter worker build:dev",
     "build:test:worker": "pnpm --filter worker build:test",
+    "build:prod:worker": "pnpm --filter worker build:prod",
     "build:android:test": "pnpm --filter desktop android:test\"",
     "build:android:prod": "pnpm --filter desktop android:prod\"",
     "load:android:test": "pnpm --filter desktop load:test",

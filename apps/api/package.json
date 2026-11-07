@@ -10,12 +10,14 @@
     "generateConfig": "node scripts/generate-config.js && node ../../packages/auth/scripts/generate-config.js && node ../../packages/activity/scripts/generate-config.js",
     "predev": "cross-env NODE_ENV=development && npm run generateConfig",
     "dev": "tsx src/server.ts",
-    "prebuild:dev": "cross-env NODE_ENV=development && npm run generateConfig",
+    "prebuild:dev": "cross-env NODE_ENV=development npm run generateConfig && cross-env NODE_ENV=development pnpm -w --filter @sailviz/db build && cross-env NODE_ENV=development pnpm -w --filter @sailviz/auth build && cross-env NODE_ENV=development pnpm -w --filter @sailviz/queue build",
     "prebuild:test": "cross-env NODE_ENV=test npm run generateConfig && cross-env NODE_ENV=test pnpm -w --filter @sailviz/db build && cross-env NODE_ENV=test pnpm -w --filter @sailviz/auth build && cross-env NODE_ENV=test pnpm -w --filter @sailviz/queue build",
+    "prebuild:prod": "cross-env NODE_ENV=production npm run generateConfig && cross-env NODE_ENV=production pnpm -w --filter @sailviz/db build && cross-env NODE_ENV=production pnpm -w --filter @sailviz/auth build && cross-env NODE_ENV=production pnpm -w --filter @sailviz/queue build",
     "build:dev": "cross-env NODE_ENV=development tsup",
     "build:test": "cross-env NODE_ENV=test tsup",
     "build:prod": "cross-env NODE_ENV=production tsup",
-    "postbuild:test": "cpy ../../packages/db/dist/generated/*.so.node dist/src/generated/ && node scripts/create-deploy-package.js"
+    "postbuild:test": "cpy ../../packages/db/dist/generated/*.so.node dist/src/generated/ && node scripts/create-deploy-package.js",
+    "postbuild:prod": "cpy ../../packages/db/dist/generated/*.so.node dist/src/generated/ && node scripts/create-deploy-package.js"
   },
   "packageManager": "pnpm@10.18.1+sha512.77a884a165cbba2d8d1c19e3b4880eee6d2fcabd0d879121e282196b80042351d5eb3ca0935fa599da1dc51265cc68816ad2bddd2a2de5ea9fdf92adbec7cd34",
   "dependencies": {

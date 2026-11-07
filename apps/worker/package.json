@@ -6,9 +6,11 @@
     "generateConfig": "node scripts/generate-config.js && node ../../packages/activity/scripts/generate-config.js",
     "prebuild:test": "pnpm -w --filter @sailviz/queue build && pnpm -w --filter @sailviz/activity build && cross-env NODE_ENV=test npm run generateConfig",
     "prebuild:dev": "pnpm -w --filter @sailviz/queue build && pnpm -w --filter @sailviz/activity build && cross-env NODE_ENV=dev npm run generateConfig",
+    "prebuild:prod": "pnpm -w --filter @sailviz/queue build && pnpm -w --filter @sailviz/activity build && cross-env NODE_ENV=production npm run generateConfig",
     "predev": "pnpm -w --filter @sailviz/queue build && pnpm -w --filter @sailviz/activity build && node scripts/generate-config.js",
     "build:test": "cross-env NODE_ENV=test tsup",
     "build:dev": "cross-env NODE_ENV=development tsup",
+    "build:prod": "cross-env NODE_ENV=production tsup",
     "dev": "tsx src/index.ts",
     "postbuild": "cpy ../../packages/db/src/generated/*.so.node dist/src/generated"
   },
