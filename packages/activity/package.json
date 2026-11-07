@@ -12,8 +12,9 @@
     }
   },
   "scripts": {
-    "build": "tsc -p tsconfig.json",
-    "generateConfig": "node scripts/generate-config.ts"
+    "generateConfig": "node scripts/generate-config.js",
+    "prebuild": "npm run generateConfig",
+    "build": "tsc -p tsconfig.json"
   },
   "keywords": [],
   "author": "",

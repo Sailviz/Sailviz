@@ -6,6 +6,8 @@
     "bundle:test:desktop": "pnpm --filter web build:test && pnpm --filter desktop build:test:desktop && pnpm --filter desktop bundle:test:desktop",
     "bundle:prod:desktop": "pnpm --filter web build:prod && pnpm --filter desktop build:prod:desktop && pnpm --filter desktop bundle:prod:desktop",
     "dev:api": "pnpm --filter api dev",
+    "build:dev:worker": "pnpm --filter worker build:dev",
+    "build:test:worker": "pnpm --filter worker build:test",
     "build:android:test": "pnpm --filter desktop android:test\"",
     "build:android:prod": "pnpm --filter desktop android:prod\"",
     "load:android:test": "pnpm --filter desktop load:test",
@@ -24,7 +26,9 @@
   "packageManager": "pnpm@10.18.1+sha512.77a884a165cbba2d8d1c19e3b4880eee6d2fcabd0d879121e282196b80042351d5eb3ca0935fa599da1dc51265cc68816ad2bddd2a2de5ea9fdf92adbec7cd34",
   "devDependencies": {
     "concurrently": "^9.2.1",
+    "cpy-cli": "^7.0.0",
+    "cross-env": "^7.0.3",
     "dotenv-cli": "^10.0.0",
-    "cross-env": "^7.0.3"
+    "tsup": "^9.0.0"
   }
 }
