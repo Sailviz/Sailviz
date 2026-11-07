@@ -18,15 +18,15 @@ if ($LASTEXITCODE -ne 0) {
 
 # send web files to server
 Write-Host "Deploying web files to server..."
-scp -r apps/web/dist/* root@192.168.3.42:/var/www/web/release
+scp -i ~/.ssh/id_ed25519_web -r apps/web/dist/* web@192.168.3.42:/var/www/web/release
 
 # send api files to server
 Write-Host "Deploying API files to server..."
-scp -r apps/api/dist/* root@192.168.3.185:/api
+scp -i ~/.ssh/id_ed25519_api -r apps/api/dist/* api@192.168.3.185:/home/api
 
 # restart api server
 Write-Host "Restarting API server..."
-ssh root@192.168.3.185 "pm2 restart sailviz-api"
+ssh -i ~/.ssh/id_ed25519_api api@192.168.3.185 "pm2 restart sailviz-api"
 
 # send worker files to server
 Write-Host "Deploying worker files to server..."
