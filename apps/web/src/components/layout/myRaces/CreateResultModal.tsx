@@ -13,6 +13,7 @@ import type { Session } from '@lib/session'
 import { useLoaderData } from '@tanstack/react-router'
 import { invoke } from '@tauri-apps/api/core'
 import { listen } from '@tauri-apps/api/event'
+import isTauriRuntime from '../../../is-tauri'
 
 export default function CreateResultModal({ org }: { org: Types.Org }) {
     const session: Session = useLoaderData({ from: `__root__` })
@@ -185,16 +186,18 @@ export default function CreateResultModal({ org }: { org: Types.Org }) {
     }, [trackers])
 
     useEffect(() => {
-        invoke('start_nfc_events')
-        listen('nfc-event', async e => {
-            console.log(e)
-            let res = await invoke('scan_nfc')
-            console.log(res)
-            console.log(trackers?.find(tracker => tracker.id == res))
-            const tracker = trackers?.find(tracker => tracker.id === res)
-            if (!tracker) return
-            setSelectedTracker({ label: tracker.name, value: tracker.id })
-        })
+        if (isTauriRuntime()) {
+            invoke('start_nfc_events')
+            listen('nfc-event', async e => {
+                console.log(e)
+                let res = await invoke('scan_nfc')
+                console.log(res)
+                console.log(trackers?.find(tracker => tracker.id == res))
+                const tracker = trackers?.find(tracker => tracker.id === res)
+                if (!tracker) return
+                setSelectedTracker({ label: tracker.name, value: tracker.id })
+            })
+        }
     }, [trackers])
 
     return (
