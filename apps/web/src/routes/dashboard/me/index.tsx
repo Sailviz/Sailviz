@@ -59,14 +59,16 @@ function Page() {
     }
 
     function OrgSection(org: any) {
-        const { data: todaysRaces } = useQuery(orpcClient.race.today.queryOptions({ input: { orgId: org.id } }))
+        org = org.org
+        const { data: todaysRaces } = useQuery(orpcClient.race.today.queryOptions({ input: { orgId: org.orgId } }))
 
+        console.log(todaysRaces)
         if (!todaysRaces) return null
 
         return (
             <div>
                 <h1>{org.organization.name}</h1>
-                <UpcomingRacesTable orgId={org.orgId} viewHref={`/club/${org.organization.name}/Race/`} />
+                <UpcomingRacesTable orgId={org.orgId} viewHref={`/dashboard/me/club/${org.organization.name}/Race/`} />
                 <CreateResultModal org={org.organization} />
             </div>
         )
@@ -85,7 +87,7 @@ function Page() {
                 </Banner>
                 Hello {session?.user.name}
                 {favouriteOrgs?.map((org: any) => {
-                    ;<OrgSection key={org.orgId} org={org} />
+                    return <OrgSection key={org.orgId} org={org} />
                 })}
                 {/* infinite scrolling history of activities for user and people they follow */}
                 <ActivityFeed userId={session.user.id} />
