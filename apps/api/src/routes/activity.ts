@@ -120,6 +120,24 @@ export const activity_saveMetadata = os.activity.saveMetadata
     return activity;
   });
 
+export const activity_analyse = os.activity.analyse
+  .use(authMiddleware)
+  .handler(async ({ input, context }) => {
+    const activity = prisma.activity.findUnique({
+      where: {
+        id: input.activityId,
+      },
+    });
+    if (activity != null) {
+      await analysisQueue.add("analyseActivity", {
+        activityId: input.activityId,
+      });
+      return { ok: true };
+    } else {
+      return { ok: false };
+    }
+  });
+
 export const activity_create = os.activity.create
   .use(authMiddleware)
   .handler(async ({ input, context }) => {

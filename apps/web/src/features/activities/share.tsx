@@ -158,6 +158,7 @@ export const ActivitySharePage = ({ activityId }: { activityId: string }) => {
 
     useEffect(() => {
         if (!positions) return
+        console.log(activity)
 
         const previewCanvas = document.getElementById('share-canvas') as HTMLCanvasElement
         const storyCanvas = document.getElementById('story-canvas') as HTMLCanvasElement
@@ -196,8 +197,8 @@ export const ActivitySharePage = ({ activityId }: { activityId: string }) => {
                 <div className='mt-6 text-xl w-full'>
                     {activity?.activityAnalysis != null && (
                         <>
-                            <p>Distance: {Math.round(activity.activityAnalysis.distance)} m</p>
-                            <p>Max Speed: {Math.round(activity.activityAnalysis.maxSpeed)} m/s</p>
+                            <div>Distance: {activity?.activityAnalysis ? (activity.activityAnalysis.distance / 1852).toFixed(1) + ' NM' : 'unknown'}</div>
+                            <div>Max Speed: {activity?.activityAnalysis ? (activity.activityAnalysis.maxSpeed * 1.94384449).toFixed(1) + ' Kn' : 'unknown'}</div>
                         </>
                     )}
                 </div>
@@ -232,8 +233,8 @@ export const ActivitySharePage = ({ activityId }: { activityId: string }) => {
                 />
 
                 <div style={{ fontSize: '48px', marginTop: '60px' }}>
-                    <p>Distance: {activity?.activityAnalysis?.distance} nm</p>
-                    <p>Max Speed: {activity?.activityAnalysis?.maxSpeed} kn</p>
+                    <div>Distance: {activity?.activityAnalysis ? (activity.activityAnalysis.distance / 1852).toFixed(1) + ' NM' : 'unknown'}</div>
+                    <div>Max Speed: {activity?.activityAnalysis ? (activity.activityAnalysis.maxSpeed * 1.94384449).toFixed(1) + ' Kn' : 'unknown'}</div>
                 </div>
             </div>
         </>

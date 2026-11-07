@@ -97,23 +97,34 @@ export default function ActivityMap({ raceId, windowHeight, activityId }: { race
         )
     }
 
-    function FitBounds({ buoys }: { buoys?: Types.BuoyType[] }) {
+    function FitBounds({ buoys, track }: { buoys?: Types.BuoyType[]; track?: Types.Position[] | null }) {
         const map = useMap()
 
         useEffect(() => {
-            // Ensure buoys exist, are not empty, and bounds haven't been set yet
-            if (!buoys || buoys.length === 0 || boundsSet) return
+            if (boundsSet) return
+            console.log('This ran')
+            //use the track first
+            if (track != undefined) {
+                const trackPoints = track.map(t => L.latLng(t.lat, t.lon))
+                const bounds = L.latLngBounds(trackPoints)
+                console.log('Bounds:', bounds)
+                map.fitBounds(bounds, { padding: [100, 100] }) // padding in pixels
+                setBoundsSet(true)
+            } else if (buoys != undefined) {
+                // Ensure buoys exist, are not empty, and bounds haven't been set yet
+                if (!buoys || buoys.length === 0 || boundsSet) return
 
-            // Create LatLng objects from buoy data
-            const buoyPoints = buoys.map(b => L.latLng(b.lat, b.lon))
+                // Create LatLng objects from buoy data
+                const buoyPoints = buoys.map(b => L.latLng(b.lat, b.lon))
 
-            // Create bounds and fit them to the map
-            const bounds = L.latLngBounds(buoyPoints)
-            map.fitBounds(bounds, { padding: [50, 50] }) // padding in pixels
+                // Create bounds and fit them to the map
+                const bounds = L.latLngBounds(buoyPoints)
+                map.fitBounds(bounds, { padding: [50, 50] }) // padding in pixels
+                setBoundsSet(true)
+            }
 
             // Mark bounds as set
-            setBoundsSet(true)
-        }, [buoys]) // Dependency on `buoys` ensures it checks for initial data
+        }, [buoys, track]) // Dependency on `buoys` ensures it checks for initial data
 
         return null
     }
@@ -266,7 +277,7 @@ export default function ActivityMap({ raceId, windowHeight, activityId }: { race
                             })()}
                     </>
                 )}
-                <FitBounds buoys={race?.courseBuoys?.map(m => m.buoy)} />
+                <FitBounds buoys={race?.courseBuoys?.map(m => m.buoy)} track={activityData.position} />
             </MapContainer>
             <div className='controls-container' style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', padding: '10px' }}>
                 <button onClick={() => setIsPlaying(!isPlaying)} className='control-button play-pause' style={{ fontSize: '1.5rem', padding: '10px' }}>

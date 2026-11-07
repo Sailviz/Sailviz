@@ -49,24 +49,44 @@ function calculateDistanceAndSpeed(points: Types.Position[]): {
   let distance = 0;
   let maxSpeed = 0;
 
+  // Total distance
   for (let i = 1; i < points.length; i++) {
-    const a = points[i - 1];
-    const b = points[i];
-
-    const dt = (b.timestamp - a.timestamp) / 1000;
-    console.log(
-      `Calculating distance and speed between points ${i - 1} and ${i}: dt=${dt}s`,
+    distance += haversine(
+      points[i - 1].lat,
+      points[i - 1].lon,
+      points[i].lat,
+      points[i].lon,
     );
+  }
+
+  // Max 5-second sustained speed
+  for (let start = 0; start < points.length - 5; start++) {
+    const end = start + 5;
+
+    let windowDistance = 0;
+
+    for (let i = start + 1; i <= end; i++) {
+      windowDistance += haversine(
+        points[i - 1].lat,
+        points[i - 1].lon,
+        points[i].lat,
+        points[i].lon,
+      );
+    }
+
+    const dt = (points[end].timestamp - points[start].timestamp) / 1000;
+
     if (dt <= 0) continue;
 
-    const d = haversine(a.lat, a.lon, b.lat, b.lon);
-    console.log(`Distance between points ${i - 1} and ${i}: ${d} meters`);
-    distance += d;
+    const speed = windowDistance / dt;
 
-    const speed = d / dt;
     maxSpeed = Math.max(maxSpeed, speed);
   }
-  return { distance, maxSpeed };
+
+  return {
+    distance,
+    maxSpeed,
+  };
 }
 
 function detectLaps(

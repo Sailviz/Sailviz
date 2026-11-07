@@ -88,10 +88,6 @@ export async function analyseActivity(activityId: string) {
     throw new Error(`Activity ${activityId} has no s3Key`);
   }
 
-  const race = await prisma.race.findUnique({
-    where: { id: activity.result?.fleet?.raceId },
-  });
-
   // Download GPX file from MinIO
   console.log(`[analysis] Downloading GPX from MinIO: ${activity.s3Key}`);
   const stream = await minioClient.getObject("sailviz", activity.s3Key);

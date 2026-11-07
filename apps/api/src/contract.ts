@@ -430,6 +430,9 @@ export const ORPCcontract = {
     find: oc
       .input(z.object({ activityId: z.string() }))
       .output(Types.ActivitySchema),
+    analyse: oc
+      .input(z.object({ activityId: z.string() }))
+      .output(z.object({ ok: z.boolean() })),
     positions: oc
       .input(
         z.object({

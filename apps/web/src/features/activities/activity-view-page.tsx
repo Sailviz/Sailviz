@@ -19,6 +19,7 @@ const ActivityViewPage = ({ activityId }: { activityId: string }) => {
 
     const queryClient = useQueryClient()
     const updateActivityMutation = useMutation(orpcClient.activity.update.mutationOptions())
+    const analyseActivityMutation = useMutation(orpcClient.activity.analyse.mutationOptions())
 
     const { uploadGPXFile } = useUploadGPXFile()
 
@@ -50,6 +51,10 @@ const ActivityViewPage = ({ activityId }: { activityId: string }) => {
         await queryClient.invalidateQueries({ queryKey: orpcClient.user.activities.all.key() })
     }
 
+    const analyseActivity = async () => {
+        await analyseActivityMutation.mutateAsync({ activityId: activity.id })
+    }
+
     const UploadGPX = () => {
         if (activity?.s3Key == null) {
             return (
@@ -71,6 +76,7 @@ const ActivityViewPage = ({ activityId }: { activityId: string }) => {
         }
     }
 
+    console.log(activity)
     return (
         <PageContainer scrollable={false}>
             <div className='flex flex-1 flex-col space-y-4'>
@@ -89,6 +95,9 @@ const ActivityViewPage = ({ activityId }: { activityId: string }) => {
                 <Separator />
                 <ActivityMap raceId={null} windowHeight={600} activityId={activityId} />
             </div>
+            <Button onClick={analyseActivity}>Re-Calculate Stats</Button>
+            <div>Distance: {activity?.activityAnalysis ? (activity.activityAnalysis.distance / 1852).toFixed(1) + ' NM' : 'unknown'}</div>
+            <div>Max Speed: {activity?.activityAnalysis ? (activity.activityAnalysis.maxSpeed * 1.94384449).toFixed(1) + ' Kn' : 'unknown'}</div>
         </PageContainer>
     )
 }
