@@ -1,7 +1,8 @@
 use tauri::{Manager, AppHandle, Emitter};
-use pcsc::*;
 use std::error::Error;
 use std::ffi::CStr;
+#[cfg(not(any(target_os = "android", target_os = "ios")))]
+use pcsc::*;
 
 #[cfg(not(any(target_os = "android", target_os = "ios")))]
 use tauri_plugin_updater::UpdaterExt;
@@ -105,6 +106,7 @@ async fn update(app: tauri::AppHandle) -> tauri_plugin_updater::Result<()> {
 
 static RUNNING: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
 
+#[cfg(not(any(target_os = "android", target_os = "ios")))]
 #[tauri::command]
 fn start_nfc_events(app: tauri::AppHandle) {
         if RUNNING.swap(true, std::sync::atomic::Ordering::SeqCst) {
@@ -154,7 +156,7 @@ fn start_nfc_events(app: tauri::AppHandle) {
 }
 
 
-
+#[cfg(not(any(target_os = "android", target_os = "ios")))]
 #[tauri::command]
 fn scan_nfc() -> Result<String, String> {
     // Establish a PC/SC context.
