@@ -182,10 +182,6 @@ export default function CreateResultModal({ org }: { org: Types.Org }) {
     }
 
     useEffect(() => {
-        console.log(trackers)
-    }, [trackers])
-
-    useEffect(() => {
         if (isTauriRuntime()) {
             invoke('start_nfc_events')
             listen('nfc-event', async e => {
@@ -196,6 +192,7 @@ export default function CreateResultModal({ org }: { org: Types.Org }) {
                 const tracker = trackers?.find(tracker => tracker.id === res)
                 if (!tracker) return
                 setSelectedTracker({ label: tracker.name, value: tracker.id })
+                setTrackerId(tracker.id)
             })
         }
     }, [trackers])
@@ -334,7 +331,6 @@ export default function CreateResultModal({ org }: { org: Types.Org }) {
                             })}
                             value={selectedTracker}
                             onChange={choice => {
-                                setBoatError(false)
                                 setTrackerId(choice!.value)
                                 setSelectedTracker(choice!)
                             }}

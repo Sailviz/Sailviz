@@ -9,6 +9,9 @@ import { Button } from '@components/ui/button'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { orpcClient } from '@lib/orpc'
 import * as Types from '@sailviz/types'
+import { invoke } from '@tauri-apps/api/core'
+import { listen } from '@tauri-apps/api/event'
+import isTauriRuntime from '../../../is-tauri'
 
 export default function CreateResultModal({ todaysRaces, boats, trackers }: { todaysRaces: Types.RaceType[]; boats: Types.BoatType[]; trackers: Types.Device[] }) {
     const createResultMutation = useMutation(
@@ -26,6 +29,7 @@ export default function CreateResultModal({ todaysRaces, boats, trackers }: { to
     const [helm, setHelm] = useState('')
     const [crew, setCrew] = useState('')
     const [sailNumber, setSailNumber] = useState('')
+    const [selectedTracker, setSelectedTracker] = useState({ label: '', value: '' })
     const [trackerId, setTrackerId] = useState('')
 
     const queryClient = useQueryClient()
@@ -155,8 +159,20 @@ export default function CreateResultModal({ todaysRaces, boats, trackers }: { to
     }
 
     useEffect(() => {
-        console.log(todaysRaces)
-    }, [todaysRaces])
+        if (isTauriRuntime()) {
+            invoke('start_nfc_events')
+            listen('nfc-event', async e => {
+                console.log(e)
+                let res = await invoke('scan_nfc')
+                console.log(res)
+                console.log(trackers?.find(tracker => tracker.id == res))
+                const tracker = trackers?.find(tracker => tracker.id === res)
+                if (!tracker) return
+                setSelectedTracker({ label: tracker.name, value: tracker.id })
+                setTrackerId(tracker.id)
+            })
+        }
+    }, [trackers])
 
     return (
         <Dialog
@@ -332,13 +348,15 @@ export default function CreateResultModal({ todaysRaces, boats, trackers }: { to
                         <p className='text-2xl font-bold'>Tracker ID - Please ignore</p>
                         <Select<{ label: string; value: string }>
                             id='trackerId'
+                            key={selectedTracker.label}
                             className=' w-56 text-3xl'
-                            options={trackers.map(tracker => {
+                            options={trackers?.map(tracker => {
                                 return { label: tracker.name, value: tracker.id }
                             })}
-                            value={{ label: trackers.find(t => t.id === trackerId)?.name || '', value: trackerId }}
+                            value={selectedTracker}
                             onChange={choice => {
                                 setTrackerId(choice!.value)
+                                setSelectedTracker(choice!)
                             }}
                             styles={{
                                 control: provided =>

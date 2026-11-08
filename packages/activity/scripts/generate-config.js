@@ -27,7 +27,7 @@ console.log(`NODE_ENV: ${process.env.NODE_ENV}`);
 const env = process.env.NODE_ENV || "development";
 const envPath = monorepoRoot + `/packages/activity/.env.${env}`;
 
-console.log(`Loading auth environment from: ${envPath}`);
+console.log(`Loading activity environment from: ${envPath}`);
 
 // Parse the env file
 const parsed = dotenv.config({ path: envPath }).parsed || {};
