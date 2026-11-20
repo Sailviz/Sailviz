@@ -18,7 +18,7 @@
     }
   },
   "scripts": {
-    "prebuild": "node ../../packages/db/scripts/generate-config.js && pnpm -w --filter @sailviz/types build && pnpm -w --filter @sailviz/db build && npm run generateConfig",
+    "prebuild": "npm run generateConfig",
     "generateConfig": "node scripts/generate-config.js",
     "build": "tsc -p tsconfig.json"
   },

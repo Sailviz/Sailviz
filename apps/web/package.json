@@ -4,11 +4,10 @@
     "version": "0.0.0",
     "type": "module",
     "scripts": {
-        "dev": "set NODE_ENV=development&& tsc -b && node ../../packages/auth/scripts/generate-config.js && node ../../packages/queue/scripts/generate-config.js && vite --mode development",
-        "test": " cross-env NODE_ENV=test vite --mode test",
+        "dev": "cross-env NODE_ENV=development tsc -b && vite --mode development",
+        "test": "cross-env NODE_ENV=test vite --mode test",
         "lint": "eslint .",
         "preview": "vite preview",
-        "prebuild": "node ../../../packages/auth/scripts/generate-config.js",
         "build:dev": "set NODE_ENV=development&& tsc -b && node ../../packages/auth/scripts/generate-config.js && vite build --mode development",
         "build:test": "set NODE_ENV=test&& tsc -b && node ../../packages/auth/scripts/generate-config.js && vite build --mode test",
         "build:prod": "set NODE_ENV=production&& tsc -b && node ../../packages/auth/scripts/generate-config.js && vite build --mode production"
