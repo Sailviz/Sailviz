@@ -155,6 +155,8 @@ export default function CreateResultModal({ todaysRaces, boats, trackers }: { to
         setSelectedRaces([])
         setSelectedFleets([])
         setSelectedBoat({ label: '', value: {} as Types.BoatType })
+        setSelectedTracker({ label: '', value: '' })
+        setTrackerId('')
         submitDisabled = false
     }
 
