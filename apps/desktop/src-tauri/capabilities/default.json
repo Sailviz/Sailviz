@@ -5,6 +5,13 @@
   "windows": ["main"],
   "permissions": [
     "core:default",
+    "fs:default",
+    {
+      "identifier": "fs:allow-write-file",
+      "allow": [{ "path": "$HOME" }, { "path": "$HOME/**/*" }]
+    },
+    "sharekit:default",
+    "sharekit:allow-share-file",
     "core:window:allow-is-fullscreen",
     "core:window:allow-set-fullscreen"
   ]

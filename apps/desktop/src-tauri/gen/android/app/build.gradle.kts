@@ -42,6 +42,12 @@ android {
     buildTypes {
         getByName("debug") {
             manifestPlaceholders["usesCleartextTraffic"] = "true"
+            applicationIdSuffix = ".dev"
+            resValue(
+                "string",
+                "app_name",
+                "Sailviz Dev"
+            )
             isDebuggable = true
             isJniDebuggable = true
             isMinifyEnabled = false

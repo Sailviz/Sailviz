@@ -15,6 +15,7 @@ pub fn run(fullscreen: bool) {
     #[cfg(not(any(target_os = "android", target_os = "ios")))]
     let mut builder = tauri::Builder::default()
         .plugin(tauri_plugin_fs::init())
+        .plugin(tauri_plugin_sharekit::init())
         .plugin(tauri_plugin_updater::Builder::new().build());
 
     if cfg!(debug_assertions) {
@@ -46,7 +47,9 @@ pub fn run(fullscreen: bool) {
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 #[cfg(any(target_os = "android", target_os = "ios"))]
 pub fn run() {
-    let mut builder = tauri::Builder::default();
+    let mut builder = tauri::Builder::default()
+        .plugin(tauri_plugin_sharekit::init())
+        .plugin(tauri_plugin_fs::init());
 
     if cfg!(debug_assertions) {
         builder = builder.plugin(

@@ -4,6 +4,7 @@ import { useEffect } from 'react'
 import * as Types from '@sailviz/types'
 import html2canvas from 'html2canvas'
 import { Button } from '@components/ui/button'
+import { shareFile } from '@choochmeque/tauri-plugin-sharekit-api'
 
 const width = 800
 const height = 400
@@ -119,10 +120,29 @@ export const ActivitySharePage = ({ activityId }: { activityId: string }) => {
         // 1. Running inside Tauri desktop/mobile
         if (isTauri) {
             const { writeFile, BaseDirectory } = await import('@tauri-apps/plugin-fs')
+            const { cacheDir } = await import('@tauri-apps/api/path')
 
+            console.log('Saving file to cache')
             await writeFile('sailviz-story.png', bytes, {
-                baseDir: BaseDirectory.Download
+                baseDir: BaseDirectory.Cache
             })
+
+            const cache = await cacheDir()
+
+            const fileUri = `file://${cache}/sailviz-story.png`
+
+            console.log('Cache dir:', cache)
+            console.log('File URI:', fileUri)
+
+            try {
+                await shareFile(fileUri, {
+                    mimeType: 'image/png',
+                    title: 'sailviz'
+                })
+                console.log('Share succeeded')
+            } catch (err) {
+                console.error('Share failed', err)
+            }
             return
         }
 
